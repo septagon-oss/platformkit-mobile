@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "PlatformKit",
+    "slug": "platformkit-mobile",
+    "scheme": "platformkit",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true, "bundleIdentifier": "dev.septagon.platformkit" },
+    "android": { "package": "dev.septagon.platformkit" },
+    "web": { "bundler": "metro", "output": "single" },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": { "typedRoutes": true }
+  }
+}
