@@ -15,7 +15,7 @@ import {
 } from "../src/core/derive";
 
 const note = parseCatalog(
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8")),
+  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
 ).resources[0]!;
 const row = {
   id: "1",

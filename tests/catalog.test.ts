@@ -4,7 +4,7 @@ import test from "node:test";
 import { CatalogError, parseCatalog } from "../src/core/catalog";
 
 const fixture = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8"));
+  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
 
 test("the golden catalog parses", () => {
   const c = parseCatalog(fixture());

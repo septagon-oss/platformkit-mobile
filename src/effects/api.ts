@@ -52,12 +52,9 @@ export function createApi(
     const headers: Record<string, string> = { Accept: "application/json" };
     if (body !== undefined) headers["Content-Type"] = "application/json";
     if (cookie) headers.Cookie = cookie;
-    const res = await fetchImpl(base + path, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-      credentials: "omit",
-    });
+    const init: RequestInit = { method, headers, credentials: "omit" };
+    if (body !== undefined) init.body = JSON.stringify(body);
+    const res = await fetchImpl(base + path, init);
     const set = res.headers.get("Set-Cookie");
     if (set) cookie = set.split(";")[0];
     if (res.status >= 400) throw await problem(res);

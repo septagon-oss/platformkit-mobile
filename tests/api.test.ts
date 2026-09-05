@@ -4,7 +4,7 @@ import { ApiError, createApi } from "../src/effects/api";
 
 type Call = { url: string; init: RequestInit };
 function fakeFetch(
-  answers: Array<{ status: number; body?: unknown; headers?: Record<string, string> }>,
+  answers: { status: number; body?: unknown; headers?: Record<string, string> }[],
 ) {
   const calls: Call[] = [];
   const f = async (url: string, init: RequestInit = {}) => {
