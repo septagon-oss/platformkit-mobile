@@ -52,9 +52,8 @@ rejects obsolete responses after sign-out, another sign-in or a newer refresh.
 state and calls the shell's API for record operations. It does not define a
 second transport or a second resource registry.
 
-Upgrading from the old two-key session format keeps the saved server address
-and requires a fresh sign-in. The old cookie is not migrated because an
-interrupted write may have associated it with a different server. Failed saves
+Only the current atomic session record is supported. Older installations require
+a fresh server selection and sign-in. Failed saves
 prevent sign-in completion. Sign-out immediately clears the active client;
 if secure storage cannot be cleared, the sign-in screen reports the failure
 and provides a retry. Until clearing succeeds, reopening the app may restore
@@ -69,6 +68,7 @@ resource schema cannot express.
 
 ## Verify a change
 
+The repository CI runs `npm run check` on pull requests and main pushes.
 `npm run check` checks package compatibility with the installed Expo SDK, then
 runs TypeScript, ESLint, the source formatting check and the Node tests.
 Use `expo install` for native dependencies so they match that SDK; the app owns

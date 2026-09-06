@@ -1,8 +1,6 @@
 // One secure record binds the cookie to its server. The composing adapter
 // supplies storage; this module also orders concurrent saves and sign-outs.
 const SESSION_KEY = "platformkit.session";
-const URL_KEY = "platformkit.url";
-const COOKIE_KEY = "platformkit.cookie";
 
 export interface Session {
   readonly baseURL: string;
@@ -12,7 +10,6 @@ export interface Session {
 export interface SecureStorage {
   getItemAsync(key: string): Promise<string | null>;
   setItemAsync(key: string, value: string): Promise<void>;
-  deleteItemAsync(key: string): Promise<void>;
 }
 
 export function createSessionStore(storage: SecureStorage) {
@@ -28,16 +25,7 @@ export function createSessionStore(storage: SecureStorage) {
     load: () =>
       ordered(async (): Promise<Session | undefined> => {
         const value = await storage.getItemAsync(SESSION_KEY);
-        if (value === null) {
-          // Legacy writes could pair a new server with an old cookie. Retain
-          // only the address and require authentication again after upgrading.
-          const baseURL = await storage.getItemAsync(URL_KEY);
-          const session = baseURL ? { baseURL } : undefined;
-          await storage.setItemAsync(SESSION_KEY, JSON.stringify({ version: 1, ...session }));
-          await storage.deleteItemAsync(COOKIE_KEY);
-          await storage.deleteItemAsync(URL_KEY);
-          return session;
-        }
+        if (value === null) return undefined;
         const record: unknown = JSON.parse(value);
         if (!record || typeof record !== "object") throw new Error("Invalid saved session");
         const { version, baseURL, cookie } = record as Record<string, unknown>;
@@ -50,7 +38,7 @@ export function createSessionStore(storage: SecureStorage) {
       }),
     save: (session: Session) =>
       ordered(() => storage.setItemAsync(SESSION_KEY, JSON.stringify({ version: 1, ...session }))),
-    // A tombstone prevents an old two-key session from being restored later.
+    // Clear authentication atomically while optionally retaining the selected server.
     clear: (baseURL?: string) =>
       ordered(() =>
         storage.setItemAsync(

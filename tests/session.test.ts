@@ -11,9 +11,6 @@ function memory() {
     async setItemAsync(key, value) {
       values.set(key, value);
     },
-    async deleteItemAsync(key) {
-      values.delete(key);
-    },
   };
   return { values, storage };
 }
@@ -42,14 +39,10 @@ test("a failed replacement cannot combine one server with another server's cooki
   assert.deepEqual(await createSessionStore(storage).load(), oldSession);
 });
 
-test("legacy records preserve the server address but never reuse an unbound cookie", async () => {
-  const { values, storage } = memory();
-  values.set("platformkit.url", nextSession.baseURL);
-  values.set("platformkit.cookie", oldSession.cookie);
-  assert.deepEqual(await createSessionStore(storage).load(), { baseURL: nextSession.baseURL });
-  assert.equal(values.has("platformkit.url"), false);
-  assert.equal(values.has("platformkit.cookie"), false);
-  assert.deepEqual(await createSessionStore(storage).load(), { baseURL: nextSession.baseURL });
+test("loading an empty store does not create a saved session", async () => {
+  const { storage, values } = memory();
+  assert.equal(await createSessionStore(storage).load(), undefined);
+  assert.equal(values.size, 0);
 });
 
 test("sign-out queues after a pending save and prevents restoration", async () => {
