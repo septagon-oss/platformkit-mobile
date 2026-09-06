@@ -8,7 +8,7 @@ import { color, font, radius, space } from "./theme";
 
 interface Props {
   readonly entries: readonly Entry[];
-  readonly onOpen: (path: string) => void;
+  readonly onOpen: (path: ReturnType<typeof screenPath>) => void;
   readonly onSignOut: () => void;
   readonly onRefresh: () => void;
 }
@@ -19,10 +19,10 @@ export function Home({ entries, onOpen, onSignOut, onRefresh }: Props) {
       <View style={styles.bar}>
         <Text style={styles.title}>PlatformKit</Text>
         <View style={styles.actions}>
-          <Pressable onPress={onRefresh} accessibilityRole="button">
+          <Pressable style={styles.action} onPress={onRefresh} accessibilityRole="button">
             <Text style={styles.link}>Refresh</Text>
           </Pressable>
-          <Pressable onPress={onSignOut} accessibilityRole="button">
+          <Pressable style={styles.action} onPress={onSignOut} accessibilityRole="button">
             <Text style={styles.link}>Sign out</Text>
           </Pressable>
         </View>
@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.surface,
   },
   actions: { flexDirection: "row", gap: space.lg },
+  action: { minHeight: 48, justifyContent: "center" },
   title: { fontSize: font.lg, fontWeight: "700", color: color.text },
   link: { color: color.accent, fontWeight: "600" },
   list: { padding: space.lg, gap: space.md },

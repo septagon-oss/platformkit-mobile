@@ -6,5 +6,5 @@
     "exactOptionalPropertyTypes": true,
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["app/**/*.ts", "app/**/*.tsx", "src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "expo-env.d.ts"]
+  "include": ["app/**/*.ts", "app/**/*.tsx", "src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "expo-env.d.ts", ".expo/types/**/*.ts"]
 }

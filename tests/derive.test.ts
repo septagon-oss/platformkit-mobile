@@ -97,4 +97,8 @@ test("values turns what a form holds back into what the API takes", () => {
 
 test("a screen path is module/entity", () => {
   assert.equal(screenPath(note), "/note/note");
+  assert.equal(
+    screenPath({ ...note, module: "north/west", entity: "note#summary" }),
+    "/north%2Fwest/note%23summary",
+  );
 });

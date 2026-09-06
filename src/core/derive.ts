@@ -171,4 +171,5 @@ export function values(
 }
 
 /** screenPath is where the router serves an entry's screens. */
-export const screenPath = (e: Entry): string => `/${e.module}/${e.entity}`;
+export const screenPath = (e: Entry): `/${string}/${string}` =>
+  `/${encodeURIComponent(e.module)}/${encodeURIComponent(e.entity)}`;

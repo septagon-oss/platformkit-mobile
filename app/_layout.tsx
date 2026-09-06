@@ -2,13 +2,16 @@
 // screens are hand-written; everything else derives from the catalog.
 import { Stack } from "expo-router";
 import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { defaultRenderers } from "../src/renderers";
 import { Shell } from "../src/shell";
 
 export default function Layout() {
   return (
     <Shell baseURL={process.env.EXPO_PUBLIC_API_URL ?? ""} renderers={defaultRenderers}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <SafeAreaView style={{ flex: 1 }}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </SafeAreaView>
     </Shell>
   );
 }

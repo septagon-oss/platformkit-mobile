@@ -35,7 +35,8 @@ that sign-in works on a device.
 
 ## Find the owner of a change
 
-`app/_layout.tsx` supplies the server URL and renderer pack to `Shell`.
+`app/_layout.tsx` supplies the server URL and renderer pack to `Shell` and keeps
+the route stack inside the device's safe area.
 `src/shell.tsx` owns session restoration, sign-in, sign-out and catalog loading.
 The resource route files delegate to `src/route.tsx`, which finds the catalog
 entry and chooses a custom or generated screen.
@@ -57,8 +58,12 @@ resource schema cannot express.
 
 ## Verify a change
 
-`npm run check` runs TypeScript checking, ESLint, the source formatting check,
-and the Node tests. The individual commands are in [package.json](package.json).
+`npm run check` checks package compatibility with the installed Expo SDK, then
+runs TypeScript, ESLint, the source formatting check and the Node tests.
+Use `expo install` for native dependencies so they match that SDK; the app owns
+the native font dependency used by its router. Starting Expo generates route
+types under the ignored `.expo/` directory, which TypeScript also checks.
+The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
 
 The tests cover catalog parsing, screen derivation, lifecycle transitions and
