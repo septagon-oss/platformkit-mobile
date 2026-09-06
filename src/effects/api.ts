@@ -46,9 +46,11 @@ export function createApi(
   initialCookie?: string,
 ): Api {
   let cookie = initialCookie;
+  let generation = 0;
   const base = baseURL.replace(/\/+$/, "");
 
   async function call(method: string, path: string, body?: unknown): Promise<Response> {
+    const started = generation;
     const headers: Record<string, string> = { Accept: "application/json" };
     if (body !== undefined) headers["Content-Type"] = "application/json";
     if (cookie) headers.Cookie = cookie;
@@ -56,7 +58,7 @@ export function createApi(
     if (body !== undefined) init.body = JSON.stringify(body);
     const res = await fetchImpl(base + path, init);
     const set = res.headers.get("Set-Cookie");
-    if (set) cookie = set.split(";")[0];
+    if (set && started === generation) cookie = set.split(";")[0];
     if (res.status >= 400) throw await problem(res);
     return res;
   }
@@ -85,11 +87,10 @@ export function createApi(
       await call("POST", "/api/v1/auth/login", { email, password });
     },
     async logout() {
-      try {
-        await call("POST", "/api/v1/auth/logout");
-      } finally {
-        cookie = undefined;
-      }
+      const request = call("POST", "/api/v1/auth/logout");
+      generation++;
+      cookie = undefined;
+      await request;
     },
     async catalog() {
       return parseCatalog(await json(await call("GET", "/api/v1/admin/resources")));

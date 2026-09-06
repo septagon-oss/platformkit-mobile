@@ -7,12 +7,13 @@ import React, {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import type { Entry } from "./core/catalog";
 import { initial, reduce, type State } from "./core/state";
 import { createApi, type Api } from "./effects/api";
-import { clearSession, loadSession, saveSession } from "./effects/session";
+import { sessions } from "./effects/native-session";
 import type { Renderers } from "./renderers";
 
 export interface ShellValue {
@@ -46,44 +47,58 @@ function message(e: unknown): string {
 
 export function Shell({ baseURL: initialURL, renderers, children }: Props) {
   const [state, dispatch] = useReducer(reduce, initial);
-  const [api, setApi] = useState<Api>(() => createApi(initialURL));
-  const [baseURL, setBaseURL] = useState(initialURL);
+  const [connection, setConnection] = useState(() => ({
+    api: createApi(initialURL),
+    baseURL: initialURL,
+  }));
+  const active = useRef(connection);
+  const generation = useRef(0);
+  const { api, baseURL } = connection;
+  const begin = useCallback(() => ++generation.current, []);
 
-  const load = useCallback(
-    async (a: Api) => {
-      dispatch({ type: "session" });
-      try {
-        dispatch({ type: "catalog", catalog: await a.catalog() });
-      } catch (e) {
-        dispatch({ type: "failed", error: message(e) });
-      }
-    },
-    [dispatch],
-  );
+  const connect = useCallback((url: string, next: Api) => {
+    const value = { api: next, baseURL: url };
+    active.current = value;
+    setConnection(value);
+  }, []);
+
+  const load = useCallback(async (a: Api, started: number) => {
+    if (generation.current !== started) return;
+    dispatch({ type: "session", generation: started });
+    try {
+      const catalog = await a.catalog();
+      if (generation.current === started)
+        dispatch({ type: "catalog", generation: started, catalog });
+    } catch (e) {
+      if (generation.current === started)
+        dispatch({ type: "failed", generation: started, error: message(e) });
+    }
+  }, []);
 
   useEffect(() => {
-    let live = true;
+    const started = begin();
     (async () => {
-      let session;
       try {
-        session = await loadSession();
+        const session = await sessions.load();
+        if (generation.current !== started) return;
+        const url = session?.baseURL ?? active.current.baseURL;
+        const a = createApi(url, fetch, session?.cookie);
+        connect(url, a);
+        if (session?.cookie) await load(a, started);
+        else dispatch({ type: "no-session", generation: started });
       } catch {
-        session = undefined; // no secure store here (the web); start anonymous
+        if (generation.current === started)
+          dispatch({
+            type: "no-session",
+            generation: started,
+            error: "The saved sign-in could not be read. Clear it or sign in again.",
+          });
       }
-      if (!live) return;
-      if (!session?.cookie) {
-        dispatch({ type: "no-session" });
-        return;
-      }
-      const a = createApi(session.baseURL, fetch, session.cookie);
-      setApi(a);
-      setBaseURL(session.baseURL);
-      await load(a);
     })();
     return () => {
-      live = false;
+      begin();
     };
-  }, [load]);
+  }, [begin, connect, load]);
 
   const value = useMemo<ShellValue>(
     () => ({
@@ -94,34 +109,57 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       entry: (module, entity) =>
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
       async signIn(url, email, password) {
+        const started = begin();
+        dispatch({ type: "sign-in", generation: started });
         const a = createApi(url);
-        await a.login(email, password);
-        setApi(a);
-        setBaseURL(url);
         try {
+          await a.login(email, password);
+          if (generation.current !== started) {
+            void a.logout().catch(() => undefined);
+            return;
+          }
           const cookie = a.cookie();
-          await saveSession(cookie ? { baseURL: url, cookie } : { baseURL: url });
-        } catch {
-          // the web has no secure store; the session lives for this tab
+          if (!cookie) throw new Error("The server did not return a session.");
+          await sessions.save({ baseURL: url, cookie });
+          if (generation.current !== started) {
+            void a.logout().catch(() => undefined);
+            return;
+          }
+          connect(url, a);
+          await load(a, started);
+        } catch (e) {
+          void a.logout().catch(() => undefined);
+          if (generation.current !== started) return;
+          dispatch({ type: "no-session", generation: started });
+          throw e;
         }
-        await load(a);
       },
       async signOut() {
+        const started = begin();
+        const previous = active.current;
+        connect(previous.baseURL, createApi(previous.baseURL));
+        dispatch({ type: "signed-out", generation: started });
+        // Revoke remotely when reachable; local clearing must not wait for it.
+        void previous.api.logout().catch(() => undefined);
         try {
-          await api.logout();
+          await sessions.clear(previous.baseURL);
         } catch {
-          // a refused logout still forgets the cookie; see Api.logout
+          if (generation.current === started)
+            dispatch({
+              type: "signed-out",
+              generation: started,
+              error:
+                "The saved sign-in could not be cleared. Please try again before closing the app.",
+            });
         }
-        try {
-          await clearSession();
-        } catch {
-          // no secure store here
-        }
-        dispatch({ type: "signed-out" });
       },
-      refresh: () => load(api),
+      refresh: () => {
+        const current = active.current.api;
+        if (!current.cookie()) return Promise.resolve();
+        return load(current, begin());
+      },
     }),
-    [api, baseURL, state, renderers, load],
+    [api, baseURL, state, renderers, begin, connect, load],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

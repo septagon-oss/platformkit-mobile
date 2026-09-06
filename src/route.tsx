@@ -29,7 +29,8 @@ export function ResourceRoute({ kind, withID = false }: Props) {
   const { state, renderers, entry } = useShell();
   const params = useLocalSearchParams<{ module: string; entity: string; id?: string }>();
 
-  if (state.phase === "anonymous") return <Redirect href="/sign-in" />;
+  if (state.phase === "anonymous" || state.phase === "signing-in")
+    return <Redirect href="/sign-in" />;
   if (state.phase === "booting" || state.phase === "loading") return <Waiting />;
   if (state.phase === "failed")
     return <Notice text={state.error ?? "The catalog could not be read."} />;

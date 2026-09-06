@@ -7,17 +7,21 @@ import { color, font, radius, space } from "./theme";
 
 interface Props {
   readonly baseURL: string;
+  readonly notice: string;
+  readonly onClear: () => Promise<void>;
   readonly onSignIn: (baseURL: string, email: string, password: string) => Promise<void>;
 }
 
-export function SignIn({ baseURL, onSignIn }: Props) {
-  const [url, setURL] = useState(baseURL);
+export function SignIn({ baseURL, onSignIn, notice, onClear }: Props) {
+  const [enteredURL, setURL] = useState<string>();
+  const url = enteredURL ?? baseURL;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
+    if (busy) return;
     setBusy(true);
     setError("");
     try {
@@ -33,7 +37,16 @@ export function SignIn({ baseURL, onSignIn }: Props) {
     <View style={styles.page}>
       <Text style={styles.title}>Sign in</Text>
       <Text style={styles.sub}>Use the address this tenant knows you by.</Text>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error || notice ? (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {error || notice}
+        </Text>
+      ) : null}
+      {notice ? (
+        <Pressable style={styles.button} onPress={onClear} accessibilityRole="button">
+          <Text style={styles.buttonText}>Clear saved sign-in</Text>
+        </Pressable>
+      ) : null}
       <TextInput
         style={styles.input}
         value={url}

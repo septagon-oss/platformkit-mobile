@@ -44,10 +44,21 @@ entry and chooses a custom or generated screen.
 `src/core/` holds the catalog types and validator, screen derivation and
 lifecycle reducer. These functions run in plain Node without React.
 `src/effects/api.ts` owns HTTP requests and API error decoding;
-`src/effects/session.ts` stores the server URL and session cookie through Expo
-SecureStore. `src/screens/` renders the generated screens, manages local form
+`src/effects/session.ts` orders secure-storage operations and binds the server
+URL and session cookie in one versioned record. `src/effects/native-session.ts`
+supplies Expo SecureStore. Each shell operation has a generation; the core
+rejects obsolete responses after sign-out, another sign-in or a newer refresh.
+`src/screens/` renders the generated screens, manages local form
 state and calls the shell's API for record operations. It does not define a
 second transport or a second resource registry.
+
+Upgrading from the old two-key session format keeps the saved server address
+and requires a fresh sign-in. The old cookie is not migrated because an
+interrupted write may have associated it with a different server. Failed saves
+prevent sign-in completion. Sign-out immediately clears the active client;
+if secure storage cannot be cleared, the sign-in screen reports the failure
+and provides a retry. Until clearing succeeds, reopening the app may restore
+the previous saved record.
 
 A custom screen belongs in the renderer pack passed to `Shell` in
 `app/_layout.tsx`. The [Renderers type](src/renderers.ts) maps `module/entity`
@@ -66,8 +77,9 @@ types under the ignored `.expo/` directory, which TypeScript also checks.
 The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
 
-The tests cover catalog parsing, screen derivation, lifecycle transitions and
-HTTP behavior with a supplied fetch implementation. They do not launch Expo,
+The tests cover catalog parsing, screen derivation, out-of-order lifecycle
+events, interrupted storage writes and HTTP behavior with supplied effects.
+They do not launch Expo,
 exercise a native device or connect to a live server. For a screen or session
 change, also exercise the affected journey on the target platform and report
 what you ran.

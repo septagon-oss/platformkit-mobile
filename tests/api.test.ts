@@ -83,3 +83,29 @@ test("logout forgets the cookie even when the server refuses", async () => {
   await assert.rejects(api.logout(), ApiError);
   assert.equal(api.cookie(), undefined);
 });
+
+test("logout clears immediately and late responses cannot restore its cookie", async () => {
+  const catalog = Promise.withResolvers<Response>();
+  const logout = Promise.withResolvers<Response>();
+  const fetchImpl = ((url: string) =>
+    url.endsWith("/logout") ? logout.promise : catalog.promise) as typeof fetch;
+  const api = createApi("https://acme.test", fetchImpl, "platformkit_session=old");
+  const loading = api.catalog();
+  const leaving = api.logout();
+  assert.equal(api.cookie(), undefined, "local sign-out does not wait for the server");
+  catalog.resolve(
+    new Response(JSON.stringify({ resources: [] }), {
+      headers: { "Set-Cookie": "platformkit_session=late; HttpOnly" },
+    }),
+  );
+  await loading;
+  assert.equal(api.cookie(), undefined);
+  logout.resolve(
+    new Response(null, {
+      status: 204,
+      headers: { "Set-Cookie": "platformkit_session=logout; HttpOnly" },
+    }),
+  );
+  await leaving;
+  assert.equal(api.cookie(), undefined);
+});
