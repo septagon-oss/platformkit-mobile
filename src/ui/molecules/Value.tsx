@@ -105,14 +105,22 @@ export function Value({ field, value, compact = false }: Props) {
   );
 }
 
-/** Labelled is a value with its field's name in front, for a list row's cells. */
+/**
+ * Labelled is a cell on a list row. A value from a closed set is a word of
+ * its own and stands alone; "No" or "2" means nothing without the field it
+ * answers, so those keep their name. What a screen reader hears is the row's
+ * label, which always names every field.
+ */
 export function Labelled({ field, value }: { readonly field: Field; readonly value: unknown }) {
   const s = useStyles(styles);
+  const speaks = (field.enum ?? []).length > 0;
   return (
     <View style={s.cell}>
-      <Text role="caption" tone="muted">
-        {humanize(field.name)}
-      </Text>
+      {speaks ? null : (
+        <Text role="caption" tone="muted">
+          {humanize(field.name)}
+        </Text>
+      )}
       <Value field={field} value={value} compact />
     </View>
   );

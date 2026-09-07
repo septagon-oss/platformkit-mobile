@@ -10,6 +10,8 @@ interface Props {
   readonly title: string;
   /** cells are what a screen reader hears, and what is shown when nothing else is given. */
   readonly cells?: readonly string[];
+  /** summary is a line of the record's own words, under its name. */
+  readonly summary?: string;
   /** shown replaces those cells with the values in the shapes their types deserve. */
   readonly shown?: ReactNode;
   readonly onPress?: () => void;
@@ -18,7 +20,15 @@ interface Props {
   readonly testID?: string;
 }
 
-export function Row({ title, cells = [], shown, onPress, tone = "primary", testID }: Props) {
+export function Row({
+  title,
+  cells = [],
+  summary,
+  shown,
+  onPress,
+  tone = "primary",
+  testID,
+}: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const opens = tone === "primary" && !!onPress;
@@ -40,6 +50,11 @@ export function Row({ title, cells = [], shown, onPress, tone = "primary", testI
         >
           {title}
         </Text>
+        {summary ? (
+          <Text role="label" tone="muted" numberOfLines={2}>
+            {summary}
+          </Text>
+        ) : null}
         {shown ? (
           <View style={s.cells}>{shown}</View>
         ) : cells.length > 0 ? (

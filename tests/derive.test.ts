@@ -11,6 +11,7 @@ import {
   label,
   listCells,
   listColumns,
+  listPreview,
   narrowed,
   noOrder,
   numberValue,
@@ -186,4 +187,14 @@ test("a row shows what tells two records apart, not the times every record has",
   // The name of the row is not repeated beneath it, and the id is never a cell.
   assert.ok(!names.includes("title"));
   assert.ok(!names.includes("id"));
+});
+
+test("a row previews the record's own words, and does not repeat them as a cell", () => {
+  // body is a long text hidden from the table's columns, which is exactly the
+  // field worth reading under the row's name.
+  assert.equal(listPreview(note)?.name, "body");
+  assert.ok(!listCells(note).some((f) => f.name === "body"));
+  // An entity with no long text has no line to preview.
+  const terse = { ...note, fields: note.fields.filter((f) => f.name !== "body") };
+  assert.equal(listPreview(terse), undefined);
 });

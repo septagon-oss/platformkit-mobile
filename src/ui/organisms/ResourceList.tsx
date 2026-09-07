@@ -10,6 +10,7 @@ import {
   humanize,
   label,
   listCells,
+  listPreview,
   narrowed,
   plural,
   sortOptions,
@@ -61,6 +62,7 @@ export function ResourceList({
   onNew,
 }: Props) {
   const columns = listCells(entry);
+  const preview = listPreview(entry);
   const noun = humanize(entry.entity).toLowerCase();
   const nouns = plural(noun);
   const narrow = narrowed(order);
@@ -111,6 +113,7 @@ export function ResourceList({
         <Section>
           <Row
             title={label(entry, row)}
+            {...(preview && text(row[preview.name]) ? { summary: text(row[preview.name]) } : {})}
             cells={columns.map((f) => `${humanize(f.name)}: ${display(f, row[f.name])}`)}
             shown={columns.map((f) => (
               <Labelled key={f.name} field={f} value={row[f.name]} />

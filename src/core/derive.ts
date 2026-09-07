@@ -135,12 +135,31 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
     return 6;
   };
   const primary = known(e.fields);
+  const preview = listPreview(e);
   return listColumns(e)
-    .filter((f) => f.name !== primary.name)
+    .filter((f) => f.name !== primary.name && f.name !== preview?.name)
     .map((f, i) => ({ f, i }))
     .sort((a, b) => rank(a.f) - rank(b.f) || a.i - b.i)
     .slice(0, limit)
     .map(({ f }) => f);
+}
+
+/**
+ * listPreview is the field a row shows a line of under its name: the first
+ * long text the entity has, which is what a person reads to recognise the
+ * record.
+ *
+ * `hide:list` does not disqualify it. That tag says a value does not belong
+ * in a table column, which is true of every long text and is why a schema
+ * marks them: a paragraph ruins a column. A line under the name is not a
+ * column, and the paragraph is exactly what is worth reading there. It stays
+ * out of the cells beside it, which are columns.
+ */
+export function listPreview(e: Entry): Field | undefined {
+  const primary = known(e.fields);
+  return e.fields.find(
+    (f) => f.name !== primary.name && !f.readOnly && (f.type === "text" || f.widget === "textarea"),
+  );
 }
 
 export interface DetailItem {
