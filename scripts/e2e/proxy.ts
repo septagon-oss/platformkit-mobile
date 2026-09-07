@@ -3,14 +3,18 @@
 // to the workstation, and this forwards each request to the upstream with the
 // Host header the tenant is known by. It is a developer's tool for the device
 // journeys and nothing else; it does not run in CI or on a phone.
-//   tsx scripts/e2e/proxy.ts <listen port> <upstream url> <tenant host>
+//   tsx scripts/e2e/proxy.ts <listen port> <upstream url> <tenant host> [bind]
 //   tsx scripts/e2e/proxy.ts 8081 http://127.0.0.1:8080 platformkit.localhost:8080
+//
+// It listens on loopback unless a bind address is given. Give one only to
+// reach a real phone on a private network you control, and remember that what
+// it forwards is plain HTTP.
 import http from "node:http";
 import https from "node:https";
 
-const [port, upstream, host] = process.argv.slice(2);
+const [port, upstream, host, bind = "127.0.0.1"] = process.argv.slice(2);
 if (!port || !upstream || !host) {
-  console.error("usage: proxy.ts <listen port> <upstream url> <tenant host>");
+  console.error("usage: proxy.ts <listen port> <upstream url> <tenant host> [bind address]");
   process.exit(2);
 }
 const target = new URL(upstream);
@@ -43,6 +47,6 @@ const server = http.createServer((req, res) => {
   req.pipe(out);
 });
 
-server.listen(Number(port), "127.0.0.1", () => {
-  console.log(`proxy: localhost:${port} -> ${upstream} as ${host}`);
+server.listen(Number(port), bind, () => {
+  console.log(`proxy: ${bind}:${port} -> ${upstream} as ${host}`);
 });
