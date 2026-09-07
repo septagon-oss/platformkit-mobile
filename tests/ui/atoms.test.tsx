@@ -8,6 +8,7 @@ import { Text } from "../../src/ui/atoms/Text";
 import { SwitchRow } from "../../src/ui/atoms/SwitchRow";
 import { FormField } from "../../src/ui/molecules/FormField";
 import { Row } from "../../src/ui/molecules/Row";
+import { TagsField } from "../../src/ui/molecules/TagsField";
 import { Section } from "../../src/ui/molecules/Section";
 import { ThemeProvider } from "../../src/ui/theme";
 import { palette } from "../../src/ui/tokens";
@@ -100,5 +101,25 @@ describe("Theme", () => {
     await screen.unmount();
     await inTheme(<Text tone="muted">x</Text>, "dark");
     expect(screen.getByText("x")).toHaveStyle({ color: palette.dark.textMuted });
+  });
+});
+
+describe("TagsField", () => {
+  test("what is typed is part of the value, so a save that never blurred it carries it", async () => {
+    const onChange = jest.fn();
+    await inTheme(<TagsField label="Tags" value="alpha, beta, " onChange={onChange} />);
+    // A value this control wrote reads back as its chips and what is being typed.
+    expect(screen.getByRole("button", { name: "Remove alpha" })).toBeOnTheScreen();
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "gam");
+    expect(onChange).toHaveBeenCalledWith("alpha, beta, gam");
+  });
+
+  test("a record's own list is all chips, none of it half-typed", async () => {
+    const onChange = jest.fn();
+    await inTheme(<TagsField label="Tags" value="alpha, beta" onChange={onChange} />);
+    expect(screen.getByRole("button", { name: "Remove beta" })).toBeOnTheScreen();
+    expect(screen.getByTestId("tags-tags")).toHaveDisplayValue("");
+    await fireEvent.press(screen.getByRole("button", { name: "Remove alpha" }));
+    expect(onChange).toHaveBeenCalledWith("beta, ");
   });
 });

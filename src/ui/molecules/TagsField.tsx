@@ -1,7 +1,9 @@
 // TagsField is a list of words: each a chip that can go, and a place to add
-// one. It speaks to the form in the comma-separated spelling the core already
-// splits, so the API contract is untouched.
-import React, { useState } from "react";
+// one. What is typed but not yet committed is part of the value, not state of
+// its own, so a save that never blurred the input still carries it. The
+// spelling is the comma-separated one the core splits, so the API contract is
+// untouched.
+import React, { useRef } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { splitList } from "../../core/derive";
 import { Icon } from "../atoms/Icon";
@@ -19,18 +21,19 @@ interface Props {
 
 export function TagsField({ label, value, onChange, disabled = false, testID }: Props) {
   const s = useStyles(styles);
-  const [draft, setDraft] = useState("");
-  const tags = splitList(value);
+  // What this control wrote, it reads back as chips plus what is being typed.
+  // A value from anywhere else — a record as the server has it — is all chips.
+  const mine = useRef<string | null>(null);
+  const ours = value === mine.current;
+  const parts = value.split(",");
+  const draft = ours ? (parts[parts.length - 1] ?? "") : "";
+  const tags = ours ? splitList(parts.slice(0, -1).join(",")) : splitList(value);
 
-  // add takes what is being committed rather than reading state, so a paste
-  // that arrives with its commas in it does not commit the previous draft.
-  const add = (raw: string) => {
-    const next = splitList(raw);
-    setDraft("");
-    if (next.length === 0) return;
-    onChange([...tags, ...next.filter((n) => !tags.includes(n))].join(", "));
+  const write = (next: readonly string[], typing: string) => {
+    const raw = next.length > 0 ? `${next.join(", ")}, ${typing}` : typing;
+    mine.current = raw;
+    onChange(raw);
   };
-  const remove = (tag: string) => onChange(tags.filter((x) => x !== tag).join(", "));
 
   return (
     <View style={s.field} {...(testID ? { testID } : {})}>
@@ -41,7 +44,12 @@ export function TagsField({ label, value, onChange, disabled = false, testID }: 
               <Text role="label">{tag}</Text>
               {disabled ? null : (
                 <Pressable
-                  onPress={() => remove(tag)}
+                  onPress={() =>
+                    write(
+                      tags.filter((x) => x !== tag),
+                      draft,
+                    )
+                  }
                   accessibilityRole="button"
                   accessibilityLabel={`Remove ${tag}`}
                   hitSlop={8}
@@ -56,14 +64,13 @@ export function TagsField({ label, value, onChange, disabled = false, testID }: 
       <TextField
         kind="mono"
         value={draft}
-        onChangeText={(v) => (v.includes(",") ? add(v) : setDraft(v))}
-        onSubmitEditing={() => add(draft)}
-        onBlur={() => add(draft)}
+        onChangeText={(typed) => write(tags, typed)}
         blurOnSubmit={false}
         placeholder={`Add to ${label.toLowerCase()}`}
         accessibilityLabel={`Add to ${label}`}
         disabled={disabled}
         returnKeyType="done"
+        testID={`tags-${label.toLowerCase()}`}
       />
     </View>
   );

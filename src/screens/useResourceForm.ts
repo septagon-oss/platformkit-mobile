@@ -32,6 +32,16 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // screen that is already gone: on Android that unwinds the stack until the
   // app itself exits.
   const left = useRef(false);
+  // A save outlives its screen when somebody dismisses the sheet while the
+  // request is in flight. The write still lands and the list still hears about
+  // it; what must not happen is this screen deciding where to go afterwards.
+  const alive = useRef(true);
+  useEffect(
+    () => () => {
+      alive.current = false;
+    },
+    [],
+  );
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -106,10 +116,12 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       const body = values(controls, held);
       const written = id ? await api.update(entry, id, body) : await api.create(entry, body);
       wrote(key(entry));
+      if (!alive.current) return;
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSaved(written);
       setPhase("saved");
     } catch (e) {
+      if (!alive.current) return;
       if (e instanceof ApiError) {
         setErrors(e.fields);
         setDetail(e.detail || "That could not be saved.");

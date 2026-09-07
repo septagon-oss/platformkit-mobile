@@ -26,13 +26,22 @@ const ignorePaths = [
   "android/**",
   "ios/**",
   "dist/**",
+  "out/**",
   ".expo/**",
   "e2e/**",
-  // scripts/ holds developer tooling, except the recipe and the settings a
-  // binary is actually built with.
-  "scripts/**",
-  "!scripts/android/**",
   "**/fingerprint.json",
+];
+
+// What a binary is built from that lives outside the app itself: the recipe,
+// the Gradle settings it appends, the signing rule and the bundler's own
+// configuration. A change to any of these is a change to the binary. They
+// have to be named: nothing under scripts/ is a source on its own, and an
+// ignore would filter these out too, so the developer tooling beside them
+// stays out by simply not being listed.
+const extraSources = [
+  { type: "dir" as const, filePath: "scripts/android", reasons: ["android-recipe"] },
+  { type: "file" as const, filePath: "Dockerfile.android", reasons: ["android-recipe"] },
+  { type: "file" as const, filePath: "metro.config.js", reasons: ["bundler"] },
 ];
 
 export function compute(root: string): Promise<Fingerprint> {
@@ -44,6 +53,7 @@ export function compute(root: string): Promise<Fingerprint> {
   delete process.env.PK_PROFILE;
   return createFingerprintAsync(root, {
     ignorePaths,
+    extraSources,
     // npm scripts and .gitignore do not define the binary either.
     sourceSkips:
       SourceSkips.ExpoConfigVersions | SourceSkips.PackageJsonScriptsAll | SourceSkips.GitIgnore,
