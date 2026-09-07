@@ -223,6 +223,16 @@ export function problems(
   return out;
 }
 
+/**
+ * mergePage is a first page read again over rows already shown: the fresh
+ * rows first, then whatever was shown that the fresh page does not repeat, so
+ * a reload keeps the pages beneath it and the place a person scrolled to.
+ */
+export function mergePage(fresh: readonly Row[], shown: readonly Row[]): readonly Row[] {
+  const ids = new Set(fresh.map((r) => text(r.id)));
+  return [...fresh, ...shown.filter((r) => !ids.has(text(r.id)))];
+}
+
 /** screenPath is where the router serves an entry's screens. */
 export const screenPath = (e: Entry): `/${string}/${string}` =>
   `/${encodeURIComponent(e.module)}/${encodeURIComponent(e.entity)}`;

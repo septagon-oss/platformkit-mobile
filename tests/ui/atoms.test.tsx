@@ -21,7 +21,7 @@ describe("Button", () => {
     const button = screen.getByRole("button", { name: "Save" });
     expect(button).toBeDisabled();
     expect(button).toBeBusy();
-    fireEvent.press(button);
+    await fireEvent.press(button);
     expect(onPress).not.toHaveBeenCalled();
   });
 
@@ -36,7 +36,7 @@ describe("Notice", () => {
     const retry = jest.fn();
     await inTheme(<Notice text="Unreachable." action={{ label: "Retry", onPress: retry }} />);
     expect(screen.getByRole("alert")).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole("button", { name: "Retry" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Retry" }));
     expect(retry).toHaveBeenCalledTimes(1);
   });
 });
@@ -57,7 +57,7 @@ describe("Rows", () => {
   test("a switch row is a switch whose whole row toggles", async () => {
     const onChange = jest.fn();
     await inTheme(<SwitchRow label="Pinned" value={false} onValueChange={onChange} />);
-    fireEvent.press(screen.getByRole("switch", { name: "Pinned" }));
+    await fireEvent.press(screen.getByRole("switch", { name: "Pinned" }));
     expect(onChange).toHaveBeenCalledWith(true);
   });
 
@@ -86,7 +86,7 @@ describe("Rows", () => {
         <Row title="Buy milk" cells={["Status: Open", "Rank: 2"]} onPress={open} />
       </Section>,
     );
-    fireEvent.press(screen.getByRole("button", { name: "Buy milk, Status: Open, Rank: 2" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Buy milk, Status: Open, Rank: 2" }));
     expect(open).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("header", { name: "Notes" })).toBeOnTheScreen();
   });

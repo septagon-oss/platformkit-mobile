@@ -22,6 +22,9 @@ export interface ShellValue {
   readonly state: State;
   readonly renderers: Renderers;
   readonly entry: (module: string, entity: string) => Entry | undefined;
+  /** writes counts what this app wrote to each resource ("module/entity"), so a screen knows whether what it shows is stale. */
+  readonly writes: Readonly<Record<string, number>>;
+  readonly wrote: (key: string) => void;
   readonly signIn: (baseURL: string, email: string, password: string) => Promise<void>;
   readonly signOut: () => Promise<void>;
   readonly refresh: () => Promise<void>;
@@ -53,6 +56,11 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
   }));
   const active = useRef(connection);
   const generation = useRef(0);
+  const [writes, setWrites] = useState<Readonly<Record<string, number>>>({});
+  const wrote = useCallback(
+    (key: string) => setWrites((w) => ({ ...w, [key]: (w[key] ?? 0) + 1 })),
+    [],
+  );
   const { api, baseURL } = connection;
   const begin = useCallback(() => ++generation.current, []);
 
@@ -106,6 +114,8 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       baseURL,
       state,
       renderers,
+      writes,
+      wrote,
       entry: (module, entity) =>
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
       async signIn(url, email, password) {
@@ -159,7 +169,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         return load(current, begin());
       },
     }),
-    [api, baseURL, state, renderers, begin, connect, load],
+    [api, baseURL, state, renderers, writes, wrote, begin, connect, load],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

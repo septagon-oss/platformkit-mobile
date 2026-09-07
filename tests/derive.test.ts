@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-
-// An instant reads in the device's zone; the test's device is in UTC.
-process.env.TZ = "UTC";
 import { parseCatalog } from "../src/core/catalog";
 import {
   detailItems,
@@ -13,6 +10,7 @@ import {
   known,
   label,
   listColumns,
+  mergePage,
   numberValue,
   problems,
   timeText,
@@ -21,6 +19,9 @@ import {
   screenPath,
   values,
 } from "../src/core/derive";
+
+// An instant reads in the device's zone; the test's device is in UTC.
+process.env.TZ = "UTC";
 
 const note = parseCatalog(
   JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
@@ -134,4 +135,14 @@ test("a form refuses a number or an instant that is not one before the server se
   assert.deepEqual(problems(controls, { rank: "abc" }), { rank: "is not a number" });
   assert.deepEqual(problems(controls, { rank: "3" }), {});
   assert.deepEqual(problems(controls, {}), {});
+});
+
+test("a first page read again keeps the rows beneath it and repeats none", () => {
+  const shown = [{ id: "a" }, { id: "b" }, { id: "c" }];
+  const fresh = [{ id: "new" }, { id: "a" }];
+  assert.deepEqual(
+    mergePage(fresh, shown).map((r) => r.id),
+    ["new", "a", "b", "c"],
+  );
+  assert.deepEqual(mergePage([], shown), shown);
 });

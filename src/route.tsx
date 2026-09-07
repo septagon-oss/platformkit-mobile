@@ -4,14 +4,15 @@
 // the composition a route file would otherwise repeat four times.
 import { Redirect, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { key } from "./core/catalog";
 import type { Renderer } from "./renderers";
 import { ResourceDetail } from "./screens/ResourceDetail";
 import { ResourceForm } from "./screens/ResourceForm";
 import { ResourceList } from "./screens/ResourceList";
-import { color, font, space } from "./screens/theme";
 import { useShell } from "./shell";
+import { Notice as NoticeView } from "./ui/atoms/Notice";
+import { Spinner } from "./ui/atoms/Spinner";
+import { Screen } from "./ui/templates/Screen";
 
 const generated: Required<Renderer> = {
   list: ResourceList,
@@ -45,28 +46,22 @@ export function ResourceRoute({ kind, withID = false }: Props) {
 }
 
 export function Waiting() {
-  return (
-    <View style={styles.center}>
-      <ActivityIndicator color={color.accent} />
-    </View>
-  );
+  return <Spinner size="large" fill />;
 }
 
-export function Notice({ text }: { readonly text: string }) {
+export function Notice({
+  text,
+  onRetry,
+}: {
+  readonly text: string;
+  readonly onRetry?: () => void;
+}) {
   return (
-    <View style={styles.center}>
-      <Text style={styles.notice}>{text}</Text>
-    </View>
+    <Screen>
+      <NoticeView
+        text={text}
+        {...(onRetry ? { action: { label: "Retry", onPress: onRetry } } : {})}
+      />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: space.xl,
-    backgroundColor: color.canvas,
-  },
-  notice: { color: color.textMuted, fontSize: font.md, textAlign: "center" },
-});

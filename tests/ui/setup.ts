@@ -7,3 +7,12 @@ jest.mock("expo-haptics", () => ({
   notificationAsync: jest.fn(async () => undefined),
   NotificationFeedbackType: { Success: "success", Warning: "warning", Error: "error" },
 }));
+
+// The safe area comes from a native provider the router installs at the root;
+// under Jest the package's own mock supplies fixed insets.
+jest.mock(
+  "react-native-safe-area-context",
+  () =>
+    (jest.requireActual("react-native-safe-area-context/jest/mock") as { default: unknown })
+      .default,
+);

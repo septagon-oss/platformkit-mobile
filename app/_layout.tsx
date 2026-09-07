@@ -1,11 +1,11 @@
 // The composition root. The shell is given where the server is and which
-// screens are hand-written; the theme follows the device's appearance; and
-// everything else derives from the catalog.
+// screens are hand-written; the theme follows the device's appearance; the
+// native stack draws every header; and everything else derives from the
+// catalog.
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { defaultRenderers } from "../src/renderers";
 import { Shell } from "../src/shell";
 import { ThemeProvider, useTheme } from "../src/ui/theme";
@@ -21,15 +21,30 @@ export default function Layout() {
 }
 
 function Root() {
-  const { color } = useTheme();
+  const { color, font } = useTheme();
   // The window behind every screen, so a transition never flashes white in the dark.
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(color.surfaceCanvas);
   }, [color.surfaceCanvas]);
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: color.surfaceCanvas }}>
+    <>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }} />
-    </SafeAreaView>
+      <Stack
+        screenOptions={{
+          headerShown: true,
+          headerLargeTitleEnabled: true,
+          headerLargeTitleShadowVisible: false,
+          headerTintColor: color.accentDefault,
+          headerStyle: { backgroundColor: color.surfaceCanvas },
+          headerTitleStyle: { color: color.textPrimary },
+          headerLargeTitleStyle: {
+            color: color.textPrimary,
+            ...(font.display ? { fontFamily: font.display } : {}),
+          },
+          headerBackButtonDisplayMode: "minimal",
+          contentStyle: { backgroundColor: color.surfaceCanvas },
+        }}
+      />
+    </>
   );
 }

@@ -1,79 +1,63 @@
-// Home is what there is: one row per resource the caller may reach, which is
-// the dashboard's cards without the counts.
-import React from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+// Home is the catalog as rows, with the account in the native header: the
+// platform's own menu offers Refresh and Sign out.
+import { Stack, useRouter } from "expo-router";
+import React, { useState } from "react";
 import type { Entry } from "../core/catalog";
-import { humanize, screenPath } from "../core/derive";
-import { color, font, radius, space } from "./theme";
+import { screenPath } from "../core/derive";
+import { useShell } from "../shell";
+import { Button } from "../ui/atoms/Button";
+import { choose } from "../ui/chooser";
+import { Home as HomeView } from "../ui/organisms/Home";
+import { useTheme } from "../ui/theme";
 
 interface Props {
   readonly entries: readonly Entry[];
-  readonly onOpen: (path: ReturnType<typeof screenPath>) => void;
-  readonly onSignOut: () => void;
-  readonly onRefresh: () => void;
 }
 
-export function Home({ entries, onOpen, onSignOut, onRefresh }: Props) {
+export function Home({ entries }: Props) {
+  const { refresh, signOut } = useShell();
+  const { mode } = useTheme();
+  const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+  const reload = async () => {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+  const account = () =>
+    choose(
+      "Account",
+      [
+        { label: "Refresh", onPress: () => void reload() },
+        { label: "Sign out", onPress: () => void signOut(), destructive: true },
+      ],
+      mode,
+    );
   return (
-    <View style={styles.page}>
-      <View style={styles.bar}>
-        <Text style={styles.title}>PlatformKit</Text>
-        <View style={styles.actions}>
-          <Pressable style={styles.action} onPress={onRefresh} accessibilityRole="button">
-            <Text style={styles.link}>Refresh</Text>
-          </Pressable>
-          <Pressable style={styles.action} onPress={onSignOut} accessibilityRole="button">
-            <Text style={styles.link}>Sign out</Text>
-          </Pressable>
-        </View>
-      </View>
-      <FlatList
-        data={entries}
-        keyExtractor={(e) => `${e.module}/${e.entity}`}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>Nothing you may reach here yet.</Text>}
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.card}
-            onPress={() => onOpen(screenPath(item))}
-            accessibilityRole="link"
-          >
-            <Text style={styles.cardTitle}>{humanize(item.entity)}s</Text>
-            <Text style={styles.cardSub}>
-              In {item.module}
-              {item.writable ? "" : " · read only"}
-            </Text>
-          </Pressable>
-        )}
+    <>
+      <Stack.Screen
+        options={{
+          title: "PlatformKit",
+          headerRight: () => (
+            <Button
+              placement="header"
+              label="Account"
+              icon="person"
+              onPress={account}
+              testID="account"
+            />
+          ),
+        }}
       />
-    </View>
+      <HomeView
+        entries={entries}
+        refreshing={refreshing}
+        onOpen={(e) => router.push(screenPath(e))}
+        onRefresh={() => void reload()}
+      />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: color.canvas },
-  bar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: space.lg,
-    borderBottomWidth: 1,
-    borderColor: color.border,
-    backgroundColor: color.surface,
-  },
-  actions: { flexDirection: "row", gap: space.lg },
-  action: { minHeight: 48, justifyContent: "center" },
-  title: { fontSize: font.lg, fontWeight: "700", color: color.text },
-  link: { color: color.accent, fontWeight: "600" },
-  list: { padding: space.lg, gap: space.md },
-  empty: { color: color.textMuted, textAlign: "center", padding: space.xl },
-  card: {
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: color.border,
-    borderRadius: radius.lg,
-    padding: space.lg,
-  },
-  cardTitle: { fontSize: font.md, fontWeight: "600", color: color.text },
-  cardSub: { fontSize: font.sm, color: color.textMuted, marginTop: space.xs },
-});

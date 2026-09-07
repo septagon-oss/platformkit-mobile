@@ -39,7 +39,7 @@ export function Skeleton({ lines = 3 }: Props) {
   }, [pulse, still]);
 
   return (
-    <View style={s.block} accessibilityLabel="Loading" accessibilityRole="progressbar">
+    <View style={s.block} accessible accessibilityLabel="Loading" accessibilityRole="progressbar">
       {Array.from({ length: lines }, (_, i) => (
         <Animated.View
           key={i}

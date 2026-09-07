@@ -31,7 +31,8 @@ export interface Api {
   login(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
   catalog(): Promise<Catalog>;
-  list(e: Entry, page: number, sort: string): Promise<Page>;
+  /** list is a page, in an order, through equality filters spelled field:value as the API takes them. */
+  list(e: Entry, page: number, sort: string, filters?: readonly string[]): Promise<Page>;
   get(e: Entry, id: string): Promise<Record<string, unknown>>;
   create(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
   update(e: Entry, id: string, values: Record<string, unknown>): Promise<Record<string, unknown>>;
@@ -95,12 +96,13 @@ export function createApi(
     async catalog() {
       return parseCatalog(await json(await call("GET", "/api/v1/admin/resources")));
     },
-    async list(e, page, sort) {
+    async list(e, page, sort, filters = []) {
       const q = new URLSearchParams({
         limit: String(PER_PAGE),
         offset: String(Math.max(page - 1, 0) * PER_PAGE),
       });
       if (sort) q.set("sort", sort);
+      for (const f of filters) q.append("filter", f);
       const body = await json<{ items?: Record<string, unknown>[]; total?: number }>(
         await call("GET", `${e.path}?${q}`),
       );

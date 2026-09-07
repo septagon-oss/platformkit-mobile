@@ -109,3 +109,13 @@ test("logout clears immediately and late responses cannot restore its cookie", a
   await leaving;
   assert.equal(api.cookie(), undefined);
 });
+
+test("a list is a page in an order through the filters the API takes", async () => {
+  const { fetch, calls } = fakeFetch([{ status: 200, body: { items: [], total: 0 } }]);
+  const api = createApi("https://acme.test", fetch);
+  await api.list(entry, 2, "-title", ["status:open", "pinned:true"]);
+  assert.equal(
+    calls[0]!.url,
+    "https://acme.test/api/v1/note/notes?limit=20&offset=20&sort=-title&filter=status%3Aopen&filter=pinned%3Atrue",
+  );
+});
