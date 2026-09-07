@@ -6,3 +6,4 @@ web-build/
 .env*
 /android/
 /ios/
+/e2e/out/
