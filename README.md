@@ -122,9 +122,11 @@ changed (the fingerprint, the configuration, the lockfile, the recipe) and
 keeps it as a run artifact for two weeks. It needs a verification environment
 with about 6 GiB of memory: one architecture, built serially with the settings
 in `scripts/android/`, peaks at 4.1 GiB by itself, and a job shares its
-allowance with the builder. The job is therefore off until the repository
-variable `ANDROID_BUILD` is set to `on`; `make apk` builds the same thing
-locally in the meantime.
+allowance with the builder, which is where 4 GiB failed. At 6 GiB a cold job
+builds in about seven and a half minutes. The job runs only when the
+repository variable `ANDROID_BUILD` is `on`, so an environment without the
+memory reports nothing rather than failing; `make apk` builds the same thing
+locally either way.
 
 ## Verify a change
 
