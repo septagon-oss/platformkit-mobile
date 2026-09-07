@@ -5,7 +5,9 @@
 import { Redirect, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { key } from "./core/catalog";
+import { humanize } from "./core/derive";
 import type { Renderer } from "./renderers";
+import { ResourceCommand } from "./screens/ResourceCommand";
 import { ResourceDetail } from "./screens/ResourceDetail";
 import { ResourceForm } from "./screens/ResourceForm";
 import { ResourceList } from "./screens/ResourceList";
@@ -19,17 +21,25 @@ const generated: Required<Renderer> = {
   list: ResourceList,
   detail: ResourceDetail,
   form: ResourceForm,
+  command: ResourceCommand,
 };
 
 interface Props {
   readonly kind: keyof Renderer;
   /** withID says the screen is about one row; the id comes from the path. */
   readonly withID?: boolean;
+  /** withVerb says the screen is about one command; the verb comes from the path. */
+  readonly withVerb?: boolean;
 }
 
-export function ResourceRoute({ kind, withID = false }: Props) {
+export function ResourceRoute({ kind, withID = false, withVerb = false }: Props) {
   const { state, renderers, entry } = useShell();
-  const params = useLocalSearchParams<{ module: string; entity: string; id?: string }>();
+  const params = useLocalSearchParams<{
+    module: string;
+    entity: string;
+    id?: string;
+    verb?: string;
+  }>();
 
   if (state.phase === "anonymous" || state.phase === "signing-in")
     return <Redirect href="/sign-in" />;
@@ -50,8 +60,41 @@ export function ResourceRoute({ kind, withID = false }: Props) {
 
   const Screen = renderers[key(found)]?.[kind] ?? generated[kind];
   const id = withID ? params.id : undefined;
-  return <Screen entry={found} {...(id !== undefined ? { id } : {})} />;
+  const verb = withVerb ? params.verb : undefined;
+  return (
+    <Screen
+      entry={found}
+      {...(id !== undefined ? { id } : {})}
+      {...(verb !== undefined ? { verb } : {})}
+    />
+  );
 }
+
+/**
+ * sheet and commandSheet are what a modal route's header is, named in the
+ * layout so it exists before the screen mounts: a modal is presented with the
+ * header it has at that moment, and a title set a frame later leaves the
+ * route's own name on screen. Both read the path, which is where the words
+ * are; they live here rather than in the layout because spelling a name is a
+ * rule, and the composition root holds none.
+ */
+export const sheet = (verb: string) => (prop: { route: { params?: unknown } }) => {
+  const entity = (prop.route.params as { entity?: string } | undefined)?.entity ?? "";
+  return {
+    presentation: "modal" as const,
+    headerLargeTitleEnabled: false,
+    title: verb + entity,
+  };
+};
+
+export const commandSheet = (prop: { route: { params?: unknown } }) => {
+  const verb = (prop.route.params as { verb?: string } | undefined)?.verb ?? "";
+  return {
+    presentation: "modal" as const,
+    headerLargeTitleEnabled: false,
+    title: humanize(verb.replace(/-/g, " ")),
+  };
+};
 
 export function Waiting() {
   return <Spinner size="large" fill />;

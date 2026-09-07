@@ -25,6 +25,7 @@ const entry = {
   fields: [],
   immutable: [],
   writable: true,
+  commands: [],
 };
 
 test("login keeps the session cookie and sends it back", async () => {
@@ -139,4 +140,38 @@ test("a server that never answers gives up and says which server it was", async 
     assert.match(e.message, /https:\/\/gone\.test did not answer within/);
     return true;
   });
+});
+
+test("a command posts to the row's own verb, and one that takes nothing sends no body", async () => {
+  const { fetch, calls } = fakeFetch([
+    { status: 200, body: { id: "1", status: "done" } },
+    { status: 200, body: { id: "1" } },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  await api.command(entry, "1", "resolve", { resolution: "fixed" });
+  assert.equal(calls[0]!.url, "https://acme.test/api/v1/note/notes/1/resolve");
+  assert.equal(calls[0]!.init.method, "POST");
+  assert.equal(calls[0]!.init.body, `{"resolution":"fixed"}`);
+  // A command about the collection has no row in its path, and one with no
+  // argument has no body at all: "{}" is not something a caller should have to
+  // send to say nothing.
+  await api.command(entry, undefined, "archive");
+  assert.equal(calls[1]!.url, "https://acme.test/api/v1/note/notes/archive");
+  assert.equal(calls[1]!.init.body, undefined);
+});
+
+test("the trail is asked for one record, a page at a time, and a caller who may not read it has none", async () => {
+  const { fetch, calls } = fakeFetch([
+    { status: 200, body: { items: [{ id: "e1", name: "n", occurredAt: "now" }], total: 42 } },
+    { status: 403, body: { status: 403, detail: "AUTH_DENIED" } },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  const page = await api.events({ record: "r1", offset: 20, limit: 20 });
+  assert.equal(page.total, 42);
+  assert.equal(page.items.length, 1);
+  const asked = new URL(calls[0]!.url);
+  assert.equal(asked.pathname, "/api/v1/audit/events");
+  assert.equal(asked.searchParams.get("record"), "r1");
+  assert.equal(asked.searchParams.get("offset"), "20");
+  assert.deepEqual(await api.events(), { items: [], total: 0 });
 });

@@ -5,6 +5,7 @@ import React from "react";
 import type { Entry } from "../../core/catalog";
 import { detailItems, type Row as Item } from "../../core/derive";
 import { Notice } from "../atoms/Notice";
+import { Actions, type Props as ActionsProps } from "./Actions";
 import { Activity, type Props as ActivityProps } from "./Activity";
 import { Skeleton } from "../atoms/Skeleton";
 import { DetailRow } from "../molecules/DetailRow";
@@ -25,9 +26,11 @@ export interface Props {
    * draws.
    */
   readonly activity?: ActivityProps;
+  /** actions are the lifecycle commands this caller may run on the record. */
+  readonly actions?: ActionsProps;
 }
 
-export function ResourceDetail({ entry, row, error, onRetry, onDelete, activity }: Props) {
+export function ResourceDetail({ entry, row, error, onRetry, onDelete, activity, actions }: Props) {
   return (
     <Screen testID="resource-detail">
       {error ? <Notice text={error} action={{ label: "Retry", onPress: onRetry }} /> : null}
@@ -50,6 +53,7 @@ export function ResourceDetail({ entry, row, error, onRetry, onDelete, activity 
           <Skeleton lines={5} />
         </Section>
       )}
+      {row && actions ? <Actions {...actions} /> : null}
       {row && activity ? <Activity {...activity} /> : null}
       {row && onDelete ? (
         <Section footer="Deleting cannot be undone.">

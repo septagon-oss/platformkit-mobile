@@ -3,6 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog } from "../src/core/catalog";
 import {
+  collectionCommands,
+  commandControls,
+  commandOf,
+  commandTitle,
   detailItems,
   display,
   formControls,
@@ -13,6 +17,7 @@ import {
   listColumns,
   listPreview,
   narrowed,
+  rowCommands,
   noOrder,
   numberValue,
   plural,
@@ -197,4 +202,39 @@ test("a row previews the record's own words, and does not repeat them as a cell"
   // An entity with no long text has no line to preview.
   const terse = { ...note, fields: note.fields.filter((f) => f.name !== "body") };
   assert.equal(listPreview(terse), undefined);
+});
+
+test("a command's argument is a form built by the rules a field is built by", () => {
+  const publish = note.commands.find((c) => c.verb === "publish")!;
+  const controls = commandControls(publish);
+  assert.equal(controls.length, 1);
+  const at = controls[0]!;
+  assert.equal(at.kind, "text");
+  assert.equal(at.label, "At");
+  assert.equal(at.readOnly, false);
+  assert.equal(at.help, "When it goes out; now if left empty");
+  // A command that takes nothing has no controls, which is what makes it a
+  // question rather than a sheet.
+  assert.deepEqual(commandControls(note.commands.find((c) => c.verb === "archive")!), []);
+});
+
+test("a command is named by its summary, or by its verb when it has none", () => {
+  assert.equal(
+    commandTitle({ verb: "check-sla", summary: "Check the SLA", fields: [] }),
+    "Check the SLA",
+  );
+  assert.equal(commandTitle({ verb: "set_password", fields: [] }), "Set password");
+});
+
+test("the commands about a row and the commands about the list are told apart", () => {
+  assert.deepEqual(
+    rowCommands(note).map((c) => c.verb),
+    ["publish"],
+  );
+  assert.deepEqual(
+    collectionCommands(note).map((c) => c.verb),
+    ["archive"],
+  );
+  assert.equal(commandOf(note, "publish")?.summary, "Publish a note");
+  assert.equal(commandOf(note, "nothing"), undefined);
 });

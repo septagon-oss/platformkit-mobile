@@ -2,7 +2,7 @@
 // only an entry's schema. The rules are the web generator's (ui/screens in the
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
-import type { Entry, Field } from "./catalog";
+import type { Command, Entry, Field } from "./catalog";
 
 export type Row = Readonly<Record<string, unknown>>;
 
@@ -205,6 +205,27 @@ export function kind(f: Field): ControlKind {
   }
 }
 
+/** control is one field as a form holds it: the same rules wherever the field came from. */
+function control(f: Field, value: string, immutable: boolean): Control {
+  const k = kind(f);
+  const notes = [f.doc ?? ""];
+  if (immutable) notes.push("Changed by a command of its own, not by this form.");
+  if (k === "reference") {
+    notes.push("The identifier of the related record. There is no picker for it yet.");
+  }
+  if (k === "list") notes.push("Comma separated.");
+  return {
+    kind: k,
+    field: f,
+    label: humanize(f.name),
+    value,
+    required: f.required === true,
+    readOnly: immutable,
+    help: notes.filter(Boolean).join(" "),
+    options: (f.enum ?? []).map((v) => ({ value: v, label: humanize(v) })),
+  };
+}
+
 /** formControls: one control per writable field; immutable fields are read-only on edit and absent on create. */
 export function formControls(e: Entry, row: Row | undefined, create: boolean): readonly Control[] {
   const out: Control[] = [];
@@ -212,27 +233,37 @@ export function formControls(e: Entry, row: Row | undefined, create: boolean): r
     if (f.readOnly) continue;
     const immutable = e.immutable.includes(f.name);
     if (create && immutable) continue;
-    const k = kind(f);
     const value = row && f.name in row ? text(row[f.name]) : create ? (f.default ?? "") : "";
-    const notes = [f.doc ?? ""];
-    if (immutable) notes.push("Changed by a command of its own, not by this form.");
-    if (k === "reference") {
-      notes.push("The identifier of the related record. There is no picker for it yet.");
-    }
-    if (k === "list") notes.push("Comma separated.");
-    out.push({
-      kind: k,
-      field: f,
-      label: humanize(f.name),
-      value,
-      required: f.required === true,
-      readOnly: immutable,
-      help: notes.filter(Boolean).join(" "),
-      options: (f.enum ?? []).map((v) => ({ value: v, label: humanize(v) })),
-    });
+    out.push(control(f, value, immutable));
   }
   return out;
 }
+
+/**
+ * commandControls is a command's argument as a form: the same controls a field
+ * of the entity gets, because a command's argument is described the same way.
+ * A command that takes no argument has none, which is what makes it a
+ * confirmation rather than a sheet.
+ */
+export function commandControls(c: Command): readonly Control[] {
+  return c.fields.map((f) => control(f, f.default ?? "", false));
+}
+
+/**
+ * commandTitle is what a person taps: the summary the API document gives, or
+ * the verb spelled as words when it gives none.
+ */
+export const commandTitle = (c: Command): string => c.summary || humanize(c.verb);
+
+/** rowCommands are the commands about one record; collectionCommands are about the list. */
+export const rowCommands = (e: Entry): readonly Command[] =>
+  e.commands.filter((c) => !c.collection);
+export const collectionCommands = (e: Entry): readonly Command[] =>
+  e.commands.filter((c) => c.collection === true);
+
+/** commandOf finds a command by its verb, which is how a route names one. */
+export const commandOf = (e: Entry, verb: string): Command | undefined =>
+  e.commands.find((c) => c.verb === verb);
 
 /** values turns what a form holds back into what the API takes. */
 export function values(

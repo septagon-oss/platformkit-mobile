@@ -7,12 +7,15 @@ import type { Entry } from "./core/catalog";
 export interface ScreenProps {
   readonly entry: Entry;
   readonly id?: string;
+  /** verb is which lifecycle command the screen is about, for the command kind. */
+  readonly verb?: string;
 }
 
 export interface Renderer {
   readonly list?: ComponentType<ScreenProps>;
   readonly detail?: ComponentType<ScreenProps>;
   readonly form?: ComponentType<ScreenProps>;
+  readonly command?: ComponentType<ScreenProps>;
 }
 
 export type Renderers = Readonly<Record<string, Renderer>>;

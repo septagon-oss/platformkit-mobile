@@ -7,18 +7,9 @@ import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect, useMemo } from "react";
 import { defaultRenderers } from "../src/renderers";
+import { commandSheet, sheet } from "../src/route";
 import { Shell } from "../src/shell";
 import { ThemeProvider, useTheme } from "../src/ui/theme";
-
-/** sheet is what a create or edit route is: a modal titled for its entity. */
-const sheet = (verb: string) => (prop: { route: { params?: unknown } }) => {
-  const entity = (prop.route.params as { entity?: string } | undefined)?.entity ?? "";
-  return {
-    presentation: "modal" as const,
-    headerLargeTitleEnabled: false,
-    title: verb + entity,
-  };
-};
 
 export default function Layout() {
   return (
@@ -66,6 +57,7 @@ function Root() {
             screen. The entity is in the path, which is where this reads it. */}
         <Stack.Screen name="[module]/[entity]/new" options={sheet("New ")} />
         <Stack.Screen name="[module]/[entity]/[id]/edit" options={sheet("Edit ")} />
+        <Stack.Screen name="[module]/[entity]/[id]/run/[verb]" options={commandSheet} />
       </Stack>
     </>
   );

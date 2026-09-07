@@ -6,7 +6,9 @@ import { StyleSheet, View } from "react-native";
 import { since, subject, verb, type Event } from "../../core/activity";
 import { timeText } from "../../core/derive";
 import { Badge } from "../atoms/Badge";
+import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
+import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
 import { Section } from "../molecules/Section";
 import { useStyles, type Theme } from "../theme";
@@ -17,12 +19,23 @@ export interface Props {
   readonly names: Readonly<Record<string, string>>;
   readonly loading: boolean;
   readonly error: string;
-  /** full says the window filled, so older events exist that were not read. */
-  readonly full: boolean;
+  /** more says older lines exist; loadMore reads the next page of them. */
+  readonly more: boolean;
+  readonly loadingMore: boolean;
+  readonly loadMore: () => void;
   readonly now?: Date;
 }
 
-export function Activity({ events, names, loading, error, full, now = new Date() }: Props) {
+export function Activity({
+  events,
+  names,
+  loading,
+  error,
+  more,
+  loadingMore,
+  loadMore,
+  now = new Date(),
+}: Props) {
   const s = useStyles(styles);
 
   if (error)
@@ -39,21 +52,13 @@ export function Activity({ events, names, loading, error, full, now = new Date()
     );
   if (events.length === 0)
     return (
-      <Section
-        title="Activity"
-        {...(full ? { footer: "Only the most recent changes are read." } : {})}
-      >
-        <Text tone="muted">
-          {full ? "Nothing recent about this record." : "Nothing has happened to this record yet."}
-        </Text>
+      <Section title="Activity">
+        <Text tone="muted">Nothing has happened to this record yet.</Text>
       </Section>
     );
 
   return (
-    <Section
-      title="Activity"
-      {...(full ? { footer: "Only the most recent changes are read." } : {})}
-    >
+    <Section title="Activity">
       {events.map((e) => {
         const who = e.actor ? (names[e.actor] ?? e.actor.slice(0, 8)) : "the system";
         const at = new Date(e.occurredAt);
@@ -79,6 +84,15 @@ export function Activity({ events, names, loading, error, full, now = new Date()
           </View>
         );
       })}
+      {more ? (
+        <View style={s.more}>
+          {loadingMore ? (
+            <Spinner />
+          ) : (
+            <Button label="Show older" tone="plain" onPress={loadMore} testID="activity-more" />
+          )}
+        </View>
+      ) : null}
     </Section>
   );
 }
@@ -101,5 +115,7 @@ const styles = (t: Theme) =>
       justifyContent: "space-between",
       gap: t.space.sm,
     },
-    when: { flexDirection: "row", alignItems: "center", gap: t.space.xs },
+    // The time never shrinks: "just now" clipped to "just" is a lie about when.
+    when: { flexDirection: "row", alignItems: "center", gap: t.space.xs, flexShrink: 0 },
+    more: { alignItems: "center", paddingVertical: t.space.xs },
   });

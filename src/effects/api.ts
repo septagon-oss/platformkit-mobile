@@ -42,6 +42,23 @@ export interface Page {
   readonly total: number;
 }
 
+/** Trail is a page of the audit trail, with how many rows the filter matched. */
+export interface Trail {
+  readonly items: readonly AuditEvent[];
+  readonly total: number;
+}
+
+/**
+ * Since is which part of a record's trail to read. The server filters by the
+ * record, so a page here is a page of that record's own history rather than a
+ * window of everything that had to be sifted.
+ */
+export interface Since {
+  readonly record?: string;
+  readonly offset?: number;
+  readonly limit?: number;
+}
+
 /** Window is which rows to read: where to start, how many, in what order, narrowed how. */
 export interface Window {
   readonly offset?: number;
@@ -54,11 +71,11 @@ export interface Api {
   /** me is who this session belongs to, or nothing when it belongs to nobody. */
   me(): Promise<Identity | undefined>;
   /**
-   * events is a window of the audit trail, newest first. The trail cannot be
-   * asked about one record, so a caller that wants a record's activity asks
-   * for a window and keeps what is about it.
+   * events is a page of the audit trail, newest first, optionally about one
+   * record. A caller who may not read the trail gets an empty one rather than
+   * an error: a record whose history is none of your business still shows.
    */
-  events(limit?: number): Promise<readonly AuditEvent[]>;
+  events(q?: Since): Promise<Trail>;
   login(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
   catalog(): Promise<Catalog>;
@@ -68,6 +85,19 @@ export interface Api {
   create(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
   update(e: Entry, id: string, values: Record<string, unknown>): Promise<Record<string, unknown>>;
   remove(e: Entry, id: string): Promise<void>;
+  /**
+   * command runs one of the entry's lifecycle routes and answers the row it
+   * left behind. id is the row it is about, or nothing for a command about the
+   * collection; values is its argument, or nothing for a command that takes
+   * none — which is sent as no body at all, because "{}" is not something a
+   * caller should have to say to say nothing.
+   */
+  command(
+    e: Entry,
+    id: string | undefined,
+    verb: string,
+    values?: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
   /** cookie is the session the shell should persist, or undefined when signed out. */
   readonly cookie: () => string | undefined;
 }
@@ -157,16 +187,18 @@ export function createApi(
         return undefined;
       }
     },
-    async events(limit = 100) {
-      const q = new URLSearchParams({ limit: String(limit), offset: "0" });
+    async events({ record = "", offset = 0, limit = PER_PAGE } = {}) {
+      const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+      if (record) q.set("record", record);
       try {
-        const body = await json<{ items?: AuditEvent[] }>(
+        const body = await json<{ items?: AuditEvent[]; total?: number }>(
           await call("GET", `/api/v1/audit/events?${q}`),
         );
-        return body.items ?? [];
+        return { items: body.items ?? [], total: body.total ?? 0 };
       } catch (e) {
         // A caller who may not read the trail simply has none to show.
-        if (e instanceof ApiError && (e.status === 403 || e.status === 404)) return [];
+        if (e instanceof ApiError && (e.status === 403 || e.status === 404))
+          return { items: [], total: 0 };
         throw e;
       }
     },
@@ -193,6 +225,10 @@ export function createApi(
     },
     async remove(e, id) {
       await call("DELETE", `${e.path}/${encodeURIComponent(id)}`);
+    },
+    async command(e, id, verb, values) {
+      const at = id ? `${e.path}/${encodeURIComponent(id)}` : e.path;
+      return json(await call("POST", `${at}/${encodeURIComponent(verb)}`, values));
     },
   };
 }

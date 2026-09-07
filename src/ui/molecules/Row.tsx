@@ -3,6 +3,7 @@
 import React, { type ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "../atoms/Icon";
+import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
 import { useStyles, useTheme, type Theme } from "../theme";
 
@@ -17,6 +18,10 @@ interface Props {
   readonly onPress?: () => void;
   /** tone colours the title: destructive rows are red and open nothing. */
   readonly tone?: "primary" | "destructive";
+  /** busy is a row whose press is under way: the chevron becomes a spinner and the press is off. */
+  readonly busy?: boolean;
+  /** opens says pressing leads somewhere, which is what the chevron promises. */
+  readonly opens?: boolean;
   readonly testID?: string;
 }
 
@@ -27,17 +32,20 @@ export function Row({
   shown,
   onPress,
   tone = "primary",
+  busy = false,
+  opens: leads,
   testID,
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
-  const opens = tone === "primary" && !!onPress;
+  const opens = (leads ?? true) && tone === "primary" && !!onPress;
   return (
     <Pressable
       style={({ pressed }) => [s.row, pressed && s.pressed]}
       onPress={onPress}
-      disabled={!onPress}
+      disabled={!onPress || busy}
       accessibilityRole="button"
+      accessibilityState={{ busy, disabled: !onPress || busy }}
       accessibilityLabel={[title, ...cells].join(", ")}
       android_ripple={{ color: t.color.borderDefault }}
       {...(testID ? { testID } : {})}
@@ -63,7 +71,7 @@ export function Row({
           </Text>
         ) : null}
       </View>
-      {opens ? <Icon name="chevron" size="sm" tone="muted" /> : null}
+      {busy ? <Spinner /> : opens ? <Icon name="chevron" size="sm" tone="muted" /> : null}
     </Pressable>
   );
 }

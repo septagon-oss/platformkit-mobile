@@ -31,6 +31,25 @@ export interface Field {
   readonly doc?: string;
 }
 
+/**
+ * Command is a door beyond the five: a rule about the state a row is in, with
+ * an event of its own, which is what a form cannot express. A command the
+ * caller may not call is absent from the document, so one that is here is one
+ * this caller may run.
+ *
+ * There is no path, because it is derived the way every other path is: POST
+ * {entry.path}/{id}/{verb}, or {entry.path}/{verb} when collection.
+ */
+export interface Command {
+  readonly verb: string;
+  readonly summary?: string;
+  readonly description?: string;
+  /** collection says the command is about the whole list, so it takes no row. */
+  readonly collection?: boolean;
+  /** fields is the shape of the argument; a command that takes none has no fields. */
+  readonly fields: readonly Field[];
+}
+
 export interface Entry {
   readonly module: string;
   readonly entity: string;
@@ -38,6 +57,8 @@ export interface Entry {
   readonly fields: readonly Field[];
   readonly immutable: readonly string[];
   readonly writable: boolean;
+  /** commands is empty for an entity that has none, and for a server too old to say. */
+  readonly commands: readonly Command[];
 }
 
 export interface Catalog {
@@ -116,6 +137,21 @@ function field(v: unknown, at: string): Field {
   };
 }
 
+function command(v: unknown, at: string): Command {
+  if (!isRecord(v)) throw new CatalogError(at, "is not an object");
+  const fields = v.fields;
+  if (fields !== undefined && !Array.isArray(fields)) {
+    throw new CatalogError(`${at}.fields`, "is not a list");
+  }
+  return {
+    verb: str(v, "verb", at, true)!,
+    ...opt("summary", str(v, "summary", at, false)),
+    ...opt("description", str(v, "description", at, false)),
+    ...opt("collection", bool(v, "collection", at)),
+    fields: (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`)),
+  };
+}
+
 function entry(v: unknown, at: string): Entry {
   if (!isRecord(v)) throw new CatalogError(at, "is not an object");
   const module = str(v, "module", at, true)!;
@@ -125,6 +161,12 @@ function entry(v: unknown, at: string): Entry {
   if (!Array.isArray(fields)) throw new CatalogError(`${at}.fields`, "is not a list");
   const writable = bool(v, "writable", at);
   if (writable === undefined) throw new CatalogError(`${at}.writable`, "is missing");
+  // Absent is none: a server that predates commands still renders every screen
+  // it did before, with no door on it.
+  const commands = v.commands;
+  if (commands !== undefined && !Array.isArray(commands)) {
+    throw new CatalogError(`${at}.commands`, "is not a list");
+  }
   return {
     module,
     entity,
@@ -132,6 +174,7 @@ function entry(v: unknown, at: string): Entry {
     fields: fields.map((f, i) => field(f, `${at}.fields[${i}]`)),
     immutable: strings(v, "immutable", at) ?? [],
     writable,
+    commands: (commands ?? []).map((c, i) => command(c, `${at}.commands[${i}]`)),
   };
 }
 

@@ -120,6 +120,30 @@ describe("ResourceDetail", () => {
   });
 });
 
+describe("Actions", () => {
+  const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: [] };
+  const detail = { entry: note, row, error: "", onRetry: none };
+  const commands = note.commands.filter((c) => !c.collection);
+
+  test("a command is a row in the API document's own words, and it runs once", async () => {
+    const onRun = jest.fn();
+    await inTheme(<ResourceDetail {...detail} actions={{ commands, running: "", onRun }} />);
+    await fireEvent.press(screen.getByRole("button", { name: "Publish a note" }));
+    expect(onRun).toHaveBeenCalledWith(commands[0]);
+    expect(screen.getByText(/Makes the note visible/)).toBeOnTheScreen();
+  });
+
+  test("a command under way cannot be run again, and a record with none shows no section", async () => {
+    const onRun = jest.fn();
+    await inTheme(<ResourceDetail {...detail} actions={{ commands, running: "publish", onRun }} />);
+    await fireEvent.press(screen.getByRole("button", { name: "Publish a note" }));
+    expect(onRun).not.toHaveBeenCalled();
+    await screen.unmount();
+    await inTheme(<ResourceDetail {...detail} actions={{ commands: [], running: "", onRun }} />);
+    expect(screen.queryByText("Actions")).toBeNull();
+  });
+});
+
 describe("Activity", () => {
   const now = new Date("2026-09-07T12:00:00Z");
   const trail = {
@@ -141,7 +165,9 @@ describe("Activity", () => {
     names: { u1: "Joao" },
     loading: false,
     error: "",
-    full: false,
+    more: false,
+    loadingMore: false,
+    loadMore: none,
     now,
   };
   const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: [] };
@@ -154,10 +180,20 @@ describe("Activity", () => {
     expect(screen.getByLabelText("Created by the system, yesterday")).toBeOnTheScreen();
   });
 
-  test("a window that filled says the trail is only the recent part", async () => {
-    await inTheme(<ResourceDetail {...detail} activity={{ ...trail, events: [], full: true }} />);
-    expect(screen.getByText("Only the most recent changes are read.")).toBeOnTheScreen();
-    expect(screen.getByText("Nothing recent about this record.")).toBeOnTheScreen();
+  test("a trail with older lines offers to read them, once", async () => {
+    const loadMore = jest.fn();
+    await inTheme(<ResourceDetail {...detail} activity={{ ...trail, more: true, loadMore }} />);
+    await fireEvent.press(screen.getByRole("button", { name: "Show older" }));
+    expect(loadMore).toHaveBeenCalledTimes(1);
+    await screen.unmount();
+    // While the older lines come there is no second press to make.
+    await inTheme(
+      <ResourceDetail {...detail} activity={{ ...trail, more: true, loadingMore: true }} />,
+    );
+    expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
+    await screen.unmount();
+    await inTheme(<ResourceDetail {...detail} activity={trail} />);
+    expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
   });
 
   test("a record with no trail yet says so, and an unreadable one says why", async () => {
