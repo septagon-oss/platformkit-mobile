@@ -1,0 +1,42 @@
+# What changed in the world while the code did not: the SDK's opinion of the
+# dependency tree, what is outdated, and whether the fingerprint is stable
+# across two runs. This reports; it never blocks a change, because it moves
+# with the world and not with the diff.
+name: drift
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: pkit-ci-linux-amd64
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+      - run: npm ci --no-audit --no-fund
+
+      - name: The SDK's opinion of this project
+        continue-on-error: true
+        run: npx --yes expo-doctor@1
+
+      - name: What is outdated
+        run: npm outdated || true
+
+      - name: The fingerprint is stable
+        run: |
+          npm run fingerprint --silent
+          cp fingerprint.json "$RUNNER_TEMP/first.json"
+          npm run fingerprint --silent
+          cmp fingerprint.json "$RUNNER_TEMP/first.json"
+          git diff --exit-code fingerprint.json || echo "::warning::fingerprint.json is stale; run npm run fingerprint"

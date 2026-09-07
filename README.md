@@ -70,7 +70,14 @@ resource schema cannot express.
 
 The repository CI runs `npm run check` on pull requests and main pushes.
 `npm run check` checks package compatibility with the installed Expo SDK, then
-runs TypeScript, ESLint, the source formatting check and the Node tests.
+runs TypeScript, ESLint, the source formatting check, the Node tests and the
+native fingerprint check. [fingerprint.json](fingerprint.json) is the hash of
+everything a binary is built from: the app configuration, the native modules in
+the lockfile and their config plugins. When a change moves it, run
+`npm run fingerprint` and say why in the commit, because that change needs a
+new binary. CI also exports both bundles, fails on a high or critical dependency
+advisory, and scans the history for secrets; a weekly workflow reports what
+drifted without blocking anything. Node is pinned once, in [.nvmrc](.nvmrc).
 Use `expo install` for native dependencies so they match that SDK; the app owns
 the native font dependency used by its router. Starting Expo generates route
 types under the ignored `.expo/` directory, which TypeScript also checks.

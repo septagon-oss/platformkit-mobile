@@ -10,11 +10,14 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "format": "prettier --write \"{app,src,tests}/**/*.{ts,tsx}\"",
-    "format:check": "prettier --check \"{app,src,tests}/**/*.{ts,tsx}\"",
+    "format": "prettier --write \"{app,src,tests,scripts}/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"{app,src,tests,scripts}/**/*.{ts,tsx}\"",
     "test": "tsx --test tests/*.test.ts",
-    "check": "npm run check:sdk && npm run typecheck && npm run lint && npm run format:check && npm run test",
-    "check:sdk": "expo install --check"
+    "check": "npm run check:sdk && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:fingerprint",
+    "check:sdk": "expo install --check",
+    "fingerprint": "tsx scripts/fingerprint.ts",
+    "check:fingerprint": "tsx scripts/fingerprint.ts --check",
+    "export:check": "expo export --platform android --platform ios --output-dir \"${RUNNER_TEMP:-/tmp}/platformkit-mobile-export\""
   },
   "dependencies": {
     "expo": "~55.0.28",
@@ -32,6 +35,7 @@
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {
+    "@expo/fingerprint": "^0.16.8",
     "@types/react": "~19.2.0",
     "babel-preset-expo": "~55.0.8",
     "eslint": "^9.0.0",
@@ -39,5 +43,8 @@
     "prettier": "^3.3.0",
     "tsx": "^4.19.0",
     "typescript": "~5.9.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
