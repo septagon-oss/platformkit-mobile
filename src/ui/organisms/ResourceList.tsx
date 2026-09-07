@@ -26,6 +26,7 @@ import { Labelled } from "../molecules/Value";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 import { ListScreen } from "../templates/ListScreen";
+import { Actions, type Props as ActionsProps } from "./Actions";
 
 export interface Props {
   readonly entry: Entry;
@@ -43,6 +44,8 @@ export interface Props {
   readonly onMore: () => void;
   readonly onRefresh: () => void;
   readonly onNew?: () => void;
+  /** actions are the commands about the whole list rather than one row. */
+  readonly actions?: ActionsProps;
 }
 
 export function ResourceList({
@@ -60,6 +63,7 @@ export function ResourceList({
   onMore,
   onRefresh,
   onNew,
+  actions,
 }: Props) {
   const columns = listCells(entry);
   const preview = listPreview(entry);
@@ -124,7 +128,13 @@ export function ResourceList({
         </Section>
       )}
       footer={
-        <LoadMore remaining={Math.max(total - rows.length, 0)} busy={loading} onPress={onMore} />
+        <>
+          <LoadMore remaining={Math.max(total - rows.length, 0)} busy={loading} onPress={onMore} />
+          {/* Under the list, because a command about the collection is about
+              what was just read, and because a header with a third button in
+              it is a header nobody reads. */}
+          {actions ? <Actions {...actions} /> : null}
+        </>
       }
       empty={
         <EmptyState

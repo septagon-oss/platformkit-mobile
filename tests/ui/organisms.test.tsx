@@ -133,6 +133,33 @@ describe("Actions", () => {
     expect(screen.getByText(/Makes the note visible/)).toBeOnTheScreen();
   });
 
+  test("a command about the collection is under the list, not on a row", async () => {
+    const onRun = jest.fn();
+    const archive = note.commands.filter((c) => c.collection);
+    await inTheme(
+      <ResourceList
+        {...{
+          entry: note,
+          rows: [],
+          total: 0,
+          loading: false,
+          refreshing: false,
+          more: false,
+          error: "",
+          order: noOrder,
+          ordering: false,
+          onOrder: none,
+          onMore: none,
+          onRefresh: none,
+          onOpen: none,
+        }}
+        actions={{ commands: archive, running: "", onRun }}
+      />,
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Archive every resolved note" }));
+    expect(onRun).toHaveBeenCalledWith(archive[0]);
+  });
+
   test("a command under way cannot be run again, and a record with none shows no section", async () => {
     const onRun = jest.fn();
     await inTheme(<ResourceDetail {...detail} actions={{ commands, running: "publish", onRun }} />);

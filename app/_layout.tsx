@@ -58,6 +58,7 @@ function Root() {
         <Stack.Screen name="[module]/[entity]/new" options={sheet("New ")} />
         <Stack.Screen name="[module]/[entity]/[id]/edit" options={sheet("Edit ")} />
         <Stack.Screen name="[module]/[entity]/[id]/run/[verb]" options={commandSheet} />
+        <Stack.Screen name="[module]/[entity]/run/[verb]" options={commandSheet} />
       </Stack>
     </>
   );
