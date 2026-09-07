@@ -28,17 +28,47 @@ export function text(v: unknown): string {
   return "";
 }
 
+/** timeValue is the instant a field holds, or nothing when it holds nothing or nonsense. */
+export function timeValue(raw: unknown): Date | undefined {
+  const s = text(raw);
+  if (!s) return undefined;
+  const at = new Date(s);
+  return Number.isNaN(at.getTime()) ? undefined : at;
+}
+
+/** timeWire is an instant as the API takes it: RFC 3339, UTC. */
+export const timeWire = (at: Date): string => at.toISOString();
+
+// timeText is an instant as a person reads it here: in the device's zone, with
+// the zone named, because a phone is somewhere. This is the one place the
+// native shell reads differently from the web shell's UTC cell, on purpose:
+// a browser tab is a desk, a phone is a person.
+let timeFormat: Intl.DateTimeFormat | undefined;
+export const timeText = (at: Date): string =>
+  (timeFormat ??= new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  })).format(at);
+
+/** numberValue is what a typed number means, accepting a decimal comma, or nothing when it is not a number. */
+export function numberValue(raw: string): number | undefined {
+  const s = raw.replace(/\s/g, "");
+  if (s === "") return undefined;
+  const normalised = /^[-+]?\d*,\d+$/.test(s) ? s.replace(",", ".") : s;
+  const n = Number(normalised);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 /** display is a value as a person reads it; nothing at all is a dash. */
 export function display(f: Field, v: unknown): string {
   if (f.type === "bool") return v === true ? "Yes" : "No";
   if (f.type === "time") {
-    const raw = text(v);
-    const at = raw ? new Date(raw) : null;
-    if (at && !Number.isNaN(at.getTime())) {
-      const p = (n: number) => String(n).padStart(2, "0");
-      return `${at.getUTCFullYear()}-${p(at.getUTCMonth() + 1)}-${p(at.getUTCDate())} ${p(at.getUTCHours())}:${p(at.getUTCMinutes())}`;
-    }
-    return raw || "—";
+    const at = timeValue(v);
+    return at ? timeText(at) : text(v) || "—";
   }
   const out = text(v);
   if (!out) return "—";
@@ -151,9 +181,11 @@ export function values(
       case "switch":
         out[c.field.name] = raw === "true";
         break;
-      case "number":
-        if (raw !== "") out[c.field.name] = Number(raw);
+      case "number": {
+        const n = numberValue(raw);
+        if (n !== undefined) out[c.field.name] = n;
         break;
+      }
       case "list":
         out[c.field.name] =
           raw === ""
@@ -166,6 +198,27 @@ export function values(
       default:
         if (raw !== "" || c.required) out[c.field.name] = raw;
     }
+  }
+  return out;
+}
+
+/**
+ * problems is what a form can refuse before the server does: a number that is
+ * not one, an instant that is not one. Required and everything else are the
+ * server's, answered in the same shape, so a form shows both the same way.
+ */
+export function problems(
+  controls: readonly Control[],
+  held: Readonly<Record<string, string>>,
+): Readonly<Record<string, string>> {
+  const out: Record<string, string> = {};
+  for (const c of controls) {
+    if (c.readOnly) continue;
+    const raw = held[c.field.name] ?? c.value;
+    if (raw === "") continue;
+    if (c.kind === "number" && numberValue(raw) === undefined)
+      out[c.field.name] = "is not a number";
+    if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = "is not a time";
   }
   return out;
 }

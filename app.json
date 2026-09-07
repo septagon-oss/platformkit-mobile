@@ -7,10 +7,25 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "ios": { "supportsTablet": true, "bundleIdentifier": "dev.septagon.platformkit" },
-    "android": { "package": "dev.septagon.platformkit" },
-    "web": { "bundler": "metro", "output": "single" },
-    "plugins": ["expo-router", "expo-secure-store", "expo-font"],
-    "experiments": { "typedRoutes": true }
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.septagon.platformkit"
+    },
+    "android": {
+      "package": "dev.septagon.platformkit",
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

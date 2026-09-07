@@ -40,9 +40,16 @@ export function themeFor(mode: Mode): Theme {
 
 const Context = createContext<Theme>(themeFor("light"));
 
-export function ThemeProvider({ children }: { readonly children: React.ReactNode }) {
+interface ProviderProps {
+  readonly children: React.ReactNode;
+  /** mode overrides the device's appearance; the gallery uses it to show both. */
+  readonly mode?: Mode;
+}
+
+export function ThemeProvider({ children, mode }: ProviderProps) {
   const scheme = useColorScheme();
-  const theme = useMemo(() => themeFor(scheme === "dark" ? "dark" : "light"), [scheme]);
+  const chosen: Mode = mode ?? (scheme === "dark" ? "dark" : "light");
+  const theme = useMemo(() => themeFor(chosen), [chosen]);
   return <Context.Provider value={theme}>{children}</Context.Provider>;
 }
 

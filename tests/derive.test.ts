@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+
+// An instant reads in the device's zone; the test's device is in UTC.
+process.env.TZ = "UTC";
 import { parseCatalog } from "../src/core/catalog";
 import {
   detailItems,
@@ -10,6 +13,11 @@ import {
   known,
   label,
   listColumns,
+  numberValue,
+  problems,
+  timeText,
+  timeValue,
+  timeWire,
   screenPath,
   values,
 } from "../src/core/derive";
@@ -51,7 +59,7 @@ test("display is the same answer as rest.Display", () => {
   assert.equal(display(f("pinned"), true), "Yes");
   assert.equal(display(f("pinned"), undefined), "No");
   assert.equal(display(f("status"), "open"), "Open");
-  assert.equal(display(f("createdAt"), row.createdAt), "2026-09-05 10:20");
+  assert.equal(display(f("createdAt"), row.createdAt), "Sep 5, 2026, 10:20 AM UTC");
   assert.equal(display(f("tags"), ["a", "b"]), "a, b");
   assert.equal(display(f("rank"), 2), "2");
   assert.equal(display(f("body"), ""), "—");
@@ -101,4 +109,29 @@ test("a screen path is module/entity", () => {
     screenPath({ ...note, module: "north/west", entity: "note#summary" }),
     "/north%2Fwest/note%23summary",
   );
+});
+
+test("an instant is parsed, rendered where the phone is, and sent as the API takes it", () => {
+  const at = timeValue("2026-01-31T09:00:00Z")!;
+  assert.equal(timeWire(at), "2026-01-31T09:00:00.000Z");
+  assert.equal(timeText(at), "Jan 31, 2026, 09:00 AM UTC");
+  assert.equal(timeValue(""), undefined);
+  assert.equal(timeValue("yesterday"), undefined);
+  assert.equal(timeValue(undefined), undefined);
+});
+
+test("a typed number may carry a decimal comma and a sign; anything else is not a number", () => {
+  assert.equal(numberValue("2"), 2);
+  assert.equal(numberValue("-1.5"), -1.5);
+  assert.equal(numberValue("1,5"), 1.5);
+  assert.equal(numberValue(" 10 "), 10);
+  assert.equal(numberValue(""), undefined);
+  assert.equal(numberValue("two"), undefined);
+});
+
+test("a form refuses a number or an instant that is not one before the server sees it", () => {
+  const controls = formControls(note, undefined, true);
+  assert.deepEqual(problems(controls, { rank: "abc" }), { rank: "is not a number" });
+  assert.deepEqual(problems(controls, { rank: "3" }), {});
+  assert.deepEqual(problems(controls, {}), {});
 });

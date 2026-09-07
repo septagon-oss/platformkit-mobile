@@ -13,6 +13,8 @@ export const type = {
   body: { size: 16, line: 22, scale: 2 },
   title: { size: 20, line: 26, scale: 2 },
   display: { size: 26, line: 32, scale: 2 },
+  /** mono is an identifier or a raw value: body-sized, in the mono face. */
+  mono: { size: 15, line: 20, scale: 1.6 },
 } as const;
 export type Role = keyof typeof type;
 
