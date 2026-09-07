@@ -3,7 +3,7 @@
 // its own, so a save that never blurred the input still carries it. The
 // spelling is the comma-separated one the core splits, so the API contract is
 // untouched.
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { splitList } from "../../core/derive";
 import { Icon } from "../atoms/Icon";
@@ -21,18 +21,17 @@ interface Props {
 
 export function TagsField({ label, value, onChange, disabled = false, testID }: Props) {
   const s = useStyles(styles);
-  // What this control wrote, it reads back as chips plus what is being typed.
-  // A value from anywhere else — a record as the server has it — is all chips.
-  const mine = useRef<string | null>(null);
-  const ours = value === mine.current;
-  const parts = value.split(",");
-  const draft = ours ? (parts[parts.length - 1] ?? "") : "";
-  const tags = ours ? splitList(parts.slice(0, -1).join(",")) : splitList(value);
+  // What is being typed is held here and written into the value on every
+  // keystroke, so a save that never blurred the input still carries it. The
+  // chips are whatever the value holds beyond that draft, which means a record
+  // as the server has it arrives as chips and nothing half-typed.
+  const [draft, setDraft] = useState("");
+  const base = value.endsWith(draft) ? value.slice(0, value.length - draft.length) : value;
+  const tags = splitList(base);
 
   const write = (next: readonly string[], typing: string) => {
-    const raw = next.length > 0 ? `${next.join(", ")}, ${typing}` : typing;
-    mine.current = raw;
-    onChange(raw);
+    setDraft(typing);
+    onChange(next.length > 0 ? `${next.join(", ")}, ${typing}` : typing);
   };
 
   return (

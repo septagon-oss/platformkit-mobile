@@ -34,7 +34,11 @@ export function useResourceDetail(entry: Entry, id: string | undefined) {
   }, [api, entry, id]);
 
   useEffect(() => {
-    void load();
+    // The await is spelled out here rather than hidden behind a call, so it is
+    // plain that nothing is set during the render this effect runs after.
+    void (async () => {
+      await load();
+    })();
   }, [load]);
 
   useFocusEffect(

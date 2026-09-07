@@ -1,7 +1,7 @@
 // Skeleton is the shape of what is coming: a few muted lines that breathe
 // until the rows arrive, and hold still for a person who asked for less
 // motion.
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AccessibilityInfo, Animated, StyleSheet, View } from "react-native";
 import { useStyles, type Theme } from "../theme";
 
@@ -11,7 +11,8 @@ interface Props {
 
 export function Skeleton({ lines = 3 }: Props) {
   const s = useStyles(styles);
-  const pulse = useRef(new Animated.Value(0.5)).current;
+  // Created once, and read where it is used rather than during render.
+  const [pulse] = useState(() => new Animated.Value(0.5));
   const [still, setStill] = useState(false);
 
   useEffect(() => {

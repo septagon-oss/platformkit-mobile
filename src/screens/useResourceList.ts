@@ -71,7 +71,11 @@ export function useResourceList(entry: Entry) {
   // The first window, and again whenever the order changes.
   useEffect(() => {
     shown.current = 0;
-    void load("first");
+    // The await is spelled out here rather than hidden behind a call, so it is
+    // plain that nothing is set during the render this effect runs after.
+    void (async () => {
+      await load("first");
+    })();
   }, [load]);
 
   // Coming back to a list this app wrote to since: the same rows, read again.

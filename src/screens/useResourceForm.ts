@@ -4,9 +4,11 @@
 // one; a dirty sheet asks before it is dismissed, by gesture as well as by
 // button; a sheet that is saving cannot be dismissed at all; and a sheet that
 // has saved leaves without asking.
-import { usePreventRemove, useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
+// The navigation hook that a native stack honours moved inside the router's
+// own re-export of react-navigation in SDK 57.
+import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Entry } from "../core/catalog";
@@ -46,8 +48,6 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   const load = useCallback(async () => {
     if (!id) return;
     const started = ++generation.current;
-    setPhase("loading");
-    setDetail("");
     try {
       const got = await api.get(entry, id);
       if (generation.current !== started) return;
@@ -61,7 +61,11 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   }, [api, entry, id]);
 
   useEffect(() => {
-    void load();
+    // The await is spelled out here rather than hidden behind a call, so it is
+    // plain that nothing is set during the render this effect runs after.
+    void (async () => {
+      await load();
+    })();
   }, [load]);
 
   const controls = useMemo(() => formControls(entry, row, create), [entry, row, create]);
@@ -137,5 +141,12 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     else router.replace(screenPath(entry));
   };
 
-  return { create, controls, held, errors, detail, phase, change, save, cancel, reload: load };
+  // Retrying is something a person did, so it may say so at once.
+  const reload = () => {
+    setPhase("loading");
+    setDetail("");
+    void load();
+  };
+
+  return { create, controls, held, errors, detail, phase, change, save, cancel, reload };
 }
