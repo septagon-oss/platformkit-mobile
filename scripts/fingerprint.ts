@@ -41,8 +41,9 @@ export function compute(root: string): Promise<Fingerprint> {
   delete process.env.PK_PROFILE;
   return createFingerprintAsync(root, {
     ignorePaths,
-    // npm scripts do not define the binary either.
-    sourceSkips: SourceSkips.ExpoConfigVersions | SourceSkips.PackageJsonScriptsAll,
+    // npm scripts and .gitignore do not define the binary either.
+    sourceSkips:
+      SourceSkips.ExpoConfigVersions | SourceSkips.PackageJsonScriptsAll | SourceSkips.GitIgnore,
   });
 }
 

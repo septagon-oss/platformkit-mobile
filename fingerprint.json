@@ -2,14 +2,6 @@
   "sources": [
     {
       "type": "file",
-      "filePath": ".gitignore",
-      "reasons": [
-        "bareGitIgnore"
-      ],
-      "hash": "add5d4bcef813bee96ce104a035ee2f283da67d5"
-    },
-    {
-      "type": "file",
       "filePath": "node_modules/base64-js/index.js",
       "reasons": [
         "expoConfigPlugins"
@@ -763,5 +755,5 @@
       "hash": "78bcd7264d6e8d230293cf5ff60bfb548f88e2ff"
     }
   ],
-  "hash": "9fa97c55ccfc83b1b1cf30211e9d216da4e1e573"
+  "hash": "544bb121ffc4f39946b505899b35a6c760f8dd73"
 }

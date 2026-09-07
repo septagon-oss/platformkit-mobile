@@ -1,0 +1,27 @@
+// Signing, decided by the environment rather than by the generated project.
+// The Expo template signs release builds with the debug key, which is fine
+// for a developer's phone and wrong for anything else, so this init script
+// (applied with -I by scripts/android/build.sh) replaces that: with
+// PK_KEYSTORE, PK_KEYSTORE_PASSWORD, PK_KEY_ALIAS and PK_KEY_PASSWORD set,
+// the release build is signed with that key; with none set, it is not signed
+// at all, and the output says so in its name (app-release-unsigned.apk).
+// Verification builds are unsigned and signed for the emulator afterwards;
+// release builds are signed where the owner keeps the key (make sign).
+allprojects {
+    afterEvaluate { project ->
+        if (project.name != "app" || !project.hasProperty("android")) return
+        def env = System.getenv()
+        def android = project.android
+        if (env.PK_KEYSTORE) {
+            android.signingConfigs.create("pk") {
+                storeFile project.file(env.PK_KEYSTORE)
+                storePassword env.PK_KEYSTORE_PASSWORD
+                keyAlias env.PK_KEY_ALIAS
+                keyPassword env.PK_KEY_PASSWORD
+            }
+            android.buildTypes.getByName("release").signingConfig = android.signingConfigs.getByName("pk")
+        } else {
+            android.buildTypes.getByName("release").signingConfig = null
+        }
+    }
+}

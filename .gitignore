@@ -4,5 +4,5 @@ dist/
 web-build/
 *.log
 .env*
-android/
-ios/
+/android/
+/ios/
