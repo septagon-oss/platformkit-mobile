@@ -27,6 +27,11 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   const [detail, setDetail] = useState("");
   const [saved, setSaved] = useState<Row | undefined>();
   const generation = useRef(0);
+  // Leaving happens once. The effect below depends on the router, whose
+  // identity is not guaranteed to be stable, and a second replace would pop a
+  // screen that is already gone: on Android that unwinds the stack until the
+  // app itself exits.
+  const left = useRef(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -53,12 +58,12 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   const dirty = Object.keys(held).length > 0;
 
   // usePreventRemove is what a native stack honours: it covers the swipe and
-  // the system back as well as the header's Cancel. The saved phase does not
-  // block, so leaving after a save asks nothing.
-  usePreventRemove(phase === "saving" || (phase === "editing" && dirty), ({ data }) => {
-    // A save in flight is never interrupted; the alert would have nothing
-    // useful to offer while the request decides.
-    if (phase === "saving") return;
+  // the system back as well as the header's Cancel. It guards the editing
+  // phase only. While a save is in flight and after it lands, the screen is
+  // dismissed by this app rather than by a person, and a guard that is still
+  // registered then leaves the native screen refusing the dismissal it was
+  // just asked for.
+  usePreventRemove(phase === "editing" && dirty, ({ data }) => {
     Alert.alert("Discard changes?", "What you typed here will be lost.", [
       { text: "Keep editing", style: "cancel" },
       {
@@ -71,7 +76,8 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
 
   // Leaving happens after the render that cleared the guard above.
   useEffect(() => {
-    if (phase !== "saved") return;
+    if (phase !== "saved" || left.current) return;
+    left.current = true;
     const at = screenPath(entry);
     // A sheet opened from a link has nothing to go back to; the record it just
     // wrote is where it belongs.

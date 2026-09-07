@@ -1,11 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <testsuites>
-  <testsuite name="Test Suite" device="Expo_Pixel_8_API_36" tests="4" failures="1" time="142.992" timestamp="2026-09-07T10:04:43">
-    <testcase id="gallery" name="gallery" classname="gallery" file="e2e/flows/gallery.yaml" time="22.101" timestamp="2026-09-07T10:04:43" status="ERROR">
-      <failure>Assertion is false: id: gallery is visible</failure>
-    </testcase>
-    <testcase id="sign-in" name="sign-in" classname="sign-in" file="e2e/flows/sign-in.yaml" time="27.248" timestamp="2026-09-07T10:05:05" status="SUCCESS"/>
-    <testcase id="record" name="record" classname="record" file="e2e/flows/record.yaml" time="63.06" timestamp="2026-09-07T10:05:32" status="SUCCESS"/>
-    <testcase id="sign-out" name="sign-out" classname="sign-out" file="e2e/flows/sign-out.yaml" time="30.559" timestamp="2026-09-07T10:06:35" status="SUCCESS"/>
+  <testsuite name="Test Suite" device="Expo_Pixel_8_API_36" tests="4" failures="0" time="143.491" timestamp="2026-09-07T11:31:41">
+    <testcase id="gallery" name="gallery" classname="gallery" file="e2e/flows/gallery.yaml" time="22.463" timestamp="2026-09-07T11:31:41" status="SUCCESS"/>
+    <testcase id="sign-in" name="sign-in" classname="sign-in" file="e2e/flows/sign-in.yaml" time="26.282" timestamp="2026-09-07T11:32:04" status="SUCCESS"/>
+    <testcase id="record" name="record" classname="record" file="e2e/flows/record.yaml" time="63.023" timestamp="2026-09-07T11:32:30" status="SUCCESS"/>
+    <testcase id="sign-out" name="sign-out" classname="sign-out" file="e2e/flows/sign-out.yaml" time="31.697" timestamp="2026-09-07T11:33:33" status="SUCCESS"/>
   </testsuite>
 </testsuites>
