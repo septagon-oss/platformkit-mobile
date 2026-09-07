@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import type { Entry } from "./core/catalog";
 import { initial, reduce, type State } from "./core/state";
-import { createApi, type Api } from "./effects/api";
+import { createApi, type Api, type Identity } from "./effects/api";
 import { sessions } from "./effects/native-session";
 import type { Renderers } from "./renderers";
 
@@ -21,6 +21,8 @@ export interface ShellValue {
   readonly baseURL: string;
   readonly state: State;
   readonly renderers: Renderers;
+  /** who this session belongs to, once the server has said. */
+  readonly identity: Identity | undefined;
   readonly entry: (module: string, entity: string) => Entry | undefined;
   /** writes counts what this app wrote to each resource ("module/entity"), so a screen knows whether what it shows is stale. */
   readonly writes: Readonly<Record<string, number>>;
@@ -56,6 +58,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
   }));
   const active = useRef(connection);
   const generation = useRef(0);
+  const [identity, setIdentity] = useState<Identity | undefined>();
   const [writes, setWrites] = useState<Readonly<Record<string, number>>>({});
   const wrote = useCallback(
     (key: string) => setWrites((w) => ({ ...w, [key]: (w[key] ?? 0) + 1 })),
@@ -74,6 +77,12 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
     if (generation.current !== started) return;
     dispatch({ type: "session", generation: started });
     try {
+      // Who the session belongs to is asked for beside the catalog and is not
+      // allowed to decide whether there is one: a trail that cannot say "you"
+      // is still a trail.
+      void a.me().then((who) => {
+        if (generation.current === started) setIdentity(who);
+      });
       const catalog = await a.catalog();
       if (generation.current === started)
         dispatch({ type: "catalog", generation: started, catalog });
@@ -114,6 +123,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       baseURL,
       state,
       renderers,
+      identity,
       writes,
       wrote,
       entry: (module, entity) =>
@@ -148,6 +158,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         const started = begin();
         const previous = active.current;
         connect(previous.baseURL, createApi(previous.baseURL));
+        setIdentity(undefined);
         dispatch({ type: "signed-out", generation: started });
         // Revoke remotely when reachable; local clearing must not wait for it.
         void previous.api.logout().catch(() => undefined);
@@ -169,7 +180,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         return load(current, begin());
       },
     }),
-    [api, baseURL, state, renderers, writes, wrote, begin, connect, load],
+    [api, baseURL, state, renderers, identity, writes, wrote, begin, connect, load],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

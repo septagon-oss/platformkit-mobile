@@ -120,6 +120,57 @@ describe("ResourceDetail", () => {
   });
 });
 
+describe("Activity", () => {
+  const now = new Date("2026-09-07T12:00:00Z");
+  const trail = {
+    events: [
+      {
+        id: "e1",
+        name: "note.note.updated",
+        occurredAt: "2026-09-07T11:58:00Z",
+        actor: "u1",
+        payload: { id: "1" },
+      },
+      {
+        id: "e2",
+        name: "note.note.created",
+        occurredAt: "2026-09-06T09:00:00Z",
+        payload: { id: "1" },
+      },
+    ],
+    names: { u1: "Joao" },
+    loading: false,
+    error: "",
+    full: false,
+    now,
+  };
+  const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: [] };
+  const detail = { entry: note, row, error: "", onRetry: none };
+
+  test("the trail says what happened, who did it and how long ago", async () => {
+    await inTheme(<ResourceDetail {...detail} activity={trail} />);
+    expect(screen.getByLabelText("Updated by Joao, 2 minutes ago")).toBeOnTheScreen();
+    // An event nobody signed is the system's, not a blank line.
+    expect(screen.getByLabelText("Created by the system, yesterday")).toBeOnTheScreen();
+  });
+
+  test("a window that filled says the trail is only the recent part", async () => {
+    await inTheme(<ResourceDetail {...detail} activity={{ ...trail, events: [], full: true }} />);
+    expect(screen.getByText("Only the most recent changes are read.")).toBeOnTheScreen();
+    expect(screen.getByText("Nothing recent about this record.")).toBeOnTheScreen();
+  });
+
+  test("a record with no trail yet says so, and an unreadable one says why", async () => {
+    await inTheme(<ResourceDetail {...detail} activity={{ ...trail, events: [] }} />);
+    expect(screen.getByText("Nothing has happened to this record yet.")).toBeOnTheScreen();
+    await screen.unmount();
+    await inTheme(
+      <ResourceDetail {...detail} activity={{ ...trail, events: [], error: "not allowed" }} />,
+    );
+    expect(screen.getByText("not allowed")).toBeOnTheScreen();
+  });
+});
+
 describe("Home", () => {
   test("one row per resource, read-only ones say so", async () => {
     const onOpen = jest.fn();

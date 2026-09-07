@@ -7,10 +7,12 @@ import { label, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
+import { useActivity } from "./useActivity";
 import { useResourceDetail } from "./useResourceDetail";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
   const detail = useResourceDetail(entry, id);
+  const activity = useActivity(entry, id);
   const router = useRouter();
   const may = entry.writable && !!id;
   const edit = useCallback(
@@ -43,6 +45,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         row={detail.row}
         error={detail.error}
         onRetry={detail.reload}
+        activity={activity}
         {...(may ? { onDelete: detail.remove } : {})}
       />
     </>

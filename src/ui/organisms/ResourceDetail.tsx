@@ -5,6 +5,7 @@ import React from "react";
 import type { Entry } from "../../core/catalog";
 import { detailItems, type Row as Item } from "../../core/derive";
 import { Notice } from "../atoms/Notice";
+import { Activity, type Props as ActivityProps } from "./Activity";
 import { Skeleton } from "../atoms/Skeleton";
 import { DetailRow } from "../molecules/DetailRow";
 import { Value } from "../molecules/Value";
@@ -18,9 +19,15 @@ export interface Props {
   readonly error: string;
   readonly onRetry: () => void;
   readonly onDelete?: () => void;
+  /**
+   * activity is the record's trail, when the caller may read it. It is a prop
+   * and not a fetch, like everything else here: the screen reads, the section
+   * draws.
+   */
+  readonly activity?: ActivityProps;
 }
 
-export function ResourceDetail({ entry, row, error, onRetry, onDelete }: Props) {
+export function ResourceDetail({ entry, row, error, onRetry, onDelete, activity }: Props) {
   return (
     <Screen testID="resource-detail">
       {error ? <Notice text={error} action={{ label: "Retry", onPress: onRetry }} /> : null}
@@ -43,6 +50,7 @@ export function ResourceDetail({ entry, row, error, onRetry, onDelete }: Props) 
           <Skeleton lines={5} />
         </Section>
       )}
+      {row && activity ? <Activity {...activity} /> : null}
       {row && onDelete ? (
         <Section footer="Deleting cannot be undone.">
           <Row
