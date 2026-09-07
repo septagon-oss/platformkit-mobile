@@ -7,7 +7,12 @@
 // the workflow that builds binaries knows when to run. The CLI's own
 // `fingerprint:diff` prints a difference and exits 0, which is why this is a
 // script.
-import { createFingerprintAsync, diffFingerprints, type Fingerprint } from "@expo/fingerprint";
+import {
+  createFingerprintAsync,
+  diffFingerprints,
+  SourceSkips,
+  type Fingerprint,
+} from "@expo/fingerprint";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -28,7 +33,17 @@ const ignorePaths = [
 ];
 
 export function compute(root: string): Promise<Fingerprint> {
-  return createFingerprintAsync(root, { ignorePaths });
+  // The fingerprint is the release identity at no particular version: a tag
+  // changes the version and the build numbers, not what the binary is made
+  // of, and a verification profile is the same native project under another
+  // package.
+  delete process.env.PK_VERSION;
+  delete process.env.PK_PROFILE;
+  return createFingerprintAsync(root, {
+    ignorePaths,
+    // npm scripts do not define the binary either.
+    sourceSkips: SourceSkips.ExpoConfigVersions | SourceSkips.PackageJsonScriptsAll,
+  });
 }
 
 export function render(fp: Fingerprint): string {

@@ -1,0 +1,52 @@
+# The Android binary, built when what a binary is made of changed. The
+# recipe is scripts/android/build.sh inside the pinned build image
+# (Dockerfile.android); the output is an unsigned arm64 APK of the
+# verification profile, kept for two weeks as a run artifact. No credential
+# is involved and nothing is published; the release workflow does that.
+name: android
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - fingerprint.json
+      - app.config.ts
+      - package-lock.json
+      - Dockerfile.android
+      - .dockerignore
+      - scripts/android/**
+      - .gitea/workflows/android.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: pkit-ci-linux-amd64
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Build the verification APK
+        run: |
+          docker build -f Dockerfile.android --target out \
+            --build-arg ABIS=arm64-v8a --build-arg PK_PROFILE=ci \
+            --output type=local,dest=out .
+          ls -la out/apk/release/
+          (cd out/apk/release && sha256sum *.apk)
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: platformkit-mobile-ci-arm64-${{ github.sha }}
+          path: out/apk/release/*.apk
+          retention-days: 14
+          if-no-files-found: error

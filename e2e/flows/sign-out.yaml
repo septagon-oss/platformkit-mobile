@@ -1,0 +1,13 @@
+# The account menu in the header, and out.
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "account"
+- tapOn: "Sign out"
+- extendedWaitUntil:
+    visible:
+      id: "sign-in"
+    timeout: 10000

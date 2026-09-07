@@ -19,6 +19,11 @@ export function humanize(name: string): string {
   return out;
 }
 
+/** plural is a screen's name for many of an entity: "task" is "tasks", "settings" is "settings". */
+export function plural(noun: string): string {
+  return noun.endsWith("s") ? noun : noun + "s";
+}
+
 /** text is a value as a control reads it: the raw spelling. */
 export function text(v: unknown): string {
   if (typeof v === "string") return v;

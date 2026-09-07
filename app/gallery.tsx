@@ -1,17 +1,18 @@
 // The library on one screen, for looking at rather than using. It exists in
-// a build that asked for it (EXPO_PUBLIC_GALLERY=1, the verification profile)
-// and in development; a release has no such route.
+// development and in a build whose configuration asked for it (the ci
+// profile in app.config.ts); a release has no such route.
+import Constants from "expo-constants";
 import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { Gallery } from "../src/ui/gallery";
 
-const shown = __DEV__ || process.env.EXPO_PUBLIC_GALLERY === "1";
+const shown = __DEV__ || Constants.expoConfig?.extra?.gallery === true;
 
 export default function GalleryRoute() {
   if (!shown) return <Redirect href="/" />;
   return (
     <>
-      <Stack.Screen options={{ title: "Gallery", headerShown: true }} />
+      <Stack.Screen options={{ title: "Gallery", headerLargeTitleEnabled: false }} />
       <Gallery />
     </>
   );

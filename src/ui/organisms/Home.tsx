@@ -3,7 +3,7 @@
 // the account menu is in the native header, set by the screen composition.
 import React from "react";
 import type { Entry } from "../../core/catalog";
-import { humanize } from "../../core/derive";
+import { humanize, plural } from "../../core/derive";
 import { EmptyState } from "../atoms/EmptyState";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
@@ -28,7 +28,7 @@ export function Home({ entries, refreshing, onOpen, onRefresh }: Props) {
       render={(e) => (
         <Section>
           <Row
-            title={humanize(e.entity) + "s"}
+            title={humanize(plural(e.entity))}
             cells={[`In ${e.module}${e.writable ? "" : ", read only"}`]}
             onPress={() => onOpen(e)}
             testID={`open-${e.module}-${e.entity}`}

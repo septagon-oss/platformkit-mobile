@@ -1,0 +1,51 @@
+# One record's whole life on a generated screen: open the list, create it,
+# see it, edit it, delete it. MODULE and ENTITY name a writable resource the
+# signed-in person may reach; KNOWN is its first writable string field (the
+# one a row is recognised by), TITLE what to type there.
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- assertVisible:
+    id: "resource-list"
+- tapOn: "New"
+- assertVisible:
+    id: "resource-form"
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE}
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- assertVisible: ${TITLE}
+- tapOn: "Edit"
+- assertVisible:
+    id: "resource-form"
+- tapOn:
+    id: "input-${KNOWN}"
+- eraseText
+- inputText: ${TITLE} edited
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible: ${TITLE} edited
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} edited

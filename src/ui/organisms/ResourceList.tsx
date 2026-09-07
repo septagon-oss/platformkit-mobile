@@ -4,7 +4,15 @@
 // derive; nothing here knows what an entity is.
 import React from "react";
 import type { Entry } from "../../core/catalog";
-import { display, humanize, label, listColumns, text, type Row as Item } from "../../core/derive";
+import {
+  display,
+  humanize,
+  label,
+  listColumns,
+  plural,
+  text,
+  type Row as Item,
+} from "../../core/derive";
 import { ChoiceRow, type Option } from "../atoms/ChoiceRow";
 import { EmptyState } from "../atoms/EmptyState";
 import { Notice } from "../atoms/Notice";
@@ -75,6 +83,7 @@ export function ResourceList({
 }: Props) {
   const columns = listColumns(entry).slice(1, 4);
   const noun = humanize(entry.entity).toLowerCase();
+  const nouns = plural(noun);
   const narrowed = Object.keys(order.filters).length > 0 || order.sort !== "";
   return (
     <ListScreen
@@ -134,7 +143,7 @@ export function ResourceList({
       }
       empty={
         <EmptyState
-          title={narrowed ? `No ${noun} matches` : `No ${noun}s yet`}
+          title={narrowed ? `No ${noun} matches` : `No ${nouns} yet`}
           text={
             narrowed
               ? "Change the order or the filters above."

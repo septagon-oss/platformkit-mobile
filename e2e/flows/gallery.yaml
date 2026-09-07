@@ -1,0 +1,22 @@
+# The library on one screen, in both modes. The gallery route exists only in
+# the verification profile, which is the build these flows run on.
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- launchApp
+# A link that arrives while the app is still starting is lost; let it settle first.
+- waitForAnimationToEnd:
+    timeout: 5000
+- openLink: platformkit://gallery
+- extendedWaitUntil:
+    visible:
+      id: "gallery"
+    timeout: 10000
+- assertVisible: "Display, the serif"
+- tapOn:
+    id: "gallery-mode"
+- tapOn: "Dark"
+- assertVisible: "Body, the system face"
+- scrollUntilVisible:
+    element: "A row that opens"

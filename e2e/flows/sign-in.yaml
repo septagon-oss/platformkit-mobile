@@ -1,0 +1,27 @@
+# The way in: the server, then who you are. Every value comes from the
+# environment (make e2e-android passes them); nothing here names a tenant.
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "sign-in"
+- tapOn:
+    id: "server"
+- eraseText
+- inputText: ${SERVER}
+- tapOn:
+    id: "email"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "home"
+    timeout: 15000

@@ -12,6 +12,7 @@ import {
   listColumns,
   mergePage,
   numberValue,
+  plural,
   problems,
   timeText,
   timeValue,
@@ -145,4 +146,10 @@ test("a first page read again keeps the rows beneath it and repeats none", () =>
     ["new", "a", "b", "c"],
   );
   assert.deepEqual(mergePage([], shown), shown);
+});
+
+test("many of an entity is its name with an s, unless it already ends in one", () => {
+  assert.equal(plural("task"), "tasks");
+  assert.equal(plural("settings"), "settings");
+  assert.equal(plural("plan"), "plans");
 });

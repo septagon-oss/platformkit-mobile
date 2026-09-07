@@ -1,0 +1,69 @@
+# A tag builds the release; the owner signs and publishes it. This runs the
+# repository's checks on the exact tagged revision first, refuses a tag whose
+# native fingerprint is not the committed one, then builds the unsigned AAB
+# and universal APK for every architecture and leaves them, with checksums
+# and the fingerprint, as run artifacts. No secret is read here: signing is
+# `make sign` where the key is kept, and the Gitea release is created from
+# the signed files by hand. Nothing here publishes.
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: pkit-ci-linux-amd64
+    timeout-minutes: 58
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+
+      # A tag never releases an unchecked tree: the same scripts ci.yml runs.
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check
+      - run: npm run export:check
+
+      - name: The version this release is
+        id: version
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/v*) echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT" ;;
+            *) echo "tag=" >> "$GITHUB_OUTPUT"; echo "not a tag: building an unversioned candidate" ;;
+          esac
+
+      - name: Build the unsigned AAB and universal APK
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          docker build -f Dockerfile.android --target out \
+            --build-arg ABIS=armeabi-v7a,arm64-v8a,x86,x86_64 \
+            --build-arg TARGETS=":app:assembleRelease :app:bundleRelease" \
+            --build-arg PK_VERSION="$TAG" \
+            --output type=local,dest=out .
+          cp fingerprint.json out/
+          (cd out && sha256sum apk/release/*.apk bundle/release/*.aab fingerprint.json > SHA256SUMS && cat SHA256SUMS)
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: platformkit-mobile-${{ steps.version.outputs.tag || github.sha }}-unsigned
+          path: |
+            out/apk/release/*.apk
+            out/bundle/release/*.aab
+            out/fingerprint.json
+            out/SHA256SUMS
+          retention-days: 90
+          if-no-files-found: error

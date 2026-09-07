@@ -42,6 +42,62 @@
     },
     {
       "type": "file",
+      "filePath": "node_modules/expo-build-properties/app.plugin.js",
+      "reasons": [
+        "expoConfigPlugins"
+      ],
+      "hash": "1a5d7672b16206ac757b118553974288c4bb3e13"
+    },
+    {
+      "type": "file",
+      "filePath": "node_modules/expo-build-properties/build/android.js",
+      "reasons": [
+        "expoConfigPlugins"
+      ],
+      "hash": "35ed16e75bb0c9e94c1590d83cdc21af8120c512"
+    },
+    {
+      "type": "file",
+      "filePath": "node_modules/expo-build-properties/build/androidQueryUtils.js",
+      "reasons": [
+        "expoConfigPlugins"
+      ],
+      "hash": "c26bb466fb10a7a1f0d942f37dd00dc7ad9f4dfb"
+    },
+    {
+      "type": "file",
+      "filePath": "node_modules/expo-build-properties/build/fileContentsUtils.js",
+      "reasons": [
+        "expoConfigPlugins"
+      ],
+      "hash": "b260a8fc9f25a782de3de950382fe95bb65a7e5c"
+    },
+    {
+      "type": "file",
+      "filePath": "node_modules/expo-build-properties/build/ios.js",
+      "reasons": [
+        "expoConfigPlugins"
+      ],
+      "hash": "065e8f7eecea9ea3cf42bf47f160c0c4a4e161b9"
+    },
+    {
+      "type": "file",
+      "filePath": "node_modules/expo-build-properties/build/pluginConfig.js",
+      "reasons": [
+        "expoConfigPlugins"
+      ],
+      "hash": "f9ac0c15b9ec3bb12a71b69b52f8c4b11ba079c7"
+    },
+    {
+      "type": "file",
+      "filePath": "node_modules/expo-build-properties/build/withBuildProperties.js",
+      "reasons": [
+        "expoConfigPlugins"
+      ],
+      "hash": "26972ce0da723ff88ac70c3d89e554a66adc1d33"
+    },
+    {
+      "type": "file",
       "filePath": "node_modules/expo-font/app.plugin.js",
       "reasons": [
         "expoConfigPlugins"
@@ -673,11 +729,11 @@
     {
       "type": "contents",
       "id": "expoConfig",
-      "contents": "{\"android\":{\"package\":\"dev.septagon.platformkit\",\"softwareKeyboardLayoutMode\":\"resize\"},\"experiments\":{\"typedRoutes\":true},\"extra\":{\"router\":{}},\"ios\":{\"bundleIdentifier\":\"dev.septagon.platformkit\",\"supportsTablet\":true},\"name\":\"PlatformKit\",\"newArchEnabled\":true,\"orientation\":\"portrait\",\"platforms\":[\"android\",\"ios\",\"web\"],\"plugins\":[\"expo-font\",\"expo-router\",\"expo-secure-store\"],\"scheme\":\"platformkit\",\"sdkVersion\":\"55.0.0\",\"slug\":\"platformkit-mobile\",\"userInterfaceStyle\":\"automatic\",\"version\":\"0.1.0\",\"web\":{\"bundler\":\"metro\",\"output\":\"single\"}}",
+      "contents": "{\"android\":{\"package\":\"dev.septagon.platformkit\",\"softwareKeyboardLayoutMode\":\"resize\"},\"experiments\":{\"typedRoutes\":true},\"extra\":{\"gallery\":false,\"router\":{}},\"ios\":{\"bundleIdentifier\":\"dev.septagon.platformkit\",\"supportsTablet\":true},\"name\":\"PlatformKit\",\"orientation\":\"portrait\",\"platforms\":[\"android\",\"ios\",\"web\"],\"plugins\":[\"expo-font\",\"expo-router\",\"expo-secure-store\",[\"expo-build-properties\",{\"android\":{\"usesCleartextTraffic\":false}}]],\"scheme\":\"platformkit\",\"sdkVersion\":\"55.0.0\",\"slug\":\"platformkit-mobile\",\"userInterfaceStyle\":\"automatic\",\"web\":{\"bundler\":\"metro\",\"output\":\"single\"}}",
       "reasons": [
         "expoConfig"
       ],
-      "hash": "197fba038db39fde5101db9e70349cf460b2faf2"
+      "hash": "9d8057345fb3842244cb52a254435418dd32c1e7"
     },
     {
       "type": "contents",
@@ -687,15 +743,6 @@
         "package:react-native"
       ],
       "hash": "419293b0cb9e3607dc4e765a06807b9ce801dc33"
-    },
-    {
-      "type": "contents",
-      "id": "packageJson:scripts",
-      "contents": "{\"start\":\"expo start\",\"web\":\"expo start --web\",\"typecheck\":\"tsc --noEmit\",\"lint\":\"eslint .\",\"format\":\"prettier --write \\\"{app,src,tests,scripts}/**/*.{ts,tsx}\\\"\",\"format:check\":\"prettier --check \\\"{app,src,tests,scripts}/**/*.{ts,tsx}\\\"\",\"test\":\"tsx --test tests/*.test.ts && jest\",\"check\":\"npm run check:sdk && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:fingerprint\",\"check:sdk\":\"expo install --check\",\"fingerprint\":\"tsx scripts/fingerprint.ts\",\"check:fingerprint\":\"tsx scripts/fingerprint.ts --check\",\"export:check\":\"expo export --platform android --platform ios --output-dir \\\"${RUNNER_TEMP:-/tmp}/platformkit-mobile-export\\\"\",\"tokens\":\"tsx scripts/tokens.ts\",\"test:ui\":\"jest\"}",
-      "reasons": [
-        "packageJson:scripts"
-      ],
-      "hash": "1276a64738205aebea089006c9b838b5c27a6ccb"
     },
     {
       "type": "contents",
@@ -716,5 +763,5 @@
       "hash": "78bcd7264d6e8d230293cf5ff60bfb548f88e2ff"
     }
   ],
-  "hash": "9a79fe08fc8424dd2748ed3b75b1121c905bf4ab"
+  "hash": "9fa97c55ccfc83b1b1cf30211e9d216da4e1e573"
 }

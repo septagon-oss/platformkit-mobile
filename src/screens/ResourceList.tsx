@@ -3,7 +3,7 @@
 import { Stack, useRouter } from "expo-router";
 import React from "react";
 import { View } from "react-native";
-import { humanize, screenPath } from "../core/derive";
+import { humanize, plural, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
@@ -19,7 +19,7 @@ export function ResourceList({ entry }: ScreenProps) {
     <>
       <Stack.Screen
         options={{
-          title: humanize(entry.entity) + "s",
+          title: humanize(plural(entry.entity)),
           headerRight: () => (
             <View style={{ flexDirection: "row" }}>
               <Button placement="header" label="Order" icon="sort" onPress={list.toggleOrdering} />

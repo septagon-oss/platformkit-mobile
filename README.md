@@ -93,6 +93,34 @@ and, when applicable, an `id`; any omitted component falls back to the
 generated screen. Add a custom screen when the workflow needs something the
 resource schema cannot express.
 
+## Build a binary
+
+The Android build is one recipe, `scripts/android/build.sh`, run inside the
+pinned build image by `Dockerfile.android`, so neither a runner nor a
+developer machine needs the SDK:
+
+```sh
+make apk                          # unsigned arm64 release APK in out/
+make apk ABIS=x86_64 PROFILE=ci   # the verification build an emulator runs
+make aab                          # unsigned AAB and universal APK, all ABIs
+make apk-mirror                   # the same recipe under the CI runner's 2 CPU / 4 GiB
+```
+
+`app.config.ts` decides the identity: `PK_VERSION=v0.2.0` gives version
+0.2.0 and a version code that only grows; `PK_PROFILE=ci` builds
+`PlatformKit CI` under its own package, with the gallery route, so it can sit
+beside a real install. Release builds are unsigned by the recipe
+(`scripts/android/signing.gradle`); `make apk-debug-sign` signs one with the
+SDK's debug key for an emulator, and `make sign` signs the release outputs
+with a keystore named by `PK_KEYSTORE` and its three companions, verifies the
+certificates and writes `SHA256SUMS`. The key never leaves the machine that
+holds it. iOS is built on a Mac with `npx expo prebuild --platform ios` and
+`npx expo run:ios --configuration Release`; there is no iOS build in CI.
+
+The `android` workflow builds the verification APK whenever a native input
+changed (the fingerprint, the configuration, the lockfile, the recipe) and
+keeps it as a run artifact for two weeks.
+
 ## Verify a change
 
 The repository CI runs `npm run check` on pull requests and main pushes.

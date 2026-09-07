@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1.7
+# The Android build, in the image that has the toolchain the app needs (JDK
+# 17, Android SDK, NDK 27.1, CMake, Node 22) so no runner and no developer
+# machine has to. The recipe is scripts/android/build.sh; this file only
+# supplies the image, the caches and the output stage. Build with
+#   docker build -f Dockerfile.android --target out --output type=local,dest=out .
+# Nothing is tagged and nothing is pushed; the npm and Gradle caches live in
+# BuildKit's store, which is what a runner keeps between jobs.
+FROM reactnativecommunity/react-native-android:v21.0@sha256:24ca7ab5a70ec0b78a81bdc5eeea5924c2531531d53971b6f2321aff08446c36 AS build
+
+ARG ABIS=arm64-v8a
+ARG TARGETS=:app:assembleRelease
+ARG PK_PROFILE=
+ARG PK_VERSION=
+ENV ABIS=$ABIS TARGETS=$TARGETS PK_PROFILE=$PK_PROFILE PK_VERSION=$PK_VERSION CI=1
+
+WORKDIR /src
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
+COPY . .
+RUN --mount=type=cache,target=/root/.gradle scripts/android/build.sh
+
+FROM scratch AS out
+COPY --from=build /src/android/app/build/outputs/ /
