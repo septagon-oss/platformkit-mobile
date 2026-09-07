@@ -36,9 +36,16 @@ export function ResourceRoute({ kind, withID = false }: Props) {
   if (state.phase === "failed")
     return <Notice text={state.error ?? "The catalog could not be read."} />;
 
-  const found = entry(params.module ?? "", params.entity ?? "");
-  if (!found)
-    return <Notice text={`${params.module}/${params.entity} is not in this installation.`} />;
+  // A resource route without a resource in its path is not a screen. It
+  // happens when the app is relaunched into a remembered route, and saying
+  // "undefined/undefined is not in this installation" would be neither true
+  // nor useful.
+  const module = params.module ?? "";
+  const entity = params.entity ?? "";
+  if (!module || !entity) return <Redirect href="/" />;
+
+  const found = entry(module, entity);
+  if (!found) return <Notice text={`${module}/${entity} is not in this installation.`} />;
 
   const Screen = renderers[key(found)]?.[kind] ?? generated[kind];
   const id = withID ? params.id : undefined;

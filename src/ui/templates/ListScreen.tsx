@@ -46,6 +46,8 @@ export function ListScreen<T>({
       renderItem={({ item }) => render(item)}
       style={s.list}
       contentContainerStyle={[s.content, { paddingBottom: insets.bottom + t.space.xl }]}
+      // What makes the rows start under the native header and the large title
+      // collapse as they scroll.
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
       refreshControl={

@@ -7,12 +7,13 @@ import React from "react";
 import { Gallery } from "../src/ui/gallery";
 
 const shown = __DEV__ || Constants.expoConfig?.extra?.gallery === true;
+const options = { title: "Gallery", headerLargeTitleEnabled: false } as const;
 
 export default function GalleryRoute() {
   if (!shown) return <Redirect href="/" />;
   return (
     <>
-      <Stack.Screen options={{ title: "Gallery", headerLargeTitleEnabled: false }} />
+      <Stack.Screen options={options} />
       <Gallery />
     </>
   );

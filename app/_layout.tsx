@@ -5,10 +5,20 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { defaultRenderers } from "../src/renderers";
 import { Shell } from "../src/shell";
 import { ThemeProvider, useTheme } from "../src/ui/theme";
+
+/** sheet is what a create or edit route is: a modal titled for its entity. */
+const sheet = (verb: string) => (prop: { route: { params?: unknown } }) => {
+  const entity = (prop.route.params as { entity?: string } | undefined)?.entity ?? "";
+  return {
+    presentation: "modal" as const,
+    headerLargeTitleEnabled: false,
+    title: verb + entity,
+  };
+};
 
 export default function Layout() {
   return (
@@ -26,25 +36,37 @@ function Root() {
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(color.surfaceCanvas);
   }, [color.surfaceCanvas]);
+  // One options object per theme. The navigator is told its options on every
+  // render, and a fresh object each time is a fresh instruction.
+  const screenOptions = useMemo(
+    () => ({
+      headerShown: true,
+      headerLargeTitleEnabled: true,
+      headerLargeTitleShadowVisible: false,
+      headerTintColor: color.accentDefault,
+      headerStyle: { backgroundColor: color.surfaceCanvas },
+      headerTitleStyle: { color: color.textPrimary },
+      headerLargeTitleStyle: {
+        color: color.textPrimary,
+        ...(font.display ? { fontFamily: font.display } : {}),
+      },
+      headerBackButtonDisplayMode: "minimal" as const,
+      contentStyle: { backgroundColor: color.surfaceCanvas },
+    }),
+    [color.accentDefault, color.surfaceCanvas, color.textPrimary, font.display],
+  );
+
   return (
     <>
       <StatusBar style="auto" />
-      <Stack
-        screenOptions={{
-          headerShown: true,
-          headerLargeTitleEnabled: true,
-          headerLargeTitleShadowVisible: false,
-          headerTintColor: color.accentDefault,
-          headerStyle: { backgroundColor: color.surfaceCanvas },
-          headerTitleStyle: { color: color.textPrimary },
-          headerLargeTitleStyle: {
-            color: color.textPrimary,
-            ...(font.display ? { fontFamily: font.display } : {}),
-          },
-          headerBackButtonDisplayMode: "minimal",
-          contentStyle: { backgroundColor: color.surfaceCanvas },
-        }}
-      />
+      <Stack screenOptions={screenOptions}>
+        {/* The two sheets are named here so their title exists before the
+            screen mounts: a modal is presented with the header it is given at
+            that moment, and a title set later leaves the route's own name on
+            screen. The entity is in the path, which is where this reads it. */}
+        <Stack.Screen name="[module]/[entity]/new" options={sheet("New ")} />
+        <Stack.Screen name="[module]/[entity]/[id]/edit" options={sheet("Edit ")} />
+      </Stack>
     </>
   );
 }

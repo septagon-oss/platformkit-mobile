@@ -90,6 +90,15 @@ export function useResourceList(entry: Entry) {
   );
 
   const busy = loading || refreshing;
+  // Stable, because the screen puts them in the navigator's options.
+  const toggleOrdering = useCallback(() => setOrdering((on) => !on), []);
+  const refresh = useCallback(() => {
+    if (!busy) void load("refresh");
+  }, [busy, load]);
+  const loadMore = useCallback(() => {
+    if (!busy) void load("more");
+  }, [busy, load]);
+
   return {
     rows,
     total,
@@ -102,8 +111,8 @@ export function useResourceList(entry: Entry) {
     order,
     ordering,
     setOrder,
-    toggleOrdering: () => setOrdering((on) => !on),
-    refresh: () => !busy && void load("refresh"),
-    loadMore: () => !busy && void load("more"),
+    toggleOrdering,
+    refresh,
+    loadMore,
   };
 }

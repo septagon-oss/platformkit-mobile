@@ -1,7 +1,7 @@
 // ResourceList is the generated list screen: the hook that loads it, the
 // native header with what a caller may do, and the organism that draws it.
 import { Stack, useRouter } from "expo-router";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { View } from "react-native";
 import { humanize, plural, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
@@ -14,22 +14,28 @@ export function ResourceList({ entry }: ScreenProps) {
   const router = useRouter();
   const at = screenPath(entry);
   const open = (id: string) => router.push(`${at}/${encodeURIComponent(id)}`);
-  const add = () => router.push(`${at}/new`);
+  const add = useCallback(() => router.push(`${at}/new`), [router, at]);
+  const { toggleOrdering } = list;
+  // The options are memoised because the navigator is told them on every
+  // render: a fresh object, with fresh callbacks in it, is a new instruction
+  // each time and the renders never settle.
+  const options = useMemo(
+    () => ({
+      title: humanize(plural(entry.entity)),
+      headerRight: () => (
+        <View style={{ flexDirection: "row" }}>
+          <Button placement="header" label="Order" icon="sort" onPress={toggleOrdering} />
+          {entry.writable ? (
+            <Button placement="header" label="New" icon="add" onPress={add} />
+          ) : null}
+        </View>
+      ),
+    }),
+    [entry.entity, entry.writable, toggleOrdering, add],
+  );
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: humanize(plural(entry.entity)),
-          headerRight: () => (
-            <View style={{ flexDirection: "row" }}>
-              <Button placement="header" label="Order" icon="sort" onPress={list.toggleOrdering} />
-              {entry.writable ? (
-                <Button placement="header" label="New" icon="add" onPress={add} />
-              ) : null}
-            </View>
-          ),
-        }}
-      />
+      <Stack.Screen options={options} />
       <ResourceListView
         entry={entry}
         rows={list.rows}

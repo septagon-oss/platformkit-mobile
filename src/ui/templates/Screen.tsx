@@ -22,10 +22,12 @@ export function Screen({ children, form = false, testID }: Props) {
     <ScrollView
       style={s.page}
       contentContainerStyle={[s.content, { paddingBottom: insets.bottom + t.space.xl }]}
+      // What makes the content start under the native header and the large
+      // title collapse as it scrolls.
       contentInsetAdjustmentBehavior="automatic"
+      automaticallyAdjustKeyboardInsets={form && Platform.OS === "ios"}
       keyboardShouldPersistTaps={form ? "handled" : "never"}
       keyboardDismissMode={form ? "interactive" : "none"}
-      automaticallyAdjustKeyboardInsets={form && Platform.OS === "ios"}
       {...(testID ? { testID } : {})}
     >
       {children}

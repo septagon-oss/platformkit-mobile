@@ -186,6 +186,14 @@
     },
     {
       "type": "dir",
+      "filePath": "android",
+      "reasons": [
+        "bareNativeDir"
+      ],
+      "hash": null
+    },
+    {
+      "type": "dir",
       "filePath": "node_modules/@expo/dom-webview/android",
       "reasons": [
         "expoAutolinkingAndroid"
@@ -241,7 +249,7 @@
         "rncoreAutolinkingAndroid",
         "rncoreAutolinkingIos"
       ],
-      "hash": "3b05f6e8002d7ec0d78e9369d2ad84de1f55e06e"
+      "hash": "4e9c4c5b817bb58369d0b099d10edd24e8ece44f"
     },
     {
       "type": "dir",
@@ -524,7 +532,7 @@
       "reasons": [
         "android-recipe"
       ],
-      "hash": "a2464b82b197637cff66e2404475ebfe5b8fcfce"
+      "hash": "a3e6f7f517f8e01693fbf5f12dc7d11a02b04862"
     },
     {
       "type": "contents",
@@ -581,5 +589,5 @@
       "hash": "7d280f1f4567bcd54c51b071ea751fb7fa9eeaa3"
     }
   ],
-  "hash": "41dc7b500d02b1ad26e74875a884aef765ef5d0b"
+  "hash": "5766fe0a963afe450af8298623e8c456af0f71ff"
 }

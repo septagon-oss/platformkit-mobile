@@ -9,7 +9,7 @@ import {
   filterFields,
   humanize,
   label,
-  listColumns,
+  listCells,
   narrowed,
   plural,
   sortOptions,
@@ -21,6 +21,7 @@ import { ChoiceRow } from "../atoms/ChoiceRow";
 import { EmptyState } from "../atoms/EmptyState";
 import { Notice } from "../atoms/Notice";
 import { LoadMore } from "../molecules/LoadMore";
+import { Labelled } from "../molecules/Value";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 import { ListScreen } from "../templates/ListScreen";
@@ -59,7 +60,7 @@ export function ResourceList({
   onRefresh,
   onNew,
 }: Props) {
-  const columns = listColumns(entry).slice(1, 4);
+  const columns = listCells(entry);
   const noun = humanize(entry.entity).toLowerCase();
   const nouns = plural(noun);
   const narrow = narrowed(order);
@@ -111,6 +112,9 @@ export function ResourceList({
           <Row
             title={label(entry, row)}
             cells={columns.map((f) => `${humanize(f.name)}: ${display(f, row[f.name])}`)}
+            shown={columns.map((f) => (
+              <Labelled key={f.name} field={f} value={row[f.name]} />
+            ))}
             onPress={() => onOpen(text(row.id))}
             testID={`row-${text(row.id)}`}
           />

@@ -101,12 +101,15 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     else router.replace(at);
   }, [phase, saved, create, entry, id, router]);
 
-  const change = (name: string, value: string) => {
+  // Every callback this hook hands out is stable, because the screen puts them
+  // in the options it gives the navigator, and options rebuilt on each render
+  // are an instruction repeated forever.
+  const change = useCallback((name: string, value: string) => {
     setHeld((h) => ({ ...h, [name]: value }));
-    if (errors[name]) setErrors(({ [name]: _, ...rest }) => rest);
-  };
+    setErrors(({ [name]: _, ...rest }) => rest);
+  }, []);
 
-  const save = async () => {
+  const save = useCallback(async () => {
     if (phase !== "editing") return;
     const refused = problems(controls, held);
     if (Object.keys(refused).length > 0) {
@@ -134,19 +137,19 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       }
       setPhase("editing");
     }
-  };
+  }, [phase, controls, held, id, api, entry, wrote]);
 
-  const cancel = () => {
+  const cancel = useCallback(() => {
     if (router.canGoBack()) router.back();
     else router.replace(screenPath(entry));
-  };
+  }, [router, entry]);
 
   // Retrying is something a person did, so it may say so at once.
-  const reload = () => {
+  const reload = useCallback(() => {
     setPhase("loading");
     setDetail("");
     void load();
-  };
+  }, [load]);
 
   return { create, controls, held, errors, detail, phase, change, save, cancel, reload };
 }

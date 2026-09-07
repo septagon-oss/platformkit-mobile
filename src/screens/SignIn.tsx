@@ -5,6 +5,9 @@ import React, { useState } from "react";
 import { useShell } from "../shell";
 import { SignInForm } from "../ui/organisms/SignInForm";
 
+// A constant, so the navigator is told the same thing rather than an equal one.
+const options = { headerShown: false } as const;
+
 export function SignIn() {
   const { state, baseURL, signIn, signOut } = useShell();
   const [error, setError] = useState("");
@@ -23,7 +26,7 @@ export function SignIn() {
   };
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen options={options} />
       <SignInForm
         baseURL={baseURL}
         notice={state.error ?? ""}

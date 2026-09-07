@@ -9,6 +9,7 @@ import {
   humanize,
   known,
   label,
+  listCells,
   listColumns,
   narrowed,
   noOrder,
@@ -177,4 +178,12 @@ test("many of an entity is its name with an s, unless it already ends in one", (
   assert.equal(plural("task"), "tasks");
   assert.equal(plural("settings"), "settings");
   assert.equal(plural("plan"), "plans");
+});
+
+test("a row shows what tells two records apart, not the times every record has", () => {
+  const names = listCells(note).map((f) => f.name);
+  assert.deepEqual(names, ["status", "pinned", "rank"]);
+  // The name of the row is not repeated beneath it, and the id is never a cell.
+  assert.ok(!names.includes("title"));
+  assert.ok(!names.includes("id"));
 });

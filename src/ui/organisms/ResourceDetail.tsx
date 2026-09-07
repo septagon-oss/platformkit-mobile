@@ -7,6 +7,7 @@ import { detailItems, type Row as Item } from "../../core/derive";
 import { Notice } from "../atoms/Notice";
 import { Skeleton } from "../atoms/Skeleton";
 import { DetailRow } from "../molecules/DetailRow";
+import { Value } from "../molecules/Value";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 import { Screen } from "../templates/Screen";
@@ -32,7 +33,7 @@ export function ResourceDetail({ entry, row, error, onRetry, onDelete }: Props) 
                 key={item.label}
                 term={item.label}
                 value={item.value}
-                mono={field?.type === "uuid" || field?.widget === "entity-picker"}
+                {...(field ? { shown: <Value field={field} value={row[field.name]} /> } : {})}
               />
             );
           })}

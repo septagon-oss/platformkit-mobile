@@ -24,6 +24,7 @@ import { Row } from "./molecules/Row";
 import { Section } from "./molecules/Section";
 import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
+import { Value } from "./molecules/Value";
 import { Screen } from "./templates/Screen";
 import { ThemeProvider, useStyles, type Theme } from "./theme";
 import type { Mode } from "./tokens";
@@ -184,7 +185,46 @@ function Samples() {
 
       <Section title="Details">
         <DetailRow term="Title" value="A note" />
-        <DetailRow term="Id" value="3f2a9c1e-1b2c-4d5e-8f90-123456789abc" mono />
+        <DetailRow
+          term="Id"
+          value="3f2a9c1e-1b2c-4d5e-8f90-123456789abc"
+          shown={
+            <Value
+              field={{ name: "id", type: "uuid" }}
+              value="3f2a9c1e-1b2c-4d5e-8f90-123456789abc"
+            />
+          }
+        />
+        <DetailRow
+          term="Status"
+          value="Open"
+          shown={
+            <Value
+              field={{ name: "status", type: "string", enum: ["open", "done"] }}
+              value="open"
+            />
+          }
+        />
+        <DetailRow
+          term="Pinned"
+          value="Yes"
+          shown={<Value field={{ name: "pinned", type: "bool" }} value={true} />}
+        />
+        <DetailRow
+          term="Due at"
+          value="Jan 31, 2026, 09:00 AM UTC"
+          shown={<Value field={{ name: "dueAt", type: "time" }} value="2026-01-31T09:00:00Z" />}
+        />
+        <DetailRow
+          term="Tags"
+          value="alpha, beta"
+          shown={
+            <Value
+              field={{ name: "tags", type: "list", elem: "string" }}
+              value={["alpha", "beta"]}
+            />
+          }
+        />
         <DetailRow term="Body" value="—" />
       </Section>
 

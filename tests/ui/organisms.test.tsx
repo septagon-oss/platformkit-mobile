@@ -37,11 +37,13 @@ describe("ResourceList", () => {
     onRefresh: none,
   };
 
-  test("a row is its name and the first three columns the schema does not hide, and opens by id", async () => {
+  test("a row is its name and what tells it apart, and opens by id", async () => {
     const onOpen = jest.fn();
     await inTheme(<ResourceList {...props} onOpen={onOpen} />);
+    // The cells are the closed set, the yes-or-no and the number, in that
+    // order: not the times every record has.
     await fireEvent.press(
-      screen.getByRole("button", { name: "Buy milk, Created at: —, Updated at: —, Status: Open" }),
+      screen.getByRole("button", { name: "Buy milk, Status: Open, Pinned: No, Rank: 2" }),
     );
     expect(onOpen).toHaveBeenCalledWith("1");
   });
@@ -164,5 +166,39 @@ describe("SignInForm", () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
     await fireEvent.press(screen.getByRole("button", { name: "Clear saved sign-in" }));
     expect(onClear).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("Values by type", () => {
+  const row = {
+    id: "1",
+    title: "Buy milk",
+    status: "open",
+    rank: 2,
+    pinned: true,
+    tags: ["a", "b"],
+  };
+
+  test("a detail shows each value in the shape its type deserves", async () => {
+    await inTheme(<ResourceDetail entry={note} row={row} error="" onRetry={none} />);
+    // A closed set and a yes-or-no are badges; a screen reader still hears the words.
+    expect(screen.getByLabelText("Status, Open")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
+    // A list is its items, not a comma-joined string.
+    expect(screen.getByLabelText("Tags, a, b")).toBeOnTheScreen();
+    expect(screen.getByText("a")).toBeOnTheScreen();
+    expect(screen.getByText("b")).toBeOnTheScreen();
+  });
+
+  test("a value a closed set does not contain is not coloured as if it were", async () => {
+    await inTheme(
+      <ResourceDetail
+        entry={note}
+        row={{ ...row, status: "unheard-of" }}
+        error=""
+        onRetry={none}
+      />,
+    );
+    expect(screen.getByLabelText("Status, Unheard of")).toBeOnTheScreen();
   });
 });

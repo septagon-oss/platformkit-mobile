@@ -117,6 +117,32 @@ export function listColumns(e: Entry): readonly Field[] {
   ];
 }
 
+/**
+ * listCells are the few fields a row shows beneath its name. A table has a
+ * header and room for every column; a row on a phone has one line, so it
+ * shows what tells two records apart first: a closed set of values, then a
+ * yes or no, then a number, then words, and only then the times and
+ * identifiers every record has and few people scan for.
+ */
+export function listCells(e: Entry, limit = 3): readonly Field[] {
+  const rank = (f: Field): number => {
+    if (f.enum && f.enum.length > 0) return 0;
+    if (f.type === "bool") return 1;
+    if (f.type === "int" || f.type === "float") return 2;
+    if (f.type === "list") return 3;
+    if (f.type === "string" || f.type === "text") return 4;
+    if (f.type === "time") return 5;
+    return 6;
+  };
+  const primary = known(e.fields);
+  return listColumns(e)
+    .filter((f) => f.name !== primary.name)
+    .map((f, i) => ({ f, i }))
+    .sort((a, b) => rank(a.f) - rank(b.f) || a.i - b.i)
+    .slice(0, limit)
+    .map(({ f }) => f);
+}
+
 export interface DetailItem {
   readonly label: string;
   readonly value: string;

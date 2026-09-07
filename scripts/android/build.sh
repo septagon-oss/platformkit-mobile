@@ -25,7 +25,11 @@ fi
 # modules; nothing in it is hand-edited, and it is ignored by git.
 npx expo prebuild --platform android --no-install --clean
 
-# The CI properties win over the template's: they are appended last.
+# The CI properties win over the template's: they are appended last. The
+# newline matters: the generated file does not end with one, so without it the
+# first line here is glued onto the last property's value, which turns a
+# setting into nonsense that fails much later and elsewhere.
+printf '\n' >> android/gradle.properties
 cat scripts/android/gradle-ci.properties >> android/gradle.properties
 
 # Ninja sizes its job pool from the CPUs the process may run on, not from a

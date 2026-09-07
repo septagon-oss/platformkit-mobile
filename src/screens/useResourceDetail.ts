@@ -51,12 +51,12 @@ export function useResourceDetail(entry: Entry, id: string | undefined) {
     }, [writes, k, load]),
   );
 
-  const leave = () => {
+  const leave = useCallback(() => {
     if (router.canGoBack()) router.back();
     else router.replace(screenPath(entry));
-  };
+  }, [router, entry]);
 
-  const remove = () => {
+  const remove = useCallback(() => {
     if (!id) return;
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert("Are you sure?", `This deletes the ${entry.entity}. It cannot be undone.`, [
@@ -76,7 +76,7 @@ export function useResourceDetail(entry: Entry, id: string | undefined) {
         },
       },
     ]);
-  };
+  }, [id, entry, api, wrote, k, leave]);
 
   return { row, error, reload: load, remove };
 }
