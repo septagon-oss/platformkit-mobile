@@ -68,6 +68,10 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
         read.current = from + page.items.length;
         setMore(read.current < page.total);
         setError("");
+        // A plan can be bought as well as cancelled, and this is the reload
+        // that would have to say so: leaving it set is a section that keeps
+        // saying "not included" about a trail it has just read.
+        setExcluded(false);
         if (users && from === 0) {
           const who = await api.list(users, { limit: 200 });
           if (generation.current !== started) return;

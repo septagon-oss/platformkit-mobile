@@ -203,3 +203,24 @@ test("a refusal about the plan is told apart from a refusal about the caller", a
     return true;
   });
 });
+
+test("the deadline covers reading the body, not only getting the headers", async () => {
+  // fetch resolves on the headers. A server that answers 200 and then stalls
+  // the body is the same endless spinner as one that never answers, and
+  // clearing the timer when fetch resolved left exactly that hole open.
+  const stalls = ((_url: string, init: RequestInit = {}) =>
+    Promise.resolve({
+      status: 200,
+      headers: new Headers(),
+      text: () =>
+        new Promise<string>((_resolve, reject) => {
+          init.signal?.addEventListener("abort", () => reject(new Error("aborted")));
+        }),
+    })) as unknown as typeof fetch;
+  const api = createApi("https://slow.test", stalls, undefined, 20);
+  await assert.rejects(api.catalog(), (e: unknown) => {
+    assert.ok(e instanceof ApiError);
+    assert.match(e.message, /did not answer within/);
+    return true;
+  });
+});

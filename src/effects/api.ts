@@ -130,7 +130,14 @@ export function createApi(
   let generation = 0;
   const base = baseURL.replace(/\/+$/, "");
 
-  async function call(method: string, path: string, body?: unknown): Promise<Response> {
+  /**
+   * call is one request, and it answers the body rather than the response
+   * because the deadline has to cover reading it. A server that sends headers
+   * and then stalls is the same spinner as one that never answers at all, and
+   * clearing the timer when fetch resolves left exactly that hole open: fetch
+   * resolves on the headers.
+   */
+  async function call(method: string, path: string, body?: unknown): Promise<string> {
     const started = generation;
     const headers: Record<string, string> = { Accept: "application/json" };
     if (body !== undefined) headers["Content-Type"] = "application/json";
@@ -139,9 +146,16 @@ export function createApi(
     const bell = setTimeout(() => stop.abort(), timeout);
     const init: RequestInit = { method, headers, credentials: "omit", signal: stop.signal };
     if (body !== undefined) init.body = JSON.stringify(body);
-    let res: Response;
+    let status = 0;
+    let text = "";
     try {
-      res = await fetchImpl(base + path, init);
+      const res = await fetchImpl(base + path, init);
+      // The cookie comes off the response this call was answered with, before
+      // anything else, because it is what the next call presents.
+      const set = res.headers.get("Set-Cookie");
+      if (set && started === generation) cookie = set.split(";")[0];
+      status = res.status;
+      text = await res.text();
     } catch (e) {
       // A request that was cut off by the deadline says so; anything else is
       // the network's own message.
@@ -154,17 +168,15 @@ export function createApi(
     } finally {
       clearTimeout(bell);
     }
-    const set = res.headers.get("Set-Cookie");
-    if (set && started === generation) cookie = set.split(";")[0];
-    if (res.status >= 400) throw await problem(res);
-    return res;
+    if (status >= 400) throw problem(status, text);
+    return text;
   }
 
-  async function problem(res: Response): Promise<ApiError> {
+  function problem(status: number, text: string): ApiError {
     let detail = "";
     const fields: Record<string, string> = {};
     try {
-      const p = (await res.json()) as { detail?: string; errors?: string[] };
+      const p = JSON.parse(text) as { detail?: string; errors?: string[] };
       detail = (p.detail ?? "").replace(/^crud: invalid: /, "");
       for (const e of p.errors ?? []) {
         const i = e.indexOf(": ");
@@ -173,10 +185,10 @@ export function createApi(
     } catch {
       // not a problem document; the status is what there is to say
     }
-    return new ApiError(res.status, detail, fields);
+    return new ApiError(status, detail, fields);
   }
 
-  const json = async <T>(res: Response): Promise<T> => (await res.json()) as T;
+  const json = <T>(text: string): T => JSON.parse(text) as T;
 
   return {
     cookie: () => cookie,

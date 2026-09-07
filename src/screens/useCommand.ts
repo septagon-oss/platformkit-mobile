@@ -10,8 +10,9 @@
 // activity re-read themselves: a command is exactly the kind of change that
 // happens to a record without the form that is open having done it.
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useNavigation, useRouter } from "expo-router";
+import { usePreventRemove } from "expo-router/react-navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Command, type Entry } from "../core/catalog";
 import { commandControls, commandTitle, humanize, problems, values } from "../core/derive";
@@ -35,19 +36,54 @@ export interface Running {
 export function useCommandForm(entry: Entry, id: string | undefined, c: Command): Running {
   const { api, wrote } = useShell();
   const router = useRouter();
-  const controls = commandControls(c);
+  const navigation = useNavigation();
+  // Memoised for the same reason useResourceForm memoises its own: run closes
+  // over the controls, ResourceCommand memoises the header options over run,
+  // and a fresh array on every render makes both of those memos a lie — which
+  // is the shape of the navigator loop this app has already been bitten by.
+  const controls = useMemo(() => commandControls(c), [c]);
   const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [detail, setDetail] = useState("");
   const [phase, setPhase] = useState<Phase>("editing");
+  // alive and left are useResourceForm's, for the same two reasons: a refusal
+  // that arrives after the sheet is gone has nothing to set, and a sheet this
+  // hook dismissed itself must not be dismissed twice.
+  const alive = useRef(true);
+  const left = useRef(false);
+  useEffect(
+    () => () => {
+      alive.current = false;
+    },
+    [],
+  );
+  const dirty = Object.keys(held).length > 0;
 
   const change = useCallback((name: string, value: string) => {
     setHeld((was) => ({ ...was, [name]: value }));
   }, []);
 
   const leave = useCallback(() => {
+    if (left.current) return;
+    left.current = true;
     if (router.canGoBack()) router.back();
   }, [router]);
+
+  // An argument somebody typed is not thrown away by a swipe. The guard is off
+  // while the command runs, because the dismissal is then this hook's own.
+  usePreventRemove(phase === "editing" && dirty, ({ data }) => {
+    Alert.alert("Discard this?", `The ${commandTitle(c).toLowerCase()} has not run.`, [
+      { text: "Keep editing", style: "cancel" },
+      {
+        text: "Discard",
+        style: "destructive",
+        onPress: () => {
+          left.current = true;
+          navigation.dispatch(data.action);
+        },
+      },
+    ]);
+  });
 
   const run = useCallback(async () => {
     const wrong = problems(controls, held);
@@ -58,11 +94,13 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     setPhase("running");
     try {
       await api.command(entry, id, c.verb, values(controls, held));
+      if (!alive.current) return;
       wrote(key(entry));
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPhase("ran");
       leave();
     } catch (e) {
+      if (!alive.current) return;
       setPhase("editing");
       if (e instanceof ApiError) {
         setErrors(e.fields);
