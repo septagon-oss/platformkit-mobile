@@ -17,7 +17,8 @@
     "check:sdk": "expo install --check",
     "fingerprint": "tsx scripts/fingerprint.ts",
     "check:fingerprint": "tsx scripts/fingerprint.ts --check",
-    "export:check": "expo export --platform android --platform ios --output-dir \"${RUNNER_TEMP:-/tmp}/platformkit-mobile-export\""
+    "export:check": "expo export --platform android --platform ios --output-dir \"${RUNNER_TEMP:-/tmp}/platformkit-mobile-export\"",
+    "tokens": "tsx scripts/tokens.ts"
   },
   "dependencies": {
     "expo": "~55.0.28",
@@ -27,6 +28,7 @@
     "expo-router": "~55.0.17",
     "expo-secure-store": "~55.0.16",
     "expo-status-bar": "~55.0.6",
+    "expo-system-ui": "~55.0.22",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.10",

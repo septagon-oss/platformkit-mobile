@@ -1,17 +1,35 @@
 // The composition root. The shell is given where the server is and which
-// screens are hand-written; everything else derives from the catalog.
+// screens are hand-written; the theme follows the device's appearance; and
+// everything else derives from the catalog.
 import { Stack } from "expo-router";
-import React from "react";
+import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
+import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { defaultRenderers } from "../src/renderers";
 import { Shell } from "../src/shell";
+import { ThemeProvider, useTheme } from "../src/ui/theme";
 
 export default function Layout() {
   return (
     <Shell baseURL={process.env.EXPO_PUBLIC_API_URL ?? ""} renderers={defaultRenderers}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </SafeAreaView>
+      <ThemeProvider>
+        <Root />
+      </ThemeProvider>
     </Shell>
+  );
+}
+
+function Root() {
+  const { color } = useTheme();
+  // The window behind every screen, so a transition never flashes white in the dark.
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(color.surfaceCanvas);
+  }, [color.surfaceCanvas]);
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: color.surfaceCanvas }}>
+      <StatusBar style="auto" />
+      <Stack screenOptions={{ headerShown: false }} />
+    </SafeAreaView>
   );
 }
