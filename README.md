@@ -119,7 +119,12 @@ holds it. iOS is built on a Mac with `npx expo prebuild --platform ios` and
 
 The `android` workflow builds the verification APK whenever a native input
 changed (the fingerprint, the configuration, the lockfile, the recipe) and
-keeps it as a run artifact for two weeks.
+keeps it as a run artifact for two weeks. It needs a verification environment
+with about 6 GiB of memory: one architecture, built serially with the settings
+in `scripts/android/`, peaks at 4.1 GiB by itself, and a job shares its
+allowance with the builder. The job is therefore off until the repository
+variable `ANDROID_BUILD` is set to `on`; `make apk` builds the same thing
+locally in the meantime.
 
 ## Verify a change
 

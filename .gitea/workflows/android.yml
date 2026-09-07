@@ -28,7 +28,15 @@ concurrency:
 
 jobs:
   apk:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # This build needs about 6 GiB of memory. One architecture, built serially
+    # with the settings in scripts/android/, peaks at 4.1 GiB on its own, and a
+    # job shares its allowance with the builder that runs it: at 4 GiB the
+    # Gradle daemon was killed. Give the verification environment the memory,
+    # then set the repository variable ANDROID_BUILD to "on" to run this job.
+    if: >-
+      vars.ANDROID_BUILD == 'on' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: pkit-ci-linux-amd64
     timeout-minutes: 55
     steps:

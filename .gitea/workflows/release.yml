@@ -50,6 +50,9 @@ jobs:
             *) echo "tag=" >> "$GITHUB_OUTPUT"; echo "not a tag: building an unversioned candidate" ;;
           esac
 
+      # Four architectures need more memory than one; see android.yml. A tag
+      # cut before the verification environment has it will fail here rather
+      # than release something unbuilt.
       - name: Build the unsigned AAB and universal APK
         env:
           TAG: ${{ steps.version.outputs.tag }}
