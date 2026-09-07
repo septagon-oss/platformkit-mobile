@@ -5,7 +5,7 @@ import { Home } from "../src/screens/Home";
 import { useShell } from "../src/shell";
 
 export default function Index() {
-  const { state, refresh } = useShell();
+  const { state, refresh, signOut } = useShell();
   if (state.phase === "anonymous" || state.phase === "signing-in")
     return <Redirect href="/sign-in" />;
   if (state.phase === "booting" || state.phase === "loading") return <Waiting />;
@@ -14,6 +14,7 @@ export default function Index() {
       <Notice
         text={state.error ?? "The catalog could not be read."}
         onRetry={() => void refresh()}
+        onSignIn={() => void signOut()}
       />
     );
   return <Home entries={state.catalog?.resources ?? []} />;

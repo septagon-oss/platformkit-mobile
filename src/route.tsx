@@ -10,6 +10,7 @@ import { ResourceDetail } from "./screens/ResourceDetail";
 import { ResourceForm } from "./screens/ResourceForm";
 import { ResourceList } from "./screens/ResourceList";
 import { useShell } from "./shell";
+import { Button } from "./ui/atoms/Button";
 import { Notice as NoticeView } from "./ui/atoms/Notice";
 import { Spinner } from "./ui/atoms/Spinner";
 import { Screen } from "./ui/templates/Screen";
@@ -59,9 +60,12 @@ export function Waiting() {
 export function Notice({
   text,
   onRetry,
+  onSignIn,
 }: {
   readonly text: string;
   readonly onRetry?: () => void;
+  /** onSignIn is the way out when the saved server is the thing that is wrong. */
+  readonly onSignIn?: () => void;
 }) {
   return (
     <Screen>
@@ -69,6 +73,9 @@ export function Notice({
         text={text}
         {...(onRetry ? { action: { label: "Retry", onPress: onRetry } } : {})}
       />
+      {onSignIn ? (
+        <Button label="Sign in to another server" tone="secondary" onPress={onSignIn} />
+      ) : null}
     </Screen>
   );
 }

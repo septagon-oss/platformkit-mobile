@@ -123,3 +123,20 @@ test("a list is a page in an order through the filters the API takes", async () 
     "https://acme.test/api/v1/note/notes?limit=20&offset=20&sort=-title&filter=status%3Aopen&filter=pinned%3Atrue",
   );
 });
+
+test("a server that never answers gives up and says which server it was", async () => {
+  // A phone keeps a saved server it may no longer reach; fetch waits forever
+  // for one that accepts the connection and then says nothing, so the deadline
+  // is what turns an endless spinner into a sentence.
+  const hang = ((_url: string, init: RequestInit = {}) =>
+    new Promise<Response>((_resolve, reject) => {
+      init.signal?.addEventListener("abort", () => reject(new Error("aborted")));
+    })) as unknown as typeof fetch;
+  const api = createApi("https://gone.test", hang, undefined, 20);
+  await assert.rejects(api.catalog(), (e: unknown) => {
+    assert.ok(e instanceof ApiError);
+    assert.equal(e.status, 0);
+    assert.match(e.message, /https:\/\/gone\.test did not answer within/);
+    return true;
+  });
+});

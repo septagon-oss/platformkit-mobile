@@ -22,6 +22,21 @@ export class ApiError extends Error {
   }
 }
 
+/** Identity is who a session belongs to, as the auth module answers. */
+export interface Identity {
+  readonly userId: string;
+  readonly email: string;
+}
+
+/** AuditEvent is one row of the trail, as the audit module answers. */
+export interface AuditEvent {
+  readonly id: string;
+  readonly name: string;
+  readonly occurredAt: string;
+  readonly actor?: string;
+  readonly payload?: unknown;
+}
+
 export interface Page {
   readonly items: readonly Record<string, unknown>[];
   readonly total: number;
@@ -36,6 +51,14 @@ export interface Window {
 }
 
 export interface Api {
+  /** me is who this session belongs to, or nothing when it belongs to nobody. */
+  me(): Promise<Identity | undefined>;
+  /**
+   * events is a window of the audit trail, newest first. The trail cannot be
+   * asked about one record, so a caller that wants a record's activity asks
+   * for a window and keeps what is about it.
+   */
+  events(limit?: number): Promise<readonly AuditEvent[]>;
   login(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
   catalog(): Promise<Catalog>;
@@ -49,10 +72,19 @@ export interface Api {
   readonly cookie: () => string | undefined;
 }
 
+/**
+ * TIMEOUT is how long a request may take before this gives up. A phone leaves
+ * networks, changes them and keeps a saved server it can no longer reach, and
+ * fetch waits for none of that: without a deadline the app sits on a spinner
+ * with nothing to say.
+ */
+export const TIMEOUT = 15_000;
+
 export function createApi(
   baseURL: string,
   fetchImpl: typeof fetch = fetch,
   initialCookie?: string,
+  timeout: number = TIMEOUT,
 ): Api {
   let cookie = initialCookie;
   let generation = 0;
@@ -63,9 +95,25 @@ export function createApi(
     const headers: Record<string, string> = { Accept: "application/json" };
     if (body !== undefined) headers["Content-Type"] = "application/json";
     if (cookie) headers.Cookie = cookie;
-    const init: RequestInit = { method, headers, credentials: "omit" };
+    const stop = new AbortController();
+    const bell = setTimeout(() => stop.abort(), timeout);
+    const init: RequestInit = { method, headers, credentials: "omit", signal: stop.signal };
     if (body !== undefined) init.body = JSON.stringify(body);
-    const res = await fetchImpl(base + path, init);
+    let res: Response;
+    try {
+      res = await fetchImpl(base + path, init);
+    } catch (e) {
+      // A request that was cut off by the deadline says so; anything else is
+      // the network's own message.
+      if (stop.signal.aborted)
+        throw new ApiError(
+          0,
+          `${base} did not answer within ${Math.round(timeout / 1000)} seconds.`,
+        );
+      throw e;
+    } finally {
+      clearTimeout(bell);
+    }
     const set = res.headers.get("Set-Cookie");
     if (set && started === generation) cookie = set.split(";")[0];
     if (res.status >= 400) throw await problem(res);
@@ -100,6 +148,27 @@ export function createApi(
       generation++;
       cookie = undefined;
       await request;
+    },
+    async me() {
+      try {
+        return await json<Identity>(await call("GET", "/api/v1/auth/me"));
+      } catch {
+        // A session that cannot say who it is still lists what it may read.
+        return undefined;
+      }
+    },
+    async events(limit = 100) {
+      const q = new URLSearchParams({ limit: String(limit), offset: "0" });
+      try {
+        const body = await json<{ items?: AuditEvent[] }>(
+          await call("GET", `/api/v1/audit/events?${q}`),
+        );
+        return body.items ?? [];
+      } catch (e) {
+        // A caller who may not read the trail simply has none to show.
+        if (e instanceof ApiError && (e.status === 403 || e.status === 404)) return [];
+        throw e;
+      }
     },
     async catalog() {
       return parseCatalog(await json(await call("GET", "/api/v1/admin/resources")));
