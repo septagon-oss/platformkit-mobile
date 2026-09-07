@@ -24,17 +24,29 @@ export default [
   ...expo,
   { ignores: ["node_modules/", ".expo/", "dist/", "android/", "ios/", "e2e/out/"] },
   forbid(["src/core/**"], [
-    { group: [...react, "**/effects/*", "**/ui/**", "**/shell", "**/screens/*"], message: "core is plain functions; it imports nothing outside src/core." },
+    { group: [...react, "**/effects/**", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "core is plain functions; it imports nothing outside src/core." },
   ]),
   forbid(["src/effects/**"], [
-    { group: [...react.filter((p) => p !== "expo-*" && p !== "expo"), "**/ui/**", "**/shell", "**/screens/*"], message: "effects know the network and the store, not React or the UI." },
+    { group: [...react.filter((p) => p !== "expo-*" && p !== "expo"), "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "effects know the network and the store, not React or the UI." },
     { group: ["expo-*", "!expo-secure-store"], message: "effects may use the secure store and nothing else of Expo." },
   ]),
   forbid(["src/ui/**"], [
-    { group: ["**/effects/*", "**/shell", "expo-router", "expo-secure-store"], message: "the UI is props in and elements out; effects arrive as callbacks from src/screens." },
+    {
+      group: [
+        "**/effects/**",
+        "**/screens/**",
+        "**/shell",
+        "**/shell.tsx",
+        "**/renderers",
+        "expo-router",
+        "expo-secure-store",
+        "expo-haptics",
+      ],
+      message: "the UI is props in and elements out; effects arrive as callbacks from src/screens.",
+    },
   ]),
   forbid(["app/**"], [
-    { group: ["**/effects/*", "**/core/*"], message: "a route composes a screen; it holds no rule and no effect." },
+    { group: ["**/effects/**", "**/core/**"], message: "a route composes a screen; it holds no rule and no effect." },
     { group: ["**/ui/**", "!**/ui/theme", "!**/ui/gallery"], message: "a route composes a screen; the theme provider and the gallery are the composition root's two exceptions." },
   ]),
 ];

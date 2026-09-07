@@ -48,16 +48,25 @@ export const timeWire = (at: Date): string => at.toISOString();
 // the zone named, because a phone is somewhere. This is the one place the
 // native shell reads differently from the web shell's UTC cell, on purpose:
 // a browser tab is a desk, a phone is a person.
+// The formatter is remade when the device's zone changes, because a phone
+// that flies keeps running.
 let timeFormat: Intl.DateTimeFormat | undefined;
-export const timeText = (at: Date): string =>
-  (timeFormat ??= new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZoneName: "short",
-  })).format(at);
+let timeZone: string | undefined;
+export function timeText(at: Date): string {
+  const now = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (!timeFormat || now !== timeZone) {
+    timeZone = now;
+    timeFormat = new Intl.DateTimeFormat(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    });
+  }
+  return timeFormat.format(at);
+}
 
 /** numberValue is what a typed number means, accepting a decimal comma, or nothing when it is not a number. */
 export function numberValue(raw: string): number | undefined {
@@ -67,6 +76,13 @@ export function numberValue(raw: string): number | undefined {
   const n = Number(normalised);
   return Number.isFinite(n) ? n : undefined;
 }
+
+/** splitList is what a comma-separated field holds: the words, trimmed, without the blanks. */
+export const splitList = (raw: string): string[] =>
+  raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
 /** display is a value as a person reads it; nothing at all is a dash. */
 export function display(f: Field, v: unknown): string {
@@ -192,13 +208,13 @@ export function values(
         break;
       }
       case "list":
-        out[c.field.name] =
-          raw === ""
-            ? []
-            : raw
-                .split(",")
-                .map((s) => s.trim())
-                .filter(Boolean);
+        out[c.field.name] = splitList(raw);
+        break;
+      case "datetime":
+        // An optional instant that was cleared is cleared on the server too:
+        // leaving it out of the body would keep what is stored.
+        if (raw !== "") out[c.field.name] = raw;
+        else if (!c.required) out[c.field.name] = null;
         break;
       default:
         if (raw !== "" || c.required) out[c.field.name] = raw;
@@ -228,15 +244,40 @@ export function problems(
   return out;
 }
 
-/**
- * mergePage is a first page read again over rows already shown: the fresh
- * rows first, then whatever was shown that the fresh page does not repeat, so
- * a reload keeps the pages beneath it and the place a person scrolled to.
- */
-export function mergePage(fresh: readonly Row[], shown: readonly Row[]): readonly Row[] {
-  const ids = new Set(fresh.map((r) => text(r.id)));
-  return [...fresh, ...shown.filter((r) => !ids.has(text(r.id)))];
+/** Order is how a list is asked for: a sort the API understands, and equality filters by field. */
+export interface Order {
+  readonly sort: string;
+  readonly filters: Readonly<Record<string, string>>;
 }
+
+export const noOrder: Order = { sort: "", filters: {} };
+
+/** sortOptions are the orders a list offers: newest, oldest, then each visible column both ways. */
+export function sortOptions(e: Entry): readonly { value: string; label: string }[] {
+  const out = [
+    { value: "", label: "Newest first" },
+    { value: "createdAt", label: "Oldest first" },
+  ];
+  for (const f of listColumns(e)) {
+    if (f.type === "bool" || f.type === "list" || f.type === "uuid") continue;
+    if (f.name === "createdAt") continue;
+    out.push({ value: f.name, label: `${humanize(f.name)}, ascending` });
+    out.push({ value: "-" + f.name, label: `${humanize(f.name)}, descending` });
+  }
+  return out;
+}
+
+/** filterFields are the fields a list can be narrowed by: the ones with a closed set of values. */
+export const filterFields = (e: Entry): readonly Field[] =>
+  e.fields.filter((f) => f.enum && f.enum.length > 0);
+
+/** queryFilters spells an Order's filters the way the API takes them. */
+export const queryFilters = (order: Order): readonly string[] =>
+  Object.entries(order.filters).map(([k, v]) => `${k}:${v}`);
+
+/** narrowed says whether a list is showing less than everything, which changes what "empty" means. */
+export const narrowed = (order: Order): boolean =>
+  order.sort !== "" || Object.keys(order.filters).length > 0;
 
 /** screenPath is where the router serves an entry's screens. */
 export const screenPath = (e: Entry): `/${string}/${string}` =>

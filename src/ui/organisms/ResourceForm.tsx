@@ -15,8 +15,8 @@ import { Section } from "../molecules/Section";
 import { TagsField } from "../molecules/TagsField";
 import { Screen } from "../templates/Screen";
 
-/** Phase is what the sheet is doing: loading the row to edit, failed to, editing, or saving. */
-export type Phase = "loading" | "failed" | "editing" | "saving";
+/** Phase is what the sheet is doing: loading the row to edit, failed to, editing, saving, or done. */
+export type Phase = "loading" | "failed" | "editing" | "saving" | "saved";
 
 export interface Props {
   readonly controls: readonly Control[];
@@ -35,7 +35,7 @@ const kinds: Partial<Record<Control["kind"], FieldKind>> = {
 };
 
 export function ResourceForm({ controls, held, errors, detail, phase, onChange, onRetry }: Props) {
-  const busy = phase === "saving";
+  const busy = phase === "saving" || phase === "saved";
   const current = (c: Control) => held[c.field.name] ?? c.value;
   return (
     <Screen form testID="resource-form">

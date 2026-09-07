@@ -28,7 +28,10 @@ const ignorePaths = [
   "dist/**",
   ".expo/**",
   "e2e/**",
+  // scripts/ holds developer tooling, except the recipe and the settings a
+  // binary is actually built with.
   "scripts/**",
+  "!scripts/android/**",
   "**/fingerprint.json",
 ];
 

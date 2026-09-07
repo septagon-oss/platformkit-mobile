@@ -4,6 +4,7 @@ import React from "react";
 import { Button } from "../../src/ui/atoms/Button";
 import { ChoiceRow } from "../../src/ui/atoms/ChoiceRow";
 import { Notice } from "../../src/ui/atoms/Notice";
+import { Text } from "../../src/ui/atoms/Text";
 import { SwitchRow } from "../../src/ui/atoms/SwitchRow";
 import { FormField } from "../../src/ui/molecules/FormField";
 import { Row } from "../../src/ui/molecules/Row";
@@ -93,15 +94,11 @@ describe("Rows", () => {
 });
 
 describe("Theme", () => {
-  test("dark mode paints the canvas the dark token", async () => {
-    await inTheme(
-      <Section>
-        <Row title="x" />
-      </Section>,
-      "dark",
-    );
-    // The section's card is the primary surface of the mode it is in.
-    expect(screen.getByText("x").parent).toBeTruthy();
-    expect(palette.dark.surfaceCanvas).not.toBe(palette.light.surfaceCanvas);
+  test("the same component reads the mode's own colours", async () => {
+    await inTheme(<Text tone="muted">x</Text>, "light");
+    expect(screen.getByText("x")).toHaveStyle({ color: palette.light.textMuted });
+    await screen.unmount();
+    await inTheme(<Text tone="muted">x</Text>, "dark");
+    expect(screen.getByText("x")).toHaveStyle({ color: palette.dark.textMuted });
   });
 });

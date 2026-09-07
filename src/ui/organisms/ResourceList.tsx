@@ -6,46 +6,24 @@ import React from "react";
 import type { Entry } from "../../core/catalog";
 import {
   display,
+  filterFields,
   humanize,
   label,
   listColumns,
+  narrowed,
   plural,
+  sortOptions,
   text,
+  type Order,
   type Row as Item,
 } from "../../core/derive";
-import { ChoiceRow, type Option } from "../atoms/ChoiceRow";
+import { ChoiceRow } from "../atoms/ChoiceRow";
 import { EmptyState } from "../atoms/EmptyState";
 import { Notice } from "../atoms/Notice";
 import { LoadMore } from "../molecules/LoadMore";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 import { ListScreen } from "../templates/ListScreen";
-
-export interface Order {
-  readonly sort: string;
-  /** filters are field:value, as the API takes them. */
-  readonly filters: Readonly<Record<string, string>>;
-}
-
-export const noOrder: Order = { sort: "", filters: {} };
-
-/** sortOptions are the orders a list offers: newest, oldest, then each visible column both ways. */
-export function sortOptions(e: Entry): readonly Option[] {
-  const out: Option[] = [
-    { value: "", label: "Newest first" },
-    { value: "createdAt", label: "Oldest first" },
-  ];
-  for (const f of listColumns(e)) {
-    if (f.type === "bool" || f.type === "list" || f.type === "uuid") continue;
-    if (f.name === "createdAt") continue;
-    out.push({ value: f.name, label: `${humanize(f.name)}, ascending` });
-    out.push({ value: "-" + f.name, label: `${humanize(f.name)}, descending` });
-  }
-  return out;
-}
-
-/** filterFields are the fields a list can be narrowed by: the ones with a closed set of values. */
-export const filterFields = (e: Entry) => e.fields.filter((f) => f.enum && f.enum.length > 0);
 
 export interface Props {
   readonly entry: Entry;
@@ -84,7 +62,7 @@ export function ResourceList({
   const columns = listColumns(entry).slice(1, 4);
   const noun = humanize(entry.entity).toLowerCase();
   const nouns = plural(noun);
-  const narrowed = Object.keys(order.filters).length > 0 || order.sort !== "";
+  const narrow = narrowed(order);
   return (
     <ListScreen
       data={rows}
@@ -143,21 +121,17 @@ export function ResourceList({
       }
       empty={
         <EmptyState
-          title={narrowed ? `No ${noun} matches` : `No ${nouns} yet`}
+          title={narrow ? `No ${noun} matches` : `No ${nouns} yet`}
           text={
-            narrowed
+            narrow
               ? "Change the order or the filters above."
               : onNew
                 ? "Add the first one."
                 : "What arrives will be listed here."
           }
-          {...(onNew && !narrowed ? { action: { label: `New ${noun}`, onPress: onNew } } : {})}
+          {...(onNew && !narrow ? { action: { label: `New ${noun}`, onPress: onNew } } : {})}
         />
       }
     />
   );
 }
-
-/** queryFilters spells an Order's filters as the API takes them. */
-export const queryFilters = (order: Order): readonly string[] =>
-  Object.entries(order.filters).map(([k, v]) => `${k}:${v}`);

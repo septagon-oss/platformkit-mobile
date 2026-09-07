@@ -27,15 +27,20 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
+          # The secret scan reads history, not one tree.
+          fetch-depth: 0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: ''
 
-      # A tag never releases an unchecked tree: the same scripts ci.yml runs.
+      # A tag never releases an unchecked tree: every gate ci.yml runs.
       - run: npm ci --no-audit --no-fund
       - run: npm run check
       - run: npm run export:check
+      - run: npm audit --audit-level=high
+      - name: No secret in the history
+        run: scripts/gitleaks.sh
 
       - name: The version this release is
         id: version
@@ -57,7 +62,11 @@ jobs:
           cp fingerprint.json out/
           (cd out && sha256sum apk/release/*.apk bundle/release/*.aab fingerprint.json > SHA256SUMS && cat SHA256SUMS)
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      # v3, not v4: v4's artifact client refuses any server whose host is not
+      # github.com, and this repository's verification runs on a self-hosted
+      # forge. The GitHub workflow uploads nothing, so nothing here is held
+      # back by it.
+      - uses: actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5 # v3.2.1
         with:
           name: platformkit-mobile-${{ steps.version.outputs.tag || github.sha }}-unsigned
           path: |

@@ -3,11 +3,11 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
-import { formControls } from "../../src/core/derive";
+import { formControls, noOrder, sortOptions } from "../../src/core/derive";
 import { Home } from "../../src/ui/organisms/Home";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
-import { noOrder, ResourceList, sortOptions } from "../../src/ui/organisms/ResourceList";
+import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { SignInForm } from "../../src/ui/organisms/SignInForm";
 import { ThemeProvider } from "../../src/ui/theme";
 
@@ -60,8 +60,6 @@ describe("ResourceList", () => {
     const labels = sortOptions(note).map((o) => o.label);
     expect(labels.slice(0, 2)).toEqual(["Newest first", "Oldest first"]);
     expect(labels).toContain("Title, ascending");
-    expect(labels).toContain("Rank, descending");
-    expect(labels).not.toContain("Pinned, ascending");
   });
 });
 

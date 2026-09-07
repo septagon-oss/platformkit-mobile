@@ -10,10 +10,14 @@ import {
   known,
   label,
   listColumns,
-  mergePage,
+  narrowed,
+  noOrder,
   numberValue,
   plural,
   problems,
+  queryFilters,
+  sortOptions,
+  splitList,
   timeText,
   timeValue,
   timeWire,
@@ -138,14 +142,35 @@ test("a form refuses a number or an instant that is not one before the server se
   assert.deepEqual(problems(controls, {}), {});
 });
 
-test("a first page read again keeps the rows beneath it and repeats none", () => {
-  const shown = [{ id: "a" }, { id: "b" }, { id: "c" }];
-  const fresh = [{ id: "new" }, { id: "a" }];
-  assert.deepEqual(
-    mergePage(fresh, shown).map((r) => r.id),
-    ["new", "a", "b", "c"],
-  );
-  assert.deepEqual(mergePage([], shown), shown);
+test("the orders a list offers are newest, oldest and each visible column both ways", () => {
+  const labels = sortOptions(note).map((o) => o.label);
+  assert.deepEqual(labels.slice(0, 2), ["Newest first", "Oldest first"]);
+  assert.ok(labels.includes("Title, ascending"));
+  assert.ok(labels.includes("Rank, descending"));
+  assert.ok(!labels.includes("Pinned, ascending"));
+});
+
+test("filters are spelled the way the API takes them, and narrowing is visible", () => {
+  assert.deepEqual(queryFilters(noOrder), []);
+  assert.deepEqual(queryFilters({ sort: "", filters: { status: "open" } }), ["status:open"]);
+  assert.equal(narrowed(noOrder), false);
+  assert.equal(narrowed({ sort: "title", filters: {} }), true);
+  assert.equal(narrowed({ sort: "", filters: { status: "open" } }), true);
+});
+
+test("a comma-separated field is split once, for the control and for the API", () => {
+  assert.deepEqual(splitList(" a , b ,, c "), ["a", "b", "c"]);
+  assert.deepEqual(splitList(""), []);
+});
+
+test("clearing an optional instant clears it on the server; a required one is left alone", () => {
+  const controls = formControls(note, { dueAt: "2026-01-31T09:00:00Z" }, false);
+  const due = controls.find((c) => c.kind === "datetime");
+  if (due) {
+    assert.equal(values(controls, { [due.field.name]: "" })[due.field.name], null);
+  }
+  const title = controls.find((c) => c.field.name === "title")!;
+  assert.equal(values([title], { title: "" }).title, "");
 });
 
 test("many of an entity is its name with an s, unless it already ends in one", () => {

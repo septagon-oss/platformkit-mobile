@@ -15,7 +15,7 @@ cd "$(dirname "$0")/../.."
 ABIS="${ABIS:-arm64-v8a}"
 TARGETS="${TARGETS:-:app:assembleRelease}"
 # Metro's transform workers, see metro.config.js.
-export METRO_MAX_WORKERS="${METRO_MAX_WORKERS:-2}"
+export METRO_MAX_WORKERS="${METRO_MAX_WORKERS:-1}"
 
 if [ ! -d node_modules ]; then
   npm ci --no-audit --no-fund
@@ -41,5 +41,5 @@ esac
 
 cd android
 # shellcheck disable=SC2086
-exec taskset -c "$pin" ./gradlew $TARGETS --no-daemon --max-workers=2 \
+exec taskset -c "$pin" ./gradlew $TARGETS --no-daemon --max-workers=1 \
   -PreactNativeArchitectures="$ABIS" -I ../scripts/android/signing.gradle --console=plain

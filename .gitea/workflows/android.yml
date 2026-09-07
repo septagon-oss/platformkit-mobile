@@ -44,7 +44,11 @@ jobs:
           ls -la out/apk/release/
           (cd out/apk/release && sha256sum *.apk)
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      # v3, not v4: v4's artifact client refuses any server whose host is not
+      # github.com, and this repository's verification runs on a self-hosted
+      # forge. The GitHub workflow uploads nothing, so nothing here is held
+      # back by it.
+      - uses: actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5 # v3.2.1
         with:
           name: platformkit-mobile-ci-arm64-${{ github.sha }}
           path: out/apk/release/*.apk

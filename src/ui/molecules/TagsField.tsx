@@ -3,6 +3,7 @@
 // splits, so the API contract is untouched.
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { splitList } from "../../core/derive";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { TextField } from "../atoms/TextField";
@@ -16,22 +17,18 @@ interface Props {
   readonly testID?: string;
 }
 
-export const split = (v: string): string[] =>
-  v
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
 export function TagsField({ label, value, onChange, disabled = false, testID }: Props) {
   const s = useStyles(styles);
   const [draft, setDraft] = useState("");
-  const tags = split(value);
+  const tags = splitList(value);
 
-  const add = () => {
-    const next = split(draft);
+  // add takes what is being committed rather than reading state, so a paste
+  // that arrives with its commas in it does not commit the previous draft.
+  const add = (raw: string) => {
+    const next = splitList(raw);
+    setDraft("");
     if (next.length === 0) return;
     onChange([...tags, ...next.filter((n) => !tags.includes(n))].join(", "));
-    setDraft("");
   };
   const remove = (tag: string) => onChange(tags.filter((x) => x !== tag).join(", "));
 
@@ -59,9 +56,9 @@ export function TagsField({ label, value, onChange, disabled = false, testID }: 
       <TextField
         kind="mono"
         value={draft}
-        onChangeText={(v) => (v.includes(",") ? (setDraft(v), add()) : setDraft(v))}
-        onSubmitEditing={add}
-        onBlur={add}
+        onChangeText={(v) => (v.includes(",") ? add(v) : setDraft(v))}
+        onSubmitEditing={() => add(draft)}
+        onBlur={() => add(draft)}
         blurOnSubmit={false}
         placeholder={`Add to ${label.toLowerCase()}`}
         accessibilityLabel={`Add to ${label}`}

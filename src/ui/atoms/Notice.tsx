@@ -45,14 +45,8 @@ export function Notice({ tone = "danger", title, text, action, testID }: Props) 
           ? t.color.statusOkBg
           : t.color.statusInfoBg;
   return (
-    <View
-      style={[s.box, { backgroundColor: bg }]}
-      accessible
-      accessibilityRole="alert"
-      accessibilityLiveRegion="polite"
-      {...(testID ? { testID } : {})}
-    >
-      <View style={s.row}>
+    <View style={[s.box, { backgroundColor: bg }]} {...(testID ? { testID } : {})}>
+      <View style={s.row} accessible accessibilityRole="alert" accessibilityLiveRegion="polite">
         <Icon name={icons[tone]} size="sm" tone={tone === "danger" ? "danger" : "primary"} />
         <View style={s.body}>
           {title ? (

@@ -27,12 +27,20 @@ export interface Page {
   readonly total: number;
 }
 
+/** Window is which rows to read: where to start, how many, in what order, narrowed how. */
+export interface Window {
+  readonly offset?: number;
+  readonly limit?: number;
+  readonly sort?: string;
+  readonly filters?: readonly string[];
+}
+
 export interface Api {
   login(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
   catalog(): Promise<Catalog>;
-  /** list is a page, in an order, through equality filters spelled field:value as the API takes them. */
-  list(e: Entry, page: number, sort: string, filters?: readonly string[]): Promise<Page>;
+  /** list is a window of rows, in an order, through equality filters spelled field:value. */
+  list(e: Entry, q?: Window): Promise<Page>;
   get(e: Entry, id: string): Promise<Record<string, unknown>>;
   create(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
   update(e: Entry, id: string, values: Record<string, unknown>): Promise<Record<string, unknown>>;
@@ -96,11 +104,8 @@ export function createApi(
     async catalog() {
       return parseCatalog(await json(await call("GET", "/api/v1/admin/resources")));
     },
-    async list(e, page, sort, filters = []) {
-      const q = new URLSearchParams({
-        limit: String(PER_PAGE),
-        offset: String(Math.max(page - 1, 0) * PER_PAGE),
-      });
+    async list(e, { offset = 0, limit = PER_PAGE, sort = "", filters = [] } = {}) {
+      const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
       if (sort) q.set("sort", sort);
       for (const f of filters) q.append("filter", f);
       const body = await json<{ items?: Record<string, unknown>[]; total?: number }>(

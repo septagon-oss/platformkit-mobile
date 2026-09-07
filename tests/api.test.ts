@@ -71,7 +71,7 @@ test("list reads the page envelope", async () => {
     { status: 200, body: { items: [{ id: "1" }], total: 7, limit: 20, offset: 20 } },
   ]);
   const api = createApi("https://acme.test", fetch);
-  const page = await api.list({ ...entry, path: "/api/v1/n/ns" }, 2, "-title");
+  const page = await api.list({ ...entry, path: "/api/v1/n/ns" }, { offset: 20, sort: "-title" });
   assert.equal(page.total, 7);
   assert.equal(page.items.length, 1);
   assert.equal(calls[0]!.url, "https://acme.test/api/v1/n/ns?limit=20&offset=20&sort=-title");
@@ -113,7 +113,11 @@ test("logout clears immediately and late responses cannot restore its cookie", a
 test("a list is a page in an order through the filters the API takes", async () => {
   const { fetch, calls } = fakeFetch([{ status: 200, body: { items: [], total: 0 } }]);
   const api = createApi("https://acme.test", fetch);
-  await api.list(entry, 2, "-title", ["status:open", "pinned:true"]);
+  await api.list(entry, {
+    offset: 20,
+    sort: "-title",
+    filters: ["status:open", "pinned:true"],
+  });
   assert.equal(
     calls[0]!.url,
     "https://acme.test/api/v1/note/notes?limit=20&offset=20&sort=-title&filter=status%3Aopen&filter=pinned%3Atrue",

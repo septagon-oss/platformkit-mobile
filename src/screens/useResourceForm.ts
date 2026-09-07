@@ -1,9 +1,12 @@
 // useResourceForm is the sheet's imperative shell. Its phase is explicit:
-// loading the row to edit, failed to, editing, saving. Save exists only while
-// editing, so a form that never loaded cannot save an empty row over one; a
-// dirty sheet asks before it is dismissed; a saved one leaves without asking.
-import { useNavigation, useRouter } from "expo-router";
+// loading the row to edit, failed to, editing, saving, saved. Save exists only
+// while editing, so a form that never loaded cannot save an empty row over
+// one; a dirty sheet asks before it is dismissed, by gesture as well as by
+// button; a sheet that is saving cannot be dismissed at all; and a sheet that
+// has saved leaves without asking.
+import { usePreventRemove, useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Entry } from "../core/catalog";
@@ -22,7 +25,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [detail, setDetail] = useState("");
-  const leaving = useRef(false);
+  const [saved, setSaved] = useState<Row | undefined>();
   const generation = useRef(0);
 
   const load = useCallback(async () => {
@@ -49,24 +52,34 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   const controls = useMemo(() => formControls(entry, row, create), [entry, row, create]);
   const dirty = Object.keys(held).length > 0;
 
-  // Dismissing a dirty sheet, by gesture, header or system back, asks first.
-  useEffect(
-    () =>
-      navigation.addListener("beforeRemove", (e) => {
-        if (leaving.current || !dirty) return;
-        e.preventDefault();
-        if (phase === "saving") return;
-        Alert.alert("Discard changes?", "What you typed here will be lost.", [
-          { text: "Keep editing", style: "cancel" },
-          {
-            text: "Discard",
-            style: "destructive",
-            onPress: () => navigation.dispatch(e.data.action),
-          },
-        ]);
-      }),
-    [navigation, dirty, phase],
-  );
+  // usePreventRemove is what a native stack honours: it covers the swipe and
+  // the system back as well as the header's Cancel. The saved phase does not
+  // block, so leaving after a save asks nothing.
+  usePreventRemove(phase === "saving" || (phase === "editing" && dirty), ({ data }) => {
+    // A save in flight is never interrupted; the alert would have nothing
+    // useful to offer while the request decides.
+    if (phase === "saving") return;
+    Alert.alert("Discard changes?", "What you typed here will be lost.", [
+      { text: "Keep editing", style: "cancel" },
+      {
+        text: "Discard",
+        style: "destructive",
+        onPress: () => navigation.dispatch(data.action),
+      },
+    ]);
+  });
+
+  // Leaving happens after the render that cleared the guard above.
+  useEffect(() => {
+    if (phase !== "saved") return;
+    const at = screenPath(entry);
+    // A sheet opened from a link has nothing to go back to; the record it just
+    // wrote is where it belongs.
+    if (create && saved) router.replace(`${at}/${encodeURIComponent(text(saved.id))}`);
+    else if (router.canGoBack()) router.back();
+    else if (id) router.replace(`${at}/${encodeURIComponent(id)}`);
+    else router.replace(at);
+  }, [phase, saved, create, entry, id, router]);
 
   const change = (name: string, value: string) => {
     setHeld((h) => ({ ...h, [name]: value }));
@@ -85,12 +98,11 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     setDetail("");
     try {
       const body = values(controls, held);
-      const saved = id ? await api.update(entry, id, body) : await api.create(entry, body);
+      const written = id ? await api.update(entry, id, body) : await api.create(entry, body);
       wrote(key(entry));
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      leaving.current = true;
-      if (create) router.replace(`${screenPath(entry)}/${encodeURIComponent(text(saved.id))}`);
-      else router.back();
+      setSaved(written);
+      setPhase("saved");
     } catch (e) {
       if (e instanceof ApiError) {
         setErrors(e.fields);
@@ -102,7 +114,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     }
   };
 
-  const cancel = () => router.back();
+  const cancel = () => {
+    if (router.canGoBack()) router.back();
+    else router.replace(screenPath(entry));
+  };
 
   return { create, controls, held, errors, detail, phase, change, save, cancel, reload: load };
 }

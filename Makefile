@@ -16,6 +16,8 @@ PROFILE ?=
 VERSION ?=
 DOCKER ?= docker
 OUT ?= out
+# MIRROR_OUT is where the mirror copies its outputs; keep it absolute for the mount.
+MIRROR_OUT ?= $(abspath $(OUT))-mirror
 ANDROID_HOME ?= $(HOME)/Android/Sdk
 BUILD_TOOLS := $(lastword $(sort $(wildcard $(ANDROID_HOME)/build-tools/*)))
 
@@ -38,14 +40,14 @@ aab:
 # same limits around the same recipe is the honest mirror; a cgroup around
 # docker build would only limit the client.
 apk-mirror:
-	mkdir -p $(abspath $(OUT)-mirror)
+	mkdir -p $(MIRROR_OUT)
 	$(DOCKER) run --rm --cpus 2 --memory 4g --memory-swap 4g \
 	  -e ABIS=$(ABIS) -e PK_PROFILE=$(PROFILE) -e PK_VERSION=$(VERSION) -e CI=1 \
 	  -v pk-mobile-mirror-npm:/root/.npm -v pk-mobile-mirror-gradle:/root/.gradle \
-	  -v "$(CURDIR):/src:ro" -v "$(abspath $(OUT)-mirror):/out" -w /tmp \
+	  -v "$(CURDIR):/src:ro" -v "$(MIRROR_OUT):/out" -w /tmp \
 	  reactnativecommunity/react-native-android:v21.0@sha256:24ca7ab5a70ec0b78a81bdc5eeea5924c2531531d53971b6f2321aff08446c36 \
 	  bash -c 'cp -r /src /tmp/app && cd /tmp/app && rm -rf node_modules android out; time scripts/android/build.sh; rc=$$?; echo "memory.peak $$(( $$(cat /sys/fs/cgroup/memory.peak) / 1048576 )) MiB"; cp -r android/app/build/outputs/* /out/ 2>/dev/null; exit $$rc'
-	@ls -la $(OUT)-mirror/apk/release/ 2>/dev/null || echo "no APK: the recipe did not fit the runner's shape"
+	@ls -la $(MIRROR_OUT)/apk/release/ 2>/dev/null || echo "no APK: the recipe did not fit the runner's shape"
 
 apk-debug-sign:
 	@test -n "$(BUILD_TOOLS)" || (echo "no Android build-tools under $(ANDROID_HOME)"; exit 1)
@@ -79,4 +81,4 @@ e2e-android:
 	scripts/e2e/android.sh
 
 clean:
-	rm -rf $(OUT) android
+	rm -rf $(OUT) $(MIRROR_OUT) android

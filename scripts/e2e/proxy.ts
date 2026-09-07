@@ -6,6 +6,7 @@
 //   tsx scripts/e2e/proxy.ts <listen port> <upstream url> <tenant host>
 //   tsx scripts/e2e/proxy.ts 8081 http://127.0.0.1:8080 platformkit.localhost:8080
 import http from "node:http";
+import https from "node:https";
 
 const [port, upstream, host] = process.argv.slice(2);
 if (!port || !upstream || !host) {
@@ -13,12 +14,19 @@ if (!port || !upstream || !host) {
   process.exit(2);
 }
 const target = new URL(upstream);
+if (target.protocol !== "http:" && target.protocol !== "https:") {
+  console.error(`proxy: ${target.protocol} is not a protocol this forwards`);
+  process.exit(2);
+}
+// An https upstream is spoken to over TLS, on its own default port.
+const send = target.protocol === "https:" ? https.request : http.request;
 
 const server = http.createServer((req, res) => {
-  const out = http.request(
+  const out = send(
     {
+      protocol: target.protocol,
       hostname: target.hostname,
-      port: target.port,
+      port: target.port || (target.protocol === "https:" ? 443 : 80),
       path: req.url,
       method: req.method,
       headers: { ...req.headers, host },
