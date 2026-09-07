@@ -21,6 +21,8 @@ export interface Props {
   readonly error: string;
   /** more says older lines exist; loadMore reads the next page of them. */
   readonly more: boolean;
+  /** excluded says the plan does not include the trail, which is not an error. */
+  readonly excluded?: boolean;
   readonly loadingMore: boolean;
   readonly loadMore: () => void;
   readonly now?: Date;
@@ -32,6 +34,7 @@ export function Activity({
   loading,
   error,
   more,
+  excluded = false,
   loadingMore,
   loadMore,
   now = new Date(),
@@ -42,6 +45,12 @@ export function Activity({
     return (
       <Section title="Activity">
         <Text tone="muted">{error}</Text>
+      </Section>
+    );
+  if (excluded)
+    return (
+      <Section title="Activity" footer="Ask whoever manages the account.">
+        <Text tone="muted">This account&rsquo;s plan does not include the activity trail.</Text>
       </Section>
     );
   if (loading && events.length === 0)

@@ -175,3 +175,31 @@ test("the trail is asked for one record, a page at a time, and a caller who may 
   assert.equal(asked.searchParams.get("offset"), "20");
   assert.deepEqual(await api.events(), { items: [], total: 0 });
 });
+
+test("a refusal about the plan is told apart from a refusal about the caller", async () => {
+  // 402 is what the kernel answers when a tenant's plan excludes an
+  // operation. It is a different sentence on screen and a different way out,
+  // so a screen asks the error rather than comparing a number.
+  const { fetch } = fakeFetch([
+    {
+      status: 402,
+      body: {
+        status: 402,
+        detail: "PLAN_EXCLUDES: this tenant's plan does not include audit-trail",
+      },
+    },
+    {
+      status: 403,
+      body: { status: 403, detail: "AUTH_DENIED: this operation requires audit:read" },
+    },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  await assert.rejects(api.get(entry, "1"), (e: unknown) => {
+    assert.ok(e instanceof ApiError && e.excluded);
+    return true;
+  });
+  await assert.rejects(api.get(entry, "1"), (e: unknown) => {
+    assert.ok(e instanceof ApiError && !e.excluded);
+    return true;
+  });
+});

@@ -193,6 +193,7 @@ describe("Activity", () => {
     loading: false,
     error: "",
     more: false,
+    excluded: false,
     loadingMore: false,
     loadMore: none,
     now,
@@ -221,6 +222,14 @@ describe("Activity", () => {
     await screen.unmount();
     await inTheme(<ResourceDetail {...detail} activity={trail} />);
     expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
+  });
+
+  test("a plan that does not include the trail says so, and is not an error", async () => {
+    await inTheme(
+      <ResourceDetail {...detail} activity={{ ...trail, events: [], excluded: true }} />,
+    );
+    expect(screen.getByText(/plan does not include the activity trail/)).toBeOnTheScreen();
+    expect(screen.queryByText("Nothing has happened to this record yet.")).toBeNull();
   });
 
   test("a record with no trail yet says so, and an unreadable one says why", async () => {

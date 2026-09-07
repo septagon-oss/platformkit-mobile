@@ -20,6 +20,16 @@ export class ApiError extends Error {
     super(detail || `HTTP ${status}`);
     this.name = "ApiError";
   }
+
+  /**
+   * excluded says the server refused this because of what the tenant is
+   * paying for rather than what the caller may do. It is a different sentence
+   * on screen — "your plan does not include this", not "you may not" — and a
+   * different way out, so the two are told apart here and not at each screen.
+   */
+  get excluded(): boolean {
+    return this.status === 402;
+  }
 }
 
 /** Identity is who a session belongs to, as the auth module answers. */

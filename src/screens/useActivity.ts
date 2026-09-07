@@ -15,6 +15,7 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { about, type Event } from "../core/activity";
+import { ApiError } from "../effects/api";
 import { key, type Entry } from "../core/catalog";
 import { text } from "../core/derive";
 import { useShell } from "../shell";
@@ -29,6 +30,8 @@ export interface Activity {
   readonly error: string;
   /** more says older lines exist, so the section offers to read them. */
   readonly more: boolean;
+  /** excluded says this tenant's plan does not include the trail. */
+  readonly excluded: boolean;
   readonly loadingMore: boolean;
   readonly loadMore: () => void;
   readonly reload: () => void;
@@ -43,6 +46,7 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [more, setMore] = useState(false);
+  const [excluded, setExcluded] = useState(false);
   const generation = useRef(0);
   const read = useRef(0); // rows of the trail asked for so far, which is the next offset
   const seen = useRef(writes[k] ?? 0);
@@ -75,6 +79,16 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
         }
       } catch (e) {
         if (generation.current !== started) return;
+        // A plan that does not include the trail is not a failure to report as
+        // one: the record simply has no history to show here, and the section
+        // says which of the two it is.
+        if (e instanceof ApiError && e.excluded) {
+          setEvents([]);
+          setMore(false);
+          setError("");
+          setExcluded(true);
+          return;
+        }
         setError(e instanceof Error ? e.message : "The activity could not be read.");
       } finally {
         if (generation.current === started) {
@@ -113,6 +127,7 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
     loading,
     error,
     more,
+    excluded,
     loadingMore,
     loadMore,
     reload,
