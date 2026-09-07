@@ -38,12 +38,18 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // request is in flight. The write still lands and the list still hears about
   // it; what must not happen is this screen deciding where to go afterwards.
   const alive = useRef(true);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    // Set on the way in as well as cleared on the way out. A ref initialised
+    // once is initialised once per hook instance, not once per mount, and a
+    // remount — Fast Refresh, a strict double-invoke — runs the cleanup
+    // without running the initialiser again. Leaving it false makes every
+    // later await return silently: the form sat disabled with its spinner on
+    // and nothing to say, which is what the device showed.
+    alive.current = true;
+    return () => {
       alive.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
 
   const load = useCallback(async () => {
     if (!id) return;

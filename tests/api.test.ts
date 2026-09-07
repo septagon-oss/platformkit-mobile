@@ -26,6 +26,7 @@ const entry = {
   immutable: [],
   writable: true,
   commands: [],
+  singleton: false,
 };
 
 test("login keeps the session cookie and sends it back", async () => {
@@ -223,4 +224,22 @@ test("the deadline covers reading the body, not only getting the headers", async
     assert.match(e.message, /did not answer within/);
     return true;
   });
+});
+
+test("a singleton is read and written at the path itself", async () => {
+  const { fetch, calls } = fakeFetch([
+    { status: 200, body: { id: "1", title: "Acme" } },
+    { status: 200, body: { id: "1", title: "Acme Inc" } },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  const single = { ...entry, path: "/api/v1/site/settings", singleton: true };
+  await api.one(single);
+  assert.equal(calls[0]!.url, "https://acme.test/api/v1/site/settings");
+  assert.equal(calls[0]!.init.method, "GET");
+  // A singleton's write is a PUT of the whole of it: there is no id in the
+  // path and no PATCH route behind it.
+  await api.replace(single, { title: "Acme Inc" });
+  assert.equal(calls[1]!.url, "https://acme.test/api/v1/site/settings");
+  assert.equal(calls[1]!.init.method, "PUT");
+  assert.equal(calls[1]!.init.body, `{"title":"Acme Inc"}`);
 });

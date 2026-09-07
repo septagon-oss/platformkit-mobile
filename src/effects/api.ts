@@ -92,6 +92,13 @@ export interface Api {
   /** list is a window of rows, in an order, through equality filters spelled field:value. */
   list(e: Entry, q?: Window): Promise<Page>;
   get(e: Entry, id: string): Promise<Record<string, unknown>>;
+  /**
+   * one is the row of a singleton, which lives at the entry's own path: a
+   * tenant has one and it has no id to ask for. replace is how it is written,
+   * because a singleton's write is a PUT of the whole of it.
+   */
+  one(e: Entry): Promise<Record<string, unknown>>;
+  replace(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
   create(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
   update(e: Entry, id: string, values: Record<string, unknown>): Promise<Record<string, unknown>>;
   remove(e: Entry, id: string): Promise<void>;
@@ -238,6 +245,12 @@ export function createApi(
     },
     async get(e, id) {
       return json(await call("GET", `${e.path}/${encodeURIComponent(id)}`));
+    },
+    async one(e) {
+      return json(await call("GET", e.path));
+    },
+    async replace(e, values) {
+      return json(await call("PUT", e.path, values));
     },
     async create(e, values) {
       return json(await call("POST", e.path, values));

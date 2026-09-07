@@ -51,12 +51,18 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
   // hook dismissed itself must not be dismissed twice.
   const alive = useRef(true);
   const left = useRef(false);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    // Set on the way in as well as cleared on the way out. A ref initialised
+    // once is initialised once per hook instance, not once per mount, and a
+    // remount — Fast Refresh, a strict double-invoke — runs the cleanup
+    // without running the initialiser again. Leaving it false makes every
+    // later await return silently: the form sat disabled with its spinner on
+    // and nothing to say, which is what the device showed.
+    alive.current = true;
+    return () => {
       alive.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
   const dirty = Object.keys(held).length > 0;
 
   const change = useCallback((name: string, value: string) => {

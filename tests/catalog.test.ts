@@ -8,7 +8,7 @@ const fixture = () =>
 
 test("the golden catalog parses", () => {
   const c = parseCatalog(fixture());
-  assert.equal(c.resources.length, 2);
+  assert.equal(c.resources.length, 3);
   const note = c.resources[0]!;
   assert.equal(note.module, "note");
   assert.equal(note.entity, "note");
@@ -38,6 +38,12 @@ test("the golden catalog parses", () => {
   assert.deepEqual(note.commands[1]!.fields, []);
   // A resource with none carries none, and so does a server too old to say.
   assert.deepEqual(c.resources[1]!.commands, []);
+  // And a singleton is told from a collection, which is what keeps a screen
+  // from offering a New button no route serves.
+  assert.equal(note.singleton, false);
+  const settings = c.resources[2]!;
+  assert.equal(settings.singleton, true);
+  assert.equal(settings.path, "/api/v1/note/settings");
 });
 
 test("a command a server spells wrongly is refused by the name of what is wrong", () => {

@@ -59,6 +59,13 @@ export interface Entry {
   readonly writable: boolean;
   /** commands is empty for an entity that has none, and for a server too old to say. */
   readonly commands: readonly Command[];
+  /**
+   * singleton says a tenant has exactly one of these, at the path itself: a
+   * GET and a PUT, with no list, no id, no create and no delete. A shell that
+   * ignored it would draw a list of one row with a New button on it and no
+   * route to serve either.
+   */
+  readonly singleton: boolean;
 }
 
 export interface Catalog {
@@ -175,6 +182,7 @@ function entry(v: unknown, at: string): Entry {
     immutable: strings(v, "immutable", at) ?? [],
     writable,
     commands: (commands ?? []).map((c, i) => command(c, `${at}.commands[${i}]`)),
+    singleton: bool(v, "singleton", at) ?? false,
   };
 }
 

@@ -11,6 +11,7 @@ import { ResourceCommand } from "./screens/ResourceCommand";
 import { ResourceDetail } from "./screens/ResourceDetail";
 import { ResourceForm } from "./screens/ResourceForm";
 import { ResourceList } from "./screens/ResourceList";
+import { Singleton } from "./screens/Singleton";
 import { useShell } from "./shell";
 import { Button } from "./ui/atoms/Button";
 import { Notice as NoticeView } from "./ui/atoms/Notice";
@@ -58,7 +59,12 @@ export function ResourceRoute({ kind, withID = false, withVerb = false }: Props)
   const found = entry(module, entity);
   if (!found) return <Notice text={`${module}/${entity} is not in this installation.`} />;
 
-  const Screen = renderers[key(found)]?.[kind] ?? generated[kind];
+  // A tenant has one of a singleton, at the entry's own path, so its list
+  // route is the record itself: a list of one row with a New button on it
+  // would be three doors the API does not have.
+  const Screen =
+    renderers[key(found)]?.[kind] ??
+    (kind === "list" && found.singleton ? Singleton : generated[kind]);
   const id = withID ? params.id : undefined;
   const verb = withVerb ? params.verb : undefined;
   return (
