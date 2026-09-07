@@ -25,6 +25,32 @@ if (target.protocol !== "http:" && target.protocol !== "https:") {
 // An https upstream is spoken to over TLS, on its own default port.
 const send = target.protocol === "https:" ? https.request : http.request;
 
+/**
+ * rewritten moves a request onto the tenant's own host. The Host header is
+ * what selects the tenant; Origin and Referer have to move with it, because a
+ * server that refuses a cross-site sign-in compares them, and a browser that
+ * typed this proxy's address sends that address. A native client sends
+ * neither and is unaffected.
+ *
+ * This is a developer's tool on a network you control, pointed at a server
+ * you are running. Rewriting Origin is exactly what a same-site rule exists
+ * to prevent, which is why nothing here belongs anywhere near a deployment.
+ */
+const scheme = target.protocol.replace(":", "");
+function rewritten(headers: http.IncomingHttpHeaders): http.IncomingHttpHeaders {
+  const out: http.IncomingHttpHeaders = { ...headers, host };
+  if (headers.origin) out.origin = `${scheme}://${host}`;
+  if (headers.referer) {
+    try {
+      const at = new URL(headers.referer);
+      out.referer = `${scheme}://${host}${at.pathname}${at.search}`;
+    } catch {
+      delete out.referer;
+    }
+  }
+  return out;
+}
+
 const server = http.createServer((req, res) => {
   const out = send(
     {
@@ -33,7 +59,7 @@ const server = http.createServer((req, res) => {
       port: target.port || (target.protocol === "https:" ? 443 : 80),
       path: req.url,
       method: req.method,
-      headers: { ...req.headers, host },
+      headers: rewritten(req.headers),
     },
     (answer) => {
       res.writeHead(answer.statusCode ?? 502, answer.headers);
