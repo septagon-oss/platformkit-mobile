@@ -20,7 +20,8 @@
     "export:check": "expo export --platform android --platform ios --output-dir \"${RUNNER_TEMP:-/tmp}/platformkit-mobile-export\"",
     "tokens": "tsx scripts/tokens.ts",
     "test:ui": "jest",
-    "check:flows": "tsx scripts/check_flows.ts"
+    "check:flows": "tsx scripts/check_flows.ts",
+    "source": "tsx scripts/source.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

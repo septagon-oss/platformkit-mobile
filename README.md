@@ -10,10 +10,11 @@ Go repository or on private modules.
 
 ## Run locally
 
-Install Node.js and npm, then run these commands from this repository:
+Install the Node.js version in `.nvmrc` and npm, then run these commands from
+this repository. `npm ci` installs the exact versions in `package-lock.json`:
 
 ```sh
-npm install
+npm ci
 npm run check
 EXPO_PUBLIC_API_URL=https://platformkit.example.com npm start
 ```
@@ -92,6 +93,51 @@ to optional `list`, `detail` and `form` components. Each receives an `entry`
 and, when applicable, an `id`; any omitted component falls back to the
 generated screen. Add a custom screen when the workflow needs something the
 resource schema cannot express.
+
+## Hand off source
+
+The application owner commits its identity in `app.config.ts`, its screens
+through the renderer pack in `app/_layout.tsx`, and its design export in
+`testdata/design-tokens.json`. Keep native dependencies in this application's
+`package.json` and lockfile. Custom screens use `src/screens/`, domain decisions
+use `src/core/`, HTTP uses `src/effects/`, and presentation composes the existing
+atomic layers in `src/ui/`. A branded shell still needs its product workflows
+and device verification before it is a complete application.
+
+After `npm run check` passes, commit the application and export its full commit
+ID. Run this from the repository root; the destination's parent must exist and
+the destination must be new and outside the workspace:
+
+```sh
+git rev-parse HEAD
+npm run source -- --revision <full-commit-id> --output /tmp/mobile-source
+```
+
+[scripts/source.ts](scripts/source.ts) reads the committed files, preserving
+their executable modes. It includes routes, source, assets, tests, the lockfile,
+native fingerprint and build recipe. Hosting workflows are excluded. Local
+dependencies, workspace links, symlinks and tracked local configuration cause
+an error; working-tree edits, ignored files and installed dependencies are
+never copied. `SOURCE.json` records the source revision and each delivered
+file's SHA-256, byte count and mode. It proves provenance, not publication or
+runtime behavior. Verify that revision is published before distributing a
+release, and retain the receipt when you archive the exported directory.
+
+From the exported directory, install and verify without the original checkout:
+
+```sh
+npm ci
+npm run check
+npm run export:check
+```
+
+Installation downloads the locked npm packages; native builds also need the
+platform toolchain and its dependencies. The export is source, not an offline
+dependency cache or a backend server. Both bundle exports must compile; use
+the [binary recipe below](#build-a-binary) and the device flows to verify the
+application's actual journeys. A recipient can edit the exported files directly.
+When importing into its own repository, retain the received receipt as
+`UPSTREAM.json` before committing: `SOURCE.json` is reserved for the next export.
 
 ## Build a binary
 
