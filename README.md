@@ -10,7 +10,7 @@ Go repository or on private modules.
 
 ## Run locally
 
-Install the Node.js version in `.nvmrc` and npm, then run these commands from
+Install Git, the Node.js version in `.nvmrc` and npm, then run these commands from
 this repository. `npm ci` installs the exact versions in `package-lock.json`:
 
 ```sh

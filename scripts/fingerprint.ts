@@ -12,6 +12,7 @@ import {
   diffFingerprints,
   SourceSkips,
   type Fingerprint,
+  type FileHookTransformFunction,
 } from "@expo/fingerprint";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -44,20 +45,43 @@ const extraSources = [
   { type: "file" as const, filePath: "metro.config.js", reasons: ["bundler"] },
 ];
 
-export function compute(root: string): Promise<Fingerprint> {
+/** masked-view's Gradle script removes this obsolete attribute under AGP 7+.
+ * Hash its effective manifest identically before and after that build step;
+ * every other byte, including permissions and another namespace, still counts.
+ */
+export function nativeFileContents(): FileHookTransformFunction {
+  const manifest =
+    "node_modules/@react-native-masked-view/masked-view/android/src/main/AndroidManifest.xml";
+  let chunks: Buffer[] = [];
+  return (source, chunk, end, encoding) => {
+    if (source.type !== "file" || source.filePath !== manifest) return chunk;
+    if (chunk !== null) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding));
+    if (!end) return null;
+    const contents = Buffer.concat(chunks).toString("utf8");
+    chunks = [];
+    return contents.replace('package="org.reactnative.maskedview"', "");
+  };
+}
+
+export async function compute(root: string): Promise<Fingerprint> {
   // The fingerprint is the release identity at no particular version: a tag
   // changes the version and the build numbers, not what the binary is made
   // of, and a verification profile is the same native project under another
   // package.
   delete process.env.PK_VERSION;
   delete process.env.PK_PROFILE;
-  return createFingerprintAsync(root, {
+  const fingerprint = await createFingerprintAsync(root, {
     ignorePaths,
     extraSources,
+    fileHookTransform: nativeFileContents(),
     // npm scripts and .gitignore do not define the binary either.
     sourceSkips:
       SourceSkips.ExpoConfigVersions | SourceSkips.PackageJsonScriptsAll | SourceSkips.GitIgnore,
   });
+  // Expo lists ignored generated directories with null hashes when they
+  // exist locally. They do not contribute to the hash; omit that checkout
+  // noise from the reviewed receipt too.
+  return { ...fingerprint, sources: fingerprint.sources.filter((source) => source.hash !== null) };
 }
 
 export function render(fp: Fingerprint): string {
@@ -107,10 +131,12 @@ async function main(args: readonly string[]): Promise<number> {
   return 1;
 }
 
-main(process.argv.slice(2)).then(
-  (code) => process.exit(code),
-  (e: unknown) => {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(2);
-  },
-);
+if (process.argv[1]?.endsWith("fingerprint.ts")) {
+  main(process.argv.slice(2)).then(
+    (code) => process.exit(code),
+    (e: unknown) => {
+      console.error(e instanceof Error ? e.message : String(e));
+      process.exit(2);
+    },
+  );
+}

@@ -186,14 +186,6 @@
     },
     {
       "type": "dir",
-      "filePath": "android",
-      "reasons": [
-        "bareNativeDir"
-      ],
-      "hash": null
-    },
-    {
-      "type": "dir",
       "filePath": "node_modules/@expo/dom-webview/android",
       "reasons": [
         "expoAutolinkingAndroid"
