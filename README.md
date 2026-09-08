@@ -130,6 +130,35 @@ resolve directly to the TypeScript source used by this reference application.
 The consuming Expo application supplies its routes, identity, renderer pack and
 product screens, and composes one shared `Shell` and `ThemeProvider`.
 
+Pass `palette` to `ThemeProvider` to use the application's complete light and
+dark palettes. Pass `fonts` for native display, body and mono faces already
+available on the device; load bundled fonts before rendering the provider.
+An undefined face selects the system font. Omitted props use the reference
+palette and platform faces. Changing either prop updates the shared components;
+keep their objects stable between changes. The provider's `mode` prop still
+overrides the device appearance when the product requires it.
+
+Keep the application's design export in `testdata/design-tokens.json`. Reuse
+`render` from `platformkit-mobile/tools/tokens` in its `scripts/tokens.ts`:
+
+```ts
+import { readFileSync, writeFileSync } from "node:fs";
+import { render } from "platformkit-mobile/tools/tokens";
+
+const document: unknown = JSON.parse(readFileSync("testdata/design-tokens.json", "utf8"));
+writeFileSync("src/ui/tokens.ts", render(document));
+```
+
+Run that script with the application's locked `tsx` tool and `@types/node`
+development dependency. Include `"types": ["node"]` in the script's TypeScript
+configuration. Import `palette` from the generated `src/ui/tokens.ts` in the
+composition root. Type checking
+against the provider requires every shared color role in both modes. CSS font
+stacks in the export are data; the application supplies their resolved native
+faces through `fonts`. The generator runs during development and verification.
+Native runtime code consumes its generated output; ESLint rejects imports of
+the build tool or Node APIs into runtime layers.
+
 The application owns its native dependencies and lockfile. Declare the native
 packages directly in that application at the versions used here so autolinking
 finds them and React, the router and their contexts have one installed instance.
@@ -138,9 +167,9 @@ application lockfile, including resolved versions and integrity hashes.
 
 This is currently an unpublished package candidate; `private: true` remains set.
 For local review, `npm pack --ignore-scripts --pack-destination /tmp` creates a
-source dependency archive. Its contents are `src/` and npm's package metadata and
-documentation. It contains the shared implementation, including generated design
-tokens. The reference application's routes, build recipes and test tooling belong
+source dependency archive. Its contents are `src/`, `scripts/tokens.ts` and npm's
+package metadata and documentation. It contains the shared implementation,
+including generated design tokens. The reference application's routes, build recipes and test tooling belong
 to the complete application handoff below. `npm run check` packs the dependency
 in a removed temporary directory, verifies public imports from the extracted
 package and checks that its relative source dependencies are present. Consumer

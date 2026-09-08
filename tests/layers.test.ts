@@ -108,3 +108,22 @@ test("package subpaths preserve the same atomic and effect boundaries", async ()
     assert.deepEqual(await boundaries(file!, source!), [], `${file}: ${source}`);
   }
 });
+
+test("native runtime layers cannot import the packaged token generator or Node tools", async () => {
+  for (const file of [
+    "src/core/probe.ts",
+    "src/effects/probe.ts",
+    "src/shell.tsx",
+    "src/ui/theme.tsx",
+    "app/probe.tsx",
+  ]) {
+    for (const source of [
+      'export { render } from "platformkit-mobile/tools/tokens";',
+      'export { render } from "../scripts/tokens";',
+      'export { readFile } from "node:fs/promises";',
+      'export { readFile } from "fs/promises";',
+    ]) {
+      assert.ok((await boundaries(file, source)).length > 0, `${file}: ${source}`);
+    }
+  }
+});

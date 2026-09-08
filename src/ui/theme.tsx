@@ -8,8 +8,10 @@ import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { hit, radius, space, type } from "./scale";
 import { palette, type Mode, type Palette } from "./tokens";
 
+export type { Mode, Palette } from "./tokens";
+
 export interface Fonts {
-  /** display is the serif of titles; undefined body and label mean the system face. */
+  /** Each role names an available native face; undefined selects the system face. */
   readonly display: string | undefined;
   readonly body: string | undefined;
   readonly mono: string | undefined;
@@ -34,8 +36,12 @@ const fonts: Fonts = {
   mono: Platform.select({ ios: "Menlo", android: "monospace", default: "monospace" }),
 };
 
-export function themeFor(mode: Mode): Theme {
-  return { mode, color: palette[mode], font: fonts, space, radius, type, hit };
+export function themeFor(
+  mode: Mode,
+  colors: Readonly<Record<Mode, Palette>> = palette,
+  faces: Fonts = fonts,
+): Theme {
+  return { mode, color: colors[mode], font: faces, space, radius, type, hit };
 }
 
 const Context = createContext<Theme>(themeFor("light"));
@@ -44,12 +50,21 @@ interface ProviderProps {
   readonly children: React.ReactNode;
   /** mode overrides the device's appearance; the gallery uses it to show both. */
   readonly mode?: Mode;
+  /** Complete light and dark palettes generated from this application's design export. */
+  readonly palette?: Readonly<Record<Mode, Palette>>;
+  /** Native faces already available on the device; undefined selects its system face. */
+  readonly fonts?: Fonts;
 }
 
-export function ThemeProvider({ children, mode }: ProviderProps) {
+export function ThemeProvider({
+  children,
+  mode,
+  palette: colors = palette,
+  fonts: faces = fonts,
+}: ProviderProps) {
   const scheme = useColorScheme();
   const chosen: Mode = mode ?? (scheme === "dark" ? "dark" : "light");
-  const theme = useMemo(() => themeFor(chosen), [chosen]);
+  const theme = useMemo(() => themeFor(chosen, colors, faces), [chosen, colors, faces]);
   return <Context.Provider value={theme}>{children}</Context.Provider>;
 }
 

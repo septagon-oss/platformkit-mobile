@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { createRequire } from "node:module";
+import { createRequire, isBuiltin } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -36,6 +36,7 @@ test("a packed dependency resolves the shared composition and atomic layers with
     "renderers",
     "route",
     "shell",
+    "tools/tokens",
     "screens/Home",
     "screens/SignIn",
     "screens/ResourceDetail",
@@ -67,7 +68,8 @@ test("a packed dependency resolves the shared composition and atomic layers with
   assert.ok(files.has("src/ui/tokens.ts"), "generated design tokens travel with their components");
   for (const name of files) {
     assert.ok(
-      name.startsWith("src/") || ["package.json", "README.md", "LICENSE", "NOTICE"].includes(name),
+      name.startsWith("src/") ||
+        ["scripts/tokens.ts", "package.json", "README.md", "LICENSE", "NOTICE"].includes(name),
       name,
     );
     assert.ok(
@@ -96,7 +98,7 @@ test("a packed dependency resolves the shared composition and atomic layers with
           .slice(0, specifier.text.startsWith("@") ? 2 : 1)
           .join("/");
         assert.ok(
-          dependencies.includes(dependency),
+          isBuiltin(specifier.text) || dependencies.includes(dependency),
           `${name}: undeclared dependency ${specifier.text}`,
         );
         continue;

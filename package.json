@@ -10,6 +10,7 @@
     "./renderers": "./src/renderers.ts",
     "./route": "./src/route.tsx",
     "./shell": "./src/shell.tsx",
+    "./tools/tokens": "./scripts/tokens.ts",
     "./screens/*": "./src/screens/*.tsx",
     "./ui/theme": "./src/ui/theme.tsx",
     "./ui/scale": "./src/ui/scale.ts",
@@ -19,7 +20,8 @@
     "./ui/templates/*": "./src/ui/templates/*.tsx"
   },
   "files": [
-    "src"
+    "src",
+    "scripts/tokens.ts"
   ],
   "scripts": {
     "start": "expo start",

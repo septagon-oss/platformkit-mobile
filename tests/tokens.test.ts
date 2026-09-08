@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 import { FIXTURE, OUTPUT, camel, render } from "../scripts/tokens";
 
 const doc = (): unknown => JSON.parse(readFileSync(FIXTURE, "utf8"));
@@ -39,4 +44,26 @@ test("a document a phone cannot render from is refused by the name of what is wr
     (t) => (t as { name: string }).name !== "--pk-color-focus",
   );
   assert.throws(() => render(short), /dark lacks --pk-color-focus/);
+});
+
+test("a consumer script named tokens.ts imports the generator without running its CLI", (t) => {
+  const temporary = mkdtempSync(path.join(os.tmpdir(), "pk-mobile-tokens-test-"));
+  t.after(() => rmSync(temporary, { recursive: true, force: true }));
+  const script = path.join(temporary, "tokens.ts");
+  const generator = pathToFileURL(path.resolve("scripts/tokens.ts")).href;
+  writeFileSync(
+    script,
+    `import { render } from ${JSON.stringify(generator)};\nprocess.stdout.write(typeof render);\n`,
+  );
+  assert.equal(
+    execFileSync(
+      process.execPath,
+      ["--import", createRequire(import.meta.url).resolve("tsx"), script],
+      {
+        cwd: temporary,
+        encoding: "utf8",
+      },
+    ),
+    "function",
+  );
 });

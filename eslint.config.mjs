@@ -3,13 +3,17 @@
 // of the UI; the UI is props in and elements out and never reaches for the
 // shell or a transport; routes compose and render nothing of their own.
 import expo from "eslint-config-expo/flat.js";
+import { builtinModules } from "node:module";
 
 // forbid is the no-restricted-imports entry for one layer: the patterns it
 // may not import, each with the sentence a reader needs.
 const forbid = (files, patterns) => ({
   files,
   rules: {
-    "no-restricted-imports": ["error", { patterns }],
+    "no-restricted-imports": ["error", { patterns: [
+      { group: [...builtinModules, "node:*", "**/scripts/**", "platformkit-mobile/tools/**"], message: "build tools run in Node; native runtime code consumes their generated source." },
+      ...patterns,
+    ] }],
     // no-restricted-imports does not see import(); this does.
     "no-restricted-syntax": [
       "error",
@@ -50,6 +54,7 @@ const uiLayer = (files, above) => forbid(files, [
 export default [
   ...expo,
   { ignores: ["node_modules/", ".expo/", "dist/", "android/", "ios/", "e2e/out/"] },
+  forbid(["src/**", "app/**"], []),
   forbid(["src/core/**"], [
     { group: [...react, "**/effects/**", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "core is plain functions; it imports nothing outside src/core." },
   ]),
