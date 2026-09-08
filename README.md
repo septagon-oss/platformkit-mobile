@@ -119,6 +119,33 @@ does not retry requests automatically. Recover uncertain writes through the
 module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
 
+## Consume the shared native source
+
+[package.json](package.json) exposes the existing implementation through package
+subpaths: `platformkit-mobile/shell`, `renderers`, `route`, `effects/api`,
+`core/catalog`, `core/derive`, `screens/<component>` and
+`ui/{atoms,molecules,organisms,templates}/<component>`. Theme and scale come from
+`platformkit-mobile/ui/theme` and `platformkit-mobile/ui/scale`. These exports
+resolve directly to the TypeScript source used by this reference application.
+The consuming Expo application supplies its routes, identity, renderer pack and
+product screens, and composes one shared `Shell` and `ThemeProvider`.
+
+The application owns its native dependencies and lockfile. Declare the native
+packages directly in that application at the versions used here so autolinking
+finds them and React, the router and their contexts have one installed instance.
+Pin the shared package to an exact published release and commit the resulting
+application lockfile, including resolved versions and integrity hashes.
+
+This is currently an unpublished package candidate; `private: true` remains set.
+For local review, `npm pack --ignore-scripts --pack-destination /tmp` creates a
+source dependency archive. Its contents are `src/` and npm's package metadata and
+documentation. It contains the shared implementation, including generated design
+tokens. The reference application's routes, build recipes and test tooling belong
+to the complete application handoff below. `npm run check` packs the dependency
+in a removed temporary directory, verifies public imports from the extracted
+package and checks that its relative source dependencies are present. Consumer
+type checking, bundling and device journeys remain separate verification steps.
+
 ## Hand off source
 
 The application owner commits its identity in `app.config.ts`, its screens

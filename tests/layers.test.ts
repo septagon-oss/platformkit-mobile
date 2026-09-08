@@ -87,3 +87,24 @@ test("aliases, typed re-exports and dynamic imports cannot hide an upward depend
     assert.ok((await boundaries("src/ui/atoms/Probe.tsx", source)).length > 0, source);
   }
 });
+
+test("package subpaths preserve the same atomic and effect boundaries", async () => {
+  for (const [file, source] of [
+    [
+      "src/ui/atoms/Probe.tsx",
+      'export { Section } from "platformkit-mobile/ui/molecules/Section";',
+    ],
+    ["src/ui/organisms/Probe.tsx", 'export { useShell } from "platformkit-mobile/shell";'],
+    ["src/core/probe.ts", 'export { ApiError } from "platformkit-mobile/effects/api";'],
+    ["app/probe.tsx", 'export { Button } from "platformkit-mobile/ui/atoms/Button";'],
+  ]) {
+    assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source}`);
+  }
+  for (const [file, source] of [
+    ["src/ui/molecules/Probe.tsx", 'export { Button } from "platformkit-mobile/ui/atoms/Button";'],
+    ["src/ui/organisms/Probe.tsx", 'export { useTheme } from "platformkit-mobile/ui/theme";'],
+    ["src/screens/Probe.tsx", 'export { useShell } from "platformkit-mobile/shell";'],
+  ]) {
+    assert.deepEqual(await boundaries(file!, source!), [], `${file}: ${source}`);
+  }
+});

@@ -3,6 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "main": "expo-router/entry",
+  "exports": {
+    "./core/catalog": "./src/core/catalog.ts",
+    "./core/derive": "./src/core/derive.ts",
+    "./effects/api": "./src/effects/api.ts",
+    "./renderers": "./src/renderers.ts",
+    "./route": "./src/route.tsx",
+    "./shell": "./src/shell.tsx",
+    "./screens/*": "./src/screens/*.tsx",
+    "./ui/theme": "./src/ui/theme.tsx",
+    "./ui/scale": "./src/ui/scale.ts",
+    "./ui/atoms/*": "./src/ui/atoms/*.tsx",
+    "./ui/molecules/*": "./src/ui/molecules/*.tsx",
+    "./ui/organisms/*": "./src/ui/organisms/*.tsx",
+    "./ui/templates/*": "./src/ui/templates/*.tsx"
+  },
+  "files": [
+    "src"
+  ],
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
