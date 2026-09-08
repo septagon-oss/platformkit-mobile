@@ -19,6 +19,33 @@ const forbid = (files, patterns) => ({
 });
 
 const react = ["react", "react-native", "react-native/*", "expo", "expo-*", "@expo/*"];
+const uiBoundary = [{
+  group: [
+    "**/effects/**",
+    "**/screens/**",
+    "**/shell",
+    "**/shell.tsx",
+    "**/renderers",
+    "expo-router",
+    "expo-secure-store",
+    "expo-haptics",
+  ],
+  message: "the UI is props in and elements out; effects arrive as callbacks from src/screens.",
+}];
+
+// A layer-specific rule replaces no-restricted-imports in flat config, so it
+// must retain the UI effect boundary. Templates here are layout primitives:
+// they accept children or render callbacks; organisms compose them with rows.
+const uiLayer = (files, above) => forbid(files, [
+  ...uiBoundary,
+  {
+    group: [
+      ...above.flatMap((layer) => [`**/${layer}`, `**/${layer}/**`]),
+      "**/gallery", "**/gallery.*", "**/gallery/**",
+    ],
+    message: "compose this UI layer from its primitives; organisms and the gallery belong above it.",
+  },
+]);
 
 export default [
   ...expo,
@@ -30,21 +57,15 @@ export default [
     { group: [...react.filter((p) => p !== "expo-*" && p !== "expo"), "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "effects know the network and the store, not React or the UI." },
     { group: ["expo-*", "!expo-secure-store"], message: "effects may use the secure store and nothing else of Expo." },
   ]),
-  forbid(["src/ui/**"], [
-    {
-      group: [
-        "**/effects/**",
-        "**/screens/**",
-        "**/shell",
-        "**/shell.tsx",
-        "**/renderers",
-        "expo-router",
-        "expo-secure-store",
-        "expo-haptics",
-      ],
-      message: "the UI is props in and elements out; effects arrive as callbacks from src/screens.",
-    },
-  ]),
+  forbid(["src/ui/**"], uiBoundary),
+  uiLayer(["src/ui/atoms/**"], ["molecules", "templates", "organisms"]),
+  uiLayer(["src/ui/molecules/**"], ["templates", "organisms"]),
+  uiLayer(["src/ui/templates/**"], ["organisms"]),
+  uiLayer(["src/ui/organisms/**"], []),
+  {
+    ...uiLayer(["src/ui/*.{ts,tsx}"], ["atoms", "molecules", "templates", "organisms"]),
+    ignores: ["src/ui/gallery.tsx"],
+  },
   forbid(["app/**"], [
     { group: ["**/effects/**", "**/core/**"], message: "a route composes a screen; it holds no rule and no effect." },
     { group: ["**/ui/**", "!**/ui/theme", "!**/ui/gallery"], message: "a route composes a screen; the theme provider and the gallery are the composition root's two exceptions." },

@@ -71,6 +71,13 @@ the generated file is stale. Distances live in `src/ui/scale.ts`. The gallery
 (`src/ui/gallery.tsx`, served by `app/gallery.tsx` in development or in a build
 with `EXPO_PUBLIC_GALLERY=1`) shows every atom and molecule in both modes.
 
+Keep UI imports pointed toward the primitives. Atoms may compose other atoms;
+molecules add atoms; templates supply layout through children or render callbacks
+and may compose atoms and molecules. Organisms combine these layers. Shared
+theme, scale and token helpers import no components, and components never import
+the gallery. ESLint checks these boundaries along with the UI's effect boundary;
+`tests/layers.test.ts` exercises permitted composition and rejected imports.
+
 `src/screens/` is where an effect becomes a prop: one hook per generated
 screen (`useResourceList`, `useResourceDetail`, `useResourceForm`) owns its
 requests, its generation guard and its phase, and one composition per screen
@@ -89,10 +96,12 @@ the previous saved record.
 
 A custom screen belongs in the renderer pack passed to `Shell` in
 `app/_layout.tsx`. The [Renderers type](src/renderers.ts) maps `module/entity`
-to optional `list`, `detail` and `form` components. Each receives an `entry`
-and, when applicable, an `id`; any omitted component falls back to the
-generated screen. Add a custom screen when the workflow needs something the
-resource schema cannot express.
+to optional `list`, `detail`, `form` and `command` components. Each receives an
+`entry` and, when applicable, an `id`; command screens also receive the `verb`.
+Any omitted component falls back to the generated screen. Custom components
+belong in `src/screens/`, where effects become props for the atomic UI layers.
+Add a custom screen when the workflow needs something the resource schema
+cannot express.
 
 ## Hand off source
 
