@@ -186,8 +186,10 @@ the lockfile and their config plugins. When a change moves it, run
 new binary. CI also exports both bundles, fails on a high or critical dependency
 advisory, and scans the history for secrets; a weekly workflow reports what
 drifted without blocking anything. Node is pinned once, in [.nvmrc](.nvmrc).
-Use `expo install` for native dependencies so they match that SDK; the app owns
-the native font dependency used by its router. Starting Expo generates route
+Use `expo install` for native dependencies so they match that SDK. The app owns
+the native font, module core, Reanimated and Worklets dependencies used by its
+router and tests; their SDK-compatible versions must resolve once at the app
+root. Commit the lockfile with every dependency change. Starting Expo generates route
 types under the ignored `.expo/` directory, which TypeScript also checks.
 The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
