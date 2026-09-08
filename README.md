@@ -103,6 +103,22 @@ belong in `src/screens/`, where effects become props for the atomic UI layers.
 Add a custom screen when the workflow needs something the resource schema
 cannot express.
 
+Custom screens use `api.request(path, options)` from the current shell API for
+module-owned JSON routes. `path` is an encoded path under `/api/v1/`, with an
+optional query string; the selected server and session stay with the shell.
+The method defaults to GET. Writes specify POST, PUT, PATCH or DELETE and may
+include a JSON `body`; an omitted body sends no content. Responses are `unknown`
+(or `undefined` for an empty body), so validate domain data in `src/core/` before
+turning it into UI props. The request uses the same cookie, deadline and
+`ApiError` decoding as resource operations.
+
+Pass an `AbortSignal` to cancel a screen's obsolete request; cancellation rejects
+with `AbortError`. A timeout remains an `ApiError` with status 0. Neither the
+transport nor cancellation proves that a write was rolled back, and the client
+does not retry requests automatically. Recover uncertain writes through the
+module's persisted read contract before offering another submission. Screen
+generation guards still decide whether a response belongs to the current view.
+
 ## Hand off source
 
 The application owner commits its identity in `app.config.ts`, its screens

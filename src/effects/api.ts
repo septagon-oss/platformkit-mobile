@@ -77,7 +77,17 @@ export interface Window {
   readonly filters?: readonly string[];
 }
 
+export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export interface RequestOptions {
+  readonly method?: RequestMethod;
+  readonly body?: unknown;
+  readonly signal?: AbortSignal;
+}
+
 export interface Api {
+  /** Module-owned JSON on this server; callers validate domain data before rendering it. */
+  request(path: string, options?: RequestOptions): Promise<unknown>;
   /** me is who this session belongs to, or nothing when it belongs to nobody. */
   me(): Promise<Identity | undefined>;
   /**
@@ -144,18 +154,43 @@ export function createApi(
    * clearing the timer when fetch resolves left exactly that hole open: fetch
    * resolves on the headers.
    */
-  async function call(method: string, path: string, body?: unknown): Promise<string> {
+  async function call(
+    method: RequestMethod,
+    path: string,
+    body?: unknown,
+    signal?: AbortSignal,
+  ): Promise<string> {
+    if (
+      !path.startsWith("/api/v1/") ||
+      path.includes("#") ||
+      path.includes("\\") ||
+      new URL(path, "https://api.invalid").pathname !== path.split("?")[0]
+    ) {
+      throw new TypeError("Expected an encoded API path under /api/v1/.");
+    }
+    if (method === "GET" && body !== undefined)
+      throw new TypeError("A GET request cannot have a body.");
+    if (signal?.aborted) throw cancelled();
     const started = generation;
     const headers: Record<string, string> = { Accept: "application/json" };
     if (body !== undefined) headers["Content-Type"] = "application/json";
     if (cookie) headers.Cookie = cookie;
     const stop = new AbortController();
-    const bell = setTimeout(() => stop.abort(), timeout);
+    const cancel = () => stop.abort();
+    signal?.addEventListener("abort", cancel, { once: true });
+    let expired = false;
+    const bell = setTimeout(() => {
+      expired = true;
+      stop.abort();
+    }, timeout);
     const init: RequestInit = { method, headers, credentials: "omit", signal: stop.signal };
-    if (body !== undefined) init.body = JSON.stringify(body);
     let status = 0;
     let text = "";
     try {
+      if (body !== undefined) {
+        init.body = JSON.stringify(body);
+        if (init.body === undefined) throw new TypeError("The request body is not JSON.");
+      }
       const res = await fetchImpl(base + path, init);
       // The cookie comes off the response this call was answered with, before
       // anything else, because it is what the next call presents.
@@ -163,17 +198,20 @@ export function createApi(
       if (set && started === generation) cookie = set.split(";")[0];
       status = res.status;
       text = await res.text();
+      if (signal?.aborted) throw cancelled();
     } catch (e) {
       // A request that was cut off by the deadline says so; anything else is
       // the network's own message.
-      if (stop.signal.aborted)
+      if (expired)
         throw new ApiError(
           0,
           `${base} did not answer within ${Math.round(timeout / 1000)} seconds.`,
         );
+      if (signal?.aborted) throw cancelled();
       throw e;
     } finally {
       clearTimeout(bell);
+      signal?.removeEventListener("abort", cancel);
     }
     if (status >= 400) throw problem(status, text);
     return text;
@@ -195,9 +233,28 @@ export function createApi(
     return new ApiError(status, detail, fields);
   }
 
-  const json = <T>(text: string): T => JSON.parse(text) as T;
+  function cancelled(): Error {
+    const error = new Error("The request was cancelled.");
+    error.name = "AbortError";
+    return error;
+  }
+
+  async function request(
+    path: string,
+    { method = "GET", body, signal }: RequestOptions = {},
+  ): Promise<unknown> {
+    const text = await call(method, path, body, signal);
+    return text === "" ? undefined : JSON.parse(text);
+  }
+
+  async function json<T>(method: RequestMethod, path: string, body?: unknown): Promise<T> {
+    const value = await request(path, { method, body });
+    if (value === undefined) throw new SyntaxError("The server returned an empty JSON response.");
+    return value as T;
+  }
 
   return {
+    request,
     cookie: () => cookie,
     async login(email, password) {
       await call("POST", "/api/v1/auth/login", { email, password });
@@ -210,7 +267,7 @@ export function createApi(
     },
     async me() {
       try {
-        return await json<Identity>(await call("GET", "/api/v1/auth/me"));
+        return await json<Identity>("GET", "/api/v1/auth/me");
       } catch {
         // A session that cannot say who it is still lists what it may read.
         return undefined;
@@ -221,7 +278,8 @@ export function createApi(
       if (record) q.set("record", record);
       try {
         const body = await json<{ items?: AuditEvent[]; total?: number }>(
-          await call("GET", `/api/v1/audit/events?${q}`),
+          "GET",
+          `/api/v1/audit/events?${q}`,
         );
         return { items: body.items ?? [], total: body.total ?? 0 };
       } catch (e) {
@@ -232,38 +290,39 @@ export function createApi(
       }
     },
     async catalog() {
-      return parseCatalog(await json(await call("GET", "/api/v1/admin/resources")));
+      return parseCatalog(await json("GET", "/api/v1/admin/resources"));
     },
     async list(e, { offset = 0, limit = PER_PAGE, sort = "", filters = [] } = {}) {
       const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
       if (sort) q.set("sort", sort);
       for (const f of filters) q.append("filter", f);
       const body = await json<{ items?: Record<string, unknown>[]; total?: number }>(
-        await call("GET", `${e.path}?${q}`),
+        "GET",
+        `${e.path}?${q}`,
       );
       return { items: body.items ?? [], total: body.total ?? 0 };
     },
     async get(e, id) {
-      return json(await call("GET", `${e.path}/${encodeURIComponent(id)}`));
+      return json("GET", `${e.path}/${encodeURIComponent(id)}`);
     },
     async one(e) {
-      return json(await call("GET", e.path));
+      return json("GET", e.path);
     },
     async replace(e, values) {
-      return json(await call("PUT", e.path, values));
+      return json("PUT", e.path, values);
     },
     async create(e, values) {
-      return json(await call("POST", e.path, values));
+      return json("POST", e.path, values);
     },
     async update(e, id, values) {
-      return json(await call("PATCH", `${e.path}/${encodeURIComponent(id)}`, values));
+      return json("PATCH", `${e.path}/${encodeURIComponent(id)}`, values);
     },
     async remove(e, id) {
       await call("DELETE", `${e.path}/${encodeURIComponent(id)}`);
     },
     async command(e, id, verb, values) {
       const at = id ? `${e.path}/${encodeURIComponent(id)}` : e.path;
-      return json(await call("POST", `${at}/${encodeURIComponent(verb)}`, values));
+      return json("POST", `${at}/${encodeURIComponent(verb)}`, values);
     },
   };
 }
