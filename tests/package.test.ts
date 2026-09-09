@@ -12,12 +12,15 @@ const root = path.resolve(import.meta.dirname, "..");
 test("a packed dependency resolves the shared composition and atomic layers without a checkout", (t) => {
   const temporary = mkdtempSync(path.join(os.tmpdir(), "pk-mobile-package-test-"));
   t.after(() => rmSync(temporary, { recursive: true, force: true }));
-  const [packed] = JSON.parse(
+  type Packed = { filename: string; files: { path: string }[] };
+  const result = JSON.parse(
     execFileSync("npm", ["pack", "--json", "--ignore-scripts", "--pack-destination", temporary], {
       cwd: root,
       encoding: "utf8",
     }),
-  ) as { filename: string; files: { path: string }[] }[];
+  ) as Packed[] | Record<string, Packed>;
+  // npm 12 keys the pack report by package name; earlier versions return an array.
+  const packed = Array.isArray(result) ? result[0] : result["platformkit-mobile"];
   assert.ok(packed);
   const installed = path.join(temporary, "node_modules/platformkit-mobile");
   mkdirSync(installed, { recursive: true });
