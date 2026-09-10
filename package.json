@@ -11,6 +11,7 @@
     "./route": "./src/route.tsx",
     "./shell": "./src/shell.tsx",
     "./tools/tokens": "./scripts/tokens.ts",
+    "./tools/android": "./scripts/android/build.sh",
     "./screens/*": "./src/screens/*.tsx",
     "./ui/theme": "./src/ui/theme.tsx",
     "./ui/scale": "./src/ui/scale.ts",
@@ -21,7 +22,8 @@
   },
   "files": [
     "src",
-    "scripts/tokens.ts"
+    "scripts/tokens.ts",
+    "scripts/android"
   ],
   "scripts": {
     "start": "expo start",

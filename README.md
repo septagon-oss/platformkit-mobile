@@ -162,18 +162,48 @@ the build tool or Node APIs into runtime layers.
 The application owns its native dependencies and lockfile. Declare the native
 packages directly in that application at the versions used here so autolinking
 finds them and React, the router and their contexts have one installed instance.
-Pin the shared package to an exact published release and commit the resulting
-application lockfile, including resolved versions and integrity hashes.
+Pin the shared package to an exact published release or an HTTPS source archive
+whose URL names a full published commit ID. Commit the resulting application
+lockfile, including the resolved URL and integrity hash; branch archives and
+local checkout paths do not identify a fixed dependency.
 
-This is currently an unpublished package candidate; `private: true` remains set.
+No npm registry release is published; `private: true` remains set.
 For local review, `npm pack --ignore-scripts --pack-destination /tmp` creates a
-source dependency archive. Its contents are `src/`, `scripts/tokens.ts` and npm's
-package metadata and documentation. It contains the shared implementation,
-including generated design tokens. The reference application's routes, build recipes and test tooling belong
-to the complete application handoff below. `npm run check` packs the dependency
+source dependency archive. Its contents are `src/`, `scripts/tokens.ts`, the
+shared `scripts/android/` recipe and npm's package metadata and documentation.
+It contains the shared implementation, including generated design tokens. The
+reference application's routes, Docker setup and test tooling belong to the
+complete application handoff below. `npm run check` packs the dependency
 in a removed temporary directory, verifies public imports from the extracted
 package and checks that its relative source dependencies are present. Consumer
 type checking, bundling and device journeys remain separate verification steps.
+
+### Build a consuming Android application
+
+The exported `platformkit-mobile/tools/android` entry is the same Bash recipe
+used by this repository. After installing the consuming app's locked
+dependencies, run this from that app's root in the Android build environment:
+
+```sh
+bash "$(node -p "require.resolve('platformkit-mobile/tools/android')")" "$PWD"
+```
+
+The target needs `package.json`, `package-lock.json` and an Expo app
+configuration. The recipe runs that app's installed Expo CLI and uses Gradle
+settings and signing rules from this versioned dependency. It never copies the
+reference app's routes or identity. The optional application argument defaults
+to the reference app when running its own `scripts/android/build.sh`.
+
+This command regenerates the target's `android/` with `expo prebuild --clean`,
+then builds the Gradle tasks selected by `TARGETS`. Keep native configuration in
+the app config and config plugins. Build a source export outside the development
+checkout to leave that checkout's generated native files untouched.
+The SDK, JDK, native npm dependencies and Gradle downloads are still build
+prerequisites; the pinned image under [Build a binary](#build-a-binary) supplies
+the toolchain. `ABIS`, `PK_PROFILE`, `PK_VERSION` and signing variables retain
+the meanings documented below, with app identity resolved by the target's own
+configuration. Outputs stay under the target's
+`android/app/build/outputs/`. A successful build still needs device verification.
 
 ## Hand off source
 

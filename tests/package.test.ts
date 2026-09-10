@@ -40,6 +40,7 @@ test("a packed dependency resolves the shared composition and atomic layers with
     "route",
     "shell",
     "tools/tokens",
+    "tools/android",
     "screens/Home",
     "screens/SignIn",
     "screens/ResourceDetail",
@@ -69,9 +70,15 @@ test("a packed dependency resolves the shared composition and atomic layers with
     JSON.parse(readFileSync(path.join(installed, "package.json"), "utf8")).dependencies,
   );
   assert.ok(files.has("src/ui/tokens.ts"), "generated design tokens travel with their components");
+  for (const file of ["build.sh", "gradle-ci.properties", "signing.gradle"]) {
+    assert.ok(files.has(`scripts/android/${file}`), `the Android recipe needs ${file}`);
+  }
   for (const name of files) {
     assert.ok(
       name.startsWith("src/") ||
+        ["build.sh", "gradle-ci.properties", "signing.gradle"].some(
+          (file) => name === `scripts/android/${file}`,
+        ) ||
         ["scripts/tokens.ts", "package.json", "README.md", "LICENSE", "NOTICE"].includes(name),
       name,
     );
