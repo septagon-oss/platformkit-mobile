@@ -238,3 +238,88 @@ test("the commands about a row and the commands about the list are told apart", 
   assert.equal(commandOf(note, "publish")?.summary, "Publish a note");
   assert.equal(commandOf(note, "nothing"), undefined);
 });
+
+test("clearing saved optional text sends an empty value while absent text stays absent", () => {
+  const entry = {
+    ...note,
+    fields: [
+      { name: "summary", type: "text" as const },
+      { name: "label", type: "string" as const },
+      { name: "absent", type: "string" as const },
+    ],
+  };
+  const controls = formControls(entry, { summary: "Old summary", label: "Old label" }, false);
+  assert.deepEqual(values(controls, { summary: "", label: "" }), { summary: "", label: "" });
+  assert.deepEqual(values(controls, {}), { summary: "Old summary", label: "Old label" });
+  assert.deepEqual(values(formControls(entry, undefined, true), {}), {});
+  assert.deepEqual(values(formControls(entry, undefined, true), { summary: "" }), {});
+});
+
+test("optional defaults are retained unless the person clears their text", () => {
+  const entry = { ...note, fields: [{ name: "label", type: "string" as const, default: "New" }] };
+  const controls = formControls(entry, undefined, true);
+  assert.deepEqual(values(controls, {}), { label: "New" });
+  assert.deepEqual(values(controls, { label: "" }), { label: "" });
+});
+
+test("list values retain declared integer, float, boolean and string elements", () => {
+  const entry = {
+    ...note,
+    fields: [
+      { name: "counts", type: "list" as const, elem: "int" as const },
+      { name: "ratios", type: "list" as const, elem: "float" as const },
+      { name: "enabled", type: "list" as const, elem: "bool" as const },
+      { name: "labels", type: "list" as const, elem: "string" as const },
+      { name: "legacy", type: "list" as const },
+    ],
+  };
+  const controls = formControls(entry, undefined, true);
+  const held = {
+    counts: "-4, 0, 12",
+    ratios: "1.25, -0.5, 1e2",
+    enabled: "true, false",
+    labels: "2, false",
+    legacy: "7, 8",
+  };
+  assert.deepEqual(problems(controls, held), {});
+  assert.deepEqual(values(controls, held), {
+    counts: [-4, 0, 12],
+    ratios: [1.25, -0.5, 100],
+    enabled: [true, false],
+    labels: ["2", "false"],
+    legacy: ["7", "8"],
+  });
+  assert.deepEqual(values(controls, {}), {
+    counts: [],
+    ratios: [],
+    enabled: [],
+    labels: [],
+    legacy: [],
+  });
+});
+
+test("invalid typed list items refuse the whole input without filtering or rounding them", () => {
+  for (const [elem, raw] of [
+    ["int", "1, 2.5"],
+    ["int", "9007199254740993"],
+    ["int", "1.0000000000000001"],
+    ["int", "9007199254740990.1"],
+    ["int", "1e-999"],
+    ["int", "1 2"],
+    ["float", "2, nope"],
+    ["float", "1 2"],
+    ["float", "0x10"],
+    ["float", "1e999"],
+    ["bool", "true, maybe"],
+  ] as const) {
+    const controls = formControls(
+      { ...note, fields: [{ name: "items", type: "list", elem }] },
+      undefined,
+      true,
+    );
+    assert.deepEqual(problems(controls, { items: raw }), {
+      items: "contains a value that does not match its item type",
+    });
+    assert.deepEqual(values(controls, { items: raw }), {});
+  }
+});

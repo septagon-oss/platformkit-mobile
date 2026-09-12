@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { ApiError, createApi } from "../src/effects/api";
+import { formControls, values } from "../src/core/derive";
 
 type Call = { url: string; init: RequestInit };
 function fakeFetch(
@@ -242,4 +243,24 @@ test("a singleton is read and written at the path itself", async () => {
   assert.equal(calls[1]!.url, "https://acme.test/api/v1/site/settings");
   assert.equal(calls[1]!.init.method, "PUT");
   assert.equal(calls[1]!.init.body, `{"title":"Acme Inc"}`);
+});
+
+test("a generated edit sends cleared text and typed list items in its PATCH body", async () => {
+  const resource = {
+    ...entry,
+    fields: [
+      { name: "summary", type: "text" as const },
+      { name: "counts", type: "list" as const, elem: "int" as const },
+      { name: "absent", type: "string" as const },
+    ],
+  };
+  const { fetch, calls } = fakeFetch([
+    { status: 200, body: { id: "7", summary: "", counts: [-4, 2] } },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  const controls = formControls(resource, { id: "7", summary: "Saved", counts: [1] }, false);
+  await api.update(resource, "7", values(controls, { summary: "", counts: "-4, 2" }));
+  assert.equal(calls[0]!.url, "https://acme.test/api/v1/note/notes/7");
+  assert.equal(calls[0]!.init.method, "PATCH");
+  assert.deepEqual(JSON.parse(String(calls[0]!.init.body)), { summary: "", counts: [-4, 2] });
 });

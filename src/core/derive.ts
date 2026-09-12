@@ -265,6 +265,26 @@ export const collectionCommands = (e: Entry): readonly Command[] =>
 export const commandOf = (e: Entry, verb: string): Command | undefined =>
   e.commands.find((c) => c.verb === verb);
 
+/** listValues retains the element types the server declared, or refuses the whole list. */
+function listValues(field: Field, raw: string): (string | number | boolean)[] | undefined {
+  const out: (string | number | boolean)[] = [];
+  for (const item of splitList(raw)) {
+    if (field.elem === "int" || field.elem === "float") {
+      const syntax =
+        field.elem === "int" ? /^[+-]?\d+$/ : /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
+      if (!syntax.test(item)) return undefined;
+      const n = Number(item);
+      if (!Number.isFinite(n) || (field.elem === "int" && !Number.isSafeInteger(n)))
+        return undefined;
+      out.push(n);
+    } else if (field.elem === "bool") {
+      if (item !== "true" && item !== "false") return undefined;
+      out.push(item === "true");
+    } else out.push(item);
+  }
+  return out;
+}
+
 /** values turns what a form holds back into what the API takes. */
 export function values(
   controls: readonly Control[],
@@ -283,9 +303,11 @@ export function values(
         if (n !== undefined) out[c.field.name] = n;
         break;
       }
-      case "list":
-        out[c.field.name] = splitList(raw);
+      case "list": {
+        const list = listValues(c.field, raw);
+        if (list !== undefined) out[c.field.name] = list;
         break;
+      }
       case "datetime":
         // An optional instant that was cleared is cleared on the server too:
         // leaving it out of the body would keep what is stored.
@@ -293,7 +315,14 @@ export function values(
         else if (!c.required) out[c.field.name] = null;
         break;
       default:
-        if (raw !== "" || c.required) out[c.field.name] = raw;
+        // An untouched optional blank stays absent; clearing existing text is
+        // an explicit empty value, so PATCH does not retain the saved text.
+        if (
+          raw !== "" ||
+          c.required ||
+          ((c.field.type === "string" || c.field.type === "text") && c.value !== "")
+        )
+          out[c.field.name] = raw;
     }
   }
   return out;
@@ -316,6 +345,8 @@ export function problems(
     if (c.kind === "number" && numberValue(raw) === undefined)
       out[c.field.name] = "is not a number";
     if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = "is not a time";
+    if (c.kind === "list" && listValues(c.field, raw) === undefined)
+      out[c.field.name] = "contains a value that does not match its item type";
   }
   return out;
 }
