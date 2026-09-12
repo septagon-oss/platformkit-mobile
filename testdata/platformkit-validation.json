@@ -1,0 +1,8 @@
+{
+  "$schema": "https://example.invalid/schemas/Problem.json",
+  "type": "about:blank",
+  "title": "Unprocessable Entity",
+  "status": 422,
+  "detail": "validation failed",
+  "errors": ["body.details.code: expected length >= 2", "body.title: expected length >= 3"]
+}

@@ -219,18 +219,36 @@ export function createApi(
 
   function problem(status: number, text: string): ApiError {
     let detail = "";
-    const fields: Record<string, string> = {};
+    const fields: [string, string][] = [];
     try {
-      const p = JSON.parse(text) as { detail?: string; errors?: string[] };
-      detail = (p.detail ?? "").replace(/^crud: invalid: /, "");
-      for (const e of p.errors ?? []) {
-        const i = e.indexOf(": ");
-        if (i > 0) fields[e.slice(0, i)] = e.slice(i + 2);
+      const p: unknown = JSON.parse(text);
+      if (!p || typeof p !== "object" || Array.isArray(p)) return new ApiError(status, "");
+      const body = p as Record<string, unknown>;
+      if (typeof body.detail === "string") detail = body.detail.replace(/^crud: invalid: /, "");
+      for (const entry of Array.isArray(body.errors) ? body.errors : []) {
+        let name = "";
+        let message = "";
+        if (typeof entry === "string") {
+          const i = entry.indexOf(": ");
+          if (i > 0) {
+            name = entry.slice(0, i);
+            message = entry.slice(i + 2);
+          }
+        } else if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+          if (typeof entry.location === "string" && typeof entry.message === "string") {
+            name = entry.location;
+            message = entry.message;
+          }
+        }
+        // PlatformKit prefixes body locations in its string errors. Huma's
+        // object form uses the same paths; preserve nested and non-body paths.
+        name = name.replace(/^body\./, "");
+        if (name && message) fields.push([name, message]);
       }
     } catch {
       // not a problem document; the status is what there is to say
     }
-    return new ApiError(status, detail, fields);
+    return new ApiError(status, detail, Object.fromEntries(fields));
   }
 
   function cancelled(): Error {

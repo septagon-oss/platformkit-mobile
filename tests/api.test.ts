@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { ApiError, createApi } from "../src/effects/api";
 import { formControls, values } from "../src/core/derive";
 
@@ -68,6 +69,100 @@ test("a problem document becomes an ApiError with field errors", async () => {
       /a note needs a title/.test(e.detail),
   );
 });
+
+test("the captured PlatformKit validation response identifies body fields", async () => {
+  // Captured through Huma with PlatformKit's installed problem.HumaError hook.
+  const body = JSON.parse(
+    readFileSync(new URL("../testdata/platformkit-validation.json", import.meta.url), "utf8"),
+  );
+  const { fetch } = fakeFetch([{ status: 422, body }]);
+  await assert.rejects(createApi("https://acme.test", fetch).create(entry, {}), (e: unknown) => {
+    assert.ok(e instanceof ApiError);
+    assert.equal(e.detail, "validation failed");
+    assert.deepEqual(e.fields, {
+      "details.code": "expected length >= 2",
+      title: "expected length >= 3",
+    });
+    return true;
+  });
+});
+
+test("structured Huma errors preserve nested paths and do not relabel query errors", async () => {
+  const { fetch } = fakeFetch([
+    {
+      status: 422,
+      body: {
+        detail: "Review the invalid fields",
+        errors: [
+          { location: "body.title", message: "is already in use", value: "Private input" },
+          { location: "body.items[2].code", message: "is required" },
+          { location: "query.title", message: "is not a supported filter" },
+        ],
+      },
+    },
+  ]);
+  await assert.rejects(createApi("https://acme.test", fetch).create(entry, {}), (e: unknown) => {
+    assert.ok(e instanceof ApiError);
+    assert.equal(e.detail, "Review the invalid fields");
+    assert.deepEqual(e.fields, {
+      title: "is already in use",
+      "items[2].code": "is required",
+      "query.title": "is not a supported filter",
+    });
+    assert.ok(!JSON.stringify(e).includes("Private input"));
+    return true;
+  });
+});
+
+test("malformed error entries do not hide later valid errors", async () => {
+  const { fetch } = fakeFetch([
+    {
+      status: 422,
+      body: {
+        detail: 17,
+        errors: [
+          null,
+          7,
+          false,
+          [],
+          {},
+          { location: "body.title", message: 42 },
+          { location: 4, message: "not a location" },
+          "unlocated failure",
+          ": no field",
+          "body.: no field",
+          "body.title: ",
+          "body.details.code: preserve the rest: of this message",
+          { location: "body.title", message: "is required" },
+          "summary: legacy field message",
+        ],
+      },
+    },
+  ]);
+  await assert.rejects(createApi("https://acme.test", fetch).create(entry, {}), (e: unknown) => {
+    assert.ok(e instanceof ApiError);
+    assert.equal(e.status, 422);
+    assert.equal(e.detail, "");
+    assert.deepEqual(e.fields, {
+      "details.code": "preserve the rest: of this message",
+      title: "is required",
+      summary: "legacy field message",
+    });
+    return true;
+  });
+});
+
+for (const errors of [null, 7, "title: wrong container", { title: "wrong container" }]) {
+  test(`a non-array errors member preserves the problem detail: ${JSON.stringify(errors)}`, async () => {
+    const { fetch } = fakeFetch([{ status: 422, body: { detail: "Review this request", errors } }]);
+    await assert.rejects(createApi("https://acme.test", fetch).create(entry, {}), (e: unknown) => {
+      assert.ok(e instanceof ApiError);
+      assert.equal(e.detail, "Review this request");
+      assert.deepEqual(e.fields, {});
+      return true;
+    });
+  });
+}
 
 test("list reads the page envelope", async () => {
   const { fetch, calls } = fakeFetch([
