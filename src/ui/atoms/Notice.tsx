@@ -10,13 +10,21 @@ import { Text } from "./Text";
 
 export type NoticeTone = "danger" | "warning" | "info" | "ok";
 
+export interface Action {
+  readonly label: string;
+  readonly onPress: () => void;
+}
+
 interface Props {
   readonly tone?: NoticeTone;
   readonly title?: string;
   readonly text: string;
-  readonly action?: { readonly label: string; readonly onPress: () => void };
+  readonly action?: Action;
   readonly testID?: string;
 }
+
+/** retry is the one action offered wherever something could not be read: the word, written once. */
+export const retry = (onPress: () => void): Action => ({ label: "Retry", onPress });
 
 const icons: Record<NoticeTone, IconName> = {
   danger: "warning",

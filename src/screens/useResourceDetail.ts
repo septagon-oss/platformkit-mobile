@@ -5,13 +5,15 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert } from "react-native";
 import { key, type Entry } from "../core/catalog";
 import { screenPath, type Row } from "../core/derive";
 import { useShell } from "../shell";
+import { confirm } from "../ui/chooser";
+import { useTheme } from "../ui/theme";
 
 export function useResourceDetail(entry: Entry, id: string | undefined) {
   const { api, writes, wrote } = useShell();
+  const { mode } = useTheme();
   const router = useRouter();
   const k = key(entry);
   const [row, setRow] = useState<Row | undefined>();
@@ -59,11 +61,11 @@ export function useResourceDetail(entry: Entry, id: string | undefined) {
   const remove = useCallback(() => {
     if (!id) return;
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert("Are you sure?", `This deletes the ${entry.entity}. It cannot be undone.`, [
-      { text: "Cancel", style: "cancel" },
+    confirm(
+      "Are you sure?",
       {
-        text: "Delete",
-        style: "destructive",
+        label: "Delete",
+        destructive: true,
         onPress: async () => {
           try {
             await api.remove(entry, id);
@@ -75,8 +77,10 @@ export function useResourceDetail(entry: Entry, id: string | undefined) {
           }
         },
       },
-    ]);
-  }, [id, entry, api, wrote, k, leave]);
+      mode,
+      { message: `This deletes the ${entry.entity}. It cannot be undone.` },
+    );
+  }, [id, entry, api, wrote, k, leave, mode]);
 
   return { row, error, reload: load, remove };
 }

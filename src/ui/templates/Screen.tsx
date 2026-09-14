@@ -3,9 +3,8 @@
 // the safe area at the foot, and, when asked, the keyboard kept off the
 // field being edited. A list has its own template.
 import React, { type ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useStyles, useTheme, type Theme } from "../theme";
+import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { useCanvas } from "./canvas";
 
 interface Props {
   readonly children: ReactNode;
@@ -15,13 +14,11 @@ interface Props {
 }
 
 export function Screen({ children, form = false, testID }: Props) {
-  const t = useTheme();
-  const s = useStyles(styles);
-  const insets = useSafeAreaInsets();
+  const canvas = useCanvas();
   const scroll = (
     <ScrollView
-      style={s.page}
-      contentContainerStyle={[s.content, { paddingBottom: insets.bottom + t.space.xl }]}
+      style={canvas.page}
+      contentContainerStyle={canvas.content}
       // What makes the content start under the native header and the large
       // title collapse as it scrolls.
       contentInsetAdjustmentBehavior="automatic"
@@ -37,16 +34,10 @@ export function Screen({ children, form = false, testID }: Props) {
   // the app config); iOS adjusts the scroll view's insets above. Neither needs
   // the avoiding view, which is kept only for a platform that has neither.
   return form && Platform.OS !== "ios" && Platform.OS !== "android" ? (
-    <KeyboardAvoidingView style={s.page} behavior="padding">
+    <KeyboardAvoidingView style={canvas.page} behavior="padding">
       {scroll}
     </KeyboardAvoidingView>
   ) : (
     scroll
   );
 }
-
-const styles = (t: Theme) =>
-  StyleSheet.create({
-    page: { flex: 1, backgroundColor: t.color.surfaceCanvas },
-    content: { padding: t.space.lg, gap: t.space.lg },
-  });

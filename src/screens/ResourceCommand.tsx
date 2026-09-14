@@ -43,7 +43,7 @@ function Sheet({
   // verb: a header button is a word, not a sentence. The layout has already
   // put the verb up there, so the title only ever grows into itself.
   const title = commandTitle(command);
-  const verb = humanize(command.verb.replace(/-/g, " "));
+  const verb = humanize(command.verb);
   // Memoised for the reason every screen's options are: a fresh object with
   // fresh callbacks in it is a new instruction on every render.
   const options = useMemo(

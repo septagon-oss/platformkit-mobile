@@ -10,15 +10,17 @@ import { useNavigation, useRouter } from "expo-router";
 // own re-export of react-navigation in SDK 57.
 import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert } from "react-native";
 import { key, type Entry } from "../core/catalog";
 import { formControls, problems, screenPath, text, values, type Row } from "../core/derive";
 import { ApiError } from "../effects/api";
 import { useShell } from "../shell";
+import { confirm } from "../ui/chooser";
 import type { Phase } from "../ui/organisms/ResourceForm";
+import { useTheme } from "../ui/theme";
 
 export function useResourceForm(entry: Entry, id: string | undefined) {
   const { api, wrote } = useShell();
+  const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   const create = !id;
@@ -84,14 +86,12 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // registered then leaves the native screen refusing the dismissal it was
   // just asked for.
   usePreventRemove(phase === "editing" && dirty, ({ data }) => {
-    Alert.alert("Discard changes?", "What you typed here will be lost.", [
-      { text: "Keep editing", style: "cancel" },
-      {
-        text: "Discard",
-        style: "destructive",
-        onPress: () => navigation.dispatch(data.action),
-      },
-    ]);
+    confirm(
+      "Discard changes?",
+      { label: "Discard", destructive: true, onPress: () => navigation.dispatch(data.action) },
+      mode,
+      { message: "What you typed here will be lost.", cancel: "Keep editing" },
+    );
   });
 
   // Leaving happens after the render that cleared the guard above.

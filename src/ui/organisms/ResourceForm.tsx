@@ -6,7 +6,7 @@ import React from "react";
 import { timeText, timeValue, timeWire, type Control } from "../../core/derive";
 import { ChoiceRow } from "../atoms/ChoiceRow";
 import { DateTimeRow } from "../atoms/DateTimeRow";
-import { Notice } from "../atoms/Notice";
+import { Notice, retry } from "../atoms/Notice";
 import { Skeleton } from "../atoms/Skeleton";
 import { SwitchRow } from "../atoms/SwitchRow";
 import { TextField, type FieldKind } from "../atoms/TextField";
@@ -43,7 +43,7 @@ export function ResourceForm({ controls, held, errors, detail, phase, onChange, 
         <Notice
           title="That could not be saved"
           text={detail}
-          {...(phase === "failed" ? { action: { label: "Retry", onPress: onRetry } } : {})}
+          {...(phase === "failed" ? { action: retry(onRetry) } : {})}
           testID="form-detail"
         />
       ) : null}

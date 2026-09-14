@@ -4,7 +4,7 @@
 import React from "react";
 import type { Entry } from "../../core/catalog";
 import { detailItems, type Row as Item } from "../../core/derive";
-import { Notice } from "../atoms/Notice";
+import { Notice, retry } from "../atoms/Notice";
 import { Actions, type Props as ActionsProps } from "./Actions";
 import { Activity, type Props as ActivityProps } from "./Activity";
 import { Skeleton } from "../atoms/Skeleton";
@@ -33,7 +33,7 @@ export interface Props {
 export function ResourceDetail({ entry, row, error, onRetry, onDelete, activity, actions }: Props) {
   return (
     <Screen testID="resource-detail">
-      {error ? <Notice text={error} action={{ label: "Retry", onPress: onRetry }} /> : null}
+      {error ? <Notice text={error} action={retry(onRetry)} /> : null}
       {row ? (
         <Section>
           {detailItems(entry, row).map((item, i) => {

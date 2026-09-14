@@ -52,6 +52,8 @@ const row = {
 test("humanize reads like the web shell", () => {
   assert.equal(humanize("slaDeadline"), "Sla deadline");
   assert.equal(humanize("in_progress"), "In progress");
+  // A command's verb is the word on its button: the dash is a space already.
+  assert.equal(humanize("mark-paid"), "Mark paid");
 });
 
 test("the row is known by its first writable string", () => {

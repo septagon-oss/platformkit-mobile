@@ -20,7 +20,7 @@ import {
 } from "../../core/derive";
 import { ChoiceRow } from "../atoms/ChoiceRow";
 import { EmptyState } from "../atoms/EmptyState";
-import { Notice } from "../atoms/Notice";
+import { Notice, retry } from "../atoms/Notice";
 import { LoadMore } from "../molecules/LoadMore";
 import { Labelled } from "../molecules/Value";
 import { Row } from "../molecules/Row";
@@ -81,7 +81,7 @@ export function ResourceList({
       testID="resource-list"
       header={
         <>
-          {error ? <Notice text={error} action={{ label: "Retry", onPress: onRefresh }} /> : null}
+          {error ? <Notice text={error} action={retry(onRefresh)} /> : null}
           {ordering ? (
             <Section title="Order">
               <ChoiceRow

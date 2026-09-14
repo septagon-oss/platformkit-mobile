@@ -18,6 +18,8 @@ import { key, type Command, type Entry } from "../core/catalog";
 import { commandControls, commandTitle, humanize, problems, values } from "../core/derive";
 import { ApiError } from "../effects/api";
 import { useShell } from "../shell";
+import { confirm } from "../ui/chooser";
+import { useTheme } from "../ui/theme";
 
 export type Phase = "editing" | "running" | "ran";
 
@@ -35,6 +37,7 @@ export interface Running {
 /** useCommandForm is a command with an argument: the sheet that sends it. */
 export function useCommandForm(entry: Entry, id: string | undefined, c: Command): Running {
   const { api, wrote } = useShell();
+  const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   // Memoised for the same reason useResourceForm memoises its own: run closes
@@ -78,17 +81,19 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
   // An argument somebody typed is not thrown away by a swipe. The guard is off
   // while the command runs, because the dismissal is then this hook's own.
   usePreventRemove(phase === "editing" && dirty, ({ data }) => {
-    Alert.alert("Discard this?", `The ${commandTitle(c).toLowerCase()} has not run.`, [
-      { text: "Keep editing", style: "cancel" },
+    confirm(
+      "Discard this?",
       {
-        text: "Discard",
-        style: "destructive",
+        label: "Discard",
+        destructive: true,
         onPress: () => {
           left.current = true;
           navigation.dispatch(data.action);
         },
       },
-    ]);
+      mode,
+      { message: `The ${commandTitle(c).toLowerCase()} has not run.`, cancel: "Keep editing" },
+    );
   });
 
   const run = useCallback(async () => {
@@ -127,6 +132,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
  */
 export function useCommandAsk(entry: Entry, id: string | undefined) {
   const { api, wrote } = useShell();
+  const { mode } = useTheme();
   const [busy, setBusy] = useState("");
 
   const ask = useCallback(
@@ -134,10 +140,10 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
       // The dialog is titled with the command's summary and answered with its
       // verb: the question is a sentence, the answer is a word.
       const title = commandTitle(c);
-      Alert.alert(title, c.description || `This runs ${c.verb} on the ${entry.entity}.`, [
-        { text: "Cancel", style: "cancel" },
+      confirm(
+        title,
         {
-          text: humanize(c.verb.replace(/-/g, " ")),
+          label: humanize(c.verb),
           onPress: async () => {
             setBusy(c.verb);
             try {
@@ -145,6 +151,8 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
               wrote(key(entry));
               void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } catch (e) {
+              // A report, not a question: the platform's alert with its one OK,
+              // because there is no form on screen to put the refusal under.
               const why = e instanceof ApiError ? e.detail : "";
               Alert.alert(title, why || (e instanceof Error ? e.message : "That did not run."));
             } finally {
@@ -152,9 +160,11 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
             }
           },
         },
-      ]);
+        mode,
+        { message: c.description || `This runs ${c.verb} on the ${entry.entity}.` },
+      );
     },
-    [api, entry, id, wrote],
+    [api, entry, id, wrote, mode],
   );
 
   return { ask, busy };

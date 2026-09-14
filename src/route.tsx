@@ -14,7 +14,7 @@ import { ResourceList } from "./screens/ResourceList";
 import { Singleton } from "./screens/Singleton";
 import { useShell } from "./shell";
 import { Button } from "./ui/atoms/Button";
-import { Notice as NoticeView } from "./ui/atoms/Notice";
+import { Notice as NoticeView, retry } from "./ui/atoms/Notice";
 import { Spinner } from "./ui/atoms/Spinner";
 import { Screen } from "./ui/templates/Screen";
 
@@ -98,7 +98,7 @@ export const commandSheet = (prop: { route: { params?: unknown } }) => {
   return {
     presentation: "modal" as const,
     headerLargeTitleEnabled: false,
-    title: humanize(verb.replace(/-/g, " ")),
+    title: humanize(verb),
   };
 };
 
@@ -118,10 +118,7 @@ export function Notice({
 }) {
   return (
     <Screen>
-      <NoticeView
-        text={text}
-        {...(onRetry ? { action: { label: "Retry", onPress: onRetry } } : {})}
-      />
+      <NoticeView text={text} {...(onRetry ? { action: retry(onRetry) } : {})} />
       {onSignIn ? (
         <Button label="Sign in to another server" tone="secondary" onPress={onSignIn} />
       ) : null}

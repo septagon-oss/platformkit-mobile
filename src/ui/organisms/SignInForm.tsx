@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../atoms/Button";
-import { Notice } from "../atoms/Notice";
+import { Notice, retry } from "../atoms/Notice";
 import { Text } from "../atoms/Text";
 import { TextField } from "../atoms/TextField";
 import { FormField } from "../molecules/FormField";
@@ -42,9 +42,7 @@ export function SignInForm({ baseURL, notice, busy, error, onSubmit, onClear }: 
         <Text role="display">Sign in</Text>
         <Text tone="muted">Use the address this tenant knows you by.</Text>
       </View>
-      {error ? (
-        <Notice text={error} action={{ label: "Retry", onPress: submit }} testID="sign-in-error" />
-      ) : null}
+      {error ? <Notice text={error} action={retry(submit)} testID="sign-in-error" /> : null}
       {notice ? (
         <Notice
           tone="warning"

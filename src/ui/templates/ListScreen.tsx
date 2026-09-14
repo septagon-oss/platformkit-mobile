@@ -4,9 +4,9 @@
 // caller.
 import React, { type ReactElement, type ReactNode } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Skeleton } from "../atoms/Skeleton";
 import { useStyles, useTheme, type Theme } from "../theme";
+import { useCanvas } from "./canvas";
 
 interface Props<T> {
   readonly data: readonly T[];
@@ -38,14 +38,14 @@ export function ListScreen<T>({
 }: Props<T>) {
   const t = useTheme();
   const s = useStyles(styles);
-  const insets = useSafeAreaInsets();
+  const canvas = useCanvas();
   return (
     <FlatList
       data={data}
       keyExtractor={keyOf}
       renderItem={({ item }) => render(item)}
-      style={s.list}
-      contentContainerStyle={[s.content, { paddingBottom: insets.bottom + t.space.xl }]}
+      style={canvas.page}
+      contentContainerStyle={canvas.content}
       // What makes the rows start under the native header and the large title
       // collapse as they scroll.
       contentInsetAdjustmentBehavior="automatic"
@@ -69,7 +69,5 @@ export function ListScreen<T>({
 
 const styles = (t: Theme) =>
   StyleSheet.create({
-    list: { flex: 1, backgroundColor: t.color.surfaceCanvas },
-    content: { padding: t.space.lg, gap: t.space.lg },
     header: { gap: t.space.lg },
   });
