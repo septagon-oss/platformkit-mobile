@@ -185,6 +185,22 @@
       "hash": "9b1069511fcba425f4de1621595666286e89fb32"
     },
     {
+      "type": "file",
+      "filePath": "testdata/design-tokens.json",
+      "reasons": [
+        "design-tokens"
+      ],
+      "hash": "1d5d5f640a9851cd2aedbd2f19fc22e428c2c9db"
+    },
+    {
+      "type": "file",
+      "filePath": "testdata/design-tokens.source.json",
+      "reasons": [
+        "design-tokens"
+      ],
+      "hash": "ce997f395087c2c24591e53ad6ad914382838f76"
+    },
+    {
       "type": "dir",
       "filePath": "node_modules/@expo/dom-webview/android",
       "reasons": [
@@ -581,5 +597,5 @@
       "hash": "0fb36ee8c93cb890b1c5a64fddf722af8ae0b952"
     }
   ],
-  "hash": "cb0c96093a57b8d1f0ff2442adfa90eef6bad3f0"
+  "hash": "d23134159e8b2106fed0cb21cf34101e0985b221"
 }

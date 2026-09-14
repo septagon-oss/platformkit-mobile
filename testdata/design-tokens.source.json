@@ -1,0 +1,10 @@
+{
+  "schema": "platformkit.design-export-source.v1",
+  "fixture": "testdata/design-tokens.json",
+  "sha256": "d374f57e39ec8bb43109ca17894099172b746f54e8c36042d063d67fa00aedc9",
+  "upstream": {
+    "repository": "https://github.com/septagon-oss/platformkit",
+    "commit": "5fc585926ce9a7d31af131f26a08ae9e967a591d",
+    "command": "go run ./tools/designexport | jq '{schema, themes}'"
+  }
+}

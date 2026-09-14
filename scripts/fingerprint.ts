@@ -34,15 +34,24 @@ const ignorePaths = [
 ];
 
 // What a binary is built from that lives outside the app itself: the recipe,
-// the Gradle settings it appends, the signing rule and the bundler's own
-// configuration. A change to any of these is a change to the binary. They
-// have to be named: nothing under scripts/ is a source on its own, and an
-// ignore would filter these out too, so the developer tooling beside them
-// stays out by simply not being listed.
+// the Gradle settings it appends, the signing rule, the bundler's own
+// configuration, and the design export the palette is generated from, with
+// the record of where that export came from. A change to any of these is a
+// change to the binary: the palette is what the gallery flow looks at on the
+// emulator, and the android workflow rebuilds when this hash moves. They have
+// to be named: nothing under scripts/ or testdata/ is a source on its own, and
+// an ignore would filter these out too, so the developer tooling and the
+// catalog fixture beside them stay out by simply not being listed.
 const extraSources = [
   { type: "dir" as const, filePath: "scripts/android", reasons: ["android-recipe"] },
   { type: "file" as const, filePath: "Dockerfile.android", reasons: ["android-recipe"] },
   { type: "file" as const, filePath: "metro.config.js", reasons: ["bundler"] },
+  { type: "file" as const, filePath: "testdata/design-tokens.json", reasons: ["design-tokens"] },
+  {
+    type: "file" as const,
+    filePath: "testdata/design-tokens.source.json",
+    reasons: ["design-tokens"],
+  },
 ];
 
 /** masked-view's Gradle script removes this obsolete attribute under AGP 7+.

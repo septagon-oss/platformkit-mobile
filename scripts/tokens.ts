@@ -2,15 +2,26 @@
 // colour is written once, in the public repository's design package, and the
 // phone reads it. testdata/design-tokens.json is a checked-in projection of
 // `go run ./tools/designexport` from that repository (its schema and themes,
-// nothing else), refreshed deliberately like testdata/catalog.json; the test
-// in tests/tokens.test.ts fails when the generated file is stale.
+// nothing else), refreshed deliberately like testdata/catalog.json, and
+// testdata/design-tokens.source.json says which commit of that repository it
+// was projected from and what the projected bytes hash to. The tests in
+// tests/tokens.test.ts fail when the fixture, its provenance and the generated
+// file disagree; `npm run tokens` refuses to regenerate from a fixture whose
+// provenance was not updated with it.
+import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { parseArgs } from "node:util";
 
 export const FIXTURE = "testdata/design-tokens.json";
+export const SOURCE = "testdata/design-tokens.source.json";
 export const OUTPUT = "src/ui/tokens.ts";
 const SCHEMA = "platformkit.design-export.v1";
+const SOURCE_SCHEMA = "platformkit.design-export-source.v1";
+/** UPSTREAM is where the export comes from, and COMMAND how the fixture is projected from it, at that repository's root. */
+export const UPSTREAM = "https://github.com/septagon-oss/platformkit";
+export const COMMAND = "go run ./tools/designexport | jq '{schema, themes}'";
 const MODES = ["light", "dark"] as const;
 const FONTS = ["--pk-font-display", "--pk-font-body", "--pk-font-mono"] as const;
 
@@ -114,15 +125,95 @@ export function render(doc: unknown): string {
   return lines.join("\n");
 }
 
-async function main(): Promise<void> {
-  const doc: unknown = JSON.parse(await readFile(FIXTURE, "utf8"));
+/**
+ * Provenance is where the fixture came from: the upstream commit it was
+ * projected from, the command that projected it, and the SHA-256 of the
+ * projected bytes, so a fixture edited by hand or refreshed without saying
+ * from what is a fixture the tests refuse.
+ */
+export interface Provenance {
+  readonly schema: typeof SOURCE_SCHEMA;
+  readonly fixture: typeof FIXTURE;
+  readonly sha256: string;
+  readonly upstream: {
+    readonly repository: string;
+    readonly commit: string;
+    readonly command: string;
+  };
+}
+
+export const sha256 = (bytes: string | Uint8Array): string =>
+  createHash("sha256").update(bytes).digest("hex");
+
+/** provenance is the record as read from disk, or an error naming what is wrong with it. */
+export function provenance(v: unknown): Provenance {
+  if (!isRecord(v) || v.schema !== SOURCE_SCHEMA)
+    throw new Error(`design export source: schema is not ${SOURCE_SCHEMA}`);
+  if (v.fixture !== FIXTURE) throw new Error(`design export source: fixture is not ${FIXTURE}`);
+  if (typeof v.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(v.sha256))
+    throw new Error("design export source: sha256 is not a hex SHA-256");
+  const u = v.upstream;
+  if (!isRecord(u) || typeof u.repository !== "string" || !/^https:\/\//.test(u.repository))
+    throw new Error("design export source: upstream.repository is not an https URL");
+  if (typeof u.commit !== "string" || !/^[0-9a-f]{40}$/.test(u.commit))
+    throw new Error("design export source: upstream.commit is not a full commit ID");
+  if (typeof u.command !== "string" || u.command === "")
+    throw new Error("design export source: upstream.command is empty");
+  return {
+    schema: SOURCE_SCHEMA,
+    fixture: FIXTURE,
+    sha256: v.sha256,
+    upstream: { repository: u.repository, commit: u.commit, command: u.command },
+  };
+}
+
+/** record is the provenance of fixture bytes projected at one upstream commit. */
+export function record(fixture: string, commit: string): Provenance {
+  if (!/^[0-9a-f]{40}$/.test(commit))
+    throw new Error(
+      "--upstream must be the full 40-character commit ID the fixture was exported from",
+    );
+  return {
+    schema: SOURCE_SCHEMA,
+    fixture: FIXTURE,
+    sha256: sha256(fixture),
+    upstream: { repository: UPSTREAM, commit, command: COMMAND },
+  };
+}
+
+/**
+ * main regenerates the palette. Without --upstream it first checks that the
+ * fixture is still the one the provenance describes; with --upstream <commit>
+ * it writes the provenance for a freshly projected fixture, then the palette.
+ */
+async function main(args: readonly string[]): Promise<number> {
+  const { values } = parseArgs({ args, options: { upstream: { type: "string" } } });
+  const fixture = await readFile(FIXTURE, "utf8");
+  if (values.upstream !== undefined) {
+    const next = record(fixture, values.upstream);
+    await writeFile(SOURCE, JSON.stringify(next, null, 2) + "\n");
+    console.log(`${SOURCE}: ${next.upstream.commit}`);
+  } else {
+    const known = provenance(JSON.parse(await readFile(SOURCE, "utf8")));
+    if (known.sha256 !== sha256(fixture)) {
+      console.error(
+        `${FIXTURE} is not the export ${SOURCE} describes; run npm run tokens -- --upstream <full-commit-id> with the ${UPSTREAM} commit it was projected from.`,
+      );
+      return 1;
+    }
+  }
+  const doc: unknown = JSON.parse(fixture);
   await writeFile(OUTPUT, render(doc));
   console.log(`${OUTPUT}: written`);
+  return 0;
 }
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
-  main().catch((e: unknown) => {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(1);
-  });
+  main(process.argv.slice(2)).then(
+    (code) => process.exit(code),
+    (e: unknown) => {
+      console.error(e instanceof Error ? e.message : String(e));
+      process.exit(1);
+    },
+  );
 }
