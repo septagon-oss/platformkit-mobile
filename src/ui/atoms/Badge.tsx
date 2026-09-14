@@ -38,7 +38,7 @@ const styles = (t: Theme) =>
   StyleSheet.create({
     pill: {
       alignSelf: "flex-start",
-      borderRadius: 999,
+      borderRadius: t.radius.full,
       paddingHorizontal: t.space.sm,
       paddingVertical: t.space.xs / 2,
     },

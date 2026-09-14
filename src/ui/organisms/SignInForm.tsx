@@ -13,7 +13,7 @@ import { FormField } from "../molecules/FormField";
 import { Section } from "../molecules/Section";
 import { ServerField } from "../molecules/ServerField";
 import { Screen } from "../templates/Screen";
-import { useStyles, type Theme } from "../theme";
+import { useStyles, useTheme, type Theme } from "../theme";
 
 export interface Props {
   readonly baseURL: string;
@@ -27,6 +27,7 @@ export interface Props {
 }
 
 export function SignInForm({ baseURL, notice, busy, error, onSubmit, onClear }: Props) {
+  const t = useTheme();
   const s = useStyles(styles);
   const insets = useSafeAreaInsets();
   const [enteredURL, setURL] = useState<string>();
@@ -38,7 +39,7 @@ export function SignInForm({ baseURL, notice, busy, error, onSubmit, onClear }: 
   };
   return (
     <Screen form testID="sign-in">
-      <View style={[s.head, { paddingTop: insets.top + 24 }]}>
+      <View style={[s.head, { paddingTop: insets.top + t.space.xl }]}>
         <Text role="display">Sign in</Text>
         <Text tone="muted">Use the address this tenant knows you by.</Text>
       </View>

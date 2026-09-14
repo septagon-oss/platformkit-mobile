@@ -54,6 +54,10 @@ export function Skeleton({ lines = 3 }: Props) {
 const styles = (t: Theme) =>
   StyleSheet.create({
     block: { gap: t.space.sm, padding: t.space.md },
-    line: { height: 14, borderRadius: t.radius.md, backgroundColor: t.color.surfaceMuted },
+    line: {
+      height: t.extent.skeleton,
+      borderRadius: t.radius.md,
+      backgroundColor: t.color.surfaceMuted,
+    },
     short: { width: "60%" },
   });

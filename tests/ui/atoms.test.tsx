@@ -1,6 +1,7 @@
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
+import { Badge } from "../../src/ui/atoms/Badge";
 import { Button } from "../../src/ui/atoms/Button";
 import { ChoiceRow } from "../../src/ui/atoms/ChoiceRow";
 import { Notice } from "../../src/ui/atoms/Notice";
@@ -10,6 +11,7 @@ import { FormField } from "../../src/ui/molecules/FormField";
 import { Row } from "../../src/ui/molecules/Row";
 import { TagsField } from "../../src/ui/molecules/TagsField";
 import { Section } from "../../src/ui/molecules/Section";
+import { radius } from "../../src/ui/scale";
 import { ThemeProvider } from "../../src/ui/theme";
 import { palette } from "../../src/ui/tokens";
 
@@ -30,6 +32,17 @@ describe("Button", () => {
   test("a primary button reads in the on-accent colour in both modes", async () => {
     await inTheme(<Button label="Go" onPress={() => undefined} />, "dark");
     expect(screen.getByText("Go")).toHaveStyle({ color: palette.dark.accentOn });
+  });
+});
+
+describe("Badge", () => {
+  test("a badge is a pill in its tone's pair, whatever its height", async () => {
+    await inTheme(<Badge label="Ok" tone="ok" />);
+    expect(screen.getByLabelText("Ok")).toHaveStyle({
+      borderRadius: radius.full,
+      backgroundColor: palette.light.statusOkBg,
+    });
+    expect(screen.getByText("Ok")).toHaveStyle({ color: palette.light.statusOk });
   });
 });
 

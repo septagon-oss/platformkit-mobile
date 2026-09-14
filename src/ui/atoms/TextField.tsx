@@ -71,7 +71,7 @@ const styles = (t: Theme) =>
       borderColor: t.color.borderDefault,
       ...(t.font.body ? { fontFamily: t.font.body } : {}),
     },
-    textarea: { minHeight: 120, textAlignVertical: "top" },
+    textarea: { minHeight: t.extent.textarea, textAlignVertical: "top" },
     mono: { fontSize: t.type.mono.size, ...(t.font.mono ? { fontFamily: t.font.mono } : {}) },
     invalid: { borderColor: t.color.statusDanger },
     disabled: { opacity: 0.6, backgroundColor: t.color.surfaceMuted },

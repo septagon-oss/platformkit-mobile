@@ -5,7 +5,7 @@
 // scale.ts. Nothing else reads a colour.
 import React, { createContext, useContext, useMemo } from "react";
 import { Platform, StyleSheet, useColorScheme } from "react-native";
-import { hit, radius, space, type } from "./scale";
+import { extent, hit, icon, radius, space, type } from "./scale";
 import { palette, type Mode, type Palette } from "./tokens";
 
 export type { Mode, Palette } from "./tokens";
@@ -23,6 +23,8 @@ export interface Theme {
   readonly font: Fonts;
   readonly space: typeof space;
   readonly radius: typeof radius;
+  readonly icon: typeof icon;
+  readonly extent: typeof extent;
   readonly type: typeof type;
   readonly hit: number;
 }
@@ -41,7 +43,7 @@ export function themeFor(
   colors: Readonly<Record<Mode, Palette>> = palette,
   faces: Fonts = fonts,
 ): Theme {
-  return { mode, color: colors[mode], font: faces, space, radius, type, hit };
+  return { mode, color: colors[mode], font: faces, space, radius, icon, extent, type, hit };
 }
 
 const Context = createContext<Theme>(themeFor("light"));

@@ -9,7 +9,7 @@ import { splitList } from "../../core/derive";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { TextField } from "../atoms/TextField";
-import { useStyles, type Theme } from "../theme";
+import { useStyles, useTheme, type Theme } from "../theme";
 
 interface Props {
   readonly label: string;
@@ -20,6 +20,7 @@ interface Props {
 }
 
 export function TagsField({ label, value, onChange, disabled = false, testID }: Props) {
+  const t = useTheme();
   const s = useStyles(styles);
   // What is being typed is held here and written into the value on every
   // keystroke, so a save that never blurred the input still carries it. The
@@ -51,7 +52,7 @@ export function TagsField({ label, value, onChange, disabled = false, testID }: 
                   }
                   accessibilityRole="button"
                   accessibilityLabel={`Remove ${tag}`}
-                  hitSlop={8}
+                  hitSlop={t.space.sm}
                 >
                   <Icon name="close" size="sm" tone="muted" />
                 </Pressable>
@@ -83,7 +84,7 @@ const styles = (t: Theme) =>
       flexDirection: "row",
       alignItems: "center",
       gap: t.space.xs,
-      borderRadius: 999,
+      borderRadius: t.radius.full,
       paddingLeft: t.space.md,
       paddingRight: t.space.sm,
       paddingVertical: t.space.xs,

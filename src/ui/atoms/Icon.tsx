@@ -3,6 +3,7 @@
 // provider resolves a name. A glyph nobody asks for is a glyph nothing draws.
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
+import type { IconSize } from "../scale";
 import { useTheme } from "../theme";
 import { toneColor, type Tone } from "./Text";
 
@@ -28,9 +29,7 @@ const glyphs = {
 } as const;
 
 export type IconName = keyof typeof glyphs;
-export type IconSize = "sm" | "md" | "lg";
-
-const sizes: Record<IconSize, number> = { sm: 16, md: 22, lg: 40 };
+export type { IconSize };
 
 interface Props {
   readonly name: IconName;
@@ -45,7 +44,7 @@ export function Icon({ name, size = "md", tone = "primary", label }: Props) {
   return (
     <Ionicons
       name={glyphs[name]}
-      size={sizes[size]}
+      size={t.icon[size]}
       color={toneColor(t, tone)}
       accessibilityElementsHidden={!label}
       importantForAccessibility={label ? "yes" : "no-hide-descendants"}

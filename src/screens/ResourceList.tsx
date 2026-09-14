@@ -2,7 +2,7 @@
 // native header with what a caller may do, and the organism that draws it.
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useMemo } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import type { Command } from "../core/catalog";
 import { collectionCommands, humanize, plural, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
@@ -37,7 +37,7 @@ export function ResourceList({ entry }: ScreenProps) {
     () => ({
       title: humanize(plural(entry.entity)),
       headerRight: () => (
-        <View style={{ flexDirection: "row" }}>
+        <View style={styles.actions}>
           <Button placement="header" label="Order" icon="sort" onPress={toggleOrdering} />
           {entry.writable ? (
             <Button placement="header" label="New" icon="add" onPress={add} />
@@ -70,3 +70,7 @@ export function ResourceList({ entry }: ScreenProps) {
     </>
   );
 }
+
+// The header's two buttons sit side by side; a layout, not a distance, so it
+// needs no theme.
+const styles = StyleSheet.create({ actions: { flexDirection: "row" } });
