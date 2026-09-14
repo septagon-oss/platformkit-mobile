@@ -15,7 +15,7 @@ import {
 import os from "node:os";
 import path from "node:path";
 import test, { type TestContext } from "node:test";
-import { exportSource } from "../scripts/source";
+import { checkSource, exportSource } from "../scripts/source";
 
 // These are disposable Git fixtures owned and removed by the test harness.
 // Their dependency metadata is intentionally small; npm installation is
@@ -202,4 +202,27 @@ test("tracked symlinks and local configuration fail instead of leaking into a ha
   env.write(".env.local", "EXPO_PUBLIC_API_URL=https://example.invalid\n");
   assert.throws(() => exportSource(env.root, env.commit(), env.output), /local configuration/);
   assert.equal(existsSync(env.output), false);
+});
+
+test("the repository's own manifest and lockfile pass the self-containment gate", () => {
+  const root = path.resolve(import.meta.dirname, "..");
+  const packages = Object.keys(
+    JSON.parse(readFileSync(path.join(root, "package-lock.json"), "utf8")).packages,
+  ).length;
+  assert.equal(
+    checkSource(root),
+    `package-lock.json: ${packages - 1} registry packages, lockfileVersion 3, no local dependency`,
+  );
+});
+
+test("the gate reads the working tree, so an uncommitted local dependency is refused at once", (t) => {
+  const f = fixture(t);
+  assert.match(checkSource(f.root), /1 registry packages, lockfileVersion 3/);
+  f.pkg.dependencies.example = "file:../shared";
+  f.manifests();
+  assert.throws(() => checkSource(f.root), /local path/);
+  f.pkg.dependencies.example = "^2.0.0";
+  f.lock.lockfileVersion = 2;
+  f.manifests();
+  assert.throws(() => checkSource(f.root), /lockfileVersion 3/);
 });

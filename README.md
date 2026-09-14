@@ -232,7 +232,10 @@ their executable modes. It includes routes, source, assets, tests, the lockfile,
 native fingerprint and build recipe. Hosting workflows are excluded. Local
 dependencies, workspace links, symlinks and tracked local configuration cause
 an error; working-tree edits, ignored files and installed dependencies are
-never copied. `SOURCE.json` records the source revision and each delivered
+never copied. `npm run check:source`, part of `npm run check`, applies the
+same manifest and lockfile rules to the working tree without exporting, so a
+local dependency or an unpinned package is refused on every check rather than
+at the handoff. `SOURCE.json` records the source revision and each delivered
 file's SHA-256, byte count and mode. It proves provenance, not publication or
 runtime behavior. Verify that revision is published before distributing a
 release, and retain the receipt when you archive the exported directory.

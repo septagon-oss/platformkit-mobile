@@ -1,8 +1,20 @@
 // Export a committed application without relying on its checkout. The receipt
 // records source provenance; running the included checks is a separate step.
+// `npm run check:source` runs the same self-containment rules against the
+// working tree's package.json and lockfile without exporting anything, so a
+// local dependency, a workspace link or an unpinned package is refused on
+// every check rather than on the day of the handoff.
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmodSync, lstatSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 
@@ -24,7 +36,8 @@ function git(root: string, ...args: string[]): Buffer {
   return execFileSync("git", ["-C", root, ...args], { maxBuffer: 64 * 1024 * 1024 });
 }
 
-function lockedDependencies(pkg: Document, lock: Document): void {
+/** lockedDependencies refuses a manifest and lockfile that cannot install from the registry alone. */
+export function lockedDependencies(pkg: Document, lock: Document): void {
   if (lock.lockfileVersion !== 3) throw new Error("package-lock.json: expected lockfileVersion 3");
   if (pkg.workspaces) throw new Error("package.json: workspaces require a separate checkout");
   const packages = object(lock.packages, "package-lock.json packages");
@@ -58,6 +71,17 @@ function lockedDependencies(pkg: Document, lock: Document): void {
     if (typeof dep.integrity !== "string" || !/^sha512-[A-Za-z0-9+/]{86}==$/.test(dep.integrity))
       throw new Error(`${name}: missing SHA-512 package integrity`);
   }
+}
+
+/** checkSource is the self-containment gate on the working tree: what is here, not what was committed. */
+export function checkSource(root: string): string {
+  const read = (name: string): Document =>
+    object(JSON.parse(readFileSync(path.join(root, name), "utf8")), name);
+  const pkg = read("package.json");
+  const lock = read("package-lock.json");
+  lockedDependencies(pkg, lock);
+  const packages = Object.keys(object(lock.packages, "package-lock.json packages")).length - 1;
+  return `package-lock.json: ${packages} registry packages, lockfileVersion ${String(lock.lockfileVersion)}, no local dependency`;
 }
 
 interface SourceFile {
@@ -159,13 +183,23 @@ export function exportSource(root: string, revision: string, output: string): st
 if (process.argv[1]?.endsWith("source.ts")) {
   try {
     const { values } = parseArgs({
-      options: { revision: { type: "string" }, output: { type: "string" } },
+      options: {
+        revision: { type: "string" },
+        output: { type: "string" },
+        check: { type: "boolean", default: false },
+      },
     });
-    if (!values.revision || !values.output)
-      throw new Error(
-        "Usage: npm run source -- --revision <full-commit-id> --output /tmp/mobile-source",
-      );
-    console.log(exportSource(process.cwd(), values.revision, values.output));
+    if (values.check) {
+      if (values.revision || values.output)
+        throw new Error("--check reads the working tree and takes no revision or output");
+      console.log(checkSource(process.cwd()));
+    } else {
+      if (!values.revision || !values.output)
+        throw new Error(
+          "Usage: npm run source -- --revision <full-commit-id> --output /tmp/mobile-source, or npm run check:source",
+        );
+      console.log(exportSource(process.cwd(), values.revision, values.output));
+    }
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
