@@ -99,7 +99,8 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         const session = await sessions.load();
         if (generation.current !== started) return;
         const url = session?.baseURL ?? active.current.baseURL;
-        const a = createApi(url, fetch, session?.cookie);
+        // The default transport; only the restored cookie is this call's business.
+        const a = createApi(url, undefined, session?.cookie);
         connect(url, a);
         if (session?.cookie) await load(a, started);
         else dispatch({ type: "no-session", generation: started });

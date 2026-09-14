@@ -12,7 +12,9 @@ async function boundaries(file: string, source: string) {
   assert.equal(result.fatalErrorCount, 0, JSON.stringify(result.messages));
   return result.messages.filter(
     (message) =>
-      message.ruleId === "no-restricted-imports" || message.ruleId === "no-restricted-syntax",
+      message.ruleId === "no-restricted-imports" ||
+      message.ruleId === "no-restricted-syntax" ||
+      message.ruleId === "no-restricted-globals",
   );
 }
 
@@ -126,4 +128,58 @@ test("native runtime layers cannot import the packaged token generator or Node t
       assert.ok((await boundaries(file, source)).length > 0, `${file}: ${source}`);
     }
   }
+});
+
+test("the route dispatcher composes screens from the catalog and performs no effect", async () => {
+  for (const source of [
+    'export { ApiError } from "./effects/api";',
+    'export { sessions } from "./effects/native-session";',
+    'export { createApi } from "platformkit-mobile/effects/api";',
+  ]) {
+    assert.ok((await boundaries("src/route.tsx", source)).length > 0, source);
+  }
+  for (const source of [
+    'export { key } from "./core/catalog";',
+    'export { humanize } from "./core/derive";',
+    'export { ResourceList } from "./screens/ResourceList";',
+    'export { Screen } from "./ui/templates/Screen";',
+  ]) {
+    assert.deepEqual(await boundaries("src/route.tsx", source), [], source);
+  }
+  // An app route still may not reach for core; the dispatcher does that for it.
+  assert.ok(
+    (await boundaries("app/probe.tsx", 'export { key } from "../src/core/catalog";')).length > 0,
+  );
+});
+
+test("effects may use the secure store and nothing else of Expo, the bare package included", async () => {
+  for (const source of [
+    'export * as Expo from "expo";',
+    'export { fetch as expoFetch } from "expo/fetch";',
+    'export { default as Constants } from "expo-constants";',
+    'export * as Haptics from "expo-haptics";',
+    'export { default as Ionicons } from "@expo/vector-icons/Ionicons";',
+    'export { Platform } from "react-native";',
+  ]) {
+    assert.ok((await boundaries("src/effects/probe.ts", source)).length > 0, source);
+  }
+  assert.deepEqual(
+    await boundaries("src/effects/probe.ts", 'export * as SecureStore from "expo-secure-store";'),
+    [],
+  );
+});
+
+test("the transport is named once, in effects; everywhere else speaks through an Api", async () => {
+  for (const [file, source] of [
+    ["src/shell.tsx", "export const api = createApi(url, fetch);"],
+    ["src/screens/Probe.tsx", 'export const read = () => fetch("/api/v1/x");'],
+    ["src/ui/atoms/Probe.tsx", "export const socket = new WebSocket(url);"],
+    ["app/probe.tsx", "export const xhr = new XMLHttpRequest();"],
+  ]) {
+    assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source}`);
+  }
+  assert.deepEqual(
+    await boundaries("src/effects/probe.ts", "export const transport: typeof fetch = fetch;"),
+    [],
+  );
 });
