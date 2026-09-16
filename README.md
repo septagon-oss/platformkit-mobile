@@ -304,8 +304,10 @@ locally either way.
 
 The repository CI runs `npm run check` on pull requests and main pushes.
 `npm run check` runs eight gates in order, and stops at the first that fails:
-`check:sdk` (`expo install --check`, package compatibility with the installed
-Expo SDK), `typecheck` (TypeScript), `lint` (ESLint, including the layer
+`check:sdk` (`EXPO_OFFLINE=1 expo install --check`: every installed native
+package against the ranges the pinned `expo` bundles, read from
+`node_modules/expo/bundledNativeModules.json`), `typecheck` (TypeScript),
+`lint` (ESLint, including the layer
 rules), `format:check` (Prettier), `test` (the Node suite, `tsx --test
 tests/*.test.ts`, then the Jest suite, every `tests/**/*.test.tsx` rendering
 components, the shell, the route dispatcher and the screen hooks),
@@ -322,8 +324,32 @@ drifted without blocking anything. Node is pinned once, in [.nvmrc](.nvmrc).
 Use `expo install` for native dependencies so they match that SDK. The app owns
 the native font, module core, Reanimated and Worklets dependencies used by its
 router and tests; their SDK-compatible versions must resolve once at the app
-root. Commit the lockfile with every dependency change. Starting Expo generates route
-types under the ignored `.expo/` directory, which TypeScript also checks.
+root. Commit the lockfile with every dependency change.
+
+The SDK gate is deliberately offline. `expo install --check` otherwise asks
+Expo's live version service, so a patch published upstream turns an unchanged
+commit red: that happened twice in one week and is somebody else's release, not
+a defect here. With `EXPO_OFFLINE=1` the same command compares the installed
+packages against `bundledNativeModules.json` inside the pinned `expo`, a file
+`npm ci` reproduces byte for byte, so the gate answers the same for a given
+tree on any machine and any day. It still refuses a package that does not match
+the pinned SDK, which is what it is for. Only `expo` itself is outside that
+manifest, because it is the pin everything else is compared against.
+
+Asking what Expo now recommends is an owner's action, not a gate:
+
+```sh
+npm run sdk:latest          # the online check: what upstream would change
+npx expo install --fix      # take it, then commit package.json and the lockfile
+npm run fingerprint         # a native pin moved, so the binary identity moves
+```
+
+Do that deliberately, in its own commit, and say in the commit why the native
+project changed. The weekly `drift` workflow runs the online check too and
+reports what it finds without blocking anything.
+
+Starting Expo generates route types under the ignored `.expo/` directory,
+which TypeScript also checks.
 The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
 

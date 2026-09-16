@@ -30,6 +30,13 @@ jobs:
         continue-on-error: true
         run: npx --yes expo-doctor@1
 
+      # The online half of check:sdk. The gate compares the installed packages
+      # against the pinned expo's own manifest, so it cannot go red when
+      # somebody else publishes; this reports what that release would change.
+      - name: What Expo now recommends
+        continue-on-error: true
+        run: npm run sdk:latest
+
       - name: What is outdated
         run: npm outdated || true
 
