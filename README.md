@@ -6,7 +6,8 @@ running server, reads `GET /api/v1/admin/resources`, and derives list, detail,
 create and edit screens from the resources returned for that session. The
 server remains responsible for authorization and validation on every request.
 This repository builds independently; it has no build-time dependency on the
-Go repository or on private modules.
+Go repository or on private modules. The source is under the Apache License,
+Version 2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE)), as PlatformKit is.
 
 ## Run locally
 
@@ -180,7 +181,8 @@ local checkout paths do not identify a fixed dependency.
 No npm registry release is published; `private: true` remains set.
 For local review, `npm pack --ignore-scripts --pack-destination /tmp` creates a
 source dependency archive. Its contents are `src/`, `scripts/tokens.ts`, the
-shared `scripts/android/` recipe and npm's package metadata and documentation.
+shared `scripts/android/` recipe, `LICENSE`, `NOTICE` and npm's package
+metadata and documentation.
 It contains the shared implementation, including generated design tokens. The
 reference application's routes, Docker setup and test tooling belong to the
 complete application handoff below. `npm run check` packs the dependency
@@ -301,11 +303,18 @@ locally either way.
 ## Verify a change
 
 The repository CI runs `npm run check` on pull requests and main pushes.
-`npm run check` checks package compatibility with the installed Expo SDK, then
-runs TypeScript, ESLint, the source formatting check, the Node tests and the
-native fingerprint check. [fingerprint.json](fingerprint.json) is the hash of
-everything a binary is built from: the app configuration, the native modules in
-the lockfile and their config plugins. When a change moves it, run
+`npm run check` runs eight gates in order, and stops at the first that fails:
+`check:sdk` (`expo install --check`, package compatibility with the installed
+Expo SDK), `typecheck` (TypeScript), `lint` (ESLint, including the layer
+rules), `format:check` (Prettier), `test` (the Node suite, `tsx --test
+tests/*.test.ts`, then the Jest suite, every `tests/**/*.test.tsx` rendering
+components, the shell, the route dispatcher and the screen hooks),
+`check:fingerprint`, `check:flows` (every id a device flow names is a testID a
+component sets) and `check:source` (the manifest and lockfile install from the
+registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
+a binary is built from: the app configuration, the native modules in the
+lockfile and their config plugins, the Android recipe, the bundler
+configuration and the design export. When a change moves it, run
 `npm run fingerprint` and say why in the commit, because that change needs a
 new binary. CI also exports both bundles, fails on a high or critical dependency
 advisory, and scans the history for secrets; a weekly workflow reports what
@@ -319,11 +328,14 @@ The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
 
 The Node tests cover catalog parsing, screen derivation, the token
-generator, out-of-order lifecycle events, interrupted storage writes and HTTP
-behavior with supplied effects. The component tests (`npm run test:ui`, Jest
-with the Expo preset and React Native Testing Library, under `tests/ui/`)
-render the organisms with sample props and assert what a screen reader would
-find. Neither launches Expo,
+generator and its provenance, the distance guard, out-of-order lifecycle
+events, interrupted storage writes, HTTP behavior with supplied effects and the
+source gates. The Jest tests (`npm run test:ui`, the Expo preset and React
+Native Testing Library) render the atoms, molecules and organisms with sample
+props and assert what a screen reader would find (`tests/ui/`), drive the
+shell over an in-memory secure store and a fake fetch (`tests/shell.test.tsx`),
+the route dispatcher over a mocked router (`tests/route.test.tsx`) and the
+screen hooks over a fake Api (`tests/screens/`). Neither suite launches Expo,
 exercises a native device or connects to a live server. For a screen or session
 change, also exercise the affected journey on the target platform and report
 what you ran.

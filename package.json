@@ -2,6 +2,7 @@
   "name": "platformkit-mobile",
   "version": "0.1.0",
   "private": true,
+  "license": "Apache-2.0",
   "main": "expo-router/entry",
   "exports": {
     "./core/catalog": "./src/core/catalog.ts",
@@ -23,7 +24,8 @@
   "files": [
     "src",
     "scripts/tokens.ts",
-    "scripts/android"
+    "scripts/android",
+    "NOTICE"
   ],
   "scripts": {
     "start": "expo start",

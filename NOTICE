@@ -1,0 +1,19 @@
+PlatformKit Mobile
+Copyright 2026 Septagon
+
+This product includes software developed at Septagon.
+
+Original PlatformKit Mobile code is licensed under the Apache License,
+Version 2.0; see LICENSE. It is the Expo and React Native client of
+PlatformKit (https://github.com/septagon-oss/platformkit), which is licensed
+the same way by the same holder and consumed here only through its public
+HTTP contract. testdata/catalog.json is a copy of that repository's catalog
+golden file and testdata/design-tokens.json a projection of its design export;
+testdata/design-tokens.source.json names the commit it was projected from.
+
+No third-party source is vendored into this repository. package.json and
+package-lock.json are the whole dependency list, resolved from the npm
+registry, and each package carries its own licence file; a binary bundles
+them, including the Ionicons glyphs that @expo/vector-icons ships under the
+MIT licence. `npm run check:source` refuses a dependency that does not come
+from the registry.
