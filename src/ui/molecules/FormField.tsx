@@ -4,6 +4,7 @@
 import React, { useEffect, type ReactNode } from "react";
 import { AccessibilityInfo, Platform, StyleSheet, View } from "react-native";
 import { Text } from "../atoms/Text";
+import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 
 interface Props {
@@ -32,7 +33,7 @@ export function FormField({
       AccessibilityInfo.announceForAccessibility(`${label}: ${error}`);
   }, [error, label]);
   return (
-    <View style={s.field} {...(testID ? { testID } : {})}>
+    <View style={s.field} {...testable(testID)}>
       {bare ? null : (
         <Text role="caption" tone="muted" weight="semibold">
           {label}

@@ -3,6 +3,7 @@
 import React, { type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "../atoms/Text";
+import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 
 interface Props {
@@ -11,12 +12,13 @@ interface Props {
   readonly value: string;
   /** shown replaces that text with the value in the shape its type deserves. */
   readonly shown?: ReactNode;
+  readonly testID?: string;
 }
 
-export function DetailRow({ term, value, shown }: Props) {
+export function DetailRow({ term, value, shown, testID }: Props) {
   const s = useStyles(styles);
   return (
-    <View style={s.row} accessible accessibilityLabel={`${term}, ${value}`}>
+    <View style={s.row} accessible accessibilityLabel={`${term}, ${value}`} {...testable(testID)}>
       <Text role="caption" tone="muted" uppercase>
         {term}
       </Text>

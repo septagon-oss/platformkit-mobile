@@ -3,6 +3,7 @@
 // may offer one action, which is how "retry" is offered everywhere.
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Button } from "./Button";
 import { Icon, type IconName } from "./Icon";
@@ -53,7 +54,7 @@ export function Notice({ tone = "danger", title, text, action, testID }: Props) 
           ? t.color.statusOkBg
           : t.color.statusInfoBg;
   return (
-    <View style={[s.box, { backgroundColor: bg }]} {...(testID ? { testID } : {})}>
+    <View style={[s.box, { backgroundColor: bg }]} {...testable(testID)}>
       <View style={s.row} accessible accessibilityRole="alert" accessibilityLiveRegion="polite">
         <Icon name={icons[tone]} size="sm" tone={tone === "danger" ? "danger" : "primary"} />
         <View style={s.body}>

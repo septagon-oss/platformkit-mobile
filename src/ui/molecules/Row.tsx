@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "../atoms/Icon";
 import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 
 interface Props {
@@ -48,7 +49,7 @@ export function Row({
       accessibilityState={{ busy, disabled: !onPress || busy }}
       accessibilityLabel={[title, ...cells].join(", ")}
       android_ripple={{ color: t.color.borderDefault }}
-      {...(testID ? { testID } : {})}
+      {...testable(testID)}
     >
       <View style={s.text}>
         <Text

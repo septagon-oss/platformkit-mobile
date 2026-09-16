@@ -6,6 +6,7 @@
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import React from "react";
 import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
@@ -41,7 +42,7 @@ export function DateTimeRow({
   if (Platform.OS === "ios") {
     const shown = value ?? new Date();
     return (
-      <View style={s.row} accessibilityLabel={label} {...(testID ? { testID } : {})}>
+      <View style={s.row} accessibilityLabel={label} {...testable(testID)}>
         <Text>{label}</Text>
         <View style={s.controls}>
           {value ? (
@@ -98,7 +99,7 @@ export function DateTimeRow({
   };
 
   return (
-    <View style={s.row} {...(testID ? { testID } : {})}>
+    <View style={s.row} {...testable(testID)}>
       <Pressable
         style={s.press}
         onPress={ask}

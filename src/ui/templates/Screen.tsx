@@ -5,6 +5,7 @@
 import React, { type ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useCanvas } from "./canvas";
+import { testable } from "../props";
 
 interface Props {
   readonly children: ReactNode;
@@ -25,7 +26,7 @@ export function Screen({ children, form = false, testID }: Props) {
       automaticallyAdjustKeyboardInsets={form && Platform.OS === "ios"}
       keyboardShouldPersistTaps={form ? "handled" : "never"}
       keyboardDismissMode={form ? "interactive" : "none"}
-      {...(testID ? { testID } : {})}
+      {...testable(testID)}
     >
       {children}
     </ScrollView>

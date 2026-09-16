@@ -3,13 +3,15 @@
 // motion.
 import React, { useEffect, useState } from "react";
 import { AccessibilityInfo, Animated, StyleSheet, View } from "react-native";
+import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 
 interface Props {
   readonly lines?: number;
+  readonly testID?: string;
 }
 
-export function Skeleton({ lines = 3 }: Props) {
+export function Skeleton({ lines = 3, testID }: Props) {
   const s = useStyles(styles);
   // Created once, and read where it is used rather than during render.
   const [pulse] = useState(() => new Animated.Value(0.5));
@@ -40,7 +42,13 @@ export function Skeleton({ lines = 3 }: Props) {
   }, [pulse, still]);
 
   return (
-    <View style={s.block} accessible accessibilityLabel="Loading" accessibilityRole="progressbar">
+    <View
+      style={s.block}
+      accessible
+      accessibilityLabel="Loading"
+      accessibilityRole="progressbar"
+      {...testable(testID)}
+    >
       {Array.from({ length: lines }, (_, i) => (
         <Animated.View
           key={i}

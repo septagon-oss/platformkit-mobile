@@ -1,6 +1,7 @@
 // Spinner is waiting, in the accent colour, centred when it is the whole screen.
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 
 interface Props {
@@ -8,13 +9,19 @@ interface Props {
   /** fill centres the spinner in all the space there is. */
   readonly fill?: boolean;
   readonly label?: string;
+  readonly testID?: string;
 }
 
-export function Spinner({ size = "small", fill = false, label = "Loading" }: Props) {
+export function Spinner({ size = "small", fill = false, label = "Loading", testID }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const indicator = (
-    <ActivityIndicator size={size} color={t.color.accentDefault} accessibilityLabel={label} />
+    <ActivityIndicator
+      size={size}
+      color={t.color.accentDefault}
+      accessibilityLabel={label}
+      {...testable(testID)}
+    />
   );
   return fill ? <View style={s.fill}>{indicator}</View> : indicator;
 }

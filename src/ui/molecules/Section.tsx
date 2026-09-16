@@ -5,6 +5,7 @@
 import React, { Children, type ReactNode } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { Text } from "../atoms/Text";
+import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 
 interface Props {
@@ -18,7 +19,7 @@ export function Section({ title, footer, children, testID }: Props) {
   const s = useStyles(styles);
   const rows = Children.toArray(children).filter(Boolean);
   return (
-    <View style={s.section} {...(testID ? { testID } : {})}>
+    <View style={s.section} {...testable(testID)}>
       {title ? (
         <Text role="caption" tone="muted" uppercase style={s.title} accessibilityRole="header">
           {title}

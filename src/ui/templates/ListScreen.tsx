@@ -5,6 +5,7 @@
 import React, { type ReactElement, type ReactNode } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { Skeleton } from "../atoms/Skeleton";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { useCanvas } from "./canvas";
 
@@ -62,7 +63,7 @@ export function ListScreen<T>({
       ListHeaderComponent={header ? <View style={s.header}>{header}</View> : null}
       ListFooterComponent={footer ? <>{footer}</> : null}
       ListEmptyComponent={loading ? <Skeleton lines={6} /> : <>{empty}</>}
-      {...(testID ? { testID } : {})}
+      {...testable(testID)}
     />
   );
 }

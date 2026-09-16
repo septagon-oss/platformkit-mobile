@@ -13,6 +13,7 @@ import { display, humanize, splitList, text } from "../../core/derive";
 import { Badge, type BadgeTone } from "../atoms/Badge";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
+import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 
 /**
@@ -32,30 +33,33 @@ interface Props {
   readonly value: unknown;
   /** compact is a value on a list row, where there is one line to say it in. */
   readonly compact?: boolean;
+  /** testID names whichever shape the value takes. */
+  readonly testID?: string;
 }
 
-export function Value({ field, value, compact = false }: Props) {
+export function Value({ field, value, compact = false, testID }: Props) {
   const s = useStyles(styles);
   const shown = display(field, value);
   const raw = text(value);
+  const id = testable(testID);
 
   if (raw === "")
     return (
-      <Text role={compact ? "caption" : "body"} tone="muted">
+      <Text role={compact ? "caption" : "body"} tone="muted" {...id}>
         —
       </Text>
     );
 
   if (field.enum && field.enum.length > 0)
-    return <Badge label={shown} tone={enumTone(field, raw)} />;
+    return <Badge label={shown} tone={enumTone(field, raw)} {...id} />;
 
   if (field.type === "bool")
-    return <Badge label={shown} tone={value === true ? "ok" : "neutral"} />;
+    return <Badge label={shown} tone={value === true ? "ok" : "neutral"} {...id} />;
 
   if (field.type === "list") {
     const items = splitList(raw);
     return (
-      <View style={s.chips}>
+      <View style={s.chips} {...id}>
         {items.slice(0, compact ? 3 : items.length).map((item) => (
           <Badge key={item} label={item} />
         ))}
@@ -68,7 +72,7 @@ export function Value({ field, value, compact = false }: Props) {
 
   if (field.type === "time")
     return (
-      <View style={s.withIcon}>
+      <View style={s.withIcon} {...id}>
         <Icon name="clock" size="sm" tone="muted" />
         <Text role={compact ? "caption" : "body"}>{shown}</Text>
       </View>
@@ -81,6 +85,7 @@ export function Value({ field, value, compact = false }: Props) {
         tone={compact ? "muted" : "primary"}
         numberOfLines={1}
         selectable={!compact}
+        {...id}
       >
         {shown}
       </Text>
@@ -88,7 +93,7 @@ export function Value({ field, value, compact = false }: Props) {
 
   if (field.type === "int" || field.type === "float")
     return (
-      <Text role="mono" tone={compact ? "muted" : "primary"}>
+      <Text role="mono" tone={compact ? "muted" : "primary"} {...id}>
         {shown}
       </Text>
     );
@@ -99,6 +104,7 @@ export function Value({ field, value, compact = false }: Props) {
       tone={compact ? "muted" : "primary"}
       numberOfLines={compact ? 1 : undefined}
       selectable={!compact}
+      {...id}
     >
       {shown}
     </Text>

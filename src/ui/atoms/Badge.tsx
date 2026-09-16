@@ -2,6 +2,7 @@
 // carries, or neutral.
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Text } from "./Text";
 
@@ -10,9 +11,10 @@ export type BadgeTone = "ok" | "warning" | "danger" | "info" | "neutral";
 interface Props {
   readonly label: string;
   readonly tone?: BadgeTone;
+  readonly testID?: string;
 }
 
-export function Badge({ label, tone = "neutral" }: Props) {
+export function Badge({ label, tone = "neutral", testID }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const [fg, bg] =
@@ -26,7 +28,11 @@ export function Badge({ label, tone = "neutral" }: Props) {
             ? [t.color.statusInfo, t.color.statusInfoBg]
             : [t.color.textMuted, t.color.surfaceMuted];
   return (
-    <View style={[s.pill, { backgroundColor: bg }]} accessibilityLabel={label}>
+    <View
+      style={[s.pill, { backgroundColor: bg }]}
+      accessibilityLabel={label}
+      {...testable(testID)}
+    >
       <Text role="caption" weight="semibold" style={{ color: fg }}>
         {label}
       </Text>

@@ -4,6 +4,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import type { IconSize } from "../scale";
+import { testable } from "../props";
 import { useTheme } from "../theme";
 import { toneColor, type Tone } from "./Text";
 
@@ -37,9 +38,10 @@ interface Props {
   readonly tone?: Tone;
   /** label makes the icon announce itself; without one it is decoration and hidden from readers. */
   readonly label?: string;
+  readonly testID?: string;
 }
 
-export function Icon({ name, size = "md", tone = "primary", label }: Props) {
+export function Icon({ name, size = "md", tone = "primary", label, testID }: Props) {
   const t = useTheme();
   return (
     <Ionicons
@@ -49,6 +51,7 @@ export function Icon({ name, size = "md", tone = "primary", label }: Props) {
       accessibilityElementsHidden={!label}
       importantForAccessibility={label ? "yes" : "no-hide-descendants"}
       {...(label ? { accessibilityLabel: label } : {})}
+      {...testable(testID)}
     />
   );
 }

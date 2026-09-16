@@ -4,6 +4,7 @@
 // filled shape, and both are this component.
 import React from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from "react-native";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Icon, type IconName } from "./Icon";
 import { Text, type Tone as TextTone } from "./Text";
@@ -59,7 +60,7 @@ export function Button({
       accessibilityState={{ disabled: off, busy }}
       android_ripple={header ? undefined : { color: t.color.borderStrong }}
       style={({ pressed }) => [...shape, pressed && s.pressed, off && s.off]}
-      {...(testID ? { testID } : {})}
+      {...testable(testID)}
     >
       <View style={s.content}>
         {busy ? (

@@ -5,6 +5,7 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import { ActionSheetIOS, Platform, Pressable, StyleSheet, View } from "react-native";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Icon } from "./Icon";
 import { Text } from "./Text";
@@ -62,7 +63,7 @@ export function ChoiceRow({
         accessibilityValue={{ text: shown }}
         accessibilityState={{ disabled }}
         accessibilityHint="Opens the choices"
-        {...(testID ? { testID } : {})}
+        {...testable(testID)}
       >
         <Text>{label}</Text>
         <View style={s.value}>
@@ -76,7 +77,7 @@ export function ChoiceRow({
   }
 
   return (
-    <View style={s.row} accessibilityLabel={label} {...(testID ? { testID } : {})}>
+    <View style={s.row} accessibilityLabel={label} {...testable(testID)}>
       <Text>{label}</Text>
       <View style={s.picker}>
         <Picker

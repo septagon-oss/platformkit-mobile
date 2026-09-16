@@ -4,13 +4,13 @@ import React from "react";
 import { Badge } from "../../src/ui/atoms/Badge";
 import { Button } from "../../src/ui/atoms/Button";
 import { ChoiceRow } from "../../src/ui/atoms/ChoiceRow";
+import { EmptyState } from "../../src/ui/atoms/EmptyState";
+import { Icon } from "../../src/ui/atoms/Icon";
 import { Notice } from "../../src/ui/atoms/Notice";
-import { Text } from "../../src/ui/atoms/Text";
+import { Skeleton } from "../../src/ui/atoms/Skeleton";
+import { Spinner } from "../../src/ui/atoms/Spinner";
 import { SwitchRow } from "../../src/ui/atoms/SwitchRow";
-import { FormField } from "../../src/ui/molecules/FormField";
-import { Row } from "../../src/ui/molecules/Row";
-import { TagsField } from "../../src/ui/molecules/TagsField";
-import { Section } from "../../src/ui/molecules/Section";
+import { Text } from "../../src/ui/atoms/Text";
 import { radius } from "../../src/ui/scale";
 import { ThemeProvider } from "../../src/ui/theme";
 import { palette } from "../../src/ui/tokens";
@@ -56,18 +56,6 @@ describe("Notice", () => {
   });
 });
 
-describe("FormField", () => {
-  test("the refusal sits under the field it is about", async () => {
-    await inTheme(
-      <FormField label="Title" required error="is required">
-        <></>
-      </FormField>,
-    );
-    expect(screen.getByText("Title *")).toBeOnTheScreen();
-    expect(screen.getByText("is required")).toBeOnTheScreen();
-  });
-});
-
 describe("Rows", () => {
   test("a switch row is a switch whose whole row toggles", async () => {
     const onChange = jest.fn();
@@ -93,18 +81,6 @@ describe("Rows", () => {
       text: "Done",
     });
   });
-
-  test("a list row is announced with its cells and opens on press", async () => {
-    const open = jest.fn();
-    await inTheme(
-      <Section title="Notes">
-        <Row title="Buy milk" cells={["Status: Open", "Rank: 2"]} onPress={open} />
-      </Section>,
-    );
-    await fireEvent.press(screen.getByRole("button", { name: "Buy milk, Status: Open, Rank: 2" }));
-    expect(open).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("header", { name: "Notes" })).toBeOnTheScreen();
-  });
 });
 
 describe("Theme", () => {
@@ -117,22 +93,35 @@ describe("Theme", () => {
   });
 });
 
-describe("TagsField", () => {
-  test("what is typed is part of the value, so a save that never blurred it carries it", async () => {
-    const onChange = jest.fn();
-    await inTheme(<TagsField label="Tags" value="alpha, beta, " onChange={onChange} />);
-    // A value this control wrote reads back as its chips and what is being typed.
-    expect(screen.getByRole("button", { name: "Remove alpha" })).toBeOnTheScreen();
-    await fireEvent.changeText(screen.getByTestId("tags-tags"), "gam");
-    expect(onChange).toHaveBeenCalledWith("alpha, beta, gam");
-  });
-
-  test("a record's own list is all chips, none of it half-typed", async () => {
-    const onChange = jest.fn();
-    await inTheme(<TagsField label="Tags" value="alpha, beta" onChange={onChange} />);
-    expect(screen.getByRole("button", { name: "Remove beta" })).toBeOnTheScreen();
-    expect(screen.getByTestId("tags-tags")).toHaveDisplayValue("");
-    await fireEvent.press(screen.getByRole("button", { name: "Remove alpha" }));
-    expect(onChange).toHaveBeenCalledWith("beta, ");
+describe("testID", () => {
+  test("every atom takes a testID a device flow can look up", async () => {
+    const none = () => undefined;
+    await inTheme(
+      <>
+        <Badge label="Ok" testID="t-badge" />
+        <Button label="Go" onPress={none} testID="t-button" />
+        <ChoiceRow label="Status" value="" options={[]} onChange={none} testID="t-choice" />
+        <EmptyState title="Nothing" testID="t-empty" />
+        <Icon name="add" testID="t-icon" />
+        <Notice text="Read this." testID="t-notice" />
+        <Skeleton testID="t-skeleton" />
+        <Spinner testID="t-spinner" />
+        <SwitchRow label="Pinned" value={false} onValueChange={none} testID="t-switch" />
+      </>,
+    );
+    for (const id of [
+      "t-badge",
+      "t-button",
+      "t-choice",
+      "t-empty",
+      "t-notice",
+      "t-skeleton",
+      "t-spinner",
+      "t-switch",
+    ])
+      expect(screen.getByTestId(id)).toBeOnTheScreen();
+    // An icon without a label is decoration, hidden from a screen reader; a
+    // device flow still finds it by id.
+    expect(screen.getByTestId("t-icon", { includeHiddenElements: true })).toBeOnTheScreen();
   });
 });

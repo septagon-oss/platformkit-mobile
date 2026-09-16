@@ -9,6 +9,7 @@ import { splitList } from "../../core/derive";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { TextField } from "../atoms/TextField";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 
 interface Props {
@@ -36,7 +37,7 @@ export function TagsField({ label, value, onChange, disabled = false, testID }: 
   };
 
   return (
-    <View style={s.field} {...(testID ? { testID } : {})}>
+    <View style={s.field} {...testable(testID)}>
       {tags.length > 0 ? (
         <View style={s.chips} accessibilityRole="list">
           {tags.map((tag) => (

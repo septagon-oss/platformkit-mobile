@@ -2,6 +2,7 @@
 // switch on the right, the whole row pressable.
 import React from "react";
 import { Pressable, StyleSheet, Switch, View } from "react-native";
+import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Text } from "./Text";
 
@@ -25,7 +26,7 @@ export function SwitchRow({ label, value, onValueChange, disabled = false, help,
       accessibilityRole="switch"
       accessibilityLabel={label}
       accessibilityState={{ checked: value, disabled }}
-      {...(testID ? { testID } : {})}
+      {...testable(testID)}
     >
       <View style={s.text}>
         <Text>{label}</Text>
