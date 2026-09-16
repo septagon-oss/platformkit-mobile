@@ -133,6 +133,13 @@ resolve directly to the TypeScript source used by this reference application.
 The consuming Expo application supplies its routes, identity, renderer pack and
 product screens, and composes one shared `Shell` and `ThemeProvider`.
 
+`platformkit-mobile/screens/SignIn` takes an optional `title`, the product's
+name over the form, and draws the shell's phases itself: a spinner while a
+saved sign-in is restored, and, when a saved sign-in could not be opened, the
+reason with Retry and a way to another server. A product that composes its
+own sign-in screen gets the same from `SignInForm` through `title`, `booting`,
+`failed` and `onRetry`; without them it renders the form as before.
+
 Pass `palette` to `ThemeProvider` to use the application's complete light and
 dark palettes. Pass `fonts` for native display, body and mono faces already
 available on the device; load bundled fonts before rendering the provider.

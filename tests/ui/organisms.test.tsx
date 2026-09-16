@@ -272,6 +272,62 @@ describe("SignInForm", () => {
     expect(onSubmit).toHaveBeenCalledWith("https://acme.test", "a@acme.test", " pw ");
   });
 
+  test('the product\'s name stands over the form, and "Sign in" when it has none to say', async () => {
+    const base = { baseURL: "", notice: "", busy: false, error: "", onSubmit: none, onClear: none };
+    await inTheme(<SignInForm {...base} />);
+    // The word is the heading and the button; nothing else says it.
+    expect(screen.getAllByText("Sign in")).toHaveLength(2);
+    await screen.unmount();
+    await inTheme(<SignInForm {...base} title="Collect" />);
+    expect(screen.getByText("Collect")).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeOnTheScreen();
+  });
+
+  test("while a saved sign-in is restored the form waits behind a spinner", async () => {
+    await inTheme(
+      <SignInForm
+        baseURL=""
+        notice=""
+        busy={false}
+        error=""
+        onSubmit={none}
+        onClear={none}
+        title="Collect"
+        booting
+      />,
+    );
+    expect(screen.getByTestId("sign-in-booting")).toBeOnTheScreen();
+    expect(screen.getByText("Collect")).toBeOnTheScreen();
+    expect(screen.getByText("Restoring your saved sign-in…")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Loading")).toBeOnTheScreen();
+    expect(screen.queryByTestId("submit")).toBeNull();
+  });
+
+  test("a saved sign-in that could not be opened is retried, or replaced by another server's", async () => {
+    const onRetry = jest.fn();
+    const onClear = jest.fn();
+    await inTheme(
+      <SignInForm
+        baseURL="https://acme.test"
+        notice=""
+        busy={false}
+        error=""
+        onSubmit={none}
+        onClear={onClear}
+        failed="https://acme.test did not answer within 15 seconds."
+        onRetry={onRetry}
+      />,
+    );
+    expect(screen.getByTestId("sign-in-failed")).toBeOnTheScreen();
+    expect(screen.getByRole("alert")).toHaveTextContent(/did not answer/);
+    await fireEvent.press(screen.getByRole("button", { name: "Retry" }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+    await fireEvent.press(screen.getByRole("button", { name: "Sign in to another server" }));
+    expect(onClear).toHaveBeenCalledTimes(1);
+    // There is no form to fill until the saved sign-in is retried or cleared.
+    expect(screen.queryByTestId("email")).toBeNull();
+  });
+
   test("an unreachable server is retried; an unreadable saved sign-in is cleared", async () => {
     const onSubmit = jest.fn();
     const onClear = jest.fn();
