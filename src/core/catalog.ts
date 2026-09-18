@@ -4,7 +4,10 @@
 // one line to read rather than a screen that is mysteriously empty.
 //
 // It mirrors kit/crud.Schema and ui/screens.Entry in the public repository.
-// testdata/catalog.json is that repository's golden file, copied verbatim.
+// testdata/catalog.json is that repository's golden file, and
+// testdata/catalog.source.json names the published version it was taken from:
+// one copy, from one version, with the two compared on a schedule in
+// .gitea/workflows/drift.yml rather than trusted because nobody looked.
 
 export const FIELD_TYPES = [
   "string",
@@ -68,7 +71,25 @@ export interface Entry {
   readonly singleton: boolean;
 }
 
+/**
+ * SUPPORTED_CATALOG_VERSION is the newest document shape this build can render.
+ *
+ * The server stamps `catalogVersion` on every answer precisely so a phone can
+ * notice a shape it was not written for, and a phone is the one client that
+ * cannot be redeployed at the moment the server changes: the answer it is parsed
+ * from is in somebody's pocket weeks after the build that reads it. So the number
+ * is checked rather than logged. It goes up in this file only when the shell has
+ * learned to render the new shape, which is the same rule the server applies from
+ * its side, and the two numbers meeting in the middle is the whole contract.
+ */
+export const SUPPORTED_CATALOG_VERSION = 1;
+
 export interface Catalog {
+  /**
+   * version is the stamped shape, or 0 for a server old enough not to stamp one —
+   * which is the shape every screen here was written against anyway.
+   */
+  readonly version: number;
   readonly resources: readonly Entry[];
 }
 
@@ -189,9 +210,39 @@ function entry(v: unknown, at: string): Entry {
 /** parseCatalog is the only way a Catalog is made from bytes. */
 export function parseCatalog(input: unknown): Catalog {
   if (!isRecord(input)) throw new CatalogError("document", "is not an object");
+  const version = catalogVersion(input.catalogVersion);
   const resources = input.resources;
   if (!Array.isArray(resources)) throw new CatalogError("resources", "is not a list");
-  return { resources: resources.map((r, i) => entry(r, `resources[${i}]`)) };
+  return { version, resources: resources.map((r, i) => entry(r, `resources[${i}]`)) };
+}
+
+/**
+ * catalogVersion decides what a build does with the stamp, and the three cases
+ * are not symmetric:
+ *
+ * - absent is 0: a server predating the field is a server this shell was built
+ *   against, and refusing it would turn an old deployment into a broken app.
+ * - anything that is not a whole positive number is refused. A stamp written as
+ *   "2" or 1.5 is a server that changed what the field *means*, which is the
+ *   event this field exists to catch — so a strange stamp is not repaired, any
+ *   more than a strange `type` is.
+ * - a number beyond SUPPORTED_CATALOG_VERSION is refused rather than rendered as
+ *   far as it is recognised. A field this build has never read is a field it will
+ *   silently drop, and a screen that quietly loses the column a person came for is
+ *   worse than the error: it looks like the data is gone.
+ */
+function catalogVersion(v: unknown): number {
+  if (v === undefined) return 0;
+  if (typeof v !== "number" || !Number.isInteger(v) || v < 1) {
+    throw new CatalogError("catalogVersion", `is ${JSON.stringify(v)}, not a whole version`);
+  }
+  if (v > SUPPORTED_CATALOG_VERSION) {
+    throw new CatalogError(
+      "catalogVersion",
+      `is ${v}; this build renders up to ${SUPPORTED_CATALOG_VERSION} and would draw screens from fields it cannot see`,
+    );
+  }
+  return v;
 }
 
 /** key is how a renderer pack names a resource: "module/entity". */

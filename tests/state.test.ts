@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { Catalog } from "../src/core/catalog";
 import { initial, reduce } from "../src/core/state";
 
-const catalog = { resources: [] };
+// A Catalog is only ever what parseCatalog returned, so the reducer's fixture says
+// the stamp too rather than pretending a document has no shape.
+const catalog: Catalog = { version: 1, resources: [] };
 
 test("restoration, loading, failure and sign-out transitions", () => {
   assert.equal(initial.phase, "booting");
