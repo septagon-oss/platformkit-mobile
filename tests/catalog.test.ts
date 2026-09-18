@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { check, provenance, raw, readSource, report } from "../scripts/catalog";
+import {
+  check,
+  lookupLatest,
+  provenance,
+  proxyPath,
+  raw,
+  readSource,
+  report,
+  type LatestLookup,
+} from "../scripts/catalog";
 import { CatalogError, parseCatalog, SUPPORTED_CATALOG_VERSION } from "../src/core/catalog";
 
 const fixture = () =>
@@ -227,21 +236,48 @@ test("the two provenance records have not forked in the fields they share", () =
   assert.deepEqual(upstream(tokens), upstream(catalog));
 });
 
-test("the drift report says the four things it can say, and only the true one", async () => {
+test("the drift report says the six things it can say, and only the true one", async () => {
   // This is the scheduled half, so its branches are chosen here rather than waited
   // for: a report nobody has watched speak is the unconnected mechanism this change
-  // exists to remove.
+  // exists to remove. Six outcomes, because "no newer version" and "I could not tell
+  // you" are different answers and used to be the same line.
   const source = await readSource();
   const ours = Buffer.from('{"catalogVersion":1}');
-  const against = (bytes: Buffer) => report(source, ours, bytes).join("\n");
-  const newer = (version: string, bytes: Buffer) =>
-    report(source, ours, ours, { version, bytes }).join("\n");
+  const lines = (latest?: LatestLookup) => report(source, ours, ours, latest).join("\n");
 
-  assert.match(against(ours), /^ok  testdata\/catalog\.json still matches v1\.1\.0/);
-  assert.match(against(Buffer.from('{"catalogVersion":2}')), /^DRIFT .*differs from v1\.1\.0/);
+  assert.match(lines(), /^ok  testdata\/catalog\.json still matches v1\.1\.0/);
+  assert.match(lines(), /^ok .*\nok  v1\.1\.0 is the version/m);
   assert.match(
-    newer("v1.2.0", Buffer.from('{"catalogVersion":2}')),
+    report(source, ours, Buffer.from('{"catalogVersion":2}')).join("\n"),
+    /^DRIFT .*differs from v1\.1\.0/,
+  );
+  assert.match(
+    lines({ state: "ahead", version: "v1.2.0", bytes: Buffer.from('{"catalogVersion":2}') }),
     /DRIFT v1\.2\.0 is published and its catalog differs/,
   );
-  assert.match(newer("v1.2.0", ours), /note  v1\.2\.0 is published; its catalog is the same shape/);
+  assert.match(
+    lines({ state: "ahead", version: "v1.2.0", bytes: ours }),
+    /note  v1\.2\.0 is published; its catalog is the same shape/,
+  );
+  // The line that shipped green without asking: an unreachable proxy must never be
+  // reported as the second "ok", because that is how a schedule becomes a placebo.
+  const unknown = lines({
+    state: "unreachable",
+    detail: "https://proxy.golang.org/… answered 404",
+  });
+  assert.match(unknown, /note  cannot tell whether a newer version is published: .*404/);
+  assert.equal(/^ok .*\nok /m.test(unknown), false, "a failed lookup cannot report two oks");
+});
+
+test("the proxy is asked about the module path, not the repository path", async () => {
+  // What actually shipped for one revision: `new URL(repo).pathname` alone, so the
+  // proxy was asked about a module called `septagon-oss/platformkit`, answered 404,
+  // and the report said "ok, latest". The host is part of a Go module path.
+  const source = await readSource();
+  assert.equal(proxyPath(source), "github.com/septagon-oss/platformkit");
+  assert.equal(
+    await lookupLatest(source).then((l) => l.state),
+    "latest",
+    "the live proxy resolves this module; a 404 here means the path is wrong again",
+  );
 });

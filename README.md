@@ -376,7 +376,11 @@ both files; the pin itself moves only by editing the recorded commit, which is a
 diff somebody reviews. What no local check can see is whether the server has moved,
 so the `contract-drift` schedule asks the public repository and the module proxy and
 reports without blocking, for the reason at the head of
-[.gitea/workflows/drift.yml](.gitea/workflows/drift.yml).
+[.gitea/workflows/drift.yml](.gitea/workflows/drift.yml). A proxy it cannot reach is
+reported as _unknown_ and never as agreement: the first version of
+`scripts/catalog.ts` asked the proxy for `septagon-oss/platformkit` instead of
+`github.com/septagon-oss/platformkit`, took a 404, and printed "ok, this is the latest
+version".
 
 Unlike the design tokens, this fixture is a test input and not a build input — no app
 code reads it, and `scripts/fingerprint.ts` names its sources rather than sweeping
