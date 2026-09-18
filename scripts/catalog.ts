@@ -137,6 +137,19 @@ export async function refresh(): Promise<string> {
 }
 
 /**
+ * What the public module proxy told us. Three states, not two: a lookup that
+ * failed is not agreement that nothing new was published. The first version of
+ * this file asked the proxy for `septagon-oss/platformkit` instead of
+ * `github.com/septagon-oss/platformkit`, got a 404, returned "" and printed
+ * "ok, this is the latest version" — a check reporting green because it never
+ * asked the question. `unreachable` exists so that mistake is a distinct answer.
+ */
+export type LatestLookup =
+  | { state: "latest"; version: string }
+  | { state: "ahead"; version: string; bytes: Buffer }
+  | { state: "unreachable"; detail: string };
+
+/**
  * report answers both questions from bytes rather than the network, so each branch
  * is testable instead of awaited: has our copy moved away from the commit it names,
  * and has a newer published version changed the contract underneath it?
@@ -145,14 +158,18 @@ export function report(
   source: Source,
   local: Buffer,
   pinned: Buffer,
-  latest?: { readonly version: string; readonly bytes: Buffer } | null,
+  latest: LatestLookup = { state: "latest", version: source.upstream.tag },
 ): readonly string[] {
   const lines = [
     hash(local) === hash(pinned)
       ? `ok  ${FIXTURE} still matches ${source.upstream.tag}`
       : `DRIFT ${FIXTURE} differs from ${source.upstream.tag}; run tsx scripts/catalog.ts refresh`,
   ];
-  if (!latest || latest.version === source.upstream.tag) {
+  if (latest.state === "unreachable") {
+    lines.push(`note  cannot tell whether a newer version is published: ${latest.detail}`);
+    return lines;
+  }
+  if (latest.state === "latest") {
     lines.push(`ok  ${source.upstream.tag} is the version the public module resolves as latest`);
     return lines;
   }
@@ -167,27 +184,55 @@ export function report(
 /** drift is report's thin effectful shell. */
 export async function drift(): Promise<string> {
   const source = await readSource();
-  const [local, pinned, version] = await Promise.all([
+  const [local, pinned, latest] = await Promise.all([
     readFile(FIXTURE),
     fetchAt(source, source.upstream.commit),
-    latestVersion(source),
+    lookupLatest(source),
   ]);
-  const latest =
-    version && version !== source.upstream.tag
-      ? { version, bytes: await fetchAt(source, version) }
-      : null;
-  return report(source, local, pinned, latest).join("\n");
+  const answered =
+    latest.state === "unreachable" || latest.version === source.upstream.tag
+      ? latest
+      : {
+          state: "ahead" as const,
+          version: latest.version,
+          bytes: await fetchAt(source, latest.version),
+        };
+  return report(source, local, pinned, answered).join("\n");
 }
 
-/** latestVersion asks the public proxy which version an outside `go get` takes. */
-async function latestVersion(source: Source): Promise<string> {
-  const module = new URL(source.upstream.repository).pathname.replace(/^\/|\/$/g, "");
-  const response = await fetch(`https://proxy.golang.org/${module}/@latest`, {
-    headers: { "user-agent": "platformkit-mobile" },
-  });
-  if (!response.ok) return "";
+/**
+ * proxyPath turns the recorded repository URL into the Go module path the public
+ * proxy indexes. The host is part of the path — `proxy.golang.org/github.com/…`,
+ * not `proxy.golang.org/…` — which is the mistake this comment exists to keep
+ * somebody from repeating, and lowercase because the proxy escapes by case.
+ */
+export function proxyPath(source: Source): string {
+  const url = new URL(source.upstream.repository);
+  return `${url.hostname}${url.pathname}`
+    .replace(/^\/|\/$/g, "")
+    .replace(/\.git$/, "")
+    .toLowerCase();
+}
+
+/** lookupLatest asks the proxy which version an outside `go get` would take. */
+export async function lookupLatest(source: Source): Promise<LatestLookup> {
+  const target = `https://proxy.golang.org/${proxyPath(source)}/@latest`;
+  let response: Response;
+  try {
+    response = await fetch(target, { headers: { "user-agent": "platformkit-mobile" } });
+  } catch (cause) {
+    return {
+      state: "unreachable",
+      detail: `${target}: ${cause instanceof Error ? cause.message : cause}`,
+    };
+  }
+  if (!response.ok)
+    return { state: "unreachable", detail: `${target} answered ${response.status}` };
   const parsed = JSON.parse(await response.text()) as unknown;
-  return isRecord(parsed) && typeof parsed.Version === "string" ? parsed.Version : "";
+  const version = isRecord(parsed) && typeof parsed.Version === "string" ? parsed.Version : "";
+  return version
+    ? { state: "latest", version }
+    : { state: "unreachable", detail: `${target} returned no version` };
 }
 
 async function main(): Promise<void> {
