@@ -367,10 +367,26 @@ change, also exercise the affected journey on the target platform and report
 what you ran.
 
 [testdata/catalog.json](testdata/catalog.json) is a checked-in copy of
-PlatformKit's `ui/screens/testdata/catalog.json`. The tests validate this local
-fixture; they do not fetch upstream changes. When the catalog contract changes,
-compare both files, update the copy deliberately, and run the checks in both
-repositories.
+PlatformKit's `ui/screens/testdata/catalog.json`, and
+[testdata/catalog.source.json](testdata/catalog.source.json) records the commit it
+was copied from, in the same shape the design-token provenance uses. The suite
+checks the bytes against that record offline, so editing the copy to make a test
+pass fails instead of fixing anything. `npx tsx scripts/catalog.ts refresh` rewrites
+both files; the pin itself moves only by editing the recorded commit, which is a
+diff somebody reviews. What no local check can see is whether the server has moved,
+so the `contract-drift` schedule asks the public repository and the module proxy and
+reports without blocking, for the reason at the head of
+[.gitea/workflows/drift.yml](.gitea/workflows/drift.yml).
+
+Unlike the design tokens, this fixture is a test input and not a build input — no app
+code reads it, and `scripts/fingerprint.ts` names its sources rather than sweeping
+`testdata/`, so refreshing the copy is not a binary change and the `android`
+workflow has nothing to rebuild. A stale copy blinds the suite and the review; it
+cannot reach the person. What can reach them is a server answering with a shape this
+build has never seen, so `parseCatalog` refuses a `catalogVersion` newer than
+`SUPPORTED_CATALOG_VERSION` in [src/core/catalog.ts](src/core/catalog.ts) rather than
+drawing a screen from the fields it happens to recognise; a server old enough not to
+stamp is the server this shell was built against, and is accepted.
 
 [testdata/design-tokens.json](testdata/design-tokens.json) is the palette's
 source and a build input: the native fingerprint hashes it, so a token change
