@@ -75,6 +75,10 @@ Distances live in `src/ui/scale.ts`. The gallery
 (`src/ui/gallery.tsx`, served by `app/gallery.tsx` in development or in a build
 with `EXPO_PUBLIC_GALLERY=1`) shows every atom and molecule in both modes.
 
+The [shared mobile components specification](docs/shared-mobile-components.md)
+defines the proposed richer components, their APIs, reuse, gallery states and
+delivery order. It describes planned work, not additional shipped components.
+
 Keep UI imports pointed toward the primitives. Atoms may compose other atoms;
 molecules add atoms; templates supply layout through children or render callbacks
 and may compose atoms and molecules. Organisms combine these layers. Shared
