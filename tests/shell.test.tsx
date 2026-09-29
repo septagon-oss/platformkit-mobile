@@ -22,7 +22,7 @@ const saved = { version: 1, baseURL: "https://saved.test", cookie: "pk=saved" };
 const identity = { userId: "u1", email: "a@saved.test" };
 const routes = {
   me: "GET /api/v1/auth/me",
-  resources: "GET /api/v1/admin/resources",
+  resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
   logout: "POST /api/v1/auth/logout",
 };

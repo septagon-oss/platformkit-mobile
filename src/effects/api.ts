@@ -308,7 +308,7 @@ export function createApi(
       }
     },
     async catalog() {
-      return parseCatalog(await json("GET", "/api/v1/admin/resources"));
+      return parseCatalog(await json("GET", "/api/v1/app/resources"));
     },
     async list(e, { offset = 0, limit = PER_PAGE, sort = "", filters = [] } = {}) {
       const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
