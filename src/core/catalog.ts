@@ -1,4 +1,4 @@
-// catalog.ts is the seam: the JSON GET /api/v1/admin/resources answers, as
+// catalog.ts is the seam: the JSON GET /api/v1/app/resources answers, as
 // types, and one validator that refuses a document the shell cannot render
 // from — by the path of the first field that is wrong, so a server change is
 // one line to read rather than a screen that is mysteriously empty.

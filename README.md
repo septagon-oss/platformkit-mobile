@@ -2,7 +2,7 @@
 
 PlatformKit Mobile is an Expo and React Native client for
 [PlatformKit](https://github.com/septagon-oss/platformkit). It signs in to a
-running server, reads `GET /api/v1/admin/resources`, and derives list, detail,
+running server, reads `GET /api/v1/app/resources`, and derives list, detail,
 create and edit screens from the resources returned for that session. The
 server remains responsible for authorization and validation on every request.
 This repository builds independently; it has no build-time dependency on the
