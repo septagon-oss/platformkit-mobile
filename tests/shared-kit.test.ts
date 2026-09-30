@@ -309,6 +309,37 @@ test("media removal never reassigns the viewer and invalid dimensions refuse", (
   refused(d.deriveMedia({ ...input, content: ready([{ ...item, width: 0 }]) }, p), "invalid-input");
 });
 
+test("viewer selection survives image load states while thumbnail opening still requires ready media", () => {
+  const item: d.MediaItem = {
+    id: "arch",
+    width: 700,
+    height: 1000,
+    description: "Stone arch",
+    decorative: false,
+    state: "ready",
+  };
+  const input: d.MediaInput = {
+    content: ready([item]),
+    selectedId: item.id,
+    page: { more: false, loading: false },
+  };
+  for (const state of ["ready", "loading", "error", "unavailable"] as const) {
+    const current = { ...input, content: ready([{ ...item, state }]) };
+    const thumbnail = ok(d.deriveMedia(current, p)).items[0]!;
+    assert.equal(thumbnail.canOpen, state === "ready");
+    const viewer = ok(d.deriveViewer({ ...current, open: true }, p));
+    assert.equal(viewer.selected?.id, "arch");
+    assert.equal(viewer.selected?.state, state);
+    assert.equal(viewer.selectionIssue, undefined);
+    assert.equal(viewer.selected?.canRetry, state === "error" || state === "unavailable");
+  }
+  const decorative = ok(
+    d.deriveViewer({ ...input, content: ready([{ ...item, decorative: true }]), open: true }, p),
+  );
+  assert.equal(decorative.selected, undefined);
+  assert.equal(decorative.selectionIssue?.code, "unavailable");
+});
+
 test("chart gaps remain disconnected, missing is not zero, hidden data domains refuse", () => {
   const input: d.ChartInput = {
     content: ready([

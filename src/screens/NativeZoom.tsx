@@ -1,7 +1,7 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ResumableZoom, type ResumableZoomRefType } from "react-native-zoom-toolkit";
+import { fitContainer, ResumableZoom, type ResumableZoomRefType } from "react-native-zoom-toolkit";
 import type { ZoomSlotProps } from "../ui/organisms/PhotoViewer";
 import { Button } from "../ui/atoms/Button";
 import { kitStyles } from "../ui/layout";
@@ -9,9 +9,11 @@ import { useStyles } from "../ui/theme";
 export function NativeZoom(props: ZoomSlotProps) {
   return <Zoom key={props.id} {...props} />;
 }
-function Zoom({ children, motion, labels }: ZoomSlotProps) {
+function Zoom({ children, aspectRatio, motion, labels }: ZoomSlotProps) {
   const zoom = useRef<ResumableZoomRefType>(null),
     s = useStyles(kitStyles);
+  const [frame, setFrame] = useState({ width: 0, height: 0 });
+  const { width } = fitContainer(aspectRatio, frame);
   const change = (factor: number) => {
     const state = zoom.current?.getState();
     if (state)
@@ -39,16 +41,28 @@ function Zoom({ children, motion, labels }: ZoomSlotProps) {
   };
   return (
     <GestureHandlerRootView style={s.grow}>
-      <ResumableZoom
-        ref={zoom}
-        maxScale={6}
-        decay={false}
-        scaleMode="clamp"
-        panMode="clamp"
-        tapsEnabled={motion === "normal"}
+      <View
+        style={s.viewport}
+        onLayout={({ nativeEvent: { layout } }) =>
+          setFrame((current) =>
+            current.width === layout.width && current.height === layout.height
+              ? current
+              : { width: layout.width, height: layout.height },
+          )
+        }
       >
-        {children}
-      </ResumableZoom>
+        <ResumableZoom
+          ref={zoom}
+          maxScale={6}
+          decay={false}
+          scaleMode="clamp"
+          panMode="clamp"
+          tapsEnabled={motion === "normal"}
+        >
+          {/* The zoom child is measured intrinsically; percentages need a bounded parent. */}
+          <View style={{ width }}>{children}</View>
+        </ResumableZoom>
+      </View>
       <View style={s.row}>
         <Button label={labels.panLeft} tone="secondary" onPress={() => pan(1, 0)} />
         <Button label={labels.panRight} tone="secondary" onPress={() => pan(-1, 0)} />

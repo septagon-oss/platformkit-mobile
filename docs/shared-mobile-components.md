@@ -838,6 +838,12 @@ MediaItem contains no credential, cookie, upload command or remote response body
 page: Page }`. An item keeps its ID while its independently loaded image changes
 state; that load state never signals domain write success.
 
+Opening a thumbnail requires ready, nondecorative media. Once a viewer is open,
+the selected ID remains valid through loading, error and unavailable states while
+the item exists and is nondecorative. Loading keeps its image adapter mounted;
+error and unavailable expose that item's retry action. Only a removed or
+decorative selected item produces the viewer's selection-unavailable notice.
+
 | Component / layer | Props and events | Gallery cases; reference |
 | --- | --- | --- |
 | `MediaHero` / molecule | `model: { item: MediaItemModel; title?: string; subtitle?: string; action?: Action }`, `renderImage(ImageSlotProps): ReactNode`, `onOpen(id)`, `onAction(id)`, `onRetry(id)`. Full-bleed media with readable content below or on a theme-backed surface; never unmeasured text contrast directly over an arbitrary image. | `media-hero/default`, `portrait`, `landscape`, `decorative`, `loading`, `error`, `unavailable`, `long-copy`; R13. |
@@ -868,7 +874,13 @@ controls. Compose `react-native-zoom-toolkit` ResumableZoom inside the existing
 native modal layout; use its gesture/zoom implementation and keep the shared
 Button/ActionBar chrome. Do not implement pinch mathematics or adopt a viewer
 that takes ownership of copy/theme/selection. No SDK-specific index escapes this
-adapter. A missing
+adapter. PhotoViewer passes the derived aspect ratio through `ZoomSlotProps`.
+The adapter measures the available viewing area and uses the toolkit's
+`fitContainer` to give its child a numeric width, including after layout changes.
+`MediaHero` accepts an optional `renderFrame(frame)` slot that fills the available
+height while keeping captions and retry controls outside the zoomed image.
+Zoomed content is clipped to the viewing area so navigation remains reachable.
+A missing
 image/source is `unavailable` (correctable by reload); invalid dimensions or
 duplicate identities are `invalid-input` (immutable). If the selected item is
 removed during viewing, show unavailable and Close; never silently open the next

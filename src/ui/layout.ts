@@ -14,6 +14,7 @@ export const kitStyles = (t: Theme) =>
       borderRadius: t.radius.lg,
     },
     grow: { flex: 1 },
+    viewport: { flex: 1, overflow: "hidden" },
     header: { padding: t.space.lg, gap: t.space.sm },
     footer: {
       padding: t.space.lg,

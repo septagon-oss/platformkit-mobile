@@ -10,6 +10,7 @@ import { useStyles } from "../theme";
 import { useCanvas } from "../templates/canvas";
 export interface ZoomSlotProps {
   readonly id: string;
+  readonly aspectRatio: number;
   readonly motion: ViewerModel["motion"];
   readonly labels: ViewerModel["labels"];
   readonly children: React.ReactNode;
@@ -35,7 +36,8 @@ export function PhotoViewer({
   onClosed,
 }: Props) {
   const s = useStyles(kitStyles),
-    canvas = useCanvas();
+    canvas = useCanvas(),
+    selected = model.selected;
   return (
     <Modal
       visible={model.open}
@@ -51,26 +53,28 @@ export function PhotoViewer({
         </View>
         {model.selectionIssue ? (
           <Notice text={model.selectionIssue.message} announcement="polite" />
-        ) : model.selected ? (
-          <View key={model.selected.id} style={s.grow}>
-            {renderZoom({
-              id: model.selected.id,
-              motion: model.motion,
-              labels: model.labels,
-              children: (
-                <MediaHero
-                  model={{
-                    item: model.selected,
-                    title: undefined,
-                    subtitle: undefined,
-                    action: undefined,
-                  }}
-                  renderImage={renderImage}
-                  fit="contain"
-                  onRetry={onRetry}
-                />
-              ),
-            })}
+        ) : selected ? (
+          <View key={selected.id} style={s.grow}>
+            <MediaHero
+              model={{
+                item: selected,
+                title: undefined,
+                subtitle: undefined,
+                action: undefined,
+              }}
+              renderImage={renderImage}
+              fit="contain"
+              onRetry={onRetry}
+              renderFrame={(children) =>
+                renderZoom({
+                  id: selected.id,
+                  aspectRatio: selected.aspectRatio,
+                  motion: model.motion,
+                  labels: model.labels,
+                  children,
+                })
+              }
+            />
           </View>
         ) : null}
         <View style={[s.footer, canvas.footer]}>

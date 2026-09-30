@@ -109,8 +109,9 @@ export function deriveViewer(input: MediaInput & { readonly open: boolean }, p: 
       ...media,
       open: input.open,
       selected,
-      selectionIssue:
-        input.open && !selected ? issue(p, "selectedId", "unavailable") : media.selectionIssue,
+      // An open viewer retains the item's load/recovery lifecycle; canOpen
+      // only governs opening a ready thumbnail from a collection.
+      selectionIssue: input.open && !selected ? issue(p, "selectedId", "unavailable") : undefined,
       position: selected ? `${index + 1} ${p.copy.kit.of} ${media.items.length}` : undefined,
       previous: at > 0 ? eligible[at - 1]!.id : undefined,
       next: at >= 0 && at < eligible.length - 1 ? eligible[at + 1]!.id : undefined,

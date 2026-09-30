@@ -12,6 +12,7 @@ export type ImageRenderer = (props: ImageSlotProps) => React.ReactNode;
 export function MediaHero({
   model,
   renderImage,
+  renderFrame,
   onOpen,
   onAction,
   onRetry,
@@ -19,6 +20,7 @@ export function MediaHero({
 }: {
   readonly model: MediaHeroModel;
   readonly renderImage: ImageRenderer;
+  readonly renderFrame?: (frame: React.ReactNode) => React.ReactNode;
   readonly onOpen?: (id: string) => void;
   readonly onAction?: (id: string) => void;
   readonly onRetry?: (id: string) => void;
@@ -26,30 +28,33 @@ export function MediaHero({
 }) {
   const s = useStyles(kitStyles),
     item = model.item;
+  const frame = (
+    <View style={[s.image, { aspectRatio: item.aspectRatio }]}>
+      {item.state === "ready" || item.state === "loading" ? (
+        <View
+          style={[s.imageFill, item.state === "loading" && s.concealed]}
+          accessibilityElementsHidden={item.state === "loading"}
+          importantForAccessibility={item.state === "loading" ? "no-hide-descendants" : "auto"}
+        >
+          {renderImage({
+            id: item.id,
+            description: item.description,
+            decorative: item.decorative,
+            fit,
+            aspectRatio: item.aspectRatio,
+          })}
+        </View>
+      ) : null}
+      {item.state === "loading" ? (
+        <Skeleton label={item.loadingLabel} motion={item.motion} variant="media" />
+      ) : item.reason ? (
+        <Notice text={item.reason} announcement="polite" />
+      ) : null}
+    </View>
+  );
   return (
-    <View style={s.stack}>
-      <View style={[s.image, { aspectRatio: item.aspectRatio }]}>
-        {item.state === "ready" || item.state === "loading" ? (
-          <View
-            style={[s.imageFill, item.state === "loading" && s.concealed]}
-            accessibilityElementsHidden={item.state === "loading"}
-            importantForAccessibility={item.state === "loading" ? "no-hide-descendants" : "auto"}
-          >
-            {renderImage({
-              id: item.id,
-              description: item.description,
-              decorative: item.decorative,
-              fit,
-              aspectRatio: item.aspectRatio,
-            })}
-          </View>
-        ) : null}
-        {item.state === "loading" ? (
-          <Skeleton label={item.loadingLabel} motion={item.motion} variant="media" />
-        ) : item.reason ? (
-          <Notice text={item.reason} announcement="polite" />
-        ) : null}
-      </View>
+    <View style={[s.stack, renderFrame && s.grow]}>
+      {renderFrame ? renderFrame(frame) : frame}
       {model.title ? <Text role="title">{model.title}</Text> : null}
       {model.subtitle ? <Text>{model.subtitle}</Text> : null}
       {item.caption ? <Text>{item.caption}</Text> : null}
