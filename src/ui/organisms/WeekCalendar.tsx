@@ -20,7 +20,7 @@ export function WeekCalendar({ model, onDate, onEvent, onMoreEvents }: Props) {
   const s = useStyles(kitStyles),
     t = useTheme();
   return (
-    <View style={s.stack}>
+    <ScrollView style={s.grow} contentContainerStyle={s.stack}>
       <ModelState model={model} />
       <ScrollView horizontal>
         <View style={s.row}>
@@ -59,13 +59,18 @@ export function WeekCalendar({ model, onDate, onEvent, onMoreEvents }: Props) {
                     {tick.label}
                   </Text>
                 ))}
-                {calendarTargets(day, t.extent.calendarHeight, t.hit).map((group) =>
+                {calendarTargets(
+                  day,
+                  t.extent.calendarHeight,
+                  t.hit,
+                  t.extent.calendarDay - 2 * t.space.lg,
+                ).map((group) =>
                   group.grouped ? (
                     <View
                       key={group.eventIds.join("/")}
                       style={{
                         position: "absolute",
-                        top: `${group.events[0]!.top * 100}%`,
+                        top: `${group.top * 100}%`,
                         left: t.space.xl,
                         right: 0,
                       }}
@@ -98,7 +103,11 @@ export function WeekCalendar({ model, onDate, onEvent, onMoreEvents }: Props) {
                           }}
                         />
                         {event.status ? (
-                          <Badge label={event.status.label} tone={event.status.tone} />
+                          <Badge
+                            label={event.status.label}
+                            tone={event.status.tone}
+                            symbol={event.status.symbol}
+                          />
                         ) : null}
                       </View>
                     ))
@@ -109,6 +118,6 @@ export function WeekCalendar({ model, onDate, onEvent, onMoreEvents }: Props) {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </ScrollView>
   );
 }

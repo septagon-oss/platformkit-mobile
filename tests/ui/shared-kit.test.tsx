@@ -1,6 +1,6 @@
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen, within } from "@testing-library/react-native";
 import { Text } from "react-native";
 import {
   deriveActions,
@@ -17,6 +17,7 @@ import { QuantityControl } from "../../src/ui/molecules/QuantityControl";
 import { DataList } from "../../src/ui/organisms/DataList";
 import { MapWithList } from "../../src/ui/organisms/MapWithList";
 import { DetailSheet } from "../../src/ui/templates/DetailSheet";
+import { MediaHero } from "../../src/ui/molecules/MediaHero";
 import { Gallery } from "../../src/ui/gallery";
 import { ThemeProvider } from "../../src/ui/theme";
 import { presentation } from "../fakes/presentation";
@@ -179,6 +180,10 @@ test("old map callbacks consult the latest model before selecting a removed mark
   retained.onMarker("point-1");
   expect(onSelect).not.toHaveBeenCalled();
   expect(onRevealPoints).not.toHaveBeenCalled();
+  await screen.rerender(view(false));
+  await screen.unmount();
+  retained.onMarker("point-1");
+  expect(onSelect).not.toHaveBeenCalled();
 });
 
 test.each([
@@ -194,4 +199,32 @@ test.each([
 ])("Gallery renders %s through its real model", async (caseId) => {
   await render(<Gallery presentation={presentation} initialCaseId={caseId} />);
   expect(screen.getByTestId("gallery")).toBeOnTheScreen();
+});
+
+test("a loading image keeps its renderer mounted so the native load can complete", async () => {
+  const model = ok(kitExamples(presentation, "media-hero/loading")).hero;
+  const image = jest.fn(() => <Text testID="image-adapter">Image adapter</Text>);
+  await render(theme(<MediaHero model={model} renderImage={image} />));
+  expect(image).toHaveBeenCalled();
+  expect(screen.getByTestId("image-adapter", { includeHiddenElements: true })).toBeTruthy();
+  expect(screen.queryByTestId("image-adapter")).toBeNull();
+  const ready = ok(kitExamples(presentation, "media-hero/default")).hero;
+  await screen.rerender(theme(<MediaHero model={ready} renderImage={image} />));
+  expect(screen.getByTestId("image-adapter")).toBeTruthy();
+});
+
+test("unsupported map providers retain the list without offering a retry", async () => {
+  await render(<Gallery presentation={presentation} initialCaseId="map-with-list/points" />);
+  expect(
+    within(screen.getByTestId("gallery-kit")).getByRole("button", { name: "Example" }),
+  ).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+  await screen.rerender(
+    <Gallery
+      key="offline"
+      presentation={presentation}
+      initialCaseId="map-with-list/provider-offline"
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Retry" })).toBeTruthy();
 });

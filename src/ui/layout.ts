@@ -24,6 +24,11 @@ export const kitStyles = (t: Theme) =>
     },
     selected: { borderColor: t.color.focus, borderWidth: t.extent.focus },
     image: { width: "100%", overflow: "hidden", backgroundColor: t.color.surfaceMuted },
+    imageFill: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0 },
+    concealed: { opacity: 0 },
     chart: { height: t.extent.chart, width: "100%" },
+    chartAxis: { height: t.extent.chart, width: t.extent.chartAxis },
+    chartPlot: { flexDirection: "row", gap: t.space.sm, alignItems: "stretch" },
+    chartTicks: { flexDirection: "row", justifyContent: "space-between", gap: t.space.sm },
     column: { minWidth: t.extent.calendarDay, flex: 1 },
   });

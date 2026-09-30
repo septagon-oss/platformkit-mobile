@@ -42,14 +42,16 @@ export function PricingTiers({ model, onPeriod, onSelect, onAction, onRetry }: P
             {plan.title}
           </Text>
           {plan.description ? <Text>{plan.description}</Text> : null}
-          {plan.badge ? <Badge label={plan.badge.label} tone={plan.badge.tone} /> : null}
+          {plan.badge ? (
+            <Badge label={plan.badge.label} tone={plan.badge.tone} symbol={plan.badge.symbol} />
+          ) : null}
           {plan.current ? <Badge label={plan.current} /> : null}
           {plan.offer?.price ? <Price model={plan.offer.price} /> : null}
           {plan.offer?.contact ? <Text>{plan.offer.contact}</Text> : null}
           {plan.reason ? <Text>{plan.reason}</Text> : null}
           {plan.features.map((feature) => (
             <Text key={feature.id} accessibilityLabel={feature.accessibleLabel}>
-              {feature.label}: {feature.text}
+              {feature.displayLabel}
             </Text>
           ))}
           <Button

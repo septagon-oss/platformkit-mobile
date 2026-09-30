@@ -44,7 +44,7 @@ export function DayStrip({
         {model.days.map((day) => (
           <Button
             key={day.id}
-            label={day.today ? `${day.title} · ${day.todayLabel}` : day.title}
+            label={day.label}
             tone={day.selected ? "primary" : "secondary"}
             selected={day.selected}
             disabled={!day.enabled}

@@ -43,7 +43,7 @@ export function Stepper({
         {model.steps.map((step) => (
           <Button
             key={step.id}
-            label={`${step.label} · ${step.stateLabel}`}
+            label={step.displayLabel}
             tone="secondary"
             selected={step.selected}
             disabled={!step.canGo}

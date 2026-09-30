@@ -36,6 +36,7 @@ test("a packed dependency resolves the shared composition and atomic layers with
     "core/catalog",
     "core/derive",
     "effects/api",
+    "effects/media",
     "renderers",
     "route",
     "shell",
@@ -111,6 +112,20 @@ test("a packed dependency resolves the shared composition and atomic layers with
   ]) {
     assert.throws(() => require.resolve(`platformkit-mobile/${name}`), name);
   }
+  const nativeMap = execFileSync(
+    process.execPath,
+    [
+      "--conditions=react-native",
+      "-e",
+      "process.stdout.write(require.resolve('platformkit-mobile/screens/NativeMap'))",
+    ],
+    { cwd: temporary, encoding: "utf8" },
+  );
+  assert.equal(nativeMap, path.join(installed, "src/screens/NativeMap.native.tsx"));
+  assert.equal(
+    require.resolve("platformkit-mobile/screens/NativeMap"),
+    path.join(installed, "src/screens/NativeMap.tsx"),
+  );
   const files = new Set(packed.files.map((file) => file.path));
   const dependencies = Object.keys(
     JSON.parse(readFileSync(path.join(installed, "package.json"), "utf8")).dependencies,

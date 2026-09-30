@@ -40,7 +40,11 @@ export function ProductCard({
           </Text>
           {product.description ? <Text>{product.description}</Text> : null}
           {product.status ? (
-            <Badge label={product.status.label} tone={product.status.tone} />
+            <Badge
+              label={product.status.label}
+              tone={product.status.tone}
+              symbol={product.status.symbol}
+            />
           ) : null}
           <Price model={product.price} />
           {product.reason ? <Text>{product.reason}</Text> : null}

@@ -12,7 +12,7 @@ export function MapLegend({ model }: { readonly model: MapLegendModel }) {
       <Text role="label">{model.title}</Text>
       <View style={s.row}>
         {model.entries.map((entry, i) => (
-          <Badge key={i} label={entry.label} tone={entry.tone} />
+          <Badge key={i} label={entry.label} tone={entry.tone} symbol={entry.symbol} />
         ))}
       </View>
     </View>

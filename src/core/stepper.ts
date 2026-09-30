@@ -77,17 +77,21 @@ export function deriveStepper(input: StepperInput, p: Presentation) {
       );
     const current = input.steps[index];
     return {
-      steps: input.steps.map((s, i) => ({
-        ...s,
-        selected: i === index,
-        canGo: editable && i < index && s.completion !== "incomplete",
-        stateLabel:
+      steps: input.steps.map((s, i) => {
+        const stateLabel =
           s.completion === "complete"
             ? p.copy.kit.complete
             : s.completion === "skipped"
               ? p.copy.kit.skipped
-              : p.copy.kit.required,
-      })),
+              : p.copy.kit.required;
+        return {
+          ...s,
+          selected: i === index,
+          canGo: editable && i < index && s.completion !== "incomplete",
+          stateLabel,
+          displayLabel: `${s.label} · ${stateLabel}`,
+        };
+      }),
       currentId: input.currentId,
       progress: input.steps.length ? done / input.steps.length : 0,
       progressLabel: `${p.copy.kit.steps}: ${done}/${input.steps.length}; ${p.copy.kit.skipped}: ${skipped}`,

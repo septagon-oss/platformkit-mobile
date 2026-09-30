@@ -5,16 +5,18 @@ import { StyleSheet, View } from "react-native";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Text } from "./Text";
+import { Icon } from "./Icon";
 
 export type BadgeTone = "ok" | "warning" | "danger" | "info" | "neutral";
 
 interface Props {
   readonly label: string;
   readonly tone?: BadgeTone;
+  readonly symbol?: "none" | "check" | "clock" | "warning";
   readonly testID?: string;
 }
 
-export function Badge({ label, tone = "neutral", testID }: Props) {
+export function Badge({ label, tone = "neutral", symbol = "none", testID }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const [fg, bg] =
@@ -33,6 +35,7 @@ export function Badge({ label, tone = "neutral", testID }: Props) {
       accessibilityLabel={label}
       {...testable(testID)}
     >
+      {symbol !== "none" ? <Icon name={symbol} size="sm" /> : null}
       <Text role="caption" weight="semibold" style={{ color: fg }}>
         {label}
       </Text>
@@ -43,6 +46,9 @@ export function Badge({ label, tone = "neutral", testID }: Props) {
 const styles = (t: Theme) =>
   StyleSheet.create({
     pill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: t.space.xs,
       alignSelf: "flex-start",
       borderRadius: t.radius.full,
       paddingHorizontal: t.space.sm,

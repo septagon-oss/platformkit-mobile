@@ -19,6 +19,7 @@ export const extent = {
   focus: 2,
   choiceMin: 120,
   chart: 200,
+  chartAxis: 64,
   chartStroke: 0.008,
   chartDot: 0.018,
   calendarDay: 240,

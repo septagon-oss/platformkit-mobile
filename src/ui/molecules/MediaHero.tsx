@@ -29,15 +29,22 @@ export function MediaHero({
   return (
     <View style={s.stack}>
       <View style={[s.image, { aspectRatio: item.aspectRatio }]}>
-        {item.state === "ready" ? (
-          renderImage({
-            id: item.id,
-            description: item.description,
-            decorative: item.decorative,
-            fit,
-            aspectRatio: item.aspectRatio,
-          })
-        ) : item.state === "loading" ? (
+        {item.state === "ready" || item.state === "loading" ? (
+          <View
+            style={[s.imageFill, item.state === "loading" && s.concealed]}
+            accessibilityElementsHidden={item.state === "loading"}
+            importantForAccessibility={item.state === "loading" ? "no-hide-descendants" : "auto"}
+          >
+            {renderImage({
+              id: item.id,
+              description: item.description,
+              decorative: item.decorative,
+              fit,
+              aspectRatio: item.aspectRatio,
+            })}
+          </View>
+        ) : null}
+        {item.state === "loading" ? (
           <Skeleton label={item.loadingLabel} motion={item.motion} variant="media" />
         ) : item.reason ? (
           <Notice text={item.reason} announcement="polite" />

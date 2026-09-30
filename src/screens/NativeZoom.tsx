@@ -24,6 +24,19 @@ function Zoom({ children, motion, labels }: ZoomSlotProps) {
         motion === "normal",
       );
   };
+  const pan = (x: number, y: number) => {
+    const state = zoom.current?.getState(),
+      frame = zoom.current?.getVisibleRect();
+    if (state && frame)
+      zoom.current?.setTransformState(
+        {
+          scale: state.scale,
+          translateX: state.translateX + (x * frame.width * state.scale) / 4,
+          translateY: state.translateY + (y * frame.height * state.scale) / 4,
+        },
+        motion === "normal",
+      );
+  };
   return (
     <GestureHandlerRootView style={s.grow}>
       <ResumableZoom
@@ -37,6 +50,10 @@ function Zoom({ children, motion, labels }: ZoomSlotProps) {
         {children}
       </ResumableZoom>
       <View style={s.row}>
+        <Button label={labels.panLeft} tone="secondary" onPress={() => pan(1, 0)} />
+        <Button label={labels.panRight} tone="secondary" onPress={() => pan(-1, 0)} />
+        <Button label={labels.panUp} tone="secondary" onPress={() => pan(0, 1)} />
+        <Button label={labels.panDown} tone="secondary" onPress={() => pan(0, -1)} />
         <Button label={labels.zoomOut} tone="secondary" onPress={() => change(0.5)} />
         <Button label={labels.zoomIn} tone="secondary" onPress={() => change(2)} />
         <Button

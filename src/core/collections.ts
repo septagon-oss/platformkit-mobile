@@ -194,6 +194,7 @@ export function deriveDataList(input: DataListInput, p: Presentation) {
           );
           return {
             ...r,
+            cellLabels: r.cells.map((cell) => `${cell.label}: ${cell.value}`),
             open: r.open ? action(r.open, v, `${path}.open`) : undefined,
             actions: actions(
               r.actions,

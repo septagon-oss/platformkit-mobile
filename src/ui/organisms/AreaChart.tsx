@@ -38,59 +38,78 @@ export function AreaChart({
       {model.empty ? (
         <Text>{model.emptyLabel}</Text>
       ) : (
-        <View style={s.chart} accessibilityElementsHidden>
-          <Svg
-            width="100%"
-            height="100%"
-            viewBox="-0.03 -0.03 1.06 1.06"
-            preserveAspectRatio="none"
-          >
-            {model.series.map((series, i) => (
-              <React.Fragment key={series.id}>
-                {series.fill ? <Path d={series.fill} fill={colors[i]!} opacity={0.12} /> : null}
-                {series.path ? (
-                  <Path
-                    d={series.path}
-                    fill="none"
-                    stroke={colors[i]!}
-                    strokeWidth={t.extent.chartStroke}
-                    {...(i
-                      ? { strokeDasharray: `${t.extent.chartDot * i} ${t.extent.chartDot}` }
-                      : {})}
-                  />
-                ) : null}
-                {series.points
-                  .filter((point) => point.py !== undefined)
-                  .map((point) => (
-                    <Circle
-                      key={point.id}
-                      cx={point.px}
-                      cy={point.py!}
-                      r={t.extent.chartDot}
-                      fill={colors[i]!}
-                    />
-                  ))}
-              </React.Fragment>
+        <View style={s.chartPlot}>
+          <View style={s.chartAxis}>
+            {model.yTicks.map((tick) => (
+              <Text
+                key={tick.position}
+                role="caption"
+                tone="muted"
+                style={{ position: "absolute", top: `${tick.position * 100}%`, right: 0 }}
+              >
+                {tick.label}
+              </Text>
             ))}
-          </Svg>
+          </View>
+          <View style={s.grow}>
+            <View style={s.chart} accessibilityElementsHidden>
+              <Svg
+                width="100%"
+                height="100%"
+                viewBox="-0.03 -0.03 1.06 1.06"
+                preserveAspectRatio="none"
+              >
+                {model.series.map((series, i) => (
+                  <React.Fragment key={series.id}>
+                    {series.fill ? <Path d={series.fill} fill={colors[i]!} opacity={0.12} /> : null}
+                    {series.path ? (
+                      <Path
+                        d={series.path}
+                        fill="none"
+                        stroke={colors[i]!}
+                        strokeWidth={t.extent.chartStroke}
+                        {...(i
+                          ? { strokeDasharray: `${t.extent.chartDot * i} ${t.extent.chartDot}` }
+                          : {})}
+                      />
+                    ) : null}
+                    {series.points
+                      .filter((point) => point.py !== undefined)
+                      .map((point) => (
+                        <Circle
+                          key={point.id}
+                          cx={point.px}
+                          cy={point.py!}
+                          r={t.extent.chartDot}
+                          fill={colors[i]!}
+                        />
+                      ))}
+                  </React.Fragment>
+                ))}
+              </Svg>
+            </View>
+            <View style={s.chartTicks}>
+              {model.xTicks.map((tick) => (
+                <Text key={tick.position} role="caption" tone="muted" style={s.grow}>
+                  {tick.label}
+                </Text>
+              ))}
+            </View>
+          </View>
         </View>
       )}
       <Text role="title">{model.tableLabel}</Text>
-      <Text>
-        {model.xLabel} · {model.yLabel}
-      </Text>
+      <Text>{model.axesLabel}</Text>
       {model.series.map((series) => (
         <View key={series.id} style={s.stack}>
           <Text role="label">{series.label}</Text>
           {series.points.map((point) =>
             point.y === null ? (
-              <Text key={point.id}>
-                {point.xText}: {point.text}
-              </Text>
+              <Text key={point.id}>{point.displayLabel}</Text>
             ) : (
               <Button
                 key={point.id}
-                label={`${series.label}, ${point.xText}: ${point.text}`}
+                label={point.accessibleLabel}
                 tone="secondary"
                 selected={point.selected}
                 onPress={() => {

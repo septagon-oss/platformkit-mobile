@@ -115,6 +115,7 @@ export function derivePricing(input: PricingInput, p: Presentation) {
           id: f.id,
           label: f.label,
           text,
+          displayLabel: `${f.label}: ${text}`,
           accessibleLabel: `${f.label}, ${plan.title}: ${text}`,
         };
       });
@@ -143,11 +144,25 @@ export function derivePricing(input: PricingInput, p: Presentation) {
           ? issue(p, "selectedPlanId", "unavailable")
           : undefined,
     };
-    return { tiers: model, comparison: model };
+    const features = input.features.map((feature) => ({
+      ...feature,
+      values: rows.map((plan) => ({
+        planId: plan.id,
+        planTitle: plan.title,
+        ...plan.features.find((value) => value.id === feature.id)!,
+      })),
+    }));
+    return {
+      tiers: model,
+      comparison: { ...model, plans: rows.map((plan) => ({ ...plan, features: [] })), features },
+    };
   });
 }
 export type PricingModel = Extract<
   ReturnType<typeof derivePricing>,
   { ok: true }
 >["value"]["tiers"];
-export type PlanComparisonModel = PricingModel;
+export type PlanComparisonModel = Extract<
+  ReturnType<typeof derivePricing>,
+  { ok: true }
+>["value"]["comparison"];

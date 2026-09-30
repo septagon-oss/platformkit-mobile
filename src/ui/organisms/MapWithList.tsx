@@ -6,6 +6,8 @@ import {
   type MapModel,
   type Viewport,
 } from "../../core/derive";
+import { GroupedListScreen } from "../templates/ListScreen";
+import { ActionControl } from "../atoms/ActionControl";
 import { Button } from "../atoms/Button";
 import { Badge } from "../atoms/Badge";
 import { Notice } from "../atoms/Notice";
@@ -30,13 +32,17 @@ export function MapWithList(props: Props) {
   const { model, renderMap, renderDetail, onMode, onSelect, onClearSelection, onAction, onRetry } =
       props,
     s = useStyles(kitStyles),
-    current = useRef(props);
+    current = useRef<Props | undefined>(props);
   useLayoutEffect(() => {
     current.current = props;
+    return () => {
+      current.current = undefined;
+    };
   }, [props]);
   const onMarker = useCallback((id: string) => {
-    const p = current.current,
-      marker = p.model.markers.find((m) => m.id === id);
+    const p = current.current;
+    if (!p) return;
+    const marker = p.model.markers.find((m) => m.id === id);
     if (!marker) return;
     if (marker.ids.length === 1) {
       if (marker.ids[0] !== p.model.selectedId) p.onSelect(marker.ids[0]!);
@@ -44,70 +50,81 @@ export function MapWithList(props: Props) {
   }, []);
   const onViewport = useCallback((viewport: Viewport) => {
     const p = current.current;
-    if (mapViewportAllowed(viewport, p.model.capabilities)) p.onViewport(viewport);
+    if (p && mapViewportAllowed(viewport, p.model.capabilities)) p.onViewport(viewport);
   }, []);
   return (
-    <View style={s.stack}>
-      <View style={s.row}>
-        <Button
-          label={model.labels.map}
-          tone="secondary"
-          selected={model.mode === "map"}
-          onPress={() => {
-            if (model.mode !== "map") onMode("map");
-          }}
-        />
-        <Button
-          label={model.labels.list}
-          tone="secondary"
-          selected={model.mode === "list"}
-          onPress={() => {
-            if (model.mode !== "list") onMode("list");
-          }}
-        />
-      </View>
-      <ModelState model={model} onRetry={onRetry} />
-      {model.providerIssue ? (
-        <Notice
-          text={model.providerIssue}
-          announcement="polite"
-          action={{ label: model.labels.retry, onPress: onRetry }}
-        />
-      ) : null}
-      {model.mode === "map" && model.canRender ? (
-        <>
-          <View style={s.chart}>
-            <MapCanvas
-              render={renderMap}
-              markers={model.markers}
-              viewport={model.viewport}
-              attribution={model.attribution}
-              motion={model.motion}
-              onMarker={onMarker}
-              onViewport={onViewport}
-            />
-          </View>
+    <GroupedListScreen
+      sections={[{ id: "points", data: model.rows }]}
+      keyOf={(point) => point.id}
+      refreshing={model.refreshing}
+      onRefresh={onRetry}
+      renderHeading={() => <></>}
+      header={
+        <View style={s.stack}>
           <View style={s.row}>
             <Button
-              label={model.labels.zoomIn}
+              label={model.labels.map}
               tone="secondary"
-              disabled={!model.zoomIn}
+              selected={model.mode === "map"}
               onPress={() => {
-                if (model.zoomIn) props.onViewport(model.zoomIn);
+                if (model.mode !== "map") onMode("map");
               }}
             />
             <Button
-              label={model.labels.zoomOut}
+              label={model.labels.list}
               tone="secondary"
-              disabled={!model.zoomOut}
+              selected={model.mode === "list"}
               onPress={() => {
-                if (model.zoomOut) props.onViewport(model.zoomOut);
+                if (model.mode !== "list") onMode("list");
               }}
             />
           </View>
-        </>
-      ) : null}
-      {model.rows.map((point) => (
+          <ModelState model={model} onRetry={onRetry} />
+          {model.providerIssue ? (
+            <Notice
+              text={model.providerIssue}
+              announcement="polite"
+              {...(model.canRetryProvider
+                ? { action: { label: model.labels.retry, onPress: onRetry } }
+                : {})}
+            />
+          ) : null}
+          {model.mode === "map" && model.canRender ? (
+            <>
+              <View style={s.chart}>
+                <MapCanvas
+                  render={renderMap}
+                  markers={model.markers}
+                  viewport={model.viewport}
+                  attribution={model.attribution}
+                  motion={model.motion}
+                  onMarker={onMarker}
+                  onViewport={onViewport}
+                />
+              </View>
+              <View style={s.row}>
+                <Button
+                  label={model.labels.zoomIn}
+                  tone="secondary"
+                  disabled={!model.zoomIn}
+                  onPress={() => {
+                    if (model.zoomIn) props.onViewport(model.zoomIn);
+                  }}
+                />
+                <Button
+                  label={model.labels.zoomOut}
+                  tone="secondary"
+                  disabled={!model.zoomOut}
+                  onPress={() => {
+                    if (model.zoomOut) props.onViewport(model.zoomOut);
+                  }}
+                />
+              </View>
+            </>
+          ) : null}
+        </View>
+      }
+      render={(point) => (
         <View key={point.id} style={s.panel}>
           <Button
             label={point.title}
@@ -118,21 +135,28 @@ export function MapWithList(props: Props) {
             }}
           />
           {point.subtitle ? <Text>{point.subtitle}</Text> : null}
-          <Badge label={point.status.label} tone={point.status.tone} />
+          <Badge label={point.status.label} tone={point.status.tone} symbol={point.status.symbol} />
           {point.reason ? <Text>{point.reason}</Text> : null}
+          {point.open ? (
+            <ActionControl model={point.open} onAction={(id) => onAction(point.id, id)} />
+          ) : null}
           <ActionBar model={point.bar} onAction={(id) => onAction(point.id, id)} />
         </View>
-      ))}
-      <Text role="caption">{model.attribution}</Text>
-      {model.selectionIssue ? (
-        <Notice text={model.selectionIssue.message} announcement="polite" />
-      ) : model.selectedId ? (
-        renderDetail(model.selectedId)
-      ) : null}
-      {model.selectedId ? (
-        <Button label={model.labels.clear} tone="plain" onPress={onClearSelection} />
-      ) : null}
-    </View>
+      )}
+      footer={
+        <View style={s.stack}>
+          <Text role="caption">{model.attribution}</Text>
+          {model.selectionIssue ? (
+            <Notice text={model.selectionIssue.message} announcement="polite" />
+          ) : model.selectedId ? (
+            renderDetail(model.selectedId)
+          ) : null}
+          {model.selectedId ? (
+            <Button label={model.labels.clear} tone="plain" onPress={onClearSelection} />
+          ) : null}
+        </View>
+      }
+    />
   );
 }
 

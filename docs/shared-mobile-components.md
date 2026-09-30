@@ -36,6 +36,14 @@ independent packages have explicit exact pins and native-shape checks. Unknown
 dependencies still fail the gate. Native build/runtime results belong in the
 implementation report and must not be inferred from these metadata checks.
 
+Installed package metadata records these runtime additions (one installed version
+per `npm ls`): Temporal 0.5.1, d3-scale 4.0.2 and d3-shape 3.2.0 are ISC;
+MapLibre 11.4.0, Expo Image 57.0.5, FlashList 2.0.2, SVG 15.15.4,
+Gesture Handler 2.32.0 and Zoom Toolkit 5.1.1 are MIT. These license/version
+records establish package provenance, not device conformance. Supply
+`Europe/Lisbon` as the Gallery presentation zone for the named spring/autumn
+DST examples; the core always uses the caller's explicit zone.
+
 `PhotoViewer` additionally requires `renderZoom(ZoomSlotProps)` from screen
 composition, just as it requires its image slot. `calendarTargets(day, extent, hit)`
 accepts measured native sizes for the pure dense-target decision. The model contains
@@ -54,7 +62,9 @@ The source migration for this slice is explicit: `Skeleton` and `Spinner` now
 require `label` and `motion`; `retry` requires `(feedback, onPress)` and is owned
 by core (its old Notice export path re-exports that function). `ListScreen`,
 `LoadMore`, `Home`, `ResourceList`, `ResourceDetail`, `ResourceForm`, `SignInForm`
-and `Activity` receive a required `feedback` value from `deriveFeedback`.
+receive a required `feedback` value from `deriveFeedback` in that slice.
+Round 2 replaces `ResourceList.feedback` with `presentation` and moves Activity
+to its required `model`, as recorded above.
 Generated screen compositions supply that value through `useFeedback`, which
 starts with reduced motion and subscribes to native preference changes. Custom
 renderers can choose EN/PT independently through `deriveCopy` and supply their

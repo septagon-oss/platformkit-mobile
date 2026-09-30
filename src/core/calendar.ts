@@ -241,10 +241,42 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
           selected: id === input.selectedDate,
           today: id === today,
           todayLabel: p.copy.kit.today,
+          label: id === today ? `${dateLabel(d)} · ${p.copy.kit.today}` : dateLabel(d),
           enabled: inBounds(id),
         };
       }),
-      navigation,
+      navigation: {
+        previous: {
+          label: p.copy.kit.previous,
+          enabled: inBounds(selected.subtract({ days: 7 }).toString()),
+          target: {
+            startDate: weekStart.subtract({ days: 7 }).toString(),
+            endDate: weekStart.toString(),
+            selectedDate: selected.subtract({ days: 7 }).toString(),
+          },
+        },
+        next: {
+          label: p.copy.kit.next,
+          enabled: inBounds(selected.add({ days: 7 }).toString()),
+          target: {
+            startDate: weekStart.add({ days: 7 }).toString(),
+            endDate: weekStart.add({ days: 14 }).toString(),
+            selectedDate: selected.add({ days: 7 }).toString(),
+          },
+        },
+        today: {
+          ...navigation.today,
+          target: {
+            startDate: todayDate
+              .subtract({ days: (todayDate.dayOfWeek - p.weekStartsOn + 7) % 7 })
+              .toString(),
+            endDate: todayDate
+              .add({ days: 7 - ((todayDate.dayOfWeek - p.weekStartsOn + 7) % 7) })
+              .toString(),
+            selectedDate: today,
+          },
+        },
+      },
     };
     const selectionIssue =
       input.selectedEventId &&
@@ -283,14 +315,27 @@ export type DayStripModel = CalendarModels["strip"];
 export type WeekModel = CalendarModels["week"];
 export type AgendaModel = CalendarModels["agenda"];
 /** Measured native lengths enter this pure decision; UI does not repeat hit-area rules. */
-export function calendarTargets(day: WeekModel["days"][number], extent: number, hit: number) {
-  const groups = new Map<number, Segment[]>();
-  day.events
-    .filter((e) => e.kind === "timed")
-    .forEach((e) => groups.set(e.group, [...(groups.get(e.group) ?? []), e]));
-  return [...groups.values()].map((events) => ({
+export function calendarTargets(
+  day: WeekModel["days"][number],
+  extent: number,
+  hit: number,
+  width = Infinity,
+) {
+  if (!(extent > 0) || !(hit > 0) || !Number.isFinite(extent) || !Number.isFinite(hit)) return [];
+  const groups: { events: Segment[]; top: number; bottom: number }[] = [];
+  for (const event of day.events.filter((e) => e.kind === "timed")) {
+    const top = Math.min(event.top * extent, Math.max(0, extent - hit));
+    const bottom = Math.max(top + hit, (event.top + event.height) * extent);
+    const previous = groups[groups.length - 1];
+    if (previous && top < previous.bottom) {
+      previous.events.push(event);
+      previous.bottom = Math.max(previous.bottom, bottom);
+    } else groups.push({ events: [event], top, bottom });
+  }
+  return groups.map(({ events, top }) => ({
     events,
-    grouped: events.some((e) => e.height * extent < hit),
+    top: top / extent,
+    grouped: events.some((e) => e.height * extent < hit || width / e.lanes < hit),
     label: `${day.moreLabel} (${events.length})`,
     date: day.id,
     eventIds: events.map((e) => e.id),

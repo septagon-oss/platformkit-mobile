@@ -59,3 +59,21 @@ env:
     element: "skeleton/reduced-motion"
 - tapOn: "skeleton/reduced-motion"
 - assertVisible: "A carregar"
+# Representative shared-family interactions; the callback receipt is derived copy.
+- tapOn:
+    id: "gallery-case"
+- scrollUntilVisible:
+    element: "quantity-control/middle"
+    direction: UP
+- tapOn: "quantity-control/middle"
+- tapOn: "Aumentar: Quantidade"
+- assertVisible:
+    id: "gallery-kit-action"
+- tapOn:
+    id: "gallery-case"
+- scrollUntilVisible:
+    element: "plan-comparison/unknown"
+- tapOn: "plan-comparison/unknown"
+- scrollUntilVisible:
+    element: "Desconhecido"
+- assertVisible: "Desconhecido"

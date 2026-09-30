@@ -20,7 +20,12 @@
     "./ui/atoms/*": "./src/ui/atoms/*.tsx",
     "./ui/molecules/*": "./src/ui/molecules/*.tsx",
     "./ui/organisms/*": "./src/ui/organisms/*.tsx",
-    "./ui/templates/*": "./src/ui/templates/*.tsx"
+    "./ui/templates/*": "./src/ui/templates/*.tsx",
+    "./effects/media": "./src/effects/media.ts",
+    "./screens/NativeMap": {
+      "react-native": "./src/screens/NativeMap.native.tsx",
+      "default": "./src/screens/NativeMap.tsx"
+    }
   },
   "files": [
     "src",

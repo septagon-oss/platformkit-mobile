@@ -13,7 +13,7 @@ export function SlotOption({
   return (
     <View>
       <Button
-        label={`${model.label} (${model.offset})`}
+        label={model.displayLabel}
         tone={model.selected ? "primary" : "secondary"}
         accessibilityRole="radio"
         checked={model.selected}

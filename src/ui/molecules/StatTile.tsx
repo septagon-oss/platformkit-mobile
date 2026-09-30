@@ -15,9 +15,7 @@ export function StatTile({ model }: { readonly model: StatModel }) {
       <Text role="display" maxFontSizeMultiplier={0}>
         {model.text}
       </Text>
-      {model.delta ? (
-        <Badge label={`${model.symbol} ${model.direction}: ${model.delta}`} tone={model.tone} />
-      ) : null}
+      {model.deltaLabel ? <Badge label={model.deltaLabel} tone={model.tone} /> : null}
       {model.percent ? <Text>{model.percent}</Text> : null}
       {model.meaning ? <Text>{model.meaning}</Text> : null}
     </View>

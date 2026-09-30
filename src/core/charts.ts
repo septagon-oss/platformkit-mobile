@@ -41,13 +41,14 @@ function domain(
   v: Validation,
 ): readonly [number, number] {
   const samples = zero ? [0, ...values] : [...values];
-  let lo = Math.min(...samples),
-    hi = Math.max(...samples);
+  let lo = samples.reduce((a, b) => Math.min(a, b), Infinity),
+    hi = samples.reduce((a, b) => Math.max(a, b), -Infinity);
   if (supplied) {
     v.need(
       supplied.length === 2 &&
         supplied.every(Number.isFinite) &&
         supplied[0] < supplied[1] &&
+        Number.isFinite(supplied[1] - supplied[0]) &&
         samples.every((n) => n >= supplied[0] && n <= supplied[1]),
       `domain.${axis}`,
     );
@@ -114,31 +115,37 @@ function chart(input: ChartInput, p: Presentation, areaChart: boolean, spark: bo
         {
           id: "range",
           label: p.copy.kit.range,
-          choices: input.ranges.map((range) => ({ ...range, enabled: !base.refreshing })),
+          choices: input.ranges.map((range) => ({
+            ...range,
+            enabled: !base.refreshing,
+            ...(base.refreshing ? { reason: p.copy.state.loading } : {}),
+          })),
           ...(input.selectedRangeId ? { selectedId: input.selectedRangeId } : {}),
           required: true,
         },
         p,
       ),
     );
-    const xDomain = all.length
-      ? domain(
-          all.map((point) => point.x),
-          input.domain?.x,
-          false,
-          "x",
-          v,
-        )
-      : undefined;
-    const yDomain = finite.length
-      ? domain(
-          finite.map((point) => point.y!),
-          input.domain?.y,
-          areaChart,
-          "y",
-          v,
-        )
-      : undefined;
+    const xDomain =
+      all.length || input.domain
+        ? domain(
+            all.map((point) => point.x),
+            input.domain?.x,
+            false,
+            "x",
+            v,
+          )
+        : undefined;
+    const yDomain =
+      finite.length || input.domain
+        ? domain(
+            finite.map((point) => point.y!),
+            input.domain?.y,
+            areaChart,
+            "y",
+            v,
+          )
+        : undefined;
     const x = xDomain ? scaleLinear().domain(xDomain).range([0, 1]) : undefined,
       y = yDomain ? scaleLinear().domain(yDomain).range([1, 0]) : undefined;
     const projected = series.map((s) => {
@@ -146,6 +153,8 @@ function chart(input: ChartInput, p: Presentation, areaChart: boolean, spark: bo
         ...point,
         xText: xText(point.x),
         text: point.y === null ? p.copy.kit.missing : format(point.y),
+        displayLabel: `${xText(point.x)}: ${point.y === null ? p.copy.kit.missing : format(point.y)}`,
+        accessibleLabel: `${s.label}, ${xText(point.x)}: ${point.y === null ? p.copy.kit.missing : format(point.y)}`,
         px: x ? x(point.x) : 0,
         py: point.y !== null && y ? y(point.y) : undefined,
         selected:
@@ -191,6 +200,7 @@ function chart(input: ChartInput, p: Presentation, areaChart: boolean, spark: bo
       xLabel: input.xLabel,
       yLabel: input.yLabel,
       tableLabel: p.copy.kit.table,
+      axesLabel: `${input.xLabel} · ${input.yLabel}`,
       empty: finite.length === 0,
       emptyLabel: p.copy.kit.noSamples,
       xDomain,
@@ -261,14 +271,19 @@ export function deriveBars(input: BarInput, p: Presentation) {
     const finite = data.series.flatMap((s) =>
       Object.values(s.values).filter((n): n is number => n !== null),
     );
-    const yDomain = finite.length ? domain(finite, input.yDomain, true, "y", v) : undefined;
+    const yDomain =
+      finite.length || input.yDomain ? domain(finite, input.yDomain, true, "y", v) : undefined;
     const y = yDomain ? scaleLinear().domain(yDomain).range([1, 0]) : undefined;
     const ranges = v.take(
       deriveChoices(
         {
           id: "ranges",
           label: p.copy.kit.range,
-          choices: input.ranges.map((r) => ({ ...r, enabled: true })),
+          choices: input.ranges.map((r) => ({
+            ...r,
+            enabled: !base.refreshing,
+            ...(base.refreshing ? { reason: p.copy.state.loading } : {}),
+          })),
           ...(input.selectedRangeId ? { selectedId: input.selectedRangeId } : {}),
           required: true,
         },
@@ -280,6 +295,7 @@ export function deriveBars(input: BarInput, p: Presentation) {
       ranges,
       xLabel: input.xLabel,
       yLabel: input.yLabel,
+      axesLabel: `${input.xLabel} · ${input.yLabel}`,
       tableLabel: p.copy.kit.table,
       empty: !finite.length,
       emptyLabel: p.copy.kit.noSamples,
@@ -398,6 +414,9 @@ export function deriveStat(input: StatInput, p: Presentation) {
           ? direction > 0
           : direction < 0;
     return {
+      deltaLabel: delta
+        ? `${direction > 0 ? "↑" : direction < 0 ? "↓" : "="} ${direction > 0 ? p.copy.kit.increase : direction < 0 ? p.copy.kit.decrease : p.copy.kit.unchanged}: ${delta}`
+        : undefined,
       label: input.label,
       text: input.unitLabel ? `${text} ${input.unitLabel}` : text,
       delta,

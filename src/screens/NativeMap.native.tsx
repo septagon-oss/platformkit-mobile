@@ -1,16 +1,17 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useMemo, useRef } from "react";
 import { Map, Camera, Marker } from "@maplibre/maplibre-react-native";
 import type { Props } from "./NativeMap";
 import { Button } from "../ui/atoms/Button";
 export function NativeMap({ model, resource, onState }: Props) {
-  const identity = `${resource.scope}/${resource.version}/${resource.styleURL}`;
-  const current = useRef<string | undefined>(identity);
+  const identity = JSON.stringify([resource.scope, resource.version, resource.styleURL]);
+  const request = useMemo(() => ({ identity }), [identity]);
+  const current = useRef<typeof request | undefined>(request);
   useLayoutEffect(() => {
-    current.current = identity;
+    current.current = request;
     return () => {
-      if (current.current === identity) current.current = undefined;
+      if (current.current === request) current.current = undefined;
     };
-  }, [identity]);
+  }, [request]);
   return (
     <Map
       key={identity}
@@ -18,13 +19,13 @@ export function NativeMap({ model, resource, onState }: Props) {
       touchRotate={false}
       touchPitch={false}
       onDidFinishLoadingMap={() => {
-        if (current.current === identity) onState("ready");
+        if (current.current === request) onState("ready");
       }}
       onDidFailLoadingMap={() => {
-        if (current.current === identity) onState("error");
+        if (current.current === request) onState("error");
       }}
       onRegionDidChange={(event) => {
-        if (current.current !== identity || !event.nativeEvent.userInteraction) return;
+        if (current.current !== request || !event.nativeEvent.userInteraction) return;
         const { center, zoom } = event.nativeEvent;
         model.onViewport({ longitude: center[0], latitude: center[1], zoom });
       }}
@@ -43,7 +44,7 @@ export function NativeMap({ model, resource, onState }: Props) {
             tone="secondary"
             selected={marker.selected}
             onPress={() => {
-              if (current.current === identity) model.onMarker(marker.id);
+              if (current.current === request) model.onMarker(marker.id);
             }}
           />
         </Marker>

@@ -121,6 +121,10 @@ export function deriveViewer(input: MediaInput & { readonly open: boolean }, p: 
         zoomIn: p.copy.kit.zoomIn,
         zoomOut: p.copy.kit.zoomOut,
         reset: p.copy.kit.reset,
+        panLeft: p.copy.kit.panLeft,
+        panRight: p.copy.kit.panRight,
+        panUp: p.copy.kit.panUp,
+        panDown: p.copy.kit.panDown,
       },
       motion: p.motion,
     };

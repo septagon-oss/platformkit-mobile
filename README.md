@@ -199,8 +199,8 @@ not claim whole-application localization.
 The rich-state unit/component suites and browser checks exercise the reference
 palette and isolated supplied-token fixtures. Android/iOS devices, VoiceOver,
 TalkBack, largest native text settings and consuming products' palettes still
-need their acceptance runs. No new native package or catalog/API contract is
-introduced. Activity now receives a derived model; raw event adaptation and the explicit clock
+need their acceptance runs. The rich-state slice introduces no catalog/API contract.
+The later families below add native dependencies. Activity now receives a derived model; raw event adaptation and the explicit clock
 belong to the generated screen/core adapter.
 
 ### Shared collection, workflow and presentation families
@@ -248,6 +248,9 @@ The native rendering adapters are `screens/NativeMap`, `screens/NativeImage` and
 `screens/NativeZoom`. Map and image resources are prepared by the product's effects
 and carry explicit scope/version identities. The MapLibre adapter takes a supplied
 style URL, uses no default city/location service, and ignores late scoped callbacks.
+Its package export selects the native adapter under the `react-native` condition;
+the default export is the explicit web fallback. Resource types are exported at
+`effects/media`.
 The image adapter uses Expo Image with no persistent cache, an identity-based
 recycling key and guarded load callbacks. Supply `NativeZoom` through PhotoViewer's
 `renderZoom` slot; it composes Zoom Toolkit with the shared labelled controls.

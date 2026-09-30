@@ -172,6 +172,8 @@ export function deriveMap(input: MapInput, p: Presentation) {
         motion: p.motion === "reduced" ? ("none" as const) : ("normal" as const),
         canRender:
           (input.providerState === "ready" || input.providerState === "loading") && supported,
+        canRetryProvider:
+          supported && (input.providerState === "error" || input.providerState === "offline"),
         providerIssue:
           input.providerState === "ready" && supported
             ? undefined

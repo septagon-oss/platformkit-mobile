@@ -122,7 +122,11 @@ export function Gallery({
       <Screen
         form
         testID="gallery"
-        scroll={!/^(data-list|photo-gallery|masonry-wall|agenda-list|calendar)\//.test(caseId)}
+        scroll={
+          !/^(data-list|photo-gallery|masonry-wall|agenda-list|calendar|map-with-list)\//.test(
+            caseId,
+          )
+        }
       >
         <Section title={words.appearance}>
           <ChoiceRow
@@ -178,14 +182,19 @@ export function Gallery({
         ) : caseId === "primitives/default" ? (
           <Samples feedback={feedback} initialDate={new Date(presentation.now)} />
         ) : (kitCaseIds as readonly string[]).includes(caseId) ? (
-          <KitSamples
-            key={caseId}
-            presentation={shown}
-            caseId={caseId}
-            onAction={setAction}
-            {...(renderImage ? { renderImage } : {})}
-            {...(renderZoom ? { renderZoom } : {})}
-          />
+          <View style={{ flex: 1 }} testID="gallery-kit">
+            <KitSamples
+              key={caseId}
+              presentation={shown}
+              caseId={caseId}
+              onAction={setAction}
+              {...(renderImage ? { renderImage } : {})}
+              {...(renderZoom ? { renderZoom } : {})}
+            />
+            <Text accessibilityLiveRegion="polite" testID="gallery-kit-action">
+              {action ? words.actionReceived(action) : ""}
+            </Text>
+          </View>
         ) : example ? (
           <Section title={words.states}>
             {example.renderer === "spinner" ? (

@@ -32,9 +32,7 @@ export function BarChart({
         />
       ) : null}
       {model.empty ? <Text>{model.emptyLabel}</Text> : null}
-      <Text>
-        {model.xLabel} · {model.yLabel}
-      </Text>
+      <Text>{model.axesLabel}</Text>
       <View style={s.row}>
         {model.categories.map((category) => (
           <View key={category.id} style={s.grow}>

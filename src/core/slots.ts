@@ -90,6 +90,7 @@ export function deriveSlots(input: SlotPickerInput, p: Presentation) {
           start: start.toISOString(),
           date: dateAt(s.start, p.timeZone),
           label: `${presentedTime(start, p)} – ${presentedTime(end, p)}`,
+          displayLabel: `${presentedTime(start, p)} – ${presentedTime(end, p)} (${Temporal.Instant.from(s.start).toZonedDateTimeISO(p.timeZone).offset})`,
           offset: Temporal.Instant.from(s.start).toZonedDateTimeISO(p.timeZone).offset,
           reason,
           enabled: !reason,

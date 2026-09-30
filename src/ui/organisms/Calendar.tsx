@@ -30,7 +30,7 @@ export function Calendar({
 }) {
   const s = useStyles(kitStyles);
   const navigate = (key: keyof CalendarModel["navigation"]) => {
-    const target = model.navigation[key];
+    const target = model.strip.navigation[key];
     if (target.enabled) onNavigate(target.target);
   };
   return (

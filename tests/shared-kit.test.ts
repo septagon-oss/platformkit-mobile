@@ -370,3 +370,149 @@ test("all literal examples derive in both languages with explicit locale and tim
       assert.ok(result.ok, `${id}: ${result.ok ? "" : JSON.stringify(result.issues)}`);
     }
 });
+
+test("comparison preserves feature and plan order, names unknowns, and uses the same offers", () => {
+  const plans: d.Plan[] = [
+    {
+      id: "team",
+      title: "Team",
+      features: { storage: { kind: "included" }, support: { kind: "text", text: "Weekdays" } },
+      offers: [{ periodId: "year", price: { kind: "price", amount: money("2500") }, action }],
+    },
+    { id: "solo", title: "Solo", features: { storage: { kind: "excluded" } }, offers: [] },
+  ];
+  const model = ok(
+    d.derivePricing(
+      {
+        content: ready(plans),
+        periods: [{ id: "year", label: "Annual" }],
+        selectedPeriodId: "year",
+        features: [
+          { id: "support", label: "Support" },
+          { id: "storage", label: "Storage" },
+        ],
+      },
+      p,
+    ),
+  );
+  assert.deepEqual(
+    model.comparison.features.map((f) => f.id),
+    ["support", "storage"],
+  );
+  assert.deepEqual(
+    model.comparison.features[0]!.values.map((v) => v.accessibleLabel),
+    ["Support, Team: Weekdays", "Support, Solo: Unknown"],
+  );
+  assert.deepEqual(
+    model.tiers.plans.map((p) => p.offer),
+    model.comparison.plans.map((p) => p.offer),
+  );
+  assert.equal(model.comparison.plans[1]!.enabled, false);
+});
+
+test("short adjacent calendar events share a reachable group without overlapping targets", () => {
+  const model = ok(
+    d.deriveCalendar(
+      {
+        content: ready([
+          {
+            id: "first",
+            title: "First",
+            kind: "timed",
+            start: "2027-01-08T09:00:00Z",
+            end: "2027-01-08T09:01:00Z",
+            open: action,
+          },
+          {
+            id: "next",
+            title: "Next",
+            kind: "timed",
+            start: "2027-01-08T09:02:00Z",
+            end: "2027-01-08T09:03:00Z",
+            open: action,
+          },
+          {
+            id: "later",
+            title: "Later",
+            kind: "timed",
+            start: "2027-01-08T15:00:00Z",
+            end: "2027-01-08T16:00:00Z",
+            open: action,
+          },
+        ]),
+        view: "day",
+        anchorDate: "2027-01-08",
+        selectedDate: "2027-01-08",
+        agendaEndDate: "2027-01-09",
+      },
+      { ...p, timeZone: "UTC" },
+    ),
+  );
+  const groups = d.calendarTargets(model.week.days[0]!, 1440, 44);
+  assert.deepEqual(
+    groups.map((g) => g.eventIds),
+    [["first", "next"], ["later"]],
+  );
+  assert.equal(groups[0]!.grouped, true);
+  assert.equal(groups[1]!.grouped, false);
+  assert.equal(model.strip.navigation.next.target.selectedDate, "2027-01-15");
+  assert.equal(model.calendar.navigation.next.target.selectedDate, "2027-01-09");
+});
+
+test("chart refresh retains values but blocks range changes and rejects empty invalid domains", () => {
+  const input: d.ChartInput = {
+    content: {
+      phase: "ready",
+      value: [{ id: "s", label: "Measured", tone: "info", points: [{ id: "p", x: 1, y: 8 }] }],
+      refresh: "loading",
+    },
+    xKind: "number",
+    xLabel: "Sample",
+    yLabel: "Count",
+    unitLabel: "items",
+    fractionDigits: 0,
+    ranges: [{ id: "all", label: "All" }],
+    selectedRangeId: "all",
+  };
+  const model = ok(d.deriveChart(input, p));
+  assert.equal(model.series[0]!.points[0]!.text, "8 items");
+  assert.equal(model.ranges.choices[0]!.enabled, false);
+  refused(
+    d.deriveChart({ ...input, content: ready([]), domain: { x: [2, 1], y: [0, 10] } }, p),
+    "invalid-input",
+  );
+});
+
+test("calendar retains parallel lanes while they fit, and groups them when the columns are too narrow", () => {
+  const model = ok(
+    d.deriveCalendar(
+      {
+        content: ready([
+          {
+            id: "a",
+            title: "A",
+            kind: "timed",
+            start: "2027-01-08T09:00:00Z",
+            end: "2027-01-08T12:00:00Z",
+            open: action,
+          },
+          {
+            id: "b",
+            title: "B",
+            kind: "timed",
+            start: "2027-01-08T10:00:00Z",
+            end: "2027-01-08T13:00:00Z",
+            open: action,
+          },
+        ]),
+        view: "day",
+        anchorDate: "2027-01-08",
+        selectedDate: "2027-01-08",
+        agendaEndDate: "2027-01-09",
+      },
+      { ...p, timeZone: "UTC" },
+    ),
+  );
+  assert.equal(d.calendarTargets(model.week.days[0]!, 1440, 44, 240)[0]!.grouped, false);
+  assert.equal(d.calendarTargets(model.week.days[0]!, 1440, 44, 60)[0]!.grouped, true);
+});

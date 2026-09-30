@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useMemo, useRef } from "react";
 import { Image } from "expo-image";
 import type { ImageSlotProps } from "../core/derive";
 import type { ImageResource } from "../effects/media";
@@ -11,16 +11,23 @@ export function NativeImage({
   readonly resource: ImageResource;
   readonly onState: (id: string, state: "loading" | "ready" | "error") => void;
 }) {
-  const identity = `${resource.scope}/${resource.id}/${resource.version}/${resource.uri}`,
-    current = useRef<string | undefined>(identity);
+  const identity = JSON.stringify([
+      resource.scope,
+      resource.id,
+      resource.version,
+      resource.uri,
+      model.id,
+    ]),
+    request = useMemo(() => ({ identity }), [identity]),
+    current = useRef<typeof request | undefined>(request);
   useLayoutEffect(() => {
-    current.current = identity;
+    current.current = request;
     return () => {
-      if (current.current === identity) current.current = undefined;
+      if (current.current === request) current.current = undefined;
     };
-  }, [identity]);
+  }, [request]);
   const report = (state: "loading" | "ready" | "error") => {
-    if (current.current === identity && resource.id === model.id) onState(model.id, state);
+    if (current.current === request && resource.id === model.id) onState(model.id, state);
   };
   if (resource.id !== model.id) return null;
   return (

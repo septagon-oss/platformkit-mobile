@@ -259,7 +259,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
     const quote = {
       id: "quote-1",
       revision: "revision-1",
-      total: { minor: "2598", currency },
+      total: { minor: state === "multiple-lines" ? "3897" : "2598", currency },
       expiresAt: state === "quote-expired" ? p.now : instant.add({ hours: 1 }).toString(),
     };
     const row = {
@@ -524,7 +524,25 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       ),
       cart: v.take(
         deriveCart(
-          { content: sample([line]), currency, adjustments: [], quote, checkout: action },
+          {
+            content: sample(
+              state === "multiple-lines"
+                ? [
+                    line,
+                    {
+                      ...line,
+                      id: "line-2",
+                      title: choice.choices[1]!.label,
+                      quantity: { ...line.quantity, value: 1, min: 1, step: 1 },
+                    },
+                  ]
+                : [line],
+            ),
+            currency,
+            adjustments: [],
+            quote,
+            checkout: action,
+          },
           p,
         ),
       ),
@@ -597,7 +615,38 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       hero: v.take(deriveMediaHero({ item: images[0]!, title: name, action: secondary }, p)),
       viewer: v.take(deriveViewer({ ...mediaInput, open: held.open ?? true }, p)),
       spark: v.take(deriveSparkline(chartInput, p)),
-      chart: v.take(deriveChart(chartInput, p)),
+      chart: v.take(
+        deriveChart(
+          state === "multiple-series"
+            ? {
+                ...chartInput,
+                content: sample([
+                  {
+                    id: "series-1",
+                    label: name,
+                    tone: "info",
+                    points: [
+                      { id: "a", x: 0, y: 4 },
+                      { id: "b", x: 1, y: 8 },
+                      { id: "c", x: 2, y: 6 },
+                    ],
+                  },
+                  {
+                    id: "series-2",
+                    label: choice.choices[1]!.label,
+                    tone: "ok",
+                    points: [
+                      { id: "d", x: 0, y: 2 },
+                      { id: "e", x: 1, y: 3 },
+                      { id: "f", x: 2, y: 5 },
+                    ],
+                  },
+                ]),
+              }
+            : chartInput,
+          p,
+        ),
+      ),
       bars: v.take(
         deriveBars(
           {

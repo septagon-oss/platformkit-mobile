@@ -150,7 +150,7 @@ export function DataList({
         <View style={s.panel}>
           <Row
             title={row.title}
-            cells={row.cells.map((cell) => `${cell.label}: ${cell.value}`)}
+            cells={row.cellLabels}
             {...(row.summary ? { summary: row.summary } : {})}
             {...(row.open?.enabled && onOpen ? { onPress: () => onOpen(row.id) } : {})}
             {...(testID
@@ -161,7 +161,9 @@ export function DataList({
                 }
               : {})}
           />
-          {row.status ? <Badge label={row.status.label} tone={row.status.tone} /> : null}
+          {row.status ? (
+            <Badge label={row.status.label} tone={row.status.tone} symbol={row.status.symbol} />
+          ) : null}
           {row.selection && onSelection ? (
             <SelectionControl
               model={row.selection}
