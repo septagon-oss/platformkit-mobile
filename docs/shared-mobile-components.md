@@ -1,17 +1,53 @@
 # Shared mobile components specification
 
-Status: staged implementation for T-0180, 2026-09-30. The rich-state source
-delivery is described below; remaining contracts are proposed. No native
-acceptance or all-product theme coverage is claimed. The inspected baseline is
-`2d56f1a36486fa4353dbc7afdfa64707073e47af`. No catalog, HTTP endpoint, database
-schema or native dependency changes are part of the rich-state slice.
+Status: implementation round 2 for T-0180, 2026-09-30. Every named family now has
+public core factories and native component source; the implementation inventory
+below is separate from native acceptance. The inspected baseline is
+`2d56f1a36486fa4353dbc7afdfa64707073e47af`. No catalog, HTTP endpoint or database
+schema changed. The native dependencies/configuration change the binary fingerprint.
+
+## Implementation status: shared families
+
+Round 2 adds the missing factory/component families through the public source
+subpaths. `ResourceList` delegates to `deriveCatalogList`/`DataList`, with native
+SectionList owned by ListScreen. `Activity` accepts its derived model; the generated
+screen adapts raw authorized events/names and samples the clock. Existing payloads
+still supply no before/after schema and therefore produce no invented changes.
+
+The kit adds `DisclosureSection`, `MoreFilters` and `SummaryDetail`. Use disclosure
+for secondary detail, MoreFilters for additional query choices, and a summary plus
+an explicit page/sheet for full detail. Do not hide required input or a primary
+control. Two disclosure levels are supported; a third level is a sibling surface
+or a routed detail screen owned by the product, not another nested accordion.
+
+Literal Gallery examples derive through the same factories. The new examples
+cover the family inventory and selected refusal/busy/selection states; the complete
+matrix below remains the acceptance target, not a claim that every cell ran.
+Map examples have no configured tile service, and media examples are labelled
+synthetic render slots. `renderImage` and `renderZoom` let a consuming Gallery use
+its actual adapters. No device or every-product palette acceptance is implied.
+
+MapLibre 11.4.0, Expo-pinned Image/FlashList/SVG/Gesture Handler and Zoom Toolkit
+5.1.1 are now pinned. Native image and map callbacks have scope/version guards;
+map resources are supplied explicitly, and image persistent caching is disabled.
+Temporal 0.5.1 and D3's pure scale/shape packages own civil arithmetic and chart
+geometry. Expo-managed dependencies remain checked against its installed manifest;
+independent packages have explicit exact pins and native-shape checks. Unknown
+dependencies still fail the gate. Native build/runtime results belong in the
+implementation report and must not be inferred from these metadata checks.
+
+`PhotoViewer` additionally requires `renderZoom(ZoomSlotProps)` from screen
+composition, just as it requires its image slot. `calendarTargets(day, extent, hit)`
+accepts measured native sizes for the pure dense-target decision. The model contains
+the date and ordered event IDs for the resulting control. No product recalculates
+interval lanes. Direct consumers must migrate `ResourceList.presentation` and
+`Activity.model` as described in README.
 
 ## Implementation status: rich-state slice
 
 The first rich-state implementation extends the four existing atoms and adds
 `StateView`, a molecule that renders `deriveState` output. It is available through
-the existing UI subpaths; core exports come from `core/derive`. Remaining groups
-and the full activity-model migration below are still planned.
+the existing UI subpaths; core exports come from `core/derive`. Subsequent family source is described above; full native acceptance remains pending.
 Native/device and product-theme acceptance must be recorded separately.
 
 The source migration for this slice is explicit: `Skeleton` and `Spinner` now
@@ -40,7 +76,7 @@ The README's Shared feedback section lists the complete source migration.
 Copy contract; unsupported runtime languages throw `RangeError` with code
 `unsupported-format`. `deriveState` returns the documented Result. Copy keys are
 added with their consumers: this slice supplies state, choice, date-control, boolean value,
-integration-error and state-gallery words; later families remain planned.
+integration-error and state-gallery words; subsequent families add the typed EN/PT kit bundle.
 
 ## Ownership and compatibility
 

@@ -1,3 +1,4 @@
+import { kitEnglish, kitPortuguese, type KitWords } from "./kitCopy";
 // Shared system words. Product names, nouns and explanations remain caller data.
 // Bundles are immutable values, so two callers never change each other's language.
 export type Language = "en" | "pt";
@@ -5,6 +6,7 @@ export type Language = "en" | "pt";
 const identity = Symbol("Copy");
 
 interface Words {
+  readonly kit: KitWords;
   readonly choice: { readonly placeholder: string; readonly cancel: string; readonly hint: string };
   readonly dateTime: {
     readonly set: string;
@@ -54,6 +56,7 @@ export interface Copy extends Words {
 }
 
 const en: Words = {
+  kit: kitEnglish,
   choice: { placeholder: "Choose", cancel: "Cancel", hint: "Opens the choices" },
   dateTime: {
     set: "Set",
@@ -102,6 +105,7 @@ const en: Words = {
 };
 
 const pt: Words = {
+  kit: kitPortuguese,
   choice: { placeholder: "Escolher", cancel: "Cancelar", hint: "Abre as opções" },
   dateTime: {
     set: "Definir",
@@ -154,6 +158,7 @@ function bundle(language: Language, words: Words): Copy {
   return Object.freeze({
     [identity]: true as const,
     language,
+    kit: Object.freeze(words.kit),
     choice: Object.freeze(words.choice),
     dateTime: Object.freeze(words.dateTime),
     value: Object.freeze(words.value),

@@ -81,20 +81,20 @@ export function Notice({
           : t.color.statusInfoBg;
   return (
     <View style={[s.box, { backgroundColor: bg }]} {...testable(testID)}>
-      <View
-        style={s.row}
-        accessible
-        {...(accessibilityLabel ? { accessibilityLabel } : {})}
-        accessibilityRole={announcement === "urgent" ? "alert" : "text"}
-        accessibilityLiveRegion={announcement === "urgent" ? "assertive" : announcement}
-        {...(language ? { accessibilityLanguage: language } : {})}
-      >
+      <View style={s.row}>
         <Icon
           name={icon ?? icons[tone]}
           size="sm"
           tone={tone === "danger" ? "danger" : "primary"}
         />
-        <View style={s.body}>
+        <View
+          style={s.body}
+          accessible
+          {...(accessibilityLabel ? { accessibilityLabel } : {})}
+          accessibilityRole={announcement === "urgent" ? "alert" : "text"}
+          accessibilityLiveRegion={announcement === "urgent" ? "assertive" : announcement}
+          {...(language ? { accessibilityLanguage: language } : {})}
+        >
           {title ? (
             <Text weight="semibold" style={{ color: fg }} maxFontSizeMultiplier={0}>
               {title}

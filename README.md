@@ -77,8 +77,8 @@ with `EXPO_PUBLIC_GALLERY=1`) shows every atom and molecule in both modes.
 
 The [shared mobile components specification](docs/shared-mobile-components.md)
 defines the richer components, their APIs, reuse, gallery states and delivery
-order. The rich-state source described below is implemented; the remaining
-component groups and native acceptance are still pending.
+order. The shared families now have source implementations and literal Gallery
+examples. Native acceptance and the complete product/theme matrix remain unverified.
 
 Keep UI imports pointed toward the primitives. Atoms may compose other atoms;
 molecules add atoms; templates supply layout through children or render callbacks
@@ -200,7 +200,67 @@ The rich-state unit/component suites and browser checks exercise the reference
 palette and isolated supplied-token fixtures. Android/iOS devices, VoiceOver,
 TalkBack, largest native text settings and consuming products' palettes still
 need their acceptance runs. No new native package or catalog/API contract is
-introduced. The full activity-model migration remains in the staged specification.
+introduced. Activity now receives a derived model; raw event adaptation and the explicit clock
+belong to the generated screen/core adapter.
+
+### Shared collection, workflow and presentation families
+
+**Reused** — the existing core catalog helpers, state atoms, Button, Row, Section,
+ListScreen, native modal/canvas, theme, scale and renderer-pack wiring carry these
+compositions. **Added** — focused pure factories in `core/derive` provide collection
+selection, surface dismissal, audit values, steps, availability, civil-day calendars,
+exact money/quotes, plans, map markers, media selection and chart projections.
+**Made reusable** — named UI subpaths and the public Gallery let products supply
+content, callbacks, locale, language, theme and native rendering resources once.
+
+Use the inputs and named factories in the
+[component contract](docs/shared-mobile-components.md#explicit-factories-and-source-migration).
+Every factory returns `Result`; render its value only after checking `ok`. All
+refusals retain their classification and return no partial value. Models are
+immutable copies, and caller drafts are neither frozen nor mutated. No factory
+fetches, writes, reads the current clock, or changes another caller's configuration.
+
+The existing UI export patterns now include `DataList`, `Activity`, `Stepper`,
+`SlotPicker`, `Calendar`/`WeekCalendar`/`AgendaList`, `ProductCard`/`Cart`/`OrderSummary`,
+`PricingTiers`/`PlanComparison`, `MapWithList`, `PhotoGallery`/`PhotoViewer`/`MasonryWall`,
+`AreaChart`/`BarChart`, and their smaller controls. Templates include `DetailSheet`,
+`SidePanel`, `BuyBar`, `MoreFilters` and `SummaryDetail`. `DisclosureSection` permits
+at most two levels; move a third level to an explicit detail page or sibling sheet.
+Keep essential fields and primary actions visible without opening a disclosure.
+
+`ResourceList` now requires `presentation` in place of `feedback` and delegates
+to `deriveCatalogList` and `DataList`. `Activity` requires `model` from
+`deriveActivity` or `deriveEventActivity`, with `onMore`, `onRetry`, `onExpand` and
+`onOpen` supplied when offered. `ResourceDetail.activity` accepts those props.
+All in-repository consumers have migrated. Direct source consumers must migrate
+these props when updating their pin; source compatibility is not implied.
+
+Money is canonical int64 decimal strings plus an explicit currency/exponent pair.
+`cartTotals` uses bigint and is independent of formatting. `deriveCart` offers
+checkout only with a matching fresh quote and eligible lines; its callback echoes
+quote ID and revision. The caller must discard quotes when options or quantity
+change and recheck the binding authoritatively on the server. Slot selection echoes
+the supplied availability version and never reserves capacity. Step callbacks ask
+the caller to validate, save, finish or reconcile; use `stepTransition` to apply
+adjacent-step outcomes. No draft storage or payment workflow is hidden in the kit.
+
+The native rendering adapters are `screens/NativeMap`, `screens/NativeImage` and
+`screens/NativeZoom`. Map and image resources are prepared by the product's effects
+and carry explicit scope/version identities. The MapLibre adapter takes a supplied
+style URL, uses no default city/location service, and ignores late scoped callbacks.
+The image adapter uses Expo Image with no persistent cache, an identity-based
+recycling key and guarded load callbacks. Supply `NativeZoom` through PhotoViewer's
+`renderZoom` slot; it composes Zoom Toolkit with the shared labelled controls.
+Unmount or key the screen subtree on session/scope loss. Core and UI models contain
+no URL credentials, SDK object or transport. Web maps show an explicit unsupported
+notice; the complete list remains available. Gallery media uses labelled synthetic
+fixtures unless a real image slot is supplied, and has no production map endpoint.
+
+The new native dependencies and config plugins change `fingerprint.json` and
+require a new binary. Native load/gesture behavior, VoiceOver/TalkBack, keyboard
+focus restoration and authenticated device journeys must still be verified on
+that binary. Node tests, component tests and JavaScript exports are separate
+source evidence; they do not establish those runtime results.
 
 ### Shared package
 

@@ -18,6 +18,12 @@ export const extent = {
   skeletonRow: 44,
   focus: 2,
   choiceMin: 120,
+  chart: 200,
+  chartStroke: 0.008,
+  chartDot: 0.018,
+  calendarDay: 240,
+  calendarHeight: 960,
+  panel: 480,
 } as const;
 
 /** type is the size and line height of each Text role, and how far Dynamic Type may scale it. */

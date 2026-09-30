@@ -36,6 +36,8 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-secure-store",
     "expo-font",
+    "expo-image",
+    "@maplibre/maplibre-react-native",
     // A verification build talks plain HTTP to a server on the workstation
     // through adb reverse; a release never does.
     ["expo-build-properties", { android: { usesCleartextTraffic: profile === "ci" } }],

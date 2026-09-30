@@ -1,132 +1,82 @@
-// Activity is a record's trail as a section: what happened, who did it, when.
-// It is the outbox's own record, so the lines are the events a module
-// published rather than a story this app invents.
 import React from "react";
-import { StyleSheet, View } from "react-native";
-import { since, subject, verb, type Event } from "../../core/activity";
-import { type Feedback, timeText } from "../../core/derive";
-import { Badge } from "../atoms/Badge";
+import { View } from "react-native";
+import type { ActivityModel } from "../../core/derive";
+import { ActionControl } from "../atoms/ActionControl";
 import { Button } from "../atoms/Button";
-import { Icon } from "../atoms/Icon";
+import { Notice } from "../atoms/Notice";
 import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
+import { DetailRow } from "../molecules/DetailRow";
+import { ModelState } from "../molecules/ModelState";
 import { Section } from "../molecules/Section";
-import { useStyles, type Theme } from "../theme";
-
+import { kitStyles } from "../layout";
+import { useStyles } from "../theme";
 export interface Props {
-  readonly feedback: Feedback;
-  readonly events: readonly Event[];
-  /** names turns an actor's id into a person; an id nobody named stays an id. */
-  readonly names: Readonly<Record<string, string>>;
-  readonly loading: boolean;
-  readonly error: string;
-  /** more says older lines exist; loadMore reads the next page of them. */
-  readonly more: boolean;
-  /** excluded says the plan does not include the trail, which is not an error. */
-  readonly excluded?: boolean;
-  readonly loadingMore: boolean;
-  readonly loadMore: () => void;
-  readonly now?: Date;
+  readonly model: ActivityModel;
+  readonly onExpand?: (ids: readonly string[]) => void;
+  readonly onOpen?: (id: string) => void;
+  readonly onMore?: () => void;
+  readonly onRetry?: () => void;
 }
-
-export function Activity({
-  feedback,
-  events,
-  names,
-  loading,
-  error,
-  more,
-  excluded = false,
-  loadingMore,
-  loadMore,
-  now = new Date(),
-}: Props) {
-  const s = useStyles(styles);
-
-  if (error)
-    return (
-      <Section title="Activity">
-        <Text tone="muted">{error}</Text>
-      </Section>
-    );
-  if (excluded)
-    return (
-      <Section title="Activity" footer="Ask whoever manages the account.">
-        <Text tone="muted">This account&rsquo;s plan does not include the activity trail.</Text>
-      </Section>
-    );
-  if (loading && events.length === 0)
-    return (
-      <Section title="Activity">
-        <Text tone="muted">Reading the trail…</Text>
-      </Section>
-    );
-  if (events.length === 0)
-    return (
-      <Section title="Activity">
-        <Text tone="muted">Nothing has happened to this record yet.</Text>
-      </Section>
-    );
-
+export function Activity({ model, onExpand, onOpen, onMore, onRetry }: Props) {
+  const s = useStyles(kitStyles);
   return (
-    <Section title="Activity">
-      {events.map((e) => {
-        const who = e.actor ? (names[e.actor] ?? e.actor.slice(0, 8)) : "the system";
-        const at = new Date(e.occurredAt);
-        return (
-          <View
-            key={e.id}
-            style={s.line}
-            accessible
-            accessibilityLabel={`${verb(e)} by ${who}, ${since(at, now, (date) => timeText(date, feedback))}`}
-          >
-            <Badge label={verb(e)} tone="info" />
-            <View style={s.who}>
-              <Text role="caption" tone="muted" numberOfLines={1}>
-                {who}
-              </Text>
-              <View style={s.when}>
-                <Icon name="clock" size="sm" tone="muted" />
-                <Text role="caption" tone="muted">
-                  {since(at, now, (date) => timeText(date, feedback))}
-                </Text>
+    <Section title={model.title}>
+      {model.excluded ? (
+        <Text>{model.excluded}</Text>
+      ) : (
+        <>
+          <ModelState model={model} {...(onRetry ? { onRetry } : {})} />
+          {model.rows.map((row) => (
+            <View key={row.id} style={s.stack}>
+              <View
+                accessible
+                accessibilityLabel={row.accessibleLabel}
+                accessibilityHint={row.time}
+              >
+                <Text weight="semibold">{row.verb}</Text>
+                <Text>{row.actor}</Text>
+                <Text>{row.relative}</Text>
               </View>
+              {onExpand && (row.changes.length || row.details) ? (
+                <Button
+                  label={row.expandLabel}
+                  tone="plain"
+                  expanded={row.expanded}
+                  onPress={() => onExpand(row.expansion)}
+                />
+              ) : null}
+              {row.expanded ? (
+                <>
+                  {row.details ? <Text>{row.details}</Text> : null}
+                  {row.changes.map((change) => (
+                    <View key={change.id}>
+                      <Text role="label">{change.label}</Text>
+                      <DetailRow term={model.before} value={change.before} />
+                      <DetailRow term={model.after} value={change.after} />
+                    </View>
+                  ))}
+                </>
+              ) : null}
+              {row.open && onOpen ? (
+                <ActionControl model={row.open} onAction={() => onOpen(row.id)} />
+              ) : null}
             </View>
-          </View>
-        );
-      })}
-      {more ? (
-        <View style={s.more}>
-          {loadingMore ? (
-            <Spinner label={feedback.loadingLabel} motion={feedback.motion} />
-          ) : (
-            <Button label="Show older" tone="plain" onPress={loadMore} testID="activity-more" />
-          )}
-        </View>
-      ) : null}
+          ))}
+          {model.pageError ? <Notice text={model.pageError} announcement="urgent" /> : null}
+          {model.more && onMore ? (
+            model.more.busy ? (
+              <View>
+                <Text>{model.more.label}</Text>
+                <Spinner label={model.more.label} motion="reduced" />
+              </View>
+            ) : (
+              <ActionControl model={model.more} onAction={onMore} testID="activity-more" />
+            )
+          ) : null}
+        </>
+      )}
     </Section>
   );
 }
-
-/** subjectOf is exported for a trail that is not about one record; the detail screen does not use it. */
-export { subject as subjectOf };
-
-const styles = (t: Theme) =>
-  StyleSheet.create({
-    line: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: t.space.sm,
-      paddingVertical: t.space.sm,
-    },
-    who: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: t.space.sm,
-    },
-    // The time never shrinks: "just now" clipped to "just" is a lie about when.
-    when: { flexDirection: "row", alignItems: "center", gap: t.space.xs, flexShrink: 0 },
-    more: { alignItems: "center", paddingVertical: t.space.xs },
-  });
+export { subject as subjectOf } from "../../core/activity";

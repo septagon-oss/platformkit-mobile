@@ -1,10 +1,10 @@
-import { feedback } from "../fakes/presentation";
+import { feedback, presentation } from "../fakes/presentation";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
-import { formControls, noOrder, sortOptions } from "../../src/core/derive";
+import { deriveEventActivity, formControls, noOrder, sortOptions } from "../../src/core/derive";
 import { Home } from "../../src/ui/organisms/Home";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
@@ -23,7 +23,7 @@ describe("ResourceList", () => {
     const onRefresh = jest.fn();
     await inTheme(
       <ResourceList
-        feedback={feedback}
+        presentation={presentation}
         entry={note}
         rows={[]}
         total={0}
@@ -65,7 +65,7 @@ describe("ResourceList", () => {
 
   test("a row is its name and what tells it apart, and opens by id", async () => {
     const onOpen = jest.fn();
-    await inTheme(<ResourceList feedback={feedback} {...props} onOpen={onOpen} />);
+    await inTheme(<ResourceList presentation={presentation} {...props} onOpen={onOpen} />);
     // The cells are the closed set, the yes-or-no and the number, in that
     // order: not the times every record has.
     await fireEvent.press(
@@ -78,7 +78,7 @@ describe("ResourceList", () => {
     const onNew = jest.fn();
     await inTheme(
       <ResourceList
-        feedback={feedback}
+        presentation={presentation}
         {...props}
         rows={[]}
         total={0}
@@ -90,7 +90,7 @@ describe("ResourceList", () => {
     expect(onNew).toHaveBeenCalledTimes(1);
     await screen.unmount();
     await inTheme(
-      <ResourceList feedback={feedback} {...props} rows={[]} total={0} onOpen={none} />,
+      <ResourceList presentation={presentation} {...props} rows={[]} total={0} onOpen={none} />,
     );
     expect(screen.queryByRole("button", { name: "New note" })).toBeNull();
   });
@@ -197,7 +197,7 @@ describe("Actions", () => {
     const archive = note.commands.filter((c) => c.collection);
     await inTheme(
       <ResourceList
-        feedback={feedback}
+        presentation={presentation}
         {...{
           entry: note,
           rows: [],
@@ -270,11 +270,16 @@ describe("Activity", () => {
     loadMore: none,
     now,
   };
+  const adapt = (value: Omit<typeof trail, "loadMore"> & { loadMore: () => void }) => {
+    const result = deriveEventActivity(value, { ...presentation, now: value.now.toISOString() });
+    if (!result.ok) throw new Error(JSON.stringify(result.issues));
+    return { model: result.value, onMore: value.loadMore };
+  };
   const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: [] };
   const detail = { entry: note, row, error: "", onRetry: none };
 
   test("the trail says what happened, who did it and how long ago", async () => {
-    await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={trail} />);
+    await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={adapt(trail)} />);
     expect(screen.getByLabelText("Updated by Joao, 2 minutes ago")).toBeOnTheScreen();
     // An event nobody signed is the system's, not a blank line.
     expect(screen.getByLabelText("Created by the system, yesterday")).toBeOnTheScreen();
@@ -286,7 +291,7 @@ describe("Activity", () => {
       <ResourceDetail
         feedback={feedback}
         {...detail}
-        activity={{ ...trail, more: true, loadMore }}
+        activity={adapt({ ...trail, more: true, loadMore })}
       />,
     );
     await fireEvent.press(screen.getByRole("button", { name: "Show older" }));
@@ -297,12 +302,12 @@ describe("Activity", () => {
       <ResourceDetail
         feedback={feedback}
         {...detail}
-        activity={{ ...trail, more: true, loadingMore: true }}
+        activity={adapt({ ...trail, more: true, loadingMore: true })}
       />,
     );
     expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
     await screen.unmount();
-    await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={trail} />);
+    await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={adapt(trail)} />);
     expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
   });
 
@@ -311,7 +316,7 @@ describe("Activity", () => {
       <ResourceDetail
         feedback={feedback}
         {...detail}
-        activity={{ ...trail, events: [], excluded: true }}
+        activity={adapt({ ...trail, events: [], excluded: true })}
       />,
     );
     expect(screen.getByText(/plan does not include the activity trail/)).toBeOnTheScreen();
@@ -320,7 +325,7 @@ describe("Activity", () => {
 
   test("a record with no trail yet says so, and an unreadable one says why", async () => {
     await inTheme(
-      <ResourceDetail feedback={feedback} {...detail} activity={{ ...trail, events: [] }} />,
+      <ResourceDetail feedback={feedback} {...detail} activity={adapt({ ...trail, events: [] })} />,
     );
     expect(screen.getByText("Nothing has happened to this record yet.")).toBeOnTheScreen();
     await screen.unmount();
@@ -328,7 +333,7 @@ describe("Activity", () => {
       <ResourceDetail
         feedback={feedback}
         {...detail}
-        activity={{ ...trail, events: [], error: "not allowed" }}
+        activity={adapt({ ...trail, events: [], error: "not allowed" })}
       />,
     );
     expect(screen.getByText("not allowed")).toBeOnTheScreen();

@@ -11,13 +11,18 @@ export interface Canvas {
   readonly page: StyleProp<ViewStyle>;
   /** content insets what is drawn and keeps its foot above the safe area. */
   readonly content: StyleProp<ViewStyle>;
+  readonly footer: StyleProp<ViewStyle>;
 }
 
 export function useCanvas(): Canvas {
   const t = useTheme();
   const s = useStyles(styles);
   const insets = useSafeAreaInsets();
-  return { page: s.page, content: [s.content, { paddingBottom: insets.bottom + t.space.xl }] };
+  return {
+    page: s.page,
+    content: [s.content, { paddingBottom: insets.bottom + t.space.xl }],
+    footer: { paddingBottom: insets.bottom + t.space.lg },
+  };
 }
 
 const styles = (t: Theme) =>

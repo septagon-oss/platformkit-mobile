@@ -3,7 +3,14 @@
 // native header is a word in the accent colour and a button on a page is a
 // filled shape, and both are this component.
 import React, { useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  View,
+  type AccessibilityRole,
+  type ViewStyle,
+} from "react-native";
 import type { Motion } from "../../core/derive";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
@@ -26,6 +33,10 @@ interface Props {
   /** Unresolved preferences stay still. Screens supply normal motion explicitly. */
   readonly motion?: Motion;
   readonly testID?: string;
+  readonly accessibilityRole?: AccessibilityRole;
+  readonly selected?: boolean;
+  readonly checked?: boolean | "mixed";
+  readonly expanded?: boolean;
 }
 
 export function Button({
@@ -40,6 +51,10 @@ export function Button({
   hint,
   motion = "reduced",
   testID,
+  accessibilityRole = "button",
+  selected,
+  checked,
+  expanded,
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
@@ -74,10 +89,16 @@ export function Button({
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
       disabled={off}
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={label}
       {...(reason || hint ? { accessibilityHint: reason ?? hint } : {})}
-      accessibilityState={{ disabled: off, busy }}
+      accessibilityState={{
+        disabled: off,
+        busy,
+        ...(selected === undefined ? {} : { selected }),
+        ...(checked === undefined ? {} : { checked }),
+        ...(expanded === undefined ? {} : { expanded }),
+      }}
       accessibilityActions={off ? [] : [{ name: "activate", label }]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "activate") activate();

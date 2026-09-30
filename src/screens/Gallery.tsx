@@ -5,6 +5,7 @@ import { Gallery as GalleryView } from "../ui/gallery";
 import { useFeedback } from "./useFeedback";
 import { StateFeedback } from "./StateFeedback";
 import type { Props as StateViewProps } from "../ui/molecules/StateView";
+import { NativeZoom } from "./NativeZoom";
 import { systemClock } from "./clock";
 
 const stateFeedback = (props: StateViewProps) => <StateFeedback {...props} />;
@@ -20,5 +21,11 @@ export function Gallery({ clock = systemClock }: { readonly clock?: Clock } = {}
     copy: deriveCopy("en"),
     motion: feedback.motion,
   };
-  return <GalleryView presentation={presentation} renderState={stateFeedback} />;
+  return (
+    <GalleryView
+      presentation={presentation}
+      renderState={stateFeedback}
+      renderZoom={(props) => <NativeZoom {...props} />}
+    />
+  );
 }

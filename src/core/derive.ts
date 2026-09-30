@@ -399,3 +399,20 @@ export const narrowed = (order: Order): boolean =>
 /** screenPath is where the router serves an entry's screens. */
 export const screenPath = (e: Entry): `/${string}/${string}` =>
   `/${encodeURIComponent(e.module)}/${encodeURIComponent(e.entity)}`;
+
+export * from "./collections";
+export * from "./surfaces";
+export * from "./audit";
+export * from "./stepper";
+export * from "./slots";
+export * from "./calendar";
+export * from "./commerce";
+export * from "./pricing";
+export * from "./map";
+export * from "./media";
+export * from "./charts";
+export type { Content, ContentModel, Page, Status, Control as ActionModel } from "./shared";
+
+export * from "./catalogActivity";
+export * from "./catalogList";
+export { kitExamples, kitCaseIds, type KitExamples, type GallerySelection } from "./kitGallery";

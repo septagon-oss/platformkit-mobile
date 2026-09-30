@@ -4,7 +4,7 @@
 // caller.
 import type { Feedback } from "../../core/derive";
 import React, { type ReactElement, type ReactNode } from "react";
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, SectionList, RefreshControl, StyleSheet, View } from "react-native";
 import { Skeleton } from "../atoms/Skeleton";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
@@ -86,3 +86,59 @@ const styles = (t: Theme) =>
   StyleSheet.create({
     header: { gap: t.space.lg },
   });
+
+/** Grouped lists retain virtualization in the same native list owner. */
+export function GroupedListScreen<T>({
+  sections,
+  keyOf,
+  render,
+  renderHeading,
+  header,
+  footer,
+  empty,
+  refreshing,
+  onRefresh,
+  testID,
+}: {
+  readonly sections: readonly { readonly id: string; readonly data: readonly T[] }[];
+  readonly keyOf: (item: T) => string;
+  readonly render: (item: T) => ReactElement;
+  readonly renderHeading: (id: string) => ReactElement;
+  readonly header?: ReactNode;
+  readonly footer?: ReactNode;
+  readonly empty?: ReactNode;
+  readonly refreshing: boolean;
+  readonly onRefresh?: () => void;
+  readonly testID?: string | undefined;
+}) {
+  const t = useTheme(),
+    canvas = useCanvas();
+  return (
+    <SectionList
+      sections={sections}
+      keyExtractor={keyOf}
+      renderItem={({ item }) => render(item)}
+      renderSectionHeader={({ section }) => renderHeading(section.id)}
+      style={canvas.page}
+      contentContainerStyle={canvas.content}
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
+      stickySectionHeadersEnabled={false}
+      {...(onRefresh
+        ? {
+            refreshControl: (
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={t.color.accentDefault}
+              />
+            ),
+          }
+        : {})}
+      ListHeaderComponent={<>{header}</>}
+      ListFooterComponent={<>{footer}</>}
+      ListEmptyComponent={<>{empty}</>}
+      {...testable(testID)}
+    />
+  );
+}

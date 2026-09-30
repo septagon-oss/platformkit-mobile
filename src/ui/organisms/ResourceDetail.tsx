@@ -26,7 +26,7 @@ export interface Props {
    * and not a fetch, like everything else here: the screen reads, the section
    * draws.
    */
-  readonly activity?: Omit<ActivityProps, "feedback">;
+  readonly activity?: ActivityProps;
   /** actions are the lifecycle commands this caller may run on the record. */
   readonly actions?: ActionsProps;
 }
@@ -72,7 +72,7 @@ export function ResourceDetail({
         </Section>
       )}
       {row && actions ? <Actions {...actions} /> : null}
-      {row && activity ? <Activity {...activity} feedback={feedback} /> : null}
+      {row && activity ? <Activity {...activity} /> : null}
       {row && onDelete ? (
         <Section footer="Deleting cannot be undone.">
           <Row
