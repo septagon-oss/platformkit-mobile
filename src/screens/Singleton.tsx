@@ -3,6 +3,7 @@
 // and no Delete, because the API it stands in front of has no route for any of
 // those — which is what the catalog's singleton flag says.
 import { Stack } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
 import { humanize } from "../core/derive";
 import type { ScreenProps } from "../renderers";
@@ -12,6 +13,7 @@ import { ResourceForm } from "../ui/organisms/ResourceForm";
 import { useSingleton } from "./useSingleton";
 
 export function Singleton({ entry }: ScreenProps) {
+  const feedback = useFeedback();
   const one = useSingleton(entry);
   const { edit, cancel, save, editing, phase } = one;
   const may = entry.writable;
@@ -51,6 +53,7 @@ export function Singleton({ entry }: ScreenProps) {
       <Stack.Screen options={options} />
       {editing ? (
         <ResourceForm
+          feedback={feedback}
           controls={one.controls}
           held={one.held}
           errors={one.errors}
@@ -61,6 +64,7 @@ export function Singleton({ entry }: ScreenProps) {
         />
       ) : (
         <ResourceDetail
+          feedback={feedback}
           entry={entry}
           row={one.row}
           error={phase === "failed" ? one.detail : ""}

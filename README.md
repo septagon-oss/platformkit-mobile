@@ -76,8 +76,9 @@ Distances live in `src/ui/scale.ts`. The gallery
 with `EXPO_PUBLIC_GALLERY=1`) shows every atom and molecule in both modes.
 
 The [shared mobile components specification](docs/shared-mobile-components.md)
-defines the proposed richer components, their APIs, reuse, gallery states and
-delivery order. It describes planned work, not additional shipped components.
+defines the richer components, their APIs, reuse, gallery states and delivery
+order. The rich-state source described below is implemented; the remaining
+component groups and native acceptance are still pending.
 
 Keep UI imports pointed toward the primitives. Atoms may compose other atoms;
 molecules add atoms; templates supply layout through children or render callbacks
@@ -128,6 +129,74 @@ module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
 
 ## Consume the shared native source
+
+### Shared feedback
+
+**Reused** — `EmptyState`, `Notice`, `Skeleton`, `Spinner`, `Button`, native
+accessibility primitives, `ThemeProvider`, scale and Gallery carry the shared
+feedback family. **Added** — pure `deriveCopy`, `deriveState` and explicit
+presentation inputs own translated copy and recovery eligibility, because the
+existing atoms had no common state or recovery contract. **Made reusable** —
+`StateView`, the `StateFeedback` screen adapter and 31 Gallery cases let another
+renderer pack use the same states, actions, tokens and conformance examples.
+
+Obtain an immutable English or Portuguese copy bundle with `deriveCopy('en')`
+or `deriveCopy('pt')` from `platformkit-mobile/core/derive`. Pass an explicit
+`Presentation` with that bundle, locale, timezone, week start, sampled UTC clock
+value and motion preference to `deriveState(input, presentation)`. Language and
+formatting locale are independent; the gallery includes `en-GB`, `pt-PT` and
+`pt-BR`. Unresolved motion preferences stay reduced.
+
+`deriveState` returns either `{ ok: true, value }` or `{ ok: false, issues }`, with
+no partial model. Render a successful value through
+`platformkit-mobile/screens/StateFeedback`, passing `model`, `onAction(id)` and
+an optional `testID`. This screen adapter composes the pure
+`ui/molecules/StateView` and performs iOS announcements when the message changes;
+Android and web use native live regions. The caller owns all reads, writes,
+navigation and reconciliation. A callback reports intent, never success.
+
+Use empty for a successful zero result, offline/error for failed reads, and
+success only after a confirmed result. An immutable error refuses a retry-read
+action. An unknown write outcome allows reconciliation or dismissal; it refuses
+resubmission and read-retry intents. Busy actions keep their labels and suppress
+activation; disabled actions require a visible reason. A success stays until its
+caller dismisses it. `updatedAt` labels stale readable content in the supplied
+locale and zone; forbidden or missing records cannot carry that stale label.
+
+Direct consumers upgrading their source pin must migrate these required props:
+
+- `Skeleton` and `Spinner`: `label` and `motion`; Skeleton also supports
+  `lines`, `rows`, `detail` and `media` variants.
+- `Notice`: explicit `announcement` (`none`, `polite` or `urgent`); its action
+  accepts busy/disabled/reason, and it can offer a secondary action.
+- `ChoiceRow`: `copy={copy.choice}` for its placeholder, cancel word and hint.
+- `ListScreen`, `LoadMore`, `Home`, `ResourceList`, `ResourceDetail`,
+  `ResourceForm`, `SignInForm` and `Activity`: `feedback`, obtained from
+  `deriveFeedback(copy, motion, { locale, timeZone })`. The in-repository screens
+  adapt native preferences in `useFeedback`. `retry(feedback, callback)` now
+  gets its label from core; the old Notice export re-exports that same helper.
+- `timeText(date, formatting)`, `display(field, value, formatting)` and
+  `detailItems(entry, row, formatting)` require explicit formatting. The latter
+  two also use its copy bundle. `Value` and `Labelled` receive that value as
+  `presentation`. There is no mutable device-default date formatter.
+
+The public `platformkit-mobile/ui/gallery` export accepts `presentation`, optional
+complete `palette`/`fonts`, `initialCaseId` and `initialMode`. Choose a rich-state
+case, language, locale and appearance in its controls. Hover, press and focus
+cases contain real controls to operate; their names do not simulate interaction.
+Passive loading states have no disabled/selection actions. Supply `renderState`
+with the `StateFeedback` adapter for iOS speech, as the reference gallery screen
+does. The older primitive samples remain English fixtures; this delivery does
+not claim whole-application localization.
+
+The rich-state unit/component suites and browser checks exercise the reference
+palette and isolated supplied-token fixtures. Android/iOS devices, VoiceOver,
+TalkBack, largest native text settings and consuming products' palettes still
+need their acceptance runs. No new native package or catalog/API contract is
+introduced. The date-picker clock/copy and full activity-model migrations remain
+in the staged specification.
+
+### Shared package
 
 [package.json](package.json) exposes the existing implementation through package
 subpaths: `platformkit-mobile/shell`, `renderers`, `route`, `effects/api`,

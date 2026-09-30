@@ -4,15 +4,21 @@
 // for it (app/gallery.tsx); nothing here names an entity.
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { timeText } from "../core/derive";
+import {
+  deriveCopy,
+  deriveFeedback,
+  stateExamples,
+  timeText,
+  type Feedback,
+  type Language,
+  type Presentation,
+} from "../core/derive";
 import { Badge } from "./atoms/Badge";
 import { Button } from "./atoms/Button";
 import { ChoiceRow } from "./atoms/ChoiceRow";
 import { DateTimeRow } from "./atoms/DateTimeRow";
-import { EmptyState } from "./atoms/EmptyState";
 import { Icon } from "./atoms/Icon";
 import { Notice } from "./atoms/Notice";
-import { Skeleton } from "./atoms/Skeleton";
 import { Spinner } from "./atoms/Spinner";
 import { SwitchRow } from "./atoms/SwitchRow";
 import { Text } from "./atoms/Text";
@@ -26,7 +32,8 @@ import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
 import { Screen } from "./templates/Screen";
-import { ThemeProvider, useStyles, type Theme } from "./theme";
+import { ThemeProvider, useStyles, type Theme, type Palette, type Fonts } from "./theme";
+import { StateView, type Props as StateViewProps } from "./molecules/StateView";
 import type { Mode } from "./tokens";
 
 const choices = [
@@ -34,30 +41,114 @@ const choices = [
   { value: "done", label: "Done" },
 ];
 
-export function Gallery() {
-  const [mode, setMode] = useState<Mode>("light");
+interface Props {
+  readonly presentation: Presentation;
+  readonly palette?: Readonly<Record<Mode, Palette>>;
+  readonly fonts?: Fonts;
+  readonly initialCaseId?: string;
+  readonly initialMode?: Mode;
+  /** Screen composition can supply its native announcement adapter. */
+  readonly renderState?: (props: StateViewProps) => React.ReactNode;
+}
+
+const stateView = (props: StateViewProps) => <StateView {...props} />;
+
+export function Gallery({
+  presentation,
+  palette,
+  fonts,
+  initialCaseId = "primitives/default",
+  initialMode = "light",
+  renderState = stateView,
+}: Props) {
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [language, setLanguage] = useState<Language>();
+  const [locale, setLocale] = useState<string>();
+  const [caseId, setCaseId] = useState(initialCaseId);
+  const [action, setAction] = useState("");
+  const copy = language ? deriveCopy(language) : presentation.copy;
+  const shown = { ...presentation, copy, locale: locale ?? presentation.locale };
+  const cases = stateExamples(shown);
+  const example = cases.ok ? cases.value.find((item) => item.id === caseId) : undefined;
+  const words = copy.gallery;
+  const feedback = deriveFeedback(copy, shown.motion, shown);
   return (
-    <ThemeProvider mode={mode}>
+    <ThemeProvider mode={mode} {...(palette ? { palette } : {})} {...(fonts ? { fonts } : {})}>
       <Screen form testID="gallery">
-        <Section title="Mode">
+        <Section title={words.appearance}>
           <ChoiceRow
-            label="Appearance"
+            copy={copy.choice}
+            label={words.appearance}
             value={mode}
             options={[
-              { value: "light", label: "Light" },
-              { value: "dark", label: "Dark" },
+              { value: "light", label: words.light },
+              { value: "dark", label: words.dark },
             ]}
-            onChange={(v) => setMode(v === "dark" ? "dark" : "light")}
+            onChange={(value) => setMode(value === "dark" ? "dark" : "light")}
             testID="gallery-mode"
           />
+          <ChoiceRow
+            copy={copy.choice}
+            label={words.language}
+            value={copy.language}
+            options={[
+              { value: "en", label: words.english },
+              { value: "pt", label: words.portuguese },
+            ]}
+            onChange={(value) => setLanguage(value === "pt" ? "pt" : "en")}
+            testID="gallery-language"
+          />
+          <ChoiceRow
+            copy={copy.choice}
+            label={words.locale}
+            value={shown.locale}
+            options={[...new Set([presentation.locale, "en-GB", "pt-PT", "pt-BR"])].map(
+              (value) => ({ value, label: value }),
+            )}
+            onChange={setLocale}
+            testID="gallery-locale"
+          />
+          <ChoiceRow
+            copy={copy.choice}
+            label={words.case}
+            value={caseId}
+            options={[
+              { value: "primitives/default", label: words.primitives },
+              ...(cases.ok ? cases.value.map(({ id }) => ({ value: id, label: id })) : []),
+            ]}
+            onChange={(id) => {
+              setCaseId(id);
+              setAction("");
+            }}
+            testID="gallery-case"
+          />
         </Section>
-        <Samples />
+        {caseId === "primitives/default" ? (
+          <Samples feedback={feedback} />
+        ) : example ? (
+          <Section title={words.states}>
+            {example.renderer === "spinner" ? (
+              <Spinner
+                label={example.model.loadingLabel}
+                motion={example.model.motion}
+                testID="gallery-spinner"
+              />
+            ) : (
+              renderState({ model: example.model, onAction: setAction, testID: "gallery-state" })
+            )}
+            <Text accessibilityLiveRegion="polite" testID="gallery-action">
+              {action ? words.actionReceived(action) : ""}
+            </Text>
+          </Section>
+        ) : (
+          <Notice text={copy.issue.invalid} announcement="urgent" />
+        )}
       </Screen>
     </ThemeProvider>
   );
 }
 
-function Samples() {
+function Samples({ feedback }: { readonly feedback: Feedback }) {
   const s = useStyles(styles);
   const [on, setOn] = useState(true);
   const [choice, setChoice] = useState("open");
@@ -116,26 +207,6 @@ function Samples() {
         </View>
       </Section>
 
-      <Section title="Notices">
-        <Notice
-          text="The server could not be reached."
-          action={{ label: "Retry", onPress: none }}
-        />
-        <Notice tone="warning" title="Heads up" text="A warning with a title." />
-        <Notice tone="info" text="Something to know." />
-        <Notice tone="ok" text="Saved." />
-      </Section>
-
-      <Section title="Waiting and nothing">
-        <Spinner />
-        <Skeleton />
-        <EmptyState
-          title="Nothing here yet"
-          text="What arrives will be listed."
-          action={{ label: "Refresh", onPress: none }}
-        />
-      </Section>
-
       <Section title="Fields">
         <FormField label="Words" required help="Some help under the field.">
           <TextField
@@ -166,10 +237,21 @@ function Samples() {
           <SwitchRow label="Pinned" value={on} onValueChange={setOn} help="A yes or a no." />
         </FormField>
         <FormField label="Status" bare>
-          <ChoiceRow label="Status" value={choice} options={choices} onChange={setChoice} />
+          <ChoiceRow
+            copy={feedback.copy.choice}
+            label="Status"
+            value={choice}
+            options={choices}
+            onChange={setChoice}
+          />
         </FormField>
         <FormField label="Due" bare>
-          <DateTimeRow label="Due" value={at} onChange={setAt} text={timeText} />
+          <DateTimeRow
+            label="Due"
+            value={at}
+            onChange={setAt}
+            text={(value) => timeText(value, feedback)}
+          />
         </FormField>
         <FormField label="Tags" help="Comma separated.">
           <TagsField label="Tags" value={tags} onChange={setTags} />
@@ -190,6 +272,7 @@ function Samples() {
           value="3f2a9c1e-1b2c-4d5e-8f90-123456789abc"
           shown={
             <Value
+              presentation={feedback}
               field={{ name: "id", type: "uuid" }}
               value="3f2a9c1e-1b2c-4d5e-8f90-123456789abc"
             />
@@ -200,6 +283,7 @@ function Samples() {
           value="Open"
           shown={
             <Value
+              presentation={feedback}
               field={{ name: "status", type: "string", enum: ["open", "done"] }}
               value="open"
             />
@@ -208,18 +292,27 @@ function Samples() {
         <DetailRow
           term="Pinned"
           value="Yes"
-          shown={<Value field={{ name: "pinned", type: "bool" }} value={true} />}
+          shown={
+            <Value presentation={feedback} field={{ name: "pinned", type: "bool" }} value={true} />
+          }
         />
         <DetailRow
           term="Due at"
           value="Jan 31, 2026, 09:00 AM UTC"
-          shown={<Value field={{ name: "dueAt", type: "time" }} value="2026-01-31T09:00:00Z" />}
+          shown={
+            <Value
+              presentation={feedback}
+              field={{ name: "dueAt", type: "time" }}
+              value="2026-01-31T09:00:00Z"
+            />
+          }
         />
         <DetailRow
           term="Tags"
           value="alpha, beta"
           shown={
             <Value
+              presentation={feedback}
               field={{ name: "tags", type: "list", elem: "string" }}
               value={["alpha", "beta"]}
             />
@@ -228,7 +321,7 @@ function Samples() {
         <DetailRow term="Body" value="—" />
       </Section>
 
-      <LoadMore remaining={12} busy={false} onPress={none} />
+      <LoadMore feedback={feedback} remaining={12} busy={false} onPress={none} />
     </>
   );
 }

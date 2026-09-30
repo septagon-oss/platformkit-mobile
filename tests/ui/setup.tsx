@@ -1,3 +1,4 @@
+import { feedback, presentation } from "../fakes/presentation";
 // What every component test needs: the native modules that have no JavaScript
 // implementation under Jest, mocked to their shape so an atom that uses them
 // renders, and React Native's component modules evaluated once before the
@@ -36,8 +37,9 @@ jest.mock(
 beforeAll(async () => {
   await render(
     <>
-      <Gallery />
+      <Gallery presentation={presentation} />
       <ListScreen
+        feedback={feedback}
         data={["warm"]}
         keyOf={(item) => item}
         render={(item) => <Text>{item}</Text>}

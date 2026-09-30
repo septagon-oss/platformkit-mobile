@@ -4,6 +4,7 @@
 // controls, the help under each — so a module that adds a command gets a
 // screen without anybody writing one.
 import { Stack } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
 import { commandOf, commandTitle, humanize } from "../core/derive";
 import type { ScreenProps } from "../renderers";
@@ -22,7 +23,10 @@ export function ResourceCommand({ entry, id, verb = "" }: ScreenProps) {
 function Missing({ entity, verb }: { readonly entity: string; readonly verb: string }) {
   return (
     <Screen>
-      <Notice text={`${entity} has no ${verb || "such"} command, or you may not run it.`} />
+      <Notice
+        announcement="urgent"
+        text={`${entity} has no ${verb || "such"} command, or you may not run it.`}
+      />
     </Screen>
   );
 }
@@ -36,6 +40,7 @@ function Sheet({
   readonly id: string | undefined;
   readonly command: NonNullable<ReturnType<typeof commandOf>>;
 }) {
+  const feedback = useFeedback();
   const form = useCommandForm(entry, id, command);
   const running = form.phase === "running";
   const { cancel, run, phase } = form;
@@ -71,6 +76,7 @@ function Sheet({
     <>
       <Stack.Screen options={options} />
       <ResourceFormView
+        feedback={feedback}
         controls={form.controls}
         held={form.held}
         errors={form.errors}

@@ -4,7 +4,7 @@
 import Constants from "expo-constants";
 import { Redirect, Stack } from "expo-router";
 import React from "react";
-import { Gallery } from "../src/ui/gallery";
+import { Gallery } from "../src/screens/Gallery";
 
 const shown = __DEV__ || Constants.expoConfig?.extra?.gallery === true;
 const options = { title: "Gallery", headerLargeTitleEnabled: false } as const;

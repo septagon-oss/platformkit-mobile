@@ -1,10 +1,42 @@
 # Shared mobile components specification
 
-Status: specification for T-0180, 2026-09-29. The contracts below are proposed;
-they are not a claim that the components, dependencies, tests or device journeys
-have shipped. The inspected baseline is
-`2d56f1a36486fa4353dbc7afdfa64707073e47af`. This document changes no runtime code,
-catalog, HTTP endpoint, database schema or native build input.
+Status: staged implementation for T-0180, 2026-09-30. The rich-state source
+delivery is described below; remaining contracts are proposed. No native
+acceptance or all-product theme coverage is claimed. The inspected baseline is
+`2d56f1a36486fa4353dbc7afdfa64707073e47af`. No catalog, HTTP endpoint, database
+schema or native dependency changes are part of the rich-state slice.
+
+## Implementation status: rich-state slice
+
+The first rich-state implementation extends the four existing atoms and adds
+`StateView`, a molecule that renders `deriveState` output. It is available through
+the existing UI subpaths; core exports come from `core/derive`. Remaining groups
+and the date-picker/full activity-model migration below are still planned.
+Native/device and product-theme acceptance must be recorded separately.
+
+The source migration for this slice is explicit: `Skeleton` and `Spinner` now
+require `label` and `motion`; `retry` requires `(feedback, onPress)` and is owned
+by core (its old Notice export path re-exports that function). `ListScreen`,
+`LoadMore`, `Home`, `ResourceList`, `ResourceDetail`, `ResourceForm`, `SignInForm`
+and `Activity` receive a required `feedback` value from `deriveFeedback`.
+Generated screen compositions supply that value through `useFeedback`, which
+starts with reduced motion and subscribes to native preference changes. Custom
+renderers can choose EN/PT independently through `deriveCopy` and supply their
+own motion adapter. `Row` uses its existing action title for its busy indicator
+and keeps that small indicator still.
+
+`Notice` requires explicit announcement urgency. `ChoiceRow` receives
+`copy.choice`; `timeText`, `display` and `detailItems` require explicit formatting,
+and Value/Labelled receive it as `presentation`. These remove the shared mutable
+formatter and component-owned choice words. `StateFeedback` is the optional
+screen adapter for iOS announcements; Gallery accepts its `renderState` slot.
+The README's Shared feedback section lists the complete source migration.
+
+`deriveCopy('en' | 'pt')` returns an immutable bundle directly, matching the common
+Copy contract; unsupported runtime languages throw `RangeError` with code
+`unsupported-format`. `deriveState` returns the documented Result. Copy keys are
+added with their consumers: this slice supplies state, choice, boolean value,
+integration-error and state-gallery words; later families remain planned.
 
 ## Ownership and compatibility
 
@@ -898,8 +930,9 @@ owner without demanding that a product assemble a second view model.
 | `deriveViewer` | MediaInput + `{ open: boolean }` + Presentation → ViewerModel, including selected position and boundary controls. |
 | `deriveSparkline`, `deriveChart`, `deriveBars`, `deriveStat` | Corresponding chart/stat inputs + Presentation → SparklineModel, ChartModel, BarModel, StatModel; one scale/value decision is shared. |
 
-All functions return Result except that the success payloads in the table may
-contain multiple named projections. These are named functions, not a generic
+All model factories return Result; deriveCopy returns its immutable bundle
+directly as described above. Success payloads in the table may contain multiple
+named projections. These are named functions, not a generic
 component factory, runtime renderer registry or schema/code generator. Existing
 core functions may accept explicit formatting/copy options and delegate to these
 owners; aliases cannot retain a second rule.

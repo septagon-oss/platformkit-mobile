@@ -2,6 +2,7 @@
 // large title, pull to refresh, the foot that loads more, the empty state,
 // and skeleton rows before the first page. What a row is comes from the
 // caller.
+import type { Feedback } from "../../core/derive";
 import React, { type ReactElement, type ReactNode } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { Skeleton } from "../atoms/Skeleton";
@@ -10,6 +11,7 @@ import { useStyles, useTheme, type Theme } from "../theme";
 import { useCanvas } from "./canvas";
 
 interface Props<T> {
+  readonly feedback: Feedback;
   readonly data: readonly T[];
   readonly keyOf: (item: T) => string;
   readonly render: (item: T) => ReactElement;
@@ -25,6 +27,7 @@ interface Props<T> {
 }
 
 export function ListScreen<T>({
+  feedback,
   data,
   keyOf,
   render,
@@ -62,7 +65,18 @@ export function ListScreen<T>({
       onEndReachedThreshold={0.4}
       ListHeaderComponent={header ? <View style={s.header}>{header}</View> : null}
       ListFooterComponent={footer ? <>{footer}</> : null}
-      ListEmptyComponent={loading ? <Skeleton lines={6} /> : <>{empty}</>}
+      ListEmptyComponent={
+        loading ? (
+          <Skeleton
+            label={feedback.loadingLabel}
+            motion={feedback.motion}
+            variant="rows"
+            lines={6}
+          />
+        ) : (
+          <>{empty}</>
+        )
+      }
       {...testable(testID)}
     />
   );

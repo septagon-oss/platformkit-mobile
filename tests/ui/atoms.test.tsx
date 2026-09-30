@@ -1,3 +1,4 @@
+import { deriveCopy } from "../../src/core/derive";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
@@ -49,7 +50,13 @@ describe("Badge", () => {
 describe("Notice", () => {
   test("a notice is an alert with its action", async () => {
     const retry = jest.fn();
-    await inTheme(<Notice text="Unreachable." action={{ label: "Retry", onPress: retry }} />);
+    await inTheme(
+      <Notice
+        announcement="urgent"
+        text="Unreachable."
+        action={{ label: "Retry", onPress: retry }}
+      />,
+    );
     expect(screen.getByRole("alert")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Retry" }));
     expect(retry).toHaveBeenCalledTimes(1);
@@ -67,6 +74,7 @@ describe("Rows", () => {
   test("a choice row announces what is chosen", async () => {
     await inTheme(
       <ChoiceRow
+        copy={deriveCopy("en").choice}
         label="Status"
         value="done"
         options={[
@@ -100,12 +108,19 @@ describe("testID", () => {
       <>
         <Badge label="Ok" testID="t-badge" />
         <Button label="Go" onPress={none} testID="t-button" />
-        <ChoiceRow label="Status" value="" options={[]} onChange={none} testID="t-choice" />
+        <ChoiceRow
+          copy={deriveCopy("en").choice}
+          label="Status"
+          value=""
+          options={[]}
+          onChange={none}
+          testID="t-choice"
+        />
         <EmptyState title="Nothing" testID="t-empty" />
         <Icon name="add" testID="t-icon" />
-        <Notice text="Read this." testID="t-notice" />
-        <Skeleton testID="t-skeleton" />
-        <Spinner testID="t-spinner" />
+        <Notice announcement="urgent" text="Read this." testID="t-notice" />
+        <Skeleton label={deriveCopy("en").state.loading} motion="reduced" testID="t-skeleton" />
+        <Spinner label={deriveCopy("en").state.loading} motion="reduced" testID="t-spinner" />
         <SwitchRow label="Pinned" value={false} onValueChange={none} testID="t-switch" />
       </>,
     );

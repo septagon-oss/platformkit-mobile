@@ -13,8 +13,10 @@ import {
   listPreview,
   narrowed,
   plural,
+  readPhase,
   sortOptions,
   text,
+  type Feedback,
   type Order,
   type Row as Item,
 } from "../../core/derive";
@@ -29,6 +31,7 @@ import { ListScreen } from "../templates/ListScreen";
 import { Actions, type Props as ActionsProps } from "./Actions";
 
 export interface Props {
+  readonly feedback: Feedback;
   readonly entry: Entry;
   readonly rows: readonly Item[];
   readonly total: number;
@@ -49,6 +52,7 @@ export interface Props {
 }
 
 export function ResourceList({
+  feedback,
   entry,
   rows,
   total,
@@ -70,21 +74,26 @@ export function ResourceList({
   const noun = humanize(entry.entity).toLowerCase();
   const nouns = plural(noun);
   const narrow = narrowed(order);
+  const phase = readPhase(loading, rows.length, error);
   return (
     <ListScreen
+      feedback={feedback}
       data={rows}
       keyOf={(r) => text(r.id)}
-      loading={loading && rows.length === 0}
+      loading={phase === "loading"}
       refreshing={refreshing}
       onRefresh={onRefresh}
       onEndReached={() => more && onMore()}
       testID="resource-list"
       header={
         <>
-          {error ? <Notice text={error} action={retry(onRefresh)} /> : null}
+          {error && phase === "ready" ? (
+            <Notice announcement="urgent" text={error} action={retry(feedback, onRefresh)} />
+          ) : null}
           {ordering ? (
             <Section title="Order">
               <ChoiceRow
+                copy={feedback.copy.choice}
                 label="Sort"
                 value={order.sort}
                 options={sortOptions(entry)}
@@ -93,6 +102,7 @@ export function ResourceList({
               />
               {filterFields(entry).map((f) => (
                 <ChoiceRow
+                  copy={feedback.copy.choice}
                   key={f.name}
                   label={humanize(f.name)}
                   value={order.filters[f.name] ?? ""}
@@ -118,9 +128,9 @@ export function ResourceList({
           <Row
             title={label(entry, row)}
             {...(preview && text(row[preview.name]) ? { summary: text(row[preview.name]) } : {})}
-            cells={columns.map((f) => `${humanize(f.name)}: ${display(f, row[f.name])}`)}
+            cells={columns.map((f) => `${humanize(f.name)}: ${display(f, row[f.name], feedback)}`)}
             shown={columns.map((f) => (
-              <Labelled key={f.name} field={f} value={row[f.name]} />
+              <Labelled presentation={feedback} key={f.name} field={f} value={row[f.name]} />
             ))}
             onPress={() => onOpen(text(row.id))}
             testID={`row-${text(row.id)}`}
@@ -129,7 +139,12 @@ export function ResourceList({
       )}
       footer={
         <>
-          <LoadMore remaining={Math.max(total - rows.length, 0)} busy={loading} onPress={onMore} />
+          <LoadMore
+            feedback={feedback}
+            remaining={Math.max(total - rows.length, 0)}
+            busy={loading}
+            onPress={onMore}
+          />
           {/* Under the list, because a command about the collection is about
               what was just read, and because a header with a third button in
               it is a header nobody reads. */}
@@ -137,17 +152,21 @@ export function ResourceList({
         </>
       }
       empty={
-        <EmptyState
-          title={narrow ? `No ${noun} matches` : `No ${nouns} yet`}
-          text={
-            narrow
-              ? "Change the order or the filters above."
-              : onNew
-                ? "Add the first one."
-                : "What arrives will be listed here."
-          }
-          {...(onNew && !narrow ? { action: { label: `New ${noun}`, onPress: onNew } } : {})}
-        />
+        phase === "error" ? (
+          <Notice announcement="urgent" text={error} action={retry(feedback, onRefresh)} />
+        ) : (
+          <EmptyState
+            title={narrow ? `No ${noun} matches` : `No ${nouns} yet`}
+            text={
+              narrow
+                ? "Change the order or the filters above."
+                : onNew
+                  ? "Add the first one."
+                  : "What arrives will be listed here."
+            }
+            {...(onNew && !narrow ? { action: { label: `New ${noun}`, onPress: onNew } } : {})}
+          />
+        )
       }
     />
   );

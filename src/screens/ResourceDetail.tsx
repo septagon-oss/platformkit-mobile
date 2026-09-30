@@ -2,6 +2,7 @@
 // the native header titled by the row's own name with Edit for a caller who
 // may, and the organism that draws it.
 import { Stack, useRouter } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import type { Command } from "../core/catalog";
 import { label, rowCommands, screenPath } from "../core/derive";
@@ -13,6 +14,7 @@ import { useCommandAsk } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
+  const feedback = useFeedback();
   const detail = useResourceDetail(entry, id);
   const activity = useActivity(entry, id);
   const { ask, busy } = useCommandAsk(entry, id);
@@ -57,6 +59,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     <>
       <Stack.Screen options={options} />
       <ResourceDetailView
+        feedback={feedback}
         entry={entry}
         row={detail.row}
         error={detail.error}

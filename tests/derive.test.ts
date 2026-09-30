@@ -1,3 +1,4 @@
+import { feedback } from "./fakes/presentation";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -71,17 +72,17 @@ test("the list leads with the known field and hides what the schema hides", () =
 
 test("display is the same answer as rest.Display", () => {
   const f = (name: string) => note.fields.find((x) => x.name === name)!;
-  assert.equal(display(f("pinned"), true), "Yes");
-  assert.equal(display(f("pinned"), undefined), "No");
-  assert.equal(display(f("status"), "open"), "Open");
-  assert.equal(display(f("createdAt"), row.createdAt), "Sep 5, 2026, 10:20 AM UTC");
-  assert.equal(display(f("tags"), ["a", "b"]), "a, b");
-  assert.equal(display(f("rank"), 2), "2");
-  assert.equal(display(f("body"), ""), "—");
+  assert.equal(display(f("pinned"), true, feedback), "Yes");
+  assert.equal(display(f("pinned"), undefined, feedback), "No");
+  assert.equal(display(f("status"), "open", feedback), "Open");
+  assert.equal(display(f("createdAt"), row.createdAt, feedback), "Sep 5, 2026, 10:20 AM UTC");
+  assert.equal(display(f("tags"), ["a", "b"], feedback), "a, b");
+  assert.equal(display(f("rank"), 2, feedback), "2");
+  assert.equal(display(f("body"), "", feedback), "—");
 });
 
 test("detail shows every field in schema order", () => {
-  const items = detailItems(note, row);
+  const items = detailItems(note, row, feedback);
   assert.equal(items[0]!.label, "Id");
   assert.equal(items.find((i) => i.label === "Status")!.value, "Open");
 });
@@ -129,7 +130,7 @@ test("a screen path is module/entity", () => {
 test("an instant is parsed, rendered where the phone is, and sent as the API takes it", () => {
   const at = timeValue("2026-01-31T09:00:00Z")!;
   assert.equal(timeWire(at), "2026-01-31T09:00:00.000Z");
-  assert.equal(timeText(at), "Jan 31, 2026, 09:00 AM UTC");
+  assert.equal(timeText(at, feedback), "Jan 31, 2026, 09:00 AM UTC");
   assert.equal(timeValue(""), undefined);
   assert.equal(timeValue("yesterday"), undefined);
   assert.equal(timeValue(undefined), undefined);

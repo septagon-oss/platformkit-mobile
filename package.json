@@ -15,6 +15,7 @@
     "./tools/android": "./scripts/android/build.sh",
     "./screens/*": "./src/screens/*.tsx",
     "./ui/theme": "./src/ui/theme.tsx",
+    "./ui/gallery": "./src/ui/gallery.tsx",
     "./ui/scale": "./src/ui/scale.ts",
     "./ui/atoms/*": "./src/ui/atoms/*.tsx",
     "./ui/molecules/*": "./src/ui/molecules/*.tsx",

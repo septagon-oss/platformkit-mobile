@@ -3,6 +3,34 @@
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
 import type { Command, Entry, Field } from "./catalog";
+import { presentedTime, type Formatting } from "./presentation";
+
+export { deriveCopy, type Copy, type Language } from "./copy";
+export { stateExamples, type StateExample } from "./stateGallery";
+export {
+  deriveFeedback,
+  instantValue,
+  presentedTime,
+  type Feedback,
+  type Formatting,
+  type Instant,
+  type Issue,
+  type IssueCode,
+  type Motion,
+  type Presentation,
+  type Result,
+} from "./presentation";
+export {
+  deriveState,
+  retry,
+  readPhase,
+  type Action,
+  type Announcement,
+  type SkeletonVariant,
+  type StateAction,
+  type StateInput,
+  type StateModel,
+} from "./feedback";
 
 export type Row = Readonly<Record<string, unknown>>;
 
@@ -44,29 +72,8 @@ export function timeValue(raw: unknown): Date | undefined {
 /** timeWire is an instant as the API takes it: RFC 3339, UTC. */
 export const timeWire = (at: Date): string => at.toISOString();
 
-// timeText is an instant as a person reads it here: in the device's zone, with
-// the zone named, because a phone is somewhere. This is the one place the
-// native shell reads differently from the web shell's UTC cell, on purpose:
-// a browser tab is a desk, a phone is a person.
-// The formatter is remade when the device's zone changes, because a phone
-// that flies keeps running.
-let timeFormat: Intl.DateTimeFormat | undefined;
-let timeZone: string | undefined;
-export function timeText(at: Date): string {
-  const now = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  if (!timeFormat || now !== timeZone) {
-    timeZone = now;
-    timeFormat = new Intl.DateTimeFormat(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short",
-    });
-  }
-  return timeFormat.format(at);
-}
+/** Existing entry point; dates have one formatter with explicit locale and zone. */
+export const timeText = presentedTime;
 
 /** numberValue is what a typed number means, accepting a decimal comma, or nothing when it is not a number. */
 export function numberValue(raw: string): number | undefined {
@@ -85,12 +92,14 @@ export const splitList = (raw: string): string[] =>
     .filter(Boolean);
 
 /** display is a value as a person reads it; nothing at all is a dash. */
-export function display(f: Field, v: unknown): string {
-  if (f.type === "bool") return v === true ? "Yes" : "No";
+export function display(f: Field, v: unknown, format: Formatting): string {
+  if (f.type === "bool") return v === true ? format.copy.value.yes : format.copy.value.no;
   if (f.type === "time") {
     const at = timeValue(v);
-    return at ? timeText(at) : text(v) || "—";
+    return at ? timeText(at, format) : text(v) || "—";
   }
+  if ((f.type === "int" || f.type === "float") && typeof v === "number" && Number.isFinite(v))
+    return new Intl.NumberFormat(format.locale, { maximumSignificantDigits: 21 }).format(v);
   const out = text(v);
   if (!out) return "—";
   return f.enum && f.enum.length > 0 ? humanize(out) : out;
@@ -167,8 +176,8 @@ export interface DetailItem {
   readonly value: string;
 }
 
-export function detailItems(e: Entry, row: Row): readonly DetailItem[] {
-  return e.fields.map((f) => ({ label: humanize(f.name), value: display(f, row[f.name]) }));
+export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
+  return e.fields.map((f) => ({ label: humanize(f.name), value: display(f, row[f.name], format) }));
 }
 
 export type ControlKind =

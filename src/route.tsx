@@ -12,6 +12,7 @@ import { ResourceDetail } from "./screens/ResourceDetail";
 import { ResourceForm } from "./screens/ResourceForm";
 import { ResourceList } from "./screens/ResourceList";
 import { Singleton } from "./screens/Singleton";
+import { useFeedback } from "./screens/useFeedback";
 import { useShell } from "./shell";
 import { Button } from "./ui/atoms/Button";
 import { Notice as NoticeView, retry } from "./ui/atoms/Notice";
@@ -103,7 +104,8 @@ export const commandSheet = (prop: { route: { params?: unknown } }) => {
 };
 
 export function Waiting() {
-  return <Spinner size="large" fill />;
+  const feedback = useFeedback();
+  return <Spinner label={feedback.loadingLabel} motion={feedback.motion} size="large" fill />;
 }
 
 export function Notice({
@@ -116,9 +118,14 @@ export function Notice({
   /** onSignIn is the way out when the saved server is the thing that is wrong. */
   readonly onSignIn?: () => void;
 }) {
+  const feedback = useFeedback();
   return (
     <Screen>
-      <NoticeView text={text} {...(onRetry ? { action: retry(onRetry) } : {})} />
+      <NoticeView
+        announcement="urgent"
+        text={text}
+        {...(onRetry ? { action: retry(feedback, onRetry) } : {})}
+      />
       {onSignIn ? (
         <Button label="Sign in to another server" tone="secondary" onPress={onSignIn} />
       ) : null}

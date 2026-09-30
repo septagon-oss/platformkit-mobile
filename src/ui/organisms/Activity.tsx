@@ -4,7 +4,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { since, subject, verb, type Event } from "../../core/activity";
-import { timeText } from "../../core/derive";
+import { type Feedback, timeText } from "../../core/derive";
 import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
@@ -14,6 +14,7 @@ import { Section } from "../molecules/Section";
 import { useStyles, type Theme } from "../theme";
 
 export interface Props {
+  readonly feedback: Feedback;
   readonly events: readonly Event[];
   /** names turns an actor's id into a person; an id nobody named stays an id. */
   readonly names: Readonly<Record<string, string>>;
@@ -29,6 +30,7 @@ export interface Props {
 }
 
 export function Activity({
+  feedback,
   events,
   names,
   loading,
@@ -76,7 +78,7 @@ export function Activity({
             key={e.id}
             style={s.line}
             accessible
-            accessibilityLabel={`${verb(e)} by ${who}, ${since(at, now, timeText)}`}
+            accessibilityLabel={`${verb(e)} by ${who}, ${since(at, now, (date) => timeText(date, feedback))}`}
           >
             <Badge label={verb(e)} tone="info" />
             <View style={s.who}>
@@ -86,7 +88,7 @@ export function Activity({
               <View style={s.when}>
                 <Icon name="clock" size="sm" tone="muted" />
                 <Text role="caption" tone="muted">
-                  {since(at, now, timeText)}
+                  {since(at, now, (date) => timeText(date, feedback))}
                 </Text>
               </View>
             </View>
@@ -96,7 +98,7 @@ export function Activity({
       {more ? (
         <View style={s.more}>
           {loadingMore ? (
-            <Spinner />
+            <Spinner label={feedback.loadingLabel} motion={feedback.motion} />
           ) : (
             <Button label="Show older" tone="plain" onPress={loadMore} testID="activity-more" />
           )}

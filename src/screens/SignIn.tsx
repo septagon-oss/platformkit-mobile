@@ -3,6 +3,7 @@
 // draws the shell's phases itself — restoring a saved sign-in, failing to
 // open one — so a product composes this screen rather than forking it.
 import { Stack } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useState } from "react";
 import { useShell } from "../shell";
 import { SignInForm } from "../ui/organisms/SignInForm";
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function SignIn({ title }: Props = {}) {
+  const feedback = useFeedback();
   const { state, baseURL, signIn, signOut, refresh } = useShell();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -39,6 +41,7 @@ export function SignIn({ title }: Props = {}) {
     <>
       <Stack.Screen options={options} />
       <SignInForm
+        feedback={feedback}
         baseURL={baseURL}
         notice={failed ? "" : (state.error ?? "")}
         booting={state.phase === "booting" || state.phase === "loading"}

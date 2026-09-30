@@ -20,3 +20,42 @@ env:
 - assertVisible: "Body, the system face"
 - scrollUntilVisible:
     element: "A row that opens"
+# The shared rich states use the same native controls and gallery in each mode.
+- scrollUntilVisible:
+    element:
+      id: "gallery-case"
+    direction: UP
+- tapOn:
+    id: "gallery-case"
+- tapOn: "empty-state/with-action"
+- assertVisible: "Nothing here yet"
+- tapOn: "Add an item"
+- assertVisible: "Action received: add"
+- tapOn:
+    id: "gallery-case"
+- scrollUntilVisible:
+    element: "notice/write-unknown"
+- tapOn: "notice/write-unknown"
+- assertVisible: "Check the result"
+- assertNotVisible: "Retry"
+- tapOn:
+    id: "gallery-language"
+- tapOn: "Português"
+- assertVisible: "Verificar o resultado"
+- tapOn:
+    id: "gallery-mode"
+- tapOn: "Claro"
+- tapOn:
+    id: "gallery-case"
+- scrollUntilVisible:
+    element: "notice/success-action"
+- tapOn: "notice/success-action"
+- assertVisible: "A alteração foi guardada."
+- tapOn: "Fechar"
+- assertVisible: "Ação recebida: dismiss"
+- tapOn:
+    id: "gallery-case"
+- scrollUntilVisible:
+    element: "skeleton/reduced-motion"
+- tapOn: "skeleton/reduced-motion"
+- assertVisible: "A carregar"

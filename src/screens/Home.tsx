@@ -1,6 +1,7 @@
 // Home is the catalog as rows, with the account in the native header: the
 // platform's own menu offers Refresh and Sign out.
 import { Stack, useRouter } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo, useState } from "react";
 import type { Entry } from "../core/catalog";
 import { screenPath } from "../core/derive";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function Home({ entries }: Props) {
+  const feedback = useFeedback();
   const { refresh, signOut } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
@@ -61,6 +63,7 @@ export function Home({ entries }: Props) {
     <>
       <Stack.Screen options={options} />
       <HomeView
+        feedback={feedback}
         entries={entries}
         refreshing={refreshing}
         onOpen={(e) => router.push(screenPath(e))}

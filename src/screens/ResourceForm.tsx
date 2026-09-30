@@ -3,6 +3,7 @@
 // controls. It is presented as a sheet, and cannot be swiped away while it
 // is saving.
 import { Stack } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
@@ -10,6 +11,7 @@ import { ResourceForm as ResourceFormView } from "../ui/organisms/ResourceForm";
 import { useResourceForm } from "./useResourceForm";
 
 export function ResourceForm({ entry, id }: ScreenProps) {
+  const feedback = useFeedback();
   const form = useResourceForm(entry, id);
   const saving = form.phase === "saving";
   const { cancel, save, phase } = form;
@@ -42,6 +44,7 @@ export function ResourceForm({ entry, id }: ScreenProps) {
     <>
       <Stack.Screen options={options} />
       <ResourceFormView
+        feedback={feedback}
         controls={form.controls}
         held={form.held}
         errors={form.errors}
