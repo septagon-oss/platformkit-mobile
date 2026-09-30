@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { View } from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fitContainer, ResumableZoom, type ResumableZoomRefType } from "react-native-zoom-toolkit";
 import type { ZoomSlotProps } from "../ui/organisms/PhotoViewer";
@@ -63,7 +63,22 @@ function Zoom({ children, aspectRatio, motion, labels }: ZoomSlotProps) {
           <View style={{ width }}>{children}</View>
         </ResumableZoom>
       </View>
-      <View style={s.row}>
+      {/* Keep controls reachable without wrapping away the image's height. */}
+      <ScrollView
+        horizontal
+        style={{ flexGrow: 0, flexShrink: 0 }}
+        contentContainerStyle={[s.row, { flexWrap: "nowrap" }]}
+        onFocus={(event) => {
+          if (Platform.OS === "web") {
+            // Browser focus can leave a partially visible button clipped.
+            (event.target as unknown as HTMLElement).scrollIntoView({
+              block: "nearest",
+              inline: "nearest",
+              behavior: "instant",
+            });
+          }
+        }}
+      >
         <Button label={labels.panLeft} tone="secondary" onPress={() => pan(1, 0)} />
         <Button label={labels.panRight} tone="secondary" onPress={() => pan(-1, 0)} />
         <Button label={labels.panUp} tone="secondary" onPress={() => pan(0, 1)} />
@@ -75,7 +90,7 @@ function Zoom({ children, aspectRatio, motion, labels }: ZoomSlotProps) {
           tone="plain"
           onPress={() => zoom.current?.reset(motion === "normal")}
         />
-      </View>
+      </ScrollView>
     </GestureHandlerRootView>
   );
 }

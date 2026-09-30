@@ -47,7 +47,7 @@ export function PhotoViewer({
       onRequestClose={onClose}
     >
       <View style={canvas.page} accessibilityViewIsModal onAccessibilityEscape={onClose}>
-        <View style={s.header}>
+        <View style={[s.header, s.row]}>
           <Button label={model.labels.close} tone="plain" onPress={onClose} />
           {model.position ? <Text accessibilityLiveRegion="polite">{model.position}</Text> : null}
         </View>
@@ -77,7 +77,7 @@ export function PhotoViewer({
             />
           </View>
         ) : null}
-        <View style={[s.footer, canvas.footer]}>
+        <View style={[s.footer, s.row, canvas.footer]}>
           <Button
             label={model.labels.previous}
             tone="secondary"

@@ -880,6 +880,8 @@ The adapter measures the available viewing area and uses the toolkit's
 `MediaHero` accepts an optional `renderFrame(frame)` slot that fills the available
 height while keeping captions and retry controls outside the zoomed image.
 Zoomed content is clipped to the viewing area so navigation remains reachable.
+Viewer navigation shares rows, and the adapter's labelled zoom/pan controls
+scroll horizontally in one row so short landscape viewports retain image space.
 A missing
 image/source is `unavailable` (correctable by reload); invalid dimensions or
 duplicate identities are `invalid-input` (immutable). If the selected item is
