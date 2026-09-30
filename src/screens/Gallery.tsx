@@ -1,18 +1,15 @@
 // The reference gallery samples its clock and native preferences at composition.
 import React from "react";
-import { deriveCopy, type Instant, type Presentation } from "../core/derive";
+import { deriveCopy, type Clock, type Presentation } from "../core/derive";
 import { Gallery as GalleryView } from "../ui/gallery";
 import { useFeedback } from "./useFeedback";
 import { StateFeedback } from "./StateFeedback";
 import type { Props as StateViewProps } from "../ui/molecules/StateView";
+import { systemClock } from "./clock";
 
-interface Clock {
-  now(): Instant;
-}
-const deviceClock: Clock = { now: () => new Date().toISOString() };
 const stateFeedback = (props: StateViewProps) => <StateFeedback {...props} />;
 
-export function Gallery({ clock = deviceClock }: { readonly clock?: Clock } = {}) {
+export function Gallery({ clock = systemClock }: { readonly clock?: Clock } = {}) {
   const feedback = useFeedback();
   const { locale, timeZone } = Intl.DateTimeFormat().resolvedOptions();
   const presentation: Presentation = {

@@ -6,6 +6,22 @@ import { act, renderHook, render, screen } from "@testing-library/react-native";
 import { AccessibilityInfo } from "react-native";
 import { deriveCopy, deriveState } from "../../src/core/derive";
 import { useFeedback } from "../../src/screens/useFeedback";
+import { useInitialDate } from "../../src/screens/clock";
+
+test("each mounted form samples its explicit clock once, independently of another form", async () => {
+  const now = jest
+    .fn<() => string>()
+    .mockReturnValueOnce("2027-03-15T08:42:00Z")
+    .mockReturnValueOnce("2027-03-16T10:05:00Z");
+  const first = await renderHook(() => useInitialDate({ now }));
+  expect(first.result.current.toISOString()).toBe("2027-03-15T08:42:00.000Z");
+  await first.rerender(undefined);
+  expect(now).toHaveBeenCalledTimes(1);
+  const second = await renderHook(() => useInitialDate({ now }));
+  expect(second.result.current.toISOString()).toBe("2027-03-16T10:05:00.000Z");
+  expect(first.result.current.toISOString()).toBe("2027-03-15T08:42:00.000Z");
+  expect(now).toHaveBeenCalledTimes(2);
+});
 
 test("unresolved or failed native preferences stay still; changes beat an older async read", async () => {
   let resolve!: (value: boolean) => void;

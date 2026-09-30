@@ -11,6 +11,7 @@ export {
   deriveFeedback,
   instantValue,
   presentedTime,
+  type Clock,
   type Feedback,
   type Formatting,
   type Instant,

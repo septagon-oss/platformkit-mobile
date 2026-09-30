@@ -4,8 +4,9 @@
 // set; one that is set can be cleared. The value is a Date; what it means on
 // the wire is the core's business.
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { Platform, Pressable, StyleSheet, View } from "react-native";
+import type { Copy } from "../../core/derive";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Button } from "./Button";
@@ -13,10 +14,13 @@ import { Icon } from "./Icon";
 import { Text } from "./Text";
 
 interface Props {
+  readonly copy: Copy["dateTime"];
+  readonly initialValue: Date;
+  readonly timeZone: string;
   readonly label: string;
   readonly value: Date | undefined;
   readonly onChange: (value: Date | undefined) => void;
-  /** text is how the value reads here; the core knows the zone, this does not. */
+  /** The caller formats the value in the same explicit zone as the picker. */
   readonly text: (at: Date) => string;
   readonly disabled?: boolean;
   readonly required?: boolean;
@@ -24,6 +28,9 @@ interface Props {
 }
 
 export function DateTimeRow({
+  copy,
+  initialValue,
+  timeZone,
   label,
   value,
   onChange,
@@ -34,16 +41,30 @@ export function DateTimeRow({
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
+  // Android retains callbacks while a native dialog is open. They must honour
+  // a newly disabled/unmounted row and report to its current consumer.
+  const current = useRef({ disabled, onChange });
+  useLayoutEffect(() => {
+    current.current = { disabled, onChange };
+    return () => {
+      current.current = { disabled: true, onChange };
+    };
+  }, [disabled, onChange]);
+  const change = (at: Date) => {
+    if (!current.current.disabled) current.current.onChange(at);
+  };
   const clear =
-    !required && value ? (
-      <Button label="Clear" tone="plain" onPress={() => onChange(undefined)} />
+    !required && !disabled && value ? (
+      <Button label={copy.clear} tone="plain" onPress={() => onChange(undefined)} />
     ) : null;
 
   if (Platform.OS === "ios") {
-    const shown = value ?? new Date();
+    const shown = value ?? initialValue;
     return (
       <View style={s.row} accessibilityLabel={label} {...testable(testID)}>
-        <Text>{label}</Text>
+        <Text style={s.label} maxFontSizeMultiplier={0}>
+          {label}
+        </Text>
         <View style={s.controls}>
           {value ? (
             <>
@@ -51,27 +72,31 @@ export function DateTimeRow({
                 value={shown}
                 mode="date"
                 display="compact"
-                onChange={(_, d) => d && onChange(d)}
+                onValueChange={(_, d) => change(d)}
+                timeZoneName={timeZone}
                 disabled={disabled}
                 themeVariant={t.mode}
                 accentColor={t.color.accentDefault}
+                {...testable(testID ? `${testID}-date` : undefined)}
               />
               <DateTimePicker
                 value={shown}
                 mode="time"
                 display="compact"
-                onChange={(_, d) => d && onChange(d)}
+                onValueChange={(_, d) => change(d)}
+                timeZoneName={timeZone}
                 disabled={disabled}
                 themeVariant={t.mode}
                 accentColor={t.color.accentDefault}
+                {...testable(testID ? `${testID}-time` : undefined)}
               />
               {clear}
             </>
           ) : (
             <Button
-              label="Set"
+              label={copy.set}
               tone="plain"
-              onPress={() => onChange(new Date())}
+              onPress={() => change(initialValue)}
               disabled={disabled}
             />
           )}
@@ -81,18 +106,19 @@ export function DateTimeRow({
   }
 
   const ask = () => {
-    const start = value ?? new Date();
+    if (disabled) return;
+    const start = value ?? initialValue;
     DateTimePickerAndroid.open({
       value: start,
       mode: "date",
-      onChange: (event, day) => {
-        if (event.type !== "set" || !day) return;
+      timeZoneName: timeZone,
+      onValueChange: (_, day) => {
+        if (current.current.disabled) return;
         DateTimePickerAndroid.open({
           value: day,
           mode: "time",
-          onChange: (e, at) => {
-            if (e.type === "set" && at) onChange(at);
-          },
+          timeZoneName: timeZone,
+          onValueChange: (_, at) => change(at),
         });
       },
     });
@@ -106,13 +132,18 @@ export function DateTimeRow({
         disabled={disabled}
         accessibilityRole="button"
         accessibilityLabel={label}
-        accessibilityValue={{ text: value ? text(value) : "Not set" }}
-        accessibilityHint="Opens the date and time dialogs"
+        accessibilityValue={{ text: value ? text(value) : copy.notSet }}
+        accessibilityHint={copy.openHint}
+        accessibilityState={{ disabled }}
       >
-        <Text>{label}</Text>
+        <Text style={s.label} maxFontSizeMultiplier={0}>
+          {label}
+        </Text>
         <View style={s.value}>
           <Icon name="calendar" size="sm" tone="muted" />
-          <Text tone={value ? "primary" : "muted"}>{value ? text(value) : "Not set"}</Text>
+          <Text style={s.label} tone={value ? "primary" : "muted"} maxFontSizeMultiplier={0}>
+            {value ? text(value) : copy.notSet}
+          </Text>
         </View>
       </Pressable>
       {clear}
@@ -145,5 +176,6 @@ const styles = (t: Theme) =>
       flexWrap: "wrap",
       justifyContent: "flex-end",
     },
-    value: { flexDirection: "row", alignItems: "center", gap: t.space.xs },
+    value: { flexDirection: "row", alignItems: "center", gap: t.space.xs, flexShrink: 1 },
+    label: { flexShrink: 1 },
   });

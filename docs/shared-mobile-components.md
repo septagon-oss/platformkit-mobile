@@ -11,7 +11,7 @@ schema or native dependency changes are part of the rich-state slice.
 The first rich-state implementation extends the four existing atoms and adds
 `StateView`, a molecule that renders `deriveState` output. It is available through
 the existing UI subpaths; core exports come from `core/derive`. Remaining groups
-and the date-picker/full activity-model migration below are still planned.
+and the full activity-model migration below are still planned.
 Native/device and product-theme acceptance must be recorded separately.
 
 The source migration for this slice is explicit: `Skeleton` and `Spinner` now
@@ -26,7 +26,11 @@ own motion adapter. `Row` uses its existing action title for its busy indicator
 and keeps that small indicator still.
 
 `Notice` requires explicit announcement urgency. `ChoiceRow` receives
-`copy.choice`; `timeText`, `display` and `detailItems` require explicit formatting,
+`copy.choice`; `DateTimeRow` receives `copy.dateTime`, `initialValue` and `timeZone`.
+Its native picker callbacks ignore a newly disabled or unmounted control, and
+Clear is unavailable for required or disabled values. `ResourceForm` also
+requires `initialDate`; form, command and singleton screen compositions sample
+their injected `Clock` once at mount. `timeText`, `display` and `detailItems` require explicit formatting,
 and Value/Labelled receive it as `presentation`. These remove the shared mutable
 formatter and component-owned choice words. `StateFeedback` is the optional
 screen adapter for iOS announcements; Gallery accepts its `renderState` slot.
@@ -35,7 +39,7 @@ The README's Shared feedback section lists the complete source migration.
 `deriveCopy('en' | 'pt')` returns an immutable bundle directly, matching the common
 Copy contract; unsupported runtime languages throw `RangeError` with code
 `unsupported-format`. `deriveState` returns the documented Result. Copy keys are
-added with their consumers: this slice supplies state, choice, boolean value,
+added with their consumers: this slice supplies state, choice, date-control, boolean value,
 integration-error and state-gallery words; later families remain planned.
 
 ## Ownership and compatibility
@@ -1134,7 +1138,7 @@ geometry, native layout ownership) are not deferred to products.
 | Standard-first | The dependency table names native primitives, Intl/Temporal, bigint, MapLibre, FlashList, Zoom Toolkit and D3/SVG, with reasons for composition over a second suite or viewer. Pin/build/device validation is owed by implementation. |
 | Core stays core | `src/core/derive.ts` owns decisions and public types, UI layer subpaths own generic presentation, renderer pack is the extension point. C38 and `npm run check` must preserve import direction and packaged consumption. |
 | Web and mobile | Built here as native components for Android/iOS. Web reference images guide hierarchy; Expo web preview is not native transport/device evidence. This adds no Go web component or promise of identical web/native renderer internals. |
-| Measurably better | The program's current `tools/pillars.py` mobile indicator counts calls to a retiring discovery alias. It is already 0 at this spec's merge base and unchanged HEAD; documentation changes cannot lower it. The indicator does not measure richer components. Implementation reports completed component/state/theme/locale tuples and verified native journeys, with numerator/denominator and paths, rather than claiming a subjective score improved. |
+| Measurably better | The program's current `tools/pillars.py` mobile indicator counts calls to a retiring discovery alias. It is already 0 at the inspected merge base; each implementation report repeats that scan at its head. The indicator does not measure richer components. Implementation reports completed component/state/theme/locale tuples and verified native journeys, with numerator/denominator and paths, rather than claiming a subjective score improved. |
 
 For each slice, IMPLEMENT.md must list Reused / Added / Made reusable, the changed
 public props and migrated consumer, each case/state/theme evidence path, exact

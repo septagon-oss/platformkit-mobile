@@ -132,10 +132,10 @@ generation guards still decide whether a response belongs to the current view.
 
 ### Shared feedback
 
-**Reused** — `EmptyState`, `Notice`, `Skeleton`, `Spinner`, `Button`, native
+**Reused** — `EmptyState`, `Notice`, `Skeleton`, `Spinner`, `Button`, `DateTimeRow`, native
 accessibility primitives, `ThemeProvider`, scale and Gallery carry the shared
 feedback family. **Added** — pure `deriveCopy`, `deriveState` and explicit
-presentation inputs own translated copy and recovery eligibility, because the
+presentation/clock inputs own translated copy and recovery eligibility, because the
 existing atoms had no common state or recovery contract. **Made reusable** —
 `StateView`, the `StateFeedback` screen adapter and 31 Gallery cases let another
 renderer pack use the same states, actions, tokens and conformance examples.
@@ -170,11 +170,18 @@ Direct consumers upgrading their source pin must migrate these required props:
 - `Notice`: explicit `announcement` (`none`, `polite` or `urgent`); its action
   accepts busy/disabled/reason, and it can offer a secondary action.
 - `ChoiceRow`: `copy={copy.choice}` for its placeholder, cancel word and hint.
+- `DateTimeRow`: `copy={copy.dateTime}`, `initialValue: Date` and `timeZone`.
+  Its Set action uses the supplied date, and both native dialogs use the supplied
+  zone. Required or disabled values cannot be cleared. Native picker language
+  follows the operating system; the surrounding labels come from the bundle.
 - `ListScreen`, `LoadMore`, `Home`, `ResourceList`, `ResourceDetail`,
   `ResourceForm`, `SignInForm` and `Activity`: `feedback`, obtained from
   `deriveFeedback(copy, motion, { locale, timeZone })`. The in-repository screens
   adapt native preferences in `useFeedback`. `retry(feedback, callback)` now
   gets its label from core; the old Notice export re-exports that same helper.
+- The `ResourceForm` organism also requires `initialDate`. Generated form,
+  command and singleton screens accept an optional `Clock` and sample it once
+  per mounted screen; the default device clock lives in screen composition.
 - `timeText(date, formatting)`, `display(field, value, formatting)` and
   `detailItems(entry, row, formatting)` require explicit formatting. The latter
   two also use its copy bundle. `Value` and `Labelled` receive that value as
@@ -193,8 +200,7 @@ The rich-state unit/component suites and browser checks exercise the reference
 palette and isolated supplied-token fixtures. Android/iOS devices, VoiceOver,
 TalkBack, largest native text settings and consuming products' palettes still
 need their acceptance runs. No new native package or catalog/API contract is
-introduced. The date-picker clock/copy and full activity-model migrations remain
-in the staged specification.
+introduced. The full activity-model migration remains in the staged specification.
 
 ### Shared package
 

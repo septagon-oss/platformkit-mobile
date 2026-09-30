@@ -6,6 +6,12 @@ const identity = Symbol("Copy");
 
 interface Words {
   readonly choice: { readonly placeholder: string; readonly cancel: string; readonly hint: string };
+  readonly dateTime: {
+    readonly set: string;
+    readonly clear: string;
+    readonly notSet: string;
+    readonly openHint: string;
+  };
   readonly value: { readonly yes: string; readonly no: string };
   readonly state: {
     readonly loading: string;
@@ -49,6 +55,12 @@ export interface Copy extends Words {
 
 const en: Words = {
   choice: { placeholder: "Choose", cancel: "Cancel", hint: "Opens the choices" },
+  dateTime: {
+    set: "Set",
+    clear: "Clear",
+    notSet: "Not set",
+    openHint: "Opens the date and time dialogs",
+  },
   value: { yes: "Yes", no: "No" },
   state: {
     loading: "Loading",
@@ -91,6 +103,12 @@ const en: Words = {
 
 const pt: Words = {
   choice: { placeholder: "Escolher", cancel: "Cancelar", hint: "Abre as opções" },
+  dateTime: {
+    set: "Definir",
+    clear: "Limpar",
+    notSet: "Não definido",
+    openHint: "Abre os seletores de data e hora",
+  },
   value: { yes: "Sim", no: "Não" },
   state: {
     loading: "A carregar",
@@ -137,6 +155,7 @@ function bundle(language: Language, words: Words): Copy {
     [identity]: true as const,
     language,
     choice: Object.freeze(words.choice),
+    dateTime: Object.freeze(words.dateTime),
     value: Object.freeze(words.value),
     state: Object.freeze({
       ...words.state,

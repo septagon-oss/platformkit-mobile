@@ -9,9 +9,16 @@ import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceForm as ResourceFormView } from "../ui/organisms/ResourceForm";
 import { useResourceForm } from "./useResourceForm";
+import type { Clock } from "../core/derive";
+import { systemClock, useInitialDate } from "./clock";
 
-export function ResourceForm({ entry, id }: ScreenProps) {
+export function ResourceForm({
+  entry,
+  id,
+  clock = systemClock,
+}: ScreenProps & { readonly clock?: Clock }) {
   const feedback = useFeedback();
+  const initialDate = useInitialDate(clock);
   const form = useResourceForm(entry, id);
   const saving = form.phase === "saving";
   const { cancel, save, phase } = form;
@@ -45,6 +52,7 @@ export function ResourceForm({ entry, id }: ScreenProps) {
       <Stack.Screen options={options} />
       <ResourceFormView
         feedback={feedback}
+        initialDate={initialDate}
         controls={form.controls}
         held={form.held}
         errors={form.errors}

@@ -5,15 +5,20 @@
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
-import { humanize } from "../core/derive";
+import { humanize, type Clock } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail } from "../ui/organisms/ResourceDetail";
 import { ResourceForm } from "../ui/organisms/ResourceForm";
 import { useSingleton } from "./useSingleton";
+import { systemClock, useInitialDate } from "./clock";
 
-export function Singleton({ entry }: ScreenProps) {
+export function Singleton({
+  entry,
+  clock = systemClock,
+}: ScreenProps & { readonly clock?: Clock }) {
   const feedback = useFeedback();
+  const initialDate = useInitialDate(clock);
   const one = useSingleton(entry);
   const { edit, cancel, save, editing, phase } = one;
   const may = entry.writable;
@@ -54,6 +59,7 @@ export function Singleton({ entry }: ScreenProps) {
       {editing ? (
         <ResourceForm
           feedback={feedback}
+          initialDate={initialDate}
           controls={one.controls}
           held={one.held}
           errors={one.errors}

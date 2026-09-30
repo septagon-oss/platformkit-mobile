@@ -20,6 +20,7 @@ export type Phase = "loading" | "failed" | "editing" | "saving" | "saved";
 
 export interface Props {
   readonly feedback: Feedback;
+  readonly initialDate: Date;
   readonly controls: readonly Control[];
   readonly held: Readonly<Record<string, string>>;
   readonly errors: Readonly<Record<string, string>>;
@@ -37,6 +38,7 @@ const kinds: Partial<Record<Control["kind"], FieldKind>> = {
 
 export function ResourceForm({
   feedback,
+  initialDate,
   controls,
   held,
   errors,
@@ -104,6 +106,9 @@ export function ResourceForm({
                 return (
                   <FormField key={name} {...common} bare>
                     <DateTimeRow
+                      copy={feedback.copy.dateTime}
+                      initialValue={initialDate}
+                      timeZone={feedback.timeZone}
                       label={c.label}
                       value={timeValue(value)}
                       onChange={(at) => onChange(name, at ? timeWire(at) : "")}

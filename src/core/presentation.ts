@@ -3,6 +3,10 @@ import type { Copy } from "./copy";
 export type Motion = "normal" | "reduced";
 export type Instant = string;
 
+export interface Clock {
+  now(): Instant;
+}
+
 export interface Presentation {
   readonly locale: string;
   readonly timeZone: string;

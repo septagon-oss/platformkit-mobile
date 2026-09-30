@@ -104,7 +104,15 @@ describe("ResourceList", () => {
 
 describe("ResourceForm", () => {
   const controls = formControls(note, undefined, true);
-  const base = { controls, held: {}, errors: {}, detail: "", onChange: none, onRetry: none };
+  const base = {
+    initialDate: new Date("2026-08-11T08:20:00Z"),
+    controls,
+    held: {},
+    errors: {},
+    detail: "",
+    onChange: none,
+    onRetry: none,
+  };
 
   test("while the row loads there is nothing to type into", async () => {
     await inTheme(<ResourceForm feedback={feedback} {...base} phase="loading" />);

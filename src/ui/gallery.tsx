@@ -124,7 +124,7 @@ export function Gallery({
           />
         </Section>
         {caseId === "primitives/default" ? (
-          <Samples feedback={feedback} />
+          <Samples feedback={feedback} initialDate={new Date(presentation.now)} />
         ) : example ? (
           <Section title={words.states}>
             {example.renderer === "spinner" ? (
@@ -148,7 +148,13 @@ export function Gallery({
   );
 }
 
-function Samples({ feedback }: { readonly feedback: Feedback }) {
+function Samples({
+  feedback,
+  initialDate,
+}: {
+  readonly feedback: Feedback;
+  readonly initialDate: Date;
+}) {
   const s = useStyles(styles);
   const [on, setOn] = useState(true);
   const [choice, setChoice] = useState("open");
@@ -247,6 +253,9 @@ function Samples({ feedback }: { readonly feedback: Feedback }) {
         </FormField>
         <FormField label="Due" bare>
           <DateTimeRow
+            copy={feedback.copy.dateTime}
+            initialValue={initialDate}
+            timeZone={feedback.timeZone}
             label="Due"
             value={at}
             onChange={setAt}

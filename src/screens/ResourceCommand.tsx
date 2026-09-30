@@ -6,18 +6,24 @@
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
-import { commandOf, commandTitle, humanize } from "../core/derive";
+import { commandOf, commandTitle, humanize, type Clock } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Notice } from "../ui/atoms/Notice";
 import { Button } from "../ui/atoms/Button";
 import { ResourceForm as ResourceFormView } from "../ui/organisms/ResourceForm";
 import { Screen } from "../ui/templates/Screen";
 import { useCommandForm } from "./useCommand";
+import { systemClock, useInitialDate } from "./clock";
 
-export function ResourceCommand({ entry, id, verb = "" }: ScreenProps) {
+export function ResourceCommand({
+  entry,
+  id,
+  verb = "",
+  clock = systemClock,
+}: ScreenProps & { readonly clock?: Clock }) {
   const command = commandOf(entry, verb);
   if (!command) return <Missing entity={entry.entity} verb={verb} />;
-  return <Sheet entry={entry} id={id} command={command} />;
+  return <Sheet entry={entry} id={id} command={command} clock={clock} />;
 }
 
 function Missing({ entity, verb }: { readonly entity: string; readonly verb: string }) {
@@ -35,12 +41,15 @@ function Sheet({
   entry,
   id,
   command,
+  clock,
 }: {
   readonly entry: ScreenProps["entry"];
   readonly id: string | undefined;
   readonly command: NonNullable<ReturnType<typeof commandOf>>;
+  readonly clock: Clock;
 }) {
   const feedback = useFeedback();
+  const initialDate = useInitialDate(clock);
   const form = useCommandForm(entry, id, command);
   const running = form.phase === "running";
   const { cancel, run, phase } = form;
@@ -77,6 +86,7 @@ function Sheet({
       <Stack.Screen options={options} />
       <ResourceFormView
         feedback={feedback}
+        initialDate={initialDate}
         controls={form.controls}
         held={form.held}
         errors={form.errors}
