@@ -90,6 +90,10 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
           read.current = 0;
           setMore(false);
           setDenied(true);
+        } else if (e instanceof ApiError && (e.status === 403 || e.status === 404)) {
+          // The directory can refuse a lookup while the trail remains readable.
+          // Its cached names and emails are no longer authorized enrichment.
+          setNames({});
         }
         // A plan that does not include the trail is not a failure to report as
         // one: the record simply has no history to show here, and the section

@@ -1,7 +1,9 @@
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
+import { deriveEventActivity } from "../../src/core/derive";
 import { createApi, type Trail } from "../../src/effects/api";
 import { useActivity } from "../../src/screens/useActivity";
+import { presentation } from "../fakes/presentation";
 import { reset } from "../fakes/router";
 import { fakeApi, note, shell, shellValue } from "../fakes/shell";
 
@@ -144,3 +146,116 @@ test("a session refusal during actor lookup withdraws the already read events", 
   expect(result.current.events).toEqual([]);
   expect(result.current.more).toBe(false);
 });
+
+test.each([403, 404])(
+  "directory HTTP %s withdraws email enrichment until a fresh lookup while history remains readable",
+  async (status) => {
+    const fetch = jest.fn<typeof globalThis.fetch>();
+    const recovered = Promise.withResolvers<Response>();
+    fetch
+      .mockResolvedValueOnce(
+        response({ items: [{ id: "actor-6", email: "earlier@example.test" }], total: 1 }),
+      )
+      .mockResolvedValueOnce(response({ detail: "Temporary directory failure" }, 503))
+      .mockResolvedValueOnce(response({ detail: "Directory access withdrawn" }, status))
+      .mockResolvedValueOnce(response({ detail: "Still unavailable" }, 503))
+      .mockReturnValueOnce(recovered.promise);
+    const api = fakeApi();
+    api.events.mockResolvedValue(first);
+    api.list.mockImplementation(createApi("https://example.test", fetch).list);
+    const users = { ...note, module: "user", entity: "user" };
+    const scope = shellValue(api);
+    shell.value = {
+      ...scope,
+      state: { ...scope.state, catalog: { ...scope.state.catalog!, resources: [note, users] } },
+    };
+    const { result } = await renderHook(() => useActivity(note, "note-14"));
+    await waitFor(() => expect(result.current.names["actor-6"]).toBe("earlier@example.test"));
+
+    await act(async () => result.current.reload());
+    await waitFor(() => expect(result.current.error).toBe("Temporary directory failure"));
+    expect(result.current.names["actor-6"]).toBe("earlier@example.test");
+
+    await act(async () => result.current.reload());
+    await waitFor(() => expect(result.current.error).toBe("Directory access withdrawn"));
+    expect(result.current.names).toEqual({});
+    expect(result.current.events).toEqual(first.items);
+    expect(result.current.denied).toBe(false);
+    expect(result.current.more).toBe(true);
+    const activity = deriveEventActivity(result.current, presentation);
+    expect(activity.ok).toBe(true);
+    if (activity.ok) {
+      expect(activity.value.rows.map((row) => row.actor)).toEqual(["actor-6"]);
+      expect(activity.value.more).toBeDefined();
+    }
+
+    api.events.mockResolvedValueOnce({
+      items: [{ ...first.items[0]!, id: "older-event-15" }],
+      total: 2,
+    });
+    await act(async () => result.current.loadMore());
+    await waitFor(() => expect(result.current.events).toHaveLength(2));
+    expect(api.events).toHaveBeenLastCalledWith({ record: "note-14", offset: 1, limit: 20 });
+    expect(api.list).toHaveBeenCalledTimes(3);
+    expect(result.current.names).toEqual({});
+
+    await act(async () => result.current.reload());
+    await waitFor(() => expect(result.current.error).toBe("Still unavailable"));
+    expect(result.current.names).toEqual({});
+    expect(result.current.events).toEqual(first.items);
+
+    await act(async () => result.current.reload());
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(5));
+    expect(result.current.loading).toBe(true);
+    expect(result.current.names).toEqual({});
+    recovered.resolve(
+      response({ items: [{ id: "actor-6", email: "fresh@example.test" }], total: 1 }),
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.names["actor-6"]).toBe("fresh@example.test");
+    expect(result.current.error).toBe("");
+  },
+);
+
+test.each([403, 404])(
+  "an obsolete directory success cannot restore names after HTTP %s",
+  async (status) => {
+    const obsolete = Promise.withResolvers<Response>();
+    const fetch = jest.fn<typeof globalThis.fetch>();
+    fetch
+      .mockResolvedValueOnce(
+        response({ items: [{ id: "actor-6", displayName: "Earlier actor" }], total: 1 }),
+      )
+      .mockReturnValueOnce(obsolete.promise)
+      .mockResolvedValueOnce(response({ detail: "Directory access withdrawn" }, status));
+    const api = fakeApi();
+    api.events.mockResolvedValue(first);
+    api.list.mockImplementation(createApi("https://example.test", fetch).list);
+    const scope = shellValue(api);
+    shell.value = {
+      ...scope,
+      state: {
+        ...scope.state,
+        catalog: {
+          ...scope.state.catalog!,
+          resources: [note, { ...note, module: "user", entity: "user" }],
+        },
+      },
+    };
+    const { result } = await renderHook(() => useActivity(note, "note-14"));
+    await waitFor(() => expect(result.current.names["actor-6"]).toBe("Earlier actor"));
+    await act(async () => result.current.reload());
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(2));
+    await act(async () => result.current.reload());
+    await waitFor(() => expect(result.current.error).toBe("Directory access withdrawn"));
+    await act(async () => {
+      obsolete.resolve(
+        response({ items: [{ id: "actor-6", displayName: "Obsolete actor" }], total: 1 }),
+      );
+      await api.list.mock.results[1]!.value;
+    });
+    expect(result.current.names).toEqual({});
+    expect(result.current.events).toEqual(first.items);
+    expect(result.current.error).toBe("Directory access withdrawn");
+  },
+);

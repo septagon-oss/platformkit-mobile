@@ -516,6 +516,14 @@ whole trail, including when the existing transport maps HTTP 403/404 to empty.
 No HTTP/catalog contract or global sign-out policy changes; reauthorization
 belongs to the shell, and a later successful read supplies fresh trail content.
 
+The actor directory is a separate authorization boundary. HTTP 403/404 from
+that lookup removes all cached directory names and email fallbacks while
+keeping the successfully read events and their actor identifiers. The signed-in
+person's existing "You" label comes from the shell identity. A subsequent
+failed lookup cannot restore withdrawn names; only a current successful lookup
+can supply them again. An ordinary directory read failure may retain names
+that have not been withdrawn. Obsolete responses cannot change either result.
+
 ## 2.1 — Stepper
 
 `Step = { id: ID; label: string; summary?: string; optional: boolean;
