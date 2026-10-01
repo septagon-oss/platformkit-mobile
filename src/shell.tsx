@@ -131,6 +131,9 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
       async signIn(url, email, password) {
         const started = begin();
+        // Identity belongs to the previous session until this sign-in starts.
+        // The new catalog may be ready before its own identity request settles.
+        setIdentity(undefined);
         dispatch({ type: "sign-in", generation: started });
         const a = createApi(url);
         try {
