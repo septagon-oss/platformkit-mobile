@@ -259,3 +259,153 @@ test.each([403, 404])(
     expect(result.current.error).toBe("Directory access withdrawn");
   },
 );
+
+test.each([401, 403, 404, 503])(
+  "retained pagination callbacks wait for the current event and directory read, including HTTP %s",
+  async (status) => {
+    const refreshed = Promise.withResolvers<Trail>();
+    const directory = Promise.withResolvers<Response>();
+    const fetch = jest.fn<typeof globalThis.fetch>();
+    fetch
+      .mockResolvedValueOnce(
+        response({ items: [{ id: "actor-6", email: "earlier@example.test" }], total: 1 }),
+      )
+      .mockReturnValueOnce(directory.promise);
+    const api = fakeApi();
+    api.events.mockResolvedValueOnce(first).mockReturnValueOnce(refreshed.promise);
+    api.list.mockImplementation(createApi("https://example.test", fetch).list);
+    const scope = shellValue(api);
+    shell.value = {
+      ...scope,
+      state: {
+        ...scope.state,
+        catalog: {
+          ...scope.state.catalog!,
+          resources: [note, { ...note, module: "user", entity: "user" }],
+        },
+      },
+    };
+    const { result } = await renderHook(() => useActivity(note, "note-14"));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.names["actor-6"]).toBe("earlier@example.test");
+    const more = result.current.loadMore;
+
+    // A callback retained by a consumer must observe the new read even before
+    // React renders its loading state.
+    await act(async () => {
+      result.current.reload();
+      more();
+    });
+    expect(api.events).toHaveBeenCalledTimes(2);
+    expect(api.list).toHaveBeenCalledTimes(1);
+    expect(result.current.loading).toBe(true);
+    const refreshing = deriveEventActivity(result.current, presentation);
+    expect(refreshing.ok).toBe(true);
+    if (refreshing.ok) expect(refreshing.value.more).toMatchObject({ busy: true, enabled: false });
+
+    await act(async () => refreshed.resolve(first));
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(2));
+    await act(async () => more());
+    expect(api.events).toHaveBeenCalledTimes(2);
+    expect(result.current.loading).toBe(true);
+    const enriching = deriveEventActivity(result.current, presentation);
+    expect(enriching.ok).toBe(true);
+    if (enriching.ok) expect(enriching.value.more).toMatchObject({ busy: true, enabled: false });
+
+    await act(async () => {
+      directory.resolve(response({ detail: "Directory read failed" }, status));
+      await expect(api.list.mock.results[1]!.value).rejects.toHaveProperty("status", status);
+    });
+    expect(result.current.loading).toBe(false);
+    expect(result.current.loadingMore).toBe(false);
+    expect(result.current.error).toBe("Directory read failed");
+    expect(result.current.names).toEqual(
+      status === 503 ? { "actor-6": "earlier@example.test" } : {},
+    );
+    expect(result.current.events).toEqual(status === 401 ? [] : first.items);
+    expect(result.current.denied).toBe(status === 401);
+
+    api.events.mockResolvedValue(first);
+    fetch.mockResolvedValue(
+      response({ items: [{ id: "actor-6", displayName: "Current actor" }], total: 1 }),
+    );
+    await act(async () => result.current.reload());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.names["actor-6"]).toBe("Current actor");
+    expect(result.current.denied).toBe(false);
+    expect(result.current.error).toBe("");
+    const ready = deriveEventActivity(result.current, presentation);
+    expect(ready.ok).toBe(true);
+    if (ready.ok) expect(ready.value.more).toMatchObject({ busy: false, enabled: true });
+
+    const older = Promise.withResolvers<Trail>();
+    api.events.mockReturnValueOnce(older.promise);
+    await act(async () => {
+      more();
+      more();
+    });
+    expect(api.events).toHaveBeenCalledTimes(4);
+    expect(api.events).toHaveBeenLastCalledWith({ record: "note-14", offset: 1, limit: 20 });
+    expect(result.current.loadingMore).toBe(true);
+    await act(async () =>
+      older.resolve({ items: [{ ...first.items[0]!, id: "older-event-73" }], total: 2 }),
+    );
+    expect(result.current.events.map((event) => event.id)).toEqual(["event-14", "older-event-73"]);
+    expect(result.current.loadingMore).toBe(false);
+    expect(result.current.more).toBe(false);
+    expect(api.list).toHaveBeenCalledTimes(3);
+  },
+);
+
+test("an obsolete read cannot unlock pagination while a newer directory read is pending", async () => {
+  const obsolete = Promise.withResolvers<Response>();
+  const current = Promise.withResolvers<Response>();
+  const fetch = jest.fn<typeof globalThis.fetch>();
+  fetch
+    .mockResolvedValueOnce(
+      response({ items: [{ id: "actor-6", displayName: "Earlier actor" }], total: 1 }),
+    )
+    .mockReturnValueOnce(obsolete.promise)
+    .mockReturnValueOnce(current.promise);
+  const api = fakeApi();
+  api.events.mockResolvedValue(first);
+  api.list.mockImplementation(createApi("https://example.test", fetch).list);
+  const scope = shellValue(api);
+  shell.value = {
+    ...scope,
+    state: {
+      ...scope.state,
+      catalog: {
+        ...scope.state.catalog!,
+        resources: [note, { ...note, module: "user", entity: "user" }],
+      },
+    },
+  };
+  const { result } = await renderHook(() => useActivity(note, "note-14"));
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  await act(async () => result.current.reload());
+  await waitFor(() => expect(api.list).toHaveBeenCalledTimes(2));
+  await act(async () => result.current.reload());
+  await waitFor(() => expect(api.list).toHaveBeenCalledTimes(3));
+
+  await act(async () => {
+    obsolete.resolve(response({ items: [{ id: "actor-6", displayName: "Obsolete" }], total: 1 }));
+    await api.list.mock.results[1]!.value;
+  });
+  await act(async () => result.current.loadMore());
+  expect(api.events).toHaveBeenCalledTimes(3);
+  expect(result.current.loading).toBe(true);
+  expect(result.current.names["actor-6"]).toBe("Earlier actor");
+
+  await act(async () => {
+    current.resolve(response({ items: [{ id: "actor-6", displayName: "Current" }], total: 1 }));
+    await api.list.mock.results[2]!.value;
+  });
+  expect(result.current.loading).toBe(false);
+  expect(result.current.names["actor-6"]).toBe("Current");
+  api.events.mockResolvedValueOnce({ items: [{ ...first.items[0]!, id: "older-74" }], total: 2 });
+  await act(async () => result.current.loadMore());
+  expect(api.events).toHaveBeenLastCalledWith({ record: "note-14", offset: 1, limit: 20 });
+  expect(result.current.events).toHaveLength(2);
+  expect(result.current.more).toBe(false);
+});

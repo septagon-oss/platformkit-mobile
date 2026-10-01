@@ -523,6 +523,11 @@ person's existing "You" label comes from the shell identity. A subsequent
 failed lookup cannot restore withdrawn names; only a current successful lookup
 can supply them again. An ordinary directory read failure may retain names
 that have not been withdrawn. Obsolete responses cannot change either result.
+The generated hook serializes pagination behind the entire current read,
+including its directory lookup. Core marks Older events busy during either a
+refresh or a page read; the hook also ignores retained pagination callbacks
+until that read settles. An explicit reload may still supersede an older read,
+whose completion cannot unlock pagination while the newer read is pending.
 
 ## 2.1 — Stepper
 

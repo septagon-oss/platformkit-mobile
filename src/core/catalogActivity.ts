@@ -64,7 +64,7 @@ export function deriveEventActivity(input: EventTrail, p: Presentation) {
           content,
           page: {
             more: !input.denied && input.more,
-            loading: !input.denied && input.loadingMore,
+            loading: !input.denied && (input.loading || input.loadingMore),
             ...(items.length && input.error ? { error: input.error } : {}),
           },
           excluded: input.excluded ?? false,

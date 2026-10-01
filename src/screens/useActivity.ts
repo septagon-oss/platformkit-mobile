@@ -43,6 +43,7 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
   const [more, setMore] = useState(false);
   const [excluded, setExcluded] = useState(false);
   const generation = useRef(0);
+  const pending = useRef(false);
   const read = useRef(0); // rows of the trail asked for so far, which is the next offset
   const seen = useRef(writes[k] ?? 0);
 
@@ -53,6 +54,7 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
     async (from: number) => {
       if (!id) return;
       const started = ++generation.current;
+      pending.current = true;
       if (from === 0) setLoading(true);
       else setLoadingMore(true);
       try {
@@ -108,6 +110,7 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
         setError(e instanceof Error ? e.message : "The activity could not be read.");
       } finally {
         if (generation.current === started) {
+          pending.current = false;
           setLoading(false);
           setLoadingMore(false);
         }
@@ -117,7 +120,11 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
   );
 
   const reload = useCallback(() => void load(0), [load]);
-  const loadMore = useCallback(() => void load(read.current), [load]);
+  const loadMore = useCallback(() => {
+    // Pagination must not obsolete a pending directory refusal. Check the
+    // active read synchronously, even for callbacks retained before a reload.
+    if (!pending.current) void load(read.current);
+  }, [load]);
 
   useEffect(() => {
     void (async () => {
