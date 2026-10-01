@@ -17,22 +17,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { about, type Event } from "../core/activity";
 import { ApiError } from "../effects/api";
 import { key, type Entry } from "../core/catalog";
-import { text } from "../core/derive";
+import { text, type EventTrail } from "../core/derive";
 import { useShell } from "../shell";
 
 /** PAGE is how much of a trail is read at once. */
 export const PAGE = 20;
 
-export interface Activity {
-  readonly events: readonly Event[];
-  readonly names: Readonly<Record<string, string>>;
-  readonly loading: boolean;
-  readonly error: string;
-  /** more says older lines exist, so the section offers to read them. */
-  readonly more: boolean;
+export interface Activity extends EventTrail {
+  readonly denied: boolean;
   /** excluded says this tenant's plan does not include the trail. */
   readonly excluded: boolean;
-  readonly loadingMore: boolean;
   readonly loadMore: () => void;
   readonly reload: () => void;
 }
@@ -45,6 +39,7 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
+  const [denied, setDenied] = useState(false);
   const [more, setMore] = useState(false);
   const [excluded, setExcluded] = useState(false);
   const generation = useRef(0);
@@ -64,10 +59,14 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
         const page = await api.events({ record: id, offset: from, limit: PAGE });
         if (generation.current !== started) return;
         const mine = page.items.filter((e) => about(e, id));
-        setEvents((held) => (from === 0 ? mine : [...held, ...mine]));
-        read.current = from + page.items.length;
+        // A zero total withdraws the whole trail, including a forbidden or
+        // missing trail that the transport represents as an empty page.
+        setEvents((held) => (from === 0 || page.total === 0 ? mine : [...held, ...mine]));
+        if (page.total === 0) setNames({});
+        read.current = page.total === 0 ? 0 : from + page.items.length;
         setMore(read.current < page.total);
         setError("");
+        setDenied(false);
         // A plan can be bought as well as cancelled, and this is the reload
         // that would have to say so: leaving it set is a section that keeps
         // saying "not included" about a trail it has just read.
@@ -83,6 +82,15 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
         }
       } catch (e) {
         if (generation.current !== started) return;
+        // A refused session withdraws both pages and resolved identities. Keep
+        // the refusal during later reads; only a successful read replaces it.
+        if (e instanceof ApiError && e.status === 401) {
+          setEvents([]);
+          setNames({});
+          read.current = 0;
+          setMore(false);
+          setDenied(true);
+        }
         // A plan that does not include the trail is not a failure to report as
         // one: the record simply has no history to show here, and the section
         // says which of the two it is.
@@ -130,6 +138,7 @@ export function useActivity(entry: Entry, id: string | undefined): Activity {
     names: whom ? { ...names, [whom]: "You" } : names,
     loading,
     error,
+    denied,
     more,
     excluded,
     loadingMore,

@@ -8,13 +8,15 @@ export interface EventTrail {
   readonly names: Readonly<Record<string, string>>;
   readonly loading: boolean;
   readonly error: string;
+  /** A refused session cannot keep a readable cached trail. */
+  readonly denied?: boolean;
   readonly more: boolean;
   readonly excluded?: boolean;
   readonly loadingMore: boolean;
 }
 export function deriveEventActivity(input: EventTrail, p: Presentation) {
   return build(p, (v: Validation) => {
-    const items: readonly ActivityItem[] = input.events.map((e) => ({
+    const items: readonly ActivityItem[] = (input.denied ? [] : input.events).map((e) => ({
       id: e.id,
       occurredAt: e.occurredAt,
       verb: verb(e),
@@ -32,7 +34,7 @@ export function deriveEventActivity(input: EventTrail, p: Presentation) {
     let content: Content<readonly ActivityItem[]>;
     if (items.length)
       content = { phase: "ready", value: items, refresh: input.loading ? "loading" : "idle" };
-    else if (input.error)
+    else if (input.denied || input.error)
       content = {
         phase: "error",
         state: v.take(
@@ -40,10 +42,10 @@ export function deriveEventActivity(input: EventTrail, p: Presentation) {
             {
               kind: "error",
               issue: {
-                code: "read-failed",
+                code: input.denied ? "forbidden" : "read-failed",
                 path: "activity",
-                recovery: "correctable",
-                message: input.error,
+                recovery: input.denied ? "immutable" : "correctable",
+                message: input.error || p.copy.kit.unavailable,
               },
             },
             p,
@@ -61,8 +63,8 @@ export function deriveEventActivity(input: EventTrail, p: Presentation) {
         {
           content,
           page: {
-            more: input.more,
-            loading: input.loadingMore,
+            more: !input.denied && input.more,
+            loading: !input.denied && input.loadingMore,
             ...(items.length && input.error ? { error: input.error } : {}),
           },
           excluded: input.excluded ?? false,

@@ -505,6 +505,17 @@ an audit payload or interpret recursive `about()` matching as an authorization
 boundary. Keep existing event reads and record attribution ownership unchanged.
 Before/after values are immutable for this surface; no edit or undo is invented.
 
+The generated `EventTrail` adapter accepts `denied?: boolean` alongside its
+events, names and error text. A denied session overrides retained events and
+pagination: core derives an immutable forbidden state with no rows or page
+control. `useActivity` sets denial on HTTP 401 from either the trail or actor
+lookup, clears cached events/names and the paging offset, and retains that
+denial until a successful read. An ordinary page failure may retain previously
+read rows and offer the same page again. A zero-total response withdraws the
+whole trail, including when the existing transport maps HTTP 403/404 to empty.
+No HTTP/catalog contract or global sign-out policy changes; reauthorization
+belongs to the shell, and a later successful read supplies fresh trail content.
+
 ## 2.1 — Stepper
 
 `Step = { id: ID; label: string; summary?: string; optional: boolean;
