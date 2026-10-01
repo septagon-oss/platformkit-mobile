@@ -1,7 +1,8 @@
-# The Android binary and what is done with it. `npm run check` remains the
-# repository's required check; these targets build, mirror the runner, sign
-# and install. Every build goes through scripts/android/build.sh.
+# The suite, the Android binary and what is done with it. `npm run check`
+# remains the repository's required check; the other targets build, mirror the
+# runner, sign and install. Every build goes through scripts/android/build.sh.
 #
+#   make test                 the Node suite and the Jest suite (npm run test)
 #   make apk                  unsigned arm64 release APK in out/ (Docker, no SDK needed)
 #   make apk ABIS=x86_64 PROFILE=ci   the verification build the emulator runs
 #   make aab                  unsigned release AAB and universal APK, all ABIs
@@ -21,7 +22,16 @@ MIRROR_OUT ?= $(abspath $(OUT))-mirror
 ANDROID_HOME ?= $(HOME)/Android/Sdk
 BUILD_TOOLS := $(lastword $(sort $(wildcard $(ANDROID_HOME)/build-tools/*)))
 
-.PHONY: apk aab apk-mirror apk-debug-sign sign e2e-android clean
+.PHONY: test apk aab apk-mirror apk-debug-sign sign e2e-android clean
+
+# The two test suites under the name a person or a gate asks for first: the Node
+# suite and the Jest suite, exactly what `npm run test` runs, and nothing else.
+# The whole repository is the suite: the target takes no package list. A
+# checkout with no node_modules gets the locked install CI uses; the guard is
+# the same one the repository's gate command carries.
+test:
+	@test -d node_modules || npm ci --no-audit --no-fund
+	npm run test
 
 apk:
 	$(DOCKER) build -f Dockerfile.android --target $(IMAGE_TARGET) \

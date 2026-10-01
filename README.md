@@ -494,6 +494,10 @@ Starting Expo generates route types under the ignored `.expo/` directory,
 which TypeScript also checks.
 The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
+`make test` runs the two suites and nothing else — `tsx --test tests/*.test.ts`
+then Jest — under the name a person or a CI step asks for the tests by, and it
+installs from the lockfile first when the checkout has no `node_modules/`. It
+replaces no gate: `npm run check` stays the required check.
 
 The Node tests cover catalog parsing, screen derivation, the token
 generator and its provenance, the distance guard, out-of-order lifecycle
