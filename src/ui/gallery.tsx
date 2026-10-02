@@ -1071,8 +1071,15 @@ const pageStyles = (t: Theme) =>
     attribution: { position: "absolute", right: t.space.sm, bottom: t.space.sm },
   });
 
-/** worldWindow is how many degrees of the world the gallery's canvas shows. */
-const worldWindow = 12;
+/**
+ * worldWindow is how many degrees of the world the gallery's canvas shows. It is
+ * the zoom the page's own points need to sit apart from one another by more than
+ * a label's width: at 12° the two places landed 8% of the canvas apart and their
+ * names overprinted each other, which reads as a broken map rather than as two
+ * pins. The window is clamped into the canvas so a name at its edge stays a name.
+ */
+const worldWindow = 4;
+const clamp = (pct: number, from: number, to: number) => Math.min(to, Math.max(from, pct));
 
 /**
  * mapCanvas is the surface a map provider is handed where the gallery owns no
@@ -1083,8 +1090,8 @@ const worldWindow = 12;
 function MapCanvasFixture(props: MapCanvasProps) {
   const s = useStyles(pageStyles);
   const place = (marker: MapCanvasProps["markers"][number]): ViewStyle => ({
-    left: `${50 + ((marker.longitude - props.viewport.longitude) / worldWindow) * 100}%`,
-    top: `${50 - ((marker.latitude - props.viewport.latitude) / worldWindow) * 100}%`,
+    left: `${clamp(50 + ((marker.longitude - props.viewport.longitude) / worldWindow) * 100, 4, 74)}%`,
+    top: `${clamp(50 - ((marker.latitude - props.viewport.latitude) / worldWindow) * 100, 8, 56)}%`,
   });
   return (
     <View style={s.canvas} accessible accessibilityLabel={props.attribution}>
