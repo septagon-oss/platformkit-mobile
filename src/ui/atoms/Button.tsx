@@ -14,6 +14,7 @@ import {
 import type { Motion } from "../../core/derive";
 import { testable } from "../props";
 import { controlInk, useStyles, useTheme, type Theme } from "../theme";
+import { useVerbStage } from "../verb";
 import { Icon, type IconName } from "./Icon";
 import { Text, toneColor, type Tone as TextTone } from "./Text";
 
@@ -65,7 +66,10 @@ export function Button({
     if (!off) onPress();
   };
   const header = placement === "header";
-  const filled = !header && (tone === "primary" || tone === "destructive");
+  const stage = useVerbStage();
+  // Only the subtree that holds the screen's one filled verb is drawn filled;
+  // everywhere else the same tone is offered in the outlined ink.
+  const filled = !header && stage && (tone === "primary" || tone === "destructive");
   const textTone: TextTone = off
     ? "primary"
     : filled
@@ -77,10 +81,9 @@ export function Button({
           : "primary";
   const shape: ViewStyle[] = [s.base];
   if (header) shape.push(s.header);
-  else if (tone === "primary") shape.push(s.primary);
-  else if (tone === "destructive") shape.push(s.destructive);
-  else if (tone === "secondary") shape.push(s.secondary);
-  else shape.push(s.plain);
+  else if (filled) shape.push(tone === "destructive" ? s.destructive : s.primary);
+  else if (tone === "plain") shape.push(s.plain);
+  else shape.push(s.secondary);
   return (
     <Pressable
       onPress={activate}

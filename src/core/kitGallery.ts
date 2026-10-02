@@ -101,6 +101,7 @@ export const kitCaseIds = [
   "map-with-list/points",
   "map-with-list/same-coordinate",
   "map-with-list/provider-offline",
+  "map-with-list/provider-unsupported",
   "map-with-list/selected-removed",
   "media-hero/default",
   "media-hero/loading",
@@ -619,8 +620,15 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             viewport: { longitude: 0, latitude: 0, zoom: 4 },
             legend: [status],
             capabilities: { latitudeBounds: [-85, 85], zoomBounds: [0, 22] },
-            providerState: state === "provider-offline" ? "offline" : "unsupported",
-            providerMessage: p.copy.issue.unsupported,
+            // The map the page leads with is the one that works: an unsupported
+            // provider is a state of its own, not the shape of every map screen.
+            providerState:
+              state === "provider-offline"
+                ? "offline"
+                : state === "provider-unsupported"
+                  ? "unsupported"
+                  : "ready",
+            ...(state === "provider-offline" ? { providerMessage: p.copy.state.offline.body } : {}),
             attribution: name,
           },
           p,

@@ -23,16 +23,20 @@ export const galleryPages = {
     lead: "data-list/grouped",
     cases: [
       "data-list/grouped",
+      "data-list/loading",
+      "data-list/error",
+      "day-strip/current",
       "disclosure-section/default",
       "activity/before-after",
-      "day-strip/current",
     ],
   },
   table: {
     lead: "stat-tile/lower-is-better",
     cases: [
       "stat-tile/lower-is-better",
+      "stat-tile/zero-baseline",
       "sparkline/rising",
+      "sparkline/gap",
       "price/fraction",
       "quantity-control/middle",
     ],
@@ -41,43 +45,82 @@ export const galleryPages = {
     lead: "media-hero/default",
     cases: [
       "media-hero/default",
+      "media-hero/loading",
+      "media-hero/error",
       "photo-gallery/mixed-ratios",
-      "masonry-wall/two-columns",
       "photo-viewer/middle",
     ],
   },
   home: {
     lead: "product-card/options",
-    cases: ["product-card/options", "action-bar/multiple"],
+    cases: [
+      "product-card/options",
+      "product-card/sold-out",
+      "product-card/loading",
+      "action-bar/multiple",
+    ],
   },
   sheet: {
     lead: "detail-sheet/open",
-    cases: ["detail-sheet/open", "side-panel/docked", "more-filters/open", "confirm-dialog/delete"],
+    cases: [
+      "detail-sheet/open",
+      "detail-sheet/dirty",
+      "side-panel/docked",
+      "more-filters/open",
+      "confirm-dialog/delete",
+    ],
   },
   navigate: {
     lead: "tab-bar/three",
-    cases: ["tab-bar/three", "tab-bar/five", "action-control/default", "summary-detail/default"],
+    cases: [
+      "tab-bar/three",
+      "tab-bar/five",
+      "action-control/default",
+      "action-control/busy",
+      "summary-detail/default",
+    ],
   },
+  // A search is a field over what it found: the field answers in three states,
+  // and the wall below it is what the kit draws for the matches it returned.
   search: {
     lead: "search-field/query",
-    cases: ["search-field/query", "search-field/clear", "search-field/busy"],
+    cases: [
+      "search-field/query",
+      "search-field/busy",
+      "search-field/clear",
+      "masonry-wall/two-columns",
+    ],
   },
   form: {
     lead: "pricing-tiers/default",
     cases: [
       "pricing-tiers/default",
+      "pricing-tiers/missing-offer",
       "plan-comparison/unknown",
       "selection-control/mixed",
       "choice-chips/selected",
+      "choice-chips/required",
     ],
   },
   steps: {
     lead: "stepper/middle",
-    cases: ["stepper/middle", "stepper/write-unknown", "slot-option/full"],
+    cases: [
+      "stepper/middle",
+      "stepper/first",
+      "stepper/write-unknown",
+      "slot-option/available",
+      "slot-option/full",
+    ],
   },
   states: {
     lead: "progress-meter/fraction",
-    cases: ["progress-meter/fraction", "progress-meter/unmeasured", "model-state/loading"],
+    cases: [
+      "progress-meter/fraction",
+      "progress-meter/percent",
+      "progress-meter/steps",
+      "progress-meter/unmeasured",
+      "model-state/loading",
+    ],
   },
   player: {
     lead: "mini-player/track",
@@ -85,7 +128,12 @@ export const galleryPages = {
   },
   commerce: {
     lead: "cart/multiple-lines",
-    cases: ["cart/multiple-lines", "order-summary/receipt", "buy-bar/default"],
+    cases: [
+      "cart/multiple-lines",
+      "cart/quote-expired",
+      "order-summary/receipt",
+      "buy-bar/default",
+    ],
   },
   schedule: {
     lead: "calendar/week",
@@ -96,7 +144,10 @@ export const galleryPages = {
       "slot-picker/date-strip",
     ],
   },
-  maps: { lead: "map-with-list/points", cases: ["map-with-list/points", "map-legend/default"] },
+  maps: {
+    lead: "map-with-list/points",
+    cases: ["map-with-list/points", "map-with-list/same-coordinate", "map-legend/default"],
+  },
   charts: {
     lead: "area-chart/multiple-series",
     cases: ["area-chart/multiple-series", "bar-chart/negative"],
@@ -117,7 +168,9 @@ export function deriveGalleryPage(id: string, _p: Presentation) {
     // accident, which is what a silent route fallback would show a reviewer.
     v.need(spec !== undefined, "page");
     const cases = spec!.cases;
-    v.need(cases.length > 0 && cases.length <= 4, "cases");
+    // A page is a screen, and a screen carries its subject and the states of it:
+    // four specimens left a page's fold half empty on a phone.
+    v.need(cases.length > 0 && cases.length <= 6, "cases");
     v.need(cases.includes(spec!.lead), "lead");
     cases.forEach((caseId, i) => {
       // The vocabulary is the kit's, so a page cannot invent a specimen and a

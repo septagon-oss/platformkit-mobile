@@ -1,9 +1,10 @@
-// Gallery is every atom and molecule with sample props, in both modes, on one
-// screen: the place a person looks at the library rather than at a resource,
-// as the web shell's component gallery is. It ships only in builds that ask
-// for it (app/gallery.tsx); nothing here names an entity.
+// Gallery is the kit looked at rather than used: the index screen audits every
+// case of every atom, molecule, organism and template in both modes, and a page
+// id draws one screen-shaped composition of them. It ships only in builds that
+// ask for it (app/gallery.tsx); nothing here names an entity, and no rule of a
+// screen lives in this file rather than in core.
 import React, { useState } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, View, useWindowDimensions, type ViewStyle } from "react-native";
 import {
   kitCaseIds,
   kitExamples,
@@ -15,6 +16,7 @@ import {
   timeText,
   type Feedback,
   type Language,
+  type MapCanvasProps,
   type Presentation,
 } from "../core/derive";
 import { deriveGalleryPage, pageFamily, type GalleryPageModel } from "../core/galleryPages";
@@ -37,6 +39,7 @@ import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
 import { Screen } from "./templates/Screen";
+import { VerbStage } from "./verb";
 import { ThemeProvider, useStyles, useTheme, type Theme, type Palette, type Fonts } from "./theme";
 import { StateView, type Props as StateViewProps } from "./molecules/StateView";
 import type { Mode } from "./tokens";
@@ -293,40 +296,46 @@ function Page({
   return (
     <View style={[s.page, column]}>
       <Text role="display">{model.title}</Text>
-      {/* The lead is given the screen: it is the composition the page stands
-          for, and what the other families hold is reached by scrolling rather
-          than competing with it for the same fold. One page, one thing to do. */}
-      <View style={[s.lead, { minHeight: viewport.height }]}>
-        <KitSamples
-          key={model.lead}
-          presentation={presentation}
-          caseId={model.lead}
-          onAction={setAction}
-          {...(renderImage ? { renderImage } : {})}
-          {...(renderZoom ? { renderZoom } : {})}
-        />
-      </View>
+      {/* One screen, one thing to do: the lead holds the page's one filled verb,
+          and every other specimen on the page is drawn in the outlined ink. The
+          lead is the composition the page stands for; the families below it are
+          reached by scrolling, and follow it in the fold rather than being held
+          back by empty space. */}
+      <VerbStage lead>
+        <View style={s.lead}>
+          <KitSamples
+            key={model.lead}
+            presentation={presentation}
+            caseId={model.lead}
+            onAction={setAction}
+            {...(renderImage ? { renderImage } : {})}
+            {...(renderZoom ? { renderZoom } : {})}
+          />
+        </View>
+      </VerbStage>
       {/* A family name sits at the column's own edge and the specimen keeps its
           card: the page never draws a card around a card, which is what put a
           second inset behind a heading and left a page with three left edges. */}
-      {groups.map((group) => (
-        <View key={group.family} style={s.group}>
-          <Text role="caption" tone="muted" uppercase accessibilityRole="header">
-            {group.family}
-          </Text>
-          {group.cases.map((caseId) => (
-            <KitSamples
-              key={caseId}
-              aside
-              presentation={presentation}
-              caseId={caseId}
-              onAction={setAction}
-              {...(renderImage ? { renderImage } : {})}
-              {...(renderZoom ? { renderZoom } : {})}
-            />
-          ))}
-        </View>
-      ))}
+      <VerbStage lead={false}>
+        {groups.map((group) => (
+          <View key={group.family} style={s.group}>
+            <Text role="caption" tone="muted" uppercase accessibilityRole="header">
+              {group.family}
+            </Text>
+            {group.cases.map((caseId) => (
+              <KitSamples
+                key={caseId}
+                aside
+                presentation={presentation}
+                caseId={caseId}
+                onAction={setAction}
+                {...(renderImage ? { renderImage } : {})}
+                {...(renderZoom ? { renderZoom } : {})}
+              />
+            ))}
+          </View>
+        ))}
+      </VerbStage>
       <Text accessibilityLiveRegion="polite" testID="gallery-page-action">
         {action ? presentation.copy.gallery.actionReceived(action) : ""}
       </Text>
@@ -817,7 +826,7 @@ function KitSamples({
       return (
         <MapWithList
           model={k.map.map}
-          renderMap={() => null}
+          renderMap={(canvas) => <MapCanvasFixture {...canvas} />}
           renderDetail={(id) => (
             <Section title={c.details}>
               <Text>{id}</Text>
@@ -953,7 +962,6 @@ function KitSamples({
           playing={caseId.endsWith("/track")}
           controls={{ back: true, forward: true }}
           collapsed={caseId.endsWith("/live")}
-          emphasised={!aside}
           onIntent={send}
           testID="gallery-player"
         />
@@ -1002,4 +1010,58 @@ const pageStyles = (t: Theme) =>
     page: { gap: t.space.md, paddingTop: t.space.sm },
     lead: { gap: t.space.sm },
     group: { gap: t.space.xs },
+    canvas: {
+      height: t.extent.chart,
+      borderRadius: t.radius.md,
+      backgroundColor: t.color.surfaceMuted,
+      borderWidth: 1,
+      borderColor: t.state.outline,
+      overflow: "hidden",
+    },
+    marker: {
+      position: "absolute",
+      width: t.icon.md,
+      height: t.icon.md,
+      borderRadius: t.radius.full,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: t.extent.focus,
+      borderColor: t.color.accentDefault,
+    },
+    markerSelected: { backgroundColor: t.color.accentDefault },
+    attribution: { position: "absolute", right: t.space.sm, bottom: t.space.sm },
   });
+
+/** worldWindow is how many degrees of the world the gallery's canvas shows. */
+const worldWindow = 12;
+
+/**
+ * mapCanvas is the surface a map provider is handed where the gallery owns no
+ * provider: the same box, the page's own points placed in it, its attribution
+ * kept. A map page then shows a map screen doing its work — canvas, points, list
+ * — instead of the hole a provider that is not there leaves.
+ */
+function MapCanvasFixture(props: MapCanvasProps) {
+  const s = useStyles(pageStyles);
+  const place = (marker: MapCanvasProps["markers"][number]): ViewStyle => ({
+    left: `${50 + ((marker.longitude - props.viewport.longitude) / worldWindow) * 100}%`,
+    top: `${50 - ((marker.latitude - props.viewport.latitude) / worldWindow) * 100}%`,
+  });
+  return (
+    <View style={s.canvas} accessible accessibilityLabel={props.attribution}>
+      {props.markers.map((marker) => (
+        <Pressable
+          key={marker.id}
+          accessibilityRole="button"
+          accessibilityLabel={marker.label}
+          onPress={() => props.onMarker(marker.id)}
+          style={[s.marker, place(marker), marker.selected && s.markerSelected]}
+        />
+      ))}
+      <Text style={s.attribution} role="caption" tone="muted">
+        {props.attribution}
+      </Text>
+    </View>
+  );
+}

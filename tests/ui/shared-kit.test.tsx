@@ -214,7 +214,9 @@ test("a loading image keeps its renderer mounted so the native load can complete
 });
 
 test("unsupported map providers retain the list without offering a retry", async () => {
-  await render(<Gallery presentation={presentation} initialCaseId="map-with-list/points" />);
+  await render(
+    <Gallery presentation={presentation} initialCaseId="map-with-list/provider-unsupported" />,
+  );
   expect(
     within(screen.getByTestId("gallery-kit")).getByRole("button", { name: "Example" }),
   ).toBeTruthy();

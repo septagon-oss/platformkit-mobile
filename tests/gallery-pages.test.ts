@@ -56,7 +56,7 @@ test("every page derives in both languages, with the specimens it names", () => 
       const page = result.value;
       assert.equal(page.id, id);
       assert.equal(page.testID, `gallery-page:${id}`);
-      assert.ok(page.cases.length >= 1 && page.cases.length <= 4, `${id}: ${page.cases.length}`);
+      assert.ok(page.cases.length >= 1 && page.cases.length <= 6, `${id}: ${page.cases.length}`);
       // The lead is one of the page's cases: the composition shows it first and
       // would show it twice if it stood outside the list.
       assert.ok(page.cases.includes(page.lead), `${id}: lead ${page.lead} is not a case`);

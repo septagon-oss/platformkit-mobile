@@ -9,6 +9,7 @@ import { testable } from "../props";
 import { Icon, type IconName } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { useStyles, useTheme, type Theme } from "../theme";
+import { useVerbStage } from "../verb";
 
 export type PlayerIntent = "play" | "pause" | "back" | "forward" | "seek" | "open";
 
@@ -24,13 +25,6 @@ interface Props {
   readonly onIntent: (intent: PlayerIntent) => void;
   /** collapsed is the strip over a list; expanded is the same record with its scrubber. */
   readonly collapsed?: boolean;
-  /**
-   * emphasised says whether this strip holds the screen's one filled action. The
-   * play/pause toggle is the verb a screen answers with, and one screen has one
-   * filled verb: a second strip on the same screen — the same record in another
-   * state — is met with the outlined control its neighbours already use.
-   */
-  readonly emphasised?: boolean;
   readonly testID?: string;
 }
 
@@ -43,10 +37,12 @@ export function MiniPlayer({
   controls = {},
   onIntent,
   collapsed = true,
-  emphasised = true,
   testID,
 }: Props) {
   const t = useTheme();
+  // The play/pause toggle is the verb a screen answers with, and one screen has
+  // one filled verb: only the subtree the screen names as its lead is filled.
+  const emphasised = useVerbStage();
   const s = useStyles(styles);
   const toggle: PlayerIntent = playing ? "pause" : "play";
   const glyph: IconName = playing ? "pause" : "play";
