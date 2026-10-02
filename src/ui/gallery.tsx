@@ -293,7 +293,10 @@ function Page({
   return (
     <View style={[s.page, column]}>
       <Text role="display">{model.title}</Text>
-      <View style={s.lead}>
+      {/* The lead is given the screen: it is the composition the page stands
+          for, and what the other families hold is reached by scrolling rather
+          than competing with it for the same fold. One page, one thing to do. */}
+      <View style={[s.lead, { minHeight: viewport.height }]}>
         <KitSamples
           key={model.lead}
           presentation={presentation}
@@ -303,11 +306,18 @@ function Page({
           {...(renderZoom ? { renderZoom } : {})}
         />
       </View>
+      {/* A family name sits at the column's own edge and the specimen keeps its
+          card: the page never draws a card around a card, which is what put a
+          second inset behind a heading and left a page with three left edges. */}
       {groups.map((group) => (
-        <Section key={group.family} title={group.family}>
+        <View key={group.family} style={s.group}>
+          <Text role="caption" tone="muted" uppercase accessibilityRole="header">
+            {group.family}
+          </Text>
           {group.cases.map((caseId) => (
             <KitSamples
               key={caseId}
+              aside
               presentation={presentation}
               caseId={caseId}
               onAction={setAction}
@@ -315,7 +325,7 @@ function Page({
               {...(renderZoom ? { renderZoom } : {})}
             />
           ))}
-        </Section>
+        </View>
       ))}
       <Text accessibilityLiveRegion="polite" testID="gallery-page-action">
         {action ? presentation.copy.gallery.actionReceived(action) : ""}
@@ -545,16 +555,24 @@ function KitSamples({
   presentation,
   caseId,
   onAction,
+  aside = false,
   renderImage,
   renderZoom,
 }: {
   readonly presentation: Presentation;
   readonly caseId: string;
   readonly onAction: (id: string) => void;
+  /**
+   * aside says this specimen is not the page's lead: a surface it opens is shut
+   * until the verb opens it, so a page never presents two screens at once, and
+   * the strip it draws takes the outlined control, because the page's one filled
+   * verb already belongs to the lead.
+   */
+  readonly aside?: boolean;
   readonly renderImage?: ImageRenderer;
   readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
 }) {
-  const [held, setHeld] = useState<GallerySelection>({});
+  const [held, setHeld] = useState<GallerySelection>(() => (aside ? { open: false } : {}));
   // A dialog is met by doing something, so the specimen offers the verb first.
   const [asked, setAsked] = useState(false);
   const result = kitExamples(presentation, caseId, held),
@@ -626,6 +644,18 @@ function KitSamples({
         />
       );
     case "detail-sheet":
+      if (aside && !held.open)
+        return (
+          <Button
+            label={c.open}
+            tone="secondary"
+            onPress={() => {
+              setHeld({ ...held, open: true });
+              action("open");
+            }}
+            testID="gallery-surface-open"
+          />
+        );
       return caseId.endsWith("busy") ? (
         <SidePanel mode="docked" model={k.surface} onAction={action} onRequestClose={close}>
           {details}
@@ -651,6 +681,18 @@ function KitSamples({
         </DisclosureSection>
       );
     case "more-filters":
+      if (aside && !held.open)
+        return (
+          <Button
+            label={c.moreFilters}
+            tone="secondary"
+            onPress={() => {
+              setHeld({ ...held, open: true });
+              action("open");
+            }}
+            testID="gallery-surface-open"
+          />
+        );
       return (
         <MoreFilters
           model={k.surface}
@@ -911,6 +953,7 @@ function KitSamples({
           playing={caseId.endsWith("/track")}
           controls={{ back: true, forward: true }}
           collapsed={caseId.endsWith("/live")}
+          emphasised={!aside}
           onIntent={send}
           testID="gallery-player"
         />
@@ -958,4 +1001,5 @@ const pageStyles = (t: Theme) =>
   StyleSheet.create({
     page: { gap: t.space.md, paddingTop: t.space.sm },
     lead: { gap: t.space.sm },
+    group: { gap: t.space.xs },
   });
