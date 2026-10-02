@@ -6,6 +6,10 @@ import { Text } from "../atoms/Text";
 import { useTheme } from "../theme";
 export function Sparkline({ model }: { readonly model: SparklineModel }) {
   const t = useTheme();
+  // The labelled View carries the meaning; the picture inside it is decoration.
+  // It takes no accessibility prop of its own: react-native-svg hands every
+  // unknown prop to the DOM node on web, where `accessible` is not an attribute,
+  // and React answers a boolean there with a red overlay over the chart.
   return model.empty ? (
     <Text>{model.emptyLabel}</Text>
   ) : (
@@ -14,13 +18,7 @@ export function Sparkline({ model }: { readonly model: SparklineModel }) {
       accessibilityLabel={model.series.map((s) => s.summary).join(". ")}
       style={{ height: t.extent.chart }}
     >
-      <Svg
-        width="100%"
-        height="100%"
-        viewBox="-0.03 -0.03 1.06 1.06"
-        preserveAspectRatio="none"
-        accessible={false}
-      >
+      <Svg width="100%" height="100%" viewBox="-0.03 -0.03 1.06 1.06" preserveAspectRatio="none">
         {model.series.map((series) => (
           <React.Fragment key={series.id}>
             {series.path ? (
