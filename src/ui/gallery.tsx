@@ -3,7 +3,7 @@
 // as the web shell's component gallery is. It ships only in builds that ask
 // for it (app/gallery.tsx); nothing here names an entity.
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import {
   kitCaseIds,
   kitExamples,
@@ -37,7 +37,7 @@ import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
 import { Screen } from "./templates/Screen";
-import { ThemeProvider, useStyles, type Theme, type Palette, type Fonts } from "./theme";
+import { ThemeProvider, useStyles, useTheme, type Theme, type Palette, type Fonts } from "./theme";
 import { StateView, type Props as StateViewProps } from "./molecules/StateView";
 import type { Mode } from "./tokens";
 
@@ -269,7 +269,17 @@ function Page({
   readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
 }) {
   const s = useStyles(pageStyles);
+  const t = useTheme();
+  const viewport = useWindowDimensions();
   const [action, setAction] = useState("");
+  // Phone components are drawn at a phone's width wherever they are looked at:
+  // on a monitor the page keeps that column and centres it, rather than
+  // stretching one specimen across the desk and leaving the rest of the screen
+  // to empty interiors.
+  const column =
+    viewport.width > t.extent.pageColumn + 2 * t.space.xl
+      ? { alignSelf: "center" as const, width: t.extent.pageColumn }
+      : undefined;
   const rest = model.cases.filter((id) => id !== model.lead);
   // One section per family, in the order the page names them: a page reads as
   // the screen it stands for, not as a list of specimen ids.
@@ -281,7 +291,7 @@ function Page({
     else groups.push({ family, cases: [caseId] });
   }
   return (
-    <View style={s.page}>
+    <View style={[s.page, column]}>
       <Text role="display">{model.title}</Text>
       <View style={s.lead}>
         <KitSamples
@@ -505,9 +515,19 @@ const styles = (t: Theme) =>
   StyleSheet.create({
     fixture: {
       flex: 1,
+      gap: t.space.xs,
       padding: t.space.lg,
-      backgroundColor: t.color.surfaceMuted,
+      alignItems: "center",
       justifyContent: "center",
+      backgroundColor: t.color.surfaceMuted,
+      // A media slot is the one place a page shows a picture the kit does not
+      // own. Without its edge the slot is a patch of the page's own colour and
+      // the screen reads as a picture that failed to load rather than as the
+      // slot it is, so the outline that says "this edge means something" is
+      // drawn here too.
+      borderWidth: 1,
+      borderColor: t.state.outline,
+      borderRadius: t.radius.md,
     },
     artwork: {
       width: t.extent.player,

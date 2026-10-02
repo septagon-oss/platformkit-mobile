@@ -34,6 +34,13 @@ export const extent = {
   player: 64,
   /** hero is the one photographic surface a screen leads with. */
   hero: 220,
+  /**
+   * pageColumn is the widest a phone composition is shown at. A screen built for
+   * a thumb stays one column wide on a desktop monitor, at the width its rhythm
+   * was drawn for, instead of stretching every card until the gaps stop meaning
+   * anything.
+   */
+  pageColumn: 420,
   /** scrim is how much of the screen a backdrop keeps back. */
   scrim: 0.45,
 } as const;
