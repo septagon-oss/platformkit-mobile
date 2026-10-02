@@ -1,7 +1,8 @@
 # What changed in the world while the code did not: the SDK's opinion of the
-# dependency tree, what is outdated, and whether the fingerprint is stable
-# across two runs. This reports; it never blocks a change, because it moves
-# with the world and not with the diff.
+# dependency tree, what is outdated, what the advisory database now claims
+# against this lockfile, and whether the fingerprint is stable across two runs.
+# This reports; it never blocks a change, because it moves with the world and
+# not with the diff.
 name: drift
 
 on:
@@ -39,6 +40,20 @@ jobs:
 
       - name: What is outdated
         run: npm outdated || true
+
+      # What the advisory database says about this lockfile today, reviewed or
+      # not. ci.yml refuses an unreviewed high filing against advisories.json;
+      # this says what that database now claims, which is the part that moves
+      # when somebody files an advisory against code nobody touched.
+      - name: What the advisory database now says
+        continue-on-error: true
+        run: npm audit --audit-level=high || true
+
+      # The same gate CI runs, so an expired review or a filed advisory shows
+      # up here before it stops a change.
+      - name: The reviewed advisory record
+        continue-on-error: true
+        run: npm run check:advisories || true
 
       - name: The fingerprint is stable
         run: |

@@ -4,15 +4,24 @@
 // for it (app/gallery.tsx); nothing here names an entity.
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { timeText } from "../core/derive";
+import {
+  kitCaseIds,
+  kitExamples,
+  type GallerySelection,
+  deriveCopy,
+  deriveFeedback,
+  stateExamples,
+  timeText,
+  type Feedback,
+  type Language,
+  type Presentation,
+} from "../core/derive";
 import { Badge } from "./atoms/Badge";
 import { Button } from "./atoms/Button";
 import { ChoiceRow } from "./atoms/ChoiceRow";
 import { DateTimeRow } from "./atoms/DateTimeRow";
-import { EmptyState } from "./atoms/EmptyState";
 import { Icon } from "./atoms/Icon";
 import { Notice } from "./atoms/Notice";
-import { Skeleton } from "./atoms/Skeleton";
 import { Spinner } from "./atoms/Spinner";
 import { SwitchRow } from "./atoms/SwitchRow";
 import { Text } from "./atoms/Text";
@@ -26,38 +35,196 @@ import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
 import { Screen } from "./templates/Screen";
-import { ThemeProvider, useStyles, type Theme } from "./theme";
+import { ThemeProvider, useStyles, type Theme, type Palette, type Fonts } from "./theme";
+import { StateView, type Props as StateViewProps } from "./molecules/StateView";
 import type { Mode } from "./tokens";
+
+import { ActionControl } from "./atoms/ActionControl";
+import { SelectionControl } from "./atoms/SelectionControl";
+import { Price } from "./atoms/Price";
+import { ActionBar } from "./molecules/ActionBar";
+import { ChoiceChips } from "./molecules/ChoiceChips";
+import { DisclosureSection } from "./molecules/DisclosureSection";
+import { DayStrip } from "./molecules/DayStrip";
+import { QuantityControl } from "./molecules/QuantityControl";
+import { SlotOption } from "./molecules/SlotOption";
+import { MapLegend } from "./molecules/MapLegend";
+import { MediaHero, type ImageRenderer } from "./molecules/MediaHero";
+import { ModelState } from "./molecules/ModelState";
+import { Sparkline } from "./molecules/Sparkline";
+import { StatTile } from "./molecules/StatTile";
+import { Activity } from "./organisms/Activity";
+import { DataList } from "./organisms/DataList";
+import { Stepper } from "./organisms/Stepper";
+import { SlotPicker } from "./organisms/SlotPicker";
+import { Calendar } from "./organisms/Calendar";
+import { WeekCalendar } from "./organisms/WeekCalendar";
+import { AgendaList } from "./organisms/AgendaList";
+import { ProductCard } from "./organisms/ProductCard";
+import { Cart } from "./organisms/Cart";
+import { OrderSummary } from "./organisms/OrderSummary";
+import { PricingTiers } from "./organisms/PricingTiers";
+import { PlanComparison } from "./organisms/PlanComparison";
+import { MapWithList } from "./organisms/MapWithList";
+import { PhotoGallery } from "./organisms/PhotoGallery";
+import { PhotoViewer, type ZoomSlotProps } from "./organisms/PhotoViewer";
+import { MasonryWall } from "./organisms/MasonryWall";
+import { AreaChart } from "./organisms/AreaChart";
+import { BarChart } from "./organisms/BarChart";
+import { BuyBar } from "./templates/BuyBar";
+import { DetailSheet } from "./templates/DetailSheet";
+import { SidePanel } from "./templates/SidePanel";
+import { MoreFilters } from "./templates/MoreFilters";
+import { SummaryDetail } from "./templates/SummaryDetail";
 
 const choices = [
   { value: "open", label: "Open" },
   { value: "done", label: "Done" },
 ];
 
-export function Gallery() {
-  const [mode, setMode] = useState<Mode>("light");
+interface Props {
+  readonly presentation: Presentation;
+  readonly palette?: Readonly<Record<Mode, Palette>>;
+  readonly fonts?: Fonts;
+  readonly initialCaseId?: string;
+  readonly initialMode?: Mode;
+  /** Screen composition can supply its native announcement adapter. */
+  readonly renderImage?: ImageRenderer;
+  readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
+  readonly renderState?: (props: StateViewProps) => React.ReactNode;
+}
+
+const stateView = (props: StateViewProps) => <StateView {...props} />;
+
+export function Gallery({
+  presentation,
+  palette,
+  fonts,
+  initialCaseId = "primitives/default",
+  initialMode = "light",
+  renderState = stateView,
+  renderImage,
+  renderZoom,
+}: Props) {
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [language, setLanguage] = useState<Language>();
+  const [locale, setLocale] = useState<string>();
+  const [caseId, setCaseId] = useState(initialCaseId);
+  const [action, setAction] = useState("");
+  const copy = language ? deriveCopy(language) : presentation.copy;
+  const shown = { ...presentation, copy, locale: locale ?? presentation.locale };
+  const cases = stateExamples(shown);
+  const example = cases.ok ? cases.value.find((item) => item.id === caseId) : undefined;
+  const words = copy.gallery;
+  const feedback = deriveFeedback(copy, shown.motion, shown);
   return (
-    <ThemeProvider mode={mode}>
-      <Screen form testID="gallery">
-        <Section title="Mode">
+    <ThemeProvider mode={mode} {...(palette ? { palette } : {})} {...(fonts ? { fonts } : {})}>
+      <Screen
+        form
+        testID="gallery"
+        scroll={
+          !/^(data-list|photo-gallery|masonry-wall|agenda-list|calendar|map-with-list)\//.test(
+            caseId,
+          )
+        }
+      >
+        <Section title={words.appearance}>
           <ChoiceRow
-            label="Appearance"
+            copy={copy.choice}
+            label={words.appearance}
             value={mode}
             options={[
-              { value: "light", label: "Light" },
-              { value: "dark", label: "Dark" },
+              { value: "light", label: words.light },
+              { value: "dark", label: words.dark },
             ]}
-            onChange={(v) => setMode(v === "dark" ? "dark" : "light")}
+            onChange={(value) => setMode(value === "dark" ? "dark" : "light")}
             testID="gallery-mode"
           />
+          <ChoiceRow
+            copy={copy.choice}
+            label={words.language}
+            value={copy.language}
+            options={[
+              { value: "en", label: words.english },
+              { value: "pt", label: words.portuguese },
+            ]}
+            onChange={(value) => setLanguage(value === "pt" ? "pt" : "en")}
+            testID="gallery-language"
+          />
+          <ChoiceRow
+            copy={copy.choice}
+            label={words.locale}
+            value={shown.locale}
+            options={[...new Set([presentation.locale, "en-GB", "pt-PT", "pt-BR"])].map(
+              (value) => ({ value, label: value }),
+            )}
+            onChange={setLocale}
+            testID="gallery-locale"
+          />
+          <ChoiceRow
+            copy={copy.choice}
+            label={words.case}
+            value={caseId}
+            options={[
+              { value: "primitives/default", label: words.primitives },
+              ...kitCaseIds.map((id) => ({ value: id, label: id })),
+              ...(cases.ok ? cases.value.map(({ id }) => ({ value: id, label: id })) : []),
+            ]}
+            onChange={(id) => {
+              setCaseId(id);
+              setAction("");
+            }}
+            testID="gallery-case"
+          />
         </Section>
-        <Samples />
+        {!cases.ok ? (
+          <Notice text={cases.issues[0]!.message} announcement="urgent" />
+        ) : caseId === "primitives/default" ? (
+          <Samples feedback={feedback} initialDate={new Date(presentation.now)} />
+        ) : (kitCaseIds as readonly string[]).includes(caseId) ? (
+          <View style={{ flex: 1 }} testID="gallery-kit">
+            <KitSamples
+              key={caseId}
+              presentation={shown}
+              caseId={caseId}
+              onAction={setAction}
+              {...(renderImage ? { renderImage } : {})}
+              {...(renderZoom ? { renderZoom } : {})}
+            />
+            <Text accessibilityLiveRegion="polite" testID="gallery-kit-action">
+              {action ? words.actionReceived(action) : ""}
+            </Text>
+          </View>
+        ) : example ? (
+          <Section title={words.states}>
+            {example.renderer === "spinner" ? (
+              <Spinner
+                label={example.model.loadingLabel}
+                motion={example.model.motion}
+                testID="gallery-spinner"
+              />
+            ) : (
+              renderState({ model: example.model, onAction: setAction, testID: "gallery-state" })
+            )}
+            <Text accessibilityLiveRegion="polite" testID="gallery-action">
+              {action ? words.actionReceived(action) : ""}
+            </Text>
+          </Section>
+        ) : (
+          <Notice text={copy.issue.invalid} announcement="urgent" />
+        )}
       </Screen>
     </ThemeProvider>
   );
 }
 
-function Samples() {
+function Samples({
+  feedback,
+  initialDate,
+}: {
+  readonly feedback: Feedback;
+  readonly initialDate: Date;
+}) {
   const s = useStyles(styles);
   const [on, setOn] = useState(true);
   const [choice, setChoice] = useState("open");
@@ -116,26 +283,6 @@ function Samples() {
         </View>
       </Section>
 
-      <Section title="Notices">
-        <Notice
-          text="The server could not be reached."
-          action={{ label: "Retry", onPress: none }}
-        />
-        <Notice tone="warning" title="Heads up" text="A warning with a title." />
-        <Notice tone="info" text="Something to know." />
-        <Notice tone="ok" text="Saved." />
-      </Section>
-
-      <Section title="Waiting and nothing">
-        <Spinner />
-        <Skeleton />
-        <EmptyState
-          title="Nothing here yet"
-          text="What arrives will be listed."
-          action={{ label: "Refresh", onPress: none }}
-        />
-      </Section>
-
       <Section title="Fields">
         <FormField label="Words" required help="Some help under the field.">
           <TextField
@@ -166,10 +313,24 @@ function Samples() {
           <SwitchRow label="Pinned" value={on} onValueChange={setOn} help="A yes or a no." />
         </FormField>
         <FormField label="Status" bare>
-          <ChoiceRow label="Status" value={choice} options={choices} onChange={setChoice} />
+          <ChoiceRow
+            copy={feedback.copy.choice}
+            label="Status"
+            value={choice}
+            options={choices}
+            onChange={setChoice}
+          />
         </FormField>
         <FormField label="Due" bare>
-          <DateTimeRow label="Due" value={at} onChange={setAt} text={timeText} />
+          <DateTimeRow
+            copy={feedback.copy.dateTime}
+            initialValue={initialDate}
+            timeZone={feedback.timeZone}
+            label="Due"
+            value={at}
+            onChange={setAt}
+            text={(value) => timeText(value, feedback)}
+          />
         </FormField>
         <FormField label="Tags" help="Comma separated.">
           <TagsField label="Tags" value={tags} onChange={setTags} />
@@ -190,6 +351,7 @@ function Samples() {
           value="3f2a9c1e-1b2c-4d5e-8f90-123456789abc"
           shown={
             <Value
+              presentation={feedback}
               field={{ name: "id", type: "uuid" }}
               value="3f2a9c1e-1b2c-4d5e-8f90-123456789abc"
             />
@@ -200,6 +362,7 @@ function Samples() {
           value="Open"
           shown={
             <Value
+              presentation={feedback}
               field={{ name: "status", type: "string", enum: ["open", "done"] }}
               value="open"
             />
@@ -208,18 +371,27 @@ function Samples() {
         <DetailRow
           term="Pinned"
           value="Yes"
-          shown={<Value field={{ name: "pinned", type: "bool" }} value={true} />}
+          shown={
+            <Value presentation={feedback} field={{ name: "pinned", type: "bool" }} value={true} />
+          }
         />
         <DetailRow
           term="Due at"
           value="Jan 31, 2026, 09:00 AM UTC"
-          shown={<Value field={{ name: "dueAt", type: "time" }} value="2026-01-31T09:00:00Z" />}
+          shown={
+            <Value
+              presentation={feedback}
+              field={{ name: "dueAt", type: "time" }}
+              value="2026-01-31T09:00:00Z"
+            />
+          }
         />
         <DetailRow
           term="Tags"
           value="alpha, beta"
           shown={
             <Value
+              presentation={feedback}
               field={{ name: "tags", type: "list", elem: "string" }}
               value={["alpha", "beta"]}
             />
@@ -228,13 +400,338 @@ function Samples() {
         <DetailRow term="Body" value="—" />
       </Section>
 
-      <LoadMore remaining={12} busy={false} onPress={none} />
+      <LoadMore feedback={feedback} remaining={12} busy={false} onPress={none} />
     </>
   );
 }
 
 const styles = (t: Theme) =>
   StyleSheet.create({
+    fixture: {
+      flex: 1,
+      padding: t.space.lg,
+      backgroundColor: t.color.surfaceMuted,
+      justifyContent: "center",
+    },
     stack: { gap: t.space.xs, paddingVertical: t.space.sm },
     wrap: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm, paddingVertical: t.space.sm },
   });
+
+function KitSamples({
+  presentation,
+  caseId,
+  onAction,
+  renderImage,
+  renderZoom,
+}: {
+  readonly presentation: Presentation;
+  readonly caseId: string;
+  readonly onAction: (id: string) => void;
+  readonly renderImage?: ImageRenderer;
+  readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
+}) {
+  const [held, setHeld] = useState<GallerySelection>({});
+  const result = kitExamples(presentation, caseId, held),
+    s = useStyles(styles);
+  if (!result.ok) return <Notice text={result.issues[0]!.message} announcement="urgent" />;
+  const k = result.value,
+    c = presentation.copy.kit,
+    family = caseId.split("/")[0];
+  const action = (id: string) => onAction(id),
+    send = (value: unknown) => onAction(JSON.stringify(value));
+  const image: ImageRenderer =
+    renderImage ??
+    ((props) => (
+      <View style={s.fixture} accessible={!props.decorative} accessibilityLabel={props.description}>
+        <Text>{props.description}</Text>
+      </View>
+    ));
+  const zoom =
+    renderZoom ??
+    ((props: ZoomSlotProps) => (
+      <View>
+        {props.children}
+        <Notice text={presentation.copy.issue.unsupported} announcement="polite" />
+      </View>
+    ));
+  const choice = (id: string | undefined) => {
+    setHeld({ ...held, ...(id ? { choice: id } : { choice: undefined }) });
+    send(id);
+  };
+  const quantity = (value: number) => {
+    setHeld({ ...held, quantity: value });
+    send(value);
+  };
+  const close = () => {
+    setHeld({ ...held, open: false });
+    action("close");
+  };
+  const details = <Text>{presentation.copy.gallery.longBody}</Text>;
+  const pricing = {
+    onPeriod: action,
+    onSelect: action,
+    onAction: send,
+    onRetry: () => action("retry"),
+  };
+  switch (family) {
+    case "action-control":
+      return <ActionControl model={k.actions.actions[0]!} onAction={action} />;
+    case "selection-control":
+      return <SelectionControl model={k.selection} onChange={send} />;
+    case "choice-chips":
+      return <ChoiceChips model={k.choices} onChange={choice} />;
+    case "action-bar":
+      return <ActionBar model={k.actions} onAction={action} />;
+    case "model-state":
+      return <ModelState model={k.list} />;
+    case "data-list":
+      return (
+        <DataList
+          model={k.list}
+          onOpen={action}
+          onRowAction={send}
+          onSelection={(ids) => {
+            setHeld({ ...held, selectedIds: ids });
+            send(ids);
+          }}
+          onCollapse={send}
+          onBulkAction={send}
+        />
+      );
+    case "detail-sheet":
+      return caseId.endsWith("busy") ? (
+        <SidePanel mode="docked" model={k.surface} onAction={action} onRequestClose={close}>
+          {details}
+        </SidePanel>
+      ) : (
+        <DetailSheet model={k.surface} onAction={action} onRequestClose={close}>
+          {details}
+        </DetailSheet>
+      );
+    case "side-panel":
+      return (
+        <SidePanel mode="docked" model={k.surface} onAction={action} onRequestClose={close}>
+          {details}
+        </SidePanel>
+      );
+    case "disclosure-section":
+      return (
+        <DisclosureSection
+          model={k.disclosure}
+          onExpanded={(expanded) => setHeld({ ...held, expanded })}
+        >
+          {details}
+        </DisclosureSection>
+      );
+    case "more-filters":
+      return (
+        <MoreFilters
+          model={k.surface}
+          filters={[k.choices]}
+          onRequestClose={close}
+          onChange={(_, id) => choice(id)}
+        />
+      );
+    case "summary-detail":
+      return (
+        <SummaryDetail
+          model={k.disclosure}
+          onExpanded={(expanded) => setHeld({ ...held, expanded })}
+        >
+          {details}
+        </SummaryDetail>
+      );
+    case "activity":
+      return <Activity model={k.activity} onExpand={send} onOpen={action} />;
+    case "stepper":
+      return (
+        <Stepper
+          model={k.stepper}
+          onNext={() => action("next")}
+          onBack={() => action("back")}
+          onGo={action}
+          onSkip={() => action("skip")}
+          onFinish={() => action("finish")}
+          onSaveAndExit={() => action("save-exit")}
+          onReconcile={() => action("reconcile")}
+        >
+          {details}
+        </Stepper>
+      );
+    case "slot-option":
+      return k.slots.slots[0] ? (
+        <SlotOption model={k.slots.slots[0]} onSelect={(id) => setHeld({ ...held, slot: id })} />
+      ) : null;
+    case "slot-picker":
+      return (
+        <SlotPicker
+          model={k.slots}
+          onDate={action}
+          onSelect={(value) => {
+            setHeld({ ...held, slot: value.slotId });
+            send(value);
+          }}
+          onClear={() => setHeld({ ...held, slot: undefined })}
+          onRefresh={() => action("refresh")}
+        />
+      );
+    case "day-strip":
+      return (
+        <DayStrip
+          model={k.calendar.strip}
+          onDate={action}
+          onPrevious={() => action("previous")}
+          onNext={() => action("next")}
+          onToday={() => action("today")}
+        />
+      );
+    case "week-calendar":
+      return (
+        <WeekCalendar
+          model={k.calendar.week}
+          onDate={action}
+          onEvent={action}
+          onMoreEvents={send}
+        />
+      );
+    case "agenda-list":
+      return <AgendaList model={k.calendar.agenda} onEvent={action} />;
+    case "calendar":
+      return (
+        <Calendar
+          model={k.calendar.calendar}
+          onDate={action}
+          onEvent={action}
+          onMoreEvents={send}
+          onRefresh={() => action("refresh")}
+          onMore={() => action("more")}
+          onView={action}
+          onNavigate={send}
+        />
+      );
+    case "price":
+      return <Price model={k.price} />;
+    case "quantity-control":
+      return <QuantityControl model={k.quantity} onChange={quantity} />;
+    case "product-card":
+      return (
+        <ProductCard
+          model={k.product}
+          onOpen={action}
+          onAction={send}
+          onOption={(_, id) => choice(id)}
+          onQuantity={quantity}
+        />
+      );
+    case "buy-bar":
+      return <BuyBar model={k.buy} onAction={action} />;
+    case "cart":
+      return (
+        <Cart
+          model={k.cart}
+          onQuantity={(_, value) => quantity(value)}
+          onRemove={action}
+          onOpen={action}
+          onCheckout={send}
+          onRefresh={() => action("refresh")}
+        />
+      );
+    case "order-summary":
+      return <OrderSummary model={k.summary} />;
+    case "pricing-tiers":
+      return <PricingTiers model={k.pricing.tiers} {...pricing} />;
+    case "plan-comparison":
+      return <PlanComparison model={k.pricing.comparison} {...pricing} />;
+    case "map-legend":
+      return <MapLegend model={k.map.legend} />;
+    case "map-with-list":
+      return (
+        <MapWithList
+          model={k.map.map}
+          renderMap={() => null}
+          renderDetail={(id) => (
+            <Section title={c.details}>
+              <Text>{id}</Text>
+            </Section>
+          )}
+          onMode={action}
+          onSelect={(id) => {
+            setHeld({ ...held, point: id });
+            action(id);
+          }}
+          onRevealPoints={send}
+          onClearSelection={() => setHeld({ ...held, point: undefined })}
+          onViewport={send}
+          onAction={send}
+          onRetry={() => action("retry")}
+        />
+      );
+    case "media-hero":
+      return (
+        <MediaHero
+          model={k.hero}
+          renderImage={image}
+          onOpen={action}
+          onAction={action}
+          onRetry={action}
+        />
+      );
+    case "photo-gallery":
+      return (
+        <PhotoGallery
+          model={k.media}
+          renderImage={image}
+          onOpen={action}
+          onMore={() => action("more")}
+          onRetry={action}
+        />
+      );
+    case "photo-viewer":
+      return (
+        <PhotoViewer
+          model={k.viewer}
+          renderImage={image}
+          renderZoom={zoom}
+          onSelect={(id) => setHeld({ ...held, media: id })}
+          onClose={close}
+          onRetry={action}
+        />
+      );
+    case "masonry-wall":
+      return (
+        <MasonryWall
+          model={k.media}
+          columns={2}
+          renderImage={image}
+          onOpen={action}
+          onMore={() => action("more")}
+          onRetry={action}
+        />
+      );
+    case "sparkline":
+      return <Sparkline model={k.spark} />;
+    case "area-chart":
+      return (
+        <AreaChart
+          model={k.chart}
+          onRange={action}
+          onPoint={send}
+          onClearPoint={() => action("clear")}
+          onRetry={() => action("retry")}
+        />
+      );
+    case "bar-chart":
+      return (
+        <BarChart
+          model={k.bars}
+          onCategory={action}
+          onRange={action}
+          onRetry={() => action("retry")}
+        />
+      );
+    case "stat-tile":
+      return <StatTile model={k.stat} />;
+    default:
+      return null;
+  }
+}

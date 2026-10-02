@@ -1,6 +1,7 @@
 // ResourceList is the generated list screen: the hook that loads it, the
 // native header with what a caller may do, and the organism that draws it.
 import { Stack, useRouter } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import type { Command } from "../core/catalog";
@@ -9,9 +10,11 @@ import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
 import { useCommandAsk } from "./useCommand";
+import { systemClock } from "./clock";
 import { useResourceList } from "./useResourceList";
 
 export function ResourceList({ entry }: ScreenProps) {
+  const feedback = useFeedback();
   const list = useResourceList(entry);
   const { ask, busy } = useCommandAsk(entry, undefined);
   const router = useRouter();
@@ -51,6 +54,7 @@ export function ResourceList({ entry }: ScreenProps) {
     <>
       <Stack.Screen options={options} />
       <ResourceListView
+        presentation={{ ...feedback, now: systemClock.now(), weekStartsOn: 1 }}
         entry={entry}
         rows={list.rows}
         total={list.total}

@@ -3,7 +3,7 @@
 // the safe area at the foot, and, when asked, the keyboard kept off the
 // field being edited. A list has its own template.
 import React, { type ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { useCanvas } from "./canvas";
 import { testable } from "../props";
 
@@ -11,11 +11,18 @@ interface Props {
   readonly children: ReactNode;
   /** form keeps the keyboard off the field being edited and lets a tap land on a control. */
   readonly form?: boolean;
+  readonly scroll?: boolean;
   readonly testID?: string;
 }
 
-export function Screen({ children, form = false, testID }: Props) {
+export function Screen({ children, form = false, scroll: scrolling = true, testID }: Props) {
   const canvas = useCanvas();
+  if (!scrolling)
+    return (
+      <View style={[canvas.page, canvas.content]} {...testable(testID)}>
+        {children}
+      </View>
+    );
   const scroll = (
     <ScrollView
       style={canvas.page}

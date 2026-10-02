@@ -5,6 +5,7 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import { ActionSheetIOS, Platform, Pressable, StyleSheet, View } from "react-native";
+import type { Copy } from "../../core/derive";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Icon } from "./Icon";
@@ -16,6 +17,7 @@ export interface Option {
 }
 
 interface Props {
+  readonly copy: Copy["choice"];
   readonly label: string;
   readonly value: string;
   readonly options: readonly Option[];
@@ -26,12 +28,13 @@ interface Props {
 }
 
 export function ChoiceRow({
+  copy,
   label,
   value,
   options,
   onChange,
   disabled = false,
-  placeholder = "Choose",
+  placeholder = copy.placeholder,
   testID,
 }: Props) {
   const t = useTheme();
@@ -44,7 +47,7 @@ export function ChoiceRow({
       ActionSheetIOS.showActionSheetWithOptions(
         {
           title: label,
-          options: [...options.map((o) => o.label), "Cancel"],
+          options: [...options.map((o) => o.label), copy.cancel],
           cancelButtonIndex: options.length,
           userInterfaceStyle: t.mode,
         },
@@ -62,12 +65,14 @@ export function ChoiceRow({
         accessibilityLabel={label}
         accessibilityValue={{ text: shown }}
         accessibilityState={{ disabled }}
-        accessibilityHint="Opens the choices"
+        accessibilityHint={copy.hint}
         {...testable(testID)}
       >
-        <Text>{label}</Text>
+        <Text style={s.label} maxFontSizeMultiplier={0}>
+          {label}
+        </Text>
         <View style={s.value}>
-          <Text tone={chosen ? "primary" : "muted"} numberOfLines={1}>
+          <Text tone={chosen ? "primary" : "muted"} style={s.label} maxFontSizeMultiplier={0}>
             {shown}
           </Text>
           <Icon name="chevron" size="sm" tone="muted" />
@@ -78,7 +83,9 @@ export function ChoiceRow({
 
   return (
     <View style={s.row} accessibilityLabel={label} {...testable(testID)}>
-      <Text>{label}</Text>
+      <Text style={s.label} maxFontSizeMultiplier={0}>
+        {label}
+      </Text>
       <View style={s.picker}>
         <Picker
           selectedValue={value}
@@ -115,6 +122,7 @@ const styles = (t: Theme) =>
       gap: t.space.md,
     },
     value: { flexDirection: "row", alignItems: "center", gap: t.space.xs, flexShrink: 1 },
-    picker: { flex: 1, maxWidth: "60%" },
-    pickerInner: { color: t.color.textPrimary, backgroundColor: "transparent" },
+    label: { flexShrink: 1 },
+    picker: { flex: 1, minWidth: t.extent.choiceMin, maxWidth: "60%" },
+    pickerInner: { color: t.color.textPrimary, backgroundColor: "transparent", minHeight: t.hit },
   });

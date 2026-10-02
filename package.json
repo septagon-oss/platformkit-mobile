@@ -15,11 +15,17 @@
     "./tools/android": "./scripts/android/build.sh",
     "./screens/*": "./src/screens/*.tsx",
     "./ui/theme": "./src/ui/theme.tsx",
+    "./ui/gallery": "./src/ui/gallery.tsx",
     "./ui/scale": "./src/ui/scale.ts",
     "./ui/atoms/*": "./src/ui/atoms/*.tsx",
     "./ui/molecules/*": "./src/ui/molecules/*.tsx",
     "./ui/organisms/*": "./src/ui/organisms/*.tsx",
-    "./ui/templates/*": "./src/ui/templates/*.tsx"
+    "./ui/templates/*": "./src/ui/templates/*.tsx",
+    "./effects/media": "./src/effects/media.ts",
+    "./screens/NativeMap": {
+      "react-native": "./src/screens/NativeMap.native.tsx",
+      "default": "./src/screens/NativeMap.tsx"
+    }
   },
   "files": [
     "src",
@@ -47,18 +53,25 @@
     "test:ui": "jest",
     "check:flows": "tsx scripts/check_flows.ts",
     "source": "tsx scripts/source.ts",
-    "check:source": "tsx scripts/source.ts --check"
+    "check:source": "tsx scripts/source.ts --check",
+    "check:advisories": "tsx scripts/advisories.ts --check"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@js-temporal/polyfill": "0.5.1",
+    "@maplibre/maplibre-react-native": "11.4.0",
     "@react-native-community/datetimepicker": "9.1.0",
     "@react-native-picker/picker": "2.11.4",
+    "@shopify/flash-list": "2.0.2",
+    "d3-scale": "4.0.2",
+    "d3-shape": "3.2.0",
     "expo": "57.0.23",
     "expo-asset": "57.0.17",
     "expo-build-properties": "~57.0.19",
     "expo-constants": "57.0.18",
     "expo-font": "57.0.4",
     "expo-haptics": "57.0.3",
+    "expo-image": "~57.0.5",
     "expo-linking": "57.0.10",
     "expo-modules-core": "57.0.18",
     "expo-router": "57.0.21",
@@ -68,15 +81,20 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-gesture-handler": "~2.32.0",
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
     "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.10.1"
+    "react-native-worklets": "0.10.1",
+    "react-native-zoom-toolkit": "5.1.1"
   },
   "devDependencies": {
     "@expo/fingerprint": "~0.20.12",
     "@testing-library/react-native": "^14.0.1",
+    "@types/d3-scale": "4.0.9",
+    "@types/d3-shape": "3.1.7",
     "@types/react": "~19.2.0",
     "babel-preset-expo": "~57.0.8",
     "eslint": "^9.0.0",

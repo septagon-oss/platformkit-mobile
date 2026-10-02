@@ -3,7 +3,7 @@
 // refusal at the top. Save and Cancel live in the native header, which the
 // screen composition sets from the same phase this renders.
 import React from "react";
-import { timeText, timeValue, timeWire, type Control } from "../../core/derive";
+import { type Feedback, timeText, timeValue, timeWire, type Control } from "../../core/derive";
 import { ChoiceRow } from "../atoms/ChoiceRow";
 import { DateTimeRow } from "../atoms/DateTimeRow";
 import { Notice, retry } from "../atoms/Notice";
@@ -19,6 +19,8 @@ import { Screen } from "../templates/Screen";
 export type Phase = "loading" | "failed" | "editing" | "saving" | "saved";
 
 export interface Props {
+  readonly feedback: Feedback;
+  readonly initialDate: Date;
   readonly controls: readonly Control[];
   readonly held: Readonly<Record<string, string>>;
   readonly errors: Readonly<Record<string, string>>;
@@ -34,22 +36,33 @@ const kinds: Partial<Record<Control["kind"], FieldKind>> = {
   reference: "mono",
 };
 
-export function ResourceForm({ controls, held, errors, detail, phase, onChange, onRetry }: Props) {
+export function ResourceForm({
+  feedback,
+  initialDate,
+  controls,
+  held,
+  errors,
+  detail,
+  phase,
+  onChange,
+  onRetry,
+}: Props) {
   const busy = phase === "saving" || phase === "saved";
   const current = (c: Control) => held[c.field.name] ?? c.value;
   return (
     <Screen form testID="resource-form">
       {detail ? (
         <Notice
+          announcement="urgent"
           title="That could not be saved"
           text={detail}
-          {...(phase === "failed" ? { action: retry(onRetry) } : {})}
+          {...(phase === "failed" ? { action: retry(feedback, onRetry) } : {})}
           testID="form-detail"
         />
       ) : null}
       {phase === "loading" ? (
         <Section>
-          <Skeleton lines={5} />
+          <Skeleton label={feedback.loadingLabel} motion={feedback.motion} lines={5} />
         </Section>
       ) : phase === "failed" ? null : (
         <Section>
@@ -80,6 +93,7 @@ export function ResourceForm({ controls, held, errors, detail, phase, onChange, 
                 return (
                   <FormField key={name} {...common} bare>
                     <ChoiceRow
+                      copy={feedback.copy.choice}
                       label={c.label}
                       value={value}
                       options={c.options}
@@ -92,10 +106,13 @@ export function ResourceForm({ controls, held, errors, detail, phase, onChange, 
                 return (
                   <FormField key={name} {...common} bare>
                     <DateTimeRow
+                      copy={feedback.copy.dateTime}
+                      initialValue={initialDate}
+                      timeZone={feedback.timeZone}
                       label={c.label}
                       value={timeValue(value)}
                       onChange={(at) => onChange(name, at ? timeWire(at) : "")}
-                      text={timeText}
+                      text={(at) => timeText(at, feedback)}
                       disabled={off}
                       required={c.required}
                     />

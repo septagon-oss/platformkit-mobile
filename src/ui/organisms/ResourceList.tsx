@@ -1,34 +1,17 @@
-// ResourceList is the generated list as a pure component: the rows the
-// caller loaded, an order and filters the caller applies, and the affordances
-// a caller who may write is given. Every column, label and cell comes from
-// derive; nothing here knows what an entity is.
+// Catalog input is adapted by core to the one shared list renderer.
 import React from "react";
 import type { Entry } from "../../core/catalog";
 import {
-  display,
-  filterFields,
-  humanize,
-  label,
-  listCells,
-  listPreview,
-  narrowed,
-  plural,
-  sortOptions,
-  text,
+  deriveCatalogList,
+  type Presentation,
   type Order,
   type Row as Item,
 } from "../../core/derive";
-import { ChoiceRow } from "../atoms/ChoiceRow";
-import { EmptyState } from "../atoms/EmptyState";
-import { Notice, retry } from "../atoms/Notice";
-import { LoadMore } from "../molecules/LoadMore";
-import { Labelled } from "../molecules/Value";
-import { Row } from "../molecules/Row";
-import { Section } from "../molecules/Section";
-import { ListScreen } from "../templates/ListScreen";
+import { Notice } from "../atoms/Notice";
 import { Actions, type Props as ActionsProps } from "./Actions";
-
+import { DataList } from "./DataList";
 export interface Props {
+  readonly presentation: Presentation;
   readonly entry: Entry;
   readonly rows: readonly Item[];
   readonly total: number;
@@ -48,107 +31,24 @@ export interface Props {
   readonly actions?: ActionsProps;
 }
 
-export function ResourceList({
-  entry,
-  rows,
-  total,
-  loading,
-  refreshing,
-  more,
-  error,
-  order,
-  ordering,
-  onOrder,
-  onOpen,
-  onMore,
-  onRefresh,
-  onNew,
-  actions,
-}: Props) {
-  const columns = listCells(entry);
-  const preview = listPreview(entry);
-  const noun = humanize(entry.entity).toLowerCase();
-  const nouns = plural(noun);
-  const narrow = narrowed(order);
+export function ResourceList(props: Props) {
+  const { presentation, onOpen, onOrder, onMore, onRefresh, onNew, actions, ...input } = props;
+  const result = deriveCatalogList({ ...input, canCreate: !!onNew }, presentation);
+  if (!result.ok) return <Notice text={result.issues[0]!.message} announcement="urgent" />;
   return (
-    <ListScreen
-      data={rows}
-      keyOf={(r) => text(r.id)}
-      loading={loading && rows.length === 0}
-      refreshing={refreshing}
+    <DataList
+      model={result.value}
+      onOpen={onOpen}
+      onOrder={onOrder}
+      onMore={onMore}
       onRefresh={onRefresh}
-      onEndReached={() => more && onMore()}
+      onStateAction={(id) => {
+        if (id === "new") onNew?.();
+        else if (id === "refresh") onRefresh();
+      }}
       testID="resource-list"
-      header={
-        <>
-          {error ? <Notice text={error} action={retry(onRefresh)} /> : null}
-          {ordering ? (
-            <Section title="Order">
-              <ChoiceRow
-                label="Sort"
-                value={order.sort}
-                options={sortOptions(entry)}
-                onChange={(sort) => onOrder({ ...order, sort })}
-                testID="sort"
-              />
-              {filterFields(entry).map((f) => (
-                <ChoiceRow
-                  key={f.name}
-                  label={humanize(f.name)}
-                  value={order.filters[f.name] ?? ""}
-                  options={[
-                    { value: "", label: "Any" },
-                    ...(f.enum ?? []).map((v) => ({ value: v, label: humanize(v) })),
-                  ]}
-                  onChange={(v) => {
-                    const filters = { ...order.filters };
-                    if (v) filters[f.name] = v;
-                    else delete filters[f.name];
-                    onOrder({ ...order, filters });
-                  }}
-                  testID={`filter-${f.name}`}
-                />
-              ))}
-            </Section>
-          ) : null}
-        </>
-      }
-      render={(row) => (
-        <Section>
-          <Row
-            title={label(entry, row)}
-            {...(preview && text(row[preview.name]) ? { summary: text(row[preview.name]) } : {})}
-            cells={columns.map((f) => `${humanize(f.name)}: ${display(f, row[f.name])}`)}
-            shown={columns.map((f) => (
-              <Labelled key={f.name} field={f} value={row[f.name]} />
-            ))}
-            onPress={() => onOpen(text(row.id))}
-            testID={`row-${text(row.id)}`}
-          />
-        </Section>
-      )}
-      footer={
-        <>
-          <LoadMore remaining={Math.max(total - rows.length, 0)} busy={loading} onPress={onMore} />
-          {/* Under the list, because a command about the collection is about
-              what was just read, and because a header with a third button in
-              it is a header nobody reads. */}
-          {actions ? <Actions {...actions} /> : null}
-        </>
-      }
-      empty={
-        <EmptyState
-          title={narrow ? `No ${noun} matches` : `No ${nouns} yet`}
-          text={
-            narrow
-              ? "Change the order or the filters above."
-              : onNew
-                ? "Add the first one."
-                : "What arrives will be listed here."
-          }
-          {...(onNew && !narrow ? { action: { label: `New ${noun}`, onPress: onNew } } : {})}
-        />
-      }
+      rowTestID={(id) => `row-${id}`}
+      header={actions ? <Actions {...actions} /> : null}
     />
   );
 }

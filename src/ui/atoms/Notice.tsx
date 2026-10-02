@@ -3,9 +3,10 @@
 // may offer one action, which is how "retry" is offered everywhere.
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import type { Announcement, Motion } from "../../core/derive";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
-import { Button } from "./Button";
+import { Button, type ButtonTone } from "./Button";
 import { Icon, type IconName } from "./Icon";
 import { Text } from "./Text";
 
@@ -14,6 +15,13 @@ export type NoticeTone = "danger" | "warning" | "info" | "ok";
 export interface Action {
   readonly label: string;
   readonly onPress: () => void;
+  readonly tone?: ButtonTone;
+  readonly disabled?: boolean;
+  readonly busy?: boolean;
+  readonly reason?: string;
+  readonly hint?: string;
+  readonly motion?: Motion;
+  readonly testID?: string;
 }
 
 interface Props {
@@ -21,11 +29,17 @@ interface Props {
   readonly title?: string;
   readonly text: string;
   readonly action?: Action;
+  readonly secondary?: Action;
+  readonly announcement: Announcement;
+  readonly updatedAt?: string;
+  readonly icon?: IconName;
+  readonly language?: string;
+  readonly accessibilityLabel?: string;
   readonly testID?: string;
 }
 
-/** retry is the one action offered wherever something could not be read: the word, written once. */
-export const retry = (onPress: () => void): Action => ({ label: "Retry", onPress });
+// Retain the old export path; the required copy now comes from the caller.
+export { retry } from "../../core/derive";
 
 const icons: Record<NoticeTone, IconName> = {
   danger: "warning",
@@ -34,7 +48,19 @@ const icons: Record<NoticeTone, IconName> = {
   ok: "check",
 };
 
-export function Notice({ tone = "danger", title, text, action, testID }: Props) {
+export function Notice({
+  tone = "danger",
+  title,
+  text,
+  action,
+  secondary,
+  announcement,
+  updatedAt,
+  icon,
+  language,
+  accessibilityLabel,
+  testID,
+}: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const fg =
@@ -55,22 +81,39 @@ export function Notice({ tone = "danger", title, text, action, testID }: Props) 
           : t.color.statusInfoBg;
   return (
     <View style={[s.box, { backgroundColor: bg }]} {...testable(testID)}>
-      <View style={s.row} accessible accessibilityRole="alert" accessibilityLiveRegion="polite">
-        <Icon name={icons[tone]} size="sm" tone={tone === "danger" ? "danger" : "primary"} />
-        <View style={s.body}>
+      <View style={s.row}>
+        <Icon
+          name={icon ?? icons[tone]}
+          size="sm"
+          tone={tone === "danger" ? "danger" : "primary"}
+        />
+        <View
+          style={s.body}
+          accessible
+          {...(accessibilityLabel ? { accessibilityLabel } : {})}
+          accessibilityRole={announcement === "urgent" ? "alert" : "text"}
+          accessibilityLiveRegion={announcement === "urgent" ? "assertive" : announcement}
+          {...(language ? { accessibilityLanguage: language } : {})}
+        >
           {title ? (
-            <Text role="label" weight="semibold" style={{ color: fg }}>
+            <Text weight="semibold" style={{ color: fg }} maxFontSizeMultiplier={0}>
               {title}
             </Text>
           ) : null}
-          <Text role="label" style={{ color: fg }}>
+          <Text style={{ color: fg }} maxFontSizeMultiplier={0}>
             {text}
           </Text>
+          {updatedAt ? (
+            <Text style={{ color: fg }} maxFontSizeMultiplier={0}>
+              {updatedAt}
+            </Text>
+          ) : null}
         </View>
       </View>
-      {action ? (
+      {action || secondary ? (
         <View style={s.action}>
-          <Button label={action.label} onPress={action.onPress} tone="plain" />
+          {action ? <Button tone="plain" {...action} /> : null}
+          {secondary ? <Button tone="plain" {...secondary} /> : null}
         </View>
       ) : null}
     </View>
@@ -82,5 +125,5 @@ const styles = (t: Theme) =>
     box: { borderRadius: t.radius.md, padding: t.space.md, gap: t.space.sm },
     row: { flexDirection: "row", gap: t.space.sm, alignItems: "flex-start" },
     body: { flex: 1, gap: t.space.xs },
-    action: { alignItems: "flex-end" },
+    action: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm, justifyContent: "flex-end" },
   });

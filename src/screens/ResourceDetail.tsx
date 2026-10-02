@@ -2,19 +2,27 @@
 // the native header titled by the row's own name with Edit for a caller who
 // may, and the organism that draws it.
 import { Stack, useRouter } from "expo-router";
+import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import type { Command } from "../core/catalog";
-import { label, rowCommands, screenPath } from "../core/derive";
+import { deriveEventActivity, label, rowCommands, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
+import { systemClock } from "./clock";
 import { useActivity } from "./useActivity";
 import { useCommandAsk } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
+  const feedback = useFeedback();
   const detail = useResourceDetail(entry, id);
   const activity = useActivity(entry, id);
+  const activityModel = deriveEventActivity(activity, {
+    ...feedback,
+    now: systemClock.now(),
+    weekStartsOn: 1,
+  });
   const { ask, busy } = useCommandAsk(entry, id);
   const router = useRouter();
   const may = entry.writable && !!id;
@@ -57,11 +65,20 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     <>
       <Stack.Screen options={options} />
       <ResourceDetailView
+        feedback={feedback}
         entry={entry}
         row={detail.row}
         error={detail.error}
         onRetry={detail.reload}
-        activity={activity}
+        {...(activityModel.ok
+          ? {
+              activity: {
+                model: activityModel.value,
+                onMore: activity.loadMore,
+                onRetry: activity.reload,
+              },
+            }
+          : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}
         {...(may ? { onDelete: detail.remove } : {})}
       />

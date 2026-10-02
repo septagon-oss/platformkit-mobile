@@ -75,6 +75,11 @@ Distances live in `src/ui/scale.ts`. The gallery
 (`src/ui/gallery.tsx`, served by `app/gallery.tsx` in development or in a build
 with `EXPO_PUBLIC_GALLERY=1`) shows every atom and molecule in both modes.
 
+The [shared mobile components specification](docs/shared-mobile-components.md)
+defines the richer components, their APIs, reuse, gallery states and delivery
+order. The shared families now have source implementations and literal Gallery
+examples. Native acceptance and the complete product/theme matrix remain unverified.
+
 Keep UI imports pointed toward the primitives. Atoms may compose other atoms;
 molecules add atoms; templates supply layout through children or render callbacks
 and may compose atoms and molecules. Organisms combine these layers. Shared
@@ -124,6 +129,143 @@ module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
 
 ## Consume the shared native source
+
+### Shared feedback
+
+**Reused** — `EmptyState`, `Notice`, `Skeleton`, `Spinner`, `Button`, `DateTimeRow`, native
+accessibility primitives, `ThemeProvider`, scale and Gallery carry the shared
+feedback family. **Added** — pure `deriveCopy`, `deriveState` and explicit
+presentation/clock inputs own translated copy and recovery eligibility, because the
+existing atoms had no common state or recovery contract. **Made reusable** —
+`StateView`, the `StateFeedback` screen adapter and 31 Gallery cases let another
+renderer pack use the same states, actions, tokens and conformance examples.
+
+Obtain an immutable English or Portuguese copy bundle with `deriveCopy('en')`
+or `deriveCopy('pt')` from `platformkit-mobile/core/derive`. Pass an explicit
+`Presentation` with that bundle, locale, timezone, week start, sampled UTC clock
+value and motion preference to `deriveState(input, presentation)`. Language and
+formatting locale are independent; the gallery includes `en-GB`, `pt-PT` and
+`pt-BR`. Unresolved motion preferences stay reduced.
+
+`deriveState` returns either `{ ok: true, value }` or `{ ok: false, issues }`, with
+no partial model. Render a successful value through
+`platformkit-mobile/screens/StateFeedback`, passing `model`, `onAction(id)` and
+an optional `testID`. This screen adapter composes the pure
+`ui/molecules/StateView` and performs iOS announcements when the message changes;
+Android and web use native live regions. The caller owns all reads, writes,
+navigation and reconciliation. A callback reports intent, never success.
+
+Use empty for a successful zero result, offline/error for failed reads, and
+success only after a confirmed result. An immutable error refuses a retry-read
+action. An unknown write outcome allows reconciliation or dismissal; it refuses
+resubmission and read-retry intents. Busy actions keep their labels and suppress
+activation; disabled actions require a visible reason. A success stays until its
+caller dismisses it. `updatedAt` labels stale readable content in the supplied
+locale and zone; forbidden or missing records cannot carry that stale label.
+
+Direct consumers upgrading their source pin must migrate these required props:
+
+- `Skeleton` and `Spinner`: `label` and `motion`; Skeleton also supports
+  `lines`, `rows`, `detail` and `media` variants.
+- `Notice`: explicit `announcement` (`none`, `polite` or `urgent`); its action
+  accepts busy/disabled/reason, and it can offer a secondary action.
+- `ChoiceRow`: `copy={copy.choice}` for its placeholder, cancel word and hint.
+- `DateTimeRow`: `copy={copy.dateTime}`, `initialValue: Date` and `timeZone`.
+  Its Set action uses the supplied date, and both native dialogs use the supplied
+  zone. Required or disabled values cannot be cleared. Native picker language
+  follows the operating system; the surrounding labels come from the bundle.
+- `ListScreen`, `LoadMore`, `Home`, `ResourceList`, `ResourceDetail`,
+  `ResourceForm`, `SignInForm` and `Activity`: `feedback`, obtained from
+  `deriveFeedback(copy, motion, { locale, timeZone })`. The in-repository screens
+  adapt native preferences in `useFeedback`. `retry(feedback, callback)` now
+  gets its label from core; the old Notice export re-exports that same helper.
+- The `ResourceForm` organism also requires `initialDate`. Generated form,
+  command and singleton screens accept an optional `Clock` and sample it once
+  per mounted screen; the default device clock lives in screen composition.
+- `timeText(date, formatting)`, `display(field, value, formatting)` and
+  `detailItems(entry, row, formatting)` require explicit formatting. The latter
+  two also use its copy bundle. `Value` and `Labelled` receive that value as
+  `presentation`. There is no mutable device-default date formatter.
+
+The public `platformkit-mobile/ui/gallery` export accepts `presentation`, optional
+complete `palette`/`fonts`, `initialCaseId` and `initialMode`. Choose a rich-state
+case, language, locale and appearance in its controls. Hover, press and focus
+cases contain real controls to operate; their names do not simulate interaction.
+Passive loading states have no disabled/selection actions. Supply `renderState`
+with the `StateFeedback` adapter for iOS speech, as the reference gallery screen
+does. The older primitive samples remain English fixtures; this delivery does
+not claim whole-application localization.
+
+The rich-state unit/component suites and browser checks exercise the reference
+palette and isolated supplied-token fixtures. Android/iOS devices, VoiceOver,
+TalkBack, largest native text settings and consuming products' palettes still
+need their acceptance runs. The rich-state slice introduces no catalog/API contract.
+The later families below add native dependencies. Activity now receives a derived model; raw event adaptation and the explicit clock
+belong to the generated screen/core adapter.
+
+### Shared collection, workflow and presentation families
+
+**Reused** — the existing core catalog helpers, state atoms, Button, Row, Section,
+ListScreen, native modal/canvas, theme, scale and renderer-pack wiring carry these
+compositions. **Added** — focused pure factories in `core/derive` provide collection
+selection, surface dismissal, audit values, steps, availability, civil-day calendars,
+exact money/quotes, plans, map markers, media selection and chart projections.
+**Made reusable** — named UI subpaths and the public Gallery let products supply
+content, callbacks, locale, language, theme and native rendering resources once.
+
+Use the inputs and named factories in the
+[component contract](docs/shared-mobile-components.md#explicit-factories-and-source-migration).
+Every factory returns `Result`; render its value only after checking `ok`. All
+refusals retain their classification and return no partial value. Models are
+immutable copies, and caller drafts are neither frozen nor mutated. No factory
+fetches, writes, reads the current clock, or changes another caller's configuration.
+
+The existing UI export patterns now include `DataList`, `Activity`, `Stepper`,
+`SlotPicker`, `Calendar`/`WeekCalendar`/`AgendaList`, `ProductCard`/`Cart`/`OrderSummary`,
+`PricingTiers`/`PlanComparison`, `MapWithList`, `PhotoGallery`/`PhotoViewer`/`MasonryWall`,
+`AreaChart`/`BarChart`, and their smaller controls. Templates include `DetailSheet`,
+`SidePanel`, `BuyBar`, `MoreFilters` and `SummaryDetail`. `DisclosureSection` permits
+at most two levels; move a third level to an explicit detail page or sibling sheet.
+Keep essential fields and primary actions visible without opening a disclosure.
+
+`ResourceList` now requires `presentation` in place of `feedback` and delegates
+to `deriveCatalogList` and `DataList`. `Activity` requires `model` from
+`deriveActivity` or `deriveEventActivity`, with `onMore`, `onRetry`, `onExpand` and
+`onOpen` supplied when offered. `ResourceDetail.activity` accepts those props.
+All in-repository consumers have migrated. Direct source consumers must migrate
+these props when updating their pin; source compatibility is not implied.
+
+Money is canonical int64 decimal strings plus an explicit currency/exponent pair.
+`cartTotals` uses bigint and is independent of formatting. `deriveCart` offers
+checkout only with a matching fresh quote and eligible lines; its callback echoes
+quote ID and revision. The caller must discard quotes when options or quantity
+change and recheck the binding authoritatively on the server. Slot selection echoes
+the supplied availability version and never reserves capacity. Step callbacks ask
+the caller to validate, save, finish or reconcile; use `stepTransition` to apply
+adjacent-step outcomes. No draft storage or payment workflow is hidden in the kit.
+
+The native rendering adapters are `screens/NativeMap`, `screens/NativeImage` and
+`screens/NativeZoom`. Map and image resources are prepared by the product's effects
+and carry explicit scope/version identities. The MapLibre adapter takes a supplied
+style URL, uses no default city/location service, and ignores late scoped callbacks.
+Its package export selects the native adapter under the `react-native` condition;
+the default export is the explicit web fallback. Resource types are exported at
+`effects/media`.
+The image adapter uses Expo Image with no persistent cache, an identity-based
+recycling key and guarded load callbacks. Supply `NativeZoom` through PhotoViewer's
+`renderZoom` slot; it composes Zoom Toolkit with the shared labelled controls.
+Unmount or key the screen subtree on session/scope loss. Core and UI models contain
+no URL credentials, SDK object or transport. Web maps show an explicit unsupported
+notice; the complete list remains available. Gallery media uses labelled synthetic
+fixtures unless a real image slot is supplied, and has no production map endpoint.
+
+The new native dependencies and config plugins change `fingerprint.json` and
+require a new binary. Native load/gesture behavior, VoiceOver/TalkBack, keyboard
+focus restoration and authenticated device journeys must still be verified on
+that binary. Node tests, component tests and JavaScript exports are separate
+source evidence; they do not establish those runtime results.
+
+### Shared package
 
 [package.json](package.json) exposes the existing implementation through package
 subpaths: `platformkit-mobile/shell`, `renderers`, `route`, `effects/api`,
@@ -318,9 +460,10 @@ a binary is built from: the app configuration, the native modules in the
 lockfile and their config plugins, the Android recipe, the bundler
 configuration and the design export. When a change moves it, run
 `npm run fingerprint` and say why in the commit, because that change needs a
-new binary. CI also exports both bundles, fails on a high or critical dependency
-advisory, and scans the history for secrets; a weekly workflow reports what
-drifted without blocking anything. Node is pinned once, in [.nvmrc](.nvmrc).
+new binary. CI also exports both bundles, refuses a dependency advisory no
+review covers (see below), scans the history for secrets, and a weekly workflow
+reports what drifted without blocking anything. Node is pinned once, in
+[.nvmrc](.nvmrc).
 Use `expo install` for native dependencies so they match that SDK. The app owns
 the native font, module core, Reanimated and Worklets dependencies used by its
 router and tests; their SDK-compatible versions must resolve once at the app
@@ -335,6 +478,32 @@ packages against `bundledNativeModules.json` inside the pinned `expo`, a file
 tree on any machine and any day. It still refuses a package that does not match
 the pinned SDK, which is what it is for. Only `expo` itself is outside that
 manifest, because it is the pin everything else is compared against.
+
+The advisory gate is deliberately reviewed rather than live, for the same reason.
+`npm audit` answers "what does the advisory database say about this tree today?",
+and that answer moves when somebody else publishes or files: three
+denial-of-service filings were made against a version of `brace-expansion` that
+no commit of ours had chosen, and turned CI red on a change that touched no
+dependency. The database has also covered a package in full — every published
+release of `node-forge`, which the Expo CLI depends on and upstream has not
+released a fix for — so the alternative below was a permanently red check until
+somebody switched it off, which is how a check dies. `npm run check:advisories`
+keeps `npm audit` as its input and compares it against
+[advisories.json](advisories.json): a high filing is refused unless a review
+names that GHSA, the versions this lockfile actually holds and a date that has
+not passed; a critical filing is never exempted; and a review whose filing is no
+longer reported, whose versions moved, or whose date has passed is itself a
+refusal, so the record cannot quietly become an ignore list. Take the fixed
+version whenever one exists — the record is for what has no version to move to.
+
+```sh
+npm run check:advisories    # the gate CI runs: needs the registry, like npm audit
+npm audit                   # what the database says, reviewed or not
+make test                   # the advisory rules themselves are tested offline
+```
+
+What the database says with nothing compared against it — and what a review will
+expire against — is in the weekly `drift` report beside the SDK's opinion.
 
 Asking what Expo now recommends is an owner's action, not a gate:
 
@@ -352,6 +521,10 @@ Starting Expo generates route types under the ignored `.expo/` directory,
 which TypeScript also checks.
 The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
+`make test` runs the two suites and nothing else — `tsx --test tests/*.test.ts`
+then Jest — under the name a person or a CI step asks for the tests by, and it
+installs from the lockfile first when the checkout has no `node_modules/`. It
+replaces no gate: `npm run check` stays the required check.
 
 The Node tests cover catalog parsing, screen derivation, the token
 generator and its provenance, the distance guard, out-of-order lifecycle

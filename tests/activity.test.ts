@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { about, since, subject, verb, type Event } from "../src/core/activity";
+import { deriveCopy, deriveEventActivity } from "../src/core/derive";
+import { presentation } from "./fakes/presentation";
 
 const at = "2026-09-07T10:00:00Z";
 const event = (name: string, payload: unknown): Event => ({
@@ -53,3 +55,41 @@ test("how long ago is the coarsest unit that is still true, and a date past a we
     "a date",
   );
 });
+
+for (const language of ["en", "pt"] as const) {
+  test(`${language} generated activity gives session denial precedence over cached rows and paging`, () => {
+    const p = { ...presentation, copy: deriveCopy(language) };
+    const trail = {
+      events: [{ ...event("note.note.updated", { id: "note-14" }), actor: "actor-6" }],
+      names: { "actor-6": "Cached actor six" },
+      error: "",
+      loading: true,
+      loadingMore: true,
+      more: true,
+      denied: true,
+    };
+    const result = deriveEventActivity(trail, p);
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.deepEqual(result.value.rows, []);
+    assert.equal(result.value.more, undefined);
+    assert.equal(result.value.pageError, undefined);
+    assert.equal(result.value.writable, false);
+    assert.equal(result.value.state?.kind, "error");
+    assert.equal(result.value.state?.body, p.copy.kit.unavailable);
+    assert.deepEqual(result.value.state?.actions, []);
+    assert.equal(JSON.stringify(result.value).includes("Cached actor six"), false);
+    assert.equal(trail.events.length, 1);
+    assert.equal(Object.isFrozen(trail.events), false);
+
+    const recovered = deriveEventActivity(
+      { ...trail, denied: false, loading: false, loadingMore: false },
+      p,
+    );
+    assert.equal(recovered.ok, true);
+    if (recovered.ok) {
+      assert.equal(recovered.value.rows[0]!.actor, "Cached actor six");
+      assert.equal(recovered.value.more?.enabled, true);
+    }
+  });
+}

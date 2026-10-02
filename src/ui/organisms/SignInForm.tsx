@@ -4,6 +4,7 @@
 // cleared. Before the form is wanted it shows the shell's two other states in
 // the same frame: a saved sign-in being restored, and one that could not be
 // opened, so a product need not draw those screens itself.
+import type { Feedback } from "../../core/derive";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +20,7 @@ import { Screen } from "../templates/Screen";
 import { useStyles, useTheme, type Theme } from "../theme";
 
 export interface Props {
+  readonly feedback: Feedback;
   readonly baseURL: string;
   /** notice is the shell's own message, about a saved sign-in that could not be read or cleared. */
   readonly notice: string;
@@ -37,6 +39,7 @@ export interface Props {
 }
 
 export function SignInForm({
+  feedback,
   baseURL,
   notice,
   busy,
@@ -68,7 +71,7 @@ export function SignInForm({
     return (
       <Screen testID="sign-in-booting">
         {head("Restoring your saved sign-in…")}
-        <Spinner size="large" />
+        <Spinner label={feedback.loadingLabel} motion={feedback.motion} size="large" />
       </Screen>
     );
   if (failed)
@@ -76,8 +79,9 @@ export function SignInForm({
       <Screen testID="sign-in-failed">
         {head("Your saved sign-in could not be opened.")}
         <Notice
+          announcement="urgent"
           text={failed}
-          {...(onRetry ? { action: retry(onRetry) } : {})}
+          {...(onRetry ? { action: retry(feedback, onRetry) } : {})}
           testID="sign-in-failed-notice"
         />
         <Button
@@ -91,9 +95,17 @@ export function SignInForm({
   return (
     <Screen form testID="sign-in">
       {head("Use the address this tenant knows you by.")}
-      {error ? <Notice text={error} action={retry(submit)} testID="sign-in-error" /> : null}
+      {error ? (
+        <Notice
+          announcement="urgent"
+          text={error}
+          action={retry(feedback, submit)}
+          testID="sign-in-error"
+        />
+      ) : null}
       {notice ? (
         <Notice
+          announcement="polite"
           tone="warning"
           text={notice}
           action={{ label: "Clear saved sign-in", onPress: onClear }}

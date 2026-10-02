@@ -1,9 +1,10 @@
+import { feedback, presentation } from "../fakes/presentation";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
-import { formControls, noOrder, sortOptions } from "../../src/core/derive";
+import { deriveEventActivity, formControls, noOrder, sortOptions } from "../../src/core/derive";
 import { Home } from "../../src/ui/organisms/Home";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
@@ -18,6 +19,31 @@ const inTheme = (el: React.ReactElement) =>
 const none = () => undefined;
 
 describe("ResourceList", () => {
+  test("a failed first read offers recovery without claiming the collection is empty", async () => {
+    const onRefresh = jest.fn();
+    await inTheme(
+      <ResourceList
+        presentation={presentation}
+        entry={note}
+        rows={[]}
+        total={0}
+        loading={false}
+        refreshing={false}
+        more={false}
+        error="Connection lost."
+        order={{ sort: "", filters: {} }}
+        ordering={false}
+        onOrder={none}
+        onOpen={none}
+        onMore={none}
+        onRefresh={onRefresh}
+      />,
+    );
+    expect(screen.getByText("Connection lost.")).toBeOnTheScreen();
+    expect(screen.queryByText("No notes yet")).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Retry" }));
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
   const rows = [
     { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: false, tags: [] },
     { id: "2", title: "Call home", status: "done", rank: 1, pinned: true, tags: ["a"] },
@@ -39,7 +65,7 @@ describe("ResourceList", () => {
 
   test("a row is its name and what tells it apart, and opens by id", async () => {
     const onOpen = jest.fn();
-    await inTheme(<ResourceList {...props} onOpen={onOpen} />);
+    await inTheme(<ResourceList presentation={presentation} {...props} onOpen={onOpen} />);
     // The cells are the closed set, the yes-or-no and the number, in that
     // order: not the times every record has.
     await fireEvent.press(
@@ -50,11 +76,22 @@ describe("ResourceList", () => {
 
   test("an empty list offers the first one only to a caller who may write", async () => {
     const onNew = jest.fn();
-    await inTheme(<ResourceList {...props} rows={[]} total={0} onOpen={none} onNew={onNew} />);
+    await inTheme(
+      <ResourceList
+        presentation={presentation}
+        {...props}
+        rows={[]}
+        total={0}
+        onOpen={none}
+        onNew={onNew}
+      />,
+    );
     await fireEvent.press(screen.getByRole("button", { name: "New note" }));
     expect(onNew).toHaveBeenCalledTimes(1);
     await screen.unmount();
-    await inTheme(<ResourceList {...props} rows={[]} total={0} onOpen={none} />);
+    await inTheme(
+      <ResourceList presentation={presentation} {...props} rows={[]} total={0} onOpen={none} />,
+    );
     expect(screen.queryByRole("button", { name: "New note" })).toBeNull();
   });
 
@@ -67,10 +104,18 @@ describe("ResourceList", () => {
 
 describe("ResourceForm", () => {
   const controls = formControls(note, undefined, true);
-  const base = { controls, held: {}, errors: {}, detail: "", onChange: none, onRetry: none };
+  const base = {
+    initialDate: new Date("2026-08-11T08:20:00Z"),
+    controls,
+    held: {},
+    errors: {},
+    detail: "",
+    onChange: none,
+    onRetry: none,
+  };
 
   test("while the row loads there is nothing to type into", async () => {
-    await inTheme(<ResourceForm {...base} phase="loading" />);
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="loading" />);
     expect(screen.queryByTestId("input-title")).toBeNull();
     expect(screen.getByRole("progressbar")).toBeOnTheScreen();
   });
@@ -78,6 +123,7 @@ describe("ResourceForm", () => {
   test("the refusal sits under the control it is about, and the general one at the top", async () => {
     await inTheme(
       <ResourceForm
+        feedback={feedback}
         {...base}
         phase="editing"
         errors={{ title: "is required" }}
@@ -89,14 +135,16 @@ describe("ResourceForm", () => {
   });
 
   test("while saving, every control is off", async () => {
-    await inTheme(<ResourceForm {...base} phase="saving" />);
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="saving" />);
     expect(screen.getByTestId("input-title")).toBeDisabled();
     expect(screen.getByRole("switch", { name: "Pinned" })).toBeDisabled();
   });
 
   test("a failed load offers a retry and no controls", async () => {
     const onRetry = jest.fn();
-    await inTheme(<ResourceForm {...base} phase="failed" detail="gone" onRetry={onRetry} />);
+    await inTheme(
+      <ResourceForm feedback={feedback} {...base} phase="failed" detail="gone" onRetry={onRetry} />,
+    );
     expect(screen.queryByTestId("input-title")).toBeNull();
     await fireEvent.press(screen.getByRole("button", { name: "Retry" }));
     expect(onRetry).toHaveBeenCalledTimes(1);
@@ -108,14 +156,23 @@ describe("ResourceDetail", () => {
     const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: ["a"] };
     const onDelete = jest.fn();
     await inTheme(
-      <ResourceDetail entry={note} row={row} error="" onRetry={none} onDelete={onDelete} />,
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        onDelete={onDelete}
+      />,
     );
     expect(screen.getByLabelText("Title, Buy milk")).toBeOnTheScreen();
     expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Delete note" }));
     expect(onDelete).toHaveBeenCalledTimes(1);
     await screen.unmount();
-    await inTheme(<ResourceDetail entry={note} row={row} error="" onRetry={none} />);
+    await inTheme(
+      <ResourceDetail feedback={feedback} entry={note} row={row} error="" onRetry={none} />,
+    );
     expect(screen.queryByRole("button", { name: "Delete note" })).toBeNull();
   });
 });
@@ -127,7 +184,9 @@ describe("Actions", () => {
 
   test("a command is a row in the API document's own words, and it runs once", async () => {
     const onRun = jest.fn();
-    await inTheme(<ResourceDetail {...detail} actions={{ commands, running: "", onRun }} />);
+    await inTheme(
+      <ResourceDetail feedback={feedback} {...detail} actions={{ commands, running: "", onRun }} />,
+    );
     await fireEvent.press(screen.getByRole("button", { name: "Publish a note" }));
     expect(onRun).toHaveBeenCalledWith(commands[0]);
     expect(screen.getByText(/Makes the note visible/)).toBeOnTheScreen();
@@ -138,6 +197,7 @@ describe("Actions", () => {
     const archive = note.commands.filter((c) => c.collection);
     await inTheme(
       <ResourceList
+        presentation={presentation}
         {...{
           entry: note,
           rows: [],
@@ -162,11 +222,23 @@ describe("Actions", () => {
 
   test("a command under way cannot be run again, and a record with none shows no section", async () => {
     const onRun = jest.fn();
-    await inTheme(<ResourceDetail {...detail} actions={{ commands, running: "publish", onRun }} />);
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        {...detail}
+        actions={{ commands, running: "publish", onRun }}
+      />,
+    );
     await fireEvent.press(screen.getByRole("button", { name: "Publish a note" }));
     expect(onRun).not.toHaveBeenCalled();
     await screen.unmount();
-    await inTheme(<ResourceDetail {...detail} actions={{ commands: [], running: "", onRun }} />);
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        {...detail}
+        actions={{ commands: [], running: "", onRun }}
+      />,
+    );
     expect(screen.queryByText("Actions")).toBeNull();
   });
 });
@@ -198,11 +270,16 @@ describe("Activity", () => {
     loadMore: none,
     now,
   };
+  const adapt = (value: Omit<typeof trail, "loadMore"> & { loadMore: () => void }) => {
+    const result = deriveEventActivity(value, { ...presentation, now: value.now.toISOString() });
+    if (!result.ok) throw new Error(JSON.stringify(result.issues));
+    return { model: result.value, onMore: value.loadMore };
+  };
   const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: [] };
   const detail = { entry: note, row, error: "", onRetry: none };
 
   test("the trail says what happened, who did it and how long ago", async () => {
-    await inTheme(<ResourceDetail {...detail} activity={trail} />);
+    await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={adapt(trail)} />);
     expect(screen.getByLabelText("Updated by Joao, 2 minutes ago")).toBeOnTheScreen();
     // An event nobody signed is the system's, not a blank line.
     expect(screen.getByLabelText("Created by the system, yesterday")).toBeOnTheScreen();
@@ -210,34 +287,54 @@ describe("Activity", () => {
 
   test("a trail with older lines offers to read them, once", async () => {
     const loadMore = jest.fn();
-    await inTheme(<ResourceDetail {...detail} activity={{ ...trail, more: true, loadMore }} />);
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        {...detail}
+        activity={adapt({ ...trail, more: true, loadMore })}
+      />,
+    );
     await fireEvent.press(screen.getByRole("button", { name: "Show older" }));
     expect(loadMore).toHaveBeenCalledTimes(1);
     await screen.unmount();
     // While the older lines come there is no second press to make.
     await inTheme(
-      <ResourceDetail {...detail} activity={{ ...trail, more: true, loadingMore: true }} />,
+      <ResourceDetail
+        feedback={feedback}
+        {...detail}
+        activity={adapt({ ...trail, more: true, loadingMore: true })}
+      />,
     );
     expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
     await screen.unmount();
-    await inTheme(<ResourceDetail {...detail} activity={trail} />);
+    await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={adapt(trail)} />);
     expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
   });
 
   test("a plan that does not include the trail says so, and is not an error", async () => {
     await inTheme(
-      <ResourceDetail {...detail} activity={{ ...trail, events: [], excluded: true }} />,
+      <ResourceDetail
+        feedback={feedback}
+        {...detail}
+        activity={adapt({ ...trail, events: [], excluded: true })}
+      />,
     );
     expect(screen.getByText(/plan does not include the activity trail/)).toBeOnTheScreen();
     expect(screen.queryByText("Nothing has happened to this record yet.")).toBeNull();
   });
 
   test("a record with no trail yet says so, and an unreadable one says why", async () => {
-    await inTheme(<ResourceDetail {...detail} activity={{ ...trail, events: [] }} />);
+    await inTheme(
+      <ResourceDetail feedback={feedback} {...detail} activity={adapt({ ...trail, events: [] })} />,
+    );
     expect(screen.getByText("Nothing has happened to this record yet.")).toBeOnTheScreen();
     await screen.unmount();
     await inTheme(
-      <ResourceDetail {...detail} activity={{ ...trail, events: [], error: "not allowed" }} />,
+      <ResourceDetail
+        feedback={feedback}
+        {...detail}
+        activity={adapt({ ...trail, events: [], error: "not allowed" })}
+      />,
     );
     expect(screen.getByText("not allowed")).toBeOnTheScreen();
   });
@@ -247,7 +344,15 @@ describe("Home", () => {
   test("one row per resource, read-only ones say so", async () => {
     const onOpen = jest.fn();
     const entries = [note, { ...note, entity: "tag", writable: false }];
-    await inTheme(<Home entries={entries} refreshing={false} onOpen={onOpen} onRefresh={none} />);
+    await inTheme(
+      <Home
+        feedback={feedback}
+        entries={entries}
+        refreshing={false}
+        onOpen={onOpen}
+        onRefresh={none}
+      />,
+    );
     await fireEvent.press(screen.getByRole("button", { name: /Tags, In note, read only/ }));
     expect(onOpen).toHaveBeenCalledWith(entries[1]);
   });
@@ -258,6 +363,7 @@ describe("SignInForm", () => {
     const onSubmit = jest.fn();
     await inTheme(
       <SignInForm
+        feedback={feedback}
         baseURL="https://acme.test "
         notice=""
         busy={false}
@@ -274,11 +380,11 @@ describe("SignInForm", () => {
 
   test('the product\'s name stands over the form, and "Sign in" when it has none to say', async () => {
     const base = { baseURL: "", notice: "", busy: false, error: "", onSubmit: none, onClear: none };
-    await inTheme(<SignInForm {...base} />);
+    await inTheme(<SignInForm feedback={feedback} {...base} />);
     // The word is the heading and the button; nothing else says it.
     expect(screen.getAllByText("Sign in")).toHaveLength(2);
     await screen.unmount();
-    await inTheme(<SignInForm {...base} title="Collect" />);
+    await inTheme(<SignInForm feedback={feedback} {...base} title="Collect" />);
     expect(screen.getByText("Collect")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Sign in" })).toBeOnTheScreen();
   });
@@ -286,6 +392,7 @@ describe("SignInForm", () => {
   test("while a saved sign-in is restored the form waits behind a spinner", async () => {
     await inTheme(
       <SignInForm
+        feedback={feedback}
         baseURL=""
         notice=""
         busy={false}
@@ -308,6 +415,7 @@ describe("SignInForm", () => {
     const onClear = jest.fn();
     await inTheme(
       <SignInForm
+        feedback={feedback}
         baseURL="https://acme.test"
         notice=""
         busy={false}
@@ -333,6 +441,7 @@ describe("SignInForm", () => {
     const onClear = jest.fn();
     await inTheme(
       <SignInForm
+        feedback={feedback}
         baseURL=""
         notice="The saved sign-in could not be read."
         busy={false}
@@ -359,7 +468,9 @@ describe("Values by type", () => {
   };
 
   test("a detail shows each value in the shape its type deserves", async () => {
-    await inTheme(<ResourceDetail entry={note} row={row} error="" onRetry={none} />);
+    await inTheme(
+      <ResourceDetail feedback={feedback} entry={note} row={row} error="" onRetry={none} />,
+    );
     // A closed set and a yes-or-no are badges; a screen reader still hears the words.
     expect(screen.getByLabelText("Status, Open")).toBeOnTheScreen();
     expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
@@ -372,6 +483,7 @@ describe("Values by type", () => {
   test("a value a closed set does not contain is not coloured as if it were", async () => {
     await inTheme(
       <ResourceDetail
+        feedback={feedback}
         entry={note}
         row={{ ...row, status: "unheard-of" }}
         error=""

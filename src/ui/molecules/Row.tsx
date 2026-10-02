@@ -72,7 +72,11 @@ export function Row({
           </Text>
         ) : null}
       </View>
-      {busy ? <Spinner /> : opens ? <Icon name="chevron" size="sm" tone="muted" /> : null}
+      {busy ? (
+        <Spinner label={title} motion="reduced" />
+      ) : opens ? (
+        <Icon name="chevron" size="sm" tone="muted" />
+      ) : null}
     </Pressable>
   );
 }

@@ -9,7 +9,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import type { Field } from "../../core/catalog";
-import { display, humanize, splitList, text } from "../../core/derive";
+import { type Formatting, display, humanize, splitList, text } from "../../core/derive";
 import { Badge, type BadgeTone } from "../atoms/Badge";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
@@ -29,6 +29,7 @@ export function enumTone(f: Field, value: string): BadgeTone {
 }
 
 interface Props {
+  readonly presentation: Formatting;
   readonly field: Field;
   readonly value: unknown;
   /** compact is a value on a list row, where there is one line to say it in. */
@@ -37,9 +38,9 @@ interface Props {
   readonly testID?: string;
 }
 
-export function Value({ field, value, compact = false, testID }: Props) {
+export function Value({ presentation, field, value, compact = false, testID }: Props) {
   const s = useStyles(styles);
-  const shown = display(field, value);
+  const shown = display(field, value, presentation);
   const raw = text(value);
   const id = testable(testID);
 
@@ -117,7 +118,15 @@ export function Value({ field, value, compact = false, testID }: Props) {
  * answers, so those keep their name. What a screen reader hears is the row's
  * label, which always names every field.
  */
-export function Labelled({ field, value }: { readonly field: Field; readonly value: unknown }) {
+export function Labelled({
+  presentation,
+  field,
+  value,
+}: {
+  readonly presentation: Formatting;
+  readonly field: Field;
+  readonly value: unknown;
+}) {
   const s = useStyles(styles);
   const speaks = (field.enum ?? []).length > 0;
   return (
@@ -127,7 +136,7 @@ export function Labelled({ field, value }: { readonly field: Field; readonly val
           {humanize(field.name)}
         </Text>
       )}
-      <Value field={field} value={value} compact />
+      <Value presentation={presentation} field={field} value={value} compact />
     </View>
   );
 }

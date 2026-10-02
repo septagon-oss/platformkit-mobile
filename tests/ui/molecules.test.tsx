@@ -1,3 +1,4 @@
+import { feedback } from "../fakes/presentation";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
@@ -66,7 +67,7 @@ describe("testID", () => {
     await inTheme(
       <>
         <DetailRow term="Title" value="A note" testID="t-detail" />
-        <LoadMore remaining={3} busy={false} onPress={none} testID="t-more" />
+        <LoadMore feedback={feedback} remaining={3} busy={false} onPress={none} testID="t-more" />
         <ServerField value="https://acme.test" onChange={none} testID="t-server" />
         <Section testID="t-section">
           <Row title="A row" testID="t-row" />
@@ -96,7 +97,7 @@ describe("testID", () => {
     await inTheme(
       <>
         {shapes.map(([id, field, value]) => (
-          <Value key={id} field={field} value={value} testID={`t-${id}`} />
+          <Value presentation={feedback} key={id} field={field} value={value} testID={`t-${id}`} />
         ))}
       </>,
     );

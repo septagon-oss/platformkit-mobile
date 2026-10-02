@@ -2,12 +2,20 @@
 // does to the world; a placement says where it sits, because a button in the
 // native header is a word in the accent colour and a button on a page is a
 // filled shape, and both are this component.
-import React from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from "react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  View,
+  type AccessibilityRole,
+  type ViewStyle,
+} from "react-native";
+import type { Motion } from "../../core/derive";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Icon, type IconName } from "./Icon";
-import { Text, type Tone as TextTone } from "./Text";
+import { Text, toneColor, type Tone as TextTone } from "./Text";
 
 export type ButtonTone = "primary" | "secondary" | "destructive" | "plain";
 export type Placement = "inline" | "header";
@@ -20,7 +28,15 @@ interface Props {
   readonly icon?: IconName;
   readonly busy?: boolean;
   readonly disabled?: boolean;
+  readonly reason?: string;
+  readonly hint?: string;
+  /** Unresolved preferences stay still. Screens supply normal motion explicitly. */
+  readonly motion?: Motion;
   readonly testID?: string;
+  readonly accessibilityRole?: AccessibilityRole;
+  readonly selected?: boolean;
+  readonly checked?: boolean | "mixed";
+  readonly expanded?: boolean;
 }
 
 export function Button({
@@ -31,20 +47,34 @@ export function Button({
   icon,
   busy = false,
   disabled = false,
+  reason,
+  hint,
+  motion = "reduced",
   testID,
+  accessibilityRole = "button",
+  selected,
+  checked,
+  expanded,
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const off = disabled || busy;
+  const activate = () => {
+    if (!off) onPress();
+  };
   const header = placement === "header";
   const filled = !header && (tone === "primary" || tone === "destructive");
-  const textTone: TextTone = filled
-    ? "on"
-    : tone === "destructive"
-      ? "danger"
-      : header || tone === "plain"
-        ? "accent"
-        : "primary";
+  const textTone: TextTone = off
+    ? "primary"
+    : filled
+      ? "on"
+      : tone === "destructive"
+        ? "danger"
+        : header || tone === "plain"
+          ? "accent"
+          : "primary";
   const shape: ViewStyle[] = [s.base];
   if (header) shape.push(s.header);
   else if (tone === "primary") shape.push(s.primary);
@@ -53,28 +83,63 @@ export function Button({
   else shape.push(s.plain);
   return (
     <Pressable
-      onPress={onPress}
+      onPress={activate}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
       disabled={off}
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={label}
-      accessibilityState={{ disabled: off, busy }}
+      {...(reason || hint ? { accessibilityHint: reason ?? hint } : {})}
+      accessibilityState={{
+        disabled: off,
+        busy,
+        ...(selected === undefined ? {} : { selected }),
+        ...(checked === undefined ? {} : { checked }),
+        ...(expanded === undefined ? {} : { expanded }),
+      }}
+      accessibilityActions={off ? [] : [{ name: "activate", label }]}
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === "activate") activate();
+      }}
       android_ripple={header ? undefined : { color: t.color.borderStrong }}
-      style={({ pressed }) => [...shape, pressed && s.pressed, off && s.off]}
+      style={({ pressed }) => [
+        ...shape,
+        (pressed || hovered) && !off && (filled ? s.activeFilled : s.active),
+        focused && s.focused,
+        off && s.off,
+      ]}
       {...testable(testID)}
     >
       <View style={s.content}>
-        {busy ? (
+        {busy && motion === "normal" ? (
           <ActivityIndicator
             size="small"
-            color={filled ? t.color.accentOn : t.color.accentDefault}
+            color={toneColor(t, textTone)}
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
           />
+        ) : busy ? (
+          <Icon name="clock" size="sm" tone={textTone} />
         ) : icon ? (
           <Icon name={icon} size="sm" tone={textTone} />
         ) : null}
-        <Text role={header ? "body" : "label"} weight="semibold" tone={textTone}>
+        <Text
+          role={header ? "body" : "label"}
+          weight="semibold"
+          tone={textTone}
+          style={s.label}
+          maxFontSizeMultiplier={0}
+        >
           {label}
         </Text>
       </View>
+      {reason ? (
+        <Text role="label" tone={textTone} align="center" maxFontSizeMultiplier={0}>
+          {reason}
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
@@ -86,23 +151,38 @@ const styles = (t: Theme) =>
       justifyContent: "center",
       borderRadius: t.radius.md,
       paddingHorizontal: t.space.lg,
-      overflow: "hidden",
+      paddingVertical: t.space.sm,
+      borderWidth: t.extent.focus,
+      borderColor: t.color.surfacePrimary,
+      gap: t.space.xs,
+      maxWidth: "100%",
     },
-    header: { paddingHorizontal: t.space.sm, minHeight: 0, borderRadius: 0 },
-    primary: { backgroundColor: t.color.accentDefault },
-    destructive: { backgroundColor: t.color.statusDanger },
+    header: { paddingHorizontal: t.space.sm, borderRadius: 0 },
+    primary: { backgroundColor: t.color.accentDefault, borderColor: t.color.accentDefault },
+    destructive: { backgroundColor: t.color.statusDanger, borderColor: t.color.statusDanger },
     secondary: {
-      borderWidth: StyleSheet.hairlineWidth * 2,
       borderColor: t.color.borderDefault,
       backgroundColor: t.color.surfacePrimary,
     },
-    plain: { paddingHorizontal: t.space.sm },
+    plain: { paddingHorizontal: t.space.sm, borderColor: t.color.surfaceCanvas },
     content: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
       gap: t.space.sm,
     },
-    pressed: { opacity: 0.7 },
-    off: { opacity: 0.5 },
+    label: { flexShrink: 1, textAlign: "center" },
+    focused: {
+      borderColor: t.color.focus,
+      outlineColor: t.color.focus,
+      outlineWidth: t.extent.focus,
+      outlineOffset: t.space.xs / 2,
+    },
+    active: { backgroundColor: t.color.surfaceMuted },
+    activeFilled: { borderColor: t.color.accentOn },
+    off: {
+      borderStyle: "dashed",
+      borderColor: t.color.borderStrong,
+      backgroundColor: t.color.surfaceMuted,
+    },
   });

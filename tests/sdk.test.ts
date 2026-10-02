@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import test from "node:test";
@@ -39,19 +39,49 @@ test("the SDK gate reads the pinned expo, not the network", () => {
   assert.ok(!pkg.scripts.check?.includes("sdk:latest"));
 });
 
-test("the pinned expo knows every native package this app declares, so the offline gate checks them all", () => {
+// Dependencies outside Expo have literal, exact version owners. Unknown packages
+// still fail closed; pure JS dependencies must contain no native build metadata.
+const independent = {
+  "@js-temporal/polyfill": { version: "0.5.1", native: false },
+  "d3-scale": { version: "4.0.2", native: false },
+  "d3-shape": { version: "3.2.0", native: false },
+  "@maplibre/maplibre-react-native": { version: "11.4.0", native: true },
+  "react-native-zoom-toolkit": { version: "5.1.1", native: false },
+} as const;
+
+test("every dependency is checked against Expo or its exact independent pin", () => {
   const known = manifest();
   // expo itself is the pin, not something pinned against it: nothing in the
   // manifest describes the package the manifest comes from. Everything else
   // this app declares must be in there, or the offline gate would pass it
   // without looking.
-  const unchecked = Object.keys(pkg.dependencies).filter((name) => !(name in known));
+  const unchecked = Object.keys(pkg.dependencies).filter(
+    (name) => !(name in known) && !(name in independent),
+  );
   assert.deepEqual(unchecked, ["expo"], "a dependency the pinned expo does not know is ungated");
   assert.equal(
     known.expo,
     undefined,
     "if a future manifest describes expo itself, the gate can check the SDK too",
   );
+});
+
+test("independent packages match their exact pins and declared native shape", () => {
+  for (const [name, expected] of Object.entries(independent)) {
+    assert.equal(pkg.dependencies[name], expected.version, name);
+    const directory = path.join(root, "node_modules", name);
+    const manifest = JSON.parse(readFileSync(path.join(directory, "package.json"), "utf8"));
+    assert.equal(manifest.version, expected.version, name);
+    const native =
+      !!manifest.codegenConfig ||
+      existsSync(path.join(directory, "android")) ||
+      existsSync(path.join(directory, "ios")) ||
+      existsSync(path.join(directory, "expo-module.config.json"));
+    assert.equal(native, expected.native, `${name}: native classification changed`);
+  }
+  const config = readFileSync(path.join(root, "app.config.ts"), "utf8");
+  assert.ok(config.includes('"@maplibre/maplibre-react-native"'));
+  assert.ok(config.includes('"expo-image"'));
 });
 
 test("every installed native package is the version the pinned expo bundles", () => {

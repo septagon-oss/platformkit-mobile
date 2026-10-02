@@ -3,22 +3,24 @@
 // the account menu is in the native header, set by the screen composition.
 import React from "react";
 import type { Entry } from "../../core/catalog";
-import { humanize, plural } from "../../core/derive";
+import { type Feedback, humanize, plural } from "../../core/derive";
 import { EmptyState } from "../atoms/EmptyState";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 import { ListScreen } from "../templates/ListScreen";
 
 export interface Props {
+  readonly feedback: Feedback;
   readonly entries: readonly Entry[];
   readonly refreshing: boolean;
   readonly onOpen: (entry: Entry) => void;
   readonly onRefresh: () => void;
 }
 
-export function Home({ entries, refreshing, onOpen, onRefresh }: Props) {
+export function Home({ feedback, entries, refreshing, onOpen, onRefresh }: Props) {
   return (
     <ListScreen
+      feedback={feedback}
       data={entries}
       keyOf={(e) => `${e.module}/${e.entity}`}
       loading={false}

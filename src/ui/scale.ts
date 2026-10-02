@@ -11,7 +11,21 @@ export const radius = { md: 8, lg: 12, full: 999 } as const;
 export const icon = { sm: 16, md: 22, lg: 40 } as const;
 export type IconSize = keyof typeof icon;
 /** extent is the few fixed lengths that are neither a gap nor a corner: how tall a paragraph field opens, how thick a skeleton line is. */
-export const extent = { textarea: 120, skeleton: 14 } as const;
+export const extent = {
+  textarea: 120,
+  skeleton: 14,
+  skeletonMedia: 180,
+  skeletonRow: 44,
+  focus: 2,
+  choiceMin: 120,
+  chart: 200,
+  chartAxis: 64,
+  chartStroke: 0.008,
+  chartDot: 0.018,
+  calendarDay: 240,
+  calendarHeight: 960,
+  panel: 480,
+} as const;
 
 /** type is the size and line height of each Text role, and how far Dynamic Type may scale it. */
 export const type = {
