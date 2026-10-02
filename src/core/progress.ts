@@ -45,7 +45,10 @@ export function deriveMeter(input: MeterInput, p: Presentation) {
     const text =
       format === "percent"
         ? new Intl.NumberFormat(p.locale, { style: "percent", maximumFractionDigits: 0 }).format(
-            fraction,
+            // A percent a person reads is a promise about where the work stands, so
+            // the rounding clamps at the two ends: a whole that is not finished never
+            // reads 100% and one that has started never reads 0%.
+            clampedPercent(input.value, input.max, fraction),
           )
         : format === "steps"
           ? `${p.copy.kit.step} ${count(input.value, p)} ${p.copy.kit.of} ${count(input.max, p)}`
@@ -61,6 +64,14 @@ export function deriveMeter(input: MeterInput, p: Presentation) {
     };
   });
 }
+/** clampedPercent keeps the nearest whole percent honest at both ends of a whole. */
+function clampedPercent(value: number, max: number, fraction: number): number {
+  const percent = Math.round(fraction * 100) / 100;
+  if (value === 0) return 0;
+  if (value >= max) return 1;
+  return Math.min(0.99, Math.max(0.01, percent));
+}
+
 export type MeterModel = Extract<ReturnType<typeof deriveMeter>, { ok: true }>["value"];
 
 export interface PlaybackInput {
