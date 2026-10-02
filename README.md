@@ -228,6 +228,18 @@ The existing UI export patterns now include `DataList`, `Activity`, `Stepper`,
 at most two levels; move a third level to an explicit detail page or sibling sheet.
 Keep essential fields and primary actions visible without opening a disclosure.
 
+**Reused** — the generated palette, `themeFor`, `scale`, `Section`, `Row`, `Text`,
+`Button`, `TextField`, `Notice`, `Spinner`, `Icon` and the gallery's own case
+vocabulary carry the phone's interaction states. **Added** — `ProgressMeter`,
+`TabBar`, `SearchField`, `MiniPlayer` and `ConfirmDialog`, with `core/progress`
+holding the one ratio rule a meter and a player share and `core/navigation` the
+tab ceiling and the search count; `core/color` holds the linear-light blend and
+the WCAG 2.2 §1.4.3 ratio. **Made reusable** — `Theme.state` (hovered, pressed,
+selected, disabled, divider, outline, scrim, raised) is the only place an
+interaction colour is mixed, `themeFor`'s `contrastPairs` registry is measured
+over both palettes by the suite, and the fifteen `/gallery/<page>` pages show
+every family in screen-shaped compositions.
+
 `ResourceList` now requires `presentation` in place of `feedback` and delegates
 to `deriveCatalogList` and `DataList`. `Activity` requires `model` from
 `deriveActivity` or `deriveEventActivity`, with `onMore`, `onRetry`, `onExpand` and
