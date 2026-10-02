@@ -2,13 +2,13 @@
 // the user's own terms: what will be lost, why it cannot be undone, the verb
 // that does it, and a cancel that keeps the screen where it was. It is a
 // decision surface, not a detail surface: DetailSheet stays for the record.
-import React, { useState } from "react";
+import React from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import type { Motion } from "../../core/derive";
 import { testable } from "../props";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
-import { useStyles, useTheme, type Theme } from "../theme";
+import { useStyles, type Theme } from "../theme";
 
 interface Props {
   readonly open: boolean;
@@ -41,9 +41,7 @@ export function ConfirmDialog({
   onCancel,
   testID,
 }: Props) {
-  const t = useTheme();
   const s = useStyles(styles);
-  const [focused, setFocused] = useState(false);
   if (!open) return null;
   return (
     <Modal
@@ -76,7 +74,7 @@ export function ConfirmDialog({
               {reason}
             </Text>
           ) : null}
-          <View style={s.actions} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
+          <View style={s.actions}>
             <Button label={cancel} tone="secondary" onPress={onCancel} busy={busy} />
             <Button
               label={confirm}
@@ -87,7 +85,6 @@ export function ConfirmDialog({
               {...testable(testID ? `${testID}-confirm` : undefined)}
             />
           </View>
-          {focused ? <View style={s.ring} accessibilityElementsHidden /> : null}
         </View>
       </Pressable>
     </Modal>
@@ -120,5 +117,4 @@ const styles = (t: Theme) =>
       gap: t.space.sm,
       paddingTop: t.space.sm,
     },
-    ring: { height: 0 },
   });

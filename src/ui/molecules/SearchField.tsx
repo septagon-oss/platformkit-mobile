@@ -2,8 +2,8 @@
 // mark while the answer is coming, a clear that returns the whole set, and the
 // count the query narrowed to. It asks for nothing: debounce, request order and
 // the result set are the screen's, exactly as they are for every other control.
-import React, { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import React, { useRef, useState } from "react";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import type { SearchModel } from "../../core/navigation";
 import { testable } from "../props";
 import { Icon } from "../atoms/Icon";
@@ -24,20 +24,29 @@ interface Props {
 export function SearchField({ model, onChangeText, onSubmit, onClear, testID }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
+  const input = useRef<TextInput>(null);
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
   return (
-    <View
-      style={[
+    <Pressable
+      // The strip is the field's chrome: a tap anywhere in it puts the caret in
+      // the text, and hover, focus and the waiting mark are three readings of it.
+      onPress={() => input.current?.focus()}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      style={({ pressed }) => [
         s.field,
         focused && s.focused,
-        (hovered && !focused) || model.busy ? s.busy : false,
+        hovered && !focused && !model.busy && s.hover,
+        model.busy && s.busy,
+        pressed && s.press,
       ]}
       {...testable(testID)}
     >
       <Icon name="search" size="sm" tone="muted" />
       <View style={s.input}>
         <TextField
+          ref={input}
           kind="search"
           plain
           value={model.value}
@@ -70,7 +79,7 @@ export function SearchField({ model, onChangeText, onSubmit, onClear, testID }: 
           {model.countText ?? model.searching}
         </Text>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 
@@ -89,7 +98,8 @@ const styles = (t: Theme) =>
     },
     input: { flex: 1 },
     focused: { borderColor: t.color.focus },
-    busy: { backgroundColor: t.state.hovered },
+    hover: { backgroundColor: t.state.hovered },
+    busy: { borderColor: t.color.borderStrong },
     press: { backgroundColor: t.state.pressed },
     clear: { padding: t.space.xs, borderRadius: t.radius.full },
   });

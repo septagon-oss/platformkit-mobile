@@ -2,7 +2,7 @@
 // places, each with the badge it carries. The ceiling is the pattern's, not a
 // preference — past five the labels truncate and no destination is a tap
 // shorter away — and a bar of one is a button wearing a bar's clothes.
-import { type Presentation, type Result } from "./presentation";
+import { type Presentation } from "./presentation";
 import { build, type Validation } from "./shared";
 
 export interface Tab {

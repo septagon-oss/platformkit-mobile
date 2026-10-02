@@ -147,7 +147,7 @@ describe("StateView", () => {
       expect(button).toHaveStyle({ borderColor: palette[mode].focus });
       await fireEvent(button, "hoverIn");
       // A hover is the derived role, measured from the palette it sits on: the
-// theme owns the mix, so the test asks the theme's own rule for the number.
+      // theme owns the mix, so the test asks the theme's own rule for the number.
       expect(button).toHaveStyle({
         backgroundColor: mix(palette[mode].surfacePrimary, palette[mode].accentDefault, 0.06),
       });

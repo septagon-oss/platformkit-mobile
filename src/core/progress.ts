@@ -3,7 +3,7 @@
 // the same numbers. Three shapes exist and nothing else: a fraction of a known
 // whole, a count with no denominator, and elapsed time whose total is unknown.
 // A fraction nobody can compute is refused, never drawn as a guess.
-import { type Presentation, type Result } from "./presentation";
+import { type Presentation } from "./presentation";
 import { build, type Validation } from "./shared";
 
 export type MeterFormat = "fraction" | "percent" | "steps";
