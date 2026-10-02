@@ -43,18 +43,24 @@ export function ConfirmDialog({
 }: Props) {
   const s = useStyles(styles);
   if (!open) return null;
+  // A busy dialog cannot be cancelled by any route: the Button is off, and the
+  // backdrop and the platform's back gesture are the same cancel written twice,
+  // so they consult the same answer rather than each hoping the other checked.
+  const stay = () => {
+    if (!busy) onCancel();
+  };
   return (
     <Modal
       visible
       transparent
       animationType={motion === "normal" ? "fade" : "none"}
-      onRequestClose={onCancel}
+      onRequestClose={stay}
       statusBarTranslucent
       testID={testID}
     >
       <Pressable
         style={s.backdrop}
-        onPress={onCancel}
+        onPress={stay}
         accessible={false}
         accessibilityViewIsModal
         {...testable(testID ? `${testID}-backdrop` : undefined)}
@@ -75,7 +81,13 @@ export function ConfirmDialog({
             </Text>
           ) : null}
           <View style={s.actions}>
-            <Button label={cancel} tone="secondary" onPress={onCancel} busy={busy} />
+            <Button
+              label={cancel}
+              tone="secondary"
+              onPress={stay}
+              busy={busy}
+              {...testable(testID ? `${testID}-cancel` : undefined)}
+            />
             <Button
               label={confirm}
               tone={tone === "destructive" ? "destructive" : "primary"}
