@@ -27,6 +27,14 @@ const glyphs = {
   sort: "swap-vertical-outline",
   trash: "trash-outline",
   warning: "alert-circle-outline",
+  search: "search",
+  home: "home",
+  grid: "grid",
+  play: "play",
+  pause: "pause",
+  forward: "play-forward",
+  rewind: "play-back",
+  circle: "ellipse-outline",
 } as const;
 
 export type IconName = keyof typeof glyphs;

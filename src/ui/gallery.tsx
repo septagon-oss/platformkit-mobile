@@ -10,12 +10,14 @@ import {
   type GallerySelection,
   deriveCopy,
   deriveFeedback,
+  humanize,
   stateExamples,
   timeText,
   type Feedback,
   type Language,
   type Presentation,
 } from "../core/derive";
+import { deriveGalleryPage, pageFamily, type GalleryPageModel } from "../core/galleryPages";
 import { Badge } from "./atoms/Badge";
 import { Button } from "./atoms/Button";
 import { ChoiceRow } from "./atoms/ChoiceRow";
@@ -88,6 +90,8 @@ interface Props {
   readonly fonts?: Fonts;
   readonly initialCaseId?: string;
   readonly initialMode?: Mode;
+  /** page shows one screen-shaped composition instead of the pickers; the index screen keeps the audit of every case. */
+  readonly page?: string;
   /** Screen composition can supply its native announcement adapter. */
   readonly renderImage?: ImageRenderer;
   readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
@@ -102,6 +106,7 @@ export function Gallery({
   fonts,
   initialCaseId = "primitives/default",
   initialMode = "light",
+  page,
   renderState = stateView,
   renderImage,
   renderZoom,
@@ -117,6 +122,29 @@ export function Gallery({
   const example = cases.ok ? cases.value.find((item) => item.id === caseId) : undefined;
   const words = copy.gallery;
   const feedback = deriveFeedback(copy, shown.motion, shown);
+  if (page !== undefined) {
+    const derived = deriveGalleryPage(page, shown);
+    return (
+      <ThemeProvider
+        mode={initialMode}
+        {...(palette ? { palette } : {})}
+        {...(fonts ? { fonts } : {})}
+      >
+        <Screen testID={derived.ok ? derived.value.testID : "gallery-page:invalid"}>
+          {derived.ok ? (
+            <Page
+              model={derived.value}
+              presentation={shown}
+              {...(renderImage ? { renderImage } : {})}
+              {...(renderZoom ? { renderZoom } : {})}
+            />
+          ) : (
+            <Notice text={derived.issues[0]!.message} announcement="urgent" />
+          )}
+        </Screen>
+      </ThemeProvider>
+    );
+  }
   return (
     <ThemeProvider mode={mode} {...(palette ? { palette } : {})} {...(fonts ? { fonts } : {})}>
       <Screen
@@ -215,6 +243,57 @@ export function Gallery({
         )}
       </Screen>
     </ThemeProvider>
+  );
+}
+
+/**
+ * Page is one gallery page: a display line naming what the screen is, the lead
+ * specimen that carries it, then the page's other cases, one section each under
+ * the family that owns them. No case id, no picker, no caption — a page has to
+ * read as the screen it stands for, which is what the review looks at.
+ */
+function Page({
+  model,
+  presentation,
+  renderImage,
+  renderZoom,
+}: {
+  readonly model: GalleryPageModel;
+  readonly presentation: Presentation;
+  readonly renderImage?: ImageRenderer;
+  readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
+}) {
+  const s = useStyles(pageStyles);
+  const [action, setAction] = useState("");
+  const rest = model.cases.filter((id) => id !== model.lead);
+  return (
+    <View style={s.page}>
+      <Text role="display">{model.title}</Text>
+      <View style={s.lead}>
+        <KitSamples
+          key={model.lead}
+          presentation={presentation}
+          caseId={model.lead}
+          onAction={setAction}
+          {...(renderImage ? { renderImage } : {})}
+          {...(renderZoom ? { renderZoom } : {})}
+        />
+      </View>
+      {rest.map((caseId) => (
+        <Section key={caseId} title={humanize(pageFamily(caseId))}>
+          <KitSamples
+            presentation={presentation}
+            caseId={caseId}
+            onAction={setAction}
+            {...(renderImage ? { renderImage } : {})}
+            {...(renderZoom ? { renderZoom } : {})}
+          />
+        </Section>
+      ))}
+      <Text accessibilityLiveRegion="polite" testID="gallery-page-action">
+        {action ? presentation.copy.gallery.actionReceived(action) : ""}
+      </Text>
+    </View>
   );
 }
 
@@ -735,3 +814,9 @@ function KitSamples({
       return null;
   }
 }
+
+const pageStyles = (t: Theme) =>
+  StyleSheet.create({
+    page: { gap: t.space.md, paddingTop: t.space.sm },
+    lead: { gap: t.space.sm },
+  });

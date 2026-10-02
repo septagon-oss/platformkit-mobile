@@ -63,6 +63,9 @@ export function Text({
           color: toneColor(t, tone),
           fontWeight: weights[weight],
           ...(family ? { fontFamily: family } : {}),
+          ...("figures" in metrics && metrics.figures === "tabular"
+            ? { fontVariant: ["tabular-nums"] }
+            : {}),
           ...(align ? { textAlign: align } : {}),
           ...(uppercase ? { textTransform: "uppercase" as const, letterSpacing: 0.6 } : {}),
         },

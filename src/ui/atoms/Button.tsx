@@ -106,7 +106,8 @@ export function Button({
       android_ripple={header ? undefined : { color: t.color.borderStrong }}
       style={({ pressed }) => [
         ...shape,
-        (pressed || hovered) && !off && (filled ? s.activeFilled : s.active),
+        hovered && !off && !filled && s.hover,
+        pressed && !off && (filled ? s.activeFilled : s.press),
         focused && s.focused,
         off && s.off,
       ]}
@@ -178,11 +179,12 @@ const styles = (t: Theme) =>
       outlineWidth: t.extent.focus,
       outlineOffset: t.space.xs / 2,
     },
-    active: { backgroundColor: t.color.surfaceMuted },
-    activeFilled: { borderColor: t.color.accentOn },
+    hover: { backgroundColor: t.state.hovered },
+    press: { backgroundColor: t.state.pressed },
+    activeFilled: { backgroundColor: t.color.accentHover, borderColor: t.color.accentHover },
     off: {
       borderStyle: "dashed",
       borderColor: t.color.borderStrong,
-      backgroundColor: t.color.surfaceMuted,
+      backgroundColor: t.state.disabled.fill,
     },
   });

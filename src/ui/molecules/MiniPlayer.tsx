@@ -1,0 +1,200 @@
+// MiniPlayer is what is playing now, still on screen while the person looks at
+// something else: the cover, what it is, how far through it is, and the one
+// control that answers right now. It owns no clock and no media SDK — the
+// screen feeds it the position it measured, and the numbers come from core.
+import React from "react";
+import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
+import type { PlaybackModel } from "../../core/progress";
+import { testable } from "../props";
+import { Icon, type IconName } from "../atoms/Icon";
+import { Text } from "../atoms/Text";
+import { useStyles, useTheme, type Theme } from "../theme";
+
+export type PlayerIntent = "play" | "pause" | "back" | "forward" | "seek" | "open";
+
+interface Props {
+  readonly model: PlaybackModel;
+  readonly title: string;
+  readonly subtitle?: string;
+  /** artwork is the caller's image element: this component draws no picture and no placeholder colour. */
+  readonly artwork?: React.ReactNode;
+  readonly playing: boolean;
+  /** controls says which intents the caller answers; a control it does not answer is not drawn. */
+  readonly controls?: { readonly back?: boolean; readonly forward?: boolean };
+  readonly onIntent: (intent: PlayerIntent) => void;
+  /** collapsed is the strip over a list; expanded is the same record with its scrubber. */
+  readonly collapsed?: boolean;
+  readonly testID?: string;
+}
+
+export function MiniPlayer({
+  model,
+  title,
+  subtitle,
+  artwork,
+  playing,
+  controls = {},
+  onIntent,
+  collapsed = true,
+  testID,
+}: Props) {
+  const t = useTheme();
+  const s = useStyles(styles);
+  const toggle: PlayerIntent = playing ? "pause" : "play";
+  const glyph: IconName = playing ? "pause" : "play";
+  return (
+    <View
+      style={[s.strip, !collapsed && s.expanded]}
+      accessible
+      accessibilityRole="adjustable"
+      accessibilityLabel={[title, subtitle, model.elapsed, model.remaining]
+        .filter(Boolean)
+        .join(", ")}
+      accessibilityValue={
+        model.fraction === undefined
+          ? { now: model.position, text: `${model.elapsed} — ${model.reason ?? ""}` }
+          : {
+              min: 0,
+              max: model.total,
+              now: model.position,
+              text: `${model.elapsed} / ${model.remaining}`,
+            }
+      }
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === "activate") onIntent(toggle);
+      }}
+      accessibilityActions={[{ name: "activate", label: model.label }]}
+      {...testable(testID)}
+    >
+      {artwork ? <View style={s.art}>{artwork}</View> : null}
+      <View style={s.text}>
+        <Text role="label" weight="semibold" numberOfLines={1}>
+          {title}
+        </Text>
+        <Text role="caption" tone="muted" numberOfLines={1}>
+          {model.fraction === undefined
+            ? `${model.elapsed} · ${model.reason ?? ""}`
+            : `${model.elapsed} · ${model.remaining}`}
+        </Text>
+        {collapsed ? null : (
+          <View style={s.track}>
+            <View
+              style={[
+                s.bar,
+                { backgroundColor: t.color.surfaceMuted },
+                !model.seekable && s.unseekable,
+              ]}
+            >
+              <View
+                style={[
+                  s.fill,
+                  {
+                    backgroundColor: t.color.accentDefault,
+                    width: `${Math.round((model.fraction ?? 0) * 1000) / 10}%`,
+                  },
+                ]}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+      <View style={s.controls}>
+        {controls.back ? (
+          <Control
+            glyph="rewind"
+            label="back"
+            onIntent={onIntent}
+            testID={testID ? `${testID}-back` : undefined}
+          />
+        ) : null}
+        <Control
+          glyph={glyph}
+          label={toggle}
+          filled
+          onIntent={onIntent}
+          testID={testID ? `${testID}-toggle` : undefined}
+        />
+        {controls.forward ? (
+          <Control
+            glyph="forward"
+            label="forward"
+            onIntent={onIntent}
+            testID={testID ? `${testID}-forward` : undefined}
+          />
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+function Control({
+  glyph,
+  label,
+  filled = false,
+  onIntent,
+  testID,
+}: {
+  readonly glyph: IconName;
+  readonly label: PlayerIntent;
+  readonly filled?: boolean;
+  readonly onIntent: (intent: PlayerIntent) => void;
+  readonly testID?: string | undefined;
+}) {
+  const s = useStyles(styles);
+  const shape: ViewStyle[] = [s.control, filled ? s.controlFilled : s.controlPlain];
+  return (
+    <Pressable
+      onPress={() => onIntent(label)}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: label === "pause" }}
+      {...testable(testID)}
+      style={({ pressed }) => [...shape, pressed && (filled ? s.pressFilled : s.press)]}
+    >
+      <Icon name={glyph} size="md" tone={filled ? "on" : "accent"} />
+    </Pressable>
+  );
+}
+
+const styles = (t: Theme) =>
+  StyleSheet.create({
+    strip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: t.space.sm,
+      paddingHorizontal: t.space.md,
+      paddingVertical: t.space.sm,
+      backgroundColor: t.color.surfacePrimary,
+      borderRadius: t.radius.lg,
+      minHeight: t.extent.player,
+      ...t.state.raised,
+    },
+    expanded: { padding: t.space.md, borderRadius: t.radius.xl, gap: t.space.sm },
+    art: {
+      width: t.extent.player,
+      height: t.extent.player,
+      borderRadius: t.radius.md,
+      overflow: "hidden",
+    },
+    text: { flex: 1, gap: t.space.xs / 2 },
+    track: { paddingTop: t.space.xs },
+    bar: { height: t.extent.meter, borderRadius: t.radius.full, overflow: "hidden" },
+    fill: { height: "100%", borderRadius: t.radius.full },
+    unseekable: { borderWidth: 1, borderStyle: "dashed", borderColor: t.color.borderStrong },
+    controls: { flexDirection: "row", alignItems: "center", gap: t.space.xs },
+    control: {
+      width: t.hit,
+      height: t.hit,
+      borderRadius: t.radius.full,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    controlFilled: { backgroundColor: t.color.accentDefault },
+    controlPlain: {
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: 1,
+      borderColor: t.state.divider,
+    },
+    press: { backgroundColor: t.state.pressed },
+    pressFilled: { backgroundColor: t.color.accentHover },
+  });

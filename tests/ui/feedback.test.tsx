@@ -13,6 +13,7 @@ import {
   type Action,
   type StateInput,
 } from "../../src/core/derive";
+import { mix } from "../../src/core/color";
 import { Skeleton } from "../../src/ui/atoms/Skeleton";
 import { Gallery } from "../../src/ui/gallery";
 import { StateView } from "../../src/ui/molecules/StateView";
@@ -145,7 +146,11 @@ describe("StateView", () => {
       await fireEvent(button, "focus");
       expect(button).toHaveStyle({ borderColor: palette[mode].focus });
       await fireEvent(button, "hoverIn");
-      expect(button).toHaveStyle({ backgroundColor: palette[mode].surfaceMuted });
+      // A hover is the derived role, measured from the palette it sits on: the
+// theme owns the mix, so the test asks the theme's own rule for the number.
+      expect(button).toHaveStyle({
+        backgroundColor: mix(palette[mode].surfacePrimary, palette[mode].accentDefault, 0.06),
+      });
       await fireEvent(button, "hoverOut");
       await fireEvent(button, "blur");
       expect(button).toHaveStyle({ borderColor: palette[mode].borderDefault });
