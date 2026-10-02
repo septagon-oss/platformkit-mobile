@@ -81,6 +81,14 @@ export interface PlaybackInput {
   readonly label: string;
 }
 
+/** PlaybackWords names the player's controls in the person's language. */
+export interface PlaybackWords {
+  readonly play: string;
+  readonly pause: string;
+  readonly rewind: string;
+  readonly skipAhead: string;
+}
+
 /** clockText speaks a duration the way a player prints it: 4:07, or 1:02:07. */
 export function clockText(seconds: number): string {
   const whole = Math.floor(seconds);
@@ -93,6 +101,14 @@ export function clockText(seconds: number): string {
 
 export function derivePlayback(input: PlaybackInput, p: Presentation) {
   return build(p, (v: Validation) => {
+    // A control's name is copy, and copy belongs to the core: the strip draws these
+    // words rather than spelling an intent id a screen reader would read aloud.
+    const words: PlaybackWords = {
+      play: p.copy.kit.play,
+      pause: p.copy.kit.pause,
+      rewind: p.copy.kit.rewind,
+      skipAhead: p.copy.kit.skipAhead,
+    };
     v.text(input.label, "label");
     v.need(Number.isSafeInteger(input.position) && input.position >= 0, "position");
     if (input.total === undefined) {
@@ -105,6 +121,7 @@ export function derivePlayback(input: PlaybackInput, p: Presentation) {
         remaining: undefined as string | undefined,
         seekable: false,
         label: input.label,
+        words,
         reason: p.copy.kit.unmeasured,
       };
     }
@@ -120,6 +137,7 @@ export function derivePlayback(input: PlaybackInput, p: Presentation) {
       remaining: `${clockText(left)} ${p.copy.kit.left}`,
       seekable: true,
       label: input.label,
+      words,
       reason: undefined as string | undefined,
     };
   });

@@ -32,9 +32,12 @@ export function TabBar({
 }: Props) {
   const s = useStyles(styles);
   const [hovered, setHovered] = useState<string | undefined>();
+  const [focused, setFocused] = useState<string | undefined>();
   return (
+    // Not `accessible`: a container marked so becomes one element on iOS and the
+    // tabs inside it stop being reachable one by one, which is the whole point of
+    // the bar. The role and its label stay; the tabs keep their own elements.
     <View
-      accessible
       accessibilityRole="tablist"
       accessibilityLabel={model.label}
       style={[s.bar, raised && s.float, { paddingBottom: insets.bottom }]}
@@ -48,15 +51,22 @@ export function TabBar({
           }}
           onHoverIn={() => setHovered(item.id)}
           onHoverOut={() => setHovered(undefined)}
+          onFocus={() => setFocused(item.id)}
+          onBlur={() => setFocused(undefined)}
           accessibilityRole="tab"
           accessibilityState={{ selected: item.selected }}
           accessibilityLabel={item.badge ? `${item.label}, ${item.badge}` : item.label}
+          accessibilityActions={item.selected ? [] : [{ name: "activate", label: item.label }]}
+          onAccessibilityAction={(event) => {
+            if (event.nativeEvent.actionName === "activate" && !item.selected) onSelect(item.id);
+          }}
           {...testable(`${testID ?? "tab-bar"}:${item.id}`)}
           style={({ pressed }) => [
             s.item,
             hovered === item.id && !item.selected && s.hover,
             pressed && s.press,
             item.selected && s.selected,
+            focused === item.id && s.focused,
           ]}
         >
           {icons[i] ? (
@@ -101,10 +111,18 @@ const styles = (t: Theme) =>
       justifyContent: "center",
       gap: t.space.xs / 2,
       paddingVertical: t.space.xs,
+      borderWidth: t.extent.focus,
+      borderColor: t.color.surfacePrimary,
     },
     hover: { backgroundColor: t.state.hovered },
     press: { backgroundColor: t.state.pressed },
     selected: { backgroundColor: t.state.selected },
+    focused: {
+      borderColor: t.color.focus,
+      outlineColor: t.color.focus,
+      outlineWidth: t.extent.focus,
+      outlineOffset: -(t.extent.focus + t.space.xs / 2),
+    },
     badge: {
       position: "absolute",
       top: t.space.xs,

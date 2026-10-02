@@ -2,7 +2,7 @@
 // something else: the cover, what it is, how far through it is, and the one
 // control that answers right now. It owns no clock and no media SDK — the
 // screen feeds it the position it measured, and the numbers come from core.
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, StyleSheet, View, type ViewStyle } from "react-native";
 import type { PlaybackModel } from "../../core/progress";
 import { testable } from "../props";
@@ -43,34 +43,20 @@ export function MiniPlayer({
   const toggle: PlayerIntent = playing ? "pause" : "play";
   const glyph: IconName = playing ? "pause" : "play";
   return (
-    <View
-      style={[s.strip, !collapsed && s.expanded]}
-      accessible
-      accessibilityRole="adjustable"
-      accessibilityLabel={[title, subtitle, model.elapsed, model.remaining]
-        .filter(Boolean)
-        .join(", ")}
-      accessibilityValue={
-        model.fraction === undefined
-          ? { now: model.position, text: `${model.elapsed} — ${model.reason ?? ""}` }
-          : {
-              min: 0,
-              max: model.total,
-              now: model.position,
-              text: `${model.elapsed} / ${model.remaining}`,
-            }
-      }
-      onAccessibilityAction={(event) => {
-        if (event.nativeEvent.actionName === "activate") onIntent(toggle);
-      }}
-      accessibilityActions={[{ name: "activate", label: model.label }]}
-      {...testable(testID)}
-    >
+    // The strip is a group, not one element: `accessible` would fold the play
+    // button into the strip on iOS, and an `adjustable` role would invite a swipe
+    // this strip cannot answer — it owns no scrubber, the screen does.
+    <View style={[s.strip, !collapsed && s.expanded]} {...testable(testID)}>
       {artwork ? <View style={s.art}>{artwork}</View> : null}
       <View style={s.text}>
         <Text role="label" weight="semibold" numberOfLines={1}>
           {title}
         </Text>
+        {subtitle ? (
+          <Text role="caption" tone="muted" numberOfLines={1}>
+            {subtitle}
+          </Text>
+        ) : null}
         <Text role="caption" tone="muted" numberOfLines={1}>
           {model.fraction === undefined
             ? `${model.elapsed} · ${model.reason ?? ""}`
@@ -102,14 +88,16 @@ export function MiniPlayer({
         {controls.back ? (
           <Control
             glyph="rewind"
-            label="back"
+            intent="back"
+            word={model.words.rewind}
             onIntent={onIntent}
             testID={testID ? `${testID}-back` : undefined}
           />
         ) : null}
         <Control
           glyph={glyph}
-          label={toggle}
+          intent={toggle}
+          word={playing ? model.words.pause : model.words.play}
           filled
           onIntent={onIntent}
           testID={testID ? `${testID}-toggle` : undefined}
@@ -117,7 +105,8 @@ export function MiniPlayer({
         {controls.forward ? (
           <Control
             glyph="forward"
-            label="forward"
+            intent="forward"
+            word={model.words.skipAhead}
             onIntent={onIntent}
             testID={testID ? `${testID}-forward` : undefined}
           />
@@ -129,27 +118,45 @@ export function MiniPlayer({
 
 function Control({
   glyph,
-  label,
+  intent,
+  word,
   filled = false,
   onIntent,
   testID,
 }: {
   readonly glyph: IconName;
-  readonly label: PlayerIntent;
+  readonly intent: PlayerIntent;
+  /** word is the control's name in the person's language, from the model core derived. */
+  readonly word: string;
   readonly filled?: boolean;
   readonly onIntent: (intent: PlayerIntent) => void;
   readonly testID?: string | undefined;
 }) {
   const s = useStyles(styles);
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const shape: ViewStyle[] = [s.control, filled ? s.controlFilled : s.controlPlain];
   return (
     <Pressable
-      onPress={() => onIntent(label)}
+      onPress={() => onIntent(intent)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
       accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected: label === "pause" }}
+      accessibilityLabel={word}
+      accessibilityState={{ selected: intent === "pause" }}
+      accessibilityActions={[{ name: "activate", label: word }]}
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === "activate") onIntent(intent);
+      }}
       {...testable(testID)}
-      style={({ pressed }) => [...shape, pressed && (filled ? s.pressFilled : s.press)]}
+      style={({ pressed }) => [
+        ...shape,
+        hovered && !filled && s.hover,
+        pressed && (filled ? s.pressFilled : s.press),
+        focused && s.focused,
+      ]}
     >
       <Icon name={glyph} size="md" tone={filled ? "on" : "accent"} />
     </Pressable>
@@ -188,13 +195,21 @@ const styles = (t: Theme) =>
       borderRadius: t.radius.full,
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: t.extent.focus,
+      borderColor: t.color.surfacePrimary,
     },
     controlFilled: { backgroundColor: t.color.accentDefault },
     controlPlain: {
       backgroundColor: t.color.surfacePrimary,
-      borderWidth: 1,
-      borderColor: t.state.divider,
+      borderColor: t.state.outline,
     },
+    hover: { backgroundColor: t.state.hovered },
     press: { backgroundColor: t.state.pressed },
     pressFilled: { backgroundColor: t.color.accentHover },
+    focused: {
+      borderColor: t.color.focus,
+      outlineColor: t.color.focus,
+      outlineWidth: t.extent.focus,
+      outlineOffset: t.space.xs / 2,
+    },
   });
