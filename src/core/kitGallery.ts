@@ -15,6 +15,8 @@ import {
   deriveBuyBar,
 } from "./commerce";
 import { derivePricing } from "./pricing";
+import { deriveMeter, derivePlayback } from "./progress";
+import { deriveSearch, deriveTabs } from "./navigation";
 import { deriveMap } from "./map";
 import { deriveMedia, deriveMediaHero, deriveViewer } from "./media";
 import { deriveSparkline, deriveChart, deriveBars, deriveStat } from "./charts";
@@ -115,6 +117,19 @@ export const kitCaseIds = [
   "bar-chart/negative",
   "stat-tile/lower-is-better",
   "stat-tile/zero-baseline",
+  "progress-meter/fraction",
+  "progress-meter/percent",
+  "progress-meter/steps",
+  "progress-meter/unmeasured",
+  "tab-bar/three",
+  "tab-bar/five",
+  "search-field/clear",
+  "search-field/query",
+  "search-field/busy",
+  "mini-player/track",
+  "mini-player/live",
+  "confirm-dialog/delete",
+  "confirm-dialog/keep",
 ] as const;
 export interface GallerySelection {
   readonly open?: boolean;
@@ -675,6 +690,62 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             fractionDigits: 0,
             preference: "lower",
           },
+          p,
+        ),
+      ),
+      // The four interaction shapes the phone owes the most: how far through,
+      // where you can go, what the query found, and what is still playing.
+      meter: v.take(
+        deriveMeter(
+          state === "unmeasured"
+            ? { value: 7, label: pt ? "Armazenamento" : "Storage" }
+            : state === "percent"
+              ? { value: 1, max: 4, format: "percent", label: pt ? "Carregamento" : "Upload" }
+              : state === "steps"
+                ? { value: 2, max: 3, format: "steps", label: c.step }
+                : { value: 3, max: 8, label: pt ? "Armazenamento" : "Storage" },
+          p,
+        ),
+      ),
+      tabs: v.take(
+        deriveTabs(
+          state === "five"
+            ? {
+                tabs: [
+                  { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
+                  { id: "sets", label: pt ? "Conjuntos" : "Sets" },
+                  { id: "search", label: c.search },
+                  { id: "library", label: pt ? "Biblioteca" : "Library", badge: 128 },
+                  { id: "you", label: pt ? "Tu" : "You" },
+                ],
+                selected: "library",
+              }
+            : {
+                tabs: [
+                  { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
+                  { id: "search", label: c.search },
+                  { id: "you", label: pt ? "Tu" : "You" },
+                ],
+                selected: "search",
+              },
+          p,
+        ),
+      ),
+      search: v.take(
+        deriveSearch(
+          state === "clear"
+            ? { value: "", placeholder: c.search }
+            : state === "busy"
+              ? { value: pt ? "música" : "music", placeholder: c.search, busy: true, count: 12 }
+              : { value: pt ? "música" : "music", placeholder: c.search, count: 12 },
+          p,
+        ),
+      ),
+      playback: v.take(
+        derivePlayback(
+          state === "live"
+            ? { position: 95, label: pt ? "A tocar" : "Now playing" }
+            : { position: 67, total: 247, label: pt ? "A tocar" : "Now playing" },
           p,
         ),
       ),

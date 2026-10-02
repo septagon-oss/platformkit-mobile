@@ -49,6 +49,11 @@ import { ChoiceChips } from "./molecules/ChoiceChips";
 import { DisclosureSection } from "./molecules/DisclosureSection";
 import { DayStrip } from "./molecules/DayStrip";
 import { QuantityControl } from "./molecules/QuantityControl";
+import { ProgressMeter } from "./molecules/ProgressMeter";
+import { TabBar } from "./molecules/TabBar";
+import { SearchField } from "./molecules/SearchField";
+import { MiniPlayer } from "./molecules/MiniPlayer";
+import { ConfirmDialog } from "./molecules/ConfirmDialog";
 import { SlotOption } from "./molecules/SlotOption";
 import { MapLegend } from "./molecules/MapLegend";
 import { MediaHero, type ImageRenderer } from "./molecules/MediaHero";
@@ -266,6 +271,15 @@ function Page({
   const s = useStyles(pageStyles);
   const [action, setAction] = useState("");
   const rest = model.cases.filter((id) => id !== model.lead);
+  // One section per family, in the order the page names them: a page reads as
+  // the screen it stands for, not as a list of specimen ids.
+  const groups: { readonly family: string; readonly cases: string[] }[] = [];
+  for (const caseId of rest) {
+    const family = humanize(pageFamily(caseId));
+    const group = groups.find((entry) => entry.family === family);
+    if (group) group.cases.push(caseId);
+    else groups.push({ family, cases: [caseId] });
+  }
   return (
     <View style={s.page}>
       <Text role="display">{model.title}</Text>
@@ -279,15 +293,18 @@ function Page({
           {...(renderZoom ? { renderZoom } : {})}
         />
       </View>
-      {rest.map((caseId) => (
-        <Section key={caseId} title={humanize(pageFamily(caseId))}>
-          <KitSamples
-            presentation={presentation}
-            caseId={caseId}
-            onAction={setAction}
-            {...(renderImage ? { renderImage } : {})}
-            {...(renderZoom ? { renderZoom } : {})}
-          />
+      {groups.map((group) => (
+        <Section key={group.family} title={group.family}>
+          {group.cases.map((caseId) => (
+            <KitSamples
+              key={caseId}
+              presentation={presentation}
+              caseId={caseId}
+              onAction={setAction}
+              {...(renderImage ? { renderImage } : {})}
+              {...(renderZoom ? { renderZoom } : {})}
+            />
+          ))}
         </Section>
       ))}
       <Text accessibilityLiveRegion="polite" testID="gallery-page-action">
@@ -492,6 +509,14 @@ const styles = (t: Theme) =>
       backgroundColor: t.color.surfaceMuted,
       justifyContent: "center",
     },
+    artwork: {
+      width: t.extent.player,
+      height: t.extent.player,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: t.radius.md,
+      backgroundColor: t.color.surfaceMuted,
+    },
     stack: { gap: t.space.xs, paddingVertical: t.space.sm },
     wrap: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm, paddingVertical: t.space.sm },
   });
@@ -510,6 +535,8 @@ function KitSamples({
   readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
 }) {
   const [held, setHeld] = useState<GallerySelection>({});
+  // A dialog is met by doing something, so the specimen offers the verb first.
+  const [asked, setAsked] = useState(false);
   const result = kitExamples(presentation, caseId, held),
     s = useStyles(styles);
   if (!result.ok) return <Notice text={result.issues[0]!.message} announcement="urgent" />;
@@ -517,6 +544,7 @@ function KitSamples({
     c = presentation.copy.kit,
     family = caseId.split("/")[0];
   const action = (id: string) => onAction(id),
+    specimen = presentation.copy.gallery,
     send = (value: unknown) => onAction(JSON.stringify(value));
   const image: ImageRenderer =
     renderImage ??
@@ -810,6 +838,97 @@ function KitSamples({
       );
     case "stat-tile":
       return <StatTile model={k.stat} />;
+    case "progress-meter":
+      return (
+        <ProgressMeter
+          model={k.meter}
+          marks={caseId.endsWith("/steps")}
+          tone={caseId.endsWith("/unmeasured") ? "warning" : "accent"}
+          testID="gallery-meter"
+        />
+      );
+    case "tab-bar":
+      return (
+        <TabBar
+          model={k.tabs}
+          icons={["person", "add", "more", "server", "sort"]}
+          onSelect={(id) => {
+            setHeld({ ...held, choice: id });
+            action(id);
+          }}
+          testID="gallery-tabs"
+        />
+      );
+    case "search-field":
+      return (
+        <SearchField
+          model={k.search}
+          onChangeText={(value) => send({ query: value })}
+          onSubmit={() => action("search")}
+          onClear={() => {
+            setHeld({ ...held, choice: undefined });
+            action("clear");
+          }}
+          testID="gallery-search"
+        />
+      );
+    case "mini-player":
+      return (
+        <MiniPlayer
+          model={k.playback}
+          title={specimen.case}
+          subtitle={c.details}
+          artwork={
+            <View
+              style={s.artwork}
+              accessible
+              accessibilityLabel={specimen.case}
+              testID="gallery-player-art"
+            >
+              <Text>{specimen.case}</Text>
+            </View>
+          }
+          playing={caseId.endsWith("/track")}
+          controls={{ back: true, forward: true }}
+          collapsed={caseId.endsWith("/live")}
+          onIntent={send}
+          testID="gallery-player"
+        />
+      );
+    case "confirm-dialog":
+      return (
+        <View style={s.stack}>
+          <Button
+            label={caseId.endsWith("/keep") ? c.close : c.remove}
+            tone={caseId.endsWith("/keep") ? "secondary" : "destructive"}
+            {...(caseId.endsWith("/keep") ? {} : { icon: "trash" as const })}
+            onPress={() => {
+              setAsked(true);
+              action("ask");
+            }}
+            testID="gallery-confirm-open"
+          />
+          <ConfirmDialog
+            open={asked}
+            title={caseId.endsWith("/keep") ? c.close : c.remove}
+            body={specimen.longBody}
+            reason={c.unsaved}
+            confirm={caseId.endsWith("/keep") ? c.close : c.remove}
+            cancel={c.cancel}
+            tone={caseId.endsWith("/keep") ? "primary" : "destructive"}
+            motion={presentation.motion}
+            onConfirm={() => {
+              setAsked(false);
+              action("confirm");
+            }}
+            onCancel={() => {
+              setAsked(false);
+              action("cancel");
+            }}
+            testID="gallery-confirm"
+          />
+        </View>
+      );
     default:
       return null;
   }
