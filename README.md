@@ -128,6 +128,36 @@ does not retry requests automatically. Recover uncertain writes through the
 module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
 
+## Design
+
+Every PlatformKit phone app is composed from this directory, so the kit is why
+one app looks like the family. Its bar is a screen a person would keep using,
+not a control that renders, and the kit commits to six things the checks name:
+
+- **The palette is the token fixture's.** No component writes a colour.
+  `src/ui/theme.tsx` names roles, `src/ui/tokens.ts` is generated, and an
+  interaction state is a linear-light mix of two palette roles
+  (`src/core/color.ts`), so both modes move together.
+- **Ink is legible on what it sits on.** Every pairing the theme hands a
+  component is measured in `tests/ui/contrast.test.tsx` against WCAG 2.2 §1.4.3
+  in both modes. A control's edge is `state.outline`, which holds 3:1 on paper,
+  on canvas and on the muted surface; a hairline between two rows is
+  `borderDefault` and claims nothing it does not identify.
+- **Type says what a thing is.** Display, title, body, caption, eyebrow and mono
+  are named roles in `src/ui/scale.ts`; money, clocks and counts are
+  `type.numeric`, whose tabular figures line up down a column.
+- **One control body.** A button, a field, a search strip, a switch row and a
+  choice row all take `hit` as their height and `state.outline` as their edge, so
+  a screen reads as one instrument rather than five.
+- **A state is visible or it is not a state.** Hover, press, selection, busy,
+  disabled and loading come from `Theme.state` and are drawn by every control
+  that can take them; `prefers-reduced-motion` stills what moves.
+- **The gallery is the measure.** `src/core/galleryPages.ts` names fifteen pages,
+  each led by one focal specimen with the states beside it, and every family the
+  kit owns is the specimen of exactly one page. Photograph `/gallery/<page>` at
+  390 and 1440 and judge those pictures against a reference screen the kit is
+  held to; a component nobody has photographed is not finished.
+
 ## Consume the shared native source
 
 ### Shared feedback
