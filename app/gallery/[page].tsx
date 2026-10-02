@@ -1,6 +1,7 @@
-// One gallery page, at its own route, with its own native header title. The
-// page id comes from the path and nothing else: an id the kit does not own
-// refuses on the page rather than falling back to something else to look at.
+// One gallery page, at its own route. The page names itself in its own display
+// line, so the native header keeps its back affordance and carries no title: the
+// raw id up there was a second, unreadable name for the same screen, and its left
+// edge a third column down the page at a desktop's width.
 import Constants from "expo-constants";
 import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
@@ -17,7 +18,7 @@ export default function GalleryPageRoute() {
   const id = Array.isArray(page) ? page[0] : (page ?? "");
   return (
     <>
-      <Stack.Screen options={{ title: id, headerLargeTitleEnabled: false }} />
+      <Stack.Screen options={{ headerTitle: "", headerLargeTitleEnabled: false }} />
       <Gallery page={id} />
     </>
   );
