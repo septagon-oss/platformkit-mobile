@@ -73,7 +73,13 @@ const interaction = (c: Palette): Interaction => ({
   // in the pair registry below: the ripple and the fill of a solid button carry
   // the rest. A darker press would strand a row's secondary line.
   pressed: mix(c.surfacePrimary, c.textPrimary, 0.04),
-  selected: mix(c.surfacePrimary, c.accentDefault, 0.1),
+  // A selection is the accent tinted into the surface it sits on. 0.08 is the most
+  // tint that leaves every ink a control paints on it at full strength above AA — a
+  // destructive row's title is the binding pair, and the registry below counts it in
+  // both palettes. A selection never rests on the tint alone: the accent glyph and
+  // the semibold label carry it, so the gap between a hover and a selection is not
+  // the only thing a person has.
+  selected: mix(c.surfacePrimary, c.accentDefault, 0.08),
   disabled: { fill: mix(c.surfacePrimary, c.surfaceMuted, 0.5), text: c.textMuted },
   divider: c.borderDefault,
   outline: c.textMuted,
@@ -139,6 +145,22 @@ export const contrastPairs: readonly [string, string, AAKind][] = [
   ["color.textMuted", "state.hovered", "text"],
   ["color.textMuted", "state.pressed", "text"],
   ["color.textMuted", "state.selected", "text"],
+  // A destructive row keeps its danger ink through every interaction state it can
+  // be in, so each of those three is measured with that ink on it, not only the
+  // plain surface. Row.tsx paints all three.
+  ["color.statusDanger", "state.hovered", "text"],
+  ["color.statusDanger", "state.pressed", "text"],
+  ["color.statusDanger", "state.selected", "text"],
+  // A plain or secondary button's label is accent ink over a hover or a press.
+  ["color.accentDefault", "state.pressed", "text"],
+  // A destructive button's own label, and a dialog's reason in danger ink.
+  ["color.accentOn", "color.statusDanger", "text"],
+  ["color.statusDanger", "color.surfacePrimary", "text"],
+  // A meter's fill is a graphic that carries how far through the work is, so the
+  // three tones it offers are measured against its track.
+  ["color.accentDefault", "color.surfaceMuted", "graphic"],
+  ["color.statusOk", "color.surfaceMuted", "graphic"],
+  ["color.statusWarning", "color.surfaceMuted", "graphic"],
   ["state.disabled.text", "state.disabled.fill", "text"],
   // A selected tab's glyph and a selected row's tick: an icon that carries the
   // selection, not the label, which is drawn in full-strength ink.
