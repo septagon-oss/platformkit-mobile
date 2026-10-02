@@ -156,7 +156,11 @@ not a control that renders, and the kit commits to six things the checks name:
   each led by one focal specimen with the states beside it, and every family the
   kit owns is the specimen of exactly one page. Photograph `/gallery/<page>` at
   390 and 1440 and judge those pictures against a reference screen the kit is
-  held to; a component nobody has photographed is not finished.
+  held to; a component nobody has photographed is not finished. The bar those
+  photographs are judged against is named row by row in
+  `design/references/refs.json` — the screen, why it was chosen for the pattern,
+  what the kit draws against it today — and `npm run check:references` proves the
+  reference store still holds exactly those bytes.
 
 ## Consume the shared native source
 

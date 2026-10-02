@@ -41,10 +41,18 @@ test("the committed manifest is rows all the way down", async () => {
     await readFile("design/references/refs.json", "utf8"),
   ) as ReferenceManifest;
   assert.deepEqual(shapeIssues(committed), []);
-  // One register, not two: the record's own ids run to R24, so this kit starts at R25.
+  // One register, not two: the record's own ids run to R24, so this kit starts at
+  // R25 and every row takes the next number. The rule is the count of rows away,
+  // so it is written as the run it is rather than as a list someone must edit.
   assert.deepEqual(
     committed.entries.map((e) => e.id),
-    ["R25", "R26", "R27"],
+    committed.entries.map((_, i) => `R${25 + i}`),
+  );
+  // A pattern named twice would be two bars for one component; coverage names which.
+  assert.equal(
+    new Set(committed.entries.map((e) => e.component)).size,
+    committed.entries.length,
+    "a component appears in two rows",
   );
   assert.equal(committed.source_root_env, "PKIT999_REFS");
 });
