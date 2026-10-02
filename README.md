@@ -460,9 +460,10 @@ a binary is built from: the app configuration, the native modules in the
 lockfile and their config plugins, the Android recipe, the bundler
 configuration and the design export. When a change moves it, run
 `npm run fingerprint` and say why in the commit, because that change needs a
-new binary. CI also exports both bundles, fails on a high or critical dependency
-advisory, and scans the history for secrets; a weekly workflow reports what
-drifted without blocking anything. Node is pinned once, in [.nvmrc](.nvmrc).
+new binary. CI also exports both bundles, refuses a dependency advisory no
+review covers (see below), scans the history for secrets, and a weekly workflow
+reports what drifted without blocking anything. Node is pinned once, in
+[.nvmrc](.nvmrc).
 Use `expo install` for native dependencies so they match that SDK. The app owns
 the native font, module core, Reanimated and Worklets dependencies used by its
 router and tests; their SDK-compatible versions must resolve once at the app
@@ -477,6 +478,32 @@ packages against `bundledNativeModules.json` inside the pinned `expo`, a file
 tree on any machine and any day. It still refuses a package that does not match
 the pinned SDK, which is what it is for. Only `expo` itself is outside that
 manifest, because it is the pin everything else is compared against.
+
+The advisory gate is deliberately reviewed rather than live, for the same reason.
+`npm audit` answers "what does the advisory database say about this tree today?",
+and that answer moves when somebody else publishes or files: three
+denial-of-service filings were made against a version of `brace-expansion` that
+no commit of ours had chosen, and turned CI red on a change that touched no
+dependency. The database has also covered a package in full — every published
+release of `node-forge`, which the Expo CLI depends on and upstream has not
+released a fix for — so the alternative below was a permanently red check until
+somebody switched it off, which is how a check dies. `npm run check:advisories`
+keeps `npm audit` as its input and compares it against
+[advisories.json](advisories.json): a high filing is refused unless a review
+names that GHSA, the versions this lockfile actually holds and a date that has
+not passed; a critical filing is never exempted; and a review whose filing is no
+longer reported, whose versions moved, or whose date has passed is itself a
+refusal, so the record cannot quietly become an ignore list. Take the fixed
+version whenever one exists — the record is for what has no version to move to.
+
+```sh
+npm run check:advisories    # the gate CI runs: needs the registry, like npm audit
+npm audit                   # what the database says, reviewed or not
+make test                   # the advisory rules themselves are tested offline
+```
+
+What the database says with nothing compared against it — and what a review will
+expire against — is in the weekly `drift` report beside the SDK's opinion.
 
 Asking what Expo now recommends is an owner's action, not a gate:
 

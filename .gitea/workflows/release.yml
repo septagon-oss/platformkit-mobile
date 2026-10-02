@@ -38,7 +38,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run check
       - run: npm run export:check
-      - run: npm audit --audit-level=high
+      - run: npm run check:advisories
       - name: No secret in the history
         run: scripts/gitleaks.sh
 

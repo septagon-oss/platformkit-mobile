@@ -1,7 +1,8 @@
 # Verify the SDK, source, tests and native fingerprint in an isolated job
-# container, then prove both bundles compile, the dependency tree carries no
-# high advisory and the history carries no secret. Nothing here builds a
-# binary (android.yml) or needs a credential.
+# container, then prove both bundles compile, that every high advisory the
+# dependency tree carries has been reviewed and none is critical, and that the
+# history carries no secret. Nothing here builds a binary (android.yml) or needs
+# a credential.
 name: ci
 
 on:
@@ -37,8 +38,12 @@ jobs:
       - name: Both bundles compile
         run: npm run export:check
 
-      - name: No high or critical advisory
-        run: npm audit --audit-level=high
+      # The blocking half of the dependency-advisory rule: every high filing
+      # needs a dated review in advisories.json, a critical one needs a fix.
+      # What the advisory database says today, reviewed or not, is the weekly
+      # drift report, because that answer moves when somebody else publishes.
+      - name: Every high advisory is reviewed and none is critical
+        run: npm run check:advisories
 
       - name: No secret in the history
         run: scripts/gitleaks.sh

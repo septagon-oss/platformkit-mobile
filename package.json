@@ -53,7 +53,8 @@
     "test:ui": "jest",
     "check:flows": "tsx scripts/check_flows.ts",
     "source": "tsx scripts/source.ts",
-    "check:source": "tsx scripts/source.ts --check"
+    "check:source": "tsx scripts/source.ts --check",
+    "check:advisories": "tsx scripts/advisories.ts --check"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
