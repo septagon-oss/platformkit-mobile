@@ -40,7 +40,7 @@ export function SwitchRow({ label, value, onValueChange, disabled = false, help,
         value={value}
         onValueChange={onValueChange}
         disabled={disabled}
-        trackColor={{ true: t.color.accentDefault, false: t.color.borderDefault }}
+        trackColor={{ true: t.color.accentDefault, false: t.state.outline }}
         thumbColor={t.color.surfacePrimary}
         importantForAccessibility="no"
       />

@@ -73,7 +73,7 @@ const styles = (t: Theme) =>
       backgroundColor: t.color.surfacePrimary,
       borderRadius: t.radius.md,
       borderWidth: StyleSheet.hairlineWidth * 2,
-      borderColor: t.color.borderDefault,
+      borderColor: t.state.outline,
       ...(t.font.body ? { fontFamily: t.font.body } : {}),
     },
     textarea: { minHeight: t.extent.textarea, textAlignVertical: "top" },

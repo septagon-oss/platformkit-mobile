@@ -162,7 +162,7 @@ const styles = (t: Theme) =>
     primary: { backgroundColor: t.color.accentDefault, borderColor: t.color.accentDefault },
     destructive: { backgroundColor: t.color.statusDanger, borderColor: t.color.statusDanger },
     secondary: {
-      borderColor: t.color.borderDefault,
+      borderColor: t.state.outline,
       backgroundColor: t.color.surfacePrimary,
     },
     plain: { paddingHorizontal: t.space.sm, borderColor: t.color.surfaceCanvas },

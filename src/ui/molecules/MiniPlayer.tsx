@@ -180,7 +180,7 @@ const styles = (t: Theme) =>
     track: { paddingTop: t.space.xs },
     bar: { height: t.extent.meter, borderRadius: t.radius.full, overflow: "hidden" },
     fill: { height: "100%", borderRadius: t.radius.full },
-    unseekable: { borderWidth: 1, borderStyle: "dashed", borderColor: t.color.borderStrong },
+    unseekable: { borderWidth: 1, borderStyle: "dashed", borderColor: t.state.outline },
     controls: { flexDirection: "row", alignItems: "center", gap: t.space.xs },
     control: {
       width: t.hit,

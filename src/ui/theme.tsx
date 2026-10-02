@@ -53,6 +53,8 @@ export interface Interaction {
   readonly selected: string;
   readonly disabled: { readonly fill: string; readonly text: string };
   readonly divider: string;
+  /** outline is a control's own edge: the line that says something here can be used. */
+  readonly outline: string;
   readonly scrim: string;
   readonly raised: Shadow;
 }
@@ -67,10 +69,14 @@ const raisedShadow = (color: string, strength: number): Shadow => ({
 
 const interaction = (c: Palette): Interaction => ({
   hovered: mix(c.surfacePrimary, c.accentDefault, 0.06),
-  pressed: mix(c.surfacePrimary, c.textPrimary, 0.1),
-  selected: mix(c.surfacePrimary, c.accentDefault, 0.12),
+  // A press is the faintest shade that leaves every ink on it legible, counted
+  // in the pair registry below: the ripple and the fill of a solid button carry
+  // the rest. A darker press would strand a row's secondary line.
+  pressed: mix(c.surfacePrimary, c.textPrimary, 0.04),
+  selected: mix(c.surfacePrimary, c.accentDefault, 0.1),
   disabled: { fill: mix(c.surfacePrimary, c.surfaceMuted, 0.5), text: c.textMuted },
   divider: c.borderDefault,
+  outline: c.textMuted,
   scrim: alpha(c.textPrimary, extent.scrim),
   raised: raisedShadow(c.textPrimary, elevation.raised),
 });
@@ -130,15 +136,21 @@ export const contrastPairs: readonly [string, string, AAKind][] = [
   ["color.textPrimary", "state.hovered", "text"],
   ["color.textPrimary", "state.pressed", "text"],
   ["color.textPrimary", "state.selected", "text"],
-  ["color.textPrimary", "color.accentHover", "text"],
+  ["color.textMuted", "state.hovered", "text"],
+  ["color.textMuted", "state.pressed", "text"],
+  ["color.textMuted", "state.selected", "text"],
   ["state.disabled.text", "state.disabled.fill", "text"],
-  ["color.accentDefault", "state.selected", "text"],
-  ["color.accentDefault", "state.hovered", "large"],
-  ["color.accentOn", "state.pressed", "large"],
+  // A selected tab's glyph and a selected row's tick: an icon that carries the
+  // selection, not the label, which is drawn in full-strength ink.
+  ["color.accentDefault", "state.selected", "graphic"],
+  ["color.accentDefault", "state.hovered", "text"],
   ["color.accentOn", "color.accentHover", "text"],
-  ["color.borderDefault", "color.surfacePrimary", "graphic"],
-  ["color.borderStrong", "color.surfacePrimary", "graphic"],
-  ["color.borderStrong", "color.surfaceCanvas", "graphic"],
+  // A control's edge is drawn in outline, never in the hairline a section rule
+  // uses: borderDefault carries no meaning on its own, so nothing claims a
+  // ratio for it. borderStrong edges a disabled control, which 1.4.3 exempts.
+  ["state.outline", "color.surfacePrimary", "graphic"],
+  ["state.outline", "color.surfaceCanvas", "graphic"],
+  ["state.outline", "color.surfaceMuted", "graphic"],
   ["color.focus", "color.surfacePrimary", "graphic"],
   ["color.accentDefault", "color.surfacePrimary", "graphic"],
   ["color.statusDanger", "color.surfacePrimary", "graphic"],

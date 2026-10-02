@@ -65,7 +65,7 @@ export function TabBar({
           <Text
             role="caption"
             weight={item.selected ? "semibold" : "regular"}
-            tone={item.selected ? "accent" : "muted"}
+            tone={item.selected ? "primary" : "muted"}
             numberOfLines={1}
           >
             {item.label}
