@@ -4,7 +4,7 @@
 // export's fallback stacks resolved to what each platform ships; the sizes are
 // scale.ts. Nothing else reads a colour.
 import React, { createContext, useContext, useMemo } from "react";
-import { Platform, StyleSheet, useColorScheme } from "react-native";
+import { Platform, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
 import { alpha, mix, type AAKind } from "../core/color";
 import { elevation, extent, hit, icon, radius, space, type } from "./scale";
 import { palette, type Mode, type Palette } from "./tokens";
@@ -213,3 +213,14 @@ export function useStyles<T extends StyleSheet.NamedStyles<T>>(make: (t: Theme) 
   const theme = useTheme();
   return useMemo(() => StyleSheet.create(make(theme)), [theme, make]);
 }
+
+/**
+ * controlInk puts the label's own colour on the element a press lands on.
+ * On the web that element is a box which, left alone, inherits the browser's
+ * black: a filled button then measures as black-on-accent (2.7:1) at its own
+ * edge even though the word drawn inside it is near-white. Native has no colour
+ * to put on a View — the Text that draws the word carries it there — so the
+ * style is written only where it means something.
+ */
+export const controlInk = (color: string): ViewStyle =>
+  (Platform.select({ web: { color }, default: undefined }) ?? {}) as ViewStyle;

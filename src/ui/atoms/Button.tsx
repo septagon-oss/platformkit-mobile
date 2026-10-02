@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import type { Motion } from "../../core/derive";
 import { testable } from "../props";
-import { useStyles, useTheme, type Theme } from "../theme";
+import { controlInk, useStyles, useTheme, type Theme } from "../theme";
 import { Icon, type IconName } from "./Icon";
 import { Text, toneColor, type Tone as TextTone } from "./Text";
 
@@ -106,6 +106,7 @@ export function Button({
       android_ripple={header ? undefined : { color: t.color.borderStrong }}
       style={({ pressed }) => [
         ...shape,
+        controlInk(toneColor(t, textTone)),
         hovered && !off && !filled && s.hover,
         pressed && !off && (filled ? s.activeFilled : s.press),
         focused && s.focused,

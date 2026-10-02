@@ -4,7 +4,7 @@
 // list are the same page.
 import { StyleSheet, type StyleProp, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useStyles, useTheme, type Theme } from "../theme";
+import { controlInk, useStyles, useTheme, type Theme } from "../theme";
 
 export interface Canvas {
   /** page fills the screen with the canvas colour. */
@@ -27,6 +27,10 @@ export function useCanvas(): Canvas {
 
 const styles = (t: Theme) =>
   StyleSheet.create({
-    page: { flex: 1, backgroundColor: t.color.surfaceCanvas },
+    // The page says what ink its words are drawn in. Left unsaid, every element
+    // on the web inherits the browser's black — a colour no component chose — and
+    // anything measured at its own edge (a selected tab, a filled button) reads as
+    // black-on-whatever-it-is. Controls that paint their own surface override it.
+    page: { flex: 1, backgroundColor: t.color.surfaceCanvas, ...controlInk(t.color.textPrimary) },
     content: { padding: t.space.lg, gap: t.space.lg },
   });
