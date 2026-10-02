@@ -35,6 +35,7 @@ const glyphs = {
   forward: "play-forward",
   rewind: "play-back",
   circle: "ellipse-outline",
+  image: "image-outline",
 } as const;
 
 export type IconName = keyof typeof glyphs;

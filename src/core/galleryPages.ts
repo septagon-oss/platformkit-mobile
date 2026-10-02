@@ -80,15 +80,16 @@ export const galleryPages = {
       "summary-detail/default",
     ],
   },
-  // A search is a field over what it found: the field answers in three states,
-  // and the wall below it is what the kit draws for the matches it returned.
+  // A search is a field over what it found: the field the person is typing in
+  // leads, the wall of matches follows it at once, and the field's other states
+  // come last under their own family name rather than stacked above the results.
   search: {
     lead: "search-field/query",
     cases: [
       "search-field/query",
+      "masonry-wall/two-columns",
       "search-field/busy",
       "search-field/clear",
-      "masonry-wall/two-columns",
     ],
   },
   form: {
@@ -135,13 +136,16 @@ export const galleryPages = {
       "buy-bar/default",
     ],
   },
+  // A schedule opens on the day that is selected and what happens in it. The
+  // date control chooses another day; the week and its hourly grid are wider
+  // views of the same week, so they follow rather than lead the screen.
   schedule: {
-    lead: "calendar/week",
+    lead: "agenda-list/range",
     cases: [
-      "calendar/week",
-      "week-calendar/overlap",
       "agenda-list/range",
       "slot-picker/date-strip",
+      "calendar/week",
+      "week-calendar/overlap",
     ],
   },
   maps: {

@@ -276,11 +276,14 @@ function Page({
   const viewport = useWindowDimensions();
   const [action, setAction] = useState("");
   // Phone components are drawn at a phone's width wherever they are looked at:
-  // on a monitor the page keeps that column and centres it, rather than
-  // stretching one specimen across the desk and leaving the rest of the screen
-  // to empty interiors.
+  // a specimen is never stretched across a desk until its gaps stop meaning
+  // anything. A monitor still gets a desk-sized page: the screen the page stands
+  // for in one phone column and its labelled states beside it in another, which
+  // is what the fold of a monitor is for. `stand` says two columns fit; between
+  // one column and two the page keeps its single centred column.
+  const stand = viewport.width > t.extent.stand + 2 * t.space.xl;
   const column =
-    viewport.width > t.extent.pageColumn + 2 * t.space.xl
+    !stand && viewport.width > t.extent.pageColumn + 2 * t.space.xl
       ? { alignSelf: "center" as const, width: t.extent.pageColumn }
       : undefined;
   const rest = model.cases.filter((id) => id !== model.lead);
@@ -293,49 +296,57 @@ function Page({
     if (group) group.cases.push(caseId);
     else groups.push({ family, cases: [caseId] });
   }
-  return (
-    <View style={[s.page, column]}>
-      <Text role="display">{model.title}</Text>
-      {/* One screen, one thing to do: the lead holds the page's one filled verb,
-          and every other specimen on the page is drawn in the outlined ink. The
-          lead is the composition the page stands for; the families below it are
-          reached by scrolling, and follow it in the fold rather than being held
-          back by empty space. */}
-      <VerbStage lead>
-        <View style={s.lead}>
-          <KitSamples
-            key={model.lead}
-            presentation={presentation}
-            caseId={model.lead}
-            onAction={setAction}
-            {...(renderImage ? { renderImage } : {})}
-            {...(renderZoom ? { renderZoom } : {})}
-          />
+  const lead = (
+    <VerbStage lead>
+      <View style={s.lead}>
+        <KitSamples
+          key={model.lead}
+          presentation={presentation}
+          caseId={model.lead}
+          onAction={setAction}
+          {...(renderImage ? { renderImage } : {})}
+          {...(renderZoom ? { renderZoom } : {})}
+        />
+      </View>
+    </VerbStage>
+  );
+  // A family name sits at the column's own edge and the specimen keeps its
+  // card: the page never draws a card around a card, which is what put a
+  // second inset behind a heading and left a page with three left edges.
+  const states = (
+    <VerbStage lead={false}>
+      {groups.map((group) => (
+        <View key={group.family} style={s.group}>
+          <Text role="caption" tone="muted" uppercase accessibilityRole="header">
+            {group.family}
+          </Text>
+          {group.cases.map((caseId) => (
+            <KitSamples
+              key={caseId}
+              aside
+              presentation={presentation}
+              caseId={caseId}
+              onAction={setAction}
+              {...(renderImage ? { renderImage } : {})}
+              {...(renderZoom ? { renderZoom } : {})}
+            />
+          ))}
         </View>
-      </VerbStage>
-      {/* A family name sits at the column's own edge and the specimen keeps its
-          card: the page never draws a card around a card, which is what put a
-          second inset behind a heading and left a page with three left edges. */}
-      <VerbStage lead={false}>
-        {groups.map((group) => (
-          <View key={group.family} style={s.group}>
-            <Text role="caption" tone="muted" uppercase accessibilityRole="header">
-              {group.family}
-            </Text>
-            {group.cases.map((caseId) => (
-              <KitSamples
-                key={caseId}
-                aside
-                presentation={presentation}
-                caseId={caseId}
-                onAction={setAction}
-                {...(renderImage ? { renderImage } : {})}
-                {...(renderZoom ? { renderZoom } : {})}
-              />
-            ))}
-          </View>
-        ))}
-      </VerbStage>
+      ))}
+    </VerbStage>
+  );
+  return (
+    <View style={[s.page, stand ? s.stand : column]}>
+      {/* One screen, one thing to do: the lead holds the page's one filled verb,
+          and every other specimen on the page is drawn in the outlined ink. On a
+          monitor the lead and the states it is shown beside stand in two phone
+          columns, so the fold holds a screen and its states rather than a strip
+          of one in the middle of an empty canvas. */}
+      <Text role="display">{model.title}</Text>
+      <View style={stand ? s.columns : undefined}>
+        <View style={stand ? s.phone : undefined}>{lead}</View>
+        <View style={stand ? s.phone : undefined}>{states}</View>
+      </View>
       <Text accessibilityLiveRegion="polite" testID="gallery-page-action">
         {action ? presentation.copy.gallery.actionReceived(action) : ""}
       </Text>
@@ -597,7 +608,11 @@ function KitSamples({
     renderImage ??
     ((props) => (
       <View style={s.fixture} accessible={!props.decorative} accessibilityLabel={props.description}>
-        <Text>{props.description}</Text>
+        {/* A media slot the kit does not own a picture for says so with the mark
+            of a picture and its shape in words: an empty box reads as a picture
+            that failed, a framed slot reads as the slot it is. */}
+        <Icon name="image" size="lg" tone="muted" />
+        <Text role="caption">{props.description}</Text>
       </View>
     ));
   const zoom =
@@ -1008,6 +1023,15 @@ function KitSamples({
 const pageStyles = (t: Theme) =>
   StyleSheet.create({
     page: { gap: t.space.md, paddingTop: t.space.sm },
+    /**
+     * stand is the page at a desk's width: two phone columns, centred as one
+     * composition rather than one column centred in an empty canvas. The width
+     * is the two columns and the gap between them, so nothing inside stretches
+     * past the width a phone composition was drawn at.
+     */
+    stand: { alignSelf: "center" as const, width: t.extent.stand },
+    columns: { flexDirection: "row" as const, alignItems: "flex-start", gap: t.space.xl },
+    phone: { width: t.extent.pageColumn, gap: t.space.md },
     lead: { gap: t.space.sm },
     group: { gap: t.space.xs },
     canvas: {
@@ -1018,18 +1042,32 @@ const pageStyles = (t: Theme) =>
       borderColor: t.state.outline,
       overflow: "hidden",
     },
-    marker: {
+    pin: {
       position: "absolute",
+      alignItems: "center",
+      gap: t.space.xs,
+      // The point is the middle of the dot, not its top-left corner: a pin whose
+      // label sits under it has to hang from the place it names.
+      transform: [{ translateX: -t.icon.md / 2 }, { translateY: -t.icon.md / 2 }],
+    },
+    marker: {
       width: t.icon.md,
       height: t.icon.md,
       borderRadius: t.radius.full,
-      alignItems: "center",
-      justifyContent: "center",
       backgroundColor: t.color.surfacePrimary,
       borderWidth: t.extent.focus,
       borderColor: t.color.accentDefault,
     },
     markerSelected: { backgroundColor: t.color.accentDefault },
+    /** pinLabel is the place's name in words: a dot with no name is a defect a person sees at once. */
+    pinLabel: {
+      borderRadius: t.radius.full,
+      paddingHorizontal: t.space.sm,
+      paddingVertical: t.space.xs,
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: 1,
+      borderColor: t.state.outline,
+    },
     attribution: { position: "absolute", right: t.space.sm, bottom: t.space.sm },
   });
 
@@ -1056,8 +1094,13 @@ function MapCanvasFixture(props: MapCanvasProps) {
           accessibilityRole="button"
           accessibilityLabel={marker.label}
           onPress={() => props.onMarker(marker.id)}
-          style={[s.marker, place(marker), marker.selected && s.markerSelected]}
-        />
+          style={[s.pin, place(marker)]}
+        >
+          <View style={[s.marker, marker.selected && s.markerSelected]} />
+          <Text style={s.pinLabel} role="caption">
+            {marker.label}
+          </Text>
+        </Pressable>
       ))}
       <Text style={s.attribution} role="caption" tone="muted">
         {props.attribution}

@@ -12,6 +12,12 @@ export const elevation = { raised: 1, floating: 2 } as const;
 /** icon is a glyph's side: beside a word, on its own, or as an empty state's mark. */
 export const icon = { sm: 16, md: 22, lg: 40 } as const;
 export type IconSize = keyof typeof icon;
+/**
+ * pageColumn is the widest a phone composition is shown at. A screen built for a
+ * thumb stays one column wide on a desktop monitor, at the width its rhythm was
+ * drawn for, instead of stretching every card until the gaps stop meaning anything.
+ */
+const pageColumn = 420;
 /** extent is the few fixed lengths that are neither a gap nor a corner: how tall a paragraph field opens, how thick a skeleton line is. */
 export const extent = {
   textarea: 120,
@@ -34,13 +40,14 @@ export const extent = {
   player: 64,
   /** hero is the one photographic surface a screen leads with. */
   hero: 220,
+  /** pageColumn, above, is the width one phone composition is shown at. */
+  pageColumn,
   /**
-   * pageColumn is the widest a phone composition is shown at. A screen built for
-   * a thumb stays one column wide on a desktop monitor, at the width its rhythm
-   * was drawn for, instead of stretching every card until the gaps stop meaning
-   * anything.
+   * stand is the width a page holds two phone columns at — the screen it stands
+   * for, and that screen's labelled states beside it — so a monitor gets a desk
+   * composition without any column stretching past pageColumn.
    */
-  pageColumn: 420,
+  stand: pageColumn * 2 + space.xl,
   /** scrim is how much of the screen a backdrop keeps back. */
   scrim: 0.45,
 } as const;
