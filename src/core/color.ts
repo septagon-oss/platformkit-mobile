@@ -18,10 +18,16 @@ export function parseColor(color: string): Channels {
   const hex = HEX.exec(color.trim());
   if (hex) {
     const body = hex[1]!;
-    const part = (i: number, size: number) =>
-      Number.parseInt(body.slice(i, i + size).padEnd(size * 2, body.slice(i, i + size)), 16);
-    if (body.length === 3) return [part(0, 1), part(1, 1), part(2, 1), 1] as const;
-    return [part(0, 2), part(2, 2), part(4, 2), body.length === 8 ? part(6, 2) / 255 : 1] as const;
+    // A three-digit hex is the four-digit one written shorter: each face repeats.
+    const digits =
+      body.length === 3
+        ? body
+            .split("")
+            .map((pair) => `${pair}${pair}`)
+            .join("")
+        : body;
+    const part = (i: number) => Number.parseInt(digits.slice(i, i + 2), 16);
+    return [part(0), part(2), part(4), digits.length === 8 ? part(6) / 255 : 1] as const;
   }
   const rgb = RGBA.exec(color.trim());
   if (rgb)
