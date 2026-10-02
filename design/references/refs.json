@@ -1,0 +1,46 @@
+{
+  "schema": "pkit-mobile-references/1",
+  "source_root_env": "PKIT999_REFS",
+  "note": "The bar this kit is measured against, as a record and not as pixels. Mobbin licences a screenshot to its subscriber, and this is public source, so no image byte is committed here: each entry names the bytes in the reference store, and `npm run check:references` proves the store still holds exactly those bytes. The `why` column is why the screen was chosen for this family; `ours` is what the kit draws today against it, which is the gap the review looks at.",
+  "entries": [
+    {
+      "id": "R25",
+      "component": "list-row",
+      "platform": "ios",
+      "source": "apps/apex/mobbin-5-jira-ios-work-items.png",
+      "sha256": "8ac408efe0d52c763564f68d9f519799e25434a35568183c466909ac9e665726",
+      "bytes": 519843,
+      "mobbin_url": "https://mobbin.com/screens/7ccfb103-e54d-45aa-9f8f-40552da41b67",
+      "app": "Jira Cloud",
+      "screen": "Work items",
+      "why": "Phone rows carrying key, priority chevron, status pill and date in a small footprint under a saved-view selector.",
+      "ours": "Row carries an eyebrow, a title, up to two cell lines and one trailing element; nothing reserves a right-aligned date column or a status pill beside it, and Section has no group header with a count."
+    },
+    {
+      "id": "R26",
+      "component": "stat-list",
+      "platform": "ios",
+      "source": "apps/stockpilot/mobbin-5-yahoo-finance-ios-lists.png",
+      "sha256": "cd08b3caeaa5f2d1894f16fbed1f58d28411cb6982226c757905e3bb63368eff",
+      "bytes": 457392,
+      "mobbin_url": "https://mobbin.com/screens/410b73e3-e5de-4807-ad8d-b2bff88251e1",
+      "app": "Yahoo Finance",
+      "screen": "Lists",
+      "why": "Watchlist card with total change, rows of ticker, name, sparkline and coloured change pill, plus Add symbol and Edit list: the phone watchlist.",
+      "ours": "StatTile, Sparkline and Badge draw those three pieces, and Sparkline's picture is decoration rather than a DOM attribute since 4abccdd; the row that holds ticker, name and sparkline in one measure is the composition the app writes, and the gallery shows them one specimen apart."
+    },
+    {
+      "id": "R27",
+      "component": "mini-player",
+      "platform": "ios",
+      "source": "apps/shelf/mobbin-8-brink-continue-card.jpg",
+      "sha256": "2603fe0a6746943478895a1d36f6356028b2f1bd385a68764ec78bdff7f6a2d2",
+      "bytes": 256877,
+      "mobbin_url": "https://mobbin.com/screens/442d1c66-914c-4e8b-b0fa-eb9d6620a5c6",
+      "app": "Brink",
+      "screen": "Continue listening card",
+      "why": "One large card for the book in progress, its progress bar and a single \"Playing · 18 min left\" button; the mini player persists while browsing.",
+      "ours": "MiniPlayer holds cover, title, elapsed and remaining and one control, collapsed over a list and expanded with its scrubber; its controls are now named in the person's language and reachable one by one (fe19dc4), and its artwork is the caller's, so a photographed strip is only as real as the picture the app supplies."
+    }
+  ]
+}

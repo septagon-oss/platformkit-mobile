@@ -54,7 +54,9 @@
     "check:flows": "node --import tsx scripts/check_flows.ts",
     "source": "node --import tsx scripts/source.ts",
     "check:source": "node --import tsx scripts/source.ts --check",
-    "check:advisories": "node --import tsx scripts/advisories.ts --check"
+    "check:advisories": "node --import tsx scripts/advisories.ts --check",
+    "references": "node --import tsx scripts/references.ts",
+    "check:references": "node --import tsx scripts/references.ts --check"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
