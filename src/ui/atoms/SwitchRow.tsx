@@ -25,7 +25,8 @@ export function SwitchRow({ label, value, onValueChange, disabled = false, help,
       disabled={disabled}
       accessibilityRole="switch"
       accessibilityLabel={label}
-      accessibilityState={{ checked: value, disabled }}
+      aria-checked={value}
+      aria-disabled={disabled}
       {...testable(testID)}
     >
       <View style={s.text}>

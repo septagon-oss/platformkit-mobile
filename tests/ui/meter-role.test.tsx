@@ -20,5 +20,8 @@ test("a determinate meter is announced as a progressbar with its value", async (
   );
   const meter = screen.getByTestId("meter");
   expect(meter).toHaveProp("accessibilityRole", "progressbar");
-  expect(meter).toHaveProp("accessibilityValue", { min: 0, max: 12, now: 5, text: "5 of 12" });
+  expect(meter).toHaveProp("aria-valuemin", 0);
+  expect(meter).toHaveProp("aria-valuemax", 12);
+  expect(meter).toHaveProp("aria-valuenow", 5);
+  expect(meter).toHaveProp("aria-valuetext", "5 of 12");
 });

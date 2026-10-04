@@ -35,7 +35,9 @@ export function Stepper({
       <Text
         accessibilityRole="progressbar"
         accessibilityLabel={model.progressLabel}
-        accessibilityValue={{ min: 0, max: 100, now: model.progress * 100 }}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={model.progress * 100}
       >
         {model.progressLabel}
       </Text>

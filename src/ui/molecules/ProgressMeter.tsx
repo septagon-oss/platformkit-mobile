@@ -52,7 +52,10 @@ export function ProgressMeter({ model, tone = "accent", marks = false, testID }:
       accessible
       accessibilityRole="progressbar"
       accessibilityLabel={model.label}
-      accessibilityValue={{ min: 0, max: model.max, now: model.value, text: model.text }}
+      aria-valuemin={0}
+      aria-valuemax={model.max}
+      aria-valuenow={model.value}
+      aria-valuetext={model.text}
       {...testable(testID)}
     >
       <View style={s.head}>

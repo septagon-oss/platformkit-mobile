@@ -149,7 +149,7 @@ function Control({
       onHoverOut={() => setHovered(false)}
       accessibilityRole="button"
       accessibilityLabel={word}
-      accessibilityState={{ selected: intent === "pause" }}
+      aria-selected={intent === "pause"}
       accessibilityActions={[{ name: "activate", label: word }]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "activate") onIntent(intent);

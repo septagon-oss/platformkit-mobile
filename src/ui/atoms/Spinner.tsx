@@ -22,7 +22,7 @@ export function Spinner({ size = "small", fill = false, label, motion, testID }:
     <View
       accessible
       accessibilityRole="progressbar"
-      accessibilityState={{ busy: true }}
+      aria-busy
       accessibilityLabel={label}
       {...testable(testID)}
     >

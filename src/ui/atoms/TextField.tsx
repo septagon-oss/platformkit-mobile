@@ -48,7 +48,7 @@ export const TextField = forwardRef<TextInput, Props>(function TextField(
       numberOfLines={kind === "textarea" ? 5 : 1}
       placeholderTextColor={t.color.textMuted}
       maxFontSizeMultiplier={t.type.body.scale}
-      accessibilityState={{ disabled }}
+      aria-disabled={disabled}
       {...rest}
       style={[
         s.input,

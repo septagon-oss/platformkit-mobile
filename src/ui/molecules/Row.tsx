@@ -63,11 +63,9 @@ export function Row({
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
       accessibilityRole="button"
-      accessibilityState={{
-        busy,
-        disabled: !onPress || busy,
-        ...(selected === undefined ? {} : { selected }),
-      }}
+      aria-busy={busy}
+      aria-disabled={!onPress || busy}
+      aria-selected={selected}
       accessibilityLabel={[eyebrow, title, ...cells].filter(Boolean).join(", ")}
       android_ripple={{ color: t.color.borderDefault }}
       {...testable(testID)}

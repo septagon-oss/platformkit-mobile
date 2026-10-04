@@ -59,7 +59,12 @@ export function TabBar({
               onFocus={() => setFocused(item.id)}
               onBlur={() => setFocused(undefined)}
               accessibilityRole="tab"
-              accessibilityState={{ selected: item.selected, disabled: off }}
+              // The state is written in the ARIA spelling React Native's View and
+              // Pressable accept as an alias and react-native-web writes straight
+              // onto the element: one statement of which destination is chosen
+              // reaches VoiceOver, TalkBack and a browser's assistive technology.
+              aria-selected={item.selected}
+              aria-disabled={off}
               accessibilityLabel={item.badge ? `${item.label}, ${item.badge}` : item.label}
               {...(item.unavailable === undefined ? {} : { accessibilityHint: item.unavailable })}
               accessibilityActions={

@@ -98,13 +98,11 @@ export function Button({
       accessibilityRole={accessibilityRole}
       accessibilityLabel={name ?? label}
       {...(reason || hint ? { accessibilityHint: reason ?? hint } : {})}
-      accessibilityState={{
-        disabled: off,
-        busy,
-        ...(selected === undefined ? {} : { selected }),
-        ...(checked === undefined ? {} : { checked }),
-        ...(expanded === undefined ? {} : { expanded }),
-      }}
+      aria-busy={busy}
+      aria-checked={checked}
+      aria-disabled={off}
+      aria-expanded={expanded}
+      aria-selected={selected}
       accessibilityActions={off ? [] : [{ name: "activate", label }]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "activate") activate();

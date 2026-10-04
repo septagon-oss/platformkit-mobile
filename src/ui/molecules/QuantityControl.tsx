@@ -31,12 +31,10 @@ export function QuantityControl({
           accessible
           accessibilityRole="adjustable"
           accessibilityLabel={model.label}
-          accessibilityValue={{
-            min: model.min,
-            max: model.max,
-            now: model.value,
-            text: model.text,
-          }}
+          aria-valuemin={model.min}
+          aria-valuemax={model.max}
+          aria-valuenow={model.value}
+          aria-valuetext={model.text}
           accessibilityActions={[
             ...(model.increase === undefined
               ? []
