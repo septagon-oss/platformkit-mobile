@@ -66,16 +66,18 @@ export function ListScreen<T>({
       ListHeaderComponent={header ? <View style={s.header}>{header}</View> : null}
       ListFooterComponent={footer ? <>{footer}</> : null}
       ListEmptyComponent={
-        loading ? (
-          <Skeleton
-            label={feedback.loadingLabel}
-            motion={feedback.motion}
-            variant="rows"
-            lines={6}
-          />
-        ) : (
-          <>{empty}</>
-        )
+        <View style={s.empty}>
+          {loading ? (
+            <Skeleton
+              label={feedback.loadingLabel}
+              motion={feedback.motion}
+              variant="rows"
+              lines={6}
+            />
+          ) : (
+            empty
+          )}
+        </View>
       }
       {...testable(testID)}
     />
@@ -85,6 +87,9 @@ export function ListScreen<T>({
 const styles = (t: Theme) =>
   StyleSheet.create({
     header: { gap: t.space.lg },
+    // The empty region keeps the page's rhythm: its elements are the list's, so
+    // they are spaced as its rows are.
+    empty: { gap: t.space.lg },
   });
 
 /** Grouped lists retain virtualization in the same native list owner. */
@@ -112,6 +117,7 @@ export function GroupedListScreen<T>({
   readonly testID?: string | undefined;
 }) {
   const t = useTheme(),
+    s = useStyles(styles),
     canvas = useCanvas();
   return (
     <SectionList
@@ -137,7 +143,12 @@ export function GroupedListScreen<T>({
         : {})}
       ListHeaderComponent={<>{header}</>}
       ListFooterComponent={<>{footer}</>}
-      ListEmptyComponent={<>{empty}</>}
+      // The list measures whatever it is given for an empty region, so the region
+      // has to be a view: a bare fragment can carry no measurement and React
+      // reports an element it cannot hand props to over the page.
+      ListEmptyComponent={
+        empty === undefined || empty === null ? undefined : <View style={s.empty}>{empty}</View>
+      }
       {...testable(testID)}
     />
   );
