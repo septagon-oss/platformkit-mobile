@@ -23,6 +23,8 @@ export type Placement = "inline" | "header";
 
 interface Props {
   readonly label: string;
+  /** name is what the control announces when the word it shows is not the whole name — a stepper's "Increase" sits beside a value named "Quantity". */
+  readonly name?: string;
   readonly onPress: () => void;
   readonly tone?: ButtonTone;
   readonly placement?: Placement;
@@ -42,6 +44,7 @@ interface Props {
 
 export function Button({
   label,
+  name,
   onPress,
   tone = "primary",
   placement = "inline",
@@ -93,7 +96,7 @@ export function Button({
       onHoverOut={() => setHovered(false)}
       disabled={off}
       accessibilityRole={accessibilityRole}
-      accessibilityLabel={label}
+      accessibilityLabel={name ?? label}
       {...(reason || hint ? { accessibilityHint: reason ?? hint } : {})}
       accessibilityState={{
         disabled: off,

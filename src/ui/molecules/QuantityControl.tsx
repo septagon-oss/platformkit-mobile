@@ -1,11 +1,10 @@
 import React from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import type { QuantityModel } from "../../core/derive";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 import { Notice } from "../atoms/Notice";
-import { kitStyles } from "../layout";
-import { useStyles } from "../theme";
+import { useStyles, type Theme } from "../theme";
 export function QuantityControl({
   model,
   onChange,
@@ -13,13 +12,14 @@ export function QuantityControl({
   readonly model: QuantityModel;
   readonly onChange: (value: number) => void;
 }) {
-  const s = useStyles(kitStyles);
+  const s = useStyles(styles);
   return (
     <View style={s.stack}>
       <Text role="label">{model.label}</Text>
       <View style={s.row}>
         <Button
-          label={model.decreaseLabel}
+          label={model.decreaseWord}
+          name={model.decreaseLabel}
           tone="secondary"
           disabled={model.decrease === undefined}
           busy={model.state === "busy"}
@@ -58,7 +58,8 @@ export function QuantityControl({
           {model.text}
         </Text>
         <Button
-          label={model.increaseLabel}
+          label={model.increaseWord}
+          name={model.increaseLabel}
           tone="secondary"
           disabled={model.increase === undefined}
           busy={model.state === "busy"}
@@ -72,3 +73,13 @@ export function QuantityControl({
     </View>
   );
 }
+
+const styles = (t: Theme) =>
+  StyleSheet.create({
+    stack: { gap: t.space.md },
+    // A stepper is read as one line — less, how many, more — so this row never
+    // wraps: a value stranded below its two controls is a number no control
+    // visibly belongs to. The word each control prints stays short for the same
+    // reason, and announces the full name in its place.
+    row: { flexDirection: "row", alignItems: "center", gap: t.space.sm },
+  });
