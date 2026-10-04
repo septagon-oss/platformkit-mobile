@@ -68,6 +68,29 @@ test("a hundred and nine new items is a crowd, not a number", () => {
   assert.equal(badgeText(0, english), "0");
 });
 
+test("a destination that cannot be opened keeps the reason it stays for", () => {
+  const tabs = ready(
+    deriveTabs(
+      {
+        tabs: [three[0]!, { ...three[1]!, unavailable: "Ask an owner for access" }, three[2]!],
+        selected: "today",
+      },
+      english,
+    ),
+  );
+  assert.deepEqual(
+    tabs.items.map((item) => item.unavailable),
+    [undefined, "Ask an owner for access", undefined],
+  );
+  refused(
+    deriveTabs(
+      { tabs: [{ ...three[0]!, unavailable: "" }, three[1]!], selected: "today" },
+      english,
+    ),
+    "tabs.0.unavailable",
+  );
+});
+
 test("a bar refuses one destination and six", () => {
   refused(deriveTabs({ tabs: [three[0]!], selected: three[0]!.id }, english), "tabs");
   refused(

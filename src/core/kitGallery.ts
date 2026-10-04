@@ -127,6 +127,7 @@ export const kitCaseIds = [
   "progress-meter/unmeasured",
   "tab-bar/three",
   "tab-bar/five",
+  "tab-bar/unavailable",
   "search-field/clear",
   "search-field/query",
   "search-field/busy",
@@ -786,14 +787,29 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 ],
                 selected: "library",
               }
-            : {
-                tabs: [
-                  { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
-                  { id: "search", label: c.search },
-                  { id: "you", label: pt ? "Tu" : "You" },
-                ],
-                selected: "search",
-              },
+            : state === "unavailable"
+              ? {
+                  tabs: [
+                    { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
+                    {
+                      id: "billing",
+                      label: pt ? "Fatura" : "Billing",
+                      unavailable: pt
+                        ? "Peça o acesso a um responsável"
+                        : "Ask an owner for access",
+                    },
+                    { id: "you", label: pt ? "Tu" : "You" },
+                  ],
+                  selected: "today",
+                }
+              : {
+                  tabs: [
+                    { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
+                    { id: "search", label: c.search },
+                    { id: "you", label: pt ? "Tu" : "You" },
+                  ],
+                  selected: "search",
+                },
           p,
         ),
       ),

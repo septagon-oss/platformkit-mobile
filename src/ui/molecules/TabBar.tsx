@@ -33,6 +33,7 @@ export function TabBar({
   const s = useStyles(styles);
   const [hovered, setHovered] = useState<string | undefined>();
   const [focused, setFocused] = useState<string | undefined>();
+  const notes = model.items.filter((item) => item.unavailable !== undefined);
   return (
     // Not `accessible`: a container marked so becomes one element on iOS and the
     // tabs inside it stop being reachable one by one, which is the whole point of
@@ -43,51 +44,74 @@ export function TabBar({
       style={[s.bar, raised && s.float, { paddingBottom: insets.bottom }]}
       {...testable(testID)}
     >
-      {model.items.map((item, i) => (
-        <Pressable
-          key={item.id}
-          onPress={() => {
-            if (!item.selected) onSelect(item.id);
-          }}
-          onHoverIn={() => setHovered(item.id)}
-          onHoverOut={() => setHovered(undefined)}
-          onFocus={() => setFocused(item.id)}
-          onBlur={() => setFocused(undefined)}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: item.selected }}
-          accessibilityLabel={item.badge ? `${item.label}, ${item.badge}` : item.label}
-          accessibilityActions={item.selected ? [] : [{ name: "activate", label: item.label }]}
-          onAccessibilityAction={(event) => {
-            if (event.nativeEvent.actionName === "activate" && !item.selected) onSelect(item.id);
-          }}
-          {...testable(`${testID ?? "tab-bar"}:${item.id}`)}
-          style={({ pressed }) => [
-            s.item,
-            hovered === item.id && !item.selected && s.hover,
-            pressed && s.press,
-            item.selected && s.selected,
-            focused === item.id && s.focused,
-          ]}
-        >
-          {icons[i] ? (
-            <Icon name={icons[i]!} size="md" tone={item.selected ? "accent" : "muted"} />
-          ) : null}
-          <Text
-            role="caption"
-            weight={item.selected ? "semibold" : "regular"}
-            tone={item.selected ? "primary" : "muted"}
-            numberOfLines={1}
-          >
+      <View style={s.lane}>
+        {model.items.map((item, i) => {
+          const off = item.unavailable !== undefined;
+          return (
+            <Pressable
+              key={item.id}
+              onPress={() => {
+                if (!item.selected && !off) onSelect(item.id);
+              }}
+              disabled={off}
+              onHoverIn={() => setHovered(item.id)}
+              onHoverOut={() => setHovered(undefined)}
+              onFocus={() => setFocused(item.id)}
+              onBlur={() => setFocused(undefined)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: item.selected, disabled: off }}
+              accessibilityLabel={item.badge ? `${item.label}, ${item.badge}` : item.label}
+              {...(item.unavailable === undefined ? {} : { accessibilityHint: item.unavailable })}
+              accessibilityActions={
+                item.selected || off ? [] : [{ name: "activate", label: item.label }]
+              }
+              onAccessibilityAction={(event) => {
+                if (event.nativeEvent.actionName === "activate" && !item.selected && !off)
+                  onSelect(item.id);
+              }}
+              {...testable(`${testID ?? "tab-bar"}:${item.id}`)}
+              style={({ pressed }) => [
+                s.item,
+                hovered === item.id && !item.selected && s.hover,
+                pressed && s.press,
+                item.selected && s.selected,
+                focused === item.id && s.focused,
+                off && s.off,
+              ]}
+            >
+              {icons[i] ? (
+                <Icon name={icons[i]!} size="md" tone={item.selected ? "accent" : "muted"} />
+              ) : null}
+              <Text
+                role="caption"
+                weight={item.selected ? "semibold" : "regular"}
+                tone={item.selected ? "primary" : "muted"}
+                numberOfLines={1}
+              >
+                {item.label}
+              </Text>
+              {item.badge ? (
+                <View style={s.badge}>
+                  <Text role="caption" weight="semibold" tone="on" style={s.badgeText}>
+                    {item.badge}
+                  </Text>
+                </View>
+              ) : null}
+            </Pressable>
+          );
+        })}
+      </View>
+      {/* A destination that cannot be opened stays where it is and says why, in
+          words under the bar: the disabled shape alone tells nobody what to do. */}
+      {notes.map((item) => (
+        <View key={item.id} style={s.note} {...testable(`${testID ?? "tab-bar"}:note-${item.id}`)}>
+          <Text role="caption" weight="semibold">
             {item.label}
           </Text>
-          {item.badge ? (
-            <View style={s.badge}>
-              <Text role="caption" weight="semibold" tone="on" style={s.badgeText}>
-                {item.badge}
-              </Text>
-            </View>
-          ) : null}
-        </Pressable>
+          <Text role="caption" tone="muted">
+            {item.unavailable}
+          </Text>
+        </View>
       ))}
     </View>
   );
@@ -96,14 +120,25 @@ export function TabBar({
 const styles = (t: Theme) =>
   StyleSheet.create({
     bar: {
-      flexDirection: "row",
-      alignItems: "stretch",
       backgroundColor: t.color.surfacePrimary,
       borderTopWidth: 1,
       borderTopColor: t.state.divider,
       minHeight: t.extent.tabBar,
     },
+    lane: {
+      flexDirection: "row",
+      alignItems: "stretch",
+      minHeight: t.extent.tabBar,
+    },
     float: { ...t.state.raised },
+    note: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "baseline",
+      gap: t.space.xs,
+      paddingHorizontal: t.space.md,
+      paddingBottom: t.space.sm,
+    },
     item: {
       flex: 1,
       minHeight: t.hit,
@@ -117,6 +152,7 @@ const styles = (t: Theme) =>
     hover: { backgroundColor: t.state.hovered },
     press: { backgroundColor: t.state.pressed },
     selected: { backgroundColor: t.state.selected },
+    off: { backgroundColor: t.state.disabled.fill },
     focused: {
       borderColor: t.color.focus,
       outlineColor: t.color.focus,

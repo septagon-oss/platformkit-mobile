@@ -79,6 +79,7 @@ export const galleryPages = {
     cases: [
       "tab-bar/three",
       "tab-bar/five",
+      "tab-bar/unavailable",
       "action-control/default",
       "action-control/busy",
       "summary-detail/default",

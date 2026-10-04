@@ -9,6 +9,8 @@ export interface Tab {
   readonly id: string;
   readonly label: string;
   readonly badge?: number;
+  /** unavailable is why this destination cannot be opened right now. The word stays with the destination: a bar that is missing one has lost the place a person would have looked for it. */
+  readonly unavailable?: string;
 }
 
 export interface TabsInput {
@@ -31,6 +33,7 @@ export function deriveTabs(input: TabsInput, p: Presentation) {
       v.text(tab.label, `tabs.${i}.label`);
       if (tab.badge !== undefined)
         v.need(Number.isSafeInteger(tab.badge) && tab.badge >= 0, `tabs.${i}.badge`);
+      if (tab.unavailable !== undefined) v.text(tab.unavailable, `tabs.${i}.unavailable`);
     });
     v.need(
       input.tabs.some((tab) => tab.id === input.selected),
@@ -42,6 +45,7 @@ export function deriveTabs(input: TabsInput, p: Presentation) {
         label: tab.label,
         selected: tab.id === input.selected,
         badge: tab.badge === undefined ? undefined : badgeText(tab.badge, p),
+        unavailable: tab.unavailable,
       })),
       label: p.copy.kit.navigate,
     };
