@@ -559,7 +559,9 @@ neither keeps a flow list of its own: the spec list is the directory, and
 `check:flows` is what makes that honest. That gate proves what is provable
 without Maestro; `maestro check-syntax <file>` — it takes one flow, not the
 directory — proves the file against the runner's own schema, and the job runs
-both before it rents a device.
+both before it rents a device. A flow says which screens it proves with
+`# screen:` lines in its header comment, above the `---` that starts its steps;
+a line like that among the steps is a remark about one step and covers nothing.
 
 The verb journey is the one that reads two ways. At the record's address
 (`app/[module]/[entity]/[id]/run/[verb].tsx`) it runs a lifecycle command to its

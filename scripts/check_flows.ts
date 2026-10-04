@@ -13,6 +13,8 @@ const SOURCES = ["src", "app"];
 const APP_ID = "dev.septagon.platformkit.ci";
 /** A flow names its screens in its own header comment, one path per line. */
 const CLAIM = /^# screen: (app\/\S+)$/gm;
+/** STEPS is the divider a Maestro flow puts between its configuration and its journey. */
+const STEPS = /^---\s*$/;
 
 function files(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
@@ -57,14 +59,26 @@ export function routeFiles(root: string): string[] {
     .sort();
 }
 
-/** screenClaims reads what each flow says it proves: every `# screen: app/…` line, in file order. */
+/**
+ * header is the text above that divider: a flow's comments and its
+ * configuration. The claim is read from here and nowhere else, because a
+ * `# screen:` line written among the steps is a remark about one step — and a
+ * screen covered by a remark is a screen no journey ever reaches.
+ */
+function header(text: string): string {
+  const lines = text.split(/\r?\n/);
+  const steps = lines.findIndex((line) => STEPS.test(line));
+  return (steps < 0 ? lines : lines.slice(0, steps)).join("\n");
+}
+
+/** screenClaims reads what each flow says it proves: every `# screen: app/…` line in its header, in file order. */
 export function screenClaims(root: string): Map<string, string[]> {
   const named = new Map<string, string[]>();
   const at = path.join(root, FLOWS);
   for (const f of readdirSync(at)
     .filter((n) => n.endsWith(".yaml"))
     .sort()) {
-    const text = readFileSync(path.join(at, f), "utf8");
+    const text = header(readFileSync(path.join(at, f), "utf8"));
     named.set(
       f,
       [...text.matchAll(CLAIM)].map((m) => m[1]!),
