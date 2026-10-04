@@ -541,6 +541,60 @@ exercises a native device or connects to a live server. For a screen or session
 change, also exercise the affected journey on the target platform and report
 what you ran.
 
+### Run the device journeys
+
+A flow is a journey a person takes on a device: `e2e/flows/` holds one per
+screen this app draws, and `make e2e-android` runs them on an emulator against a
+server you already have. It needs the verification build signed for an emulator
+(`make apk ABIS=x86_64 PROFILE=ci && make apk-debug-sign`), a device on `adb`,
+the Maestro CLI, and the values the flows read, which `scripts/e2e/run.sh`
+names: `SERVER`, `EMAIL`, `PASSWORD`, a writable resource `MODULE`/`ENTITY`
+whose first writable string field is `KNOWN`, a lifecycle command `VERB` with
+its argument `VERB_FIELD` and the summary the API document gives it
+`VERB_TITLE`, and optionally `TITLE` (a per-run stamp by default). Nothing is
+committed, no flow names a tenant, and no journey runs against a mocked API.
+Both runners end at `scripts/e2e/run.sh` — the workstation's
+`scripts/e2e/android.sh` and the CI job's `scripts/e2e/mobile_ci.sh` — so
+neither keeps a flow list of its own: the spec list is the directory, and
+`check:flows` is what makes that honest. That gate proves what is provable
+without Maestro; `maestro check-syntax <file>` — it takes one flow, not the
+directory — proves the file against the runner's own schema, and the job runs
+both before it rents a device.
+
+The `mobile-e2e` workflow runs every flow on each push to main and nightly,
+against a kernel it serves itself, and carries no `continue-on-error`: a journey
+that skipped would leave the coverage the gate above counts looking like a
+figure nobody earned. It needs two repository variables and no secret —
+`PK_KERNEL_IMAGE`, the kernel to serve, pinned to a digest because this
+repository has no Go toolchain and cannot build one, and `PK_MOBILE_AVD`, the
+Android Virtual Device to boot — and it refuses by name when either is missing.
+Its own database, tenant, administrator and password are created by the run and
+dropped with it, and the Maestro report is printed in the job log. What that job
+proves is these journeys; the kernel's `mobile_flow_pass_rate` is read from the
+kernel's own manifest, and stays where that manifest puts it until a kernel-side
+change reads this repository's report.
+
+**Reused** — the four journeys that already existed (`sign-in.yaml` as a
+sub-flow every new one opens with, `gallery.yaml`'s deep-link and scroll
+vocabulary, `record.yaml`'s create-edit-delete spine), the testIDs and header
+words the components already set, `scripts/source.ts`'s exported-check-plus
+module-run-guard shape for `scripts/check_flows.ts`, `tests/scale.test.ts`'s
+guard-with-its-own-fixtures shape for `tests/flow-coverage.test.ts`, and —
+copied and cited in each file's header — the kernel's `scripts/mobile_e2e.sh`
+serve-and-wait fixture, its `.gitea/workflows/mobile.yml` step list, its
+`postgres-init.sql` role, and the tool search and refusal of its
+`e2e/maestro/README.md`. **Added** — `scripts/e2e/mobile_ci.sh`, because nothing
+in this repository has ever started a server (`android.sh` required one somebody
+else had started) and no existing unit could state the claim that a device which
+signed in can use what the served catalog published; and
+`.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all.
+**Made reusable** — `scripts/e2e/run.sh`, one last mile (install, reverse, run
+the directory, write the JUnit) that any future runner calls instead of
+repeating, `scripts/e2e/tools.sh`, the tool search and the refusal that says
+where it looked, and `# screen:` as the way a journey says what it proves — so
+the next screen added under `app/` arrives with a journey or with a failing
+check.
+
 [testdata/catalog.json](testdata/catalog.json) is a checked-in copy of
 PlatformKit's `ui/screens/testdata/catalog.json`, and
 [testdata/catalog.source.json](testdata/catalog.source.json) records the commit it

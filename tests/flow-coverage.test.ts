@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test, { type TestContext } from "node:test";
@@ -108,4 +108,41 @@ test("a route added without a journey is refused, not the flows beside it", (t) 
 
 test("this checkout names a flow for every one of its route screens", () => {
   assert.deepEqual(checkFlows(process.cwd()), []);
+});
+
+const tracked = (at: string): string =>
+  readFileSync(path.join(import.meta.dirname, "..", at), "utf8");
+
+test("the job that runs the journeys runs the directory, and refuses rather than continues", () => {
+  const job = tracked(".gitea/workflows/mobile-e2e.yml");
+  // Every push to main, nightly, and startable by hand; one at a time.
+  assert.match(job, /branches: \[main\]/);
+  assert.match(job, /- cron: '/);
+  assert.match(job, /workflow_dispatch:/);
+  assert.match(job, /cancel-in-progress: false/);
+  // A journey that quietly continued after an error would leave the coverage the
+  // gate above counts looking like a figure nobody earned.
+  assert.doesNotMatch(job, /continue-on-error/, "this job blocks, it does not report");
+  assert.match(job, /run: scripts\/e2e\/mobile_ci\.sh --probe/);
+  // Maestro's own schema, checked on the runner before a device is rented.
+  assert.match(job, /maestro check-syntax "\$flow"/);
+  assert.match(job, /run: scripts\/e2e\/mobile_ci\.sh/);
+  assert.match(job, /did not reach its report/, "no JUnit is a refusal, not an empty pass");
+  assert.match(job, /steps\.emulator\.outputs\.pid/, "teardown is by the pid that was recorded");
+});
+
+test("one script runs Maestro, and no runner keeps a flow list beside it", () => {
+  const runners = [
+    "scripts/e2e/run.sh",
+    "scripts/e2e/android.sh",
+    "scripts/e2e/mobile_ci.sh",
+    "scripts/e2e/tools.sh",
+  ].filter((f) => /"?\$?MAESTRO"?\s+test\s/i.test(tracked(f)));
+  assert.deepEqual(runners, ["scripts/e2e/run.sh"], "the last mile has one owner");
+  for (const f of [
+    "scripts/e2e/android.sh",
+    "scripts/e2e/mobile_ci.sh",
+    ".gitea/workflows/mobile-e2e.yml",
+  ])
+    assert.doesNotMatch(tracked(f), /flows\/[a-z-]+\.yaml/, `${f}: names a flow file`);
 });
