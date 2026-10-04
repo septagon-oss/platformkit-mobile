@@ -51,7 +51,10 @@ export function SearchField({ model, onChangeText, onSubmit, onClear, testID }: 
           plain
           value={model.value}
           onChangeText={onChangeText}
-          onSubmitEditing={onSubmit}
+          // A query that is still being answered owns the next one: while the
+          // model is busy the field keeps the caret and the typed text, but a
+          // submit asks for nothing, exactly as a busy button asks for nothing.
+          onSubmitEditing={model.busy ? undefined : onSubmit}
           accessibilityLabel={model.label}
           placeholder={model.placeholder}
           returnKeyType="search"
