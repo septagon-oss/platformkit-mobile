@@ -159,8 +159,15 @@ not a control that renders, and the kit commits to six things the checks name:
   held to; a component nobody has photographed is not finished. The bar those
   photographs are judged against is named row by row in
   `design/references/refs.json` — the screen, why it was chosen for the pattern,
-  what the kit draws against it today — and `npm run check:references` proves the
-  reference store still holds exactly those bytes.
+  what the kit draws against it today — and each row carries its own picture:
+  the kit's specimen for that pattern, committed beside the manifest at 390 px
+  (`ours_case` names it, `?case=<specimen>` opens it, and
+  `tests/references-capture.case.mjs` re-photographs every row). Mobbin licences
+  a screenshot to its subscriber, so no reference image byte is copied into this
+  public source; `source` with `store_sha256`/`store_bytes` names the bar in the
+  reference store, and `npm run check:references` proves the store still holds
+  exactly those bytes and that every committed picture is the bytes its row
+  promises.
 
 ## Consume the shared native source
 

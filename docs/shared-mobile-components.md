@@ -1087,7 +1087,10 @@ Use the named section as the reference for hierarchy and behavior; adapt it to
 native targets, accessibility and the supplied palette. A web screenshot does
 not prove a native gesture, another state, a second theme or pixel parity. No
 reference image, account content or product-specific fixture is copied into the
-public source. The phase report records the existing file paths and hashes.
+public source. The phase report records the existing file paths and hashes. The
+phone-pattern bar added for the gallery (`design/references/refs.json`, R25–R41)
+holds the same line: each chosen screen is named by URL and hash, and what is
+committed beside it is the kit's own specimen for that pattern, photographed.
 
 | ID | Public reference and inspected section | Native answer / evidence limit |
 | --- | --- | --- |

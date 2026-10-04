@@ -441,7 +441,10 @@ function Samples({
         </View>
       </Section>
 
-      <Section title="Fields">
+      {/* The fields block carries an id because design/references/refs.json
+          photographs it: a refused field is the kit's drawing of that bar, and
+          the picture has to name the block it came from. */}
+      <Section title="Fields" testID="gallery-block:primitives-fields">
         <FormField label="Words" required help="Some help under the field.">
           <TextField
             value={words}
