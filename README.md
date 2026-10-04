@@ -559,9 +559,13 @@ Both runners end at `scripts/e2e/run.sh` — the workstation's
 `scripts/e2e/android.sh` and the CI job's `scripts/e2e/mobile_ci.sh` — so
 neither keeps a flow list of its own: the spec list is the directory, and
 `check:flows` is what makes that honest. That gate proves what is provable
-without Maestro; `maestro check-syntax <file>` — it takes one flow, not the
-directory — proves the file against the runner's own schema, and the job runs
-both before it rents a device. A flow says which screens it proves with
+without Maestro, and `check:flows -- --list` answers with the same set, which is
+what the job walks for `maestro check-syntax <file>` — it takes one flow, not the
+directory — so gate, job and runner name one set of journeys. `ANDROID_SERIAL`
+names the device to adb, and `scripts/e2e/run.sh` names it to Maestro too
+(`--device`): Maestro reads no `ANDROID_SERIAL` and falls back to every device it
+finds connected, so a second emulator would otherwise install on one device and
+run the journeys on another. A flow says which screens it proves with
 `# screen:` lines in its header comment, above the `---` that starts its steps;
 a line like that among the steps is a remark about one step and covers nothing.
 

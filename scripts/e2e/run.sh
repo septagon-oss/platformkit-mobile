@@ -12,7 +12,9 @@
 #
 # Needs: one device on adb, the Maestro CLI, and a server the device reaches at
 # SERVER. ANDROID_SERIAL, when set, names which device — the CI job names the
-# emulator it booted, and run.sh refuses a serial that is not attached. An
+# emulator it booted, run.sh refuses a serial that is not attached, and Maestro is
+# started with that same device named to it, because adb and Maestro each pick a
+# device of their own unless told otherwise. An
 # address on this machine arrives through `adb reverse`: localhost on the
 # emulator is this machine's localhost for the reversed port. A server that
 # selects its tenant by host name is reached through scripts/e2e/proxy.ts — set
@@ -53,14 +55,24 @@ pk_tools run.sh adb "$MAESTRO" || exit 1
   echo "run.sh: no APK at $apk; run make apk ABIS=x86_64 PROFILE=ci && make apk-debug-sign" >&2
   exit 1
 }
-# One device, and it is named. adb takes -s before the command, so ANDROID_SERIAL
-# (which the CI job sets to the emulator it booted, at the step that booted it)
-# sends every call below to that device alone: a second device on the host is not
-# driven by this run, and a serial that is not attached is a refusal rather than a
-# journey on somebody else's phone. With nothing named, adb does what it always
-# did — the workstation's own emulator is the only device there.
+# One device, and it is named — to both tools that will touch it. adb takes -s
+# before the command, so ANDROID_SERIAL (which the CI job sets to the emulator it
+# booted, at the step that booted it) sends every call below to that device alone.
+# Maestro takes the same fact as its own option: it reads no ANDROID_SERIAL, and
+# its device ids come from the command line, falling back to every device it finds
+# connected (maestro.cli.command.TestCommand, `--udid, --device=<deviceId>`). With
+# nothing named here it picks one itself, so a second emulator that appeared after
+# the boot check would install on one device and run the state-clearing journeys on
+# another. A serial that is not attached is a refusal rather than a journey on
+# somebody else's phone. With nothing named at all, adb does what it always did —
+# the workstation's own emulator is the only device there, and a second one is adb's
+# own refusal to guess.
 adb_cmd=(adb)
-if [ -n "${ANDROID_SERIAL:-}" ]; then adb_cmd=(adb -s "$ANDROID_SERIAL"); fi
+maestro_device=()
+if [ -n "${ANDROID_SERIAL:-}" ]; then
+  adb_cmd=(adb -s "$ANDROID_SERIAL")
+  maestro_device=(--device "$ANDROID_SERIAL")
+fi
 # The list is taken unqualified: -s does not narrow `adb devices`, and what this
 # check asks is whether anything at all is attached.
 attached=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+device$/\1/p')
@@ -91,7 +103,7 @@ if [ -n "$port" ]; then "${adb_cmd[@]}" reverse "tcp:$port" "tcp:$port"; fi
 echo "run.sh: installed $apk, running e2e/flows against $SERVER"
 
 mkdir -p "$(dirname "$report")"
-"$MAESTRO" test e2e/flows \
+"$MAESTRO" test e2e/flows "${maestro_device[@]}" \
   -e SERVER="$SERVER" -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" \
   -e MODULE="$MODULE" -e ENTITY="$ENTITY" -e KNOWN="$KNOWN" \
   -e VERB="$VERB" -e VERB_FIELD="$VERB_FIELD" -e VERB_TITLE="$VERB_TITLE" \
