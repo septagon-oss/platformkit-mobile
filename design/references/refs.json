@@ -154,8 +154,8 @@
       "ours": "TabBar draws two to five destinations, icon above label, inside the device's bottom inset, `raised` when it floats over the content, with the tab's badge text where it has one. What the screen still shows and the kit does not is the bar sitting under a persistent mini player: the kit draws the two a page apart.",
       "ours_case": "tab-bar/three",
       "ours_file": "R33-tab-bar.png",
-      "sha256": "43ea5b510f375cc2abc42c18abe4d98010fe027a4837159567d6a4aa16af18b1",
-      "bytes": 51187
+      "sha256": "8cd8323471f117e5e6be91fdfe4c430a4696fa90c3d7492f0ee2522aab7dd8fb",
+      "bytes": 53193
     },
     {
       "id": "R34",
