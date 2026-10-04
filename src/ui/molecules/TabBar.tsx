@@ -13,8 +13,8 @@ import { useStyles, type Theme } from "../theme";
 interface Props {
   readonly model: TabsModel;
   readonly onSelect: (id: string) => void;
-  /** icons names each destination in the same order as the model's items. */
-  readonly icons?: readonly IconName[];
+  /** icons names each destination in the same order as the model's items; a destination with no honest glyph for its label draws none. */
+  readonly icons?: readonly (IconName | undefined)[];
   /** insets is what the device asks back for: the safe area under the bar. */
   readonly insets?: { readonly bottom: number; readonly top?: number };
   /** raised is the bar floating over the content rather than ending the page. */

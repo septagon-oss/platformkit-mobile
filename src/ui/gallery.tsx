@@ -24,7 +24,7 @@ import { Badge } from "./atoms/Badge";
 import { Button } from "./atoms/Button";
 import { ChoiceRow } from "./atoms/ChoiceRow";
 import { DateTimeRow } from "./atoms/DateTimeRow";
-import { Icon } from "./atoms/Icon";
+import { Icon, type IconName } from "./atoms/Icon";
 import { Notice } from "./atoms/Notice";
 import { Spinner } from "./atoms/Spinner";
 import { SwitchRow } from "./atoms/SwitchRow";
@@ -92,6 +92,17 @@ const choices = [
   { value: "open", label: "Open" },
   { value: "done", label: "Done" },
 ];
+
+// A tab's glyph says what its label says, so it belongs to the destination and
+// never to the order a list of glyphs was written in. A destination absent here
+// draws no glyph rather than whichever one came next.
+const tabGlyph: Readonly<Record<string, IconName>> = {
+  today: "calendar",
+  sets: "grid",
+  search: "search",
+  library: "image",
+  you: "person",
+};
 
 interface Props {
   readonly presentation: Presentation;
@@ -964,7 +975,7 @@ function KitSamples({
       return (
         <TabBar
           model={k.tabs}
-          icons={["person", "add", "more", "server", "sort"]}
+          icons={k.tabs.items.map((item) => tabGlyph[item.id])}
           onSelect={(id) => {
             setHeld({ ...held, choice: id });
             action(id);
