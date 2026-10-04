@@ -14,6 +14,7 @@ import {
   commandTitle,
   humanize,
   otherScope,
+  screenPath,
   type Clock,
   type CommandScope,
 } from "../core/derive";
@@ -58,10 +59,13 @@ function Refused({
 }) {
   const router = useRouter();
   // The way out is the one every sheet here uses: back over whatever pushed it,
-  // which for a deep link is the screen the link was opened from.
+  // and where a link opened the sheet on an empty stack there is nothing to go
+  // back over, so the screen lands on the resource list the refusal is about.
+  // An enabled control that did nothing would be a door with no room behind it.
   const done = useCallback(() => {
     if (router.canGoBack()) router.back();
-  }, [router]);
+    else router.replace(screenPath(entry));
+  }, [router, entry]);
   const other = commandOf(entry, verb, otherScope(at));
   const text = other
     ? at === "collection"
