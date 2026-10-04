@@ -30,13 +30,17 @@ export const galleryPages = {
       "activity/before-after",
     ],
   },
+  // A table page is a table first: named columns over rows of records, with the
+  // figures in a column of their own. The tiles and the sparkline are what a
+  // table's cells are made of, so they read beside it rather than standing in
+  // for it — which is what left this page with no columns and no rows.
   table: {
-    lead: "stat-tile/lower-is-better",
+    lead: "data-table/populated",
     cases: [
+      "data-table/populated",
+      "data-table/absent-figure",
       "stat-tile/lower-is-better",
-      "stat-tile/zero-baseline",
       "sparkline/rising",
-      "sparkline/gap",
       "price/fraction",
       "quantity-control/middle",
     ],

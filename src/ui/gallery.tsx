@@ -63,6 +63,7 @@ import { MediaHero, type ImageRenderer } from "./molecules/MediaHero";
 import { ModelState } from "./molecules/ModelState";
 import { Sparkline } from "./molecules/Sparkline";
 import { StatTile } from "./molecules/StatTile";
+import { DataTable } from "./organisms/DataTable";
 import { Activity } from "./organisms/Activity";
 import { DataList } from "./organisms/DataList";
 import { Stepper } from "./organisms/Stepper";
@@ -922,6 +923,8 @@ function KitSamples({
           onRetry={() => action("retry")}
         />
       );
+    case "data-table":
+      return <DataTable model={k.table} />;
     case "stat-tile":
       return <StatTile model={k.stat} />;
     case "progress-meter":

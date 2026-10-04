@@ -20,6 +20,7 @@ import { deriveSearch, deriveTabs } from "./navigation";
 import { deriveMap } from "./map";
 import { deriveMedia, deriveMediaHero, deriveViewer } from "./media";
 import { deriveSparkline, deriveChart, deriveBars, deriveStat } from "./charts";
+import { deriveTable } from "./table";
 import { deriveState, type Action } from "./feedback";
 import type { Presentation } from "./presentation";
 import { build, type Validation, type Content } from "./shared";
@@ -77,6 +78,8 @@ export const kitCaseIds = [
   "agenda-list/range",
   "calendar/week",
   "calendar/agenda",
+  "data-table/populated",
+  "data-table/absent-figure",
   "price/fraction",
   "price/large-int64",
   "price/negative",
@@ -533,6 +536,61 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         ),
       ),
       calendar: v.take(deriveCalendar(calendarInput, p)),
+      // The same four records read across rather than down: the quote line, how
+      // many, and what each one costs. One row of `absent-figure` carries no
+      // price, which the table draws as nothing rather than as zero.
+      table: v.take(
+        deriveTable(
+          {
+            caption: c.table,
+            columns: [
+              { id: "quote", label: c.quote, kind: "text" },
+              { id: "quantity", label: c.quantity, kind: "number" },
+              { id: "price", label: c.price, kind: "money" },
+            ],
+            rows: [
+              {
+                id: "summary",
+                cells: [
+                  { columnId: "quote", value: c.summary },
+                  { columnId: "quantity", value: 2 },
+                  { columnId: "price", value: { minor: "1299", currency } },
+                ],
+              },
+              {
+                id: "details",
+                cells: [
+                  { columnId: "quote", value: c.details },
+                  { columnId: "quantity", value: 1 },
+                  { columnId: "price", value: { minor: "4500", currency } },
+                ],
+              },
+              {
+                id: "receipt",
+                cells: [
+                  { columnId: "quote", value: c.receipt },
+                  { columnId: "quantity", value: 5 },
+                  { columnId: "price", value: { minor: "7250", currency } },
+                ],
+              },
+              {
+                id: "estimate",
+                cells: [
+                  { columnId: "quote", value: c.estimate },
+                  { columnId: "quantity", value: 3 },
+                  // No figure at all, which is a value the cell holds: a zero
+                  // here would claim a line that costs nothing.
+                  {
+                    columnId: "price",
+                    ...(state === "absent-figure" ? {} : { value: { minor: "3100", currency } }),
+                  },
+                ],
+              },
+            ],
+          },
+          p,
+        ),
+      ),
       price: v.take(derivePrice(price, p)),
       quantity: v.take(deriveQuantity(quantity, p)),
       product: v.take(
