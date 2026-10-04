@@ -19,7 +19,7 @@
 # The step list is composed from platformkit's .gitea/workflows/mobile.yml (the
 # probe with the paths it found, :81-120; the emulator booted headless with its
 # pid recorded, :147-167; the report step that refuses when the JUnit is absent,
-# :172-180; teardown by recorded pid, :182-192; concurrency per ref, :26-30) and
+# :172-180; teardown by recorded pid, :182-192; concurrency, :26-30) and
 # this repository's own nightly precedent, .gitea/workflows/drift.yml:8-10. The
 # server half is not copied from anything here: no unit in this repository has
 # ever started a server (scripts/e2e/android.sh required one somebody else had
@@ -43,12 +43,18 @@ permissions:
   contents: read
 
 concurrency:
-  # One journey per ref: adb reverse and a booted emulator are host-level, so a
-  # second run on the same machine would drive the first one's device. Queued,
-  # not cancelled — platformkit's mobile job cancels, and this one does not,
-  # because killing a journey mid-write leaves a device, a reversed port and a
-  # served kernel for the next run to trip over.
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # One journey at a time on a machine, whichever ref started it. The group is
+  # named for the device and not for the ref, because what needs the exclusion is
+  # host-level: adb reverse, the booted emulator and the served kernel's ports are
+  # one per host. A group per ref — the shape platformkit's mobile job uses — lets
+  # a workflow_dispatch on a branch run beside the nightly on main, which is the
+  # collision itself. Queued, not cancelled: killing a journey mid-write leaves a
+  # device, a reversed port and a served kernel for the next run to trip over.
+  # What this cannot reach is a job that is not this workflow's: another
+  # repository's mobile job on the same runner is outside the group, and a
+  # workflow file has no way to hold a host, so the step that boots the emulator
+  # refuses a device that is already attached rather than share one.
+  group: ${{ github.workflow }}-device
   cancel-in-progress: false
 
 jobs:
@@ -172,6 +178,16 @@ jobs:
             echo "PK_MOBILE_AVD names no Android Virtual Device on this image." >&2
             exit 1
           fi
+          # A device already on adb belongs to something this job cannot see. The
+          # concurrency group above keeps this workflow's runs off each other; a
+          # workflow file cannot hold a host against another repository's job, so
+          # the job refuses the host instead of driving a device it did not boot.
+          attached=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+device$/\1/p')
+          if [ -n "$attached" ]; then
+            echo "a device is already attached to adb on this host:" >&2
+            echo "$attached" >&2
+            exit 1
+          fi
           emulator -avd "$PK_MOBILE_AVD" -no-window -no-audio -no-boot-anim -no-snapshot \
             -gpu swiftshader_indirect >emulator.log 2>&1 &
           echo "pid=$!" >> "$GITHUB_OUTPUT"
@@ -179,6 +195,15 @@ jobs:
           for i in $(seq 1 120); do
             if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
               adb devices
+              # Name the device for the rest of the job, so scripts/e2e/run.sh's
+              # adb calls go to the emulator this step booted and to nothing else.
+              booted=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+device$/\1/p')
+              if [ "$(printf '%s\n' "$booted" | grep -c .)" != 1 ]; then
+                echo "this job expects to have booted the only device on the host; it sees:" >&2
+                echo "$booted" >&2
+                exit 1
+              fi
+              echo "serial=$booted" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             sleep 2
@@ -193,6 +218,8 @@ jobs:
         # from a list beside it. Maestro runs one invocation serially, so the
         # journeys share a device; they do not share a record, because each names
         # its own `${TITLE} <journey>` and deletes it.
+        env:
+          ANDROID_SERIAL: ${{ steps.emulator.outputs.serial }}
         run: scripts/e2e/mobile_ci.sh "$(ls out/apk/release/*-debug-signed.apk | head -1)"
 
       - name: The report, in the job's own log

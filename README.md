@@ -581,7 +581,14 @@ figure nobody earned. It needs two repository variables and no secret —
 repository has no Go toolchain and cannot build one, and `PK_MOBILE_AVD`, the
 Android Virtual Device to boot — and it refuses by name when either is missing.
 Its own database, tenant, administrator and password are created by the run and
-dropped with it, and the Maestro report is printed in the job log. What that job
+dropped with it, and the Maestro report is printed in the job log. The device is
+host-level, so the job's concurrency group is named for the device and not the
+ref, and the step that boots the emulator refuses a host that already has a
+device attached: a workflow file cannot hold a machine against a job that is not
+its own, so it declines the machine instead of sharing one. What a checkout
+cannot see is whether this forge fires `schedule:` or whether the label answers
+`actions/setup-node` and `services:` — the first run is what will tell, and
+until then no journey here has been shown passing on a device. What that job
 proves is these journeys; the kernel's `mobile_flow_pass_rate` is read from the
 kernel's own manifest, and stays where that manifest puts it until a kernel-side
 change reads this repository's report.

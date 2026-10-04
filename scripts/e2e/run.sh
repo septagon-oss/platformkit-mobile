@@ -11,8 +11,10 @@
 # no component sets; that is what `npm run check` proves about the directory.
 #
 # Needs: one device on adb, the Maestro CLI, and a server the device reaches at
-# SERVER. An address on this machine arrives through `adb reverse`: localhost on
-# the emulator is this machine's localhost for the reversed port. A server that
+# SERVER. ANDROID_SERIAL, when set, names which device — the CI job names the
+# emulator it booted, and run.sh refuses a serial that is not attached. An
+# address on this machine arrives through `adb reverse`: localhost on the
+# emulator is this machine's localhost for the reversed port. A server that
 # selects its tenant by host name is reached through scripts/e2e/proxy.ts — set
 # UPSTREAM (its real address) and TENANT_HOST (the host it knows the tenant by),
 # and SERVER to the proxy's own http://localhost:PORT.
@@ -51,15 +53,29 @@ pk_tools run.sh adb "$MAESTRO" || exit 1
   echo "run.sh: no APK at $apk; run make apk ABIS=x86_64 PROFILE=ci && make apk-debug-sign" >&2
   exit 1
 }
+# One device, and it is named. adb takes -s before the command, so ANDROID_SERIAL
+# (which the CI job sets to the emulator it booted, at the step that booted it)
+# sends every call below to that device alone: a second device on the host is not
+# driven by this run, and a serial that is not attached is a refusal rather than a
+# journey on somebody else's phone. With nothing named, adb does what it always
+# did — the workstation's own emulator is the only device there.
+adb_cmd=(adb)
+if [ -n "${ANDROID_SERIAL:-}" ]; then adb_cmd=(adb -s "$ANDROID_SERIAL"); fi
+# The list is taken unqualified: -s does not narrow `adb devices`, and what this
+# check asks is whether anything at all is attached.
+attached=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+device$/\1/p')
 # A device has to be attached for adb to have something to wait for: starting one
 # is the caller's job, because the caller is the one that knows the image, the AVD
 # and the GPU. scripts/e2e/mobile_ci.sh is the CI caller; a developer boots one.
-adb devices | grep -qs 'device$' || {
+if [ -z "$attached" ]; then
   echo "run.sh: no device is attached. Boot the emulator (see .gitea/workflows/mobile-e2e.yml) or plug in a phone." >&2
   exit 1
-}
-
-adb wait-for-device
+fi
+if [ -n "${ANDROID_SERIAL:-}" ] && ! printf '%s\n' "$attached" | grep -qxF "$ANDROID_SERIAL"; then
+  echo "run.sh: ANDROID_SERIAL=$ANDROID_SERIAL is not attached; this host has: $(echo "$attached" | tr '\n' ' ')" >&2
+  exit 1
+fi
+"${adb_cmd[@]}" wait-for-device
 port=$(echo "$SERVER" | sed -nE 's#^[a-z]+://[^:/]+:([0-9]+).*$#\1#p')
 if [ -n "${TENANT_HOST:-}" ]; then
   [ -n "$port" ] || {
@@ -70,8 +86,8 @@ if [ -n "${TENANT_HOST:-}" ]; then
   trap 'kill %1 2>/dev/null || true' EXIT
   sleep 1
 fi
-if [ -n "$port" ]; then adb reverse "tcp:$port" "tcp:$port"; fi
-adb install -r "$apk" >/dev/null
+if [ -n "$port" ]; then "${adb_cmd[@]}" reverse "tcp:$port" "tcp:$port"; fi
+"${adb_cmd[@]}" install -r "$apk" >/dev/null
 echo "run.sh: installed $apk, running e2e/flows against $SERVER"
 
 mkdir -p "$(dirname "$report")"
