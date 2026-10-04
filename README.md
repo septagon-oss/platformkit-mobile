@@ -561,6 +561,16 @@ without Maestro; `maestro check-syntax <file>` — it takes one flow, not the
 directory — proves the file against the runner's own schema, and the job runs
 both before it rents a device.
 
+The verb journey is the one that reads two ways. At the record's address
+(`app/[module]/[entity]/[id]/run/[verb].tsx`) it runs a lifecycle command to its
+end: the sheet, its argument, `run`, and the field the command wrote in the
+record afterward. At the collection's address
+(`app/[module]/[entity]/run/[verb].tsx`) it proves the refusal: a command says
+whether it is about one record or about the list, the reference kernel composes
+no command about a collection, so the screen owes that address a named refusal
+and not a sheet a person could fill in and run at a path the server never
+mounted.
+
 The `mobile-e2e` workflow runs every flow on each push to main and nightly,
 against a kernel it serves itself, and carries no `continue-on-error`: a journey
 that skipped would leave the coverage the gate above counts looking like a

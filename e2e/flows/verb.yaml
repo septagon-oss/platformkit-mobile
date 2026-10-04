@@ -1,8 +1,17 @@
-# A lifecycle command, in both of the forms the routes give it: about the
-# collection, reached by its own address because nothing the reference kernel
-# composes mounts a collection command, and about one record, which is run to
-# its end. VERB names the verb, VERB_FIELD its one argument, VERB_TITLE the
-# summary the API document gives it.
+# A lifecycle command, in both of the forms the routes give it. VERB names the
+# verb, VERB_FIELD its one argument, VERB_TITLE the summary the API document
+# gives it.
+#
+# The two forms differ by whether the path holds a row, and a command says
+# which it is about — `collection`. Nothing the reference kernel composes mounts
+# a command about the collection (each command in modules/task passes a bare
+# rest.CommandOptions{}, so `grep -rn 'rest.CommandOptions{Collection: true}'
+# --include=*.go .` is empty), so what the collection address can be shown
+# proving here is the refusal it owes a command about one record: the screen
+# named command-refused is drawn and resource-form is not, so nobody is handed a
+# sheet to fill in and run at an address the server never mounted. The day a
+# module ships a collection command, this leg goes red, and the sheet is what
+# belongs in it. The record form is run to its end below.
 # screen: app/[module]/[entity]/run/[verb].tsx
 # screen: app/[module]/[entity]/[id]/run/[verb].tsx
 appId: ${APP_ID}
@@ -15,14 +24,11 @@ env:
 - openLink: platformkit://${MODULE}/${ENTITY}/run/${VERB}
 - extendedWaitUntil:
     visible:
-      id: "resource-form"
+      id: "command-refused"
     timeout: 15000
-- assertVisible: ${VERB_TITLE}
-- assertVisible:
-    id: "input-${VERB_FIELD}"
-- assertVisible:
-    id: "run"
-- tapOn: "Cancel"
+- assertNotVisible:
+    id: "resource-form"
+- tapOn: "Close"
 - extendedWaitUntil:
     visible:
       id: "home"

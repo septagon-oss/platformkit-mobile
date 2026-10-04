@@ -7,6 +7,7 @@ import {
   collectionCommands,
   commandControls,
   commandOf,
+  commandScope,
   commandTitle,
   detailItems,
   display,
@@ -229,7 +230,7 @@ test("a command is named by its summary, or by its verb when it has none", () =>
   assert.equal(commandTitle({ verb: "set_password", fields: [] }), "Set password");
 });
 
-test("the commands about a row and the commands about the list are told apart", () => {
+test("the commands about a row and the commands about the list are told apart, by address", () => {
   assert.deepEqual(
     rowCommands(note).map((c) => c.verb),
     ["publish"],
@@ -238,8 +239,17 @@ test("the commands about a row and the commands about the list are told apart", 
     collectionCommands(note).map((c) => c.verb),
     ["archive"],
   );
-  assert.equal(commandOf(note, "publish")?.summary, "Publish a note");
-  assert.equal(commandOf(note, "nothing"), undefined);
+  assert.equal(commandOf(note, "publish", "record")?.summary, "Publish a note");
+  assert.equal(commandOf(note, "archive", "collection")?.summary, "Archive every resolved note");
+  // The address says whether there is a row to send, so it decides which form a
+  // verb takes: the same verb found on one side of the divider is not on offer
+  // at the other, where its POST would name a row the path does not hold.
+  assert.equal(commandOf(note, "publish", "collection"), undefined);
+  assert.equal(commandOf(note, "archive", "record"), undefined);
+  assert.equal(commandOf(note, "nothing", "record"), undefined);
+  assert.equal(commandOf(note, "nothing", "collection"), undefined);
+  assert.equal(commandScope("42"), "record");
+  assert.equal(commandScope(undefined), "collection");
 });
 
 test("clearing saved optional text sends an empty value while absent text stays absent", () => {
