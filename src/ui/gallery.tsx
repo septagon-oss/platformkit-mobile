@@ -256,6 +256,26 @@ export function Gallery({
 }
 
 /**
+ * The states rail keeps one plane for ink: the name of a family, the words of
+ * the specimen under it and the figures in it all start at the same left. A
+ * family that draws its own surface — a card, a table, a wall of pictures —
+ * hangs from the rail's edge and holds its words one step inside that surface,
+ * so the caption above it takes the same step and names the words rather than
+ * the border. A family that draws no surface is pulled in to that step itself.
+ * The set is the kit's own surfaces: leave a family out of it and its caption
+ * lands on a third line down the page at a desk's width, which
+ * tests/gallery-desktop-alignment.case.mjs measures on every page this branch
+ * creates.
+ */
+const ownSurface = new Set([
+  "data-table",
+  "product-card",
+  "pricing-tiers",
+  "plan-comparison",
+  "photo-gallery",
+]);
+
+/**
  * Page is one gallery page: a display line naming what the screen is, the lead
  * specimen that carries it, then the page's other cases, one section each under
  * the family that owns them. No case id, no picker, no caption — a page has to
@@ -290,12 +310,12 @@ function Page({
   const rest = model.cases.filter((id) => id !== model.lead);
   // One section per family, in the order the page names them: a page reads as
   // the screen it stands for, not as a list of specimen ids.
-  const groups: { readonly family: string; readonly cases: string[] }[] = [];
+  const groups: { readonly id: string; readonly family: string; readonly cases: string[] }[] = [];
   for (const caseId of rest) {
-    const family = humanize(pageFamily(caseId));
-    const group = groups.find((entry) => entry.family === family);
+    const id = pageFamily(caseId);
+    const group = groups.find((entry) => entry.id === id);
     if (group) group.cases.push(caseId);
-    else groups.push({ family, cases: [caseId] });
+    else groups.push({ id, family: humanize(id), cases: [caseId] });
   }
   const lead = (
     <VerbStage lead>
@@ -317,20 +337,21 @@ function Page({
   const states = (
     <VerbStage lead={false}>
       {groups.map((group) => (
-        <View key={group.family} style={s.group}>
-          <Text role="caption" tone="muted" uppercase accessibilityRole="header">
+        <View key={group.id} style={s.group}>
+          <Text role="caption" tone="muted" uppercase accessibilityRole="header" style={s.ink}>
             {group.family}
           </Text>
           {group.cases.map((caseId) => (
-            <KitSamples
-              key={caseId}
-              aside
-              presentation={presentation}
-              caseId={caseId}
-              onAction={setAction}
-              {...(renderImage ? { renderImage } : {})}
-              {...(renderZoom ? { renderZoom } : {})}
-            />
+            <View key={caseId} style={ownSurface.has(group.id) ? undefined : s.ink}>
+              <KitSamples
+                aside
+                presentation={presentation}
+                caseId={caseId}
+                onAction={setAction}
+                {...(renderImage ? { renderImage } : {})}
+                {...(renderZoom ? { renderZoom } : {})}
+              />
+            </View>
           ))}
         </View>
       ))}
@@ -1037,6 +1058,13 @@ const pageStyles = (t: Theme) =>
     phone: { width: t.extent.pageColumn, gap: t.space.md },
     lead: { gap: t.space.sm },
     group: { gap: t.space.xs },
+    /**
+     * ink is the rail's one plane for words: one step in from the column's edge,
+     * which is where a specimen that carries its own surface already keeps them.
+     * A margin, not a padding: a box is measured where it starts, and words set
+     * inside their own padding would still stand on the column's edge.
+     */
+    ink: { marginLeft: t.space.lg },
     canvas: {
       height: t.extent.chart,
       borderRadius: t.radius.md,
