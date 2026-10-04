@@ -450,8 +450,8 @@ The repository CI runs `npm run check` on pull requests and main pushes.
 package against the ranges the pinned `expo` bundles, read from
 `node_modules/expo/bundledNativeModules.json`), `typecheck` (TypeScript),
 `lint` (ESLint, including the layer
-rules), `format:check` (Prettier), `test` (the Node suite, `tsx --test
-tests/*.test.ts`, then the Jest suite, every `tests/**/*.test.tsx` rendering
+rules), `format:check` (Prettier), `test` (the Node suite, `node --import
+tsx --test tests/*.test.ts`, then the Jest suite, every `tests/**/*.test.tsx` rendering
 components, the shell, the route dispatcher and the screen hooks),
 `check:fingerprint`, `check:flows` (the journeys counted are the ones
 `maestro test e2e/flows` takes — either YAML spelling, in that directory itself,
@@ -539,8 +539,8 @@ Starting Expo generates route types under the ignored `.expo/` directory,
 which TypeScript also checks.
 The individual commands are in [package.json](package.json).
 `npm run format` formats TypeScript in `app/`, `src/` and `tests/`.
-`make test` runs the two suites and nothing else — `tsx --test tests/*.test.ts`
-then Jest — under the name a person or a CI step asks for the tests by, and it
+`make test` runs the two suites and nothing else — `node --import tsx --test
+tests/*.test.ts` then Jest — under the name a person or a CI step asks for the tests by, and it
 installs from the lockfile first when the checkout has no `node_modules/`. It
 replaces no gate: `npm run check` stays the required check.
 
@@ -644,7 +644,7 @@ PlatformKit's `ui/screens/testdata/catalog.json`, and
 [testdata/catalog.source.json](testdata/catalog.source.json) records the commit it
 was copied from, in the same shape the design-token provenance uses. The suite
 checks the bytes against that record offline, so editing the copy to make a test
-pass fails instead of fixing anything. `npx tsx scripts/catalog.ts refresh` rewrites
+pass fails instead of fixing anything. `node --import tsx scripts/catalog.ts refresh` rewrites
 both files; the pin itself moves only by editing the recorded commit, which is a
 diff somebody reviews. What no local check can see is whether the server has moved,
 so the `contract-drift` schedule asks the public repository and the module proxy and
