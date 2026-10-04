@@ -258,12 +258,18 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       validUntil: state === "expired-snapshot" ? p.now : instant.add({ hours: 1 }).toString(),
     };
     const status = { label: c.available, tone: "ok" as const, symbol: "check" as const };
+    // A badge and an availability are the same statement: a specimen that says a
+    // thing is sold out paints no pill saying it can still be had.
+    const productStatus =
+      state === "sold-out"
+        ? { label: c.soldOut, tone: "warning" as const, symbol: "none" as const }
+        : status;
     const product = {
       id: "product-1",
       title: name,
       price: safePrice,
       availability: state === "sold-out" ? ("sold-out" as const) : ("available" as const),
-      status,
+      status: productStatus,
       open: secondary,
       primary: action,
     };
