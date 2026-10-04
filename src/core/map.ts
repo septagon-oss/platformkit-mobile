@@ -174,13 +174,22 @@ export function deriveMap(input: MapInput, p: Presentation) {
           (input.providerState === "ready" || input.providerState === "loading") && supported,
         canRetryProvider:
           supported && (input.providerState === "error" || input.providerState === "offline"),
+        // The line names the state the provider is actually in: a dropped
+        // connection says reconnect, a failed request says try again, and only
+        // a viewport or format the provider cannot serve says it is unsupported.
+        // Masking all three behind one sentence sent a person to reconnect when
+        // the map service was down, and the gallery hid it by supplying its own.
         providerIssue:
           input.providerState === "ready" && supported
             ? undefined
             : (input.providerMessage ??
               (input.providerState === "loading"
                 ? p.copy.state.loading
-                : p.copy.issue.unsupported)),
+                : input.providerState === "offline"
+                  ? p.copy.state.offline.body
+                  : input.providerState === "error"
+                    ? p.copy.state.error.body
+                    : p.copy.issue.unsupported)),
         selectedId: input.selectedId,
         selectionIssue:
           input.selectedId && !rows.some((row) => row.selected)
