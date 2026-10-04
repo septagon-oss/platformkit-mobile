@@ -1,5 +1,6 @@
 # The way in: the server, then who you are. Every value comes from the
 # environment (make e2e-android passes them); nothing here names a tenant.
+# screen: app/sign-in.tsx
 appId: ${APP_ID}
 env:
   APP_ID: dev.septagon.platformkit.ci

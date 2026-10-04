@@ -1,0 +1,76 @@
+# A lifecycle command, in both of the forms the routes give it: about the
+# collection, reached by its own address because nothing the reference kernel
+# composes mounts a collection command, and about one record, which is run to
+# its end. VERB names the verb, VERB_FIELD its one argument, VERB_TITLE the
+# summary the API document gives it.
+# screen: app/[module]/[entity]/run/[verb].tsx
+# screen: app/[module]/[entity]/[id]/run/[verb].tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- waitForAnimationToEnd:
+    timeout: 5000
+- openLink: platformkit://${MODULE}/${ENTITY}/run/${VERB}
+- extendedWaitUntil:
+    visible:
+      id: "resource-form"
+    timeout: 15000
+- assertVisible: ${VERB_TITLE}
+- assertVisible:
+    id: "input-${VERB_FIELD}"
+- assertVisible:
+    id: "run"
+- tapOn: "Cancel"
+- extendedWaitUntil:
+    visible:
+      id: "home"
+    timeout: 15000
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE} verb
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "command-${VERB}"
+- tapOn:
+    id: "command-${VERB}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-form"
+    timeout: 15000
+- assertVisible: ${VERB_TITLE}
+- tapOn:
+    id: "input-${VERB_FIELD}"
+- inputText: ${TITLE} resolved
+- hideKeyboard
+- tapOn:
+    id: "run"
+- extendedWaitUntil:
+    visible: ${TITLE} resolved
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} verb

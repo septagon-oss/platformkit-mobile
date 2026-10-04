@@ -1,0 +1,50 @@
+# The list a generated entry opens: its two header doors, a row of its own, and
+# that the row opens the record it names. The row is created here, named after
+# this journey, and deleted by the end of it.
+# screen: app/[module]/[entity]/index.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertVisible: "Order"
+- assertVisible: "New"
+- tapOn: "New"
+- assertVisible:
+    id: "resource-form"
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE} list
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- back
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertVisible: ${TITLE} list
+- tapOn: ${TITLE} list
+- assertVisible:
+    id: "resource-detail"
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} list

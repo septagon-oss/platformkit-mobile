@@ -454,7 +454,9 @@ rules), `format:check` (Prettier), `test` (the Node suite, `tsx --test
 tests/*.test.ts`, then the Jest suite, every `tests/**/*.test.tsx` rendering
 components, the shell, the route dispatcher and the screen hooks),
 `check:fingerprint`, `check:flows` (every id a device flow names is a testID a
-component sets) and `check:source` (the manifest and lockfile install from the
+component sets, every route screen under `app/` is named by some flow's
+`# screen:` header, and every flow names the screen it proves) and
+`check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the
 lockfile and their config plugins, the Android recipe, the bundler

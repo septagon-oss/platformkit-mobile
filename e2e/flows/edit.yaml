@@ -1,10 +1,5 @@
-# One record's whole life on a generated screen: open the list, create it,
-# see it, edit it, delete it. MODULE and ENTITY name a writable resource the
-# signed-in person may reach; KNOWN is its first writable string field (the
-# one a row is recognised by), TITLE what to type there.
-# screen: app/[module]/[entity]/index.tsx
-# screen: app/[module]/[entity]/new.tsx
-# screen: app/[module]/[entity]/[id]/index.tsx
+# An edit: the sheet opens holding what the record says, Cancel changes nothing,
+# and what is saved is what the record says afterwards.
 # screen: app/[module]/[entity]/[id]/edit.tsx
 appId: ${APP_ID}
 env:
@@ -13,14 +8,14 @@ env:
 - runFlow: sign-in.yaml
 - tapOn:
     id: "open-${MODULE}-${ENTITY}"
-- assertVisible:
-    id: "resource-list"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
 - tapOn: "New"
-- assertVisible:
-    id: "resource-form"
 - tapOn:
     id: "input-${KNOWN}"
-- inputText: ${TITLE}
+- inputText: ${TITLE} edit
 - hideKeyboard
 - tapOn:
     id: "save"
@@ -28,20 +23,31 @@ env:
     visible:
       id: "resource-detail"
     timeout: 15000
-- assertVisible: ${TITLE}
 - tapOn: "Edit"
+- assertVisible: "Edit ${ENTITY}"
 - assertVisible:
     id: "resource-form"
+- assertVisible: ${TITLE} edit
+- tapOn: "Cancel"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- assertVisible: ${TITLE} edit
+- tapOn: "Edit"
 - tapOn:
     id: "input-${KNOWN}"
 - eraseText
-- inputText: ${TITLE} edited
+- inputText: ${TITLE} amended
 - hideKeyboard
 - tapOn:
     id: "save"
 - extendedWaitUntil:
-    visible: ${TITLE} edited
+    visible: ${TITLE} amended
     timeout: 15000
+- assertVisible:
+    id: "resource-detail"
+- assertNotVisible: ${TITLE} edit
 - scrollUntilVisible:
     element:
       id: "delete"
@@ -52,4 +58,4 @@ env:
     visible:
       id: "resource-list"
     timeout: 15000
-- assertNotVisible: ${TITLE} edited
+- assertNotVisible: ${TITLE} amended

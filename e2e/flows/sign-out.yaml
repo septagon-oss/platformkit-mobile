@@ -1,4 +1,5 @@
-# The account menu in the header, and out.
+# The account menu in the header, and out: the door belongs to the home screen.
+# screen: app/index.tsx
 appId: ${APP_ID}
 env:
   APP_ID: dev.septagon.platformkit.ci

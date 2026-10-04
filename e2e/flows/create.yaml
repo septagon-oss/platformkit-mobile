@@ -1,0 +1,62 @@
+# A new record: the sheet a New button opens, what it refuses, and where a
+# saved one lands. An empty record is refused by the server, and the sheet keeps
+# its place and says so — the write that found nothing is the one that must.
+# screen: app/[module]/[entity]/new.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- assertVisible: "New ${ENTITY}"
+- assertVisible:
+    id: "resource-form"
+- tapOn: "Cancel"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} create
+- tapOn: "New"
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "form-detail"
+    timeout: 15000
+- assertVisible:
+    id: "resource-form"
+- tapOn: "Cancel"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE} create
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- assertVisible: ${TITLE} create
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} create
