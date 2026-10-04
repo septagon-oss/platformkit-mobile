@@ -124,12 +124,15 @@ jobs:
         # flow names, that every id it taps is a testID a component sets and that no
         # route screen is left unclaimed (check:flows, the repository's own gate), and
         # that Maestro's schema accepts each file — check-syntax takes a file and not
-        # a directory, so the directory is walked here. A step verb Maestro does not
-        # know is a refusal at this line and not forty emulator minutes later.
+        # a directory, so the set is asked for from the same gate rather than globbed
+        # here: check_flows.ts --list answers with the journeys `maestro test
+        # e2e/flows` will run, at either YAML spelling and at any depth. A step verb
+        # Maestro does not know is a refusal at this line and not forty emulator
+        # minutes later.
         run: |
           npm ci --no-audit --no-fund
           npm run check:flows
-          for flow in e2e/flows/*.yaml; do maestro check-syntax "$flow"; done
+          for flow in $(npm run --silent check:flows -- --list); do maestro check-syntax "$flow"; done
 
       - name: The verification APK for this architecture
         # The emulator is x86_64, and only the verification profile carries the

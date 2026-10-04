@@ -15,6 +15,14 @@ const APP_ID = "dev.septagon.platformkit.ci";
 const CLAIM = /^# screen: (app\/\S+)$/gm;
 /** STEPS is the divider a Maestro flow puts between its configuration and its journey. */
 const STEPS = /^---\s*$/;
+/**
+ * FLOW_FILE is the extension test Maestro's own directory walk uses
+ * (maestro.orchestra.workspace.FiltersKt.isFlowFile): a journey with the other
+ * spelling is run by Maestro and invisible to a gate that reads `.yaml` only.
+ */
+const FLOW_FILE = /\.ya?ml$/;
+/** workspaceConfig is the file Maestro reads as the workspace's configuration rather than as a journey. */
+const WORKSPACE_CONFIG = new Set(["config.yaml", "config.yml"]);
 
 function files(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
@@ -71,13 +79,27 @@ function header(text: string): string {
   return (steps < 0 ? lines : lines.slice(0, steps)).join("\n");
 }
 
+/**
+ * flowFiles are the journeys a `maestro test e2e/flows` run will execute, as
+ * paths under e2e/flows: every yaml file at either spelling, in any depth, minus
+ * the workspace's own configuration. The set is what the coverage rule counts and
+ * what the CI job hands to `maestro check-syntax`, so the runner, the gate and the
+ * job read one list — a flow outside it is a journey no rule answers for.
+ */
+export function flowFiles(root: string): string[] {
+  const at = path.join(root, FLOWS);
+  if (!existsSync(at)) return [];
+  return files(at)
+    .map((f) => path.relative(at, f).split(path.sep).join("/"))
+    .filter((f) => FLOW_FILE.test(f) && !WORKSPACE_CONFIG.has(f))
+    .sort();
+}
+
 /** screenClaims reads what each flow says it proves: every `# screen: app/…` line in its header, in file order. */
 export function screenClaims(root: string): Map<string, string[]> {
   const named = new Map<string, string[]>();
   const at = path.join(root, FLOWS);
-  for (const f of readdirSync(at)
-    .filter((n) => n.endsWith(".yaml"))
-    .sort()) {
+  for (const f of flowFiles(root)) {
     const text = header(readFileSync(path.join(at, f), "utf8"));
     named.set(
       f,
@@ -91,7 +113,7 @@ export function checkFlows(root: string): string[] {
   const problems: string[] = [];
   const ids = knownIDs(root);
   const flowsAt = path.join(root, FLOWS);
-  for (const f of readdirSync(flowsAt).filter((n) => n.endsWith(".yaml"))) {
+  for (const f of flowFiles(root)) {
     const text = readFileSync(path.join(flowsAt, f), "utf8");
     if (!new RegExp(`^\\s*APP_ID: ${APP_ID.replace(/\./g, "\\.")}$`, "m").test(text))
       problems.push(`${f}: does not name ${APP_ID} as APP_ID`);
@@ -120,6 +142,12 @@ export function checkFlows(root: string): string[] {
 }
 
 if (process.argv[1]?.endsWith("check_flows.ts")) {
+  // --list answers with the journeys a directory run would take, one path per
+  // line, so the CI job that checks each file's syntax walks the same set.
+  if (process.argv[2] === "--list") {
+    for (const f of flowFiles(process.cwd())) console.log(`${FLOWS}/${f}`);
+    process.exit(0);
+  }
   const problems = checkFlows(process.cwd());
   for (const p of problems) console.error(p);
   if (problems.length === 0)

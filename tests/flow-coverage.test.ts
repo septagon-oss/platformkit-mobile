@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import os from "node:os";
 import path from "node:path";
 import test, { type TestContext } from "node:test";
-import { checkFlows, routeFiles, screenClaims } from "../scripts/check_flows";
+import { checkFlows, flowFiles, routeFiles, screenClaims } from "../scripts/check_flows";
 
 // A journey earns its place by naming the screen it proves, and the rule that
 // keeps the set complete is scripts/check_flows.ts — the gate `npm run check`
@@ -53,6 +53,33 @@ function tree(t: TestContext): string {
 }
 
 const flowOf = (root: string, name: string) => path.join(root, "e2e/flows", name);
+
+const written = (root: string, at: string, text: string): string => {
+  const file = path.join(root, "e2e/flows", at);
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, text);
+  return file;
+};
+
+test("the gate's set is Maestro's set: either spelling, any depth, no workspace config", (t) => {
+  const root = tree(t);
+  // `maestro test e2e/flows` walks the directory and takes a file whose
+  // extension is yaml or yml (maestro.orchestra.workspace.FiltersKt.isFlowFile),
+  // reading <workspace>/config.yaml as configuration instead of running it. The
+  // gate counts that walk and nothing else: an unclaimed journey two folders down
+  // escapes as completely as one spelled .yml beside the rest.
+  written(root, "nested/deep.yml", flow(["app/x/y.tsx"]));
+  assert.deepEqual(checkFlows(root), []);
+  assert.ok(flowFiles(root).includes("nested/deep.yml"), "a .yml at depth is a journey");
+  written(root, "nested/extra.yaml", flow([]));
+  assert.deepEqual(checkFlows(root), ["nested/extra.yaml: names no screen"]);
+  // The workspace's own configuration carries no screen claim and no step, and
+  // Maestro never runs it: refusing it would be the gate inventing a journey.
+  writeFileSync(path.join(root, "e2e/flows", "config.yaml"), "name: journeys\n");
+  rmSync(path.join(root, "e2e/flows", "nested", "extra.yaml"));
+  assert.deepEqual(checkFlows(root), []);
+  assert.ok(!flowFiles(root).includes("config.yaml"), "config.yaml is not a journey");
+});
 
 test("a route screen is a .tsx under app/ and a layout is not one", (t) => {
   const root = tree(t);
@@ -124,8 +151,12 @@ test("the job that runs the journeys runs the directory, and refuses rather than
   // gate above counts looking like a figure nobody earned.
   assert.doesNotMatch(job, /continue-on-error/, "this job blocks, it does not report");
   assert.match(job, /run: scripts\/e2e\/mobile_ci\.sh --probe/);
-  // Maestro's own schema, checked on the runner before a device is rented.
+  // Maestro's own schema, checked on the runner before a device is rented — over
+  // the set the gate itself covers, because a glob beside it is a second, smaller
+  // definition of "every flow" and the first thing to drift.
   assert.match(job, /maestro check-syntax "\$flow"/);
+  assert.match(job, /check:flows -- --list/);
+  assert.doesNotMatch(job, /flows\/\*\.ya?ml/, "the job globs no flow list of its own");
   assert.match(job, /run: scripts\/e2e\/mobile_ci\.sh/);
   assert.match(job, /did not reach its report/, "no JUnit is a refusal, not an empty pass");
   assert.match(job, /steps\.emulator\.outputs\.pid/, "teardown is by the pid that was recorded");
