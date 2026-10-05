@@ -130,11 +130,13 @@ export function DataList({
       renderHeading={(id) => {
         const section = model.sections.find((item) => item.id === id)!;
         return (
-          <View style={s.header}>
-            <Text role="title" accessibilityRole="header">
-              {section.title}
-            </Text>
-            <Text>{section.count}</Text>
+          <View style={s.groupHeader}>
+            <View style={s.groupWords}>
+              <Text role="title" accessibilityRole="header">
+                {section.title}
+              </Text>
+              <Text>{section.count}</Text>
+            </View>
             {section.collapse && onCollapse ? (
               <Button
                 label={section.collapse.label}

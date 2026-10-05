@@ -84,6 +84,21 @@ export const kitStyles = (t: Theme) =>
     // columns belongs to the plot and does not slide the names inward.
     chartLabels: { flexDirection: "row", paddingTop: t.space.sm },
     chartLabel: { flex: 1, alignItems: "center" },
+    /**
+     * A group says what it is, how many it holds and whether it is open in one
+     * line: the words take the room, the disclosure keeps the edge it ends at.
+     * Stacked, those three pieces cost a phone half of its first screen before
+     * the first item is in sight.
+     */
+    groupHeader: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: t.space.sm,
+      paddingHorizontal: t.space.lg,
+      paddingVertical: t.space.md,
+      minHeight: t.hit,
+    },
+    groupWords: { flex: 1, gap: t.space.xs / 2 },
     // A browser is where a kit is looked at, and a sheet opened there is a phone's
     // surface on a desk: it keeps a phone's column and lets the canvas show around
     // it, the way every specimen in the gallery does. Left unbounded it stretched
