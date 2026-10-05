@@ -35,6 +35,36 @@ const WORKSPACE_CONFIG = new Set(["config.yaml", "config.yml"]);
 const READABLE = new Set(["name", "flows", "excludeFlows"]);
 /** The two fields the plan is built from. */
 const FILTERS = ["flows", "excludeFlows"] as const;
+type Filter = (typeof FILTERS)[number];
+/**
+ * BREAK is every line break the YAML spec counts, so a configuration saved on
+ * another platform splits where its parser splits rather than into one long line.
+ */
+const BREAK = /\r\n|[\r\n\u0085\u2028\u2029]/;
+/**
+ * KEY is the one spelling of a top-level key this gate applies: a plain or quoted
+ * word at column zero, spaces before the colon, and after the colon a space, a
+ * tab or the end of the line. The last rule is YAML's own — `flows:[a.yaml]` keeps
+ * the colon inside a plain scalar, and Maestro's parser refuses that file — so a
+ * line that breaks it is refused here rather than applied as a selection nobody
+ * parses. A quoted key, a space before the colon and a leading byte-order mark
+ * are the other ways the same key is written; Maestro's planner reads each of
+ * them (measured against maestro-cli-2.8.0's WorkspaceExecutionPlanner, which
+ * plans the named journey alone for all four), so the gate reads them too.
+ */
+const KEY =
+  /^(?:"([A-Za-z][\w-]*)"|'([A-Za-z][\w-]*)'|([A-Za-z][\w-]*))[ \t]*:(?:[ \t](.*?))?[ \t]*$/;
+/**
+ * ENTRY is a `- name` line below its key. A block sequence may sit at its key's
+ * own column as well as indented under it, so the leading run is optional — and
+ * only an open filter takes one: `- a.yaml` at column zero with no key above it is
+ * a whole-document sequence, which Maestro's config reader refuses.
+ */
+const ENTRY = /^[ \t]*-[ \t]+(.*\S)(?:[ \t]+#.*)?$/;
+/** REMARK is a blank line or a comment, which carries no field and joins no list. */
+const REMARK = /^[ \t]*(#.*)?$/;
+/** isFilter tells the two path filters from the other readable field, whose value no plan consults. */
+const isFilter = (field: string): field is Filter => (FILTERS as readonly string[]).includes(field);
 
 function files(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
@@ -133,27 +163,22 @@ export function workspacePlan(root: string): { files: string[]; problems: string
       ],
     };
   const config = named[0]!;
-  const text = readFileSync(path.join(at, config), "utf8");
-  const problems: string[] = [];
-  for (const field of fields(text))
-    if (!READABLE.has(field))
-      problems.push(
-        `${config}: ${field} is no workspace field this gate can read, so it cannot name the journeys Maestro plans`,
-      );
+  const selection = readConfig(readFileSync(path.join(at, config), "utf8"));
   let files = all;
   for (const field of FILTERS) {
-    const list = filterList(text, field);
-    if (list.problem) problems.push(`${config}: ${list.problem}`);
-    if (!list.entries) continue;
-    for (const entry of list.entries)
+    const entries = selection.filters.get(field);
+    if (!entries) continue;
+    for (const entry of entries)
       if (!all.some((f) => matches(entry, f)))
-        problems.push(`${config}: ${field} names ${entry}, which is no journey in ${FLOWS}`);
+        selection.problems.push(`${field} names ${entry}, which is no journey in ${FLOWS}`);
     files =
       field === "flows"
-        ? files.filter((f) => list.entries!.some((e) => matches(e, f)))
-        : files.filter((f) => !list.entries!.some((e) => matches(e, f)));
+        ? files.filter((f) => entries.some((e) => matches(e, f)))
+        : files.filter((f) => !entries.some((e) => matches(e, f)));
   }
-  return { files, problems };
+  // Every refusal names the file it came from, so the person who wrote the line
+  // is told which one to open.
+  return { files, problems: selection.problems.map((p) => `${config}: ${p}`) };
 }
 
 /** journeys are the yaml files in the flow directory itself, configuration aside, before any selection narrows them. */
@@ -167,40 +192,81 @@ function journeys(root: string): string[] {
     .sort();
 }
 
-/** fields are the configuration's top-level keys: a word at column zero followed by a colon. */
-function fields(text: string): string[] {
-  return [...text.matchAll(/^([A-Za-z][\w-]*):/gm)].map((m) => m[1]!);
-}
-
 /**
- * filterList reads one of the two path filters: a block list of `- name` lines
- * or the flow form `[name, name]`, each entry optionally quoted. Anything else
- * after the key — a scalar, a nested map, an entry that is not an entry — is
- * said back as the problem, because a filter the gate cannot read is a filter it
- * cannot apply, and a plan built without it is a plan nobody runs.
+ * readConfig walks a workspace configuration and accounts for every line of it.
+ * What it applies is a block mapping: a top-level key at column zero, and its
+ * filter either spelled `[a.yaml, b.yaml]` on the key line or as `- a.yaml`
+ * lines below it. A field it names but cannot apply (`tags:`) is refused by name
+ * and its block skipped; a line it cannot even place — a flow mapping, a nested
+ * map, a scalar where a list belongs, an entry with nothing above it — refuses
+ * the whole file, because a plan built out of the part that happened to be
+ * readable is the guess this rule exists to refuse. A filter given with no value
+ * at all is no filter: for `flows:` with nothing after it Maestro plans every
+ * journey in the directory (measured, maestro-cli-2.8.0), so the plan is left
+ * alone rather than narrowed to nothing. A key written twice wins the way
+ * Maestro's parser lets it win: the last one.
  */
-function filterList(text: string, field: string): { entries?: string[]; problem?: string } {
-  const lines = text.split(/\r?\n/);
-  const at = lines.findIndex((line) => line.startsWith(`${field}:`));
-  if (at < 0) return {};
-  const rest = lines[at]!.slice(field.length + 1).trim();
-  if (rest.startsWith("[") && rest.endsWith("]") && !rest.slice(1, -1).includes("["))
-    return { entries: split(rest.slice(1, -1)) };
-  if (rest !== "" && !rest.startsWith("#"))
-    return { problem: `${field} is no list this gate can read: ${rest}` };
-  const entries: string[] = [];
-  for (const line of lines.slice(at + 1)) {
-    if (/^\s*(#.*)?$/.test(line)) continue;
-    const item = /^\s+-\s+(.*\S)(?:\s+#.*)?$/.exec(line);
-    // The list ends where the next field begins; anything else in its place is a
-    // shape the gate will not guess at.
-    if (!item)
-      return /^[A-Za-z]/.test(line)
-        ? { entries }
-        : { problem: `${field} holds "${line.trim()}", which is no list entry` };
-    entries.push(item[1]!.replace(/^["']|['"]$/g, ""));
+function readConfig(text: string): { filters: Map<Filter, string[]>; problems: string[] } {
+  const lines = text.replace(/^\uFEFF/, "").split(BREAK);
+  const filters = new Map<Filter, string[]>();
+  const problems: string[] = [];
+  /** `open` is the block list a `- …` line below the current key would join. */
+  let open: { field: Filter; entries: string[] } | null = null;
+  /** `refused` is a field whose whole block is skipped: it is already named. */
+  let refused = false;
+  /**
+   * unreadable closes the file: the gate read too little of it to name a plan,
+   * so nothing it did read gets applied.
+   */
+  const unreadable = (problem: string): { filters: Map<Filter, string[]>; problems: string[] } => {
+    problems.push(problem);
+    return { filters: new Map(), problems };
+  };
+  for (const line of lines) {
+    if (REMARK.test(line)) continue;
+    if (refused && /^[ \t]/.test(line)) continue;
+    const item = ENTRY.exec(line);
+    if (item && open) {
+      open.entries.push(item[1]!.replace(/^["']|['"]$/g, ""));
+      continue;
+    }
+    const key = KEY.exec(line);
+    if (!key)
+      return open
+        ? unreadable(`${open.field} holds "${line.trim()}", which is no list entry`)
+        : unreadable(
+            `"${line.trim()}" is no workspace key this gate can read: it applies a name at column zero with its list in [brackets] or as - items below it`,
+          );
+    if (open) {
+      // The list ends where the next field begins. An empty one is the key with
+      // no value, which Maestro reads as no filter at all, so it is not recorded.
+      if (open.entries.length > 0) filters.set(open.field, open.entries);
+      open = null;
+    }
+    refused = false;
+    const field = key[1] ?? key[2] ?? key[3]!;
+    if (!READABLE.has(field)) {
+      if (!problems.some((p) => p.startsWith(`${field} `)))
+        problems.push(
+          `${field} is no workspace field this gate can read, so it cannot name the journeys Maestro plans`,
+        );
+      refused = true;
+      continue;
+    }
+    // Only the two path filters carry a list; anything else readable is a value
+    // the plan does not consult, and its own block would be nothing to apply.
+    if (!isFilter(field)) continue;
+    const value = (key[4] ?? "").trim();
+    if (value.startsWith("[") && value.endsWith("]") && !value.slice(1, -1).includes("[")) {
+      filters.set(field, split(value.slice(1, -1)));
+    } else if (value !== "" && !value.startsWith("#")) {
+      return unreadable(`${field} is no list this gate can read: ${value}`);
+    } else {
+      open = { field, entries: [] };
+    }
   }
-  return { entries };
+  if (open && open.entries.length > 0) filters.set(open.field, open.entries);
+  return { filters, problems };
 }
 
 /** split reads the entries of `[a, b]`, quoted or not, and drops the blanks. */

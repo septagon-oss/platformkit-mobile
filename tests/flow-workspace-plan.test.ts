@@ -6,11 +6,12 @@ import test, { type TestContext } from "node:test";
 import { checkFlows, flowFiles, workspacePlan } from "../scripts/check_flows";
 
 // `tests/flow-workspace-selection.test.ts` proves the invariant: a screen whose
-// only journey is excluded from the plan is uncovered. These cases hold the four
-// edges of how that plan is built — that an exclusion narrows it the way an
+// only journey is excluded from the plan is uncovered. These cases hold the edges
+// of how that plan is built — that an exclusion narrows it the way an
 // inclusion does, that a glob selects instead of refusing everything, that an
-// entry naming no journey is named back, and that a field the gate cannot read
-// is refused rather than read as agreement.
+// entry naming no journey is named back, that a field the gate cannot read is
+// refused rather than read as agreement, and which spellings of a selection the
+// gate applies and which it refuses by name.
 
 const APP_ID = "dev.septagon.platformkit.ci";
 const body = `appId: \${APP_ID}\nenv:\n  APP_ID: ${APP_ID}\n---\n- launchApp\n`;
@@ -92,4 +93,41 @@ test("a workspace field the gate cannot apply is refused, not assumed", (t) => {
     "app/index.tsx: no device flow names it",
     "app/other.tsx: no device flow names it",
   ]);
+});
+
+test("the shape a selection is written in is part of what the gate reads", (t) => {
+  const root = pair(t);
+  // Maestro's own planner reads each of these as `flows: [index.yaml]` — every
+  // one printed `PLANNED index.yaml` alone from
+  // maestro.orchestra.workspace.WorkspaceExecutionPlanner (2.8.0) — so the gate
+  // applies them, and other.yaml's claim is a screen no run reaches.
+  for (const spelling of [
+    '"flows": [index.yaml]\n',
+    "flows : [index.yaml]\n",
+    "\uFEFFflows: [index.yaml]\n",
+    "flows:\n  - index.yaml\n",
+    "flows:\n- index.yaml\n",
+  ]) {
+    config(root, spelling);
+    assert.deepEqual(flowFiles(root), ["index.yaml"], spelling);
+    assert.deepEqual(checkFlows(root), ["app/other.tsx: no device flow names it"], spelling);
+  }
+  // What the planner reads as one document, the gate may not guess at: a
+  // whole-document flow mapping is refused with the file that holds it, and the
+  // plan stays the whole directory, because a refusal is answerable and a partial
+  // reading is not.
+  config(root, "{flows: [index.yaml]}\n");
+  assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"]);
+  assert.deepEqual(checkFlows(root), [
+    'config.yaml: "{flows: [index.yaml]}" is no workspace key this gate can read: it applies a name at column zero with its list in [brackets] or as - items below it',
+  ]);
+  // A filter with no value after it is no filter at all: measured on the same
+  // planner, `flows:` with nothing after it plans every journey in the directory,
+  // so the gate leaves the plan alone instead of narrowing it to nothing.
+  config(root, "flows:\nname: journeys\n");
+  assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"]);
+  assert.deepEqual(checkFlows(root), []);
+  // And a key written twice wins the way that parser lets it win: the last one.
+  config(root, "flows: [index.yaml]\nflows: [other.yaml]\n");
+  assert.deepEqual(flowFiles(root), ["other.yaml"]);
 });
