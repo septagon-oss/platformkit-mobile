@@ -1,0 +1,53 @@
+// A page's lead is a screen, and a control on a screen is drawn with the thing it
+// controls: a search field whose results are held behind a disclosure is a promise
+// the page does not keep. `withLead` names what a lead is a control over, and this
+// checks the rule that keeps it honest — it must be one of the page's own cases,
+// never the lead itself, and never one of the states below the fold.
+import assert from "node:assert/strict";
+import test from "node:test";
+import { deriveCopy } from "../src/core/copy";
+import { deriveGalleryPage, galleryPageIds, galleryPages } from "../src/core/galleryPages";
+import type { Presentation } from "../src/core/presentation";
+
+const english: Presentation = {
+  copy: deriveCopy("en"),
+  locale: "en-GB",
+  timeZone: "UTC",
+  now: "2026-08-14T12:00:00Z",
+  weekStartsOn: 1,
+  motion: "reduced",
+};
+
+const page = (id: string) => {
+  const result = deriveGalleryPage(id, english);
+  assert.ok(result.ok, `${id}: ${result.ok ? "" : JSON.stringify(result.issues)}`);
+  if (!result.ok) throw new Error("unreachable after the assertion above");
+  return result.value;
+};
+
+test("every page names its lead's companions from its own cases", () => {
+  for (const id of galleryPageIds) {
+    const model = page(id);
+    for (const caseId of model.withLead) {
+      assert.ok(model.cases.includes(caseId), `${id}: ${caseId} is not one of its cases`);
+      assert.notEqual(caseId, model.lead, `${id}: the lead is not its own companion`);
+    }
+  }
+});
+
+test("the search page draws its results with the field that asked for them", () => {
+  const model = page("search");
+  assert.deepEqual(model.withLead, ["masonry-wall/two-columns"]);
+  // The wall is not one of the states a person has to open to find.
+  const rest = model.cases.filter(
+    (id) => id !== model.lead && !model.withLead.includes(id) && id !== "search-field/query",
+  );
+  assert.ok(!rest.includes("masonry-wall/two-columns"));
+});
+
+test("a page with nothing beside its lead says so by holding none", () => {
+  const companions = Object.entries(galleryPages)
+    .filter(([id, spec]) => (spec.withLead?.length ?? 0) > 0 && id !== "search")
+    .map(([id]) => id);
+  assert.deepEqual(companions, [], `${companions.join(", ")}: named before it was drawn`);
+});
