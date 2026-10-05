@@ -39,7 +39,7 @@ export function Stepper({
         aria-valuemax={100}
         aria-valuenow={model.progress * 100}
       >
-        {model.progressLabel}
+        {model.progressText}
       </Text>
       <View style={s.row}>
         {model.steps.map((step) => (

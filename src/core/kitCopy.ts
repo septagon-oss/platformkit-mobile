@@ -138,6 +138,8 @@ export const kitEnglish = {
   unitVisitors: "visitors",
   unitPasses: "passes",
   meterStorage: "Storage used",
+  detailBody: "Admits two adults to the print room and the courtyard. Show it at either entrance.",
+  queryPrint: "print room",
   sourceSpecimen: "Specimen map data",
   audioTour: "Audio tour",
 } as const;
@@ -275,6 +277,8 @@ export const kitPortuguese: KitWords = {
   unitVisitors: "visitantes",
   unitPasses: "passes",
   meterStorage: "Armazenamento usado",
+  detailBody: "Admite dois adultos à sala de gravuras e ao pátio. Mostre-o em qualquer entrada.",
+  queryPrint: "sala de gravuras",
   sourceSpecimen: "Dados de mapa de exemplo",
   audioTour: "Audioguia",
 };

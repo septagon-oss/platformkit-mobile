@@ -748,7 +748,15 @@ function KitSamples({
     setHeld({ ...held, open: false });
     action("close");
   };
-  const details = <Text>{presentation.copy.gallery.longBody}</Text>;
+  // The body of a sheet or panel is the record the sheet is about. The kit's empty
+  // collection stays where an empty collection is the specimen, and not under a title
+  // that already names what is in it.
+  const details = (
+    <>
+      <Text role="title">{presentation.copy.kit.specimenPass}</Text>
+      <Text>{presentation.copy.kit.detailBody}</Text>
+    </>
+  );
   const pricing = {
     onPeriod: action,
     onSelect: action,

@@ -675,7 +675,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                           action: secondary,
                         },
                       ],
-                features: {},
+                features: { feature: { kind: "excluded" } },
               },
             ]),
             periods: [{ id: "period-1", label: c.period }],
@@ -841,8 +841,13 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
           state === "clear"
             ? { value: "", placeholder: c.search }
             : state === "busy"
-              ? { value: pt ? "música" : "music", placeholder: c.search, busy: true, count: 12 }
-              : { value: pt ? "música" : "music", placeholder: c.search, count: 12 },
+              ? {
+                  value: c.queryPrint,
+                  placeholder: c.search,
+                  busy: true,
+                  count: images.length,
+                }
+              : { value: c.queryPrint, placeholder: c.search, count: images.length },
           p,
         ),
       ),
