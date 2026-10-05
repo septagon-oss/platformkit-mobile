@@ -755,10 +755,17 @@ function KitSamples({
   // collection stays where an empty collection is the specimen, and not under a title
   // that already names what is in it.
   const details = (
-    <>
-      <Text role="title">{presentation.copy.kit.specimenPass}</Text>
+    <View>
       <Text>{presentation.copy.kit.detailBody}</Text>
-    </>
+      <DetailRow
+        term={presentation.copy.kit.detailAdmission}
+        value={presentation.copy.kit.placePrintRoom}
+      />
+      <DetailRow
+        term={presentation.copy.kit.detailVisitors}
+        value={presentation.copy.kit.variantTwoAdults}
+      />
+    </View>
   );
   const pricing = {
     onPeriod: action,

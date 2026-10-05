@@ -337,7 +337,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       },
       {
         id: "second",
-        label: c.stepPayment,
+        label: c.stepVisit,
         optional: true,
         completion: "incomplete" as const,
         problems: state === "invalid" ? [{ fieldId: "quantity", message: c.validation }] : [],
@@ -676,7 +676,9 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                     : [
                         {
                           periodId: "period-year",
-                          price: { kind: "contact", label: c.details },
+                          // Both cards state a price: a plan whose price is the word
+                          // "Full details" repeats its own row label and chooses nothing.
+                          price: { kind: "price", amount: { minor: "2199", currency } },
                           action: secondary,
                         },
                       ],

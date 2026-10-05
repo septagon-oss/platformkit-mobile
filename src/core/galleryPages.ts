@@ -115,6 +115,7 @@ export const galleryPages = {
   },
   steps: {
     lead: "stepper/middle",
+    withLead: ["slot-option/available"],
     cases: [
       "stepper/middle",
       "stepper/first",

@@ -45,9 +45,13 @@ test("the search page draws its results with the field that asked for them", () 
   assert.ok(!rest.includes("masonry-wall/two-columns"));
 });
 
-test("a page with nothing beside its lead says so by holding none", () => {
-  const companions = Object.entries(galleryPages)
-    .filter(([id, spec]) => (spec.withLead?.length ?? 0) > 0 && id !== "search")
-    .map(([id]) => id);
-  assert.deepEqual(companions, [], `${companions.join(", ")}: named before it was drawn`);
+test("only a page whose lead controls something names a companion", () => {
+  // A companion is drawn, not remembered: a page that names one and does not show
+  // it would put the same specimen in the fold and behind the disclosure at once.
+  const named = Object.entries(galleryPages)
+    .filter(([, spec]) => (spec as { withLead?: readonly string[] }).withLead?.length)
+    .map(([id]) => id)
+    .sort();
+  assert.deepEqual(named, ["search", "steps"]);
+  assert.deepEqual([...page("steps").withLead], ["slot-option/available"]);
 });
