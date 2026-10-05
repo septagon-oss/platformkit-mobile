@@ -246,6 +246,10 @@ function chart(input: ChartInput, p: Presentation, areaChart: boolean, spark: bo
           ? issue(p, "selectedPoint", "unavailable")
           : undefined,
       clearLabel: p.copy.kit.clear,
+      // The act that returns a selection belongs to a selection: a plot with
+      // nothing chosen has nothing to return, so its model says whether the
+      // choice a person holds is one that can be put back.
+      clearsSelection: input.selectedPoint !== undefined,
     };
   });
 }

@@ -23,7 +23,9 @@ const plotMargin = 0.03,
 /**
  * A label may be as wide as the narrowest gap between two ticks, which is what
  * keeps two names from running into each other while each stays centred on its
- * own measurement.
+ * own measurement. It is a ceiling and not a floor: a tick named by two figures
+ * takes a two-figure box, so the box of the last name on the axis ends with that
+ * name instead of reaching past the plot's edge into the column beside it.
  */
 const tickSpan = (positions: readonly number[]): number =>
   positions.length < 2 ? 1 : Math.min(...positions.slice(1).map((at, i) => at - positions[i]!));
@@ -131,7 +133,7 @@ export function AreaChart({
                     tone="muted"
                     style={[
                       s.chartTickLabel,
-                      { left: `${tick.position * 100}%`, width: `${span * 100}%` },
+                      { left: `${tick.position * 100}%`, maxWidth: `${span * 100}%` },
                     ]}
                   >
                     {tick.label}
@@ -188,7 +190,12 @@ export function AreaChart({
           </View>
         ))}
       </View>
-      <Button label={model.clearLabel} tone="plain" onPress={onClearPoint} />
+      {/* Returning a choice is offered while a choice is held. A screen that
+          prints "Clear" beside a plot with nothing selected asks for an act
+          that would change nothing. */}
+      {model.clearsSelection ? (
+        <Button label={model.clearLabel} tone="plain" onPress={onClearPoint} />
+      ) : null}
     </View>
   );
 }
