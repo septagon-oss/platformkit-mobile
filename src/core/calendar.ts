@@ -39,6 +39,8 @@ interface Segment {
   readonly id: string;
   readonly title: string;
   readonly label: string;
+  /** time is when the appointment is, on its own, so a list can write the name above it instead of welding the two into one long control label. */
+  readonly time: string;
   readonly start: number;
   readonly end: number;
   readonly top: number;
@@ -154,6 +156,7 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
           if (e.startDate <= id && id < e.endDate)
             allDay.push({
               ...common,
+              time: p.copy.kit.allDay,
               label: `${e.title} · ${p.copy.kit.allDay}`,
               start: begin,
               end,
@@ -169,6 +172,7 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
           if (finish > s)
             timed.push({
               ...common,
+              time: `${presentedRange(new Date(actualStart), new Date(actualEnd), p)}${actualStart < begin || actualEnd > end ? ` · ${p.copy.kit.continues}` : ""}`,
               start: s,
               end: finish,
               top: (s - begin) / duration,
