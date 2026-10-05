@@ -56,41 +56,44 @@ export function AreaChart({
           </View>
           <View style={s.grow}>
             <View style={s.chart}>
-              <Svg
-                width="100%"
-                height="100%"
-                viewBox="-0.03 -0.03 1.06 1.06"
-                preserveAspectRatio="none"
-                accessibilityElementsHidden
-              >
-                {model.series.map((series, i) => (
-                  <React.Fragment key={series.id}>
-                    {series.fill ? <Path d={series.fill} fill={colors[i]!} opacity={0.12} /> : null}
-                    {series.path ? (
-                      <Path
-                        d={series.path}
-                        fill="none"
-                        stroke={colors[i]!}
-                        strokeWidth={t.extent.chartStroke}
-                        {...(i
-                          ? { strokeDasharray: `${t.extent.chartDot * i} ${t.extent.chartDot}` }
-                          : {})}
-                      />
-                    ) : null}
-                    {series.points
-                      .filter((point) => point.py !== undefined)
-                      .map((point) => (
-                        <Circle
-                          key={point.id}
-                          cx={point.px}
-                          cy={point.py!}
-                          r={t.extent.chartDot}
-                          fill={colors[i]!}
+              <View style={s.grow} accessibilityElementsHidden>
+                <Svg
+                  width="100%"
+                  height="100%"
+                  viewBox="-0.03 -0.03 1.06 1.06"
+                  preserveAspectRatio="none"
+                >
+                  {model.series.map((series, i) => (
+                    <React.Fragment key={series.id}>
+                      {series.fill ? (
+                        <Path d={series.fill} fill={colors[i]!} opacity={0.12} />
+                      ) : null}
+                      {series.path ? (
+                        <Path
+                          d={series.path}
+                          fill="none"
+                          stroke={colors[i]!}
+                          strokeWidth={t.extent.chartStroke}
+                          {...(i
+                            ? { strokeDasharray: `${t.extent.chartDot * i} ${t.extent.chartDot}` }
+                            : {})}
                         />
-                      ))}
-                  </React.Fragment>
-                ))}
-              </Svg>
+                      ) : null}
+                      {series.points
+                        .filter((point) => point.py !== undefined)
+                        .map((point) => (
+                          <Circle
+                            key={point.id}
+                            cx={point.px}
+                            cy={point.py!}
+                            r={t.extent.chartDot}
+                            fill={colors[i]!}
+                          />
+                        ))}
+                    </React.Fragment>
+                  ))}
+                </Svg>
+              </View>
               {model.zero === undefined ? null : (
                 <View
                   testID="kit-chart-zero"
