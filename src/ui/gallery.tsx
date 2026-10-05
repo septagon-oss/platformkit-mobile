@@ -276,11 +276,10 @@ export function Gallery({
  * The states rail keeps one plane for ink: the name of a family, the words of
  * the specimen under it and the figures in it all start at the same left. A
  * family that draws its own surface — a card, a table, a wall of pictures —
- * hangs from the rail's edge and holds its words one step inside that surface,
- * so the caption above it takes the same step and names the words rather than
- * the border. A family that draws no surface is pulled in to that step itself.
- * The set is the kit's own surfaces: leave a family out of it and its caption
- * lands on a third line down the page at a desk's width, which
+ * hangs from the rail's edge instead and holds its words one step inside that
+ * surface, which is the plane the rest of the column stands on. The set is the
+ * kit's own surfaces: leave a family out of it and its card, and the words it
+ * keeps inside, land on a third line down the page at a desk's width, which
  * tests/gallery-desktop-alignment.case.mjs measures on every page this branch
  * creates.
  */
@@ -363,11 +362,11 @@ function Page({
     <VerbStage lead={false}>
       {shown.map((group) => (
         <View key={group.id} style={s.group}>
-          <Text role="caption" tone="muted" uppercase accessibilityRole="header" style={s.ink}>
+          <Text role="caption" tone="muted" uppercase accessibilityRole="header">
             {group.family}
           </Text>
           {group.cases.map((caseId) => (
-            <View key={caseId} style={ownSurface.has(group.id) ? undefined : s.ink}>
+            <View key={caseId} style={stand && ownSurface.has(group.id) ? s.hang : undefined}>
               <KitSamples
                 aside
                 presentation={presentation}
@@ -419,9 +418,12 @@ function Page({
       <Text role="display">{model.title}</Text>
       <View style={stand ? s.columns : undefined}>
         <View style={stand ? s.phone : undefined}>{lead}</View>
-        <View style={stand ? s.phone : undefined}>
+        <View style={stand ? [s.phone, s.rail] : undefined}>
           {stand && statesSection.ok && laterGroups.length > 0 ? (
-            // The column spaces what stands in it; these two are its rows.
+            // The column spaces what stands in it; these two are its rows. The
+            // disclosure is one of those rows, so its own words stand on the plane
+            // the column already set, and what it reveals takes that plane too —
+            // the names it opens land beside the names already standing there.
             <>
               {statesOf(openGroups)}
               <DisclosureSection
@@ -1257,12 +1259,20 @@ const pageStyles = (t: Theme) =>
     lead: { gap: t.space.sm },
     group: { gap: t.space.xs },
     /**
-     * ink is the rail's one plane for words: one step in from the column's edge,
-     * which is where a specimen that carries its own surface already keeps them.
-     * A margin, not a padding: a box is measured where it starts, and words set
-     * inside their own padding would still stand on the column's edge.
+     * rail is the state column's one step in from its edge, taken by the column
+     * once rather than by every line in it: a family's name, the words of a
+     * specimen that draws no surface, and a disclosure's own heading then stand on
+     * one plane by construction, instead of each row being asked to remember the
+     * step. On a phone the states share the screen's column, so nothing is inset
+     * and they stand where every other word on the screen stands.
      */
-    ink: { marginLeft: t.space.lg },
+    rail: { paddingLeft: t.space.lg },
+    /**
+     * hang is that step taken back: a family that draws its own surface starts from
+     * the column's edge, so the words inside its surface — which is where a person
+     * reads — come back to the plane the column holds.
+     */
+    hang: { marginLeft: -t.space.lg },
     // The plan draws a building, not a field for pins: a muted floor, the rooms cut
     // out of it in the page's own surface, the walk to them kept clear, and the
     // threshold a person enters by in the one accent. The geometry is PLAN below.
