@@ -5,7 +5,7 @@
 import React, { useRef, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import type { SearchModel } from "../../core/navigation";
-import { testable } from "../props";
+import { searchFieldRole, testable } from "../props";
 import { Icon } from "../atoms/Icon";
 import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
@@ -58,7 +58,9 @@ export function SearchField({ model, onChangeText, onSubmit, onClear, testID }: 
           accessibilityLabel={model.label}
           placeholder={model.placeholder}
           returnKeyType="search"
-          accessibilityRole="search"
+          // The editable role is the input's own on the web and the platform's
+          // only clue on a device (src/ui/props.ts).
+          {...searchFieldRole()}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />

@@ -5,7 +5,7 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import type { TabsModel } from "../../core/navigation";
-import { testable } from "../props";
+import { tabRing, testable } from "../props";
 import { Icon, type IconName } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { useStyles, type Theme } from "../theme";
@@ -34,6 +34,19 @@ export function TabBar({
   const [hovered, setHovered] = useState<string | undefined>();
   const [focused, setFocused] = useState<string | undefined>();
   const notes = model.items.filter((item) => item.unavailable !== undefined);
+  const open = model.items.filter((item) => item.unavailable === undefined);
+  const chosen = model.items.find((item) => item.selected)?.id;
+  // Where a destination cannot be opened, the arrows do not walk onto it: a stop
+  // that answers to nothing would trap the keyboard. Selecting is what arriving
+  // means, the way a press means it — the bar draws from a model the screen owns,
+  // so nothing is remembered here.
+  const ring = tabRing(
+    open.map((item) => item.id),
+    chosen,
+    (id) => {
+      if (id !== chosen) onSelect(id);
+    },
+  );
   return (
     // Not `accessible`: a container marked so becomes one element on iOS and the
     // tabs inside it stop being reachable one by one, which is the whole point of
@@ -59,6 +72,9 @@ export function TabBar({
               onFocus={() => setFocused(item.id)}
               onBlur={() => setFocused(undefined)}
               accessibilityRole="tab"
+              // On the web the bar is one Tab stop and the arrows walk inside it
+              // (src/ui/props.ts); on a device every tab stays its own element.
+              {...ring.stop(item.id)}
               // The state is written in the ARIA spelling React Native's View and
               // Pressable accept as an alias and react-native-web writes straight
               // onto the element: one statement of which destination is chosen
