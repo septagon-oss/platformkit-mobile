@@ -304,6 +304,11 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         : state === "selection-unavailable"
           ? ["removed"]
           : []);
+    // Grouping and bulk selection are two demonstrations of two things. Only the
+    // specimens named for selection carry tick boxes and a bar of actions: drawn on
+    // every list, they pushed the first row of /gallery/list down the fold by the
+    // height of a control the person on that screen has not asked for.
+    const selecting = state === "selection-some" || state === "selection-unavailable";
     const surface = {
       open: held.open ?? true,
       title: name,
@@ -467,10 +472,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             filters: [],
             views: [],
             viewDirty: false,
-            selection: "multiple",
+            selection: selecting ? "multiple" : "none",
             selectedIds,
             collapsedIds: state === "collapsed" ? ["group"] : [],
-            bulkActions: [action],
+            bulkActions: selecting ? [action] : [],
             page: { more: false, loading: false },
           },
           p,

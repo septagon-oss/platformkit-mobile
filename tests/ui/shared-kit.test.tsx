@@ -85,7 +85,10 @@ test("controlled choice, clear and quantity emit only eligible changed targets",
 });
 
 test("selection and inline row actions do not activate the row", async () => {
-  const model = ok(kitExamples(presentation, "data-list/grouped")).list,
+  // The specimen that demonstrates selection, with nothing ticked yet — the grouped
+  // specimen carries no tick boxes at all, since grouping and bulk selection are
+  // two demonstrations and one screen does not make both points at once.
+  const model = ok(kitExamples(presentation, "data-list/selection-some", { selectedIds: [] })).list,
     onOpen = jest.fn(),
     onSelection = jest.fn(),
     onRowAction = jest.fn();
