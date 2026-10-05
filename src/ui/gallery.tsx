@@ -8,7 +8,10 @@ import { Pressable, StyleSheet, View, useWindowDimensions, type ViewStyle } from
 import {
   kitCaseIds,
   kitExamples,
+  posterFor,
   type GallerySelection,
+  type ImageSlotProps,
+  type PosterMark,
   deriveCopy,
   deriveFeedback,
   humanize,
@@ -577,24 +580,82 @@ function Samples({
   );
 }
 
+// SpecimenPoster is the gallery's own media renderer: a composition drawn from
+// the specimen's id (src/core/media.ts/posterFor), so the same specimen is the
+// same artwork on every page and in every run, and two specimens of one shape are
+// told apart at a glance. It is the gallery's, not the kit's: a screen with a
+// picture of its own passes a renderer, and a picture that failed to load is
+// still reported as one with its reason and a retry (molecules/MediaHero).
+function SpecimenPoster(props: ImageSlotProps) {
+  const t = useTheme();
+  const s = useStyles(styles);
+  const poster = posterFor(props.id);
+  const fill: Record<PosterMark["tone"], string> = {
+    accent: t.color.accentDefault,
+    ink: t.color.borderStrong,
+    sheet: t.color.surfaceMuted,
+  };
+  return (
+    <View
+      style={s.fixture}
+      accessible={!props.decorative}
+      accessibilityLabel={props.description}
+      testID={`poster:${poster.layout}`}
+    >
+      {/* The marks carry no meaning of their own: the slot's name is the
+          description, spoken once as the element's label and written below. */}
+      <View
+        style={s.field}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {poster.marks.map((mark) => (
+          <View
+            key={mark.id}
+            style={[
+              s.mark,
+              mark.shape === "disc" && s.disc,
+              {
+                left: `${mark.left * 100}%`,
+                top: `${mark.top * 100}%`,
+                width: `${mark.width * 100}%`,
+                ...(mark.height === undefined
+                  ? { aspectRatio: 1 }
+                  : { height: `${mark.height * 100}%` }),
+                backgroundColor: fill[mark.tone],
+              },
+            ]}
+          />
+        ))}
+      </View>
+      <View style={s.caption}>
+        <Text role="caption" tone="muted">
+          {props.description}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 const styles = (t: Theme) =>
   StyleSheet.create({
+    // A media slot is the one place a page shows a picture the kit does not own.
+    // The gallery owns none, so it draws one (SpecimenPoster) rather than a patch
+    // of the page's own colour, which reads as a picture that failed to load.
     fixture: {
       flex: 1,
       gap: t.space.xs,
-      padding: t.space.lg,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: t.color.surfaceMuted,
-      // A media slot is the one place a page shows a picture the kit does not
-      // own. Without its edge the slot is a patch of the page's own colour and
-      // the screen reads as a picture that failed to load rather than as the
-      // slot it is, so the outline that says "this edge means something" is
-      // drawn here too.
+      padding: t.space.sm,
+      backgroundColor: t.color.surfacePrimary,
       borderWidth: 1,
       borderColor: t.state.outline,
       borderRadius: t.radius.md,
+      overflow: "hidden",
     },
+    field: { flex: 1, position: "relative" },
+    mark: { position: "absolute" },
+    disc: { borderRadius: t.radius.full },
+    caption: { paddingTop: t.space.xs },
     artwork: {
       width: t.extent.player,
       height: t.extent.player,
@@ -640,17 +701,7 @@ function KitSamples({
   const action = (id: string) => onAction(id),
     specimen = presentation.copy.gallery,
     send = (value: unknown) => onAction(JSON.stringify(value));
-  const image: ImageRenderer =
-    renderImage ??
-    ((props) => (
-      <View style={s.fixture} accessible={!props.decorative} accessibilityLabel={props.description}>
-        {/* A media slot the kit does not own a picture for says so with the mark
-            of a picture and its shape in words: an empty box reads as a picture
-            that failed, a framed slot reads as the slot it is. */}
-        <Icon name="image" size="lg" tone="muted" />
-        <Text role="caption">{props.description}</Text>
-      </View>
-    ));
+  const image: ImageRenderer = renderImage ?? ((props) => <SpecimenPoster {...props} />);
   const zoom =
     renderZoom ??
     ((props: ZoomSlotProps) => (
