@@ -1,9 +1,16 @@
 import React from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import type { DayStripModel } from "../../core/derive";
 import { Button } from "../atoms/Button";
 import { kitStyles } from "../layout";
-import { useStyles } from "../theme";
+import { useStyles, useTheme } from "../theme";
+
+/**
+ * A week is one line of days. Wrapped, seven named days become three unrelated
+ * rows and the sequence a person scans — this day, then the next one — is gone;
+ * sideways, the week keeps its order and the days past the edge are one push
+ * away, which is what the kit's own grid says in words (calendar.ts, `sideways`).
+ */
 export function DayStrip({
   model,
   onDate,
@@ -17,7 +24,8 @@ export function DayStrip({
   readonly onNext: () => void;
   readonly onToday: () => void;
 }) {
-  const s = useStyles(kitStyles);
+  const s = useStyles(kitStyles),
+    t = useTheme();
   return (
     <View style={s.stack}>
       <View style={s.row}>
@@ -40,7 +48,14 @@ export function DayStrip({
           onPress={onNext}
         />
       </View>
-      <View style={s.row}>
+      <ScrollView
+        horizontal
+        contentContainerStyle={{
+          flexDirection: "row",
+          alignItems: "stretch",
+          gap: t.space.sm,
+        }}
+      >
         {model.days.map((day) => (
           <Button
             key={day.id}
@@ -55,7 +70,7 @@ export function DayStrip({
             }}
           />
         ))}
-      </View>
+      </ScrollView>
     </View>
   );
 }

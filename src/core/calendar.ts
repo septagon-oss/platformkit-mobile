@@ -133,6 +133,18 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
         month: "short",
         day: "numeric",
       }).format(new Date(`${date.toString()}T12:00:00Z`));
+    // The strip's own cell: the weekday over the number, which is what fits a whole
+    // week across one phone column. The whole date remains the name the cell
+    // announces, so the compact cell costs nothing to a screen reader, and today is
+    // named for what it is instead of wearing its date plus the word beside it —
+    // eleven words, which is what sent the strip wrapping down the column in three
+    // uneven rows and lost the week as a sequence.
+    const cellLabel = (date: Temporal.PlainDate) =>
+      new Intl.DateTimeFormat(p.locale, {
+        timeZone: "UTC",
+        weekday: "short",
+        day: "numeric",
+      }).format(new Date(`${date.toString()}T12:00:00Z`));
     const days = Array.from({ length }, (_, i) => {
       const date = start.add({ days: i }),
         id = date.toString();
@@ -245,7 +257,7 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
           selected: id === input.selectedDate,
           today: id === today,
           todayLabel: p.copy.kit.today,
-          label: id === today ? `${dateLabel(d)} · ${p.copy.kit.today}` : dateLabel(d),
+          label: id === today ? p.copy.kit.today : cellLabel(d),
           enabled: inBounds(id),
         };
       }),
