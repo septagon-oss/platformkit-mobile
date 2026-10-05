@@ -46,47 +46,54 @@ export function MiniPlayer({
   const s = useStyles(styles);
   const toggle: PlayerIntent = playing ? "pause" : "play";
   const glyph: IconName = playing ? "pause" : "play";
+  // A strip over a list is one line tall and its words are cut short; the card a
+  // person stops on is not. Expanded, the title and the position take the lines
+  // the sentence needs and the controls move below them, so the words are not
+  // what gets squeezed by the transport.
+  const lines = collapsed ? 1 : 2;
   return (
     // The strip is a group, not one element: `accessible` would fold the play
     // button into the strip on iOS, and an `adjustable` role would invite a swipe
     // this strip cannot answer — it owns no scrubber, the screen does.
     <View style={[s.strip, !collapsed && s.expanded]} {...testable(testID)}>
-      {artwork ? <View style={s.art}>{artwork}</View> : null}
-      <View style={s.text}>
-        <Text role="label" weight="semibold" numberOfLines={1}>
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text role="caption" tone="muted" numberOfLines={1}>
-            {subtitle}
+      <View style={s.body}>
+        {artwork ? <View style={s.art}>{artwork}</View> : null}
+        <View style={s.text}>
+          <Text role="label" weight="semibold" numberOfLines={lines}>
+            {title}
           </Text>
-        ) : null}
-        <Text role="caption" tone="muted" numberOfLines={1}>
-          {model.fraction === undefined
-            ? `${model.elapsed} · ${model.reason ?? ""}`
-            : `${model.elapsed} · ${model.remaining}`}
-        </Text>
-        {collapsed ? null : (
-          <View style={s.track}>
-            <View
-              style={[
-                s.bar,
-                { backgroundColor: t.color.surfaceMuted },
-                !model.seekable && s.unseekable,
-              ]}
-            >
+          {subtitle ? (
+            <Text role="caption" tone="muted" numberOfLines={lines}>
+              {subtitle}
+            </Text>
+          ) : null}
+          <Text role="caption" tone="muted" numberOfLines={lines}>
+            {model.fraction === undefined
+              ? `${model.elapsed} · ${model.reason ?? ""}`
+              : `${model.elapsed} · ${model.remaining}`}
+          </Text>
+          {collapsed ? null : (
+            <View style={s.track}>
               <View
                 style={[
-                  s.fill,
-                  {
-                    backgroundColor: t.color.accentDefault,
-                    width: `${Math.round((model.fraction ?? 0) * 1000) / 10}%`,
-                  },
+                  s.bar,
+                  { backgroundColor: t.color.surfaceMuted },
+                  !model.seekable && s.unseekable,
                 ]}
-              />
+              >
+                <View
+                  style={[
+                    s.fill,
+                    {
+                      backgroundColor: t.color.accentDefault,
+                      width: `${Math.round((model.fraction ?? 0) * 1000) / 10}%`,
+                    },
+                  ]}
+                />
+              </View>
             </View>
-          </View>
-        )}
+          )}
+        </View>
       </View>
       <View style={s.controls}>
         {controls.back ? (
@@ -182,7 +189,14 @@ const styles = (t: Theme) =>
       minHeight: t.extent.player,
       ...t.state.raised,
     },
-    expanded: { padding: t.space.md, borderRadius: t.radius.xl, gap: t.space.sm },
+    expanded: {
+      flexDirection: "column",
+      alignItems: "flex-start",
+      padding: t.space.md,
+      borderRadius: t.radius.xl,
+      gap: t.space.sm,
+    },
+    body: { flex: 1, flexDirection: "row", alignItems: "center", gap: t.space.sm },
     art: {
       width: t.extent.player,
       height: t.extent.player,
