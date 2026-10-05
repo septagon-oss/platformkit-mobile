@@ -152,11 +152,6 @@ export function deriveQuantity(input: QuantityInput, p: Presentation) {
         ready && input.value + input.step <= input.max ? input.value + input.step : undefined,
       decreaseLabel: `${p.copy.kit.decrease}: ${input.label}`,
       increaseLabel: `${p.copy.kit.increase}: ${input.label}`,
-      // The stepper reads as one line — less, how many, more — so the word it
-      // prints stays short; the Label above names the same act in full, and the
-      // control announces that one.
-      decreaseWord: p.copy.kit.decrease,
-      increaseWord: p.copy.kit.increase,
       text: new Intl.NumberFormat(p.locale).format(input.value),
     };
   });

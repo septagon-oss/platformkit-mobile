@@ -10,6 +10,8 @@ import { toneColor, type Tone } from "./Text";
 
 const glyphs = {
   add: "add",
+  // The stepper's two halves: one glyph adds, the other takes one away.
+  less: "remove-outline",
   back: "chevron-back",
   calendar: "calendar-outline",
   clock: "time-outline",

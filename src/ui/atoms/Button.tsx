@@ -22,6 +22,12 @@ export type ButtonTone = "primary" | "secondary" | "destructive" | "plain";
 export type Placement = "inline" | "header";
 
 interface Props {
+  /**
+   * label is the word the control prints. An empty label prints nothing and the
+   * control is its glyph alone — the two halves of a stepper, which are the same
+   * act on every screen and cannot be told apart by a word in two languages. The
+   * name below is then what the control announces.
+   */
   readonly label: string;
   /** name is what the control announces when the word it shows is not the whole name — a stepper's "Increase" sits beside a value named "Quantity". */
   readonly name?: string;
@@ -68,6 +74,10 @@ export function Button({
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const off = disabled || busy;
+  // A control with no word of its own is announced entirely by its name, and the
+  // accessibility action carries that same whole name rather than an empty word.
+  const spoken = name ?? label;
+  const glyphOnly = label === "";
   const activate = () => {
     if (!off) onPress();
   };
@@ -99,25 +109,30 @@ export function Button({
       onHoverOut={() => setHovered(false)}
       disabled={off}
       accessibilityRole={accessibilityRole}
-      {...currentInSet(current, name ?? label)}
+      {...currentInSet(current, spoken)}
       {...(reason || hint ? { accessibilityHint: reason ?? hint } : {})}
       aria-busy={busy}
       aria-checked={checked}
       aria-disabled={off}
       aria-expanded={expanded}
       {...chosenState(accessibilityRole, selected)}
-      accessibilityActions={off ? [] : [{ name: "activate", label }]}
+      accessibilityActions={off ? [] : [{ name: "activate", label: spoken }]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "activate") activate();
       }}
       android_ripple={header ? undefined : { color: t.color.borderStrong }}
       style={({ pressed }) => [
         ...shape,
+        glyphOnly && s.mark,
         controlInk(toneColor(t, textTone)),
         hovered && !off && !filled && s.hover,
         pressed && !off && (filled ? s.activeFilled : s.press),
         focused && s.focused,
-        off && s.off,
+        // A selected member of a set is the one the screen is on. Saying it cannot be
+        // pressed (there is nowhere to press *to*) does not make it the member that
+        // is out of reach, so it is never drawn in the unavailable outline.
+        off && !selected && s.off,
+        selected && s.picked,
       ]}
       {...testable(testID)}
     >
@@ -134,15 +149,17 @@ export function Button({
         ) : icon ? (
           <Icon name={icon} size="sm" tone={textTone} />
         ) : null}
-        <Text
-          role={header ? "body" : "label"}
-          weight="semibold"
-          tone={textTone}
-          style={s.label}
-          maxFontSizeMultiplier={0}
-        >
-          {label}
-        </Text>
+        {glyphOnly ? null : (
+          <Text
+            role={header ? "body" : "label"}
+            weight="semibold"
+            tone={textTone}
+            style={s.label}
+            maxFontSizeMultiplier={0}
+          >
+            {label}
+          </Text>
+        )}
       </View>
       {reason ? (
         <Text role="label" tone={textTone} align="center" maxFontSizeMultiplier={0}>
@@ -181,6 +198,12 @@ const styles = (t: Theme) =>
       gap: t.space.sm,
     },
     label: { flexShrink: 1, textAlign: "center" },
+    // The member the screen is on: the accent ring the kit already uses for what
+    // a person has chosen, on the surface it is drawn in.
+    picked: { borderColor: t.color.accentDefault, backgroundColor: t.color.surfacePrimary },
+    // A glyph alone keeps the whole hit area and spends none of it on padding
+    // around a word that is not printed.
+    mark: { paddingHorizontal: t.space.sm, minWidth: t.hit },
     focused: {
       borderColor: t.color.focus,
       outlineColor: t.color.focus,

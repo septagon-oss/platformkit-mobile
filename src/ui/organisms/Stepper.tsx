@@ -43,10 +43,19 @@ export function Stepper({
       </Text>
       <View style={s.row}>
         {model.steps.map((step) => (
+          // A stage is named by the thing it asks for; its state is drawn, not
+          // appended to its name. The stage a person is standing on carries the
+          // ring the kit uses for what is chosen, a stage they finished carries
+          // the check that says so, and a stage this task will not let them jump
+          // to keeps the outline that means exactly that — which is not the one
+          // they are on. The full words, "Your details · Complete", are what the
+          // control announces, in the language the screen was asked for.
           <Button
             key={step.id}
-            label={step.displayLabel}
+            label={step.label}
+            name={step.displayLabel}
             tone="secondary"
+            {...(step.completion === "complete" ? { icon: "check" as const } : {})}
             selected={step.selected}
             disabled={!step.canGo}
             onPress={() => {
