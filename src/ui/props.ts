@@ -14,7 +14,7 @@ export const testable = (testID: string | undefined): { readonly testID?: string
 // aria-busy/checked/disabled/expanded/selected and the value quartet), so the
 // device half is stated as accessibilityState.selected, which react-native-web
 // drops. One fact, each spelling written where that reader looks.
-import type { AccessibilityRole, AccessibilityState } from "react-native";
+import { Platform, type AccessibilityRole, type AccessibilityState } from "react-native";
 
 /** roles whose ARIA definition carries a selected state */
 const SELECTED_ROLES: readonly string[] = ["gridcell", "option", "row", "tab"];
@@ -33,4 +33,25 @@ export const chosenState = (
   if (selected === undefined) return {};
   if (SELECTED_ROLES.includes(role)) return { "aria-selected": selected };
   return { "aria-pressed": selected, accessibilityState: { selected } };
+};
+
+// "Of this related set, this control is the current one" has no shared
+// spelling either. ARIA carries it as aria-current; React Native's
+// accessibilityState holds only disabled/selected/checked/busy/expanded, so on
+// a device the word that says it joins the name. A control's name stays what
+// it is called — a day's name is its date, whatever marks it as today — and the
+// word a person reads stays on the screen. (Chromium writes aria-current onto
+// the element; its CDP accessibility tree exposes no `current` property, so the
+// announcement is read from the DOM, not from that tree.)
+export interface CurrentProps {
+  readonly "aria-current"?: "true";
+  readonly accessibilityLabel?: string;
+}
+
+/** currentInSet names the control that is the current one in a related set. */
+export const currentInSet = (word: string | undefined, name: string): CurrentProps => {
+  if (word === undefined) return { accessibilityLabel: name };
+  return Platform.OS === "web"
+    ? { "aria-current": "true", accessibilityLabel: name }
+    : { accessibilityLabel: `${name}, ${word}` };
 };

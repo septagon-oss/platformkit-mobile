@@ -12,7 +12,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import type { Motion } from "../../core/derive";
-import { chosenState, testable } from "../props";
+import { chosenState, currentInSet, testable } from "../props";
 import { controlInk, useStyles, useTheme, type Theme } from "../theme";
 import { useVerbStage } from "../verb";
 import { Icon, type IconName } from "./Icon";
@@ -38,6 +38,8 @@ interface Props {
   readonly testID?: string;
   readonly accessibilityRole?: AccessibilityRole;
   readonly selected?: boolean;
+  /** current is the word that says this control is the current one in its set — a day strip's "Today". The control keeps the name of the thing it is; the word is stated as the state each platform holds it in. */
+  readonly current?: string;
   readonly checked?: boolean | "mixed";
   readonly expanded?: boolean;
 }
@@ -57,6 +59,7 @@ export function Button({
   testID,
   accessibilityRole = "button",
   selected,
+  current,
   checked,
   expanded,
 }: Props) {
@@ -96,7 +99,7 @@ export function Button({
       onHoverOut={() => setHovered(false)}
       disabled={off}
       accessibilityRole={accessibilityRole}
-      accessibilityLabel={name ?? label}
+      {...currentInSet(current, name ?? label)}
       {...(reason || hint ? { accessibilityHint: reason ?? hint } : {})}
       aria-busy={busy}
       aria-checked={checked}

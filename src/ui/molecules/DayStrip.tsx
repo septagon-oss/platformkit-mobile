@@ -45,9 +45,11 @@ export function DayStrip({
           <Button
             key={day.id}
             label={day.label}
+            name={day.title}
             tone={day.selected ? "primary" : "secondary"}
             selected={day.selected}
             disabled={!day.enabled}
+            {...(day.today ? { current: day.todayLabel } : {})}
             onPress={() => {
               if (day.enabled && !day.selected) onDate(day.id);
             }}
