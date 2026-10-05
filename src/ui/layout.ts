@@ -25,7 +25,11 @@ export const kitStyles = (t: Theme) =>
       borderColor: t.color.borderDefault,
     },
     selected: { borderColor: t.color.focus, borderWidth: t.extent.focus },
-    image: { width: "100%", overflow: "hidden", backgroundColor: t.color.surfaceMuted },
+    // A media frame is the space a picture takes. It is drawn in the page's own
+    // surface, not in a filled block: the placeholder that says a picture is coming
+    // is itself drawn in that muted tone, and a waiting frame the same colour as its
+    // own placeholder showed nothing at all — a loading state nobody could see.
+    image: { width: "100%", overflow: "hidden", backgroundColor: t.color.surfacePrimary },
     /**
      * imageVoid is the media frame when no image is coming: the reason is what
      * occupies it, so it takes the height of the sentence rather than the height
