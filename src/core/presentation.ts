@@ -128,7 +128,9 @@ export function presentationIssues(p: Presentation): readonly Issue[] {
  * its day, its clock and its zone, so a range built from two of them says the day
  * twice, says the zone twice and wraps across two lines — which is how a booking
  * slot came to read as a data dump. The day is written once (twice only when the
- * span crosses midnight), the two clock times follow, and the zone is said once.
+ * span crosses midnight), the two clock times follow, and the zone is said once —
+ * unless the two ends fall in different zones, which is the one span where one
+ * name would be a wrong time rather than a repeated one.
  */
 export function presentedRange(
   start: Date,
@@ -145,14 +147,24 @@ export function presentedRange(
       .map((part) => part.value)
       .join("")
       .trim();
-  const offset = face({ hour: "2-digit", minute: "2-digit", timeZoneName: "short" })
-    .formatToParts(start)
-    .find((part) => part.type === "timeZoneName")?.value;
+  const zone = (at: Date) =>
+    face({ hour: "2-digit", minute: "2-digit", timeZoneName: "short" })
+      .formatToParts(at)
+      .find((part) => part.type === "timeZoneName")?.value;
+  const firstZone = zone(start);
+  const lastZone = zone(end);
   const firstDay = day(start);
   const secondDay = day(end);
   const when = firstDay === secondDay ? firstDay : `${firstDay} – ${secondDay}`;
-  const hours = `${clock(start)} – ${clock(end)}`;
-  return `${when} · ${hours}${offset ? ` ${offset}` : ""}`;
+  // One zone for a span whose ends share it; the zone each end falls in when
+  // they do not. A spring-forward or autumn-back shift moves the second clock
+  // an hour without moving the minute, so naming only the first zone would
+  // place the end an hour away from where the person's own clock reads it.
+  const hours =
+    firstZone && lastZone && firstZone !== lastZone
+      ? `${clock(start)} ${firstZone} – ${clock(end)} ${lastZone}`
+      : `${clock(start)} – ${clock(end)}${firstZone ? ` ${firstZone}` : ""}`;
+  return `${when} · ${hours}`;
 }
 
 /** A formatter belongs to this explicit invocation, never to a mutable device default. */
