@@ -593,10 +593,15 @@ Its own database, tenant, administrator and password are created by the run and
 dropped with it, and the Maestro report is printed in the job log. The device is
 host-level, so the job's concurrency group is named for the device and not the
 ref, and the step that boots the emulator refuses a host that already has a
-device attached: a workflow file cannot hold a machine against a job that is not
-its own, so it declines the machine instead of sharing one. What a checkout
-cannot see is whether this forge fires `schedule:` or whether the label answers
-`actions/setup-node` and `services:` — the first run is what will tell, and
+device attached — in any state adb lists it, because an `offline` entry is
+another job's emulator mid-boot, and adb answers for it — then asks every
+question of adb with the one serial whose console port it claimed, and publishes
+that serial only while it is the sole device the host has: a launch that failed
+cannot then be read as a device somebody else booted. A workflow file cannot
+hold a machine against a job that is not its own, so it declines the machine
+instead of sharing one. What a checkout cannot see is whether this forge fires
+`schedule:` or whether the label answers `actions/setup-node` and
+`services:` — the first run is what will tell, and
 until then no journey here has been shown passing on a device. What that job
 proves is these journeys; the kernel's `mobile_flow_pass_rate` is read from the
 kernel's own manifest, and stays where that manifest puts it until a kernel-side

@@ -53,7 +53,8 @@ concurrency:
   # What this cannot reach is a job that is not this workflow's: another
   # repository's mobile job on the same runner is outside the group, and a
   # workflow file has no way to hold a host, so the step that boots the emulator
-  # refuses a device that is already attached rather than share one.
+  # refuses a device that is already attached — in any state adb lists it — and
+  # publishes only the serial whose console port it claimed for itself.
   group: ${{ github.workflow }}-device
   cancel-in-progress: false
 
@@ -183,39 +184,70 @@ jobs:
             echo "PK_MOBILE_AVD names no Android Virtual Device on this image." >&2
             exit 1
           fi
-          # A device already on adb belongs to something this job cannot see. The
-          # concurrency group above keeps this workflow's runs off each other; a
-          # workflow file cannot hold a host against another repository's job, so
-          # the job refuses the host instead of driving a device it did not boot.
-          attached=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+device$/\1/p')
+          # A device already on adb — in any state adb lists it — belongs to
+          # something this job cannot see. `device` is another job's running
+          # emulator; `offline` is a boot half done, and adb answers for that one
+          # too, so a filter that kept only `device` refused the host a step later
+          # than the host was already taken. The concurrency group above keeps this
+          # workflow's runs off each other; a workflow file cannot hold a host
+          # against another repository's job, so the job refuses the host instead of
+          # driving a device it did not boot.
+          attached=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+[^[:space:]]+$/\1/p')
           if [ -n "$attached" ]; then
             echo "a device is already attached to adb on this host:" >&2
             echo "$attached" >&2
             exit 1
           fi
-          emulator -avd "$PK_MOBILE_AVD" -no-window -no-audio -no-boot-anim -no-snapshot \
-            -gpu swiftshader_indirect >emulator.log 2>&1 &
-          echo "pid=$!" >> "$GITHUB_OUTPUT"
-          adb wait-for-device
+          # The console port is this job's own, claimed before the process starts:
+          # the emulator answers as emulator-<port>, so the serial this step will
+          # publish is a number chosen here and not a name read off adb afterwards.
+          # Every adb call below carries it — an unqualified adb call is answered by
+          # whichever device the host happens to have, which is how a launch that
+          # failed could be reported as a device. A port someone else holds makes
+          # the emulator itself fail, and this step's log says so.
+          serial=emulator-5584
+          emulator -avd "$PK_MOBILE_AVD" -port "${serial#emulator-}" -no-window -no-audio \
+            -no-boot-anim -no-snapshot -gpu swiftshader_indirect >emulator.log 2>&1 &
+          pid=$!
+          echo "pid=$pid" >> "$GITHUB_OUTPUT"
+          # The launch is not the device, and a device on the host is not proof of
+          # this launch. A process that died has booted nothing, so its death ends
+          # this step before any answer — from this host or another's emulator —
+          # could be read as a boot that completed. Two seconds, 120 turns: the
+          # wait platformkit's own mobile job gives an emulator to come up.
+          ready=0
           for i in $(seq 1 120); do
-            if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
-              adb devices
-              # Name the device for the rest of the job, so scripts/e2e/run.sh's
-              # adb calls go to the emulator this step booted and to nothing else.
-              booted=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+device$/\1/p')
-              if [ "$(printf '%s\n' "$booted" | grep -c .)" != 1 ]; then
-                echo "this job expects to have booted the only device on the host; it sees:" >&2
-                echo "$booted" >&2
-                exit 1
-              fi
-              echo "serial=$booted" >> "$GITHUB_OUTPUT"
-              exit 0
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "the emulator for $PK_MOBILE_AVD exited before $serial was ready:" >&2
+              tail -40 emulator.log >&2
+              exit 1
+            fi
+            if [ "$(adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              ready=1
+              break
             fi
             sleep 2
           done
-          echo "the emulator did not finish booting:" >&2
-          tail -40 emulator.log >&2
-          exit 1
+          if [ "$ready" != 1 ]; then
+            echo "the emulator did not finish booting $serial:" >&2
+            tail -40 emulator.log >&2
+            exit 1
+          fi
+          adb devices
+          # What the rest of the job drives is this step's own serial: scripts/e2e/
+          # run.sh installs the APK on it, reverses the server's port on it and runs
+          # the journeys that clear their state. So the host must hold exactly one
+          # device, it must be ready, and it must be this one — a second serial in
+          # any state is another job on this machine, which is the host this step
+          # refuses rather than the device it would share.
+          listed=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+([^[:space:]]+)$/\1 \2/p')
+          others=$(printf '%s\n' "$listed" | grep -v "^$serial " | grep . || true)
+          if [ -n "$others" ] || ! printf '%s\n' "$listed" | grep -qx "$serial device"; then
+            echo "this job expects $serial to be the only device adb has; it sees:" >&2
+            echo "$listed" >&2
+            exit 1
+          fi
+          echo "serial=$serial" >> "$GITHUB_OUTPUT"
 
       - name: Run every journey in e2e/flows
         # The served kernel, its own database, one tenant and one administrator,
