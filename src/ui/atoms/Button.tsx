@@ -190,7 +190,14 @@ const styles = (t: Theme) =>
       borderColor: t.state.outline,
       backgroundColor: t.color.surfacePrimary,
     },
-    plain: { paddingHorizontal: t.space.sm, borderColor: t.color.surfaceCanvas },
+    // A plain control is a word in the page's own column of words, so it begins
+    // where that column begins; centring it would float an action in the middle
+    // of the space around it.
+    plain: {
+      paddingHorizontal: t.space.sm,
+      borderColor: t.color.surfaceCanvas,
+      justifyContent: "flex-start",
+    },
     content: {
       flexDirection: "row",
       alignItems: "center",

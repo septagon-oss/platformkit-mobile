@@ -704,8 +704,8 @@ const styles = (t: Theme) =>
     // content, and a poster drawn as marks on a field has no content of its own
     // to hold a width with, so the marks would be drawn into nothing.
     artwork: {
-      width: t.extent.player,
-      height: t.extent.player,
+      width: "100%",
+      height: "100%",
       borderRadius: t.radius.md,
       overflow: "hidden",
       backgroundColor: t.color.surfaceMuted,

@@ -67,9 +67,11 @@ export function MiniPlayer({
     // this strip cannot answer — it owns no scrubber, the screen does.
     <View style={[s.strip, !collapsed && s.expanded]} {...testable(testID)}>
       <View style={s.body}>
-        {artwork ? <View style={s.art}>{artwork}</View> : null}
+        {artwork ? <View style={collapsed ? s.art : s.artCover}>{artwork}</View> : null}
         <View style={s.text}>
-          <Text role="label" weight="semibold" numberOfLines={lines}>
+          {/* On the strip the title is one line among three; on the card it is
+              the heading the artwork stands beside. */}
+          <Text role={collapsed ? "label" : "title"} weight="semibold" numberOfLines={lines}>
             {title}
           </Text>
           {subtitle ? (
@@ -205,10 +207,18 @@ const styles = (t: Theme) =>
       gap: t.space.sm,
     },
     body: { flex: 1, flexDirection: "row", alignItems: "center", gap: t.space.sm },
+    // The strip's cover is the size of a row; the card's is the size of the
+    // thing being played. Both crop what the caller draws into the box.
     art: {
       width: t.extent.player,
       height: t.extent.player,
       borderRadius: t.radius.md,
+      overflow: "hidden",
+    },
+    artCover: {
+      width: t.extent.playerCover,
+      height: t.extent.playerCover,
+      borderRadius: t.radius.lg,
       overflow: "hidden",
     },
     text: { flex: 1, gap: t.space.xs / 2 },

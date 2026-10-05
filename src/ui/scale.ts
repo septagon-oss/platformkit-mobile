@@ -38,6 +38,10 @@ export const extent = {
   /** tabBar and player are the two strips that ride the viewport's edge over the content. */
   tabBar: 49,
   player: 64,
+  /** playerCover is the artwork of the player a person stops on — the card, not
+   * the strip that rides the edge while they look at something else. A cover
+   * smaller than a fingertip's span says "a thumbnail somewhere else". */
+  playerCover: 132,
   /** hero is the one photographic surface a screen leads with. */
   hero: 220,
   /** pageColumn, above, is the width one phone composition is shown at. */
