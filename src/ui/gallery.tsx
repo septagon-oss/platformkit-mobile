@@ -23,6 +23,7 @@ import {
   type Presentation,
 } from "../core/derive";
 import { deriveGalleryPage, pageFamily, type GalleryPageModel } from "../core/galleryPages";
+import { deriveDisclosure } from "../core/surfaces";
 import { Badge } from "./atoms/Badge";
 import { Button } from "./atoms/Button";
 import { ChoiceRow } from "./atoms/ChoiceRow";
@@ -310,6 +311,11 @@ function Page({
   const t = useTheme();
   const viewport = useWindowDimensions();
   const [action, setAction] = useState("");
+  // A phone's fold holds one screen. What else the page demonstrates — the same
+  // family's other states — opens on request under the disclosure the kit already
+  // has, so the fold is a screen rather than a screen's scaffolding. On a desk two
+  // columns fit, and the states stand beside the screen where they are read.
+  const [statesOpen, setStatesOpen] = useState(false);
   // Phone components are drawn at a phone's width wherever they are looked at:
   // a specimen is never stretched across a desk until its gaps stop meaning
   // anything. A monitor still gets a desk-sized page: the screen the page stands
@@ -371,6 +377,17 @@ function Page({
       ))}
     </VerbStage>
   );
+  const statesSection = deriveDisclosure(
+    {
+      id: "gallery-page-states",
+      title: presentation.copy.gallery.states,
+      summary: presentation.copy.gallery.statesHint,
+      expanded: statesOpen,
+      depth: 1,
+      enabled: true,
+    },
+    presentation,
+  );
   return (
     <View style={[s.page, stand ? s.stand : column]}>
       {/* One screen, one thing to do: the lead holds the page's one filled verb,
@@ -381,7 +398,15 @@ function Page({
       <Text role="display">{model.title}</Text>
       <View style={stand ? s.columns : undefined}>
         <View style={stand ? s.phone : undefined}>{lead}</View>
-        <View style={stand ? s.phone : undefined}>{states}</View>
+        <View style={stand ? s.phone : undefined}>
+          {stand || !statesSection.ok ? (
+            states
+          ) : (
+            <DisclosureSection model={statesSection.value} onExpanded={setStatesOpen}>
+              {states}
+            </DisclosureSection>
+          )}
+        </View>
       </View>
       <Text accessibilityLiveRegion="polite" testID="gallery-page-action">
         {action ? presentation.copy.gallery.actionReceived(action) : ""}

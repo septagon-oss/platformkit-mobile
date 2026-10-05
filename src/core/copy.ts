@@ -36,6 +36,7 @@ interface Words {
     readonly english: string;
     readonly portuguese: string;
     readonly states: string;
+    readonly statesHint: string;
     readonly primitives: string;
     readonly locale: string;
     readonly case: string;
@@ -89,6 +90,7 @@ const en: Words = {
     english: "English",
     portuguese: "Português",
     states: "Rich states",
+    statesHint: "How this screen reads while it loads, comes up empty or refuses a thing.",
     primitives: "Atoms and molecules",
     locale: "Date and number locale",
     case: "Example",
@@ -139,6 +141,7 @@ const pt: Words = {
     english: "English",
     portuguese: "Português",
     states: "Estados de conteúdo",
+    statesHint: "Como este ecrã se lê enquanto carrega, fica vazio ou recusa uma ação.",
     primitives: "Átomos e moléculas",
     locale: "Formato de datas e números",
     case: "Exemplo",
