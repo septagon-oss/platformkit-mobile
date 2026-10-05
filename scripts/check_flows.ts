@@ -25,17 +25,37 @@ const FLOW_FILE = /\.ya?ml$/;
 const WORKSPACE_CONFIG = new Set(["config.yaml", "config.yml"]);
 /**
  * READABLE are the fields of Maestro's own workspace configuration
- * (maestro.orchestra.model.MaestroWorkspaceConfig) this gate can apply: a
- * label, and the two path filters it can match against a set of file names.
- * `tags` is deliberately absent — a tag lives in each flow's own header, so a
- * tag filter is answered by reading every flow as Maestro would, and a gate that
- * pretended otherwise would count coverage on journeys it never planned. So the
- * one rule below refuses any field it cannot apply, by its name.
+ * (maestro.orchestra.model.MaestroWorkspaceConfig) this gate can apply: a label
+ * and the one path filter it can match against a set of file names.
+ * Two fields are deliberately absent:
+ *
+ * - `tags`, because a tag lives in each flow's own header, so a tag filter is
+ *   answered only by reading every flow as Maestro would, and a gate that
+ *   pretended otherwise would count coverage on journeys it never planned; and
+ * - `excludeFlows`, because no Maestro run applies it: the planner that decides
+ *   the journeys (maestro-cli-2.8.0's WorkspaceExecutionPlanner.plan, the entry
+ *   point TestCommand calls) reads tags and inclusion patterns out of this file
+ *   and no exclusion — measured, a workspace whose config excludes index.yaml
+ *   still plans index.yaml. Narrowing the count to that line would drop a flow
+ *   the run takes from every check below, so the field is refused by name below,
+ *   beside the fields the gate cannot read at all.
+ *
+ * The rule is one: a field the gate cannot apply is refused, never read as
+ * agreement with a plan it has not built.
  */
-const READABLE = new Set(["name", "flows", "excludeFlows"]);
-/** The two fields the plan is built from. */
-const FILTERS = ["flows", "excludeFlows"] as const;
-type Filter = (typeof FILTERS)[number];
+const READABLE = new Set(["name", "flows"]);
+/**
+ * UNAPPLIED names a field Maestro itself ignores, with what a run does instead,
+ * so the refusal says the truth about it rather than claiming the gate could not
+ * parse a line it read perfectly well.
+ */
+const UNAPPLIED = new Map([
+  [
+    "excludeFlows",
+    "maestro-cli-2.8.0's planner takes its journeys from flows: and reads no exclusion from this file, so what this line drops still runs",
+  ],
+]);
+type Filter = "flows";
 /**
  * BREAK is every line break the YAML spec counts, so a configuration saved on
  * another platform splits where its parser splits rather than into one long line.
@@ -63,8 +83,8 @@ const KEY =
 const ENTRY = /^[ \t]*-[ \t]+(.*\S)(?:[ \t]+#.*)?$/;
 /** REMARK is a blank line or a comment, which carries no field and joins no list. */
 const REMARK = /^[ \t]*(#.*)?$/;
-/** isFilter tells the two path filters from the other readable field, whose value no plan consults. */
-const isFilter = (field: string): field is Filter => (FILTERS as readonly string[]).includes(field);
+/** isFilter tells the one field the plan is built from from the other readable field, whose value no plan consults. */
+const isFilter = (field: string): field is Filter => field === "flows";
 
 function files(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
@@ -164,17 +184,16 @@ export function workspacePlan(root: string): { files: string[]; problems: string
     };
   const config = named[0]!;
   const selection = readConfig(readFileSync(path.join(at, config), "utf8"));
+  // Inclusion is the only narrowing a Maestro run makes from this file, so it is
+  // the only one the gate makes: a plan narrower than the run would hide a flow
+  // from every check below while the device still walks into it.
   let files = all;
-  for (const field of FILTERS) {
-    const entries = selection.filters.get(field);
-    if (!entries) continue;
+  const entries = selection.filters.get("flows");
+  if (entries) {
     for (const entry of entries)
       if (!all.some((f) => matches(entry, f)))
-        selection.problems.push(`${field} names ${entry}, which is no journey in ${FLOWS}`);
-    files =
-      field === "flows"
-        ? files.filter((f) => entries.some((e) => matches(e, f)))
-        : files.filter((f) => !entries.some((e) => matches(e, f)));
+        selection.problems.push(`flows names ${entry}, which is no journey in ${FLOWS}`);
+    files = files.filter((f) => entries.some((e) => matches(e, f)));
   }
   // Every refusal names the file it came from, so the person who wrote the line
   // is told which one to open.
@@ -195,16 +214,16 @@ function journeys(root: string): string[] {
 /**
  * readConfig walks a workspace configuration and accounts for every line of it.
  * What it applies is a block mapping: a top-level key at column zero, and its
- * filter either spelled `[a.yaml, b.yaml]` on the key line or as `- a.yaml`
- * lines below it. A field it names but cannot apply (`tags:`) is refused by name
- * and its block skipped; a line it cannot even place — a flow mapping, a nested
- * map, a scalar where a list belongs, an entry with nothing above it — refuses
- * the whole file, because a plan built out of the part that happened to be
- * readable is the guess this rule exists to refuse. A filter given with no value
- * at all is no filter: for `flows:` with nothing after it Maestro plans every
- * journey in the directory (measured, maestro-cli-2.8.0), so the plan is left
- * alone rather than narrowed to nothing. A key written twice wins the way
- * Maestro's parser lets it win: the last one.
+ * inclusion list either spelled `[a.yaml, b.yaml]` on the key line or as
+ * `- a.yaml` lines below it. A field it names but cannot apply (`tags:`, or one
+ * no Maestro run reads at all) is refused by name and its block skipped; a line
+ * it cannot even place — a flow mapping, a nested map, a scalar where a list
+ * belongs, an entry with nothing above it — refuses the whole file, because a
+ * plan built out of the part that happened to be readable is the guess this rule
+ * exists to refuse. A filter given with no value at all is no filter: for `flows:`
+ * with nothing after it Maestro plans every journey in the directory (measured,
+ * maestro-cli-2.8.0), so the plan is left alone rather than narrowed to nothing.
+ * A key written twice wins the way Maestro's parser lets it win: the last one.
  */
 function readConfig(text: string): { filters: Map<Filter, string[]>; problems: string[] } {
   const lines = text.replace(/^\uFEFF/, "").split(BREAK);
@@ -222,6 +241,14 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
     problems.push(problem);
     return { filters: new Map(), problems };
   };
+  /**
+   * keep closes the list that was open. An empty one is a key with no value
+   * after it, which is no filter at all, so it is recorded as nothing.
+   */
+  const keep = (): void => {
+    if (open && open.entries.length > 0) filters.set(open.field, open.entries);
+    open = null;
+  };
   for (const line of lines) {
     if (REMARK.test(line)) continue;
     if (refused && /^[ \t]/.test(line)) continue;
@@ -237,14 +264,18 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
         : unreadable(
             `"${line.trim()}" is no workspace key this gate can read: it applies a name at column zero with its list in [brackets] or as - items below it`,
           );
-    if (open) {
-      // The list ends where the next field begins. An empty one is the key with
-      // no value, which Maestro reads as no filter at all, so it is not recorded.
-      if (open.entries.length > 0) filters.set(open.field, open.entries);
-      open = null;
-    }
+    keep(); // The list ends where the next field begins.
     refused = false;
     const field = key[1] ?? key[2] ?? key[3]!;
+    const ignored = UNAPPLIED.get(field);
+    if (ignored !== undefined) {
+      if (!problems.some((p) => p.startsWith(`${field} `)))
+        problems.push(
+          `${field} is no field a Maestro run applies — ${ignored}; select what runs with flows: instead`,
+        );
+      refused = true;
+      continue;
+    }
     if (!READABLE.has(field)) {
       if (!problems.some((p) => p.startsWith(`${field} `)))
         problems.push(
@@ -253,8 +284,8 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
       refused = true;
       continue;
     }
-    // Only the two path filters carry a list; anything else readable is a value
-    // the plan does not consult, and its own block would be nothing to apply.
+    // Only `flows` carries a list; `name` is a label no plan consults, and a
+    // block under it would be nothing for the plan to apply.
     if (!isFilter(field)) continue;
     const value = (key[4] ?? "").trim();
     if (value.startsWith("[") && value.endsWith("]") && !value.slice(1, -1).includes("[")) {
@@ -265,7 +296,7 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
       open = { field, entries: [] };
     }
   }
-  if (open && open.entries.length > 0) filters.set(open.field, open.entries);
+  keep();
   return { filters, problems };
 }
 

@@ -7,11 +7,10 @@ import { checkFlows, flowFiles, workspacePlan } from "../scripts/check_flows";
 
 // `tests/flow-workspace-selection.test.ts` proves the invariant: a screen whose
 // only journey is excluded from the plan is uncovered. These cases hold the edges
-// of how that plan is built — that an exclusion narrows it the way an
-// inclusion does, that a glob selects instead of refusing everything, that an
-// entry naming no journey is named back, that a field the gate cannot read is
-// refused rather than read as agreement, and which spellings of a selection the
-// gate applies and which it refuses by name.
+// of how that plan is built — that an inclusion narrows it, that a glob selects
+// instead of refusing everything, that an entry naming no journey is named back,
+// that a field the gate cannot read is refused rather than read as agreement, and
+// which spellings of a selection the gate applies and which it refuses by name.
 
 const APP_ID = "dev.septagon.platformkit.ci";
 const body = `appId: \${APP_ID}\nenv:\n  APP_ID: ${APP_ID}\n---\n- launchApp\n`;
@@ -35,12 +34,20 @@ function pair(t: TestContext): string {
 const config = (root: string, text: string) =>
   writeFileSync(path.join(root, "e2e/flows/config.yaml"), text);
 
-test("a flow excluded from the plan leaves its screen uncovered", (t) => {
+test("an exclusion no Maestro run applies is refused, not narrowed to", (t) => {
   const root = pair(t);
   assert.deepEqual(checkFlows(root), []);
+  // Measured on the planner `maestro test e2e/flows` itself calls —
+  // WorkspaceExecutionPlanner.plan (maestro-cli-2.8.0) with the CLI's own
+  // arguments — a workspace whose configuration excludes index.yaml still plans
+  // index.yaml, at either spelling of the list and beside a matching `flows:`.
+  // So the gate keeps both journeys in every check below and names the line that
+  // would otherwise have left a running flow unchecked.
   config(root, "excludeFlows:\n  - other.yaml\n");
-  assert.deepEqual(flowFiles(root), ["index.yaml"], "the exclusion narrows the list CI walks");
-  assert.deepEqual(checkFlows(root), ["app/other.tsx: no device flow names it"]);
+  assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"]);
+  assert.deepEqual(checkFlows(root), [
+    "config.yaml: excludeFlows is no field a Maestro run applies — maestro-cli-2.8.0's planner takes its journeys from flows: and reads no exclusion from this file, so what this line drops still runs; select what runs with flows: instead",
+  ]);
 });
 
 test("a glob selects journeys without refusing the set that matches it", (t) => {
