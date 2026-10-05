@@ -1,5 +1,13 @@
 import React from "react";
-import { KeyboardAvoidingView, Modal, Platform, ScrollView, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import type { SurfaceModel } from "../../core/derive";
 import { ActionControl } from "../atoms/ActionControl";
 import { Text } from "../atoms/Text";
@@ -29,12 +37,17 @@ export function DetailSurface({
 }: { readonly mode?: "modal" | "docked" } & DetailSurfaceProps) {
   const s = useStyles(kitStyles),
     canvas = useCanvas();
+  // Which column the sheet's own surface holds. `canvas.page` says what ink its
+  // words are drawn in and fills whatever it is given; here it is told how wide a
+  // surface a phone's sheet is — see sheetColumn in layout.ts for why a device and
+  // a browser answer that differently.
+  const column: StyleProp<ViewStyle> = s.sheetColumn;
   const close = (source: "button" | "back" | "escape" | "gesture") => {
     if (model.canRequestClose) onRequestClose(source);
   };
   const body = (
     <KeyboardAvoidingView
-      style={canvas.page}
+      style={[canvas.page, column]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       accessibilityViewIsModal={mode === "modal"}
       onAccessibilityEscape={() => close("escape")}

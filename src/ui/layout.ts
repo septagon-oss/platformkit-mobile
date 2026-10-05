@@ -1,5 +1,6 @@
 // Shared composition spacing; every distance and colour remains theme-owned.
 import { StyleSheet } from "react-native";
+import { Platform } from "react-native";
 import type { Theme } from "./theme";
 export const kitStyles = (t: Theme) =>
   StyleSheet.create({
@@ -49,5 +50,15 @@ export const kitStyles = (t: Theme) =>
     },
     chartColumn: { flex: 1, height: "100%", flexDirection: "row" },
     chartLabels: { flexDirection: "row", gap: t.space.sm, paddingTop: t.space.sm },
+    // A browser is where a kit is looked at, and a sheet opened there is a phone's
+    // surface on a desk: it keeps a phone's column and lets the canvas show around
+    // it, the way every specimen in the gallery does. Left unbounded it stretched
+    // its own rows across the whole desktop — a full-width close control over an
+    // empty canvas. On a device the sheet is the system's (iOS draws a partial
+    // sheet, Android gives it the screen), so nothing is imposed there.
+    sheetColumn:
+      Platform.OS === "web"
+        ? { maxWidth: t.extent.pageColumn, width: "100%", alignSelf: "center" }
+        : {},
     column: { minWidth: t.extent.calendarDay, flex: 1 },
   });
