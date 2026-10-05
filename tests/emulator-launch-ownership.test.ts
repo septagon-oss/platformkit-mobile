@@ -36,6 +36,17 @@ function bootStep(): string {
  * `shell getprop sys.boot_completed` for, and names it only when the call passes
  * it as `-s <serial>`: an unqualified adb call is answered by nothing. `fails`
  * is whether this job's own launch survives.
+ *
+ * The stub's own device comes into existence at the launch, the way a real one
+ * does: adb answers a question about a serial only once a process on the host
+ * claimed that console port, which is the `registered` file the `emulator` stub
+ * writes before it does anything else, and the launch then outlives the step's
+ * poll period. Both the listing and the boot answer read that one file, so
+ * neither can report a device the other does not. A stub that answered
+ * `boot_completed` from the first poll, before the launch had reached its marker
+ * write, let the step go ready while `adb devices` still listed nothing, so the
+ * step refused its own device: a case that failed on a loaded host and passed on
+ * a quiet one, which is the shape of a test that proves nothing.
  */
 function boot(
   t: TestContext,
@@ -45,7 +56,13 @@ function boot(
     boots?: string;
     fails?: boolean;
   },
-): { status: number | null; recorded: string; log: string; launched: boolean } {
+): {
+  status: number | null;
+  recorded: string;
+  log: string;
+  launched: boolean;
+  registered: string;
+} {
   const root = mkdtempSync(path.join(os.tmpdir(), "pk-emulator-launch-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const output = path.join(root, "output");
@@ -61,25 +78,36 @@ function boot(
     devices)
       printf 'List of devices attached\\n'
       printf '%b' "${stub.attached ?? ""}"
-      [ -e "$BOOT_ATTEMPTED" ] || return 0
+      [ -s "$BOOT_REGISTERED" ] || return 0
       printf '%b' "${stub.appears ?? ""}" ;;
     -s)
-      [ "$2" = "${stub.boots ?? ""}" ] && [ "$3" = shell ] &&
+      # Nothing answers for a device this host does not have: adb names a serial
+      # once the emulator process claimed that console port, so the launch above
+      # is what puts a device on this stub's host, and the boot answer and the
+      # listing below the launch are read from the one claim.
+      [ "$(cat "$BOOT_REGISTERED" 2>/dev/null)" = "$2" ] &&
+        [ "$2" = "${stub.boots ?? ""}" ] && [ "$3" = shell ] &&
         [ "$4" = getprop ] && [ "$5" = sys.boot_completed ] && printf '1\\r\\n' ;;
   esac
 }
 emulator() {
-  case "$*" in
-    *'-port '*) : ;;
-    *) echo 'no console port claimed: the emulator would take one adb cannot name' >&2
-       return 1 ;;
-  esac
-  touch "$BOOT_ATTEMPTED"
+  port=""
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = -port ]; then port="$2"; shift 2; else shift; fi
+  done
+  if [ -z "$port" ]; then
+    echo 'no console port claimed: the emulator would take one adb cannot name' >&2
+    return 1
+  fi
+  printf 'emulator-%s\\n' "$port" > "$BOOT_REGISTERED"
   if [ "${stub.fails ? 1 : 0}" = 1 ]; then
     echo 'the requested AVD cannot start' >&2
     return 1
   fi
-  sleep 2
+  # The launch outlives the wait that follows it, as a real emulator does: this
+  # sleep is longer than the step's own two-second poll so the only way the step
+  # can stop watching its process is the boot answer, never a lifetime chosen here.
+  sleep 5
 }
 ${bootStep()}`,
     ],
@@ -90,7 +118,7 @@ ${bootStep()}`,
       env: {
         ...process.env,
         PK_MOBILE_AVD: "fixture-avd",
-        BOOT_ATTEMPTED: path.join(root, "attempted"),
+        BOOT_REGISTERED: path.join(root, "registered"),
         GITHUB_OUTPUT: output,
       },
     },
@@ -100,9 +128,13 @@ ${bootStep()}`,
     undefined,
     `the step must answer inside its timeout: ${result.stderr}`,
   );
+  const registered = existsSync(path.join(root, "registered"))
+    ? readFileSync(path.join(root, "registered"), "utf8").trim()
+    : "";
   return {
     status: result.status,
-    launched: existsSync(path.join(root, "attempted")),
+    launched: registered !== "",
+    registered,
     recorded: existsSync(output) ? readFileSync(output, "utf8") : "",
     log:
       result.stderr +
@@ -171,6 +203,11 @@ test("the serial this job publishes is the console port it claimed", (t) => {
   });
   assert.equal(run.status, 0, run.log);
   assert.match(run.recorded, /^pid=\d+$/m, "teardown keeps the process it recorded");
+  assert.equal(
+    run.registered,
+    "emulator-5584",
+    "the launch has to claim the console port the step names, or this case is about nothing",
+  );
   assert.match(
     run.recorded,
     /^serial=emulator-5584$/m,
