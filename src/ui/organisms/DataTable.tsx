@@ -94,10 +94,18 @@ const styles = (t: Theme) =>
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderColor: t.color.borderDefault,
     },
+    /**
+     * A row of a table is a thing a finger is aimed at on a phone, so it takes the
+     * height the kit sets for anything a finger presses rather than the height of
+     * the one line inside it: rows then sit at a rhythm a person can scan down and
+     * still land on, and the figures keep the column's edge.
+     */
     row: {
       flexDirection: "row" as const,
+      alignItems: "center" as const,
       gap: t.space.sm,
       paddingHorizontal: t.space.lg,
+      minHeight: t.hit,
     },
     cell: { flex: 1, minWidth: t.extent.chartAxis },
     word: { alignItems: "flex-start" as const },

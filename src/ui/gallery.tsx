@@ -416,9 +416,9 @@ function Page({
           columns, so the fold holds a screen and its states rather than a strip
           of one in the middle of an empty canvas. */}
       <Text role="display">{model.title}</Text>
-      <View style={stand ? s.columns : undefined}>
+      <View style={stand ? s.columns : s.stack}>
         <View style={stand ? s.phone : undefined}>{lead}</View>
-        <View style={stand ? [s.phone, s.rail] : undefined}>
+        <View style={stand ? [s.phone, s.rail] : s.states}>
           {stand && statesSection.ok && laterGroups.length > 0 ? (
             // The column spaces what stands in it; these two are its rows. The
             // disclosure is one of those rows, so its own words stand on the plane
@@ -1255,6 +1255,16 @@ const pageStyles = (t: Theme) =>
      */
     stand: { alignSelf: "center" as const, width: t.extent.stand },
     columns: { flexDirection: "row" as const, alignItems: "flex-start", gap: t.space.xl },
+    /**
+     * stack is the same two blocks at a phone's width, one under the other, and it
+     * owes the gap the row gets for free: the screen the page stands for and the
+     * states beside it at a desk are the screen and the states below it here, and
+     * without a step between them a table ends and its own states begin on the
+     * very line its last rule is drawn.
+     */
+    stack: { gap: t.space.xl },
+    /** states is what the stack puts under the screen: one step between its groups. */
+    states: { gap: t.space.lg },
     phone: { width: t.extent.pageColumn, gap: t.space.xl },
     lead: { gap: t.space.sm },
     group: { gap: t.space.xs },
