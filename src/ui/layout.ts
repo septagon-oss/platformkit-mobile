@@ -38,6 +38,20 @@ export const kitStyles = (t: Theme) =>
     chartAxis: { height: t.extent.chart, width: t.extent.chartAxis },
     chartPlot: { flexDirection: "row", gap: t.space.sm, alignItems: "stretch" },
     chartTicks: { flexDirection: "row", justifyContent: "space-between", gap: t.space.sm },
+    /** legend is the plot's key: the ink each series is drawn in, beside its name. */
+    legend: { flexDirection: "row" as const, flexWrap: "wrap" as const, gap: t.space.md },
+    legendItem: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: t.space.xs,
+    },
+    legendMark: {
+      width: t.space.xl,
+      height: t.extent.focus,
+      borderRadius: t.radius.full,
+    },
+    // A tick label sits on its tick, not below it: half a caption line lifts it
+    // so the value is level with the mark it names rather than starting there.
     chartTick: {
       position: "absolute",
       right: 0,

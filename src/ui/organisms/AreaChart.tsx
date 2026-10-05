@@ -111,6 +111,16 @@ export function AreaChart({
           </View>
         </View>
       )}
+      {/* The key belongs with the plot: two series drawn in two inks are only two
+          series once the page says which ink is which. */}
+      <View style={s.legend} testID="kit-chart-legend">
+        {model.series.map((series, i) => (
+          <View key={`legend-${series.id}`} style={s.legendItem}>
+            <View style={[s.legendMark, { backgroundColor: colors[i]! }]} />
+            <Text role="label">{series.label}</Text>
+          </View>
+        ))}
+      </View>
       <Text role="title">{model.tableLabel}</Text>
       <Text>{model.axesLabel}</Text>
       {model.series.map((series) => (
