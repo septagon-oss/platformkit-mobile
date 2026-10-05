@@ -116,7 +116,9 @@ export const galleryPages = {
   },
   steps: {
     lead: "stepper/middle",
-    withLead: ["slot-option/available"],
+    // The stage's own subject is drawn inside the stepper, above the verbs that
+    // move past it, so the slot examples stand beside the page as the family's
+    // other states rather than as a second screen below the stage's actions.
     cases: [
       "stepper/middle",
       "stepper/first",

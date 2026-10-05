@@ -888,7 +888,23 @@ function KitSamples({
           onSaveAndExit={() => action("save-exit")}
           onReconcile={() => action("reconcile")}
         >
-          {details}
+          {/* The stage asks for a time, so a time is what stands under its name —
+              before the verbs that move past it, not below them. */}
+          <View>
+            <Text role="title" accessibilityRole="header">
+              {k.stepper.steps.find((step) => step.selected)?.label ?? c.stepVisit}
+            </Text>
+            {k.slots.slots.slice(0, 2).map((option) => (
+              <SlotOption
+                key={option.id}
+                model={option}
+                onSelect={(id) => {
+                  setHeld({ ...held, slot: id });
+                  send(id);
+                }}
+              />
+            ))}
+          </View>
         </Stepper>
       );
     case "slot-option":

@@ -52,7 +52,10 @@ test("only a page whose lead controls something names a companion", () => {
     .filter(([, spec]) => (spec as { withLead?: readonly string[] }).withLead?.length)
     .map(([id]) => id)
     .sort();
-  assert.deepEqual(named, ["navigate", "search", "steps"]);
-  assert.deepEqual([...page("steps").withLead], ["slot-option/available"]);
+  assert.deepEqual(named, ["navigate", "search"]);
+  // The staged task needs no companion: what its stage asks for is drawn inside
+  // the stepper, above the verbs that move past it, so a slot named beside the
+  // lead would show the same choice twice on one screen.
+  assert.deepEqual([...page("steps").withLead], []);
   assert.deepEqual([...page("navigate").withLead], ["summary-detail/default"]);
 });
