@@ -772,7 +772,12 @@ function KitSamples({
     </View>
   );
   const pricing = {
-    onPeriod: action,
+    // The period chips change the figures: a control over a price redraws the
+    // prices rather than announcing that something happened.
+    onPeriod: (id: string) => {
+      setHeld({ ...held, period: id });
+      action(id);
+    },
     onSelect: action,
     onAction: send,
     onRetry: () => action("retry"),

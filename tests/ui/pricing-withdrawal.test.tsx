@@ -45,8 +45,8 @@ test.each([
         ],
       },
       periods: [
-        { id: "month", label: "Monthly" },
-        { id: "year", label: "Yearly" },
+        { id: "month", label: "Monthly", unitLabel: "per month" },
+        { id: "year", label: "Yearly", unitLabel: "per year" },
       ],
       features: [{ id: "history", label: labels.history }],
       selectedPeriodId: "month",

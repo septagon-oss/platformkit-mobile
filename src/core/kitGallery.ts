@@ -145,6 +145,8 @@ export interface GallerySelection {
   readonly slot?: string | undefined;
   readonly media?: string;
   readonly point?: string | undefined;
+  /** period is the billing period the pricing specimen is drawn on: a chip a person taps changes the amounts they are choosing between. */
+  readonly period?: string;
 }
 export function kitExamples(p: Presentation, caseId: string, held: GallerySelection = {}) {
   return build(p, (v: Validation) => {
@@ -664,7 +666,16 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
               {
                 id: "plan-1",
                 title: c.variantIndividual,
-                offers: [{ periodId: "period-year", price: safePrice, action }],
+                // A tier offered for both periods carries the amount of each, so the
+                // figure a person reads is the one for the period they selected.
+                offers: [
+                  { periodId: "period-month", price: safePrice, action },
+                  {
+                    periodId: "period-year",
+                    price: { kind: "price", amount: { minor: "12990", currency } },
+                    action,
+                  },
+                ],
                 features: { feature: { kind: "included" } },
               },
               {
@@ -675,10 +686,15 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                     ? []
                     : [
                         {
+                          periodId: "period-month",
+                          price: { kind: "price", amount: { minor: "2199", currency } },
+                          action: secondary,
+                        },
+                        {
                           periodId: "period-year",
                           // Both cards state a price: a plan whose price is the word
                           // "Full details" repeats its own row label and chooses nothing.
-                          price: { kind: "price", amount: { minor: "2199", currency } },
+                          price: { kind: "price", amount: { minor: "21990", currency } },
                           action: secondary,
                         },
                       ],
@@ -686,10 +702,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
               },
             ]),
             periods: [
-              { id: "period-month", label: c.periodMonthly },
-              { id: "period-year", label: c.periodAnnual },
+              { id: "period-month", label: c.periodMonthly, unitLabel: c.unitMonthly },
+              { id: "period-year", label: c.periodAnnual, unitLabel: c.unitYearly },
             ],
-            selectedPeriodId: "period-year",
+            selectedPeriodId: held.period ?? "period-year",
             features: [{ id: "feature", label: c.details }],
           },
           p,

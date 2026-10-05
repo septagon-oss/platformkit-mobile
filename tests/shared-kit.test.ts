@@ -450,7 +450,7 @@ test("comparison preserves feature and plan order, names unknowns, and uses the 
     d.derivePricing(
       {
         content: ready(plans),
-        periods: [{ id: "year", label: "Annual" }],
+        periods: [{ id: "year", label: "Annual", unitLabel: "per year" }],
         selectedPeriodId: "year",
         features: [
           { id: "support", label: "Support" },

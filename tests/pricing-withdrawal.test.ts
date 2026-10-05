@@ -46,8 +46,8 @@ for (const language of ["en", "pt"] as const) {
     const input: PricingInput = {
       content: { phase: "ready", refresh: "idle", value: plans },
       periods: [
-        { id: "month", label: "Monthly" },
-        { id: "year", label: "Yearly" },
+        { id: "month", label: "Monthly", unitLabel: "per month" },
+        { id: "year", label: "Yearly", unitLabel: "per year" },
       ],
       selectedPeriodId: "month",
       selectedPlanId: "studio",

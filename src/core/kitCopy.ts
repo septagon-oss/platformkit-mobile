@@ -149,6 +149,11 @@ export const kitEnglish = {
   nowPlaying: "Now playing",
   periodMonthly: "Monthly",
   periodAnnual: "Annual",
+  // An amount owed on a schedule says what it is charged in, or it is not a
+  // commitment anyone can check: 12.99 monthly and 12.99 yearly are the same
+  // four figures and two different promises.
+  unitMonthly: "per month",
+  unitYearly: "per year",
   sourceSpecimen: "Specimen map data",
   audioTour: "Audio tour",
 } as const;
@@ -297,6 +302,8 @@ export const kitPortuguese: KitWords = {
   nowPlaying: "A tocar",
   periodMonthly: "Mensal",
   periodAnnual: "Anual",
+  unitMonthly: "por mês",
+  unitYearly: "por ano",
   sourceSpecimen: "Dados de mapa de exemplo",
   audioTour: "Audioguia",
 };
