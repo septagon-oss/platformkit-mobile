@@ -134,7 +134,55 @@ test("the shape a selection is written in is part of what the gate reads", (t) =
   config(root, "flows:\nname: journeys\n");
   assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"]);
   assert.deepEqual(checkFlows(root), []);
-  // And a key written twice wins the way that parser lets it win: the last one.
+  // And a key written twice wins the way that parser lets it win: the last one —
+  // even when the last one holds nothing, which hands the directory back.
   config(root, "flows: [index.yaml]\nflows: [other.yaml]\n");
   assert.deepEqual(flowFiles(root), ["other.yaml"]);
+  config(root, "flows:\n  - index.yaml\nflows: [other.yaml]\n");
+  assert.deepEqual(flowFiles(root), ["other.yaml"]);
+  config(root, "flows: [index.yaml]\nflows:\n");
+  assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"]);
+});
+
+test("a selection the runner's own parser stops on is named, never trimmed into a plan", (t) => {
+  const root = pair(t);
+  // Each text below is a workspace configuration Maestro 2.8.0's planner refuses
+  // outright (measured with the CLI's own arguments: a SyntaxError at the comma,
+  // the unclosed bracket or the tab, a ValidationError for the name that matches
+  // nothing). A reader that dropped the unreadable part would hand the CI job a
+  // journey list to check that no device run ever takes, and the refusal would
+  // arrive after the APK build and the kernel boot.
+  const refused = new Map<string, string>([
+    ["an item with nothing in it", "flows: [, index.yaml, other.yaml]\n"],
+    ["two commas with no name between", "flows: [index.yaml, , other.yaml]\n"],
+    ["a [ no ] closes", "flows: [index.yaml\n"],
+    ["a remark where the ] should be", "flows: [index.yaml # smoke\n"],
+    ["a second node after the ]", "flows: [index.yaml]]\n"],
+    ["a list beside the list", "flows: [index.yaml] [other.yaml]\n"],
+    ["a list inside the list", "flows: [[index.yaml]]\n"],
+    ["a quote with no mate", "flows: ['index.yaml, other.yaml]\n"],
+    ["a quote inside a plain name", 'flows: [index.yaml" ]\n'],
+    ["an unterminated block item", 'flows:\n  - "index.yaml\n'],
+    ["a tab after the colon", "flows:\t[index.yaml]\n"],
+    ["a tab before an item", "flows:\n\t- index.yaml\n"],
+  ]);
+  for (const [shape, text] of refused) {
+    config(root, text);
+    const problems = checkFlows(root);
+    assert.ok(
+      problems.some((p) => p.startsWith("config.yaml:")),
+      `${shape} must be refused by the file that holds it: ${JSON.stringify(problems)}`,
+    );
+  }
+  // What that parser does read, the gate reads too — a trailing comma and a
+  // remark are YAML, and refusing them would send an author away from a
+  // configuration that runs exactly what they wrote.
+  config(root, "flows: [index.yaml, other.yaml, ]\n");
+  assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"]);
+  assert.deepEqual(checkFlows(root), []);
+  config(root, "flows: [index.yaml] # only the first\n");
+  assert.deepEqual(flowFiles(root), ["index.yaml"]);
+  assert.deepEqual(checkFlows(root), ["app/other.tsx: no device flow names it"]);
+  config(root, "flows:\n  - index.yaml # only the first\n");
+  assert.deepEqual(flowFiles(root), ["index.yaml"]);
 });

@@ -461,12 +461,16 @@ so the gate refuses a folder that holds a journey rather than count coverage no
 run makes. The configuration narrows the count only as far as it narrows the
 run: a journey `flows:` leaves out covers nothing, a selection is read in every
 spelling that planner reads it (a quoted key, a space before the colon, a
-leading byte-order mark), and one written any other way — a flow mapping, a
-scalar where a list belongs, a filter pointing at no file beside it, a `tags:`
-read out of each flow's own header, an `excludeFlows:` no Maestro run applies at
-all — is refused by name rather than read as agreement; every id one of them
-names is a testID a component sets, every route screen under `app/` is named by
-some flow's `# screen:` header, and every flow names the screen it proves) and
+leading byte-order mark) and the last `flows:` key is the one that wins — its
+empty value included, because `flows:` with nothing after it plans the whole
+directory and takes the run back from a selection written above it — and one
+written any other way — a flow mapping, a scalar where a list belongs, a list
+with an item left empty, unclosed or tab-indented, a filter pointing at no file
+beside it, a `tags:` read out of each flow's own header, an `excludeFlows:` no
+Maestro run applies at all — is refused by name rather than read as agreement;
+every id one of them names is a testID a component sets, every route screen under
+`app/` is named by some flow's `# screen:` header, and every flow names the
+screen it proves) and
 `check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the

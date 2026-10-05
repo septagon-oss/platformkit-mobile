@@ -62,25 +62,36 @@ type Filter = "flows";
  */
 const BREAK = /\r\n|[\r\n\u0085\u2028\u2029]/;
 /**
+ * Selection is what one `flows` key says may run: the patterns it lists, or
+ * nothing at all when the key carries no value. `flows:` with nothing after it
+ * plans every journey in the directory (measured, maestro-cli-2.8.0), and as the
+ * last of two keys it takes the run back from the selection written above it —
+ * that reader keeps the last value of a repeated key, no value included.
+ */
+type Selection = string[] | null;
+/**
  * KEY is the one spelling of a top-level key this gate applies: a plain or quoted
- * word at column zero, spaces before the colon, and after the colon a space, a
- * tab or the end of the line. The last rule is YAML's own — `flows:[a.yaml]` keeps
+ * word at column zero, spaces before the colon, and after the colon a space or
+ * the end of the line. The last rule is YAML's own — `flows:[a.yaml]` keeps
  * the colon inside a plain scalar, and Maestro's parser refuses that file — so a
  * line that breaks it is refused here rather than applied as a selection nobody
  * parses. A quoted key, a space before the colon and a leading byte-order mark
  * are the other ways the same key is written; Maestro's planner reads each of
  * them (measured against maestro-cli-2.8.0's WorkspaceExecutionPlanner, which
- * plans the named journey alone for all four), so the gate reads them too.
+ * plans the named journey alone for all four), so the gate reads them too. A tab
+ * after that colon is no space: measured, `flows:\t[a.yaml]` fails the same
+ * parser, and every line of this file is refused for a tab below.
  */
-const KEY =
-  /^(?:"([A-Za-z][\w-]*)"|'([A-Za-z][\w-]*)'|([A-Za-z][\w-]*))[ \t]*:(?:[ \t](.*?))?[ \t]*$/;
+const KEY = /^(?:"([A-Za-z][\w-]*)"|'([A-Za-z][\w-]*)'|([A-Za-z][\w-]*))[ ]*:(?:[ ](.*?))?[ ]*$/;
 /**
  * ENTRY is a `- name` line below its key. A block sequence may sit at its key's
  * own column as well as indented under it, so the leading run is optional — and
  * only an open filter takes one: `- a.yaml` at column zero with no key above it is
- * a whole-document sequence, which Maestro's config reader refuses.
+ * a whole-document sequence, which Maestro's config reader refuses. The remark a
+ * line may end with is cut by `remark`, the same cut the bracketed spelling gets,
+ * so one rule answers where a line's text stops in either shape.
  */
-const ENTRY = /^[ \t]*-[ \t]+(.*\S)(?:[ \t]+#.*)?$/;
+const ENTRY = /^[ ]*-[ ]+(.*\S)$/;
 /** REMARK is a blank line or a comment, which carries no field and joins no list. */
 const REMARK = /^[ \t]*(#.*)?$/;
 /** isFilter tells the one field the plan is built from from the other readable field, whose value no plan consults. */
@@ -188,12 +199,15 @@ export function workspacePlan(root: string): { files: string[]; problems: string
   // the only one the gate makes: a plan narrower than the run would hide a flow
   // from every check below while the device still walks into it.
   let files = all;
-  const entries = selection.filters.get("flows");
-  if (entries) {
-    for (const entry of entries)
+  // A key never written and a key written with nothing after it narrow nothing:
+  // the second is `flows:` alone, which plans the whole directory, and as the
+  // last key of the file it takes the run back from a selection written above it.
+  const patterns = selection.filters.get("flows");
+  if (patterns) {
+    for (const entry of patterns)
       if (!all.some((f) => matches(entry, f)))
         selection.problems.push(`flows names ${entry}, which is no journey in ${FLOWS}`);
-    files = files.filter((f) => entries.some((e) => matches(e, f)));
+    files = files.filter((f) => patterns.some((e) => matches(e, f)));
   }
   // Every refusal names the file it came from, so the person who wrote the line
   // is told which one to open.
@@ -220,14 +234,22 @@ function journeys(root: string): string[] {
  * it cannot even place — a flow mapping, a nested map, a scalar where a list
  * belongs, an entry with nothing above it — refuses the whole file, because a
  * plan built out of the part that happened to be readable is the guess this rule
- * exists to refuse. A filter given with no value at all is no filter: for `flows:`
- * with nothing after it Maestro plans every journey in the directory (measured,
- * maestro-cli-2.8.0), so the plan is left alone rather than narrowed to nothing.
- * A key written twice wins the way Maestro's parser lets it win: the last one.
+ * exists to refuse. The shape is closed rather than approximated: the reader
+ * applies a name at column zero, its list in brackets on that line or as `-`
+ * items below it, and a remark, and refuses what is no line of that grammar —
+ * including a bracketed list with an empty item, a `[` no `]` closes, a quote no
+ * quote closes and text after the close, each of which stops Maestro's own
+ * parser (measured, maestro-cli-2.8.0) rather than parsing into a shorter list.
+ * A filter given with no value at all is no filter: for `flows:` with nothing
+ * after it Maestro plans every journey in the directory (measured,
+ * maestro-cli-2.8.0), so that plan is recorded as no selection rather than an
+ * empty one. A key written twice wins the way Maestro's parser lets it win: the
+ * last one, and the last one even when it holds nothing — a `flows:` below a
+ * `flows: [a.yaml]` gives the whole directory back to the run.
  */
-function readConfig(text: string): { filters: Map<Filter, string[]>; problems: string[] } {
+function readConfig(text: string): { filters: Map<Filter, Selection>; problems: string[] } {
   const lines = text.replace(/^\uFEFF/, "").split(BREAK);
-  const filters = new Map<Filter, string[]>();
+  const filters = new Map<Filter, Selection>();
   const problems: string[] = [];
   /** `open` is the block list a `- …` line below the current key would join. */
   let open: { field: Filter; entries: string[] } | null = null;
@@ -237,16 +259,34 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
    * unreadable closes the file: the gate read too little of it to name a plan,
    * so nothing it did read gets applied.
    */
-  const unreadable = (problem: string): { filters: Map<Filter, string[]>; problems: string[] } => {
+  const unreadable = (problem: string): { filters: Map<Filter, Selection>; problems: string[] } => {
     problems.push(problem);
     return { filters: new Map(), problems };
   };
   /**
+   * refusal names a selection line the gate cannot build a plan from: the field,
+   * what is wrong with its text, the text itself, and the two shapes it does read.
+   */
+  const refusal = (field: string, why: string, text: string): string =>
+    `${field} holds ${why}: ${text}; this gate names the journeys a Maestro run plans, so a selection it cannot read is refused rather than trimmed into one — write it as [a.yaml, b.yaml] or as - a.yaml lines below the key`;
+  // A tab is refused before any line is placed, because every place this gate
+  // would read one is a place Maestro's parser stops: `flows:\t[a.yaml]`,
+  // `  -\ta.yaml` and `[a.yaml,\tb.yaml]` each fail to parse (measured), so a
+  // reader that applied them would be planning a run that never starts. A tab in
+  // a remark is a remark's business: it carries no field and joins no list.
+  const tabbed = lines.findIndex((line) => line.includes("\t") && !REMARK.test(line));
+  if (tabbed >= 0)
+    return unreadable(
+      `line ${tabbed + 1} holds a tab, which maestro's parser refuses wherever this gate would read one: write the key, its list and the indent with spaces`,
+    );
+  /**
    * keep closes the list that was open. An empty one is a key with no value
-   * after it, which is no filter at all, so it is recorded as nothing.
+   * after it, which is no filter at all, so it is recorded as nothing — and
+   * recorded, not skipped, because the last key of the file wins and a selection
+   * written above this one is overwritten by it.
    */
   const keep = (): void => {
-    if (open && open.entries.length > 0) filters.set(open.field, open.entries);
+    if (open) filters.set(open.field, open.entries.length > 0 ? open.entries : null);
     open = null;
   };
   for (const line of lines) {
@@ -254,7 +294,9 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
     if (refused && /^[ \t]/.test(line)) continue;
     const item = ENTRY.exec(line);
     if (item && open) {
-      open.entries.push(item[1]!.replace(/^["']|['"]$/g, ""));
+      const named = scalar(remark(item[1]!).trim());
+      if ("why" in named) return unreadable(refusal(open.field, named.why, item[1]!));
+      open.entries.push(named.name);
       continue;
     }
     const key = KEY.exec(line);
@@ -288,8 +330,10 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
     // block under it would be nothing for the plan to apply.
     if (!isFilter(field)) continue;
     const value = (key[4] ?? "").trim();
-    if (value.startsWith("[") && value.endsWith("]") && !value.slice(1, -1).includes("[")) {
-      filters.set(field, split(value.slice(1, -1)));
+    if (value.startsWith("[")) {
+      const list = flowList(value);
+      if ("why" in list) return unreadable(refusal(field, list.why, value));
+      filters.set(field, list.entries);
     } else if (value !== "" && !value.startsWith("#")) {
       return unreadable(`${field} is no list this gate can read: ${value}`);
     } else {
@@ -300,12 +344,126 @@ function readConfig(text: string): { filters: Map<Filter, string[]>; problems: s
   return { filters, problems };
 }
 
-/** split reads the entries of `[a, b]`, quoted or not, and drops the blanks. */
-function split(list: string): string[] {
-  return list
-    .split(",")
-    .map((e) => e.trim().replace(/^["']|['"]$/g, ""))
-    .filter((e) => e !== "");
+/**
+ * flowList reads `[a.yaml, b.yaml]` the way Maestro's yaml parser does: one entry
+ * per comma outside the quotes, a quoted name kept whole, the list over at its own
+ * `]`, and a remark beyond that `]` a remark only. Everything else is refused,
+ * because the run stops on it — each case measured on maestro-cli-2.8.0's
+ * WorkspaceExecutionPlanner with the CLI's own arguments: `[, a.yaml]` and
+ * `[a.yaml, , b.yaml]` fail at the item with no name, `[a.yaml` never closes,
+ * `[a.yaml]]` and `[a.yaml] [b.yaml]` hold text after a `]` that closed,
+ * `[[a.yaml]]` holds a list inside the list, and a name whose quote never closes
+ * (`['a.yaml]`, `[a.yaml"]`) fails the same way. Dropping the unreadable item and
+ * keeping the rest would name a plan the runner never builds; the device job would
+ * only find out forty emulator minutes in, after the APK build and the kernel boot.
+ */
+function flowList(value: string): { entries: string[] } | { why: string } {
+  const entries: string[] = [];
+  /** `left` is the entry being read; `state` says where in the list it sits. */
+  let left = "";
+  let state: "before" | "item" | "after" = "before";
+  let quote: string | null = null;
+  /** take closes the entry in hand, naming it rather than dropping it if it holds nothing. */
+  const take = (): { name: string } | { why: string } => {
+    const text = left.trim();
+    left = "";
+    return text === "" ? { why: "an entry with no name between the brackets" } : scalar(text);
+  };
+  for (const c of remark(value)) {
+    if (quote !== null) {
+      left += c;
+      if (c === quote) quote = null;
+      continue;
+    }
+    // The `]` ends the list: anything but a space after it is a second node on
+    // the key's line, which is what `[a.yaml]]` and `[a.yaml] [b.yaml]` are and
+    // what Maestro's parser refuses them for.
+    if (state === "after") {
+      if (c !== " ") return { why: "text after the ] that closed the list" };
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      if (left.trim() !== "") return { why: "a quote inside a name that is already open" };
+      quote = c;
+      left += c;
+      continue;
+    }
+    if (state === "before") {
+      if (c !== "[") return { why: "no list that opens with a [" };
+      state = "item";
+      continue;
+    }
+    if (c === "[" || c === "{" || c === "}")
+      return { why: "a list inside the list, not a journey name" };
+    if (c === "]") {
+      // The last entry has no comma to end it, and `[]` holds no entry at all.
+      if (left.trim() !== "") {
+        const one = take();
+        if ("why" in one) return one;
+        entries.push(one.name);
+      }
+      state = "after";
+      continue;
+    }
+    if (c === ",") {
+      const one = take();
+      if ("why" in one) return one;
+      entries.push(one.name);
+      continue;
+    }
+    left += c;
+  }
+  if (quote !== null) return { why: "a quoted name whose quote never closes" };
+  if (state !== "after")
+    return {
+      why: "a [ this line never closes — a remark or a line break ends what is read here, and a list left open names no plan",
+    };
+  return { entries };
+}
+
+/**
+ * remark cuts a line's text where its remark begins: a `#` at the start of the
+ * text or after a space, with no quote open over it — where YAML ends a line's
+ * text. A list whose `]` lies beyond the cut is open, not closed: measured,
+ * `flows: [index.yaml # smoke` fails Maestro's parser at the end of that line.
+ */
+function remark(text: string): string {
+  let quote: string | null = null;
+  for (let i = 0; i < text.length; i += 1) {
+    const c = text[i]!;
+    if (quote !== null) {
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'") quote = c;
+    else if (c === "#" && (i === 0 || text[i - 1] === " ")) return text.slice(0, i);
+  }
+  return text;
+}
+
+/**
+ * scalar reads one journey name out of the text an entry holds: a plain word, or
+ * one pair of quotes around it, kept whole. An item with nothing in it, a quote
+ * with no mate, and a bracket or brace inside an unquoted name each stop Maestro's
+ * parser (measured: `[, a.yaml]`, `['a.yaml]` and `[index.yaml"]` fail the run);
+ * a double-quoted name spelled with an escape (`["index\u002eyaml"]`) is a name
+ * this gate does not read at all — Maestro resolves the escape and plans a file
+ * the text never names — so it is refused by that name rather than matched
+ * against whatever nearby file happens to fit what is left.
+ */
+function scalar(text: string): { name: string } | { why: string } {
+  if (text === "") return { why: "an entry with no name" };
+  const quote = text[0] === '"' || text[0] === "'" ? text[0] : null;
+  if (quote !== null) {
+    if (text.length < 2 || !text.endsWith(quote) || text.slice(1, -1).includes(quote))
+      return { why: "a quoted name whose quote never closes" };
+    if (quote === '"' && text.includes("\\"))
+      return { why: "a name spelled with an escape this gate does not read" };
+    return { name: text.slice(1, -1) };
+  }
+  if (/[[\]{}"'\\]/.test(text))
+    return { why: "no plain name: a bracket, brace, quote or escape sits inside it" };
+  return { name: text };
 }
 
 /**
