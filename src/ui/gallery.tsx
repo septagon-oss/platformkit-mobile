@@ -9,6 +9,8 @@ import {
   kitCaseIds,
   kitExamples,
   posterFor,
+  sceneFor,
+  sceneNames,
   type GallerySelection,
   type ImageSlotProps,
   type PosterMark,
@@ -609,16 +611,20 @@ function Samples({
   );
 }
 
-// SpecimenPoster is the gallery's own media renderer: a composition drawn from
-// the specimen's id (src/core/media.ts/posterFor), so the same specimen is the
-// same artwork on every page and in every run, and two specimens of one shape are
-// told apart at a glance. It is the gallery's, not the kit's: a screen with a
-// picture of its own passes a renderer, and a picture that failed to load is
-// still reported as one with its reason and a retry (molecules/MediaHero).
+// SpecimenPoster is the gallery's own media renderer: a composition drawn from the
+// specimen's own scene where it names one (src/core/kitScenes.ts) and from its id
+// where it does not (src/core/media.ts/posterFor), so the same specimen is the same
+// artwork on every page and in every run, and two specimens of one shape are told
+// apart at a glance. It is the gallery's, not the kit's: a screen with a picture of
+// its own passes a renderer, and a picture that failed to load is still reported as
+// one with its reason and a retry (molecules/MediaHero).
 function SpecimenPoster(props: ImageSlotProps & { readonly caption?: boolean }) {
   const t = useTheme();
   const s = useStyles(styles);
-  const poster = posterFor(props.id);
+  const scene = props.scene ? sceneFor(props.scene) : undefined;
+  const poster = scene
+    ? { layout: scene.name, marks: scene.marks }
+    : posterFor(props.id);
   const fill: Record<PosterMark["tone"], string> = {
     accent: t.color.accentDefault,
     ink: t.color.borderStrong,
@@ -644,6 +650,7 @@ function SpecimenPoster(props: ImageSlotProps & { readonly caption?: boolean }) 
             style={[
               s.mark,
               mark.shape === "disc" && s.disc,
+              mark.shape === "frame" && s.frame,
               {
                 left: `${mark.left * 100}%`,
                 top: `${mark.top * 100}%`,
@@ -651,7 +658,9 @@ function SpecimenPoster(props: ImageSlotProps & { readonly caption?: boolean }) 
                 ...(mark.height === undefined
                   ? { aspectRatio: 1 }
                   : { height: `${mark.height * 100}%` }),
-                backgroundColor: fill[mark.tone],
+                ...(mark.shape === "frame"
+                  ? { borderColor: fill[mark.tone] }
+                  : { backgroundColor: fill[mark.tone] }),
               },
             ]}
           />
@@ -688,6 +697,9 @@ const styles = (t: Theme) =>
     field: { flex: 1, position: "relative" },
     mark: { position: "absolute" },
     disc: { borderRadius: t.radius.full },
+    // An opening is an edge with nothing in it: the window, the doorway and the
+    // sheet on the rack are the shapes a filled rectangle cannot be.
+    frame: { borderWidth: 1, borderStyle: "solid", backgroundColor: "transparent" },
     caption: { paddingTop: t.space.xs },
     // The player's artwork slot: the picture fills it, as it fills every media
     // frame. Centring its child would collapse the frame to the width of its
@@ -1140,6 +1152,7 @@ function KitSamples({
             <View style={s.artwork} testID="gallery-player-art">
               <SpecimenPoster
                 id="audio-tour"
+                scene="print-room"
                 description={`${c.audioTour}: ${c.photoPrintRoom}`}
                 decorative={false}
                 fit="cover"

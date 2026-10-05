@@ -503,3 +503,4 @@ export type { Content, ContentModel, Page, Status, Control as ActionModel } from
 export * from "./catalogActivity";
 export * from "./catalogList";
 export { kitExamples, kitCaseIds, type KitExamples, type GallerySelection } from "./kitGallery";
+export { sceneFor, sceneNames, type Scene } from "./kitScenes";

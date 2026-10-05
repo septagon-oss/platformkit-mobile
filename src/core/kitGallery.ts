@@ -390,6 +390,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         height: 900,
         description: c.photoPrintRoom,
         decorative: false,
+        scene: "print-room",
         state:
           state === "error"
             ? ("error" as const)
@@ -403,6 +404,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         height: 800,
         description: c.photoCourtyard,
         decorative: false,
+        scene: "courtyard",
         state: "ready" as const,
       },
     ];

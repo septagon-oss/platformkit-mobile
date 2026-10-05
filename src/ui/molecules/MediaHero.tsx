@@ -48,6 +48,7 @@ export function MediaHero({
             decorative: item.decorative,
             fit,
             aspectRatio: item.aspectRatio,
+            ...(item.scene ? { scene: item.scene } : {}),
             // The name is written once: by this surface when it draws a line of
             // its own, and by the frame when the hero has no line to carry it.
             caption: named ? false : true,

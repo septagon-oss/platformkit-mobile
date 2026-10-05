@@ -19,6 +19,14 @@ export interface MediaItem {
   readonly decorative: boolean;
   readonly state: "loading" | "ready" | "error" | "unavailable";
   readonly reason?: string;
+  /**
+   * scene names the composition a slot draws when the app holds no picture of its
+   * own: the specimen says what to depict, the renderer owns how a scene is drawn
+   * (src/ui/gallery.tsx) and the geometry of that scene belongs to the specimen too
+   * (src/core/kitScenes.ts). A screen with a real image supplies a renderer and this
+   * is never read.
+   */
+  readonly scene?: string;
 }
 export interface MediaInput {
   readonly content: Content<readonly MediaItem[]>;
@@ -31,6 +39,8 @@ export interface ImageSlotProps {
   readonly decorative: boolean;
   readonly fit: "cover" | "contain";
   readonly aspectRatio: number;
+  /** scene is the item's own, passed through: what to draw when the renderer draws rather than loads. */
+  readonly scene?: string;
   /**
    * caption says whether the slot writes the image's name inside its own frame.
    * A surface that draws that name as a line of its own — a hero's caption, a
@@ -152,7 +162,12 @@ export interface PosterMark {
   readonly id: string;
   /** tone is which colour role fills the mark, named for its job in the palette. */
   readonly tone: "accent" | "ink" | "sheet";
-  readonly shape: "disc" | "band";
+  /**
+   * shape is how the mark is painted: a filled square with round corners, a filled
+   * rectangle, or the outline of one — an edge with nothing in it, which is how a
+   * window, a doorway and a sheet of paper differ from a wall.
+   */
+  readonly shape: "disc" | "band" | "frame";
   /** left, top and width are fractions of the slot's width; a band's height is a fraction of its height, a disc is a square. */
   readonly left: number;
   readonly top: number;
