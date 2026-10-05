@@ -1057,7 +1057,9 @@ function KitSamples({
       return (
         <MapWithList
           model={k.map.map}
-          renderMap={(canvas) => <MapCanvasFixture {...canvas} />}
+          renderMap={(canvas) => (
+            <MapCanvasFixture {...canvas} entrance={presentation.copy.gallery.entrance} />
+          )}
           renderDetail={(id) => (
             <Section title={c.details}>
               <Text>{id}</Text>
@@ -1301,7 +1303,13 @@ const pageStyles = (t: Theme) =>
       backgroundColor: t.color.surfacePrimary,
       borderWidth: 1,
       borderColor: t.state.outline,
+      // A plan says which room is which: the name is written where the room is,
+      // so the drawing carries the same words the list below it carries.
+      alignItems: "center",
+      justifyContent: "center",
+      padding: t.space.xs,
     },
+    roomName: { textAlign: "center" },
     // The walk is floor with a wall either side of it, which is how a plan says
     // "this is where you go" without drawing an arrow.
     walk: {
@@ -1318,7 +1326,11 @@ const pageStyles = (t: Theme) =>
       borderRightWidth: 1,
       borderColor: t.state.outline,
       justifyContent: "flex-end",
+      alignItems: "center",
+      gap: t.space.xs,
+      paddingBottom: t.space.xs,
     },
+    entranceName: { textAlign: "center" },
     threshold: { height: t.extent.focus, backgroundColor: t.color.accentDefault },
     pin: {
       position: "absolute",
@@ -1387,12 +1399,26 @@ const clamp = (pct: number, from: number, to: number) => Math.min(to, Math.max(f
  * kept. A map page then shows a map screen doing its work — canvas, points, list
  * — instead of the hole a provider that is not there leaves.
  */
-function MapCanvasFixture(props: MapCanvasProps) {
+function MapCanvasFixture(props: MapCanvasProps & { readonly entrance: string }) {
   const s = useStyles(pageStyles);
-  const place = (marker: MapCanvasProps["markers"][number]): ViewStyle => ({
-    left: `${clamp(50 + ((marker.longitude - props.viewport.longitude) / worldWindow) * 100, 4, 74)}%`,
-    top: `${clamp(50 - ((marker.latitude - props.viewport.latitude) / worldWindow) * 100, 8, 56)}%`,
-  });
+  // A place the plan already names is drawn where that name is, not at a pin of
+  // its own with the same word under it: the dot stands in the room and the room's
+  // own name says what it is. A marker the plan does not name — two points under
+  // one marker, a point outside the building — keeps its coordinates and its word.
+  const named = (marker: MapCanvasProps["markers"][number]) =>
+    PLAN.rooms.find((room) => humanize(room.id) === marker.label);
+  const place = (marker: MapCanvasProps["markers"][number]): ViewStyle => {
+    const room = named(marker);
+    if (room)
+      return {
+        left: `${(room.left + room.width / 2) * 100}%`,
+        top: `${(room.top + room.height - 0.1) * 100}%`,
+      };
+    return {
+      left: `${clamp(50 + ((marker.longitude - props.viewport.longitude) / worldWindow) * 100, 4, 74)}%`,
+      top: `${clamp(50 - ((marker.latitude - props.viewport.latitude) / worldWindow) * 100, 8, 56)}%`,
+    };
+  };
   const box = (part: { left: number; top: number; width: number; height: number }): ViewStyle => ({
     left: `${part.left * 100}%`,
     top: `${part.top * 100}%`,
@@ -1403,10 +1429,17 @@ function MapCanvasFixture(props: MapCanvasProps) {
     <View style={s.canvas} accessible accessibilityLabel={props.attribution}>
       <View style={s.plan}>
         {PLAN.rooms.map((room) => (
-          <View key={room.id} style={[s.room, box(room)]} />
+          <View key={room.id} style={[s.room, box(room)]}>
+            <Text role="caption" tone="muted" style={s.roomName} numberOfLines={2}>
+              {humanize(room.id)}
+            </Text>
+          </View>
         ))}
         <View style={[s.walk, box(PLAN.walk)]} />
         <View style={[s.entrance, box(PLAN.entrance)]}>
+          <Text role="caption" tone="muted" style={s.entranceName} numberOfLines={1}>
+            {props.entrance}
+          </Text>
           <View style={s.threshold} />
         </View>
         {props.markers.map((marker) => (
@@ -1418,9 +1451,11 @@ function MapCanvasFixture(props: MapCanvasProps) {
             style={[s.pin, place(marker)]}
           >
             <View style={[s.marker, marker.selected && s.markerSelected]} />
-            <Text style={s.pinLabel} role="caption">
-              {marker.label}
-            </Text>
+            {named(marker) ? null : (
+              <Text style={s.pinLabel} role="caption">
+                {marker.label}
+              </Text>
+            )}
           </Pressable>
         ))}
       </View>
