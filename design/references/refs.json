@@ -17,8 +17,8 @@
       "ours": "Row carries an eyebrow, a title, up to two cell lines and one trailing element; nothing reserves a right-aligned date column or a status pill beside it, and Section has no group header with a count.",
       "ours_case": "data-list/grouped",
       "ours_file": "R25-list-row.png",
-      "sha256": "a0e7bc8bf21fe76e9fe845a880aad881c9d698bb54a3a009ef754b9fc9a6f933",
-      "bytes": 89920
+      "sha256": "92ca06dceda2e926eeee94513db050d222ee8758b469b044ceab12c8f4fb70df",
+      "bytes": 88725
     },
     {
       "id": "R26",
@@ -34,8 +34,8 @@
       "ours": "StatTile, Sparkline and Badge draw those three pieces, and Sparkline's picture is decoration rather than a DOM attribute since 4abccdd; the row that holds ticker, name and sparkline in one measure is the composition the app writes, and the gallery shows them one specimen apart.",
       "ours_case": "stat-tile/lower-is-better",
       "ours_file": "R26-stat-list.png",
-      "sha256": "aa7628b15aab3cc37971bc9ed44216afea6aa0648ab2483319ca2fc5f4a01c42",
-      "bytes": 60354
+      "sha256": "95acdcee1d0f542ace4d28f567da3824fa378ba41f96901f14a0d9efdecbeccc",
+      "bytes": 62014
     },
     {
       "id": "R27",
@@ -51,8 +51,8 @@
       "ours": "MiniPlayer holds cover, title, elapsed and remaining and one control, collapsed over a list and expanded with its scrubber; its controls are now named in the person's language and reachable one by one (fe19dc4), and its artwork is the caller's, so a photographed strip is only as real as the picture the app supplies.",
       "ours_case": "mini-player/track",
       "ours_file": "R27-mini-player.png",
-      "sha256": "4e4a1d7d699d696e6fa1c1a86a5eb8020365de3bc70ba0dc1d3815b7d9e67e5f",
-      "bytes": 67267
+      "sha256": "405030cf030f7b801c8754fe7c2e08d7e84596cbbad6a743b9c477e3e86ba2bd",
+      "bytes": 67615
     },
     {
       "id": "R28",
@@ -68,8 +68,8 @@
       "ours": "MediaHero draws a picture, its caption and one control beneath the picture, and ProductCard draws cover, name, price and option chips inside a bordered card. Nothing in the kit writes a price chip or a title over the artwork, and a card that cannot be bought says so in a line under the picture rather than on the tile itself.",
       "ours_case": "media-hero/default",
       "ours_file": "R28-cover-media-card.png",
-      "sha256": "8bf4e3b8252c3db3527302ace21fdfd249566956504bcf8a043f7add032b80c7",
-      "bytes": 49414
+      "sha256": "0cb93857e1a3eedb7ab72513113be8fa5bd40bd3f18df80f3127ce768de61c24",
+      "bytes": 47931
     },
     {
       "id": "R29",
@@ -102,8 +102,8 @@
       "ours": "DetailSheet is DetailSurface in modal mode: the same header, body and foot verb, opened and closed. It has no detent, no drag, and nothing behind it changes while it moves \u2014 the sheet arrives rather than being pulled up.",
       "ours_case": "detail-sheet/open",
       "ours_file": "R30-bottom-sheet.png",
-      "sha256": "56c68fac95b4e6015a475997c10037fc9a74ed8eced6bb3ce1821b42dcc7fab1",
-      "bytes": 41900
+      "sha256": "948715c8c3c1ad8f0b082462fc27cfbe8964c5262701230018dd917f3eab6efe",
+      "bytes": 47573
     },
     {
       "id": "R31",
@@ -119,8 +119,8 @@
       "ours": "SidePanel is that same surface docked at a width: a column of whatever the caller passes, closed by the same verb. It owns no labelled summary block and no meter of its own; the record-with-a-state layout is still written by the app.",
       "ours_case": "side-panel/docked",
       "ours_file": "R31-drawer.png",
-      "sha256": "5b6ad0b3fcb1443b6d7ef41019b8b3ffedeb0045ea69bde460a279745bf3ca9b",
-      "bytes": 75758
+      "sha256": "c2ac9f8104cd07fb0af46deb76bb3983b3d1cdf0e728dba975e9e94395d9de03",
+      "bytes": 81675
     },
     {
       "id": "R32",
@@ -171,8 +171,8 @@
       "ours": "Row draws a title, up to a few cell lines and a chevron; MoreFilters gathers choice groups behind one verb. The kit has no icon-row preset that carries a subtitle beside the glyph and no counted rail \u2014 the destinations a phone navigates by are still composed per app.",
       "ours_case": "more-filters/open",
       "ours_file": "R34-side-navigation.png",
-      "sha256": "06124a3c4d18fd945c0c3d5a85e3a451cf1c4a5dbbbc3ec33ec6bd9bcb57b767",
-      "bytes": 26260
+      "sha256": "831ceedcc741baa207ad07d4136b673fba367c3313a4494f03dbcc17877eef8a",
+      "bytes": 33733
     },
     {
       "id": "R35",
@@ -205,8 +205,8 @@
       "ours": "ChoiceChips shows which chip is selected and refuses a disabled one with its reason; MoreFilters holds groups behind one verb. A selected chip still prints no value, and nothing beside the row offers a reset \u2014 a filter you can only read is a second implementation of the screen's state.",
       "ours_case": "choice-chips/selected",
       "ours_file": "R36-filter-chips.png",
-      "sha256": "051cec6e9c758269bfb82b40ee9d0e1badc784952a0b6a53854cc18619f772f1",
-      "bytes": 53075
+      "sha256": "a786f54ffba53ecf1ec1fb3dc2a818ed751c3ddb5c4ed5f91f8724d105489ea1",
+      "bytes": 54492
     },
     {
       "id": "R37",
@@ -240,8 +240,8 @@
       "ours": "Stepper marks first, middle and last, names the step it refuses, keeps its own revision, and offers Save & exit for a write with an unknown outcome. It does not say what happens next under the step the person is on.",
       "ours_case": "stepper/middle",
       "ours_file": "R38-stepper.png",
-      "sha256": "92d2ba73e539be59218062aaaa3b6ccb47b079a1e9fde1a52a57edfc11432a9b",
-      "bytes": 99696
+      "sha256": "68f885fb551b8122a2bd7258b197542fcbffc8cda9c7fea504c4fbb7aaec7ed7",
+      "bytes": 102238
     },
     {
       "id": "R39",
