@@ -2,6 +2,15 @@
   "schema": 1,
   "reviews": [
     {
+      "ghsa": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "severity": "high",
+      "versions": ["3.0.3"],
+      "reviewedAt": "2026-10-05",
+      "reviewBy": "2027-01-15",
+      "reason": "The filing covers braces <=3.0.3 and names no first patched release, and 3.0.3 is what the registry publishes as latest, so there is no version to take: the only dependent, micromatch@4.0.8 (also latest), requires braces ^3.0.3. The chains are all Node build and test tooling — metro-file-map > micromatch, reached through @expo/metro > @expo/metro-config > expo and through metro > @react-native/community-cli-plugin > react-native, and jest-haste-map, @jest/core, @jest/transform, jest-config and jest-message-util > micromatch — and no module of braces appears in the exported Hermes bundles, so nothing this repository ships runs it. What the filing describes is unguarded recursion in the AST walkers: a deeply nested brace pattern exhausts the call stack and ends the Node process with a RangeError, and every pattern these callers hand the matcher is a glob this repository or its developer writes — metro's recrawl globs, the testMatch this repository's jest.config.js sets, the coverage globs its Jest preset supplies, and the path argument a jest run is given — while the file paths they test are subjects, which braces never parses, so neither a served catalog nor a device can supply a pattern. Re-review when upstream releases a fixed braces, when micromatch drops the dependency, or by this date."
+    },
+    {
       "ghsa": "GHSA-86w9-cpqp-85rv",
       "package": "node-forge",
       "severity": "high",
