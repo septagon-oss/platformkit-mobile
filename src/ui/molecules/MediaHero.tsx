@@ -33,7 +33,10 @@ export function MediaHero({
   // failed specimen that reserves it reads as a page still waiting.
   const drawn = item.state === "ready" || item.state === "loading";
   // Whether this hero says the picture's name itself, in a line under the frame.
-  const named = Boolean(model.title || model.subtitle || item.caption);
+  // A control that takes the picture's words as its own label writes them too: the
+  // name is then on the screen once, and the frame has nothing left to add.
+  const named =
+    Boolean(model.title || model.subtitle || item.caption) || (item.canOpen && Boolean(onOpen));
   const frame = (
     <View style={[s.image, drawn ? { aspectRatio: item.aspectRatio } : s.imageVoid]}>
       {drawn ? (
