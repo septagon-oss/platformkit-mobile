@@ -99,13 +99,17 @@ test("selection and inline row actions do not activate the row", async () => {
       />,
     ),
   );
-  await fireEvent.press(screen.getByRole("checkbox", { name: "Select: Example" }));
+  await fireEvent.press(
+    screen.getByRole("checkbox", { name: `Select: ${presentation.copy.kit.specimenPass}` }),
+  );
   expect(onSelection.mock.calls).toEqual([[["row-1"]]]);
   expect(onOpen).not.toHaveBeenCalled();
   await fireEvent.press(screen.getAllByRole("button", { name: "Full details" })[0]!);
   expect(onRowAction.mock.calls).toEqual([["row-1", "inspect"]]);
   expect(onOpen).not.toHaveBeenCalled();
-  await fireEvent.press(screen.getByRole("button", { name: "Example, Quantity: 2" }));
+  await fireEvent.press(
+    screen.getByRole("button", { name: `${presentation.copy.kit.specimenPass}, Quantity: 2` }),
+  );
   expect(onOpen.mock.calls).toEqual([["row-1"]]);
 });
 
@@ -218,7 +222,9 @@ test("unsupported map providers retain the list without offering a retry", async
     <Gallery presentation={presentation} initialCaseId="map-with-list/provider-unsupported" />,
   );
   expect(
-    within(screen.getByTestId("gallery-kit")).getByRole("button", { name: "Example" }),
+    within(screen.getByTestId("gallery-kit")).getByRole("button", {
+      name: presentation.copy.kit.placePrintRoom,
+    }),
   ).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
   await screen.rerender(

@@ -150,7 +150,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
   return build(p, (v: Validation) => {
     const c = p.copy.kit,
       pt = p.copy.language === "pt",
-      name = pt ? "Exemplo" : "Example",
+      name = c.specimenPass,
       state = caseId.split("/")[1],
       busy = state === "busy" || state === "checkout-busy",
       disabled = state === "disabled";
@@ -198,10 +198,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       id: "option",
       label: pt ? "Opção" : "Option",
       choices: [
-        { id: "first", label: pt ? "Primeira" : "First", enabled: true },
+        { id: "first", label: c.variantIndividual, enabled: true },
         {
           id: "second",
-          label: pt ? "Segunda" : "Second",
+          label: c.variantTwoAdults,
           enabled: state !== "disabled-option",
           ...(state === "disabled-option" ? { reason: c.unavailable } : {}),
         },
@@ -320,14 +320,14 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
     const steps = [
       {
         id: "first",
-        label: choice.choices[0]!.label,
+        label: c.stepDetails,
         optional: false,
         completion: state === "first" ? ("incomplete" as const) : ("complete" as const),
         problems: [],
       },
       {
         id: "second",
-        label: choice.choices[1]!.label,
+        label: c.stepPayment,
         optional: true,
         completion: "incomplete" as const,
         problems: state === "invalid" ? [{ fieldId: "quantity", message: c.validation }] : [],
@@ -373,7 +373,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         id: "image-1",
         width: 600,
         height: 900,
-        description: pt ? "Forma vertical" : "Portrait shape",
+        description: c.photoPrintRoom,
         decorative: false,
         state:
           state === "error"
@@ -386,7 +386,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         id: "image-2",
         width: 1200,
         height: 800,
-        description: pt ? "Forma horizontal" : "Landscape shape",
+        description: c.photoCourtyard,
         decorative: false,
         state: "ready" as const,
       },
@@ -397,12 +397,19 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       page: { more: false, loading: false },
     };
     const points = [
-      { id: "point-1", longitude: 0, latitude: 0, title: name, status, actions: [secondary] },
+      {
+        id: "point-1",
+        longitude: 0,
+        latitude: 0,
+        title: c.placePrintRoom,
+        status,
+        actions: [secondary],
+      },
       {
         id: "point-2",
         longitude: state === "same-coordinate" ? 0 : 1,
         latitude: 0,
-        title: choice.choices[1]!.label,
+        title: c.placeCourtyard,
         status,
         actions: [],
       },
@@ -411,7 +418,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       content: sample([
         {
           id: "series-1",
-          label: name,
+          label: c.seriesVisitors,
           tone: "info" as const,
           points:
             state === "one-point"
@@ -630,7 +637,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       summary: v.take(
         deriveSummary(
           {
-            lines: [{ id: "summary-1", label: name, amount: unit }],
+            lines: [{ id: "summary-1", label: c.seriesVisitors, amount: unit }],
             adjustments: [],
             currency,
             kind: "receipt",
@@ -645,7 +652,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             content: sample([
               {
                 id: "plan-1",
-                title: name,
+                title: c.variantIndividual,
                 offers: [{ periodId: "period-1", price: safePrice, action }],
                 features: { feature: { kind: "included" } },
               },
@@ -694,13 +701,15 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                   ? "unsupported"
                   : "ready",
             ...(state === "provider-offline" ? { providerMessage: p.copy.state.offline.body } : {}),
-            attribution: name,
+            attribution: c.sourceSpecimen,
           },
           p,
         ),
       ),
       media: v.take(deriveMedia(mediaInput, p)),
-      hero: v.take(deriveMediaHero({ item: images[0]!, title: name, action: secondary }, p)),
+      hero: v.take(
+        deriveMediaHero({ item: images[0]!, title: c.photoPrintRoom, action: secondary }, p),
+      ),
       viewer: v.take(deriveViewer({ ...mediaInput, open: held.open ?? true }, p)),
       spark: v.take(deriveSparkline(chartInput, p)),
       chart: v.take(
@@ -711,7 +720,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 content: sample([
                   {
                     id: "series-1",
-                    label: name,
+                    label: c.seriesVisitors,
                     tone: "info",
                     points: [
                       { id: "a", x: 0, y: 4 },
@@ -743,7 +752,9 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 { id: "a", label: choice.choices[0]!.label },
                 { id: "b", label: choice.choices[1]!.label },
               ],
-              series: [{ id: "values", label: name, tone: "info", values: { a: -2, b: 5 } }],
+              series: [
+                { id: "values", label: c.seriesVisitors, tone: "info", values: { a: -2, b: 5 } },
+              ],
             }),
             xLabel: chartInput.xLabel,
             yLabel: chartInput.yLabel,
@@ -757,7 +768,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       stat: v.take(
         deriveStat(
           {
-            label: name,
+            label: c.seriesVisitors,
             value: 90,
             comparison: state === "zero-baseline" ? 0 : 120,
             fractionDigits: 0,

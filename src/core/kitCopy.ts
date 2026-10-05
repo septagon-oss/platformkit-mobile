@@ -116,6 +116,23 @@ export const kitEnglish = {
   navigate: "Navigate",
   cancel: "Cancel",
   dismiss: "Dismiss",
+  // The words a specimen is made of. A gallery that said only "Example", "First"
+  // and "Second" showed controls and no task, so the kit's specimens speak of one
+  // visit to one place: a pass bought, the rooms it opens, when it is used. These
+  // are the gallery's own fixture, named in both languages and read through here
+  // like every other word: no screen, case or rule branches on them, and no
+  // consumer of the kit is named by them.
+  specimenPass: "Riverside Gallery annual pass",
+  variantIndividual: "Individual",
+  variantTwoAdults: "Two adults",
+  stepDetails: "Your details",
+  stepPayment: "Payment",
+  photoPrintRoom: "The print room in morning light",
+  photoCourtyard: "The courtyard from the upper landing",
+  placePrintRoom: "Print room",
+  placeCourtyard: "Courtyard",
+  seriesVisitors: "Visitors per hour",
+  sourceSpecimen: "Specimen map data",
 } as const;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
 export const kitPortuguese: KitWords = {
@@ -235,4 +252,15 @@ export const kitPortuguese: KitWords = {
   navigate: "Navegar",
   cancel: "Cancelar",
   dismiss: "Dispensar",
+  specimenPass: "Passe anual da Galeria do Rio",
+  variantIndividual: "Individual",
+  variantTwoAdults: "Dois adultos",
+  stepDetails: "Os seus dados",
+  stepPayment: "Pagamento",
+  photoPrintRoom: "A sala de gravuras com a luz da manhã",
+  photoCourtyard: "O pátio visto do patamar de cima",
+  placePrintRoom: "Sala de gravuras",
+  placeCourtyard: "Pátio",
+  seriesVisitors: "Visitantes por hora",
+  sourceSpecimen: "Dados de mapa de exemplo",
 };
