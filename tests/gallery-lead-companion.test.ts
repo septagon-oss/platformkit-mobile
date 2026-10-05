@@ -52,6 +52,7 @@ test("only a page whose lead controls something names a companion", () => {
     .filter(([, spec]) => (spec as { withLead?: readonly string[] }).withLead?.length)
     .map(([id]) => id)
     .sort();
-  assert.deepEqual(named, ["search", "steps"]);
+  assert.deepEqual(named, ["navigate", "search", "steps"]);
   assert.deepEqual([...page("steps").withLead], ["slot-option/available"]);
+  assert.deepEqual([...page("navigate").withLead], ["summary-detail/default"]);
 });

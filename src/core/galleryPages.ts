@@ -80,6 +80,7 @@ export const galleryPages = {
   },
   navigate: {
     lead: "tab-bar/three",
+    withLead: ["summary-detail/default"],
     cases: [
       "tab-bar/three",
       "tab-bar/five",
