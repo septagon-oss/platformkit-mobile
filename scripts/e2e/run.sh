@@ -7,8 +7,9 @@
 # The spec list is the directory, never a list beside it — platformkit's
 # scripts/mobile_e2e.sh:209-227 reads its flows from the manifest it declares and
 # says why. Reading the directory is only honest because scripts/check_flows.ts
-# refuses a flow in it that names no screen, a screen no flow names and a testID
-# no component sets; that is what `npm run check` proves about the directory.
+# refuses a flow in it that names no screen, a screen no flow names, a testID
+# no component sets, and a folder holding a journey Maestro's planner would skip;
+# that is what `npm run check` proves about the directory.
 #
 # Needs: one device on adb, the Maestro CLI, and a server the device reaches at
 # SERVER. ANDROID_SERIAL, when set, names which device — the CI job names the

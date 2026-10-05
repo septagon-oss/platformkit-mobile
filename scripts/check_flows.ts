@@ -81,17 +81,48 @@ function header(text: string): string {
 
 /**
  * flowFiles are the journeys a `maestro test e2e/flows` run will execute, as
- * paths under e2e/flows: every yaml file at either spelling, in any depth, minus
- * the workspace's own configuration. The set is what the coverage rule counts and
- * what the CI job hands to `maestro check-syntax`, so the runner, the gate and the
- * job read one list — a flow outside it is a journey no rule answers for.
+ * paths under e2e/flows: every yaml file at either spelling in that directory
+ * itself, minus the workspace's own configuration. One directory, because that is
+ * what Maestro plans: its workspace planner keeps what the `flows:` glob matches,
+ * and the default glob is `*` — a name in the workspace, not a path below it
+ * (measured against maestro-cli-2.8.0: planned with no configuration file, a
+ * workspace holding home.yaml, extra.yml and nested/deep.yaml yields the first
+ * two) — and this repository ships no workspace config to widen it. The set is
+ * what the coverage rule counts and what the CI job hands to
+ * `maestro check-syntax`, so the runner, the gate and the job read one list — a
+ * flow outside it is a journey no rule answers for, which is why a folder that
+ * holds one is refused below.
  */
 export function flowFiles(root: string): string[] {
   const at = path.join(root, FLOWS);
   if (!existsSync(at)) return [];
-  return files(at)
-    .map((f) => path.relative(at, f).split(path.sep).join("/"))
+  return readdirSync(at, { withFileTypes: true })
+    .filter((d) => d.isFile())
+    .map((d) => d.name)
     .filter((f) => FLOW_FILE.test(f) && !WORKSPACE_CONFIG.has(f))
+    .sort();
+}
+
+/**
+ * flowFolders are the folders under e2e/flows that hold a journey, each named
+ * with a trailing slash. A journey one folder down is planned by no run this
+ * repository configures: its steps never execute, so the screens it claims are
+ * screens no device journey reaches. Counting it would make the coverage number a
+ * promise about a file nobody runs, and refusing an empty folder would name a
+ * journey that is not there, so the gate refuses the folder exactly when a flow
+ * file sits inside it.
+ */
+function flowFolders(root: string): string[] {
+  const at = path.join(root, FLOWS);
+  if (!existsSync(at)) return [];
+  const held = (f: string): boolean =>
+    files(path.join(at, f)).some((nested) => {
+      const name = path.basename(nested);
+      return FLOW_FILE.test(name) && !WORKSPACE_CONFIG.has(name);
+    });
+  return readdirSync(at, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && held(d.name))
+    .map((d) => `${d.name}/`)
     .sort();
 }
 
@@ -113,6 +144,12 @@ export function checkFlows(root: string): string[] {
   const problems: string[] = [];
   const ids = knownIDs(root);
   const flowsAt = path.join(root, FLOWS);
+  // First the shape of the directory: a folder in it is where journeys go to be
+  // skipped, and every count below would otherwise include what they claim.
+  for (const dir of flowFolders(root))
+    problems.push(
+      `${dir}: a journey in a folder is one Maestro never plans — its default workspace glob is * — so what sits here runs nowhere`,
+    );
   for (const f of flowFiles(root)) {
     const text = readFileSync(path.join(flowsAt, f), "utf8");
     if (!new RegExp(`^\\s*APP_ID: ${APP_ID.replace(/\./g, "\\.")}$`, "m").test(text))

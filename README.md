@@ -454,8 +454,11 @@ rules), `format:check` (Prettier), `test` (the Node suite, `tsx --test
 tests/*.test.ts`, then the Jest suite, every `tests/**/*.test.tsx` rendering
 components, the shell, the route dispatcher and the screen hooks),
 `check:fingerprint`, `check:flows` (the journeys counted are the ones
-`maestro test e2e/flows` takes — either YAML spelling, any depth, the
-workspace's own `config.yaml` aside; every id one of them names is a testID a
+`maestro test e2e/flows` takes — either YAML spelling, in that directory itself,
+the workspace's own `config.yaml` aside: Maestro's planner keeps what the
+workspace's `flows:` glob matches and its default is `*`, a name and not a path,
+so the gate refuses a folder that holds a journey rather than count coverage no
+run makes; every id one of them names is a testID a
 component sets, every route screen under `app/` is named by some flow's
 `# screen:` header, and every flow names the screen it proves) and
 `check:source` (the manifest and lockfile install from the

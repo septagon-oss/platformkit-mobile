@@ -61,23 +61,35 @@ const written = (root: string, at: string, text: string): string => {
   return file;
 };
 
-test("the gate's set is Maestro's set: either spelling, any depth, no workspace config", (t) => {
+test("the gate's set is Maestro's set: either spelling, one directory, no workspace config", (t) => {
   const root = tree(t);
-  // `maestro test e2e/flows` walks the directory and takes a file whose
-  // extension is yaml or yml (maestro.orchestra.workspace.FiltersKt.isFlowFile),
-  // reading <workspace>/config.yaml as configuration instead of running it. The
-  // gate counts that walk and nothing else: an unclaimed journey two folders down
-  // escapes as completely as one spelled .yml beside the rest.
-  written(root, "nested/deep.yml", flow(["app/x/y.tsx"]));
+  // `maestro test e2e/flows` takes a file whose extension is yaml or yml
+  // (maestro.orchestra.workspace.FiltersKt.isFlowFile), reading
+  // <workspace>/config.yaml as configuration instead of running it, and keeps
+  // only what the workspace's `flows:` glob matches — whose default is `*`, a
+  // name in that directory and not a path below it. The gate counts that walk
+  // and nothing else: a folder is refused as the place journeys go unrun, and
+  // what sits in it is not counted as a journey, so its claims cover nothing.
+  written(root, "extra.yml", flow(["app/index.tsx"]));
   assert.deepEqual(checkFlows(root), []);
-  assert.ok(flowFiles(root).includes("nested/deep.yml"), "a .yml at depth is a journey");
-  written(root, "nested/extra.yaml", flow([]));
-  assert.deepEqual(checkFlows(root), ["nested/extra.yaml: names no screen"]);
+  assert.ok(flowFiles(root).includes("extra.yml"), "a .yml beside the rest is a journey");
+  const deep = written(root, "nested/deep.yml", flow(["app/x/y.tsx", "app/x/z.tsx"]));
+  assert.deepEqual(checkFlows(root), [
+    "nested/: a journey in a folder is one Maestro never plans — its default workspace glob is * — so what sits here runs nowhere",
+  ]);
+  assert.ok(
+    !flowFiles(root).some((f) => f.includes("/")),
+    "a journey below e2e/flows is not one the gate counts",
+  );
   // The workspace's own configuration carries no screen claim and no step, and
   // Maestro never runs it: refusing it would be the gate inventing a journey.
   writeFileSync(path.join(root, "e2e/flows", "config.yaml"), "name: journeys\n");
-  rmSync(path.join(root, "e2e/flows", "nested", "extra.yaml"));
+  // An empty folder holds no journey to lose: the refusal is about the file the
+  // planner would skip, so with the journey gone the folder says nothing — the
+  // tree's own nested/ stays on disk and passes.
+  rmSync(deep);
   assert.deepEqual(checkFlows(root), []);
+  assert.ok(!flowFiles(root).some((f) => f.includes("/")), "one directory, either spelling");
   assert.ok(!flowFiles(root).includes("config.yaml"), "config.yaml is not a journey");
 });
 
