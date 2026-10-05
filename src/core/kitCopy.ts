@@ -133,6 +133,7 @@ export const kitEnglish = {
   placeCourtyard: "Courtyard",
   seriesVisitors: "Visitors per hour",
   sourceSpecimen: "Specimen map data",
+  audioTour: "Audio tour",
 } as const;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
 export const kitPortuguese: KitWords = {
@@ -263,4 +264,5 @@ export const kitPortuguese: KitWords = {
   placeCourtyard: "Pátio",
   seriesVisitors: "Visitantes por hora",
   sourceSpecimen: "Dados de mapa de exemplo",
+  audioTour: "Audioguia",
 };

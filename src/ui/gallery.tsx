@@ -1051,8 +1051,11 @@ function KitSamples({
       return (
         <MiniPlayer
           model={k.playback}
-          title={specimen.case}
-          subtitle={c.details}
+          // What is playing, in words a person would recognise — the room the
+          // recording is of and the kind of track it is — not the gallery's own
+          // word for "specimen", which names the page and not the audio.
+          title={c.photoPrintRoom}
+          subtitle={c.audioTour}
           artwork={
             <View
               style={s.artwork}
