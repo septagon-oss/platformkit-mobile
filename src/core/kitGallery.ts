@@ -733,7 +733,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                   ? "unsupported"
                   : "ready",
             ...(state === "provider-offline" ? { providerMessage: p.copy.state.offline.body } : {}),
-            attribution: c.sourceSpecimen,
+            attribution: c.sourceFloorPlan,
           },
           p,
         ),

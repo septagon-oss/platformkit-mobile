@@ -157,7 +157,7 @@ export const kitEnglish = {
   // four figures and two different promises.
   unitMonthly: "per month",
   unitYearly: "per year",
-  sourceSpecimen: "Specimen map data",
+  sourceFloorPlan: "Gallery floor plan",
   audioTour: "Audio tour",
 } as const;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
@@ -308,6 +308,6 @@ export const kitPortuguese: KitWords = {
   periodAnnual: "Anual",
   unitMonthly: "por mês",
   unitYearly: "por ano",
-  sourceSpecimen: "Dados de mapa de exemplo",
+  sourceFloorPlan: "Planta do piso da galeria",
   audioTour: "Audioguia",
 };

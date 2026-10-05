@@ -1215,6 +1215,9 @@ const pageStyles = (t: Theme) =>
      * inside their own padding would still stand on the column's edge.
      */
     ink: { marginLeft: t.space.lg },
+    // The plan draws a building, not a field for pins: a muted floor, the rooms cut
+    // out of it in the page's own surface, the walk to them kept clear, and the
+    // threshold a person enters by in the one accent. The geometry is PLAN below.
     canvas: {
       height: t.extent.chart,
       borderRadius: t.radius.md,
@@ -1222,7 +1225,33 @@ const pageStyles = (t: Theme) =>
       borderWidth: 1,
       borderColor: t.state.outline,
       overflow: "hidden",
+      gap: t.space.xs,
     },
+    plan: { flex: 1 },
+    room: {
+      position: "absolute",
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: 1,
+      borderColor: t.state.outline,
+    },
+    // The walk is floor with a wall either side of it, which is how a plan says
+    // "this is where you go" without drawing an arrow.
+    walk: {
+      position: "absolute",
+      backgroundColor: t.color.surfacePrimary,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: t.state.outline,
+    },
+    entrance: {
+      position: "absolute",
+      backgroundColor: t.color.surfacePrimary,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: t.state.outline,
+      justifyContent: "flex-end",
+    },
+    threshold: { height: t.extent.focus, backgroundColor: t.color.accentDefault },
     pin: {
       position: "absolute",
       alignItems: "center",
@@ -1249,8 +1278,30 @@ const pageStyles = (t: Theme) =>
       borderWidth: 1,
       borderColor: t.state.outline,
     },
-    attribution: { position: "absolute", right: t.space.sm, bottom: t.space.sm },
+    // The plan's source is its own line under the drawing, where a map keeps its
+    // attribution. Painted inside the drawing it reads as a status the map reports
+    // about itself.
+    attribution: { paddingHorizontal: t.space.sm, paddingBottom: t.space.xs },
   });
+
+/**
+ * PLAN is the building the specimen's points stand in, in fractions of the canvas:
+ * rooms, the walk that reaches them and the threshold a person enters by. The
+ * gallery owns no map provider, so it draws a plan it can name rather than an
+ * empty field for pins to float in. Fixed geometry, so one page is one building in
+ * every capture, in every run.
+ */
+const PLAN = {
+  rooms: [
+    { id: "print-room", left: 0.05, top: 0.08, width: 0.35, height: 0.32 },
+    { id: "upper-landing", left: 0.44, top: 0.08, width: 0.2, height: 0.32 },
+    { id: "courtyard", left: 0.68, top: 0.08, width: 0.27, height: 0.32 },
+    { id: "frame-hall", left: 0.05, top: 0.64, width: 0.35, height: 0.28 },
+    { id: "bindery", left: 0.68, top: 0.64, width: 0.27, height: 0.28 },
+  ],
+  walk: { left: 0.05, top: 0.46, width: 0.9, height: 0.1 },
+  entrance: { left: 0.44, top: 0.56, width: 0.2, height: 0.36 },
+};
 
 /**
  * worldWindow is how many degrees of the world the gallery's canvas shows. It is
@@ -1274,22 +1325,37 @@ function MapCanvasFixture(props: MapCanvasProps) {
     left: `${clamp(50 + ((marker.longitude - props.viewport.longitude) / worldWindow) * 100, 4, 74)}%`,
     top: `${clamp(50 - ((marker.latitude - props.viewport.latitude) / worldWindow) * 100, 8, 56)}%`,
   });
+  const box = (part: { left: number; top: number; width: number; height: number }): ViewStyle => ({
+    left: `${part.left * 100}%`,
+    top: `${part.top * 100}%`,
+    width: `${part.width * 100}%`,
+    height: `${part.height * 100}%`,
+  });
   return (
     <View style={s.canvas} accessible accessibilityLabel={props.attribution}>
-      {props.markers.map((marker) => (
-        <Pressable
-          key={marker.id}
-          accessibilityRole="button"
-          accessibilityLabel={marker.label}
-          onPress={() => props.onMarker(marker.id)}
-          style={[s.pin, place(marker)]}
-        >
-          <View style={[s.marker, marker.selected && s.markerSelected]} />
-          <Text style={s.pinLabel} role="caption">
-            {marker.label}
-          </Text>
-        </Pressable>
-      ))}
+      <View style={s.plan}>
+        {PLAN.rooms.map((room) => (
+          <View key={room.id} style={[s.room, box(room)]} />
+        ))}
+        <View style={[s.walk, box(PLAN.walk)]} />
+        <View style={[s.entrance, box(PLAN.entrance)]}>
+          <View style={s.threshold} />
+        </View>
+        {props.markers.map((marker) => (
+          <Pressable
+            key={marker.id}
+            accessibilityRole="button"
+            accessibilityLabel={marker.label}
+            onPress={() => props.onMarker(marker.id)}
+            style={[s.pin, place(marker)]}
+          >
+            <View style={[s.marker, marker.selected && s.markerSelected]} />
+            <Text style={s.pinLabel} role="caption">
+              {marker.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
       <Text style={s.attribution} role="caption" tone="muted">
         {props.attribution}
       </Text>
