@@ -131,7 +131,6 @@ export const kitEnglish = {
   // like every other word: no screen, case or rule branches on them, and no
   // consumer of the kit is named by them.
   specimenPass: "Riverside Gallery annual pass",
-  choosePlan: "Choose this pass",
   benefitTours: "Guided tour of the print room",
   variantIndividual: "Individual",
   variantTwoAdults: "Two adults",
@@ -288,7 +287,6 @@ export const kitPortuguese: KitWords = {
   cancel: "Cancelar",
   dismiss: "Dispensar",
   specimenPass: "Passe anual da Galeria do Rio",
-  choosePlan: "Escolher este bilhete",
   benefitTours: "Visita guiada à sala de gravuras",
   variantIndividual: "Individual",
   variantTwoAdults: "Dois adultos",

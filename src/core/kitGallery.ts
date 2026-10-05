@@ -172,14 +172,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       tone: "secondary",
       state: "ready",
     };
-    // A tier card's verb names choosing that tier. It is the same verb on every card,
-    // so no plan offers the page's own continuation in its place.
-    const choose: Action = {
-      id: "choose",
-      label: c.choosePlan,
-      tone: "secondary",
-      state: "ready",
-    };
+    // An offer's amount, in the currency the presentation is drawn in: read where the
+    // tiers are built, not where this helper is written, because the currency is decided
+    // further down.
+    const money = (minor: string) => ({ kind: "price" as const, amount: { minor, currency } });
     // An empty collection that offers the verb which would fill it is the state
     // a person can act on; one that only says so is a notice.
     const empty = v.take(
@@ -701,13 +697,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 title: c.variantIndividual,
                 // A tier offered for both periods carries the amount of each, so the
                 // figure a person reads is the one for the period they selected.
+                // A tier card holds one control: the card's own selection. An offer
+                // that carries a verb of its own puts a second way to choose -- or,
+                // worse, the page's own continuation -- inside a choice.
                 offers: [
-                  { periodId: "period-month", price: safePrice, action: choose },
-                  {
-                    periodId: "period-year",
-                    price: { kind: "price", amount: { minor: "12990", currency } },
-                    action: choose,
-                  },
+                  { periodId: "period-month", price: safePrice },
+                  { periodId: "period-year", price: money("12990") },
                 ],
                 features: { feature: { kind: "excluded" } },
               },
@@ -718,18 +713,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                   state === "missing-offer"
                     ? []
                     : [
-                        {
-                          periodId: "period-month",
-                          price: { kind: "price", amount: { minor: "2199", currency } },
-                          action: choose,
-                        },
-                        {
-                          periodId: "period-year",
-                          // Both cards state a price: a plan whose price is the word
-                          // "Full details" repeats its own row label and chooses nothing.
-                          price: { kind: "price", amount: { minor: "21990", currency } },
-                          action: choose,
-                        },
+                        { periodId: "period-month", price: money("2199") },
+                        // Both cards state a price: a plan whose price is the word
+                        // "Full details" repeats its own row label and chooses nothing.
+                        { periodId: "period-year", price: money("21990") },
                       ],
                 features: { feature: { kind: "included" } },
               },
