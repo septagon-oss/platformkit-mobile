@@ -90,7 +90,7 @@ const en: Words = {
     english: "English",
     portuguese: "Português",
     states: "Rich states",
-    statesHint: "How this screen reads while it loads, comes up empty or refuses a thing.",
+    statesHint: "How this screen reads while it loads, comes up empty or refuses an action.",
     primitives: "Atoms and molecules",
     locale: "Date and number locale",
     case: "Example",
