@@ -46,6 +46,16 @@ export function MiniPlayer({
   const s = useStyles(styles);
   const toggle: PlayerIntent = playing ? "pause" : "play";
   const glyph: IconName = playing ? "pause" : "play";
+  // Where the track has got to. A position with no total is not a sum the strip
+  // can complete, so the one-line strip says how far the track has run and leaves
+  // the sentence that explains the missing total to the card, which has the line
+  // to write it in.
+  const position =
+    model.fraction !== undefined
+      ? `${model.elapsed} · ${model.remaining}`
+      : collapsed
+        ? model.elapsed
+        : `${model.elapsed} · ${model.reason ?? ""}`;
   // A strip over a list is one line tall and its words are cut short; the card a
   // person stops on is not. Expanded, the title and the position take the lines
   // the sentence needs and the controls move below them, so the words are not
@@ -68,9 +78,7 @@ export function MiniPlayer({
             </Text>
           ) : null}
           <Text role="caption" tone="muted" numberOfLines={lines}>
-            {model.fraction === undefined
-              ? `${model.elapsed} · ${model.reason ?? ""}`
-              : `${model.elapsed} · ${model.remaining}`}
+            {position}
           </Text>
           {collapsed ? null : (
             <View style={s.track}>
