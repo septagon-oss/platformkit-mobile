@@ -426,24 +426,30 @@ function Page({
             // the names it opens land beside the names already standing there.
             <>
               {statesOf(openGroups)}
-              <DisclosureSection
-                model={statesSection.value}
-                onExpanded={setStatesOpen}
-                testID="gallery-page-later-states"
-              >
-                {statesOf(laterGroups)}
-              </DisclosureSection>
+              <View style={s.rule}>
+                <DisclosureSection
+                  model={statesSection.value}
+                  onExpanded={setStatesOpen}
+                  testID="gallery-page-later-states"
+                  summaryInside
+                >
+                  {statesOf(laterGroups)}
+                </DisclosureSection>
+              </View>
             </>
           ) : stand || !statesSection.ok ? (
             states
           ) : (
-            <DisclosureSection
-              model={statesSection.value}
-              onExpanded={setStatesOpen}
-              testID="gallery-page-later-states"
-            >
-              {states}
-            </DisclosureSection>
+            <View style={s.rule}>
+              <DisclosureSection
+                model={statesSection.value}
+                onExpanded={setStatesOpen}
+                testID="gallery-page-later-states"
+                summaryInside
+              >
+                {states}
+              </DisclosureSection>
+            </View>
           )}
         </View>
       </View>
@@ -1270,6 +1276,16 @@ const pageStyles = (t: Theme) =>
     phone: { width: t.extent.pageColumn, gap: t.space.xl },
     lead: { gap: t.space.sm },
     group: { gap: t.space.xs },
+    /**
+     * rule is the one step the page's state disclosure takes from the screen above
+     * it: a hairline and a step, so the row that asks for the page's other states
+     * reads as the screen's own quiet row rather than as a second screen.
+     */
+    rule: {
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: t.color.borderDefault,
+      paddingTop: t.space.lg,
+    },
     /**
      * rail is the state column's one step in from its edge, taken by the column
      * once rather than by every line in it: a family's name, the words of a
