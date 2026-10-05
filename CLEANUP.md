@@ -95,14 +95,63 @@ not this repository's history.
 | review-named files (`pillars.REVIEW_NAMED` over `git ls-files`) | 48 | **0** |
 | `grep -rn "T0180" tests/` | 55 lines | no output |
 
-The Node count rises by two because six `.spec.ts` bodies that executed in no gate
-now do, six family-contract cases were folded into their owners, and eight carried
-cases were added. `npx jest --coverage --coverageReporters=text-summary` at head
-repeats the merge base exactly — 78.66 % statements (2364/3005), 70.19 % branches
-(2216/3157), 73.13 % functions (675/923), 81.48 % lines (2148/2636) over 45 suites
-and 232 tests — which is what a rename should do to coverage: nothing. The Node
-suite has no coverage runner, which is why it reports the test count above instead
-of a second percentage.
+## Coverage, per touched folder, same command in both trees
+
+`31dc830` was exported with `git archive 31dc830 | tar -x -C "$TMPDIR/base-31dc830"` and given a
+symlink to this checkout's `node_modules`; each command below ran once in that export and once here.
+Statements / branches / functions / lines from Jest's own `All files` row:
+
+| Suites selected | base | head |
+| --- | --- | --- |
+| `npx jest --coverage --coverageReporters=text --testPathPattern 'tests/ui/'` | 75.89 / 68.51 / 71.16 / 78.83 (17 suites, 119 tests) | 75.89 / 68.51 / 71.16 / 78.83 (16 suites, 119 tests) |
+| `… --testPathPattern 'tests/screens/'` | 40.39 / 33.15 / 31.59 / 41.88 (22 suites, 97 tests) | 40.39 / 33.15 / 31.59 / 41.88 (22 suites, 97 tests) |
+| `… --testPathPattern 'tests/[^/]+\.test\.tsx$'` — the root's Jest half | 36.09 / 27.41 / 28.95 / 38.07 (7 suites, 16 tests) | 36.09 / 27.41 / 28.95 / 38.07 (7 suites, 16 tests) |
+| `npx jest --coverage --coverageReporters=text-summary` — the whole suite | 78.66 / 70.19 / 73.13 / 81.48 (46 suites, 232 tests) | 78.66 / 70.19 / 73.13 / 81.48 (45 suites, 232 tests) |
+
+No cell moved, which is what a rename should do to coverage. The one suite-count change
+(`tests/ui/` 17 → 16, tests still 119) is `review-feedback.test.tsx`'s two cases moving into
+`tests/ui/feedback.test.tsx`. The Node suite has no coverage runner, which is why it reports the
+test count above instead of a second percentage.
+
+## The Node count, case by case
+
+Every root Node file was run on its own (`node --import tsx --test tests/<f>.test.ts`) in both
+trees, so the arithmetic names every case rather than summarising it. Base: 189 in 33 files; head:
+191 in 38 files. Of the 189, 27 sat in the ten review-named files; six `.spec.ts` bodies held 7
+more cases that no gate executed.
+
+`189 − 27` (the review-named files' cases leave their names) `+ 26` (the same cases under their new
+names, plus what was carried to them) `+ 3` (new cases inside two files that never moved) `= 191`.
+
+| Head file | Cases | Where its cases come from |
+| --- | --- | --- |
+| `activity-actor-snapshot.test.ts` | 2 | moved whole from `review-activity-directory-snapshot` |
+| `activity-scope-isolation.test.ts` | 2 | moved whole from `review-activity-scope-isolation` |
+| `activity-audit-snapshot.test.ts` | 2 | moved whole from `review-activity-withdrawal` |
+| `calendar-withdrawal.test.ts` | 3 | 2 moved whole, + 1 overnight civil-day row from `review-family-contracts` |
+| `map-withdrawal.test.ts` | 2 | moved whole from `review-map-withdrawal` |
+| `pricing-withdrawal.test.ts` | 2 | moved whole from `review-pricing-withdrawal` |
+| `stepper-pending-write.test.ts` | 3 | 2 moved whole, + 1 refused-transition-in-the-caller's-copy row |
+| `cart-quote-withdrawal.test.ts` | 2 | 1 body no gate ran, + 1 busy-quote row from `review-family-contracts` |
+| `slot-availability-withdrawal.test.ts` | 2 | 1 body no gate ran, + 1 DST `slot.offset` row |
+| `list-selection-withdrawal.test.ts` | 1 | body that no gate ran |
+| `viewer-snapshot-isolation.test.ts` | 1 | body that no gate ran |
+| `viewer-lost-selection.test.ts` | 1 | body that no gate ran |
+| `media-denial-clears-selection.test.ts` | 2 | body that no gate ran (two locales) |
+| `core-component-families.test.ts` | 1 | new file — the one `review-shared-components` assertion with no owner |
+| `activity.test.ts` 6 → 8 | +2 | the two inputs only `review-activity-denied-snapshot` held; its own two cases were duplicates and were dropped |
+| `shared-kit.test.ts` 14 → 15 | +1 | the negative-domain/null-split case; its empty-cart `"0"` and line-overflow rows joined the existing money case's data |
+
+Eight of the 27 cases stopped existing as separate cases, each one checked against the kept side
+line by line first. Four were pure duplicates: two `review-activity-denied-snapshot` copies of
+`activity.test.ts`'s denial pair (its two unique inputs are the `+2` above), and two
+`review-family-contracts` copies — removed-but-selected rows against
+`tests/list-selection-withdrawal.test.ts:65-69`, map provider failure against
+`tests/map-withdrawal.test.ts:48-55`. Four carried an input an owner lacked, so the input moved into
+a case that already existed instead of becoming a new one: `review-shared-components`' locale
+independence, nested copy-key walk (which widened the narrower comparison it joined) and
+secondary-intent refusal into three `tests/feedback.test.ts` cases, and its exact-cart-total case
+into `tests/shared-kit.test.ts`'s money case as data.
 
 ## Left as it was, on purpose
 
