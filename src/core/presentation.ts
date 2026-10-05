@@ -123,6 +123,38 @@ export function presentationIssues(p: Presentation): readonly Issue[] {
   return issues;
 }
 
+/**
+ * presentedRange is one span of time in one sentence. A formatted instant names
+ * its day, its clock and its zone, so a range built from two of them says the day
+ * twice, says the zone twice and wraps across two lines — which is how a booking
+ * slot came to read as a data dump. The day is written once (twice only when the
+ * span crosses midnight), the two clock times follow, and the zone is said once.
+ */
+export function presentedRange(
+  start: Date,
+  end: Date,
+  p: Pick<Presentation, "locale" | "timeZone">,
+): string {
+  const face = (options: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(p.locale, { timeZone: p.timeZone, ...options });
+  const day = (at: Date) => face({ month: "short", day: "numeric" }).format(at);
+  const clock = (at: Date) =>
+    face({ hour: "2-digit", minute: "2-digit" })
+      .formatToParts(at)
+      .filter((part) => part.type !== "timeZoneName")
+      .map((part) => part.value)
+      .join("")
+      .trim();
+  const offset = face({ hour: "2-digit", minute: "2-digit", timeZoneName: "short" })
+    .formatToParts(start)
+    .find((part) => part.type === "timeZoneName")?.value;
+  const firstDay = day(start);
+  const secondDay = day(end);
+  const when = firstDay === secondDay ? firstDay : `${firstDay} – ${secondDay}`;
+  const hours = `${clock(start)} – ${clock(end)}`;
+  return `${when} · ${hours}${offset ? ` ${offset}` : ""}`;
+}
+
 /** A formatter belongs to this explicit invocation, never to a mutable device default. */
 export function presentedTime(at: Date, p: Pick<Presentation, "locale" | "timeZone">): string {
   return new Intl.DateTimeFormat(p.locale, {

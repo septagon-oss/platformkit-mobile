@@ -1,6 +1,6 @@
 import { Temporal } from "@js-temporal/polyfill";
 import type { Action } from "./feedback";
-import { instantValue, presentedTime, type Presentation } from "./presentation";
+import { instantValue, presentedRange, presentedTime, type Presentation } from "./presentation";
 import { civilDate, dateAt, type LocalDate } from "./slots";
 import {
   action,
@@ -174,7 +174,7 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
               top: (s - begin) / duration,
               height: (finish - s) / duration,
               kind: "timed",
-              label: `${e.title} · ${presentedTime(new Date(actualStart), p)} – ${presentedTime(new Date(actualEnd), p)}${actualStart < begin || actualEnd > end ? ` · ${p.copy.kit.continues}` : ""}`,
+              label: `${e.title} · ${presentedRange(new Date(actualStart), new Date(actualEnd), p)}${actualStart < begin || actualEnd > end ? ` · ${p.copy.kit.continues}` : ""}`,
             });
         }
       }

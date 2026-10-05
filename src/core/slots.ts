@@ -1,5 +1,5 @@
 import { Temporal } from "@js-temporal/polyfill";
-import { instantValue, presentedTime, type Presentation } from "./presentation";
+import { instantValue, presentedRange, type Presentation } from "./presentation";
 import { build, content, issue, type Content, type Validation } from "./shared";
 export type LocalDate = string;
 export function civilDate(value: string): Temporal.PlainDate | undefined {
@@ -89,8 +89,10 @@ export function deriveSlots(input: SlotPickerInput, p: Presentation) {
           id: s.id,
           start: start.toISOString(),
           date: dateAt(s.start, p.timeZone),
-          label: `${presentedTime(start, p)} – ${presentedTime(end, p)}`,
-          displayLabel: `${presentedTime(start, p)} – ${presentedTime(end, p)} (${Temporal.Instant.from(s.start).toZonedDateTimeISO(p.timeZone).offset})`,
+          label: presentedRange(start, end, p),
+          // The spoken line is the same sentence: the raw offset remains its own
+          // field for anything that has to read it, and does not clutter the label.
+          displayLabel: presentedRange(start, end, p),
           offset: Temporal.Instant.from(s.start).toZonedDateTimeISO(p.timeZone).offset,
           reason,
           enabled: !reason,
