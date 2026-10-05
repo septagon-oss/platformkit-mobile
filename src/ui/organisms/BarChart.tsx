@@ -84,7 +84,7 @@ export function BarChart({
           </View>
           <View style={s.chartLabels}>
             {model.categories.map((category) => (
-              <View key={category.id} style={s.grow}>
+              <View key={category.id} style={s.chartLabel}>
                 <Button
                   label={category.label}
                   tone="secondary"

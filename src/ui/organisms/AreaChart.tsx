@@ -8,6 +8,26 @@ import { ChoiceChips } from "../molecules/ChoiceChips";
 import { ModelState } from "../molecules/ModelState";
 import { kitStyles } from "../layout";
 import { statusInk, useStyles, useTheme } from "../theme";
+
+/**
+ * The plot is drawn inside a margin of its own box so a measurement on the edge
+ * keeps its whole mark — a point at x=0 is a full circle, not a clipped half.
+ * The x axis is set in that same band: a label is written where the measurement
+ * it names was drawn, not in the middle of an equal share of the width.
+ */
+const plotMargin = 0.03,
+  plotBox = `${-plotMargin} ${-plotMargin} ${1 + plotMargin * 2} ${1 + plotMargin * 2}`,
+  // The fraction of the plot's width between its edge and where x=0 is drawn.
+  plotInset = plotMargin / (1 + plotMargin * 2);
+
+/**
+ * A label may be as wide as the narrowest gap between two ticks, which is what
+ * keeps two names from running into each other while each stays centred on its
+ * own measurement.
+ */
+const tickSpan = (positions: readonly number[]): number =>
+  positions.length < 2 ? 1 : Math.min(...positions.slice(1).map((at, i) => at - positions[i]!));
+
 export function AreaChart({
   model,
   onRange,
@@ -27,6 +47,7 @@ export function AreaChart({
   // and the word that names it agree; a second series of the same tone is told
   // apart by its dash, which the plot below keeps by position.
   const colors = model.series.map((series) => statusInk(t, series.tone));
+  const span = tickSpan(model.xTicks.map((tick) => tick.position));
   return (
     <View style={s.stack}>
       <ModelState model={model} onRetry={onRetry} />
@@ -57,12 +78,7 @@ export function AreaChart({
           <View style={s.grow}>
             <View style={s.chart}>
               <View style={s.grow} accessibilityElementsHidden>
-                <Svg
-                  width="100%"
-                  height="100%"
-                  viewBox="-0.03 -0.03 1.06 1.06"
-                  preserveAspectRatio="none"
-                >
+                <Svg width="100%" height="100%" viewBox={plotBox} preserveAspectRatio="none">
                   {model.series.map((series, i) => (
                     <React.Fragment key={series.id}>
                       {series.fill ? (
@@ -102,11 +118,26 @@ export function AreaChart({
               )}
             </View>
             <View style={s.chartTicks}>
-              {model.xTicks.map((tick) => (
-                <Text key={tick.position} role="caption" tone="muted" style={s.grow}>
-                  {tick.label}
-                </Text>
-              ))}
+              <View
+                style={[
+                  s.chartTickBand,
+                  { left: `${plotInset * 100}%`, right: `${plotInset * 100}%` },
+                ]}
+              >
+                {model.xTicks.map((tick) => (
+                  <Text
+                    key={tick.position}
+                    role="caption"
+                    tone="muted"
+                    style={[
+                      s.chartTickLabel,
+                      { left: `${tick.position * 100}%`, width: `${span * 100}%` },
+                    ]}
+                  >
+                    {tick.label}
+                  </Text>
+                ))}
+              </View>
             </View>
           </View>
         </View>

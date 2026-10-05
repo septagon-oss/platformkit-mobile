@@ -166,3 +166,58 @@ describe("a plot names zero only where its scale holds it", () => {
     expect(rule.top).toBe(`${model.zero! * 100}%`);
   });
 });
+
+/**
+ * The x axis names a measurement where the plot drew it. A row of equal cells
+ * puts every hour name a little inward of its own point, so the picture and its
+ * labels make two claims at once; each name is set at the position the scale put
+ * its measurement, and centred there rather than beginning there.
+ */
+describe("an x axis names its measurements where it drew them", () => {
+  const hours = (): ChartModel => {
+    const result = deriveChart(
+      {
+        content: {
+          phase: "ready",
+          refresh: "idle",
+          value: [
+            {
+              id: "visitors",
+              label: "Visitors",
+              tone: "info",
+              points: [
+                { id: "a", x: 10, y: 4 },
+                { id: "b", x: 12, y: 8 },
+                { id: "c", x: 14, y: 6 },
+              ],
+            },
+          ],
+        },
+        xKind: "number",
+        xLabel: "Hour",
+        yLabel: "People",
+        unitLabel: "people",
+        fractionDigits: 0,
+        ranges: [],
+      },
+      presentation,
+    );
+    if (!result.ok) throw new Error(result.issues.map((i) => `${i.path}/${i.code}`).join(", "));
+    return result.value;
+  };
+
+  test("every tick name is centred on the position the scale puts its measurement", async () => {
+    const model = hours();
+    expect(model.xTicks.length).toBeGreaterThan(2);
+    await inLight(
+      <AreaChart model={model} onRange={none} onPoint={none} onClearPoint={none} onRetry={none} />,
+    );
+    for (const tick of model.xTicks) {
+      const style = StyleSheet.flatten(screen.getByText(tick.label).props.style) ?? ({} as object);
+      expect(style).toMatchObject({
+        left: `${tick.position * 100}%`,
+        transform: [{ translateX: "-50%" }],
+      });
+    }
+  });
+});

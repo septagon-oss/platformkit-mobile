@@ -37,7 +37,20 @@ export const kitStyles = (t: Theme) =>
     chart: { height: t.extent.chart, width: "100%" },
     chartAxis: { height: t.extent.chart, width: t.extent.chartAxis },
     chartPlot: { flexDirection: "row", gap: t.space.sm, alignItems: "stretch" },
-    chartTicks: { flexDirection: "row", justifyContent: "space-between", gap: t.space.sm },
+    // The x axis is one caption line written in the plot's own band (the
+    // organism insets that band to the drawing area), not a row of equal cells:
+    // a measurement plotted at a quarter of the width is named at a quarter of
+    // the width. chartTickBand is the band, chartTickLabel one name in it.
+    chartTicks: { position: "relative", minHeight: t.type.caption.line, marginTop: t.space.sm },
+    chartTickBand: { position: "absolute", top: 0, bottom: 0 },
+    // Centred on the tick rather than beginning there: half the label's own
+    // width is what stands between its middle and the measurement above it.
+    chartTickLabel: {
+      position: "absolute",
+      top: 0,
+      textAlign: "center",
+      transform: [{ translateX: "-50%" }],
+    },
     /** legend is the plot's key: the ink each series is drawn in, beside its name. */
     legend: { flexDirection: "row" as const, flexWrap: "wrap" as const, gap: t.space.md },
     legendItem: {
@@ -67,7 +80,10 @@ export const kitStyles = (t: Theme) =>
       backgroundColor: t.color.textMuted,
     },
     chartColumn: { flex: 1, height: "100%", flexDirection: "row" },
-    chartLabels: { flexDirection: "row", gap: t.space.sm, paddingTop: t.space.sm },
+    // A category label is centred in the column it names, so the gap between
+    // columns belongs to the plot and does not slide the names inward.
+    chartLabels: { flexDirection: "row", paddingTop: t.space.sm },
+    chartLabel: { flex: 1, alignItems: "center" },
     // A browser is where a kit is looked at, and a sheet opened there is a phone's
     // surface on a desk: it keeps a phone's column and lets the canvas show around
     // it, the way every specimen in the gallery does. Left unbounded it stretched
