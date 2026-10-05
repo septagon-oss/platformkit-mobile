@@ -33,6 +33,17 @@ export interface ChartInput {
 function precision(n: number, v: Validation) {
   v.need(Number.isInteger(n) && n >= 0 && n <= 6, "fractionDigits", "unsupported-format");
 }
+/**
+ * zeroRule says where the line a bar or an area is measured from sits in a plot,
+ * as the same 0 (top) to 1 (bottom) fraction the tick positions use — and says
+ * nothing at all when there is no scale yet. A plot with no measurements has no
+ * zero to stand its marks on.
+ */
+const zeroRule = (y: ((value: number) => number) | undefined): number | undefined => {
+  if (!y) return undefined;
+  const at = y(0);
+  return at >= 0 && at <= 1 ? at : undefined;
+};
 function domain(
   values: readonly number[],
   supplied: readonly [number, number] | undefined,
@@ -205,7 +216,7 @@ function chart(input: ChartInput, p: Presentation, areaChart: boolean, spark: bo
       emptyLabel: p.copy.kit.noSamples,
       xDomain,
       yDomain,
-      baseline: y ? y(0) : undefined,
+      zero: zeroRule(y),
       xTicks: x ? x.ticks(5).map((value) => ({ position: x(value), label: xText(value) })) : [],
       yTicks: y ? y.ticks(5).map((value) => ({ position: y(value), label: format(value) })) : [],
       selectionIssue:
@@ -271,6 +282,8 @@ export function deriveBars(input: BarInput, p: Presentation) {
     const finite = data.series.flatMap((s) =>
       Object.values(s.values).filter((n): n is number => n !== null),
     );
+    const format = (value: number) =>
+      `${new Intl.NumberFormat(p.locale, { minimumFractionDigits: input.fractionDigits, maximumFractionDigits: input.fractionDigits }).format(value)} ${input.unitLabel}`;
     const yDomain =
       finite.length || input.yDomain ? domain(finite, input.yDomain, true, "y", v) : undefined;
     const y = yDomain ? scaleLinear().domain(yDomain).range([1, 0]) : undefined;
@@ -300,16 +313,16 @@ export function deriveBars(input: BarInput, p: Presentation) {
       empty: !finite.length,
       emptyLabel: p.copy.kit.noSamples,
       yDomain,
-      baseline: y ? y(0) : undefined,
+      zero: zeroRule(y),
+      // The plot draws its own scale: a bar with no numbers beside it cannot be
+      // read as anything but a taller or shorter shape.
+      yTicks: y ? y.ticks(5).map((value) => ({ position: y(value), label: format(value) })) : [],
       categories: data.categories.map((c) => ({
         ...c,
         selected: input.selectedCategoryId === c.id,
         values: data.series.map((s) => {
           const value = s.values[c.id] ?? null;
-          const text =
-            value === null
-              ? p.copy.kit.missing
-              : `${new Intl.NumberFormat(p.locale, { minimumFractionDigits: input.fractionDigits, maximumFractionDigits: input.fractionDigits }).format(value)} ${input.unitLabel}`;
+          const text = value === null ? p.copy.kit.missing : format(value);
           return {
             seriesId: s.id,
             label: s.label,

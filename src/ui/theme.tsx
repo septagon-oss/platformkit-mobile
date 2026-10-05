@@ -6,6 +6,7 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { Platform, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
 import { alpha, mix, type AAKind } from "../core/color";
+import type { Status } from "../core/shared";
 import { elevation, extent, hit, icon, radius, space, type } from "./scale";
 import { palette, type Mode, type Palette } from "./tokens";
 
@@ -117,6 +118,27 @@ export function themeFor(
 }
 
 /**
+ * statusInk is what a tone looks like when it is drawn rather than written: the
+ * colour a chart's series, a bar or any other mark wears for its tone. The core
+ * decides which tone a value carries; only this function decides the ink, so a
+ * series that says "warning" cannot be blue on one screen and amber on another.
+ */
+export function statusInk(t: Theme, tone: Status["tone"]): string {
+  switch (tone) {
+    case "info":
+      return t.color.statusInfo;
+    case "ok":
+      return t.color.statusOk;
+    case "warning":
+      return t.color.statusWarning;
+    case "danger":
+      return t.color.statusDanger;
+    default:
+      return t.color.textPrimary;
+  }
+}
+
+/**
  * contrastPairs is the registry the theme owes AA to: every role it hands a
  * component, on the surface that role is drawn over, with the minimum the
  * acceptance names. A new role with no row here fails the suite, so an
@@ -177,6 +199,19 @@ export const contrastPairs: readonly [string, string, AAKind][] = [
   ["color.accentDefault", "color.surfacePrimary", "graphic"],
   ["color.statusDanger", "color.surfacePrimary", "graphic"],
   ["color.statusOk", "color.surfacePrimary", "graphic"],
+  // A chart series is a mark whose tone is the only thing saying which series a
+  // bar or a line is, so every ink statusInk can hand out is measured over both
+  // surfaces a plot is drawn on. BarChart.tsx and AreaChart.tsx paint all four.
+  ["color.statusInfo", "color.surfacePrimary", "graphic"],
+  ["color.statusWarning", "color.surfacePrimary", "graphic"],
+  ["color.statusInfo", "color.surfaceCanvas", "graphic"],
+  ["color.statusWarning", "color.surfaceCanvas", "graphic"],
+  ["color.statusOk", "color.surfaceCanvas", "graphic"],
+  ["color.statusDanger", "color.surfaceCanvas", "graphic"],
+  // A bar is measured from zero, so the plot draws the zero line; it is a graphic
+  // a reader needs to tell a bar above nothing from one below it.
+  ["color.textMuted", "color.surfacePrimary", "graphic"],
+  ["color.textMuted", "color.surfaceCanvas", "graphic"],
 ];
 
 const Context = createContext<Theme>(themeFor("light"));

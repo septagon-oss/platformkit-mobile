@@ -7,7 +7,7 @@ import { Text } from "../atoms/Text";
 import { ChoiceChips } from "../molecules/ChoiceChips";
 import { ModelState } from "../molecules/ModelState";
 import { kitStyles } from "../layout";
-import { useStyles, useTheme } from "../theme";
+import { statusInk, useStyles, useTheme } from "../theme";
 export function AreaChart({
   model,
   onRange,
@@ -23,7 +23,10 @@ export function AreaChart({
 }) {
   const s = useStyles(kitStyles),
     t = useTheme();
-  const colors = [t.color.textPrimary, t.color.statusInfo, t.color.statusOk, t.color.statusWarning];
+  // Each series is drawn in the ink of the tone its model carries, so the mark
+  // and the word that names it agree; a second series of the same tone is told
+  // apart by its dash, which the plot below keeps by position.
+  const colors = model.series.map((series) => statusInk(t, series.tone));
   return (
     <View style={s.stack}>
       <ModelState model={model} onRetry={onRetry} />
@@ -39,25 +42,26 @@ export function AreaChart({
         <Text>{model.emptyLabel}</Text>
       ) : (
         <View style={s.chartPlot}>
-          <View style={s.chartAxis}>
+          <View style={s.chartAxis} testID="kit-chart-axis">
             {model.yTicks.map((tick) => (
               <Text
                 key={tick.position}
                 role="caption"
                 tone="muted"
-                style={{ position: "absolute", top: `${tick.position * 100}%`, right: 0 }}
+                style={[s.chartTick, { top: `${tick.position * 100}%` }]}
               >
                 {tick.label}
               </Text>
             ))}
           </View>
           <View style={s.grow}>
-            <View style={s.chart} accessibilityElementsHidden>
+            <View style={s.chart}>
               <Svg
                 width="100%"
                 height="100%"
                 viewBox="-0.03 -0.03 1.06 1.06"
                 preserveAspectRatio="none"
+                accessibilityElementsHidden
               >
                 {model.series.map((series, i) => (
                   <React.Fragment key={series.id}>
@@ -87,6 +91,12 @@ export function AreaChart({
                   </React.Fragment>
                 ))}
               </Svg>
+              {model.zero === undefined ? null : (
+                <View
+                  testID="kit-chart-zero"
+                  style={[s.chartBaseline, { top: `${model.zero * 100}%` }]}
+                />
+              )}
             </View>
             <View style={s.chartTicks}>
               {model.xTicks.map((tick) => (

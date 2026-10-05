@@ -31,5 +31,23 @@ export const kitStyles = (t: Theme) =>
     chartAxis: { height: t.extent.chart, width: t.extent.chartAxis },
     chartPlot: { flexDirection: "row", gap: t.space.sm, alignItems: "stretch" },
     chartTicks: { flexDirection: "row", justifyContent: "space-between", gap: t.space.sm },
+    // A tick label sits on its tick, not below it: half a caption line lifts it
+    // so the value is level with the mark it names rather than starting there.
+    chartTick: {
+      position: "absolute",
+      right: 0,
+      transform: [{ translateY: -t.type.caption.line / 2 }],
+    },
+    // The line a bar is measured from spans the whole plot, gaps between the
+    // category columns included, which is why it is drawn over them, not in them.
+    chartBaseline: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: t.color.textMuted,
+    },
+    chartColumn: { flex: 1, height: "100%", flexDirection: "row" },
+    chartLabels: { flexDirection: "row", gap: t.space.sm, paddingTop: t.space.sm },
     column: { minWidth: t.extent.calendarDay, flex: 1 },
   });

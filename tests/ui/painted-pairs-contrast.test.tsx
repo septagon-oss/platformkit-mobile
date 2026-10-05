@@ -25,6 +25,15 @@ const painted: readonly [string, Role, Role, AAKind][] = [
   ["meter fill", (t) => t.color.accentDefault, (t) => t.color.surfaceMuted, "graphic"],
   ["meter fill, ok", (t) => t.color.statusOk, (t) => t.color.surfaceMuted, "graphic"],
   ["meter fill, warning", (t) => t.color.statusWarning, (t) => t.color.surfaceMuted, "graphic"],
+  // A chart series: BarChart paints each column and AreaChart each line and mark in
+  // statusInk's colour for the tone the model carries, over the page's surface.
+  ["chart series, neutral", (t) => t.color.textPrimary, (t) => t.color.surfaceCanvas, "graphic"],
+  ["chart series, info", (t) => t.color.statusInfo, (t) => t.color.surfaceCanvas, "graphic"],
+  ["chart series, ok", (t) => t.color.statusOk, (t) => t.color.surfaceCanvas, "graphic"],
+  ["chart series, warning", (t) => t.color.statusWarning, (t) => t.color.surfaceCanvas, "graphic"],
+  ["chart series, danger", (t) => t.color.statusDanger, (t) => t.color.surfaceCanvas, "graphic"],
+  // The zero line every bar stands on, in the same muted ink as the numbers naming it.
+  ["chart zero line", (t) => t.color.textMuted, (t) => t.color.surfaceCanvas, "graphic"],
 ];
 
 describe("pairs the shared components paint reach AA", () => {
