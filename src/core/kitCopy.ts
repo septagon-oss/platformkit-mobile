@@ -132,6 +132,11 @@ export const kitEnglish = {
   placePrintRoom: "Print room",
   placeCourtyard: "Courtyard",
   seriesVisitors: "Visitors per hour",
+  seriesPassesSold: "Passes sold",
+  axisHour: "Hour of day",
+  axisVisitors: "Visitors",
+  unitVisitors: "visitors",
+  unitPasses: "passes",
   sourceSpecimen: "Specimen map data",
   audioTour: "Audio tour",
 } as const;
@@ -263,6 +268,11 @@ export const kitPortuguese: KitWords = {
   placePrintRoom: "Sala de gravuras",
   placeCourtyard: "Pátio",
   seriesVisitors: "Visitantes por hora",
+  seriesPassesSold: "Passes vendidos",
+  axisHour: "Hora do dia",
+  axisVisitors: "Visitantes",
+  unitVisitors: "visitantes",
+  unitPasses: "passes",
   sourceSpecimen: "Dados de mapa de exemplo",
   audioTour: "Audioguia",
 };

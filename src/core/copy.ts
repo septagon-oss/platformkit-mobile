@@ -28,6 +28,12 @@ interface Words {
     readonly updatedAt: (instant: string) => string;
   };
   readonly issue: { readonly invalid: string; readonly unsupported: string };
+  /** A disclosure control names what it holds, not how it behaves: "Expand" describes
+   * the control, "Show loading, empty and unavailable examples" describes the screen. */
+  readonly disclosure: {
+    readonly reveal: (what: string) => string;
+    readonly conceal: (what: string) => string;
+  };
   readonly gallery: {
     readonly appearance: string;
     readonly light: string;
@@ -37,6 +43,8 @@ interface Words {
     readonly portuguese: string;
     readonly states: string;
     readonly statesHint: string;
+    /** What the page's state disclosure holds, so its control can name it. */
+    readonly statesContent: string;
     readonly primitives: string;
     readonly locale: string;
     readonly case: string;
@@ -82,6 +90,10 @@ const en: Words = {
     invalid: "This information is not valid.",
     unsupported: "This format is not supported.",
   },
+  disclosure: {
+    reveal: (what) => `Show ${what}`,
+    conceal: (what) => `Hide ${what}`,
+  },
   gallery: {
     appearance: "Appearance",
     light: "Light",
@@ -91,6 +103,7 @@ const en: Words = {
     portuguese: "Português",
     states: "Rich states",
     statesHint: "How this screen reads while it loads, comes up empty or refuses an action.",
+    statesContent: "loading, empty and unavailable examples",
     primitives: "Atoms and molecules",
     locale: "Date and number locale",
     case: "Example",
@@ -133,6 +146,10 @@ const pt: Words = {
     updatedAt: (instant) => `Última atualização: ${instant}`,
   },
   issue: { invalid: "Esta informação não é válida.", unsupported: "Este formato não é suportado." },
+  disclosure: {
+    reveal: (what) => `Mostrar ${what}`,
+    conceal: (what) => `Ocultar ${what}`,
+  },
   gallery: {
     appearance: "Aspeto",
     light: "Claro",
@@ -142,6 +159,7 @@ const pt: Words = {
     portuguese: "Português",
     states: "Estados de conteúdo",
     statesHint: "Como este ecrã se lê enquanto carrega, fica vazio ou recusa uma ação.",
+    statesContent: "exemplos de carregamento, vazio e indisponibilidade",
     primitives: "Átomos e moléculas",
     locale: "Formato de datas e números",
     case: "Exemplo",
@@ -173,6 +191,7 @@ function bundle(language: Language, words: Words): Copy {
       success: Object.freeze(words.state.success),
     }),
     issue: Object.freeze(words.issue),
+    disclosure: Object.freeze(words.disclosure),
     gallery: Object.freeze(words.gallery),
   });
 }

@@ -38,6 +38,11 @@ test("the player page holds one filled verb, its states shut and open", async ()
   // Shut, the fold holds the screen the page stands for and nothing else.
   expect(drawn()).toEqual({ strips: 1, filled: 1, lead: accent });
   // Open, the page's other specimen joins it and one filled verb is still the rule.
-  await fireEvent.press(screen.getByRole("button", { name: presentation.copy.kit.expand }));
+  await fireEvent.press(
+    // The control names what it holds, so the test asks for it by those words.
+    screen.getByRole("button", {
+      name: presentation.copy.disclosure.reveal(presentation.copy.gallery.statesContent),
+    }),
+  );
   expect(drawn()).toEqual({ strips: 2, filled: 1, lead: accent });
 });

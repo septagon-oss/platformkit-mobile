@@ -382,6 +382,7 @@ function Page({
       id: "gallery-page-states",
       title: presentation.copy.gallery.states,
       summary: presentation.copy.gallery.statesHint,
+      reveals: presentation.copy.gallery.statesContent,
       expanded: statesOpen,
       depth: 1,
       enabled: true,

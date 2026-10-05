@@ -427,18 +427,18 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
           tone: "info" as const,
           points:
             state === "one-point"
-              ? [{ id: "p1", x: 7, y: 5 }]
+              ? [{ id: "p1", x: 12, y: 5 }]
               : [
-                  { id: "p1", x: 0, y: 2 },
-                  { id: "p2", x: 1, y: state === "gap" || state === "gaps" ? null : 4 },
-                  { id: "p3", x: 2, y: 3 },
+                  { id: "p1", x: 10, y: 2 },
+                  { id: "p2", x: 11, y: state === "gap" || state === "gaps" ? null : 4 },
+                  { id: "p3", x: 12, y: 3 },
                 ],
         },
       ]),
       xKind: "number" as const,
-      xLabel: pt ? "Tempo" : "Time",
-      yLabel: c.quantity,
-      unitLabel: pt ? "itens" : "items",
+      xLabel: c.axisHour,
+      yLabel: c.axisVisitors,
+      unitLabel: c.unitVisitors,
       fractionDigits: 0,
       ranges: [],
     };
@@ -488,6 +488,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             id: "section",
             title: c.details,
             summary: p.copy.gallery.longBody,
+            reveals: c.details,
             expanded: held.expanded ?? state === "expanded",
             depth: 1,
             enabled: true,
@@ -642,7 +643,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       summary: v.take(
         deriveSummary(
           {
-            lines: [{ id: "summary-1", label: c.seriesVisitors, amount: unit }],
+            lines: [{ id: "summary-1", label: c.specimenPass, amount: unit }],
             adjustments: [],
             currency,
             kind: "receipt",
@@ -728,19 +729,19 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                     label: c.seriesVisitors,
                     tone: "info",
                     points: [
-                      { id: "a", x: 0, y: 4 },
-                      { id: "b", x: 1, y: 8 },
-                      { id: "c", x: 2, y: 6 },
+                      { id: "a", x: 10, y: 4 },
+                      { id: "b", x: 11, y: 8 },
+                      { id: "c", x: 12, y: 6 },
                     ],
                   },
                   {
                     id: "series-2",
-                    label: choice.choices[1]!.label,
+                    label: c.seriesPassesSold,
                     tone: "ok",
                     points: [
-                      { id: "d", x: 0, y: 2 },
-                      { id: "e", x: 1, y: 3 },
-                      { id: "f", x: 2, y: 5 },
+                      { id: "d", x: 10, y: 2 },
+                      { id: "e", x: 11, y: 3 },
+                      { id: "f", x: 12, y: 5 },
                     ],
                   },
                 ]),
@@ -758,12 +759,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 { id: "b", label: choice.choices[1]!.label },
               ],
               series: [
-                { id: "values", label: c.seriesVisitors, tone: "info", values: { a: -2, b: 5 } },
+                { id: "values", label: c.seriesPassesSold, tone: "info", values: { a: 3, b: 5 } },
               ],
             }),
-            xLabel: chartInput.xLabel,
-            yLabel: chartInput.yLabel,
-            unitLabel: chartInput.unitLabel,
+            xLabel: c.axisHour,
+            yLabel: c.seriesPassesSold,
+            unitLabel: c.unitPasses,
             fractionDigits: 0,
             ranges: [],
           },
