@@ -1,15 +1,15 @@
 # Shared mobile components specification
 
-Status: implementation round 2 for T-0180, 2026-09-30. Every named family now has
-public core factories and native component source; the implementation inventory
-below is separate from native acceptance. The inspected baseline is
+Status: current as at 2026-09-30. Every named family has public core factories
+and native component source; the implementation inventory below is separate from
+native acceptance. The inspected baseline is
 `2d56f1a36486fa4353dbc7afdfa64707073e47af`. No catalog, HTTP endpoint or database
 schema changed. The native dependencies/configuration change the binary fingerprint.
 
 ## Implementation status: shared families
 
-Round 2 adds the missing factory/component families through the public source
-subpaths. `ResourceList` delegates to `deriveCatalogList`/`DataList`, with native
+Every factory and component family below is reached through a public source
+subpath. `ResourceList` delegates to `deriveCatalogList`/`DataList`, with native
 SectionList owned by ListScreen. `Activity` accepts its derived model; the generated
 screen adapts raw authorized events/names and samples the clock. Existing payloads
 still supply no before/after schema and therefore produce no invented changes.
@@ -63,8 +63,8 @@ require `label` and `motion`; `retry` requires `(feedback, onPress)` and is owne
 by core (its old Notice export path re-exports that function). `ListScreen`,
 `LoadMore`, `Home`, `ResourceList`, `ResourceDetail`, `ResourceForm`, `SignInForm`
 receive a required `feedback` value from `deriveFeedback` in that slice.
-Round 2 replaces `ResourceList.feedback` with `presentation` and moves Activity
-to its required `model`, as recorded above.
+`ResourceList` takes `presentation` in place of a lone `feedback` value, and
+Activity takes its required `model`, as recorded above.
 Generated screen compositions supply that value through `useFeedback`, which
 starts with reduced motion and subscribes to native preference changes. Custom
 renderers can choose EN/PT independently through `deriveCopy` and supply their
