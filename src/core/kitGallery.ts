@@ -371,14 +371,17 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         },
       ]),
       view:
-        state === "agenda"
+        state === "agenda" || state === "range"
           ? ("agenda" as const)
           : state === "dst-short" || state === "dst-long"
             ? ("day" as const)
             : ("week" as const),
       anchorDate: calendarDate,
       selectedDate: calendarDate,
-      agendaEndDate: Temporal.PlainDate.from(calendarDate).add({ days: 7 }).toString(),
+      // The agenda the page leads with reaches the next two days: what is coming,
+      // with one empty day on either side of it, which is what a plan is read for.
+      // The whole week is the page's other view, not its first screen.
+      agendaEndDate: Temporal.PlainDate.from(calendarDate).add({ days: 2 }).toString(),
     };
     const images = [
       {
