@@ -40,6 +40,7 @@ export const kitCaseIds = [
   "action-bar/busy",
   "action-bar/disabled",
   "model-state/loading",
+  "model-state/empty",
   "data-list/grouped",
   "data-list/collapsed",
   "data-list/selection-some",
@@ -169,7 +170,20 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       tone: "secondary",
       state: "ready",
     };
-    const empty = v.take(deriveState({ kind: "empty" }, p));
+    // An empty collection that offers the verb which would fill it is the state
+    // a person can act on; one that only says so is a notice.
+    const empty = v.take(
+      deriveState(
+        {
+          kind: "empty",
+          action: {
+            intent: "next",
+            control: { id: "add", label: p.copy.gallery.add, tone: "primary", state: "ready" },
+          },
+        },
+        p,
+      ),
+    );
     const sample = <T>(value: T): Content<T> =>
       state === "loading"
         ? { phase: "loading" }
@@ -498,8 +512,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         deriveDisclosure(
           {
             id: "section",
-            title: c.details,
-            summary: p.copy.gallery.longBody,
+            // A section named "Full details" with a paragraph of guidance under it
+            // is a shape with nothing in it: the section is about the pass, so it
+            // says the pass's name and one true line about it, and the verb that
+            // opens it still says what the person will see.
+            title: name,
+            summary: c.detailBody,
             reveals: c.details,
             expanded: held.expanded ?? state === "expanded",
             depth: 1,

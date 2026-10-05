@@ -61,6 +61,10 @@ export const kitEnglish = {
   allDay: "All day",
   continues: "Continues",
   moreEvents: "More events",
+  // Seven days do not fit a phone's column, so the week is drawn sideways. The row
+  // says so, because a column that ends mid-Tuesday reads as a broken table rather
+  // than as the first part of a week.
+  weekSideways: "Swipe sideways for the rest of the week",
   noEvents: "No events",
   estimate: "Estimate",
   price: "Price",
@@ -223,6 +227,7 @@ export const kitPortuguese: KitWords = {
   allDay: "Todo o dia",
   continues: "Continua",
   moreEvents: "Mais eventos",
+  weekSideways: "Deslize para o lado para ver o resto da semana",
   noEvents: "Sem eventos",
   estimate: "Estimativa",
   price: "Preço",

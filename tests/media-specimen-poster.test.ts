@@ -60,10 +60,7 @@ test("a scene a specimen names is drawn, in its slot, in the kit's colour", () =
       `${name}: the kit's own colour is in the picture`,
     );
     for (const mark of scene!.marks) {
-      assert.ok(
-        mark.left >= 0 && mark.left + mark.width <= 1,
-        `${name}: ${mark.id} horizontally`,
-      );
+      assert.ok(mark.left >= 0 && mark.left + mark.width <= 1, `${name}: ${mark.id} horizontally`);
       assert.ok(
         mark.top >= 0 && mark.top + (mark.height ?? mark.width) <= 1,
         `${name}: ${mark.id} vertically`,

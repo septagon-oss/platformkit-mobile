@@ -127,14 +127,17 @@ export const galleryPages = {
       "slot-option/full",
     ],
   },
+  // A state is met by doing something about it, so the screen opens on the one
+  // state a person can act on — a collection with nothing in it and the verb that
+  // fills it — and the measures, which say how far something has come, follow.
   states: {
-    lead: "progress-meter/fraction",
+    lead: "model-state/empty",
     cases: [
+      "model-state/empty",
+      "model-state/loading",
       "progress-meter/fraction",
       "progress-meter/percent",
-      "progress-meter/steps",
       "progress-meter/unmeasured",
-      "model-state/loading",
     ],
   },
   player: {

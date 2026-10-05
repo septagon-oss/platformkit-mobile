@@ -622,9 +622,7 @@ function SpecimenPoster(props: ImageSlotProps & { readonly caption?: boolean }) 
   const t = useTheme();
   const s = useStyles(styles);
   const scene = props.scene ? sceneFor(props.scene) : undefined;
-  const poster = scene
-    ? { layout: scene.name, marks: scene.marks }
-    : posterFor(props.id);
+  const poster = scene ? { layout: scene.name, marks: scene.marks } : posterFor(props.id);
   const fill: Record<PosterMark["tone"], string> = {
     accent: t.color.accentDefault,
     ink: t.color.borderStrong,
@@ -961,6 +959,8 @@ function KitSamples({
       return (
         <WeekCalendar
           model={k.calendar.week}
+          navigation={k.calendar.strip.navigation}
+          onNavigate={send}
           onDate={action}
           onEvent={action}
           onMoreEvents={send}

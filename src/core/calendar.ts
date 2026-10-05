@@ -287,7 +287,11 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
       !days.some((d) => d.events.some((e) => e.id === input.selectedEventId))
         ? issue(p, "selectedEventId", "unavailable")
         : undefined;
-    const week = { ...base, days, selectionIssue };
+    // Seven days do not fit a phone's column, so the kit draws them sideways.
+    // The row says so in words: a grid that ends mid-Tuesday reads as a broken table
+    // rather than as the first part of a week, which is what a person scrolling
+    // sideways needs to know before they try it.
+    const week = { ...base, days, selectionIssue, sideways: p.copy.kit.weekSideways };
     const agenda = {
       ...week,
       more: input.page ? pageControl(input.page, v, input.content.phase === "ready") : undefined,

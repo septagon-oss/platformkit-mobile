@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, View } from "react-native";
-import { calendarTargets, type WeekModel } from "../../core/derive";
+import { calendarTargets, type CalendarModel, type WeekModel } from "../../core/derive";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 import { Badge } from "../atoms/Badge";
@@ -15,13 +15,49 @@ export interface Props {
     readonly date: string;
     readonly eventIds: readonly string[];
   }) => void;
+  /**
+   * navigation is the week's own reach — the same three verbs a day strip is
+   * given. Seven days do not fit a phone's column, so the grid is drawn sideways;
+   * without the verbs beside it the row simply stops at the edge of the surface
+   * and the days past that edge look lost rather than one scroll away.
+   */
+  readonly navigation?: CalendarModel["navigation"];
+  readonly onNavigate?: (range: {
+    readonly startDate: string;
+    readonly endDate: string;
+    readonly selectedDate: string;
+  }) => void;
 }
-export function WeekCalendar({ model, onDate, onEvent, onMoreEvents }: Props) {
+const steps: readonly (keyof CalendarModel["navigation"])[] = ["previous", "today", "next"];
+export function WeekCalendar({
+  model,
+  navigation,
+  onNavigate,
+  onDate,
+  onEvent,
+  onMoreEvents,
+}: Props) {
   const s = useStyles(kitStyles),
     t = useTheme();
   return (
     <ScrollView style={s.grow} contentContainerStyle={s.stack}>
       <ModelState model={model} />
+      {navigation ? (
+        <View style={s.row}>
+          {steps.map((key) => (
+            <Button
+              key={key}
+              label={navigation[key].label}
+              tone="secondary"
+              disabled={!navigation[key].enabled}
+              onPress={() => {
+                const step = navigation[key];
+                if (step.enabled) onNavigate?.(step.target);
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
       <ScrollView horizontal>
         <View style={s.row}>
           {model.days.map((day) => (
@@ -118,6 +154,11 @@ export function WeekCalendar({ model, onDate, onEvent, onMoreEvents }: Props) {
           ))}
         </View>
       </ScrollView>
+      {model.sideways ? (
+        <Text role="caption" tone="muted">
+          {model.sideways}
+        </Text>
+      ) : null}
     </ScrollView>
   );
 }
