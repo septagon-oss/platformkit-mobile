@@ -6,8 +6,11 @@
 #
 # The spec list is the directory, never a list beside it — platformkit's
 # scripts/mobile_e2e.sh:209-227 reads its flows from the manifest it declares and
-# says why. Reading the directory is only honest because scripts/check_flows.ts
-# refuses a flow in it that names no screen, a screen no flow names, a testID
+# says why. Maestro reads the directory's own `config.yaml` while it plans, so
+# the directory run takes whatever that selection keeps, and nothing else keeps
+# its own list either. Reading the directory is only honest because
+# scripts/check_flows.ts plans the same selection and refuses a flow in it that
+# names no screen, a screen no planned flow names, a testID
 # no component sets, and a folder holding a journey Maestro's planner would skip;
 # that is what `npm run check` proves about the directory.
 #

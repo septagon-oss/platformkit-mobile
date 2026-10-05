@@ -458,9 +458,13 @@ components, the shell, the route dispatcher and the screen hooks),
 the workspace's own `config.yaml` aside: Maestro's planner keeps what the
 workspace's `flows:` glob matches and its default is `*`, a name and not a path,
 so the gate refuses a folder that holds a journey rather than count coverage no
-run makes; every id one of them names is a testID a
-component sets, every route screen under `app/` is named by some flow's
-`# screen:` header, and every flow names the screen it proves) and
+run makes. The configuration narrows the count the way it narrows the run: a
+journey `flows:` or `excludeFlows:` leaves out covers nothing, and a field the
+gate cannot apply — a scalar where a list belongs, a filter pointing at no file
+beside it, a `tags:` read out of each flow's own header — is refused by name
+rather than read as agreement; every id one of them
+names is a testID a component sets, every route screen under `app/` is named by
+some flow's `# screen:` header, and every flow names the screen it proves) and
 `check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the

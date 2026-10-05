@@ -128,8 +128,8 @@ jobs:
         # a directory, so the set is asked for from the same gate rather than globbed
         # here: check_flows.ts --list answers with the journeys `maestro test
         # e2e/flows` will run, at either YAML spelling and in that directory
-        # itself — a journey in a folder is refused, because Maestro plans none
-        # there. A step verb
+        # itself, the directory's own `config.yaml` selection applied — a journey
+        # in a folder is refused, because Maestro plans none there. A step verb
         # Maestro does not know is a refusal at this line and not forty emulator
         # minutes later.
         run: |

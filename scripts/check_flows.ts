@@ -23,6 +23,18 @@ const STEPS = /^---\s*$/;
 const FLOW_FILE = /\.ya?ml$/;
 /** workspaceConfig is the file Maestro reads as the workspace's configuration rather than as a journey. */
 const WORKSPACE_CONFIG = new Set(["config.yaml", "config.yml"]);
+/**
+ * READABLE are the fields of Maestro's own workspace configuration
+ * (maestro.orchestra.model.MaestroWorkspaceConfig) this gate can apply: a
+ * label, and the two path filters it can match against a set of file names.
+ * `tags` is deliberately absent — a tag lives in each flow's own header, so a
+ * tag filter is answered by reading every flow as Maestro would, and a gate that
+ * pretended otherwise would count coverage on journeys it never planned. So the
+ * one rule below refuses any field it cannot apply, by its name.
+ */
+const READABLE = new Set(["name", "flows", "excludeFlows"]);
+/** The two fields the plan is built from. */
+const FILTERS = ["flows", "excludeFlows"] as const;
 
 function files(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
@@ -82,18 +94,70 @@ function header(text: string): string {
 /**
  * flowFiles are the journeys a `maestro test e2e/flows` run will execute, as
  * paths under e2e/flows: every yaml file at either spelling in that directory
- * itself, minus the workspace's own configuration. One directory, because that is
- * what Maestro plans: its workspace planner keeps what the `flows:` glob matches,
- * and the default glob is `*` — a name in the workspace, not a path below it
- * (measured against maestro-cli-2.8.0: planned with no configuration file, a
- * workspace holding home.yaml, extra.yml and nested/deep.yaml yields the first
- * two) — and this repository ships no workspace config to widen it. The set is
- * what the coverage rule counts and what the CI job hands to
+ * itself — the workspace's own configuration aside — narrowed by what that
+ * configuration says to run. One directory, because that is what Maestro plans:
+ * its workspace planner keeps what the `flows:` glob matches, and the default
+ * glob is `*` — a name in the workspace, not a path below it (measured against
+ * maestro-cli-2.8.0: planned with no configuration file, a workspace holding
+ * home.yaml, extra.yml and nested/deep.yaml yields the first two).
+ *
+ * The narrowing matters as much as the walk. `maestro test e2e/flows` reads
+ * `config.yaml` from that directory whether or not anyone told it to, so a
+ * workspace that names a subset runs a subset — and a gate that counted the
+ * files beside it would report a screen covered by a journey no run takes.
+ * The set here is what the coverage rule counts and what the CI job hands to
  * `maestro check-syntax`, so the runner, the gate and the job read one list — a
  * flow outside it is a journey no rule answers for, which is why a folder that
  * holds one is refused below.
  */
 export function flowFiles(root: string): string[] {
+  return workspacePlan(root).files;
+}
+
+/**
+ * workspacePlan applies the flow directory's own configuration the way
+ * Maestro's planner does, and says what it could not apply. A selection it
+ * cannot read is a refusal, never an empty plan: a gate that guessed would
+ * count coverage on a set of journeys it does not know it is not running.
+ */
+export function workspacePlan(root: string): { files: string[]; problems: string[] } {
+  const all = journeys(root);
+  const at = path.join(root, FLOWS);
+  const named = [...WORKSPACE_CONFIG].filter((c) => existsSync(path.join(at, c)));
+  if (named.length === 0) return { files: all, problems: [] };
+  if (named.length > 1)
+    return {
+      files: all,
+      problems: [
+        `${named[0]}: ${named.join(" and ")} both configure this workspace, and which one Maestro reads is not a guess this gate gets to make`,
+      ],
+    };
+  const config = named[0]!;
+  const text = readFileSync(path.join(at, config), "utf8");
+  const problems: string[] = [];
+  for (const field of fields(text))
+    if (!READABLE.has(field))
+      problems.push(
+        `${config}: ${field} is no workspace field this gate can read, so it cannot name the journeys Maestro plans`,
+      );
+  let files = all;
+  for (const field of FILTERS) {
+    const list = filterList(text, field);
+    if (list.problem) problems.push(`${config}: ${list.problem}`);
+    if (!list.entries) continue;
+    for (const entry of list.entries)
+      if (!all.some((f) => matches(entry, f)))
+        problems.push(`${config}: ${field} names ${entry}, which is no journey in ${FLOWS}`);
+    files =
+      field === "flows"
+        ? files.filter((f) => list.entries!.some((e) => matches(e, f)))
+        : files.filter((f) => !list.entries!.some((e) => matches(e, f)));
+  }
+  return { files, problems };
+}
+
+/** journeys are the yaml files in the flow directory itself, configuration aside, before any selection narrows them. */
+function journeys(root: string): string[] {
   const at = path.join(root, FLOWS);
   if (!existsSync(at)) return [];
   return readdirSync(at, { withFileTypes: true })
@@ -101,6 +165,72 @@ export function flowFiles(root: string): string[] {
     .map((d) => d.name)
     .filter((f) => FLOW_FILE.test(f) && !WORKSPACE_CONFIG.has(f))
     .sort();
+}
+
+/** fields are the configuration's top-level keys: a word at column zero followed by a colon. */
+function fields(text: string): string[] {
+  return [...text.matchAll(/^([A-Za-z][\w-]*):/gm)].map((m) => m[1]!);
+}
+
+/**
+ * filterList reads one of the two path filters: a block list of `- name` lines
+ * or the flow form `[name, name]`, each entry optionally quoted. Anything else
+ * after the key — a scalar, a nested map, an entry that is not an entry — is
+ * said back as the problem, because a filter the gate cannot read is a filter it
+ * cannot apply, and a plan built without it is a plan nobody runs.
+ */
+function filterList(text: string, field: string): { entries?: string[]; problem?: string } {
+  const lines = text.split(/\r?\n/);
+  const at = lines.findIndex((line) => line.startsWith(`${field}:`));
+  if (at < 0) return {};
+  const rest = lines[at]!.slice(field.length + 1).trim();
+  if (rest.startsWith("[") && rest.endsWith("]") && !rest.slice(1, -1).includes("["))
+    return { entries: split(rest.slice(1, -1)) };
+  if (rest !== "" && !rest.startsWith("#"))
+    return { problem: `${field} is no list this gate can read: ${rest}` };
+  const entries: string[] = [];
+  for (const line of lines.slice(at + 1)) {
+    if (/^\s*(#.*)?$/.test(line)) continue;
+    const item = /^\s+-\s+(.*\S)(?:\s+#.*)?$/.exec(line);
+    // The list ends where the next field begins; anything else in its place is a
+    // shape the gate will not guess at.
+    if (!item)
+      return /^[A-Za-z]/.test(line)
+        ? { entries }
+        : { problem: `${field} holds "${line.trim()}", which is no list entry` };
+    entries.push(item[1]!.replace(/^["']|['"]$/g, ""));
+  }
+  return { entries };
+}
+
+/** split reads the entries of `[a, b]`, quoted or not, and drops the blanks. */
+function split(list: string): string[] {
+  return list
+    .split(",")
+    .map((e) => e.trim().replace(/^["']|['"]$/g, ""))
+    .filter((e) => e !== "");
+}
+
+/**
+ * matches answers whether one filter entry takes a journey: a plain name by
+ * equality, a glob with `*` and `?` stopping at a `/` and `**` crossing one —
+ * the shapes a path filter spells, and the reason a nested entry is worth
+ * spelling: it matches nothing here, because this gate walks one directory, so
+ * the entry that names it is refused above as naming no journey.
+ */
+function matches(entry: string, file: string): boolean {
+  if (!/[*?]/.test(entry)) return entry === file;
+  let source = "";
+  for (let i = 0; i < entry.length; i += 1) {
+    const c = entry[i]!;
+    if (c === "*") {
+      const across = entry[i + 1] === "*";
+      if (across) i += 1;
+      source += across ? ".*" : "[^/]*";
+    } else if (c === "?") source += "[^/]";
+    else source += c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+  return new RegExp(`^${source}$`).test(file);
 }
 
 /**
@@ -141,16 +271,19 @@ export function screenClaims(root: string): Map<string, string[]> {
 }
 
 export function checkFlows(root: string): string[] {
-  const problems: string[] = [];
   const ids = knownIDs(root);
   const flowsAt = path.join(root, FLOWS);
-  // First the shape of the directory: a folder in it is where journeys go to be
+  // First what the workspace itself says to run: a selection the gate cannot
+  // read makes every count below a count of the wrong set.
+  const plan = workspacePlan(root);
+  const problems: string[] = [...plan.problems];
+  // Then the shape of the directory: a folder in it is where journeys go to be
   // skipped, and every count below would otherwise include what they claim.
   for (const dir of flowFolders(root))
     problems.push(
       `${dir}: a journey in a folder is one Maestro never plans — its default workspace glob is * — so what sits here runs nowhere`,
     );
-  for (const f of flowFiles(root)) {
+  for (const f of plan.files) {
     const text = readFileSync(path.join(flowsAt, f), "utf8");
     if (!new RegExp(`^\\s*APP_ID: ${APP_ID.replace(/\./g, "\\.")}$`, "m").test(text))
       problems.push(`${f}: does not name ${APP_ID} as APP_ID`);
