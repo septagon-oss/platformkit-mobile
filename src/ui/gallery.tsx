@@ -888,23 +888,31 @@ function KitSamples({
           onSaveAndExit={() => action("save-exit")}
           onReconcile={() => action("reconcile")}
         >
-          {/* The stage asks for a time, so a time is what stands under its name —
-              before the verbs that move past it, not below them. */}
-          <View>
-            <Text role="title" accessibilityRole="header">
-              {k.stepper.steps.find((step) => step.selected)?.label ?? c.stepVisit}
-            </Text>
-            {k.slots.slots.slice(0, 2).map((option) => (
-              <SlotOption
-                key={option.id}
-                model={option}
-                onSelect={(id) => {
-                  setHeld({ ...held, slot: id });
-                  send(id);
-                }}
-              />
-            ))}
-          </View>
+          {(() => {
+            // A stage is drawn with the thing it asks for, before the verbs that
+            // move past it. The specimens speak of one task, and the stage that
+            // asks when is the one that shows the times on offer; a stage that
+            // asks who is coming shows the visit, not a slot grid.
+            const stage = k.stepper.steps.find((step) => step.selected);
+            if (stage?.label !== c.stepVisit) return details;
+            return (
+              <View>
+                <Text role="title" accessibilityRole="header">
+                  {stage.label}
+                </Text>
+                {k.slots.slots.slice(0, 2).map((option) => (
+                  <SlotOption
+                    key={option.id}
+                    model={option}
+                    onSelect={(id) => {
+                      setHeld({ ...held, slot: id });
+                      send(id);
+                    }}
+                  />
+                ))}
+              </View>
+            );
+          })()}
         </Stepper>
       );
     case "slot-option":
