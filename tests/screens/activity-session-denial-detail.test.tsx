@@ -1,3 +1,5 @@
+// A 401 on the audit read is a refused request, not an empty page: the detail withdraws the
+// history it had shown and offers no write the refused session could not make.
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";

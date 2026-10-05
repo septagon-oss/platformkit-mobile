@@ -1,3 +1,6 @@
+// Redaction and denial reach an audit trail in different shapes: a redacted change keeps its
+// row and loses its value, a denied trail loses the row, the private value and the right to
+// page. One shape for both would let withheld history read as an empty one.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

@@ -1,3 +1,7 @@
+// An activity row may name its actor only from the directory snapshot read with it. Once that
+// snapshot is withdrawn the row falls back to the raw id, and a later lookup cannot rewrite a
+// row another caller already derived: a carried-over name would show a person to someone who
+// just lost the right to see them.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { deriveCopy, deriveEventActivity, type EventTrail } from "../src/core/derive";

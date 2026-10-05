@@ -1,3 +1,6 @@
+// Paging a trail while a directory refusal is in flight cannot interleave a name back in.
+// Whatever order the responses arrive in, the rows lose their actor enrichment and the screen
+// keeps a reachable way to load them again.
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";

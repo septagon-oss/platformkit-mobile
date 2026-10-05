@@ -1,3 +1,5 @@
+// A cart that lost its content or its quote says so: denied lines disappear, and an expired or
+// still-being-written quote has no submit control to press.
 import React from "react";
 import { View } from "react-native";
 import { expect, jest, test } from "@jest/globals";
@@ -58,7 +60,7 @@ test.each([
       if (!model.ok) throw new Error(JSON.stringify(model.issues));
       return (
         <ThemeProvider mode={mode}>
-          <View testID="review-cart">
+          <View testID="cart-surface">
             <Cart
               model={model.value}
               onCheckout={onCheckout}
@@ -99,7 +101,7 @@ test.each([
       if (!state.ok) throw new Error(JSON.stringify(state.issues));
       await screen.rerender(view({ ...input, content: { phase: "error", state: state.value } }));
       // The outer container establishes reachability without depending on refusal output.
-      expect(screen.getByTestId("review-cart")).toBeOnTheScreen();
+      expect(screen.getByTestId("cart-surface")).toBeOnTheScreen();
       expect(screen.queryByText("Paper print", { includeHiddenElements: true })).toBeNull();
       expect(
         screen.queryByRole("button", { name: "Checkout", includeHiddenElements: true }),

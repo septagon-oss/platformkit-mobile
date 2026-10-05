@@ -1,3 +1,5 @@
+// A withdrawn list does not keep the controls of the list it replaced: selection and bulk
+// actions go with it, and coming back needs an explicit selection rather than a guess.
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
@@ -48,7 +50,7 @@ test.each([
         <ThemeProvider mode={mode}>
           <DataList
             model={derived.value}
-            testID="review-list"
+            testID="list-surface"
             onBulkAction={onBulkAction}
             onSelection={onSelection}
             onMore={onMore}
@@ -72,7 +74,7 @@ test.each([
       if (!state.ok) throw new Error(JSON.stringify(state.issues));
       await screen.rerender(view({ ...input, content: { phase: "error", state: state.value } }));
       // Reach the assertions through the list container, independently of refusal copy.
-      expect(screen.getByTestId("review-list")).toBeOnTheScreen();
+      expect(screen.getByTestId("list-surface")).toBeOnTheScreen();
       expect(screen.queryByText("Record A", { includeHiddenElements: true })).toBeNull();
       expect(screen.queryByRole("checkbox", { name: `${p.copy.kit.select}: Record A` })).toBeNull();
       for (const name of ["Archive", p.copy.kit.more]) {

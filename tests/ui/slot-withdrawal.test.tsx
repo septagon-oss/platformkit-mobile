@@ -1,3 +1,5 @@
+// A slot whose availability was withdrawn cannot be selected, kept selected or confirmed until
+// a usable snapshot returns and echoes its own version.
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";

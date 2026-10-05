@@ -1,3 +1,5 @@
+// Recovery keeps what is already true: the loader stays while it is genuinely loading, and a
+// selection the viewer abandoned stays abandoned until its own read succeeds.
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
@@ -57,7 +59,7 @@ test("viewer recovery retains the active loader without reviving an abandoned se
               model={model}
               resource={{
                 id: model.id,
-                scope: "review-session",
+                scope: "viewer-session",
                 version: "image-rev-3",
                 uri: `https://images.example.test/${model.id}`,
               }}

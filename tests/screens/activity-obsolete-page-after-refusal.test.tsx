@@ -1,3 +1,5 @@
+// A page requested before a refusal must not repopulate the trail after it. The current refusal
+// stands, and only a fresh read from the start restores history and identity.
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";

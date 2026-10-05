@@ -1,3 +1,5 @@
+// A step write with an unknown outcome keeps what the person typed and offers reconciliation
+// only: no second submit, no advance, no discarded draft.
 import React, { useState } from "react";
 import { View } from "react-native";
 import { expect, jest, test } from "@jest/globals";
@@ -12,7 +14,7 @@ function DraftField() {
   const [value, setValue] = useState("");
   return (
     <TextField
-      testID="review-step-draft"
+      testID="step-draft-input"
       accessibilityLabel="Draft"
       value={value}
       onChangeText={setValue}
@@ -89,7 +91,7 @@ test.each([
       if (!model.ok) throw new Error(JSON.stringify(model.issues));
       return (
         <ThemeProvider mode={mode}>
-          <View testID="review-stepper">
+          <View testID="stepper-surface">
             <Stepper model={model.value} {...callbacks}>
               <DraftField />
             </Stepper>
@@ -98,7 +100,7 @@ test.each([
       );
     };
     await render(view("editing"));
-    await fireEvent.changeText(screen.getByTestId("review-step-draft"), "Retained input 47");
+    await fireEvent.changeText(screen.getByTestId("step-draft-input"), "Retained input 47");
     await fireEvent.press(screen.getByRole("button", { name: labels.save }));
     expect(callbacks.onSaveAndExit).toHaveBeenCalledTimes(1);
     callbacks.onSaveAndExit.mockClear();
@@ -107,8 +109,8 @@ test.each([
       for (const phase of ["saving-exit", "write-unknown", "submitting", "finished"] as const) {
         await screen.rerender(view(phase, currentId));
         // The independent shell and retained field establish reachability before refusals.
-        expect(screen.getByTestId("review-stepper")).toBeOnTheScreen();
-        expect(screen.getByTestId("review-step-draft").props.value).toBe("Retained input 47");
+        expect(screen.getByTestId("stepper-surface")).toBeOnTheScreen();
+        expect(screen.getByTestId("step-draft-input").props.value).toBe("Retained input 47");
         expect(screen.getByText(p.copy.kit.unsaved)).toBeOnTheScreen();
         for (const button of screen.getAllByRole("button")) {
           if (button.props.accessibilityLabel === p.copy.state.reconcile) continue;
@@ -133,7 +135,7 @@ test.each([
       }
     }
     await screen.rerender(view("failed", "confirm"));
-    expect(screen.getByTestId("review-step-draft").props.value).toBe("Retained input 47");
+    expect(screen.getByTestId("step-draft-input").props.value).toBe("Retained input 47");
     expect(screen.getByRole("button", { name: labels.finish })).toBeEnabled();
     expect(callbacks.onSaveAndExit).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByRole("button", { name: labels.save }));

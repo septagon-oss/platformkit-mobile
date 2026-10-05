@@ -1,3 +1,6 @@
+// Leaving this route, or replacing the session inside it, ends the enrichment in flight. A
+// directory response that lands afterwards cannot name a row in the new route's trail, even
+// when the event ids are identical.
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";

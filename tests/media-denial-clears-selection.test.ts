@@ -1,3 +1,5 @@
+// A denied media read ends the selection it covered: caption, description and retry stop
+// existing, and nothing the viewer showed from the earlier authorized read is still on screen.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

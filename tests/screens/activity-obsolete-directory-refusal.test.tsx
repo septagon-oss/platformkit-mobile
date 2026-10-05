@@ -1,3 +1,5 @@
+// An old request's refusal says nothing about the current one. When it fails after a newer read
+// has succeeded, the trail keeps its rows and the identities that newer read resolved.
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";

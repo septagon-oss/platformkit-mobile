@@ -1,3 +1,5 @@
+// Coming back from lost pricing needs a press, not a quiet refill, and no plan may keep a value
+// or an offer the current read no longer allows.
 import React from "react";
 import { View } from "react-native";
 import { expect, jest, test } from "@jest/globals";
@@ -61,7 +63,7 @@ test.each([
       if (!model.ok) throw new Error(JSON.stringify(model.issues));
       return (
         <ThemeProvider mode={mode}>
-          <View testID="review-pricing">
+          <View testID="pricing-surface">
             <PlanComparison model={model.value.comparison} {...callbacks} />
           </View>
         </ThemeProvider>
@@ -84,7 +86,7 @@ test.each([
     expect(callbacks.onAction).not.toHaveBeenCalled();
 
     await screen.rerender(view({ ...input, selectedPeriodId: "year" }));
-    expect(screen.getByTestId("review-pricing")).toBeOnTheScreen();
+    expect(screen.getByTestId("pricing-surface")).toBeOnTheScreen();
     expect(screen.queryByRole("button", { name: labels.enrol })).toBeNull();
     const unavailable = screen.getByRole("button", {
       name: `${p.copy.kit.select}: ${labels.plan}`,
@@ -107,7 +109,7 @@ test.each([
       if (!state.ok) throw new Error(JSON.stringify(state.issues));
       await screen.rerender(view({ ...input, content: { phase: "error", state: state.value } }));
       // Reach the mounted surface independently of the refusal's wording or old content.
-      expect(screen.getByTestId("review-pricing")).toBeOnTheScreen();
+      expect(screen.getByTestId("pricing-surface")).toBeOnTheScreen();
       expect(screen.queryByText(labels.plan, { includeHiddenElements: true })).toBeNull();
       expect(screen.queryByText(labels.value, { includeHiddenElements: true })).toBeNull();
       expect(

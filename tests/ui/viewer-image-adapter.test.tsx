@@ -1,3 +1,6 @@
+// An open viewer keeps the image adapter it chose: the selected photo stays mounted while it
+// loads, and an error or unavailable image offers recovery for that same adapter instead of
+// quietly swapping another one in.
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";

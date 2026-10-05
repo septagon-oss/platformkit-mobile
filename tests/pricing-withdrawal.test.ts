@@ -1,3 +1,6 @@
+// Offers and plan values are facts the caller was allowed to read. When they are withdrawn the
+// table drops them and disables the action rather than substituting another plan or leaving a
+// live button over a value nobody can see.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

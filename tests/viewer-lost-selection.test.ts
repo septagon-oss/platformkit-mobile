@@ -1,3 +1,6 @@
+// The viewer shows the image a person opened, or none. An item removed from the list or newly
+// marked decorative clears the selection with its own refusal instead of advancing to the next
+// item, which would show a different picture under the same caption.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { deriveCopy, deriveViewer, type MediaInput, type MediaItem } from "../src/core/derive";

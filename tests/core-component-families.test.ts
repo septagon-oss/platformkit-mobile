@@ -1,3 +1,5 @@
+// Every component family the shared mobile specification names has a public core factory, so a
+// product that composes a family reaches the same derivation its components use.
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as derive from "../src/core/derive";

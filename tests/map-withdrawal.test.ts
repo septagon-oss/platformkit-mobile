@@ -1,3 +1,6 @@
+// Losing the map is not losing the records. A provider failure keeps the authorized rows and
+// their selection; a denial removes markers, selection and detail text so that no coordinate or
+// title survives a read that stopped being allowed.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

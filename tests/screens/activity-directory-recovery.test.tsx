@@ -1,3 +1,5 @@
+// Recovery must not restore enrichment by halves. After a directory refusal, later pages and a
+// later successful lookup for one actor restore only what the current read authorises.
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";

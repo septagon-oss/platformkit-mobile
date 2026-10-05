@@ -1,3 +1,7 @@
+// A slot may be selected only while the snapshot that checked it is the snapshot in force.
+// Withdrawn availability suppresses selection until a usable one returns, recovery echoes the
+// new version, and a civil time that repeats keeps its own offset so a duplicate label cannot
+// take a slot past its capacity.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

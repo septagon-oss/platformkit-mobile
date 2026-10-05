@@ -1,3 +1,6 @@
+// Denied calendar content leaves every projection — day, week, agenda — with an explicit
+// recovery, and each projection keeps its own bounds: an event that ended before the viewed
+// day empties that day without moving the week around it.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

@@ -1,3 +1,6 @@
+// Two callers derive activity at the same time over equal event ids. Each row keeps the actor
+// named by its own caller's snapshot, and one caller's withdrawal may not empty, rewrite or
+// leak into rows the other already derived.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { deriveCopy, deriveEventActivity, type EventTrail, type Result } from "../src/core/derive";

@@ -1,3 +1,6 @@
+// Checkout exists only for the quote a person is looking at. A withdrawn quote loses the
+// button, a fresh quote restores only its own revision, and a quote still being written is not
+// checkable out even while it reports itself live.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

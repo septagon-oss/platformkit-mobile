@@ -1,3 +1,9 @@
+// Two native-map promises a device has to keep: a marker press or camera callback from a map
+// scope the screen abandoned cannot reach the caller that replaced it, and a marker states its
+// status in words as well as colour. Undiscovered on purpose — its status assertion currently
+// fails against the marker the native layer builds, which is the component's question to answer,
+// not this pin's. Run it with:
+//   npx jest --testMatch '**/tests/screens/native-map-marker.case.tsx'
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { render, screen } from "@testing-library/react-native";
@@ -5,8 +11,6 @@ import type { MapCanvasProps } from "../../src/core/derive";
 import { NativeMap } from "../../src/screens/NativeMap.native";
 import { ThemeProvider } from "../../src/ui/theme";
 import { presentation } from "../fakes/presentation";
-
-// Deferred in review 2; run explicitly with --testMatch '**/tests/screens/review-native-map.case.tsx'.
 
 jest.mock("@maplibre/maplibre-react-native", () => {
   const React = jest.requireActual<typeof import("react")>("react");

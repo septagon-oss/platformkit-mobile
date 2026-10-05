@@ -153,17 +153,54 @@ independence, nested copy-key walk (which widened the narrower comparison it joi
 secondary-intent refusal into three `tests/feedback.test.ts` cases, and its exact-cart-total case
 into `tests/shared-kit.test.ts`'s money case as data.
 
+## What each file says about itself
+
+Decision 0072 asks a reader to learn what a file protects from its name and first comment. Every
+file in the table above that carried no comment at all — and every one this fold renamed, whether or
+not it had one — now opens with two or three lines naming the rule it holds and what breaks without
+it. Nothing else in those files moved.
+
+Fixture identifiers written by the same review rounds moved with them, because they are names a
+person greps: `review-cart` → `cart-surface`, `review-calendar` → `calendar-surface`,
+`review-list` → `list-surface`, `review-map`/`-canvas`/`-detail-` → `map-surface`/`map-canvas`/
+`map-detail-`, `review-pricing` → `pricing-surface`, `review-stepper`/`review-step-draft` →
+`stepper-surface`/`step-draft-input`, and the `review-session` media scope → `viewer-session`. Every
+one is set and read inside one test file; no component, flow or `e2e/flows` id refers to any of them
+(`grep -rn "review-" e2e/` → empty before and after, and `npm run check:flows` still answers
+“every id is a testID a component sets”).
+
+The two manual `.case.tsx` pins said “Deferred in review 2” and named the file's own old path. They
+now say what they pin, why they are undiscovered (their assertion fails against the component today,
+which is the component's question) and the exact command that runs them.
+
+## Beyond the tool's list, because the shape was the same
+
+`review_named.py` lists files by name, so four behaviour-named files with the exact shape this fold
+remained inside the fold's own scope of work. They are folded for the same reason the listed ones
+were — one discovery rule, `tests/**/*.test.ts(x)` for Jest and `tests/*.test.ts` for Node:
+
+| From | To |
+| --- | --- |
+| `tests/session-load-order.spec.ts` (body) + `.test.ts` (1-line shim) | `tests/session-load-order.test.ts` |
+| `tests/session-save-order.spec.ts` (body) + `.test.ts` (2-line shim) | `tests/session-save-order.test.ts` |
+| `tests/advisory-filing-identity.spec.ts` (body) + `.test.ts` (1-line shim) | `tests/advisory-filing-identity.test.ts` |
+| `tests/component-suite-gate.spec.ts` (body) + `.test.ts` (1-line shim) | `tests/component-suite-gate.test.ts` |
+| `tests/screens/activity-directory-{pagination,read-order}.spec.ts` | deleted — a `.spec.ts` beside a discovered `.test.tsx` under `tests/screens/` runs nothing, and each held only `import "./x.test"` |
+
+`grep -rn 'import "\./' tests/` now returns nothing: no test reaches another test file, and the three
+`tests/*.spec.ts` bodies that stay are the browser pins, which run only by hand.
+
 ## Left as it was, on purpose
 
-* `tests/screens/activity-directory-{pagination,read-order}.spec.ts` and
-  `tests/viewer-controls.spec.ts` are dead shims and an unexecuted body with the
-  same disease, but they are behaviour-named, so `review_named.py` does not list
-  them and this fold leaves them for a round that owns them.
-* The `C01:`/`C02:`/`C03:` case-id prefixes in `tests/feedback.test.ts` and
-  `tests/shared-kit.test.ts` predate this task and survived in behaviour-named files.
+* The `C01:`/`C02:`/`C03:` prefixes in `tests/feedback.test.ts` are not review numbering: they name
+  conformance cases of the shared specification
+  (`docs/shared-mobile-components.md:1138-1145`), and a test title that cites them says which
+  requirement it answers. They stay.
 * `tests/ui/calendar-navigation.case.tsx` and `tests/screens/native-map-marker.case.tsx`
   fail when run by hand at the merge base. They stay undiscovered: making them
   discovered would turn `npm run check` red on a production question, and whether
   the failure is a bug or a wrong expectation is a separate decision.
-* The two `PLAYWRIGHT_MODULE` pins stay manual for the same reason — playwright is
-  not a dependency here, and installing a browser driver is not this fold's call.
+* The three `PLAYWRIGHT_MODULE` pins — `tests/viewer-landscape-orientation.spec.ts`,
+  `tests/viewer-zoom-reflow.spec.ts` and the behaviour-named
+  `tests/viewer-controls.spec.ts` — stay manual: playwright is not a dependency here, and
+  installing a browser driver is not this fold's call.

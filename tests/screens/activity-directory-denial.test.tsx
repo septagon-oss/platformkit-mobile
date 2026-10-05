@@ -1,3 +1,6 @@
+// A directory refusal empties the actor names a trail shows, and a response to a request the
+// screen no longer wants cannot put them back: the detail keeps its own history, refuses to
+// enrich it from a stale lookup, and writes nothing.
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react-native";

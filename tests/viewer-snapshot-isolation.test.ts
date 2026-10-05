@@ -1,3 +1,6 @@
+// Each viewer model belongs to the input it came from: a later caller edit or a later
+// withdrawal cannot reach into a model already derived, so a screen holding an old snapshot
+// keeps showing exactly what was authorized when it read.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { deriveViewer, type MediaItem } from "../src/core/derive";

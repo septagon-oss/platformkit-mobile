@@ -1,3 +1,6 @@
+// A step write whose outcome is unknown is neither done nor undone. The wizard refuses every
+// transition, leaves the draft byte-identical, advances exactly one step on an explicit valid
+// retry, and writes its refusal in the caller's own copy.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

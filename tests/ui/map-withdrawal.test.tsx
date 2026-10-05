@@ -1,3 +1,5 @@
+// Map data that was withdrawn cannot keep a marker's detail open or accept a marker press that
+// arrived late: the surface answers with what it can still authorise.
 import React from "react";
 import { View } from "react-native";
 import { expect, jest, test } from "@jest/globals";
@@ -78,20 +80,20 @@ test.each([
       onRetry: jest.fn(),
     };
     let canvas: MapCanvasProps | undefined;
-    const detail = jest.fn((id: string) => <View testID={`review-map-detail-${id}`} />);
+    const detail = jest.fn((id: string) => <View testID={`map-detail-${id}`} />);
     const view = (value: MapInput) => {
       const model = deriveMap(value, p);
       if (!model.ok) throw new Error(JSON.stringify(model.issues));
       return (
         <ThemeProvider mode={mode}>
-          <View testID="review-map">
+          <View testID="map-surface">
             <MapWithList
               model={model.value.map}
               {...callbacks}
               renderDetail={detail}
               renderMap={(props) => {
                 canvas = props;
-                return <View testID="review-map-canvas" />;
+                return <View testID="map-canvas" />;
               }}
             />
           </View>
@@ -99,7 +101,7 @@ test.each([
       );
     };
     await render(view(input));
-    expect(screen.getByTestId("review-map-detail-archive")).toBeOnTheScreen();
+    expect(screen.getByTestId("map-detail-archive")).toBeOnTheScreen();
     expect(screen.getAllByText(labels.status)).toHaveLength(2);
     const retained = canvas!;
     expect(retained.markers.map((marker) => marker.id)).toEqual(["archive", "annex"]);
@@ -130,9 +132,9 @@ test.each([
       detail.mockClear();
       await screen.rerender(view({ ...input, content: { phase: "error", state: state.value } }));
       // Establish reachability independently of either the denied content or the refusal wording.
-      expect(screen.getByTestId("review-map")).toBeOnTheScreen();
+      expect(screen.getByTestId("map-surface")).toBeOnTheScreen();
       expect(
-        screen.queryByTestId("review-map-detail-archive", { includeHiddenElements: true }),
+        screen.queryByTestId("map-detail-archive", { includeHiddenElements: true }),
       ).toBeNull();
       expect(screen.queryByText(labels.title, { includeHiddenElements: true })).toBeNull();
       expect(screen.queryByText(labels.annex, { includeHiddenElements: true })).toBeNull();
@@ -144,8 +146,8 @@ test.each([
       for (const callback of Object.values(callbacks)) expect(callback).not.toHaveBeenCalled();
     }
     await screen.rerender(view({ ...input, providerState: "unsupported", mode: "list" }));
-    expect(screen.queryByTestId("review-map-canvas")).toBeNull();
-    expect(screen.getByTestId("review-map-detail-archive")).toBeOnTheScreen();
+    expect(screen.queryByTestId("map-canvas")).toBeNull();
+    expect(screen.getByTestId("map-detail-archive")).toBeOnTheScreen();
     for (const callback of Object.values(callbacks)) expect(callback).not.toHaveBeenCalled();
     await fireEvent(screen.getByRole("button", { name: labels.update }), "accessibilityAction", {
       nativeEvent: { actionName: "activate" },

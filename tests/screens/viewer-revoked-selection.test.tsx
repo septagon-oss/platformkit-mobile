@@ -1,3 +1,5 @@
+// Losing the selected image loses it: the viewer shows its unavailable state rather than the
+// next item, and an id that becomes authorized again is shown only through its own new loader.
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";

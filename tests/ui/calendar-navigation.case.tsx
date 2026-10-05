@@ -1,3 +1,8 @@
+// The Calendar's next and previous controls walk the civil range of the view a person is in,
+// in day, week and agenda, in both languages. Undiscovered on purpose: its day and agenda rows
+// fail against the calendar the components build today, which is theirs to answer, not this
+// pin's. Run it with:
+//   npx jest --testMatch '**/tests/ui/calendar-navigation.case.tsx'
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
@@ -6,7 +11,6 @@ import { Calendar } from "../../src/ui/organisms/Calendar";
 import { ThemeProvider } from "../../src/ui/theme";
 import { presentation } from "../fakes/presentation";
 
-// Explicit deferred conformance case; run with Jest --testMatch for this file.
 test.each([
   { view: "day", startDate: "2026-07-19", endDate: "2026-07-20", selectedDate: "2026-07-19" },
   { view: "agenda", startDate: "2026-07-21", endDate: "2026-07-24", selectedDate: "2026-07-21" },

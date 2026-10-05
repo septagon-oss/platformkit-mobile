@@ -1,3 +1,5 @@
+// Denied calendar content removes what the person could act on in every view — day, week and
+// agenda — and asks for an explicit recovery intent instead of silently refilling the grid.
 import React from "react";
 import { View } from "react-native";
 import { expect, jest, test } from "@jest/globals";
@@ -63,7 +65,7 @@ test.each(
     };
     const node = (content: CalendarInput["content"]) => (
       <ThemeProvider mode={mode}>
-        <View testID="review-calendar">
+        <View testID="calendar-surface">
           <Calendar
             model={value(deriveCalendar({ ...input, content }, p)).calendar}
             {...callbacks}
@@ -107,7 +109,7 @@ test.each(
       );
       await screen.rerender(node({ phase: "error", state }));
       // The container exists independently of either refusal's translated sentence.
-      expect(screen.getByTestId("review-calendar")).toBeOnTheScreen();
+      expect(screen.getByTestId("calendar-surface")).toBeOnTheScreen();
       expect(
         screen.queryAllByRole("button", { name: eventName, includeHiddenElements: true }),
       ).toEqual([]);

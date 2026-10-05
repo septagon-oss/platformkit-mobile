@@ -1,3 +1,6 @@
+// Once the media read is denied, the viewer stops showing the item it covered: no progress bar,
+// no retry, no caption. A later authorized response carrying the same source, scope and version
+// does not revive it in that surface.
 import React from "react";
 import { expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
