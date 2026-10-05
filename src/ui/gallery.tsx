@@ -615,7 +615,7 @@ function Samples({
 // told apart at a glance. It is the gallery's, not the kit's: a screen with a
 // picture of its own passes a renderer, and a picture that failed to load is
 // still reported as one with its reason and a retry (molecules/MediaHero).
-function SpecimenPoster(props: ImageSlotProps) {
+function SpecimenPoster(props: ImageSlotProps & { readonly caption?: boolean }) {
   const t = useTheme();
   const s = useStyles(styles);
   const poster = posterFor(props.id);
@@ -657,11 +657,15 @@ function SpecimenPoster(props: ImageSlotProps) {
           />
         ))}
       </View>
-      <View style={s.caption}>
-        <Text role="caption" tone="muted">
-          {props.description}
-        </Text>
-      </View>
+      {/* A cover thumbnail carries no caption: its name is spoken as the slot's
+          label, and written where a line of it can be read in full. */}
+      {props.caption === false ? null : (
+        <View style={s.caption}>
+          <Text role="caption" tone="muted">
+            {props.description}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -1108,6 +1112,7 @@ function KitSamples({
                 decorative={false}
                 fit="cover"
                 aspectRatio={1}
+                caption={false}
               />
             </View>
           }

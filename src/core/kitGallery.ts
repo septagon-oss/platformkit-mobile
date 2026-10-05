@@ -740,20 +740,25 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                     id: "series-1",
                     label: c.seriesVisitors,
                     tone: "info",
+                    // Open to close in whole hours, so the axis names hours and
+                    // not the half-hours between the counts.
                     points: [
                       { id: "a", x: 10, y: 4 },
-                      { id: "b", x: 11, y: 8 },
-                      { id: "c", x: 12, y: 6 },
+                      { id: "b", x: 12, y: 8 },
+                      { id: "c", x: 14, y: 6 },
                     ],
                   },
                   {
+                    // One chart, one unit: a second series of the same thing, named
+                    // for where it is counted. "Passes sold" beside a y axis of
+                    // visitors is the same sentence reading two ways at once.
                     id: "series-2",
-                    label: c.seriesPassesSold,
+                    label: c.seriesCourtyard,
                     tone: "ok",
                     points: [
                       { id: "d", x: 10, y: 2 },
-                      { id: "e", x: 11, y: 3 },
-                      { id: "f", x: 12, y: 5 },
+                      { id: "e", x: 12, y: 3 },
+                      { id: "f", x: 14, y: 5 },
                     ],
                   },
                 ]),
