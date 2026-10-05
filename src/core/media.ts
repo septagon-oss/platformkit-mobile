@@ -31,6 +31,14 @@ export interface ImageSlotProps {
   readonly decorative: boolean;
   readonly fit: "cover" | "contain";
   readonly aspectRatio: number;
+  /**
+   * caption says whether the slot writes the image's name inside its own frame.
+   * A surface that draws that name as a line of its own — a hero's caption, a
+   * card's title — sets it false, so a person reads the sentence once. The slot
+   * still speaks `description` as its accessibility label either way: what is
+   * withdrawn is the duplicate line, never the name.
+   */
+  readonly caption?: boolean;
 }
 function mediaItem(item: MediaItem, v: Validation) {
   v.text(item.id, "item.id");

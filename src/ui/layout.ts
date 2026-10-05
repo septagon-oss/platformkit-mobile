@@ -26,14 +26,18 @@ export const kitStyles = (t: Theme) =>
     },
     selected: { borderColor: t.color.focus, borderWidth: t.extent.focus },
     image: { width: "100%", overflow: "hidden", backgroundColor: t.color.surfaceMuted },
+    /**
+     * imageVoid is the media frame when no image is coming: the reason is what
+     * occupies it, so it takes the height of the sentence rather than the height
+     * of the picture that never arrived.
+     */
+    imageVoid: { paddingHorizontal: t.space.md, paddingVertical: t.space.sm },
     imageFill: { position: "absolute", top: 0, bottom: 0, left: 0, right: 0 },
     concealed: { opacity: 0 },
     chart: { height: t.extent.chart, width: "100%" },
     chartAxis: { height: t.extent.chart, width: t.extent.chartAxis },
     chartPlot: { flexDirection: "row", gap: t.space.sm, alignItems: "stretch" },
     chartTicks: { flexDirection: "row", justifyContent: "space-between", gap: t.space.sm },
-    // A tick label sits on its tick, not below it: half a caption line lifts it
-    // so the value is level with the mark it names rather than starting there.
     chartTick: {
       position: "absolute",
       right: 0,
