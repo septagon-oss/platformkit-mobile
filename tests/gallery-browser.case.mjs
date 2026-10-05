@@ -32,7 +32,7 @@ test("the zoom adapter displays the selected ready Gallery media", async () => {
   await gallery(async (page) => {
     await page.getByTestId("gallery-case").locator("select").selectOption("photo-viewer/middle");
     await page.getByRole("button", { name: "Close", exact: true }).waitFor();
-    const image = page.getByText("Landscape shape", { exact: true });
+    const image = page.getByText("The courtyard from the upper landing", { exact: true });
     // Give the actual zoom/layout adapter time to measure, including after its first render.
     await image.waitFor({ state: "visible", timeout: 3000 }).catch(() => undefined);
     const bounds = await image.boundingBox();
