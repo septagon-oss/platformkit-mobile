@@ -153,7 +153,9 @@ not a control that renders, and the kit commits to six things the checks name:
   disabled and loading come from `Theme.state` and are drawn by every control
   that can take them; `prefers-reduced-motion` stills what moves.
 - **The gallery is the measure.** `src/core/galleryPages.ts` names fifteen pages,
-  each led by one focal specimen with the states beside it, and every family the
+  each led by the one specimen its screen is about — the page's other states beside
+  it where two phone columns fit, and behind the kit's own disclosure on a phone,
+  where a fold holds one screen rather than a screen's variants — and every family the
   kit owns is the specimen of exactly one page. Photograph `/gallery/<page>` at
   390 and 1440 and judge those pictures against a reference screen the kit is
   held to; a component nobody has photographed is not finished. The bar those
