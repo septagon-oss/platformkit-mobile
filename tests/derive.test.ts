@@ -86,6 +86,9 @@ test("detail shows every field in schema order", () => {
   const items = detailItems(note, row, feedback);
   assert.equal(items[0]!.label, "Id");
   assert.equal(items.find((i) => i.label === "Status")!.value, "Open");
+  // Each item carries the schema entry it came from: the screen names its row
+  // after the field, and never re-derives which column a fact belongs to.
+  assert.equal(items.find((i) => i.label === "Status")!.field.name, "status");
 });
 
 test("form controls derive from the schema", () => {

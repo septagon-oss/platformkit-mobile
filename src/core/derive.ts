@@ -173,12 +173,18 @@ export function listPreview(e: Entry): Field | undefined {
 }
 
 export interface DetailItem {
+  /** field is the schema entry this fact is about, as `Control.field` is. */
+  readonly field: Field;
   readonly label: string;
   readonly value: string;
 }
 
 export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  return e.fields.map((f) => ({ label: humanize(f.name), value: display(f, row[f.name], format) }));
+  return e.fields.map((f) => ({
+    field: f,
+    label: humanize(f.name),
+    value: display(f, row[f.name], format),
+  }));
 }
 
 export type ControlKind =

@@ -166,6 +166,9 @@ describe("ResourceDetail", () => {
       />,
     );
     expect(screen.getByLabelText("Title, Buy milk")).toBeOnTheScreen();
+    // A field's row is named after the field, so a journey finds it by the name
+    // the API document gives it and never by the label's spelling.
+    expect(screen.getByTestId("field-title")).toBeOnTheScreen();
     expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Delete note" }));
     expect(onDelete).toHaveBeenCalledTimes(1);

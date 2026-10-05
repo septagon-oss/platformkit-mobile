@@ -25,7 +25,8 @@ env:
       id: "resource-detail"
     timeout: 15000
 - assertVisible: ${TITLE} record
-- assertVisible: "Title"
+- assertVisible:
+    id: "field-${KNOWN}"
 - assertVisible: "Edit"
 - scrollUntilVisible:
     element:
