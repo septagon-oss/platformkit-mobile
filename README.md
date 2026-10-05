@@ -462,8 +462,9 @@ run makes. The configuration narrows the count only as far as it narrows the
 run: a journey `flows:` leaves out covers nothing, a selection is read in every
 spelling that planner reads it (a quoted key, a space before the colon, a
 leading byte-order mark) and the last `flows:` key is the one that wins — its
-empty value included, because `flows:` with nothing after it plans the whole
-directory and takes the run back from a selection written above it — and one
+empty value included, because `flows:` with nothing after it, or that same value
+spelled `~` or `null`, plans the whole directory and takes the run back from a
+selection written above it — and one
 written any other way — a flow mapping, a scalar where a list belongs, a list
 with an item left empty, unclosed or tab-indented, a filter pointing at no file
 beside it, a `tags:` read out of each flow's own header, an `excludeFlows:` no

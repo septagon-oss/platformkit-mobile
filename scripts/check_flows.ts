@@ -243,9 +243,11 @@ function journeys(root: string): string[] {
  * A filter given with no value at all is no filter: for `flows:` with nothing
  * after it Maestro plans every journey in the directory (measured,
  * maestro-cli-2.8.0), so that plan is recorded as no selection rather than an
- * empty one. A key written twice wins the way Maestro's parser lets it win: the
- * last one, and the last one even when it holds nothing — a `flows:` below a
- * `flows: [a.yaml]` gives the whole directory back to the run.
+ * empty one — and `~`, `null`, `Null` and `NULL` are that same value to its
+ * reader, measured planning the same set, at either end of a repeated key. A key
+ * written twice wins the way Maestro's parser lets it win: the last one, and the
+ * last one even when it holds nothing — a `flows:` below a `flows: [a.yaml]` gives
+ * the whole directory back to the run.
  */
 function readConfig(text: string): { filters: Map<Filter, Selection>; problems: string[] } {
   const lines = text.replace(/^\uFEFF/, "").split(BREAK);
@@ -329,15 +331,27 @@ function readConfig(text: string): { filters: Map<Filter, Selection>; problems: 
     // Only `flows` carries a list; `name` is a label no plan consults, and a
     // block under it would be nothing for the plan to apply.
     if (!isFilter(field)) continue;
-    const value = (key[4] ?? "").trim();
+    // The remark is cut first, because it is no part of the value: what is left
+    // is what the file's reader sees, and `flows: [a] # nightly` and `flows: ~`
+    // are a list and no list by what stands before the `#`.
+    const value = remark((key[4] ?? "").trim()).trim();
     if (value.startsWith("[")) {
       const list = flowList(value);
       if ("why" in list) return unreadable(refusal(field, list.why, value));
       filters.set(field, list.entries);
-    } else if (value !== "" && !value.startsWith("#")) {
-      return unreadable(`${field} is no list this gate can read: ${value}`);
-    } else {
+    } else if (value === "") {
+      // Nothing after the colon is no filter at all: Maestro plans every journey
+      // in the directory (measured). The block below may still fill the list; if
+      // none follows, `keep` records the same answer as `~` gets below.
       open = { field, entries: [] };
+    } else if (PLAIN_NULL.test(value)) {
+      // `~`, `null`, `Null` and `NULL` are that same no-value to the reader, and
+      // the same plan (measured: both spellings run the whole directory), so the
+      // answer is recorded here rather than opened: no list of items belongs under
+      // a null value, and `flows: null` with `- a.yaml` below it fails the run.
+      filters.set(field, null);
+    } else {
+      return unreadable(`${field} is no list this gate can read: ${value}`);
     }
   }
   keep();
@@ -345,10 +359,19 @@ function readConfig(text: string): { filters: Map<Filter, Selection>; problems: 
 }
 
 /**
+ * PLAIN_NULL is the set of texts a block mapping's value takes for no value at
+ * all — the shapes YAML resolves to null, quoted spellings excluded, since
+ * `flows: "null"` is a string and Maestro looks for a journey called `null` and
+ * refuses the run when none matches (both measured, maestro-cli-2.8.0).
+ */
+const PLAIN_NULL = /^(?:~|null|Null|NULL)$/;
+
+/**
  * flowList reads `[a.yaml, b.yaml]` the way Maestro's yaml parser does: one entry
  * per comma outside the quotes, a quoted name kept whole, the list over at its own
- * `]`, and a remark beyond that `]` a remark only. Everything else is refused,
- * because the run stops on it — each case measured on maestro-cli-2.8.0's
+ * `]`. Its caller has already cut the remark, so a `[` left open by that cut is
+ * open here too. Everything else refused is refused because the run stops on it —
+ * each case measured on maestro-cli-2.8.0's
  * WorkspaceExecutionPlanner with the CLI's own arguments: `[, a.yaml]` and
  * `[a.yaml, , b.yaml]` fail at the item with no name, `[a.yaml` never closes,
  * `[a.yaml]]` and `[a.yaml] [b.yaml]` hold text after a `]` that closed,
@@ -369,7 +392,7 @@ function flowList(value: string): { entries: string[] } | { why: string } {
     left = "";
     return text === "" ? { why: "an entry with no name between the brackets" } : scalar(text);
   };
-  for (const c of remark(value)) {
+  for (const c of value) {
     if (quote !== null) {
       left += c;
       if (c === quote) quote = null;

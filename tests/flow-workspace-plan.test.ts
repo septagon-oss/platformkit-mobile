@@ -142,6 +142,32 @@ test("the shape a selection is written in is part of what the gate reads", (t) =
   assert.deepEqual(flowFiles(root), ["other.yaml"]);
   config(root, "flows: [index.yaml]\nflows:\n");
   assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"]);
+  // A null value is that same answer spelled out: `~`, `null`, `Null` and `NULL`
+  // are the key with nothing in it to Maestro's reader, and every journey runs —
+  // measured, at either end of a selection. A *quoted* null is a name it looks for
+  // and refuses to find, and no list of items belongs under a null value.
+  for (const spelling of [
+    "flows: ~\n",
+    "flows: null\n",
+    "flows: Null\n",
+    "flows: NULL\n",
+    "flows: null # none\n",
+    "flows: [index.yaml]\nflows: ~\n",
+  ]) {
+    config(root, spelling);
+    assert.deepEqual(flowFiles(root), ["index.yaml", "other.yaml"], spelling);
+    assert.deepEqual(checkFlows(root), [], spelling);
+  }
+  for (const [shape, text] of [
+    ["a quoted null", 'flows: "null"\n'],
+    ["a list under a null value", "flows: null\n  - index.yaml\n"],
+  ] as const) {
+    config(root, text);
+    assert.ok(
+      checkFlows(root).some((p) => p.startsWith("config.yaml:")),
+      `${shape} must be refused by the file that holds it: ${JSON.stringify(checkFlows(root))}`,
+    );
+  }
 });
 
 test("a selection the runner's own parser stops on is named, never trimmed into a plan", (t) => {
