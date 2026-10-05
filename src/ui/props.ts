@@ -14,12 +14,7 @@ export const testable = (testID: string | undefined): { readonly testID?: string
 // aria-busy/checked/disabled/expanded/selected and the value quartet), so the
 // device half is stated as accessibilityState.selected, which react-native-web
 // drops. One fact, each spelling written where that reader looks.
-import {
-  Platform,
-  type AccessibilityRole,
-  type AccessibilityState,
-  type View,
-} from "react-native";
+import { Platform, type AccessibilityRole, type AccessibilityState, type View } from "react-native";
 
 /** roles whose ARIA definition carries a selected state */
 const SELECTED_ROLES: readonly string[] = ["gridcell", "option", "row", "tab"];
