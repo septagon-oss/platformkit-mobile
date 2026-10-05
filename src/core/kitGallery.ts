@@ -788,12 +788,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       meter: v.take(
         deriveMeter(
           state === "unmeasured"
-            ? { value: 7, label: pt ? "Armazenamento" : "Storage" }
+            ? { value: 7, label: c.meterStorage }
             : state === "percent"
               ? { value: 1, max: 4, format: "percent", label: pt ? "Carregamento" : "Upload" }
               : state === "steps"
                 ? { value: 2, max: 3, format: "steps", label: c.step }
-                : { value: 3, max: 8, label: pt ? "Armazenamento" : "Storage" },
+                : { value: 3, max: 8, label: c.meterStorage },
           p,
         ),
       ),

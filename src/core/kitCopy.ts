@@ -137,6 +137,7 @@ export const kitEnglish = {
   axisVisitors: "Visitors",
   unitVisitors: "visitors",
   unitPasses: "passes",
+  meterStorage: "Storage used",
   sourceSpecimen: "Specimen map data",
   audioTour: "Audio tour",
 } as const;
@@ -273,6 +274,7 @@ export const kitPortuguese: KitWords = {
   axisVisitors: "Visitantes",
   unitVisitors: "visitantes",
   unitPasses: "passes",
+  meterStorage: "Armazenamento usado",
   sourceSpecimen: "Dados de mapa de exemplo",
   audioTour: "Audioguia",
 };
