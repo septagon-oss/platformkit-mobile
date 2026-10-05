@@ -759,11 +759,26 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 { id: "b", label: choice.choices[1]!.label },
               ],
               series: [
-                { id: "values", label: c.seriesPassesSold, tone: "info", values: { a: 3, b: 5 } },
+                state === "negative"
+                  ? {
+                      // A change is the one thing about passes that is honestly
+                      // negative. A count of them is not, and a bar chart showing -2
+                      // of a thing that cannot go below zero reads as a broken chart.
+                      id: "change",
+                      label: c.seriesChange,
+                      tone: "info",
+                      values: { a: -2, b: 5 },
+                    }
+                  : {
+                      id: "values",
+                      label: c.seriesPassesSold,
+                      tone: "info",
+                      values: { a: 3, b: 5 },
+                    },
               ],
             }),
-            xLabel: c.axisHour,
-            yLabel: c.seriesPassesSold,
+            xLabel: c.axisVariant,
+            yLabel: state === "negative" ? c.seriesChange : c.seriesPassesSold,
             unitLabel: c.unitPasses,
             fractionDigits: 0,
             ranges: [],
