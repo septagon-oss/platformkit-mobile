@@ -1,5 +1,6 @@
-// A denied media read ends the selection it covered: caption, description and retry stop
-// existing, and nothing the viewer showed from the earlier authorized read is still on screen.
+// A denied media read ends the selection it covered — items, caption, position and retry intent go
+// empty, and a stale-but-readable copy of it is refused — without latching: the next authorized
+// response derives the viewer that was showing before the refusal, from an untouched input.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

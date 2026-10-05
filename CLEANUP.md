@@ -169,6 +169,11 @@ one is set and read inside one test file; no component, flow or `e2e/flows` id r
 (`grep -rn "review-" e2e/` → empty before and after, and `npm run check:flows` still answers
 “every id is a testID a component sets”).
 
+The five files that hold more than one rule — `activity-audit-snapshot`,
+`list-selection-withdrawal`, `map-withdrawal`, `media-denial-clears-selection`,
+`pricing-withdrawal` — had their header rewritten after it was first written, because a
+header that names one of three rules is a claim the file does not answer.
+
 The two manual `.case.tsx` pins said “Deferred in review 2” and named the file's own old path. They
 now say what they pin, why they are undiscovered (their assertion fails against the component today,
 which is the component's question) and the exact command that runs them.

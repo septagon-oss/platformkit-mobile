@@ -1,6 +1,6 @@
-// A bulk action runs against every id it is handed. A refresh that drops or disables a row has
-// to drop it from the selection, the select-all target and the bulk action at once, or the app
-// acts on a record the caller can no longer see.
+// A bulk action runs against every id it is handed, so selection is derived rather than carried: ids
+// arrive in any order and may repeat, a refresh that drops or disables a row drops it from the
+// selection, the select-all target and the bulk action together, and a denial empties all three.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

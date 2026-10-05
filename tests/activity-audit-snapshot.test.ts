@@ -1,6 +1,6 @@
-// Redaction and denial reach an audit trail in different shapes: a redacted change keeps its
-// row and loses its value, a denied trail loses the row, the private value and the right to
-// page. One shape for both would let withheld history read as an empty one.
+// An audit trail answers redaction and denial differently: a redacted change keeps its row and loses
+// its value, a denied trail loses the row, the private value and the right to page, and an excluded
+// trail says it was excluded rather than showing nothing. Repeated event ids refuse the snapshot.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
