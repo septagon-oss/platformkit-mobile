@@ -211,7 +211,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         ? { selectedId: held.choice }
         : state === "selected"
           ? { selectedId: "second" }
-          : {}),
+          : // The card draws a quantity and an enabled next step, so one of these
+            // two variants already is the one on the screen. Two outlined chips and
+            // a quantity of six state neither.
+            state === "default" || state === "options"
+            ? { selectedId: "first" }
+            : {}),
     };
     const quantity = {
       value: held.quantity ?? (state === "max" ? 10 : state === "invalid" ? 7 : 6),
@@ -659,7 +664,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
               {
                 id: "plan-1",
                 title: c.variantIndividual,
-                offers: [{ periodId: "period-1", price: safePrice, action }],
+                offers: [{ periodId: "period-year", price: safePrice, action }],
                 features: { feature: { kind: "included" } },
               },
               {
@@ -670,7 +675,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                     ? []
                     : [
                         {
-                          periodId: "period-1",
+                          periodId: "period-year",
                           price: { kind: "contact", label: c.details },
                           action: secondary,
                         },
@@ -678,8 +683,11 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 features: { feature: { kind: "excluded" } },
               },
             ]),
-            periods: [{ id: "period-1", label: c.period }],
-            selectedPeriodId: "period-1",
+            periods: [
+              { id: "period-month", label: c.periodMonthly },
+              { id: "period-year", label: c.periodAnnual },
+            ],
+            selectedPeriodId: "period-year",
             features: [{ id: "feature", label: c.details }],
           },
           p,
@@ -714,7 +722,9 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       ),
       media: v.take(deriveMedia(mediaInput, p)),
       hero: v.take(
-        deriveMediaHero({ item: images[0]!, title: c.photoPrintRoom, action: secondary }, p),
+        // The frame already carries the photograph's own line; the heading names
+        // the room, so the screen does not say the same sentence twice.
+        deriveMediaHero({ item: images[0]!, title: c.placePrintRoom, action: secondary }, p),
       ),
       viewer: v.take(deriveViewer({ ...mediaInput, open: held.open ?? true }, p)),
       spark: v.take(deriveSparkline(chartInput, p)),
@@ -869,8 +879,8 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       playback: v.take(
         derivePlayback(
           state === "live"
-            ? { position: 95, label: pt ? "A tocar" : "Now playing" }
-            : { position: 67, total: 247, label: pt ? "A tocar" : "Now playing" },
+            ? { position: 95, label: c.nowPlaying }
+            : { position: 67, total: 247, label: c.nowPlaying },
           p,
         ),
       ),

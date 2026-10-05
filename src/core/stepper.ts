@@ -78,12 +78,17 @@ export function deriveStepper(input: StepperInput, p: Presentation) {
     const current = input.steps[index];
     return {
       steps: input.steps.map((s, i) => {
+        // The word under a stage is its own. An optional stage that is not done
+        // yet is not "Required": that sentence is about what a person owes, and a
+        // stage which can be skipped owes nothing.
         const stateLabel =
           s.completion === "complete"
             ? p.copy.kit.complete
             : s.completion === "skipped"
               ? p.copy.kit.skipped
-              : p.copy.kit.required;
+              : s.optional
+                ? p.copy.kit.optional
+                : p.copy.kit.required;
         return {
           ...s,
           selected: i === index,

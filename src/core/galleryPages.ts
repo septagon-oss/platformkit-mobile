@@ -16,6 +16,10 @@ interface PageSpec {
   readonly cases: readonly string[];
   /** lead names the specimen the screen opens with: the one thing the page is about. */
   readonly lead: string;
+  /** withLead names what the lead is a control *over*. A field with nothing beside
+   * it is a promise; the thing it produced belongs to the same screen, so the fold
+   * shows both and the states of either open beneath. */
+  readonly withLead?: readonly string[];
 }
 
 export const galleryPages = {
@@ -90,6 +94,7 @@ export const galleryPages = {
   // come last under their own family name rather than stacked above the results.
   search: {
     lead: "search-field/query",
+    withLead: ["masonry-wall/two-columns"],
     cases: [
       "search-field/query",
       "masonry-wall/two-columns",
@@ -186,10 +191,18 @@ export function deriveGalleryPage(id: string, _p: Presentation) {
       // renamed case fails here instead of showing an empty section.
       v.need((kitCaseIds as readonly string[]).includes(caseId), `cases.${i}`);
     });
+    const withLead = spec!.withLead ?? [];
+    // What is drawn with the lead is drawn because the lead is a control over it,
+    // so it cannot also be one of the states held behind the page's disclosure.
+    v.need(
+      withLead.every((caseId) => cases.includes(caseId) && caseId !== spec!.lead),
+      "withLead",
+    );
     return {
       id,
       title: humanize(id),
       lead: spec!.lead,
+      withLead,
       cases: cases as readonly string[],
       testID: `gallery-page:${id}`,
     };

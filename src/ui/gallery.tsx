@@ -327,7 +327,8 @@ function Page({
     !stand && viewport.width > t.extent.pageColumn + 2 * t.space.xl
       ? { alignSelf: "center" as const, width: t.extent.pageColumn }
       : undefined;
-  const rest = model.cases.filter((id) => id !== model.lead);
+  const shown = [model.lead, ...model.withLead];
+  const rest = model.cases.filter((id) => !shown.includes(id));
   // One section per family, in the order the page names them: a page reads as
   // the screen it stands for, not as a list of specimen ids.
   const groups: { readonly id: string; readonly family: string; readonly cases: string[] }[] = [];
@@ -340,14 +341,16 @@ function Page({
   const lead = (
     <VerbStage lead>
       <View style={s.lead}>
-        <KitSamples
-          key={model.lead}
-          presentation={presentation}
-          caseId={model.lead}
-          onAction={setAction}
-          {...(renderImage ? { renderImage } : {})}
-          {...(renderZoom ? { renderZoom } : {})}
-        />
+        {shown.map((caseId) => (
+          <KitSamples
+            key={caseId}
+            presentation={presentation}
+            caseId={caseId}
+            onAction={setAction}
+            {...(renderImage ? { renderImage } : {})}
+            {...(renderZoom ? { renderZoom } : {})}
+          />
+        ))}
       </View>
     </VerbStage>
   );
@@ -1091,13 +1094,14 @@ function KitSamples({
           title={c.photoPrintRoom}
           subtitle={c.audioTour}
           artwork={
-            <View
-              style={s.artwork}
-              accessible
-              accessibilityLabel={specimen.case}
-              testID="gallery-player-art"
-            >
-              <Text>{specimen.case}</Text>
+            <View style={s.artwork} testID="gallery-player-art">
+              <SpecimenPoster
+                id="audio-tour"
+                description={`${c.audioTour}: ${c.photoPrintRoom}`}
+                decorative={false}
+                fit="cover"
+                aspectRatio={1}
+              />
             </View>
           }
           playing={caseId.endsWith("/track")}
