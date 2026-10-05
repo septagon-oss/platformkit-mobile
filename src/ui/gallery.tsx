@@ -359,9 +359,9 @@ function Page({
   // A family name sits at the column's own edge and the specimen keeps its
   // card: the page never draws a card around a card, which is what put a
   // second inset behind a heading and left a page with three left edges.
-  const states = (
+  const statesOf = (shown: typeof groups) => (
     <VerbStage lead={false}>
-      {groups.map((group) => (
+      {shown.map((group) => (
         <View key={group.id} style={s.group}>
           <Text role="caption" tone="muted" uppercase accessibilityRole="header" style={s.ink}>
             {group.family}
@@ -382,6 +382,21 @@ function Page({
       ))}
     </VerbStage>
   );
+  const states = statesOf(groups);
+  // A monitor's second column holds the screen's other states, read beside the
+  // screen they belong to. One state per family stands there openly; the rest of a
+  // family's examples open under the same disclosure a phone puts them behind.
+  // Showing every example at once turned that column into a wall of variants —
+  // three "Step 1 of 2" screens, one admission fact written four times — and a
+  // person could not tell which of them the page was.
+  const openGroups = stand
+    ? groups.map((group) => ({ ...group, cases: group.cases.slice(0, 1) }))
+    : groups;
+  const laterGroups = stand
+    ? groups
+        .map((group) => ({ ...group, cases: group.cases.slice(1) }))
+        .filter((group) => group.cases.length > 0)
+    : [];
   const statesSection = deriveDisclosure(
     {
       id: "gallery-page-states",
@@ -405,10 +420,26 @@ function Page({
       <View style={stand ? s.columns : undefined}>
         <View style={stand ? s.phone : undefined}>{lead}</View>
         <View style={stand ? s.phone : undefined}>
-          {stand || !statesSection.ok ? (
+          {stand && statesSection.ok && laterGroups.length > 0 ? (
+            // The column spaces what stands in it; these two are its rows.
+            <>
+              {statesOf(openGroups)}
+              <DisclosureSection
+                model={statesSection.value}
+                onExpanded={setStatesOpen}
+                testID="gallery-page-later-states"
+              >
+                {statesOf(laterGroups)}
+              </DisclosureSection>
+            </>
+          ) : stand || !statesSection.ok ? (
             states
           ) : (
-            <DisclosureSection model={statesSection.value} onExpanded={setStatesOpen}>
+            <DisclosureSection
+              model={statesSection.value}
+              onExpanded={setStatesOpen}
+              testID="gallery-page-later-states"
+            >
               {states}
             </DisclosureSection>
           )}

@@ -9,10 +9,12 @@ export function DisclosureSection({
   model,
   children,
   onExpanded,
+  testID,
 }: {
   readonly model: DisclosureModel;
   readonly children: React.ReactNode;
   readonly onExpanded: (value: boolean) => void;
+  readonly testID?: string;
 }) {
   const s = useStyles(kitStyles);
   return (
@@ -25,6 +27,7 @@ export function DisclosureSection({
         label={model.control.label}
         tone="plain"
         expanded={model.expanded}
+        {...(testID ? { testID } : {})}
         disabled={!model.control.enabled}
         {...(model.reason ? { reason: model.reason } : {})}
         onPress={() => {
