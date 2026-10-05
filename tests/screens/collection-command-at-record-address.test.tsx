@@ -9,12 +9,12 @@ jest.mock("expo-router", () => require("../fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("../fakes/router").reactNavigation);
 jest.mock("../../src/shell", () => ({ useShell: () => require("../fakes/shell").shell.value }));
 
-// The two refusals are one rule read from each side. The review's test shows a
-// command about one record refused at the collection's address; this one shows a
-// command about the collection refused at a record's, where the row in the path
-// would be sent to a door that takes none — and shows that scoping the verb by
-// address costs the sheet its own kind does have, so the rule is not a screen
-// that refuses everything with a word it does not recognise.
+// The two refusals are one rule read from each side. The record-address test
+// shows a command about one record refused at the collection's address; this one
+// shows a command about the collection refused at a record's, where the row in
+// the path would be sent to a door that takes none — and shows that scoping the
+// verb by address costs the sheet its own kind does have, so the rule is not a
+// screen that refuses everything with a word it does not recognise.
 
 const archive = note.commands.find((c) => c.verb === "archive")!;
 
