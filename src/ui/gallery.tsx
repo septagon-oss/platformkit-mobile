@@ -1173,7 +1173,7 @@ const pageStyles = (t: Theme) =>
      */
     stand: { alignSelf: "center" as const, width: t.extent.stand },
     columns: { flexDirection: "row" as const, alignItems: "flex-start", gap: t.space.xl },
-    phone: { width: t.extent.pageColumn, gap: t.space.md },
+    phone: { width: t.extent.pageColumn, gap: t.space.xl },
     lead: { gap: t.space.sm },
     group: { gap: t.space.xs },
     /**
