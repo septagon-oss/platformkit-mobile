@@ -791,7 +791,11 @@ function KitSamples({
       setHeld({ ...held, period: id });
       action(id);
     },
-    onSelect: action,
+    onSelect: (id: string) => {
+      // Choosing a tier marks it: the card a person chose is the card drawn chosen.
+      setHeld({ ...held, plan: id });
+      action(id);
+    },
     onAction: send,
     onRetry: () => action("retry"),
   };

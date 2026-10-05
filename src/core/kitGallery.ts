@@ -148,6 +148,8 @@ export interface GallerySelection {
   readonly point?: string | undefined;
   /** period is the billing period the pricing specimen is drawn on: a chip a person taps changes the amounts they are choosing between. */
   readonly period?: string;
+  /** plan is the tier the person chose on the pricing specimen: the card they chose is the one drawn chosen. */
+  readonly plan?: string;
 }
 export function kitExamples(p: Presentation, caseId: string, held: GallerySelection = {}) {
   return build(p, (v: Validation) => {
@@ -167,6 +169,14 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
     const secondary: Action = {
       id: "inspect",
       label: c.details,
+      tone: "secondary",
+      state: "ready",
+    };
+    // A tier card's verb names choosing that tier. It is the same verb on every card,
+    // so no plan offers the page's own continuation in its place.
+    const choose: Action = {
+      id: "choose",
+      label: c.choosePlan,
       tone: "secondary",
       state: "ready",
     };
@@ -692,14 +702,14 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 // A tier offered for both periods carries the amount of each, so the
                 // figure a person reads is the one for the period they selected.
                 offers: [
-                  { periodId: "period-month", price: safePrice, action },
+                  { periodId: "period-month", price: safePrice, action: choose },
                   {
                     periodId: "period-year",
                     price: { kind: "price", amount: { minor: "12990", currency } },
-                    action,
+                    action: choose,
                   },
                 ],
-                features: { feature: { kind: "included" } },
+                features: { feature: { kind: "excluded" } },
               },
               {
                 id: "plan-2",
@@ -711,17 +721,17 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                         {
                           periodId: "period-month",
                           price: { kind: "price", amount: { minor: "2199", currency } },
-                          action: secondary,
+                          action: choose,
                         },
                         {
                           periodId: "period-year",
                           // Both cards state a price: a plan whose price is the word
                           // "Full details" repeats its own row label and chooses nothing.
                           price: { kind: "price", amount: { minor: "21990", currency } },
-                          action: secondary,
+                          action: choose,
                         },
                       ],
-                features: { feature: { kind: "excluded" } },
+                features: { feature: { kind: "included" } },
               },
             ]),
             periods: [
@@ -729,7 +739,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
               { id: "period-year", label: c.periodAnnual, unitLabel: c.unitYearly },
             ],
             selectedPeriodId: held.period ?? "period-year",
-            features: [{ id: "feature", label: c.details }],
+            // The card a person chose is the card drawn chosen; the page holds it the
+            // way it holds the chosen chip, point and period.
+            ...(held.plan ? { selectedPlanId: held.plan } : {}),
+            features: [{ id: "feature", label: c.benefitTours }],
           },
           p,
         ),
