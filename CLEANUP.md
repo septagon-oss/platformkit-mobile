@@ -180,9 +180,9 @@ which is the component's question) and the exact command that runs them.
 
 ## Beyond the tool's list, because the shape was the same
 
-`review_named.py` lists files by name, so four behaviour-named files with the exact shape this fold
-remained inside the fold's own scope of work. They are folded for the same reason the listed ones
-were — one discovery rule, `tests/**/*.test.ts(x)` for Jest and `tests/*.test.ts` for Node:
+`review_named.py` lists files by name, so four files carrying the exact shape this fold exists to
+remove were not on its list. They are folded anyway, for the reason the listed ones were — one
+discovery rule, `tests/**/*.test.ts(x)` for Jest and `tests/*.test.ts` for Node:
 
 | From | To |
 | --- | --- |
@@ -194,6 +194,29 @@ were — one discovery rule, `tests/**/*.test.ts(x)` for Jest and `tests/*.test.
 
 `grep -rn 'import "\./' tests/` now returns nothing: no test reaches another test file, and the three
 `tests/*.spec.ts` bodies that stay are the browser pins, which run only by hand.
+
+## The same check by machine, so no name vanished silently
+
+Every case the tree executed at the merge base was listed — `node --import tsx --test tests/<f>.test.ts`
+per root file plus one run of the six `.spec.ts` bodies no gate globs, and `npx jest --verbose` — in
+the exported `31dc830`; the same lists were taken at head; and the two were compared after removing
+the `T0180: ` prefix and the `en`/`pt` prefix each locale-paired case carries:
+
+* **Jest: 232 cases at base, 232 at head; 169 distinct behaviours after stripping the `T0180: ` and
+  the `en`/`pt`/`light`/`dark`/`day`/`week`/`agenda` prefixes each table-driven case carries — equal
+  on both sides, name by name and count by count.** Not one component, screen or shell case was
+  renamed away, dropped or run fewer times.
+* **Node: the required check ran 189 cases at the merge base, and the six `.spec.ts` bodies no gate
+  ran held 7 more — 196 executed, 187 distinct behaviours. Head runs 191 and 182.** Ten names
+  stopped being separate cases and five new ones appeared; **no name runs fewer times at head than
+  at base**, which is the check that a case did not dissolve inside a rename. The ten are accounted
+  for above: four reappear under a new name here — the overnight civil day and the negative-domain
+  series (one base case split between its two owners), the busy quote, the repeated civil time and
+  the refused step transition — four became inputs inside a case that already existed (`C01`, `C02`,
+  the nested copy-key walk, the exact-cart-total case), and two were duplicates cited to the file and
+  lines that cover them. A further two cases at base (`review-activity-denied-snapshot`) shared their
+  names verbatim with `activity.test.ts`, so a name comparison cannot see them leave and only the
+  line-by-line read above can: their two unique inputs are now cases there. Nothing else differs.
 
 ## Left as it was, on purpose
 
