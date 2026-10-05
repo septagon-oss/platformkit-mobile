@@ -149,7 +149,9 @@ function Control({
       onHoverOut={() => setHovered(false)}
       accessibilityRole="button"
       accessibilityLabel={word}
-      aria-selected={intent === "pause"}
+      // A play/pause control names its own state — the word is Play or Pause —
+      // so it states nothing further: aria-selected is not allowed on
+      // role="button" and a browser drops it (src/ui/props.ts).
       accessibilityActions={[{ name: "activate", label: word }]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "activate") onIntent(intent);

@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "../atoms/Icon";
 import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
-import { testable } from "../props";
+import { chosenState, testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 
 interface Props {
@@ -65,7 +65,7 @@ export function Row({
       accessibilityRole="button"
       aria-busy={busy}
       aria-disabled={!onPress || busy}
-      aria-selected={selected}
+      {...chosenState("button", selected)}
       accessibilityLabel={[eyebrow, title, ...cells].filter(Boolean).join(", ")}
       android_ripple={{ color: t.color.borderDefault }}
       {...testable(testID)}

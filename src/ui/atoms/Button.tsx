@@ -12,7 +12,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import type { Motion } from "../../core/derive";
-import { testable } from "../props";
+import { chosenState, testable } from "../props";
 import { controlInk, useStyles, useTheme, type Theme } from "../theme";
 import { useVerbStage } from "../verb";
 import { Icon, type IconName } from "./Icon";
@@ -102,7 +102,7 @@ export function Button({
       aria-checked={checked}
       aria-disabled={off}
       aria-expanded={expanded}
-      aria-selected={selected}
+      {...chosenState(accessibilityRole, selected)}
       accessibilityActions={off ? [] : [{ name: "activate", label }]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "activate") activate();
