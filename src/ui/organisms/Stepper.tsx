@@ -61,11 +61,16 @@ export function Stepper({
         <Notice text={model.firstProblem.message} announcement="urgent" />
       ) : null}
       {children}
-      <View style={s.row}>
-        {model.back ? <ActionControl model={model.back} onAction={onBack} /> : null}
+      {/* Moving the stage on and leaving it are different acts, so they are not
+          offered in one line: what the stage asks for now stands on its own, and
+          going back, saving the draft or resolving a lost write follow beneath. */}
+      <View style={s.row} testID="stepper-verbs">
         {model.next ? <ActionControl model={model.next} onAction={onNext} /> : null}
-        {model.skip ? <ActionControl model={model.skip} onAction={onSkip} /> : null}
         {model.finish ? <ActionControl model={model.finish} onAction={onFinish} /> : null}
+        {model.skip ? <ActionControl model={model.skip} onAction={onSkip} /> : null}
+      </View>
+      <View style={s.row} testID="stepper-exit">
+        {model.back ? <ActionControl model={model.back} onAction={onBack} /> : null}
         {model.saveAndExit ? (
           <ActionControl model={model.saveAndExit} onAction={onSaveAndExit} />
         ) : null}
