@@ -136,7 +136,7 @@ export function Button({
       ]}
       {...testable(testID)}
     >
-      <View style={s.content}>
+      <View style={[s.content, tone === "plain" ? s.plainContent : null]}>
         {busy && motion === "normal" ? (
           <ActivityIndicator
             size="small"
@@ -154,6 +154,7 @@ export function Button({
             role={header ? "body" : "label"}
             weight="semibold"
             tone={textTone}
+            align={tone === "plain" ? "left" : "center"}
             style={s.label}
             maxFontSizeMultiplier={0}
           >
@@ -204,7 +205,13 @@ const styles = (t: Theme) =>
       justifyContent: "center",
       gap: t.space.sm,
     },
-    label: { flexShrink: 1, textAlign: "center" },
+    // A plain control sits in a column of words, so its word begins where that column
+    // begins. The centred arrangement belongs to a control that stands alone; kept
+    // here it drew the chart's six read-out rows, the commerce page's three verbs and
+    // a page's one disclosure label as captions floating in the middle of the width
+    // around them, which is what the captures of those specimens named.
+    plainContent: { justifyContent: "flex-start" },
+    label: { flexShrink: 1 },
     // The member the screen is on: the accent ring the kit already uses for what
     // a person has chosen, on the surface it is drawn in.
     picked: { borderColor: t.color.accentDefault, backgroundColor: t.color.surfacePrimary },
