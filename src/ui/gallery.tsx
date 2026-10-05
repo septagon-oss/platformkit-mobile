@@ -689,12 +689,15 @@ const styles = (t: Theme) =>
     mark: { position: "absolute" },
     disc: { borderRadius: t.radius.full },
     caption: { paddingTop: t.space.xs },
+    // The player's artwork slot: the picture fills it, as it fills every media
+    // frame. Centring its child would collapse the frame to the width of its
+    // content, and a poster drawn as marks on a field has no content of its own
+    // to hold a width with, so the marks would be drawn into nothing.
     artwork: {
       width: t.extent.player,
       height: t.extent.player,
-      alignItems: "center",
-      justifyContent: "center",
       borderRadius: t.radius.md,
+      overflow: "hidden",
       backgroundColor: t.color.surfaceMuted,
     },
     stack: { gap: t.space.xs, paddingVertical: t.space.sm },
