@@ -50,10 +50,12 @@ test("disclosure exposes its expanded state in the browser accessibility tree", 
       .getByTestId("gallery-case")
       .locator("select")
       .selectOption("disclosure-section/default");
-    const expand = page.getByRole("button", { name: "Expand", exact: true });
+    // The control is named for what it reveals and what it hides, in the words the
+    // bundle supplies ("Show the details", "Hide the details"), not for a bare verb.
+    const expand = page.getByRole("button", { name: /^Show / });
     await expand.focus();
     await page.keyboard.press("Space");
-    const collapse = page.getByRole("button", { name: "Collapse", exact: true });
+    const collapse = page.getByRole("button", { name: /^Hide / });
     await collapse.waitFor();
     assert.equal(await collapse.getAttribute("aria-expanded"), "true");
     await page.keyboard.press("Space");
