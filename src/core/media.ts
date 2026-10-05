@@ -72,6 +72,10 @@ function mediaItem(item: MediaItem, v: Validation) {
         : undefined,
     loadingLabel: v.p.copy.state.loading,
     retryLabel: v.p.copy.kit.retryImage,
+    // Opening is the act; the picture's name is the thing the act is on. A control
+    // that prints the name as its word is a caption in an accent colour, and a
+    // person cannot tell the line they read from the line they press.
+    openLabel: v.p.copy.kit.open,
     motion: v.p.motion,
   };
 }

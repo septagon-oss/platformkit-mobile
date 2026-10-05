@@ -32,11 +32,11 @@ export function MediaHero({
   // the cover's aspect ratio is the space a picture would have taken, and a
   // failed specimen that reserves it reads as a page still waiting.
   const drawn = item.state === "ready" || item.state === "loading";
-  // Whether this hero says the picture's name itself, in a line under the frame.
-  // A control that takes the picture's words as its own label writes them too: the
-  // name is then on the screen once, and the frame has nothing left to add.
-  const named =
-    Boolean(model.title || model.subtitle || item.caption) || (item.canOpen && Boolean(onOpen));
+  // Whether this hero writes the picture's name as a line of its own. It is written
+  // once: here when there is a line to carry it, by the frame when there is not. The
+  // control that opens the picture never writes it — an accent-coloured copy of the
+  // caption reads as a caption, not as the act it is.
+  const named = Boolean(model.title || model.subtitle || item.caption);
   const frame = (
     <View style={[s.image, drawn ? { aspectRatio: item.aspectRatio } : s.imageVoid]}>
       {drawn ? (
@@ -72,7 +72,12 @@ export function MediaHero({
       {model.subtitle ? <Text>{model.subtitle}</Text> : null}
       {item.caption ? <Text>{item.caption}</Text> : null}
       {item.canOpen && onOpen ? (
-        <Button label={item.description} tone="plain" onPress={() => onOpen(item.id)} />
+        <Button
+          label={item.openLabel}
+          name={`${item.openLabel}: ${item.description}`}
+          tone="plain"
+          onPress={() => onOpen(item.id)}
+        />
       ) : null}
       {item.canRetry && onRetry ? (
         <Button label={item.retryLabel} tone="plain" onPress={() => onRetry(item.id)} />
