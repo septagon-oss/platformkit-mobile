@@ -166,10 +166,16 @@ export function deriveDataList(input: DataListInput, p: Presentation) {
     const total = (n: number | undefined, loaded: number, path: string) => {
       if (n !== undefined) v.need(Number.isSafeInteger(n) && n >= loaded, path);
       return n === undefined
-        ? `${countText(loaded, p)} ${p.copy.kit.loaded}`
+        ? countText(loaded, p)
         : `${countText(loaded, p)} ${p.copy.kit.of} ${countText(n, p)}`;
     };
-    const count = total(input.total, all.length, "total");
+    // The figure is checked whether or not it is drawn: a server that names a total
+    // smaller than what arrived is refused by the name of the field that lied.
+    const listed = total(input.total, all.length, "total");
+    // A count counts what is here. While the list has not arrived there is nothing
+    // it counts, and "0 loaded" reads as a figure of zero rather than as no figure
+    // — the same rule that keeps an absent table cell from being drawn as a zero.
+    const count = all.length === 0 ? undefined : listed;
     const sections = groups.map((g, i) => {
       v.text(g.title, `sections.${i}.title`);
       return {

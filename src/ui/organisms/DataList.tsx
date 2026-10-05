@@ -112,7 +112,7 @@ export function DataList({
           {model.saveView && onSaveView ? (
             <ActionControl model={model.saveView} onAction={() => onSaveView(model.saveTarget)} />
           ) : null}
-          <Text accessibilityLiveRegion="polite">{model.count}</Text>
+          {model.count ? <Text accessibilityLiveRegion="polite">{model.count}</Text> : null}
           {model.selectionIssue ? (
             <Notice text={model.selectionIssue.message} announcement="polite" />
           ) : null}
