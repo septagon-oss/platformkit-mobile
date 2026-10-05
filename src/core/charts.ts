@@ -204,9 +204,26 @@ function chart(input: ChartInput, p: Presentation, areaChart: boolean, spark: bo
         summary: `${s.label}: ${points.map((point) => `${point.xText}, ${point.text}`).join("; ")}`,
       };
     });
+    // A plot is read for one observation before it is read for any other: the
+    // largest one. The line is built from the same formatted x and y the axis
+    // and the value list use, so the takeaway, the tick and the figure cannot
+    // disagree, and a page whose chart says nothing still says its numbers.
+    let highest:
+        { readonly seriesLabel: string; readonly at: string; readonly text: string } | undefined,
+      peak: number | undefined;
+    for (const series of projected)
+      for (const point of series.points)
+        // The first largest observation wins, which is the earliest one drawn.
+        if (point.y !== null && (peak === undefined || point.y > peak)) {
+          peak = point.y;
+          highest = { seriesLabel: series.label, at: point.xText, text: point.text };
+        }
     return {
       ...base,
       series: projected,
+      takeaway: highest
+        ? `${p.copy.kit.peak} · ${highest.seriesLabel} · ${highest.at}: ${highest.text}`
+        : undefined,
       ranges,
       xLabel: input.xLabel,
       yLabel: input.yLabel,

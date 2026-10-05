@@ -96,6 +96,9 @@ export const kitEnglish = {
   imageUnavailable: "Image unavailable",
   retryImage: "Reload image",
   table: "Data table",
+  // What a plot says before its numbers: the one observation a person came to
+  // read. The axis supplies the rest of the sentence.
+  peak: "Peak",
   range: "Range",
   noSamples: "No samples",
   noBaseline: "No baseline",
@@ -255,6 +258,7 @@ export const kitPortuguese: KitWords = {
   imageUnavailable: "Imagem indisponível",
   retryImage: "Recarregar imagem",
   table: "Tabela de dados",
+  peak: "Pico",
   range: "Intervalo",
   noSamples: "Sem amostras",
   noBaseline: "Sem referência",

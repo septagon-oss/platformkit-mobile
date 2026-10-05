@@ -39,7 +39,6 @@ export function BarChart({
         />
       ) : null}
       {model.empty ? <Text>{model.emptyLabel}</Text> : null}
-      <Text>{model.axesLabel}</Text>
       <View style={s.chartPlot}>
         <View style={s.chartAxis} testID="kit-chart-axis">
           {model.yTicks.map((tick) => (
@@ -98,14 +97,21 @@ export function BarChart({
           </View>
         </View>
       </View>
-      <Text role="title">{model.tableLabel}</Text>
-      {model.categories.map((category) => (
-        <View key={category.id}>
-          {category.values.map((value) => (
-            <Text key={value.seriesId}>{value.accessibleLabel}</Text>
-          ))}
-        </View>
-      ))}
+      {/* One caption names what the lines below are, exactly once, and each
+          observation is then written once beside it — the same shape the area
+          chart's text alternative takes. */}
+      <View style={s.chartValues} testID="kit-chart-values">
+        <Text role="caption" tone="muted">
+          {`${model.tableLabel} · ${model.axesLabel}`}
+        </Text>
+        {model.categories.map((category) => (
+          <View key={category.id}>
+            {category.values.map((value) => (
+              <Text key={value.seriesId}>{value.accessibleLabel}</Text>
+            ))}
+          </View>
+        ))}
+      </View>
     </View>
   );
 }

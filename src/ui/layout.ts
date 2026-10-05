@@ -51,6 +51,9 @@ export const kitStyles = (t: Theme) =>
       textAlign: "center",
       transform: [{ translateX: "-50%" }],
     },
+    /** chartValues is the plot's text alternative: the caption that names the
+     * columns, then one tight line per observation. */
+    chartValues: { gap: t.space.xs },
     /** legend is the plot's key: the ink each series is drawn in, beside its name. */
     legend: { flexDirection: "row" as const, flexWrap: "wrap" as const, gap: t.space.md },
     legendItem: {

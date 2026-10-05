@@ -152,28 +152,42 @@ export function AreaChart({
           </View>
         ))}
       </View>
-      <Text role="title">{model.tableLabel}</Text>
-      <Text>{model.axesLabel}</Text>
-      {model.series.map((series) => (
-        <View key={series.id} style={s.stack}>
-          <Text role="label">{series.label}</Text>
-          {series.points.map((point) =>
-            point.y === null ? (
-              <Text key={point.id}>{point.displayLabel}</Text>
-            ) : (
-              <Button
-                key={point.id}
-                label={point.accessibleLabel}
-                tone="secondary"
-                selected={point.selected}
-                onPress={() => {
-                  if (!point.selected) onPoint({ seriesId: series.id, pointId: point.id });
-                }}
-              />
-            ),
-          )}
-        </View>
-      ))}
+      {model.takeaway ? (
+        <Text role="label" testID="kit-chart-takeaway">
+          {model.takeaway}
+        </Text>
+      ) : null}
+      {/* The exact values are the plot's text alternative: one line per observation,
+          each naming its series, its hour and its figure, in the order drawn. A line
+          that opens that observation is a control; a line that only repeats a figure
+          under a heading that already names it is not, which is what turned this
+          table into a wall of outlined boxes. */}
+      <View style={s.chartValues} testID="kit-chart-values">
+        <Text role="caption" tone="muted">
+          {`${model.tableLabel} · ${model.axesLabel}`}
+        </Text>
+        {model.series.map((series) => (
+          <View key={series.id}>
+            {series.points.map((point) =>
+              point.y === null ? (
+                <Text key={point.id} accessibilityLabel={point.accessibleLabel}>
+                  {point.displayLabel}
+                </Text>
+              ) : (
+                <Button
+                  key={point.id}
+                  label={point.accessibleLabel}
+                  tone="plain"
+                  selected={point.selected}
+                  onPress={() => {
+                    if (!point.selected) onPoint({ seriesId: series.id, pointId: point.id });
+                  }}
+                />
+              ),
+            )}
+          </View>
+        ))}
+      </View>
       <Button label={model.clearLabel} tone="plain" onPress={onClearPoint} />
     </View>
   );
