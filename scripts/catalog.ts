@@ -10,11 +10,14 @@
 //
 //   check    (offline, run by the suite) the bytes here hash to what the record
 //            says, so editing the copy to make a test pass is a failure.
-//   drift    (scheduled, reports) fetch the recorded commit and compare; then ask
+//   drift    (by hand, reports) fetch the recorded commit and compare; then ask
 //            the public module proxy which version an outside `go get` would take
-//            and whether its catalog differs. The second question cannot be
-//            answered offline, so it reports rather than blocks — see the head of
-//            .gitea/workflows/drift.yml.
+//            and whether its catalog differs. Neither question can be answered
+//            offline, so it reports rather than blocks — and nothing runs it on a
+//            schedule today: .gitea/workflows/drift.yml is the weekly report of
+//            what the SDK, the dependency tree, the advisories and the fingerprint
+//            say, and holds no catalog step. The nightly that would run this is
+//            T-0298's.
 //   refresh  (deliberate) rewrite the fixture from the recorded commit. The pin
 //            itself only moves by editing that commit field, which is a diff.
 //
@@ -110,7 +113,7 @@ export async function check(): Promise<string> {
     throw new Error(
       `${FIXTURE} is not what ${SOURCE} says it is:\n  recorded ${source.sha256}\n  on disk  ${got}\n` +
         `It is copied from ${source.upstream.commit.slice(0, 12)}. Either restore that file or run ` +
-        `tsx scripts/catalog.ts refresh and review the diff.`,
+        `node --import tsx scripts/catalog.ts refresh and review the diff.`,
     );
   return `${FIXTURE} matches ${source.upstream.tag} (${got.slice(0, 12)}…)`;
 }
@@ -163,7 +166,7 @@ export function report(
   const lines = [
     hash(local) === hash(pinned)
       ? `ok  ${FIXTURE} still matches ${source.upstream.tag}`
-      : `DRIFT ${FIXTURE} differs from ${source.upstream.tag}; run tsx scripts/catalog.ts refresh`,
+      : `DRIFT ${FIXTURE} differs from ${source.upstream.tag}; run node --import tsx scripts/catalog.ts refresh`,
   ];
   if (latest.state === "unreachable") {
     lines.push(`note  cannot tell whether a newer version is published: ${latest.detail}`);
@@ -239,7 +242,10 @@ async function main(): Promise<void> {
   const { positionals } = parseArgs({ allowPositionals: true });
   const command = positionals[0] ?? "check";
   const run = { check, refresh, drift }[command];
-  if (!run) throw new Error(`usage: tsx scripts/catalog.ts [check|refresh|drift] (got ${command})`);
+  if (!run)
+    throw new Error(
+      `usage: node --import tsx scripts/catalog.ts [check|refresh|drift] (got ${command})`,
+    );
   console.log(await run());
 }
 

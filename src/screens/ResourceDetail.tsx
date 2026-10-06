@@ -4,7 +4,7 @@
 import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
-import type { Command } from "../core/catalog";
+import { doors, type Command } from "../core/catalog";
 import { deriveEventActivity, label, rowCommands, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
@@ -25,7 +25,11 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   });
   const { ask, busy } = useCommandAsk(entry, id);
   const router = useRouter();
-  const may = entry.writable && !!id;
+  // Edit and Delete are separate doors: a resource may mount PATCH without
+  // DELETE, and a caller who may amend a row may not be one who may erase it.
+  const may = doors(entry);
+  const canEdit = !!id && may.update;
+  const canDelete = !!id && may.delete;
   const edit = useCallback(
     () => id && router.push(`${screenPath(entry)}/${encodeURIComponent(id)}/edit`),
     [router, entry, id],
@@ -51,15 +55,17 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     () => ({
       title,
       headerLargeTitleEnabled: false,
-      ...(may
-        ? {
-            headerRight: () => (
-              <Button placement="header" label="Edit" icon="edit" onPress={edit} />
-            ),
-          }
-        : {}),
+      // Both sides of the door are spelled out, as Singleton does: a native
+      // stack keeps the option it was last given, so *omitting* headerRight is
+      // how an Edit that no longer belongs — a withdrawn write, a re-read
+      // catalogue handing this screen an entry with no `update` — sits in the
+      // header greyed and doing nothing. An empty block is the refusal that
+      // actually shows.
+      headerRight: canEdit
+        ? () => <Button placement="header" label="Edit" icon="edit" onPress={edit} />
+        : () => null,
     }),
-    [title, may, edit],
+    [title, canEdit, edit],
   );
   return (
     <>
@@ -80,7 +86,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
             }
           : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}
-        {...(may ? { onDelete: detail.remove } : {})}
+        {...(canDelete ? { onDelete: detail.remove } : {})}
       />
     </>
   );

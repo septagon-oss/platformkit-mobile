@@ -2,7 +2,7 @@
 // only an entry's schema. The rules are the web generator's (ui/screens in the
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
-import type { Command, Entry, Field } from "./catalog";
+import type { Command, CrudVerb, Entry, Field } from "./catalog";
 import { presentedTime, type Formatting } from "./presentation";
 
 export { deriveCopy, type Copy, type Language } from "./copy";
@@ -437,6 +437,54 @@ export const narrowed = (order: Order): boolean =>
 /** screenPath is where the router serves an entry's screens. */
 export const screenPath = (e: Entry): `/${string}/${string}` =>
   `/${encodeURIComponent(e.module)}/${encodeURIComponent(e.entity)}`;
+
+/**
+ * writePath is where an entry's writes are answered: POST, PATCH, PUT and
+ * DELETE go here, GETs go to `path`. Most resources answer both at the same
+ * address and print no `write_path`; the one that does — a control plane whose
+ * writes are mounted on another surface — is not something a screen or a
+ * transport gets to guess at.
+ */
+export const writePath = (e: Entry): string => e.writePath ?? e.path;
+
+/** rowPlaceholder is the literal the kernel leaves in a printed command path. */
+const rowPlaceholder = "{id}";
+
+/**
+ * verbRefusal is what a screen says when it is asked to send a verb the
+ * resource does not mount. The door for such a verb is never drawn, so this is
+ * the sentence for a sheet reached by a link or a stale notification rather
+ * than for a choice somebody was offered — and the request itself is refused
+ * before it is built, because the address it would go to is not there.
+ */
+export const verbRefusal = (verb: CrudVerb): string =>
+  verb === "create"
+    ? "This record cannot be created here."
+    : verb === "update"
+      ? "This record cannot be edited here."
+      : verb === "delete"
+        ? "This record cannot be deleted here."
+        : "This is not available here.";
+
+/**
+ * commandPath is where a command is POSTed. The kernel prints an address only
+ * when {entry.path}/{id}/{verb} — or {entry.path}/{verb} for a command about
+ * the collection — is no longer where it mounted the verb, so a printed path is
+ * the whole endpoint and already ends in the verb: it is used as it is read,
+ * with the row substituted and the verb never appended again.
+ */
+export const commandPath = (e: Entry, verb: string, id?: string): string => {
+  const printed = e.commands.find((c) => c.verb === verb)?.path;
+  if (printed === undefined) {
+    const at = id ? `${e.path}/${encodeURIComponent(id)}` : e.path;
+    return `${at}/${encodeURIComponent(verb)}`;
+  }
+  if (!printed.includes(rowPlaceholder)) return printed;
+  if (id === undefined) {
+    throw new TypeError(`command "${verb}" is answered at ${printed}, which needs the row`);
+  }
+  return printed.split(rowPlaceholder).join(encodeURIComponent(id));
+};
 
 export * from "./collections";
 export * from "./surfaces";

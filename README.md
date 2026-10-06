@@ -646,11 +646,13 @@ was copied from, in the same shape the design-token provenance uses. The suite
 checks the bytes against that record offline, so editing the copy to make a test
 pass fails instead of fixing anything. `node --import tsx scripts/catalog.ts refresh` rewrites
 both files; the pin itself moves only by editing the recorded commit, which is a
-diff somebody reviews. What no local check can see is whether the server has moved,
-so the `contract-drift` schedule asks the public repository and the module proxy and
-reports without blocking, for the reason at the head of
-[.gitea/workflows/drift.yml](.gitea/workflows/drift.yml). A proxy it cannot reach is
-reported as _unknown_ and never as agreement: the first version of
+diff somebody reviews. What no local check can see is whether the server has moved.
+`node --import tsx scripts/catalog.ts drift` asks the recorded commit and the
+public module proxy and reports without blocking, and nothing runs it on a
+schedule: the weekly [drift workflow](.gitea/workflows/drift.yml) reports what the
+SDK, the dependency tree, the advisory database and the fingerprint say today,
+and holds no catalogue step — the nightly that would run this is T-0298's.
+A proxy it cannot reach is reported as _unknown_ and never as agreement: the first version of
 `scripts/catalog.ts` asked the proxy for `septagon-oss/platformkit` instead of
 `github.com/septagon-oss/platformkit`, took a 404, and printed "ok, this is the latest
 version".
@@ -664,6 +666,66 @@ build has never seen, so `parseCatalog` refuses a `catalogVersion` newer than
 `SUPPORTED_CATALOG_VERSION` in [src/core/catalog.ts](src/core/catalog.ts) rather than
 drawing a screen from the fields it happens to recognise; a server old enough not to
 stamp is the server this shell was built against, and is accepted.
+
+The stamp this build answers to is 2, which is `ui/screens.CatalogVersion` on
+kernel main, and version 2 says three things version 1 did not. `write_path` is
+where a resource's writes are answered when they are not answered at its read
+address — a control plane whose rows read from the tenant host and are written on
+the ops one. `operations` names the verbs the server actually mounted for the
+resource, and a command's `path` is its whole endpoint, `{id}` and the verb
+already in it. One function owns each derivation: `writePath` and `commandPath`
+in [src/core/derive.ts](src/core/derive.ts). The transport builds no write
+address of its own — a list, a read and a singleton read go to `path`; a POST,
+PATCH, PUT and DELETE to `writePath`, which is `path` unless the document printed
+another; and a command to the address it printed, with the row substituted and
+the verb never appended a second time. Which doors a screen draws is one rule
+too: `doors(entry)` is `writable` — this caller may write — times `operations` —
+this verb is mounted — and it is what the three generated screens draw. The three
+hooks that send a write recheck the verb half of that rule, `offers(entry, verb)`,
+because a sheet arrives by a link or a restored stack as easily as by the button;
+what `writable` says is not rechecked there, exactly as before version 2, and the
+server is what refuses a write from a caller who may not perform one. An absent or
+empty `operations` means all five, exactly as in version 1, so a server that says
+nothing keeps every door it always had. `operations` narrows the write doors only:
+no screen consults it for `list` or `read`, so an entry naming `["create"]` and
+nothing else would still be given a list and a detail whose GETs nothing answers —
+the shape no kernel resource is today, since a resource with no read is nowhere the
+phone can go.
+
+The pinned copy carries none of those three keys — no resource in the kernel's
+golden has its writes elsewhere — so
+[testdata/catalog.control-plane.json](testdata/catalog.control-plane.json) sits
+beside it: the copy's three resources, then a resource written on another
+surface, a command at a printed address of its own, and a singleton whose PUT
+follows it. The copy is not extended in place, because the hash that makes it
+trustworthy is a hash of the kernel's bytes; a test asserts the extension is
+those bytes plus those entries instead. The version-2 keys this build ignores on
+purpose are `screen` (the web workspace's page address, where the phone's routes
+are its own file tree), `display`, `present` and `maxLength` (no control here
+draws them yet) and the `richtext` widget, which stays T-0192's; a case in
+`tests/catalog.test.ts` refuses any of them an unintended reader.
+
+**Reused** — `parseCatalog`'s own validators (`str`, `strings`, `CatalogError`) and
+the `writable` gate the screens already consulted; the New, Edit, Delete and Save
+buttons, their copy and their testIDs; `createApi`'s `call`/`json` and its `/api/v1/`
+guard; `scripts/catalog.ts`'s `provenance`, `check` and `refresh` with the
+`platformkit.catalog-source.v1` record unchanged; `fakeFetch` and the fakes in
+`tests/fakes/`. **Added** — `writePath`, `operations` and a command's `path` on the
+parsed entry, one `absolute()` rule shared by every address the document prints, the
+verb set `offers`/`doors`, the two derivations, and the extension fixture — nothing
+existing carried an address that is not the read path, and the extension is a second
+file because widening the pinned copy would break the very hash that vouches for it.
+**Made reusable** — one named owner per address, so a renderer pack or the next
+screen asks `writePath`/`commandPath` instead of joining `entry.path` by hand; the
+rule that every address the document prints is an absolute path, refused at its own
+field — named as a rule rather than a symbol, because the function that holds it is
+private to [src/core/catalog.ts](src/core/catalog.ts), and because it is the
+half a document can be refused for: what makes a path sendable at all (under
+`/api/v1/`, no fragment, fully encoded) is one rule owned by `createApi`, so a
+document printing `/elsewhere` stops at send time, not at the parser — and this is
+what the generated types (T-0287) will have to answer to; and
+`testdata/catalog.control-plane.json` is the fixture any later control-plane work —
+and the cross-pin nightly (T-0298) — runs against.
 
 [testdata/design-tokens.json](testdata/design-tokens.json) is the palette's
 source and a build input: the native fingerprint hashes it, so a token change

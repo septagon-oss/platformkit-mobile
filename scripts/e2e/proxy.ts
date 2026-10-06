@@ -3,8 +3,8 @@
 // to the workstation, and this forwards each request to the upstream with the
 // Host header the tenant is known by. It is a developer's tool for the device
 // journeys and nothing else; it does not run in CI or on a phone.
-//   tsx scripts/e2e/proxy.ts <listen port> <upstream url> <tenant host> [bind]
-//   tsx scripts/e2e/proxy.ts 8081 http://127.0.0.1:8080 platformkit.localhost:8080
+//   node --import tsx scripts/e2e/proxy.ts <listen port> <upstream url> <tenant host> [bind]
+//   node --import tsx scripts/e2e/proxy.ts 8081 http://127.0.0.1:8080 platformkit.localhost:8080
 //
 // It listens on loopback unless a bind address is given. Give one only to
 // reach a real phone on a private network you control, and remember that what

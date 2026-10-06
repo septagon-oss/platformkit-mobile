@@ -198,6 +198,74 @@
       "screen": "/app/note/notes",
       "writable": true,
       "singleton": true
+    },
+    {
+      "module": "pricing",
+      "entity": "price-list",
+      "path": "/api/v1/pricing/price-lists",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "readOnly": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "effectiveAt",
+          "type": "time"
+        }
+      ],
+      "immutable": [
+        "id"
+      ],
+      "writable": true,
+      "write_path": "/api/v1/ops/pricing/price-lists",
+      "operations": [
+        "list",
+        "read",
+        "create",
+        "update"
+      ],
+      "commands": [
+        {
+          "verb": "retire",
+          "summary": "Retire a price list",
+          "path": "/api/v1/ops/pricing/price-lists/{id}/retire",
+          "fields": [
+            {
+              "name": "reason",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module": "pricing",
+      "entity": "currency",
+      "path": "/api/v1/pricing/currency",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "readOnly": true
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "immutable": [
+        "id"
+      ],
+      "writable": true,
+      "write_path": "/api/v1/ops/pricing/currency",
+      "singleton": true
     }
   ]
 }

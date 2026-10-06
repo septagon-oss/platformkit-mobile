@@ -339,3 +339,116 @@ test("invalid typed list items refuse the whole input without filtering or round
     assert.deepEqual(values(controls, { items: raw }), {});
   }
 });
+
+// ---------------------------------------------------------------------------
+// Where a write goes, and which doors are drawn. One implementation of each,
+// which is why these cases are here and not in the screens that use them.
+// ---------------------------------------------------------------------------
+
+import { doors, offers, type Entry } from "../src/core/catalog";
+import { commandPath, verbRefusal, writePath } from "../src/core/derive";
+
+const control = parseCatalog(
+  JSON.parse(
+    readFileSync(
+      new URL("../testdata/catalog.control-plane.json", import.meta.url).pathname,
+      "utf8",
+    ),
+  ),
+);
+const priceLists = control.resources[3]!;
+
+test("writePath is the address the entry names, or its own path when it names none", () => {
+  assert.equal(writePath(note), "/api/v1/note/notes");
+  assert.equal(writePath(priceLists), "/api/v1/ops/pricing/price-lists");
+  // A singleton's PUT is a write like any other, and the kernel mounts it on
+  // the write surface too (kit/rest/singleton.go), so the same field answers
+  // for it; nothing in the phone gets to assume a singleton is read and
+  // written at one address.
+  assert.equal(writePath(control.resources[4]!), "/api/v1/ops/pricing/currency");
+  // The field is never a permission: an entry with no write_path reads its own
+  // path whether it is writable or not.
+  assert.equal(writePath({ ...note, writable: false }), "/api/v1/note/notes");
+});
+
+test("commandPath sends a printed address as printed, and derives one that was never printed", () => {
+  // No path printed: today's derivation, byte for byte, verb appended.
+  assert.equal(commandPath(note, "publish", "1"), "/api/v1/note/notes/1/publish");
+  assert.equal(commandPath(note, "archive"), "/api/v1/note/notes/archive");
+  // A path printed is the whole endpoint and already ends in the verb, so the
+  // verb is never appended again and only {id} is filled in.
+  assert.equal(commandPath(priceLists, "retire", "1"), "/api/v1/ops/pricing/price-lists/1/retire");
+  // The row is part of the address; a caller without one cannot ask for it.
+  assert.throws(
+    () => commandPath(priceLists, "retire"),
+    (e: unknown) =>
+      e instanceof TypeError &&
+      e.message.includes("/api/v1/ops/pricing/price-lists/{id}/retire") &&
+      e.message.includes("needs the row"),
+  );
+  // A printed address with no row in it stands exactly as it is, and a verb
+  // this entry does not carry at all is still derived.
+  const wholeCollection: Entry = {
+    ...priceLists,
+    commands: [{ verb: "recalc", path: "/api/v1/ops/pricing/recalculate", fields: [] }],
+  };
+  assert.equal(commandPath(wholeCollection, "recalc"), "/api/v1/ops/pricing/recalculate");
+  // An id is an id wherever it lands, encoded the same way in both spellings.
+  assert.equal(commandPath(note, "publish", "a/b"), "/api/v1/note/notes/a%2Fb/publish");
+  assert.equal(
+    commandPath(priceLists, "retire", "a/b"),
+    "/api/v1/ops/pricing/price-lists/a%2Fb/retire",
+  );
+  // A verb the entry does not carry is derived as it always was: the transport
+  // stays the last word on whether an address is sendable at all.
+  assert.equal(commandPath(note, "resolve", "1"), "/api/v1/note/notes/1/resolve");
+});
+
+test("offers reads an absent set and an empty one as all five", () => {
+  const empty: Entry = { ...note, operations: [] };
+  for (const verb of ["list", "read", "create", "update", "delete"] as const) {
+    assert.equal(offers(note, verb), true, "absent names every verb");
+    assert.equal(offers(empty, verb), true, "an empty set means all five");
+  }
+  const noDelete: Entry = { ...note, operations: ["list", "read", "create", "update"] };
+  assert.equal(offers(noDelete, "delete"), false);
+  assert.equal(offers(noDelete, "update"), true);
+});
+
+test("doors draws a door only where writable and operations both say so", () => {
+  // note is the pinned entry: writable, and no operation set at all.
+  assert.deepEqual(doors(note), { create: true, update: true, delete: true });
+  assert.deepEqual(doors({ ...note, operations: [] }), {
+    create: true,
+    update: true,
+    delete: true,
+  });
+  assert.deepEqual(doors({ ...note, operations: ["list", "read", "create", "update"] }), {
+    create: true,
+    update: true,
+    delete: false,
+  });
+  assert.deepEqual(doors({ ...note, operations: ["list", "read", "delete"] }), {
+    create: false,
+    update: false,
+    delete: true,
+  });
+  // writable is the caller's guard and operations only narrows it: a document
+  // that named every verb for a caller who may not write still draws no door.
+  assert.deepEqual(
+    doors({
+      ...note,
+      writable: false,
+      operations: ["list", "read", "create", "update", "delete"],
+    }),
+    { create: false, update: false, delete: false },
+  );
+});
+
+test("a verb that is not offered is refused in the resource's own words", () => {
+  // The words name what will not happen, not who refused: a person reading them
+  // has no use for the server's vocabulary.
+  assert.match(verbRefusal("create"), /^This record cannot be created here\.$/);
+  assert.match(verbRefusal("update"), /^This record cannot be edited here\.$/);
+  assert.match(verbRefusal("delete"), /^This record cannot be deleted here\.$/);
+});

@@ -5,6 +5,7 @@
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
+import { doors } from "../core/catalog";
 import { humanize, type Clock } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
@@ -21,7 +22,10 @@ export function Singleton({
   const initialDate = useInitialDate(clock);
   const one = useSingleton(entry);
   const { edit, cancel, save, editing, phase } = one;
-  const may = entry.writable;
+  // A singleton writes its one row with a PUT, whose verb the kernel calls
+  // update; a singleton prints no operation set today, so this is the answer
+  // `entry.writable` always gave and the right one the day one names a set.
+  const may = doors(entry).update;
   const saving = phase === "saving";
   // Memoised because the navigator is told its options on every render.
   const options = useMemo(

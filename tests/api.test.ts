@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { ApiError, createApi } from "../src/effects/api";
+import { parseCatalog } from "../src/core/catalog";
 import { formControls, values } from "../src/core/derive";
 
 type Call = { url: string; init: RequestInit };
@@ -358,4 +359,108 @@ test("a generated edit sends cleared text and typed list items in its PATCH body
   assert.equal(calls[0]!.url, "https://acme.test/api/v1/note/notes/7");
   assert.equal(calls[0]!.init.method, "PATCH");
   assert.deepEqual(JSON.parse(String(calls[0]!.init.body)), { summary: "", counts: [-4, 2] });
+});
+
+// The acceptance case for a version-2 document: the reads stay where they
+// always were and the writes go to the address the catalogue named, which for
+// these two resources is a different surface. Every assertion below is the
+// address, not the shape of a request — the shapes are pinned above.
+
+const controlPlane = parseCatalog(
+  JSON.parse(
+    readFileSync(
+      new URL("../testdata/catalog.control-plane.json", import.meta.url).pathname,
+      "utf8",
+    ),
+  ),
+);
+const priceLists = controlPlane.resources[3]!;
+const currency = controlPlane.resources[4]!;
+
+test("a write goes where the catalogue says and a read stays where it was", async () => {
+  const { fetch, calls } = fakeFetch([
+    { status: 201, body: { id: "1" } },
+    { status: 200, body: { id: "1" } },
+    { status: 204 },
+    { status: 200, body: { id: "1" } },
+    { status: 200, body: { items: [], total: 0 } },
+    { status: 200, body: { id: "1" } },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  await api.create(priceLists, { title: "Autumn" });
+  await api.update(priceLists, "1", { title: "Autumn" });
+  await api.remove(priceLists, "1");
+  await api.command(priceLists, "1", "retire", { reason: "superseded" });
+  await api.list(priceLists);
+  await api.get(priceLists, "1");
+  const sent = calls.map((c) => [c.init.method, new URL(c.url).pathname]) as [
+    string | undefined,
+    string,
+  ][];
+  assert.deepEqual(sent, [
+    ["POST", "/api/v1/ops/pricing/price-lists"],
+    ["PATCH", "/api/v1/ops/pricing/price-lists/1"],
+    ["DELETE", "/api/v1/ops/pricing/price-lists/1"],
+    ["POST", "/api/v1/ops/pricing/price-lists/1/retire"],
+    ["GET", "/api/v1/pricing/price-lists"],
+    ["GET", "/api/v1/pricing/price-lists/1"],
+  ]);
+  // The list keeps the paging it always sent; only the surface moved.
+  assert.match(calls[4]!.url, /\?limit=20&offset=0$/);
+});
+
+test("a singleton's PUT follows its write path, and its GET stays on its own", async () => {
+  const { fetch, calls } = fakeFetch([
+    { status: 200, body: { id: "1", code: "EUR" } },
+    { status: 200, body: { id: "1", code: "EUR" } },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  await api.one(currency);
+  await api.replace(currency, { code: "EUR" });
+  assert.deepEqual(
+    calls.map((c) => [c.init.method, c.url.slice("https://acme.test".length)]),
+    [
+      ["GET", "/api/v1/pricing/currency"],
+      ["PUT", "/api/v1/ops/pricing/currency"],
+    ],
+  );
+});
+
+test("an entry that names no write address is written where it always was", async () => {
+  // The regression gate: this change moved the derivation, not the answer, for
+  // every resource the pinned document describes — which is the only way a
+  // build that reads version 2 can still serve a server on version 1.
+  const { fetch, calls } = fakeFetch([
+    { status: 201, body: { id: "1" } },
+    { status: 200, body: { id: "1" } },
+    { status: 204 },
+    { status: 200, body: { id: "1" } },
+  ]);
+  const api = createApi("https://acme.test", fetch);
+  const note = parseCatalog(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  ).resources[0]!;
+  await api.create(note, { title: "x" });
+  await api.update(note, "1", { title: "x" });
+  await api.remove(note, "1");
+  await api.command(note, "1", "publish", {});
+  assert.deepEqual(
+    calls.map((c) => [c.init.method, c.url.slice("https://acme.test".length)]),
+    [
+      ["POST", "/api/v1/note/notes"],
+      ["PATCH", "/api/v1/note/notes/1"],
+      ["DELETE", "/api/v1/note/notes/1"],
+      ["POST", "/api/v1/note/notes/1/publish"],
+    ],
+  );
+});
+
+test("a command whose printed address needs a row is refused before anything is sent", async () => {
+  const { fetch, calls } = fakeFetch([]);
+  const api = createApi("https://acme.test", fetch);
+  await assert.rejects(
+    () => api.command(priceLists, undefined, "retire", { reason: "x" }),
+    (e: unknown) => e instanceof TypeError && e.message.includes('command "retire" is answered at'),
+  );
+  assert.equal(calls.length, 0, "the transport was asked to send an address it never got");
 });
