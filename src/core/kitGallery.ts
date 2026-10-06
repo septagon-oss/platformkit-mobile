@@ -305,14 +305,23 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       productId: product.id,
       title: name,
       unitPrice: unit,
-      quantity: { ...quantity, value: 2 },
+      // A cart is a screen someone is partway through a task on: both halves of its
+      // stepper have somewhere to go. Where a step has reached its floor the kit says
+      // so on the quantity specimens, which are about that state; drawn on the page's
+      // one cart it was an order that looked as though it could not be edited.
+      quantity: { ...quantity, value: 4 },
       availability: "available" as const,
       remove: { ...secondary, id: "remove", label: c.remove },
     };
     const quote = {
       id: "quote-1",
       revision: "revision-1",
-      total: { minor: state === "multiple-lines" ? "3897" : "2598", currency },
+      // A quote's total is its lines: the cart refuses a quote whose figure contradicts
+      // what it is a quote for, so the fixture moves both together.
+      total: {
+        minor: state === "multiple-lines" ? "7794" : "5196",
+        currency,
+      },
       expiresAt: state === "quote-expired" ? p.now : instant.add({ hours: 1 }).toString(),
     };
     const row = {
@@ -658,7 +667,20 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       price: v.take(derivePrice(price, p)),
       quantity: v.take(deriveQuantity(quantity, p)),
       product: v.take(
-        deriveProductCard({ content: sample({ product, options: [choice], quantity }) }, p),
+        deriveProductCard(
+          {
+            content: sample({
+              product,
+              options: [choice],
+              // A card is the kit's first-use example: a party of four, with room on the
+              // step for both halves of the stepper to move. Six is where the quantity
+              // specimen sits because it is the middle of its range, not a number anyone
+              // arriving at a pass would have chosen.
+              quantity: { ...quantity, value: 4 },
+            }),
+          },
+          p,
+        ),
       ),
       cart: v.take(
         deriveCart(
@@ -671,7 +693,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                       ...line,
                       id: "line-2",
                       title: choice.choices[1]!.label,
-                      quantity: { ...line.quantity, value: 1, min: 1, step: 1 },
+                      quantity: { ...line.quantity, value: 2, min: 1, step: 1 },
                     },
                   ]
                 : [line],
