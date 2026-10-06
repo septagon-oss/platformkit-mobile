@@ -1,3 +1,8 @@
+// What a trail shows is derived from events the server owns: an event belongs to a record when its
+// id appears anywhere in the payload, its name's last segment is the verb a person reads, its module
+// and entity name the subject, and "how long ago" picks the coarsest unit that is still true. A
+// session denial withdraws a trail before it is validated or formatted — rows, actor names, the
+// paging control and any page error go, in both languages, and the caller's draft is left as held.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { about, since, subject, verb, type Event } from "../src/core/activity";

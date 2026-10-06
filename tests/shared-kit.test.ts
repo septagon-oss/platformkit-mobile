@@ -1,3 +1,8 @@
+// The shared kit's components draw every column, control and value from these derivations, so the
+// rule behind each lives here and nowhere else: selection and bulk actions, step writes, slot
+// eligibility, calendar lanes, money exact beyond Number's range, map points, media and viewer
+// selection, chart gaps and domains, comparisons and the literal gallery — each decided in the
+// caller's copy and locale, refusing where a guess would draw something nobody was allowed to see.
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as d from "../src/core/derive";

@@ -1,3 +1,7 @@
+// A state view shows the phase it is handed: failed, empty and pending reads render distinct bodies
+// whose retries are the caller's own intents, a success keeps two independent actions, reduced
+// motion never starts or continues a pulse, and a gallery consumer's palette, fonts and copy reach
+// only its own screens — never another provider rendered beside them.
 import { describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";

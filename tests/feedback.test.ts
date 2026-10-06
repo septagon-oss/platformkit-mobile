@@ -1,3 +1,8 @@
+// A rich state says what happened and what a person may do next, from the caller's own copy, locale
+// and zone: an unknown or immutable write never offers a retry, contradictory controls refuse the
+// whole input without touching the caller's data, a busy action keeps its label, a failed or denied
+// first read is never an empty list, and formatting the locale cannot do refuses rather than
+// borrowing the device's. Both copy trees hold the same nested keys, in both languages.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
