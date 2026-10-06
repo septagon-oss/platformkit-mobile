@@ -60,6 +60,20 @@ export function TabBar({
       <View style={s.lane}>
         {model.items.map((item, i) => {
           const off = item.unavailable !== undefined;
+          const glyph = icons[i];
+          // The count rides the corner of the destination's mark: its glyph where the
+          // kit has an honest one for the word, and the destination's own box where it
+          // draws no glyph because nothing nearer carries it. Pinned to the cell alone,
+          // a count drifts to the far corner of a wide tab and stops naming the thing
+          // it counts.
+          const count = (onGlyph: boolean) =>
+            item.badge === undefined ? null : (
+              <View style={[s.badge, onGlyph && s.badgeOnGlyph]} {...testable("kit-tab-count")}>
+                <Text role="caption" weight="semibold" tone="on" style={s.badgeText}>
+                  {item.badge}
+                </Text>
+              </View>
+            );
           return (
             <Pressable
               key={item.id}
@@ -100,9 +114,14 @@ export function TabBar({
                 off && s.off,
               ]}
             >
-              {icons[i] ? (
-                <Icon name={icons[i]!} size="md" tone={item.selected ? "accent" : "muted"} />
-              ) : null}
+              {glyph === undefined ? (
+                count(false)
+              ) : (
+                <View style={s.mark}>
+                  <Icon name={glyph} size="md" tone={item.selected ? "accent" : "muted"} />
+                  {count(true)}
+                </View>
+              )}
               <Text
                 role="caption"
                 weight={item.selected ? "semibold" : "regular"}
@@ -111,13 +130,6 @@ export function TabBar({
               >
                 {item.label}
               </Text>
-              {item.badge ? (
-                <View style={s.badge}>
-                  <Text role="caption" weight="semibold" tone="on" style={s.badgeText}>
-                    {item.badge}
-                  </Text>
-                </View>
-              ) : null}
             </Pressable>
           );
         })}
@@ -188,6 +200,13 @@ const styles = (t: Theme) =>
       paddingHorizontal: t.space.xs,
       borderRadius: t.radius.full,
       backgroundColor: t.color.accentDefault,
+    },
+    // The mark is the destination's mark — the glyph where the kit has one — and
+    // it is what the count is measured against, so the box stays the glyph's own.
+    mark: { position: "relative" },
+    badgeOnGlyph: {
+      top: -(t.space.xs / 2),
+      right: -t.space.xs,
     },
     badgeText: { textAlign: "center" },
   });
