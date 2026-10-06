@@ -2,7 +2,8 @@
 // rule behind each lives here and nowhere else: selection and bulk actions, step writes, slot
 // eligibility, calendar lanes, money exact beyond Number's range, map points, media and viewer
 // selection, chart gaps and domains, comparisons and the literal gallery — each decided in the
-// caller's copy and locale, refusing where a guess would draw something nobody was allowed to see.
+// caller's copy and locale, and refused outright where a guess would draw a value the input never
+// gave.
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as d from "../src/core/derive";
