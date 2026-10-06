@@ -44,8 +44,24 @@ export function reset(): void {
 
 const Nothing = (): null => null;
 
+/** headerBlocks are the two slots a screen may put in the native header. */
+interface ScreenOptions {
+  readonly headerLeft?: () => React.ReactElement | null;
+  readonly headerRight?: () => React.ReactElement | null;
+}
+
+/**
+ * Screen draws what the navigator would draw from `options`. A screen owns its
+ * header buttons — New, Edit, Save, Cancel — and puts them in the header slots
+ * rather than in the page, so a fake that rendered `Stack.Screen` as nothing
+ * could not see a single one of them: "no New on a resource that offers no
+ * create" would be unobservable, and an invisible door is not a tested door.
+ */
+const Screen = ({ options }: { readonly options?: ScreenOptions }): React.ReactElement =>
+  React.createElement(React.Fragment, null, options?.headerLeft?.(), options?.headerRight?.());
+
 export const expoRouter = {
-  Stack: Object.assign(Nothing, { Screen: Nothing }),
+  Stack: Object.assign(Nothing, { Screen }),
   Redirect: ({ href }: { readonly href: string }) =>
     React.createElement(Text, { testID: "redirect" }, href),
   useRouter: () => router,
