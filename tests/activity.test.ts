@@ -1,3 +1,8 @@
+// What a trail shows is derived from events the server owns: an event belongs to a record when its
+// id appears anywhere in the payload, its name's last segment is the verb a person reads, its module
+// and entity name the subject, and "how long ago" picks the coarsest unit that is still true. A
+// session denial withdraws a trail before it is validated or formatted — rows, actor names, the
+// paging control and any page error go, in both languages, and the caller's draft is left as held.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { about, since, subject, verb, type Event } from "../src/core/activity";
@@ -91,5 +96,58 @@ for (const language of ["en", "pt"] as const) {
       assert.equal(recovered.value.rows[0]!.actor, "Cached actor six");
       assert.equal(recovered.value.more?.enabled, true);
     }
+  });
+
+  test(`${language} denial withdraws a cached trail before validating or formatting it`, () => {
+    const p = { ...presentation, copy: deriveCopy(language) };
+    // The cached row is unreadable on its own terms: a withdrawn trail must not
+    // be re-derived into a validation refusal, because that would describe the
+    // caller's own cache as readable data they never got to see.
+    const cached = {
+      events: [
+        {
+          ...event("note.note.updated", { id: "note-203" }),
+          occurredAt: "not-an-instant",
+          actor: "actor-203",
+        },
+      ],
+      names: { "actor-203": "Withdrawn actor" },
+      loading: true,
+      loadingMore: true,
+      more: true,
+      error: "",
+      denied: true,
+    };
+    const before = JSON.stringify(cached);
+    const result = deriveEventActivity(cached, p);
+    assert.equal(result.ok, true, "withdrawn cached data is not a new readable snapshot");
+    if (!result.ok) return;
+    assert.deepEqual(result.value.rows, []);
+    assert.equal(result.value.more, undefined);
+    assert.equal(result.value.pageError, undefined);
+    assert.equal(result.value.state?.body, p.copy.kit.unavailable);
+    assert.deepEqual(result.value.state?.actions, []);
+    assert.equal(JSON.stringify(result.value).includes("Withdrawn actor"), false);
+    assert.equal(JSON.stringify(cached), before);
+    assert.equal(Object.isFrozen(cached.events[0]), false);
+
+    // The same row without the denial is the caller's readable data, and its
+    // timestamp still has to be one.
+    const malformed = deriveEventActivity({ ...cached, denied: false }, p);
+    assert.equal(malformed.ok, false, "readable timestamps still require validation");
+    assert.equal("value" in malformed, false);
+
+    // Only explicit new input makes history readable again: the snapshot already
+    // returned stays detached after the caller edits its own draft.
+    cached.events[0]!.occurredAt = "2026-08-04T11:00:00Z";
+    cached.names["actor-203"] = "Fresh actor";
+    const recovered = deriveEventActivity(
+      { ...cached, denied: false, loading: false, loadingMore: false },
+      p,
+    );
+    assert.equal(recovered.ok, true);
+    if (recovered.ok) assert.equal(recovered.value.rows[0]?.actor, "Fresh actor");
+    assert.deepEqual(result.value.rows, []);
+    assert.equal(result.value.state?.body, p.copy.kit.unavailable);
   });
 }

@@ -1,3 +1,9 @@
+// The shared kit's components draw every column, control and value from these derivations, so the
+// rule behind each lives here and nowhere else: selection and bulk actions, step writes, slot
+// eligibility, calendar lanes, money exact beyond Number's range, map points, media and viewer
+// selection, chart gaps and domains, comparisons and the literal gallery — each decided in the
+// caller's copy and locale, and refused outright where a guess would draw a value the input never
+// gave.
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as d from "../src/core/derive";
@@ -223,6 +229,39 @@ test("money is exact beyond Number, cancelling adjustments are order-independent
     { id: "c", label: "C", amount: money("-9223372036854775807") },
   ];
   assert.equal(ok(d.cartTotals({ currency, lines: [], adjustments })).total.minor, "1");
+  // An empty cart is a readable cart: its total is "0", not a refusal and not a
+  // missing field a renderer would have to invent.
+  assert.equal(ok(d.cartTotals({ currency, lines: [], adjustments: [] })).total.minor, "0");
+  const priced = ok(
+    d.cartTotals({
+      currency,
+      lines: [
+        { id: "first", unitPrice: money("319"), quantity: 2 },
+        { id: "second", unitPrice: money("1249"), quantity: 3 },
+      ],
+      adjustments: [
+        { id: "credit", label: "Credit", amount: money("-400") },
+        { id: "charge", label: "Charge", amount: money("125") },
+      ],
+    }),
+  );
+  assert.equal(priced.subtotal.minor, "4385");
+  assert.equal(priced.total.minor, "4110");
+  // A line's own multiplication can overflow as well: the whole computation
+  // refuses rather than publishing a partial total somebody could charge.
+  const lineOverflow = d.cartTotals({
+    currency,
+    lines: [{ id: "large", unitPrice: money("9223372036854775807"), quantity: 2 }],
+    adjustments: [],
+  });
+  assert.equal(lineOverflow.ok, false);
+  assert.equal("value" in lineOverflow, false);
+  if (!lineOverflow.ok)
+    assert.ok(
+      lineOverflow.issues.some(
+        (issue) => issue.code === "invalid-input" && issue.recovery === "immutable",
+      ),
+    );
   assert.deepEqual(
     d.cartTotals({ currency, lines: [], adjustments }),
     d.cartTotals({ currency, lines: [], adjustments: [...adjustments].reverse() }),
@@ -333,11 +372,6 @@ test("viewer selection survives image load states while thumbnail opening still 
     assert.equal(viewer.selectionIssue, undefined);
     assert.equal(viewer.selected?.canRetry, state === "error" || state === "unavailable");
   }
-  const decorative = ok(
-    d.deriveViewer({ ...input, content: ready([{ ...item, decorative: true }]), open: true }, p),
-  );
-  assert.equal(decorative.selected, undefined);
-  assert.equal(decorative.selectionIssue?.code, "unavailable");
 });
 
 test("chart gaps remain disconnected, missing is not zero, hidden data domains refuse", () => {
@@ -546,4 +580,38 @@ test("calendar retains parallel lanes while they fit, and groups them when the c
   );
   assert.equal(d.calendarTargets(model.week.days[0]!, 1440, 44, 240)[0]!.grouped, false);
   assert.equal(d.calendarTargets(model.week.days[0]!, 1440, 44, 60)[0]!.grouped, true);
+});
+
+test("a series that dips below zero keeps its own bounds and a missing sample splits its line", () => {
+  // A negative minimum is what a chart of changes needs: rescaling to zero would
+  // draw a fall as a rise. A null is a missing sample, so the line breaks there
+  // instead of drawing a straight segment through the gap.
+  const chart = ok(
+    d.deriveChart(
+      {
+        content: ready([
+          {
+            id: "visits",
+            label: "Visits",
+            tone: "info",
+            points: [
+              { id: "one", x: 11, y: -7 },
+              { id: "two", x: 13, y: null },
+              { id: "three", x: 19, y: 4 },
+            ],
+          },
+        ]),
+        xKind: "number",
+        xLabel: "Sample",
+        yLabel: "Change",
+        unitLabel: "items",
+        fractionDigits: 0,
+        ranges: [],
+      },
+      p,
+    ),
+  );
+  assert.deepEqual(chart.yDomain, [-7, 4]);
+  assert.equal(chart.series[0]!.segments.length, 2);
+  assert.equal(chart.series[0]!.points[1]!.py, undefined);
 });

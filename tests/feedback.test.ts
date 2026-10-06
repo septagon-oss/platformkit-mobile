@@ -1,3 +1,11 @@
+// A rich state says what happened and what a person may do next, from the caller's own copy, locale
+// and zone: an unknown or immutable write never offers a retry, contradictory controls refuse the
+// whole input without touching the caller's data, a busy action keeps its label, a failed or denied
+// first read is never an empty list, and formatting the locale cannot do refuses rather than
+// borrowing the device's — a value a person is shown shares the copy and locale a title uses. A
+// timestamp is stale only if it is a real UTC/offset instant, both copy trees hold the same nested
+// keys, and every example the literal gallery draws derives in EN and PT across the locales a
+// consumer is allowed to name.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
@@ -61,6 +69,46 @@ test("C02: immutable and unknown writes refuse retry intents, including secondar
   assert.equal(result.value.actions[0]?.intent, "reconcile");
   assert.match(result.value.body, /may have been saved/);
   assert.equal(deriveState({ ...write, action: { ...read, intent: "next" } }, p).ok, false);
+
+  // The refusal is written in the caller's copy, not in an English default, and
+  // a valid dismissal intent on the same draft is accepted.
+  const pt = { ...p, copy: deriveCopy("pt"), locale: "pt-BR" };
+  const translated: StateInput = {
+    kind: "error",
+    issue: {
+      code: "write-unknown",
+      path: "submit",
+      recovery: "correctable",
+      message: "O resultado ainda não é conhecido.",
+    },
+    action: {
+      intent: "reconcile",
+      control: { id: "lookup", label: "Consultar", state: "ready", tone: "primary" },
+    },
+    secondary: {
+      intent: "next",
+      control: { id: "submit-again", label: "Enviar", state: "ready", tone: "plain" },
+    },
+  };
+  const original = JSON.stringify(translated);
+  const refusal = deriveState(translated, pt);
+  assert.equal(refusal.ok, false);
+  assert.equal("value" in refusal, false);
+  if (!refusal.ok)
+    assert.deepEqual(refusal.issues, [
+      {
+        code: "invalid-input",
+        path: "secondary.intent",
+        recovery: "immutable",
+        message: "Esta informação não é válida.",
+      },
+    ]);
+  assert.equal(JSON.stringify(translated), original);
+  assert.equal(
+    deriveState({ ...translated, secondary: { ...translated.secondary!, intent: "dismiss" } }, pt)
+      .ok,
+    true,
+  );
 });
 
 test("state derivation rejects contradictory controls without changing caller data", () => {
@@ -115,7 +163,22 @@ test("C01: copy, locale and zone are explicit and independent between callers", 
   assert.deepEqual(deriveState(input, p), english);
   assert.equal(portuguese.value.title, "Está sem ligação");
   assert.equal(Object.isFrozen(deriveCopy("pt").state), true);
-  assert.deepEqual(Object.keys(deriveCopy("pt").state), Object.keys(deriveCopy("en").state));
+  const portugueseActions = deriveState(input, {
+    ...p,
+    copy: deriveCopy("pt"),
+    locale: "pt-BR",
+    timeZone: "Pacific/Honolulu",
+  });
+  assert.ok(portugueseActions.ok);
+  assert.ok(Object.isFrozen(portugueseActions.value.actions));
+  // The whole nested tree has to exist in both languages: a key missing from one
+  // copy renders an empty control in that language and nowhere else.
+  const paths = (value: object, prefix = ""): string[] =>
+    Object.entries(value).flatMap(([key, child]) => {
+      const path = `${prefix}${key}`;
+      return child !== null && typeof child === "object" ? paths(child, `${path}.`) : [path];
+    });
+  assert.deepEqual(paths(deriveCopy("pt")), paths(deriveCopy("en")));
 });
 
 test("unsupported formatting refuses instead of falling back to the device", () => {

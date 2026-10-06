@@ -98,7 +98,7 @@ if [ -n "${TENANT_HOST:-}" ]; then
     echo "run.sh: SERVER needs an explicit port when TENANT_HOST is set" >&2
     exit 1
   }
-  npx tsx scripts/e2e/proxy.ts "$port" "${UPSTREAM:?the real address of the server, e.g. http://127.0.0.1:8080}" "$TENANT_HOST" &
+  node --import tsx scripts/e2e/proxy.ts "$port" "${UPSTREAM:?the real address of the server, e.g. http://127.0.0.1:8080}" "$TENANT_HOST" &
   trap 'kill %1 2>/dev/null || true' EXIT
   sleep 1
 fi
