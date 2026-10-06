@@ -40,15 +40,25 @@ export function reset(): void {
   prevent.enabled = false;
   prevent.ask = undefined;
   params = {};
+  header.options = undefined;
 }
 
 const Nothing = (): null => null;
 
-/** headerBlocks are the two slots a screen may put in the native header. */
+/** ScreenOptions is what a screen hands the navigator. The two header slots are
+ * what a test reads out of it. */
 interface ScreenOptions {
   readonly headerLeft?: () => React.ReactElement | null;
   readonly headerRight?: () => React.ReactElement | null;
 }
+
+/**
+ * header is the last options any screen handed `Stack.Screen`. Drawing the
+ * blocks answers "what is on screen"; some claims are about the instruction —
+ * that a door is drawn closed rather than left unmentioned — and only the
+ * object the navigator was given knows which of the two it was.
+ */
+export const header: { options: ScreenOptions | undefined } = { options: undefined };
 
 /**
  * Screen draws what the navigator would draw from `options`. A screen owns its
@@ -57,8 +67,15 @@ interface ScreenOptions {
  * could not see a single one of them: "no New on a resource that offers no
  * create" would be unobservable, and an invisible door is not a tested door.
  */
-const Screen = ({ options }: { readonly options?: ScreenOptions }): React.ReactElement =>
-  React.createElement(React.Fragment, null, options?.headerLeft?.(), options?.headerRight?.());
+const Screen = ({ options }: { readonly options?: ScreenOptions }): React.ReactElement => {
+  if (options) header.options = options;
+  return React.createElement(
+    React.Fragment,
+    null,
+    options?.headerLeft?.(),
+    options?.headerRight?.(),
+  );
+};
 
 export const expoRouter = {
   Stack: Object.assign(Nothing, { Screen }),

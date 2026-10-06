@@ -55,13 +55,15 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     () => ({
       title,
       headerLargeTitleEnabled: false,
-      ...(canEdit
-        ? {
-            headerRight: () => (
-              <Button placement="header" label="Edit" icon="edit" onPress={edit} />
-            ),
-          }
-        : {}),
+      // Both sides of the door are spelled out, as Singleton does: a native
+      // stack keeps the option it was last given, so *omitting* headerRight is
+      // how an Edit that no longer belongs — a withdrawn write, a re-read
+      // catalogue handing this screen an entry with no `update` — sits in the
+      // header greyed and doing nothing. An empty block is the refusal that
+      // actually shows.
+      headerRight: canEdit
+        ? () => <Button placement="header" label="Edit" icon="edit" onPress={edit} />
+        : () => null,
     }),
     [title, canEdit, edit],
   );

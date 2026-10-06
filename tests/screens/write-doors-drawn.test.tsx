@@ -6,7 +6,7 @@ import { ResourceDetail } from "../../src/screens/ResourceDetail";
 import { ResourceList } from "../../src/screens/ResourceList";
 import { Singleton } from "../../src/screens/Singleton";
 import { ThemeProvider } from "../../src/ui/theme";
-import { reset } from "../fakes/router";
+import { reset, header } from "../fakes/router";
 import { fakeApi, note, setting, shell, shellValue } from "../fakes/shell";
 
 jest.mock(
@@ -117,6 +117,14 @@ test("a record whose resource mounts no update loses Edit and keeps Delete", asy
   await render(view(<ResourceDetail entry={{ ...note, operations: NO_UPDATE }} id={row.id} />));
   await waitFor(() => expect(screen.getByTestId("delete")).toBeOnTheScreen());
   expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
+  // The other half of the same door: the option is handed over *empty*, not
+  // omitted. A native stack keeps the option it was last given, so an omitted
+  // headerRight leaves the Edit of the row before this one sitting in the
+  // header, greyed and doing nothing — a door drawn closed is not a door the
+  // navigator was never told about. `Singleton` spells both sides out for the
+  // reason; this is the same rule on the screen that gained a second door.
+  expect(header.options?.headerRight).toBeInstanceOf(Function);
+  expect(header.options?.headerRight?.()).toBeNull();
 });
 
 test("a record whose resource says nothing about operations draws both doors", async () => {
