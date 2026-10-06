@@ -1,6 +1,8 @@
-// Losing the map is not losing the records. A provider failure keeps the authorized rows and
-// their selection; a denial removes markers, selection and detail text so that no coordinate or
-// title survives a read that stopped being allowed; a refresh that drops a point drops its selection.
+// Losing the map is not losing the records. A provider failure keeps the authorized rows, the
+// selectedId the caller handed the drawer and the row's own selected flag — a view that reads one
+// and not the other still has to be told the truth; a denial removes markers, selection and detail
+// text so that no coordinate or title survives a read that stopped being allowed; a refresh that
+// drops a point drops its selection.
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
@@ -55,6 +57,7 @@ for (const language of ["en", "pt"] as const) {
         ["west", "east", "polar"],
       );
       assert.equal(failed.rows.find((row) => row.selected)?.id, "west");
+      assert.equal(failed.selectedId, "west");
       assert.equal(failed.selectionIssue, undefined);
     }
 
