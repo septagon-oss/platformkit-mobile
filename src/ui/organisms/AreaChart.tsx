@@ -53,6 +53,14 @@ export function AreaChart({
   return (
     <View style={s.stack}>
       <ModelState model={model} onRetry={onRetry} />
+      {/* The plot's one observation leads the specimen: what a person came to read is
+          named before the range, the axis, the key and the values that support it, so
+          a chart at a phone's width opens with a sentence rather than a shape. */}
+      {model.takeaway ? (
+        <Text role="title" accessibilityRole="header" testID="kit-chart-takeaway">
+          {model.takeaway}
+        </Text>
+      ) : null}
       {model.ranges.choices.length ? (
         <ChoiceChips
           model={model.ranges}
@@ -154,11 +162,6 @@ export function AreaChart({
           </View>
         ))}
       </View>
-      {model.takeaway ? (
-        <Text role="label" testID="kit-chart-takeaway">
-          {model.takeaway}
-        </Text>
-      ) : null}
       {/* The exact values are the plot's text alternative: one line per observation,
           each naming its series, its hour and its figure, in the order drawn. A line
           that opens that observation is a control; a line that only repeats a figure
