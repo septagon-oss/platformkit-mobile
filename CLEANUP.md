@@ -71,7 +71,7 @@ were copies of area owners. Each input no owner held moved to that owner first:
 | a refused step transition whose message is Portuguese copy | `tests/stepper-pending-write.test.ts` |
 | an event that ended before the viewed day (`minutes 1500`, `events.length 0`) | `tests/calendar-withdrawal.test.ts` |
 | a negative `yDomain`, a null splitting the line into two segments | `tests/shared-kit.test.ts` |
-| empty-cart total `"0"`, the `subtotal`/`total` pair, a line multiplication that overflows | `tests/shared-kit.test.ts` |
+| empty-cart total `"0"`, the `subtotal`/`total` pair, a line multiplication that overflows | `tests/shared-kit.test.ts` — its `total.currency` and input-unchanged assertions did **not** move with the data; see the lost blocks below |
 | the whole nested copy-key walk, the frozen action list, the secondary-intent refusal in the caller's copy | `tests/feedback.test.ts` (the walk **replaces** the narrower `Object.keys(copy.state)` comparison, so the parity rule keeps one implementation) |
 | every specified family has its public core factory | **new** `tests/core-component-families.test.ts` — no owner asserted the derive surface |
 
@@ -80,6 +80,19 @@ Three assertion blocks were deleted, each after the kept side was read line by l
 * removed-but-selected rows and the disabled bulk action — `tests/list-selection-withdrawal.test.ts:65-69` asserts the same three things;
 * map provider failure retaining rows, selection and `selectionIssue === undefined` — `tests/map-withdrawal.test.ts:48-55`;
 * the decorative-item block in `tests/shared-kit.test.ts` — `tests/viewer-lost-selection.test.ts:31-47` covers both causes and compares the whole `selectionIssue`.
+
+The line-by-line read above missed two blocks that left a file with no owner. A review read the
+deleted copies against the kept side and found them; both are named tests again.
+
+* `review-shared-components`' cart-totals case ended at its two minor-unit sums at head. The
+  assertions that a cart total carries the cart's own currency, and that `cartTotals` leaves the
+  lines its caller still holds alone, stayed in the deleted file. **new**
+  `tests/cart-total-currency.test.ts` holds both from its own inputs (BRL; 275x4 + 1890 − 150), and
+  fails when `cartTotals` builds money from a fixed currency or sorts the caller's `lines` in place.
+* `review-activity-denied-snapshot`'s withdrawn-cached-trail case lost `more === undefined` and
+  `pageError === undefined`: those two held at head only for the sibling input whose cached row was
+  readable. They are back inside `tests/activity.test.ts`'s withdrawn-trail case, beside the input
+  that needs them, and fail when a denied trail keeps its paging control or emits a page error.
 
 Nothing else left a file. Fixture titles that read "Review record 347" read
 "Note 347"; the `T0180: ` prefix is gone from every title. Domain content a test
@@ -91,7 +104,8 @@ not this repository's history.
 | | base | head |
 | --- | --- | --- |
 | `npm run test` Jest suites / tests | 46 / 232 | 45 / 232 (one suite moved into another) |
-| `node --import tsx --test tests/*.test.ts` | 189 | 191 |
+| `node --import tsx --test tests/*.test.ts` | 189 | 193 (191 from the fold, + 2 pins a review added) |
+| root Node test files | 33 | 39 (37 from the fold, + the two review pins) |
 | review-named files (`pillars.REVIEW_NAMED` over `git ls-files`) | 48 | **0** |
 | `grep -rn "T0180" tests/` | 55 lines | no output |
 
@@ -108,20 +122,23 @@ Statements / branches / functions / lines from Jest's own `All files` row:
 | `… --testPathPattern 'tests/[^/]+\.test\.tsx$'` — the root's Jest half | 36.09 / 27.41 / 28.95 / 38.07 (7 suites, 16 tests) | 36.09 / 27.41 / 28.95 / 38.07 (7 suites, 16 tests) |
 | `npx jest --coverage --coverageReporters=text-summary` — the whole suite | 78.66 / 70.19 / 73.13 / 81.48 (46 suites, 232 tests) | 78.66 / 70.19 / 73.13 / 81.48 (45 suites, 232 tests) |
 
-No cell moved, which is what a rename should do to coverage. The one suite-count change
-(`tests/ui/` 17 → 16, tests still 119) is `review-feedback.test.tsx`'s two cases moving into
-`tests/ui/feedback.test.tsx`. The Node suite has no coverage runner, which is why it reports the
-test count above instead of a second percentage.
+No cell moved, which is what a rename should do to coverage — the whole-suite row was re-run at this
+head and reads the same, 78.66 / 70.19 / 73.13 / 81.48 over 45 suites and 232 tests, because both
+pins added after the review are Node cases and Jest's count and coverage cannot move. The one
+suite-count change (`tests/ui/` 17 → 16, tests still 119) is `review-feedback.test.tsx`'s two cases
+moving into `tests/ui/feedback.test.tsx`. The Node suite has no coverage runner, which is why it
+reports the test count above instead of a second percentage.
 
 ## The Node count, case by case
 
 Every root Node file was run on its own (`node --import tsx --test tests/<f>.test.ts`) in both
-trees, so the arithmetic names every case rather than summarising it. Base: 189 in 33 files; head:
-191 in 38 files. Of the 189, 27 sat in the ten review-named files; six `.spec.ts` bodies held 7
-more cases that no gate executed.
+trees, so the arithmetic names every case rather than summarising it. Base: 189 in 33 files; the
+fold left 191 in 37 files; the two review pins take head to 193 in 39 files. Of the 189, 27 sat in
+the ten review-named files; six `.spec.ts` bodies held 7 more cases that no gate executed.
 
 `189 − 27` (the review-named files' cases leave their names) `+ 26` (the same cases under their new
-names, plus what was carried to them) `+ 3` (new cases inside two files that never moved) `= 191`.
+names, plus what was carried to them) `+ 3` (new cases inside two files that never moved) `= 191`
+`+ 2` (the two pins named below, one case each) `= 193`.
 
 | Head file | Cases | Where its cases come from |
 | --- | --- | --- |
@@ -139,7 +156,9 @@ names, plus what was carried to them) `+ 3` (new cases inside two files that nev
 | `viewer-lost-selection.test.ts` | 1 | body that no gate ran |
 | `media-denial-clears-selection.test.ts` | 2 | body that no gate ran (two locales) |
 | `core-component-families.test.ts` | 1 | new file — the one `review-shared-components` assertion with no owner |
-| `activity.test.ts` 6 → 8 | +2 | the two inputs only `review-activity-denied-snapshot` held; its own two cases were duplicates and were dropped |
+| `cart-total-currency.test.ts` | 1 | new file after the review — the cart `currency` and untouched-input assertions the exact-total case lost when it became data |
+| `test-file-first-comment.test.ts` | 1 | new file after the review — the first comment of the four merge targets |
+| `activity.test.ts` 6 → 8 | +2 | the two inputs only `review-activity-denied-snapshot` held; its own two cases were duplicates and were dropped. Its withdrawn-trail case also took back `more`/`pageError` for its own malformed-timestamp input, inside the case that already ran it |
 | `shared-kit.test.ts` 14 → 15 | +1 | the negative-domain/null-split case; its empty-cart `"0"` and line-overflow rows joined the existing money case's data |
 
 Eight of the 27 cases stopped existing as separate cases, each one checked against the kept side
@@ -151,7 +170,8 @@ line by line first. Four were pure duplicates: two `review-activity-denied-snaps
 a case that already existed instead of becoming a new one: `review-shared-components`' locale
 independence, nested copy-key walk (which widened the narrower comparison it joined) and
 secondary-intent refusal into three `tests/feedback.test.ts` cases, and its exact-cart-total case
-into `tests/shared-kit.test.ts`'s money case as data.
+into `tests/shared-kit.test.ts`'s money case as data — as data only: two of that case's assertions
+did not travel with it, and the `tests/cart-total-currency.test.ts` row above is where they live now.
 
 ## What each file says about itself
 
@@ -159,6 +179,14 @@ Decision 0072 asks a reader to learn what a file protects from its name and firs
 file in the table above that carried no comment at all — and every one this fold renamed, whether or
 not it had one — now opens with two or three lines naming the rule it holds and what breaks without
 it. Nothing else in those files moved.
+
+Four files were left out of that by the fold itself: the merge targets `tests/activity.test.ts`,
+`tests/feedback.test.ts`, `tests/shared-kit.test.ts` and `tests/ui/feedback.test.tsx` received other
+files' cases and still opened with an import, so the acceptance a reader judges by name and first
+comment alone was false for exactly the files where it mattered most. Each now opens with the rules
+its own cases hold, and **new** `tests/test-file-first-comment.test.ts` pins the first non-blank line
+of those four paths so the omission cannot come back quietly. It names those four and walks no other
+file: it is a pin about this fold, not a linter for the tree.
 
 Fixture identifiers written by the same review rounds moved with them, because they are names a
 person greps: `review-cart` → `cart-surface`, `review-calendar` → `calendar-surface`,
@@ -207,7 +235,8 @@ the `T0180: ` prefix and the `en`/`pt` prefix each locale-paired case carries:
   on both sides, name by name and count by count.** Not one component, screen or shell case was
   renamed away, dropped or run fewer times.
 * **Node: the required check ran 189 cases at the merge base, and the six `.spec.ts` bodies no gate
-  ran held 7 more — 196 executed, 187 distinct behaviours. Head runs 191 and 182.** Ten names
+  ran held 7 more — 196 executed, 187 distinct behaviours. The fold left 191 and 182; head now runs
+  193 and 184** (the two review pins, one case and one new name each). Ten names
   stopped being separate cases and five new ones appeared; **no name runs fewer times at head than
   at base**, which is the check that a case did not dissolve inside a rename. The ten are accounted
   for above: four reappear under a new name here — the overnight civil day and the negative-domain
@@ -216,7 +245,12 @@ the `T0180: ` prefix and the `en`/`pt` prefix each locale-paired case carries:
   the nested copy-key walk, the exact-cart-total case), and two were duplicates cited to the file and
   lines that cover them. A further two cases at base (`review-activity-denied-snapshot`) shared their
   names verbatim with `activity.test.ts`, so a name comparison cannot see them leave and only the
-  line-by-line read above can: their two unique inputs are now cases there. Nothing else differs.
+  line-by-line read above can: their two unique inputs are now cases there. The head side of this
+  comparison was re-taken after the two pins landed (`node --import tsx --test --test-reporter=tap
+  tests/*.test.ts`, names stripped of `T0180: ` and the `en`/`pt` prefix, then counted): 193 lines,
+  184 distinct, the extra two being `a cart total carries the cart's currency and leaves the caller's
+  lines untouched` and `a test file states the rules it holds before it imports`. The base side is as
+  measured in the exported `31dc830`, which this fix did not rebuild. Nothing else differs.
 
 ## Left as it was, on purpose
 
