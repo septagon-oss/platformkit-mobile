@@ -60,9 +60,10 @@ export function useResourceDetail(entry: Entry, id: string | undefined) {
 
   const remove = useCallback(() => {
     if (!id) return;
-    // Delete is drawn from doors(entry); this is the same check for a call
-    // made from anywhere else. A resource with no delete has no address to
-    // send one to, so the question is never even asked.
+    // Delete is drawn from doors(entry); the verb half of that rule, `offers`,
+    // is what a call made from anywhere else rechecks — the server is what
+    // answers a caller who may not write. A resource with no delete has no
+    // address to send one to, so the question is never even asked.
     if (!offers(entry, "delete")) {
       setError(verbRefusal("delete"));
       return;

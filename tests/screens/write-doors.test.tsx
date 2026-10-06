@@ -58,9 +58,9 @@ test("a remove asked for on a resource with no delete asks no question", async (
 
 test("a singleton opened for an update the resource does not mount sends no PUT", async () => {
   // The third of the three write hooks. A singleton's whole write is one PUT,
-  // which the kernel names `update`, and its Edit is drawn from the same
-  // `doors` this check consults — so a sheet reached any other way still sends
-  // nothing, counts no write, and says what is not mounted.
+  // which the kernel names `update`, and its Edit is drawn from `doors`, of
+  // which this hook rechecks the verb half — so a sheet reached any other way
+  // still sends nothing, counts no write, and says what is not mounted.
   const noUpdate: Entry = { ...setting, operations: ["list", "read"] };
   const { result } = await renderHook(() => useSingleton(noUpdate));
   await act(async () => {

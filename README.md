@@ -680,11 +680,17 @@ PATCH, PUT and DELETE to `writePath`, which is `path` unless the document printe
 another; and a command to the address it printed, with the row substituted and
 the verb never appended a second time. Which doors a screen draws is one rule
 too: `doors(entry)` is `writable` — this caller may write — times `operations` —
-this verb is mounted — and it is what the three generated screens and the three
-hooks that send a write consult, so a form reached by a deep link for a verb
-nobody mounts says so and sends nothing. An absent or empty `operations` means
-all five, exactly as in version 1, so a server that says nothing keeps every door
-it always had.
+this verb is mounted — and it is what the three generated screens draw. The three
+hooks that send a write recheck the verb half of that rule, `offers(entry, verb)`,
+because a sheet arrives by a link or a restored stack as easily as by the button;
+what `writable` says is not rechecked there, exactly as before version 2, and the
+server is what refuses a write from a caller who may not perform one. An absent or
+empty `operations` means all five, exactly as in version 1, so a server that says
+nothing keeps every door it always had. `operations` narrows the write doors only:
+no screen consults it for `list` or `read`, so an entry naming `["create"]` and
+nothing else would still be given a list and a detail whose GETs nothing answers —
+the shape no kernel resource is today, since a resource with no read is nowhere the
+phone can go.
 
 The pinned copy carries none of those three keys — no resource in the kernel's
 golden has its writes elsewhere — so
@@ -710,8 +716,14 @@ verb set `offers`/`doors`, the two derivations, and the extension fixture — no
 existing carried an address that is not the read path, and the extension is a second
 file because widening the pinned copy would break the very hash that vouches for it.
 **Made reusable** — one named owner per address, so a renderer pack or the next
-screen asks `writePath`/`commandPath` instead of joining `entry.path` by hand;
-`absolute()` is the rule the generated types (T-0287) will have to answer to; and
+screen asks `writePath`/`commandPath` instead of joining `entry.path` by hand; the
+rule that every address the document prints is an absolute path, refused at its own
+field — named as a rule rather than a symbol, because the function that holds it is
+private to [src/core/catalog.ts](src/core/catalog.ts), and because it is the
+half a document can be refused for: what makes a path sendable at all (under
+`/api/v1/`, no fragment, fully encoded) is one rule owned by `createApi`, so a
+document printing `/elsewhere` stops at send time, not at the parser — and this is
+what the generated types (T-0287) will have to answer to; and
 `testdata/catalog.control-plane.json` is the fixture any later control-plane work —
 and the cross-pin nightly (T-0298) — runs against.
 

@@ -127,8 +127,9 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     if (phase !== "editing") return;
     // The header's New/Edit button is the door for this write, and it is drawn
     // from doors(entry). A sheet can also be reached by a link or a restored
-    // stack, so the verb is checked again here: a create the resource does not
-    // mount has no address to POST to, and nothing is sent to find out.
+    // stack, so the verb half of that rule is checked again here: a create the
+    // resource does not mount has no address to POST to, and nothing is sent to
+    // find out.
     if (!offers(entry, create ? "create" : "update")) {
       setDetail(verbRefusal(create ? "create" : "update"));
       return;

@@ -167,10 +167,16 @@ function strings(
 }
 
 /**
- * absolute reads an address the transport can be asked to send. Every path in
- * the document — the read path, the write path, a command's own endpoint — is
- * checked here and nowhere else, so a missing slash names its field at the
- * document rather than failing as an unsendable URL at request time.
+ * absolute reads an address shaped like one of this app's own. Every path the
+ * document prints — the read path, the write path, a command's own endpoint —
+ * passes through here, so a relative one names its field at the document rather
+ * than reaching a screen to be resolved against whatever the request happened to
+ * be built on. This is the document-shape half of the address rule only: whether
+ * a path is sendable at all — under `/api/v1/`, no fragment, no backslash,
+ * fully encoded — is one rule with one owner, the guard inside `createApi` in
+ * src/effects/api.ts, and a document printing `/elsewhere` or `//example/x` is
+ * refused there, before any request leaves. Carrying that half in here would be
+ * a second copy of a URL rule in a layer that names no transport.
  */
 function absolute(
   o: Record<string, unknown>,

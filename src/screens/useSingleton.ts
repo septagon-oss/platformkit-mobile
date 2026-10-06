@@ -72,9 +72,10 @@ export function useSingleton(entry: Entry) {
   const cancel = useCallback(() => setEditing(false), []);
 
   const save = useCallback(async () => {
-    // Edit is drawn from doors(entry); this is the same check for the sheet
-    // reached by any other way. A singleton's PUT is an update of its one row,
-    // and a resource that mounts no update has no address for it.
+    // Edit is drawn from doors(entry); what this rechecks for a sheet reached
+    // any other way is the verb half of that rule, `offers` — whether this
+    // caller may write stays the server's answer. A singleton's PUT is an update
+    // of its one row, and a resource that mounts no update has no address for it.
     if (!offers(entry, "update")) {
       setDetail(verbRefusal("update"));
       return;
