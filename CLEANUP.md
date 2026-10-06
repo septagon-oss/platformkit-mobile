@@ -94,7 +94,7 @@ deleted copies against the kept side and found them; both are named tests again.
   readable. They are back inside `tests/activity.test.ts`'s withdrawn-trail case, beside the input
   that needs them, and fail when a denied trail keeps its paging control or emits a page error.
 
-Nothing else left a file. Fixture titles that read "Review record 347" read
+Nothing else left a file besides those two blocks. Fixture titles that read "Review record 347" read
 "Note 347"; the `T0180: ` prefix is gone from every title. Domain content a test
 quotes — an activity verb of `Reviewed` — stays, because it is the server's word,
 not this repository's history.
@@ -123,8 +123,8 @@ Statements / branches / functions / lines from Jest's own `All files` row:
 | `npx jest --coverage --coverageReporters=text-summary` — the whole suite | 78.66 / 70.19 / 73.13 / 81.48 (46 suites, 232 tests) | 78.66 / 70.19 / 73.13 / 81.48 (45 suites, 232 tests) |
 
 No cell moved, which is what a rename should do to coverage — the whole-suite row was re-run at this
-head and reads the same, 78.66 / 70.19 / 73.13 / 81.48 over 45 suites and 232 tests, because both
-pins added after the review are Node cases and Jest's count and coverage cannot move. The one
+head and reads the same, 78.66 / 70.19 / 73.13 / 81.48 over 45 suites and 232 tests, because every
+case added after the fold is a Node one and Jest's count and coverage cannot move. The one
 suite-count change (`tests/ui/` 17 → 16, tests still 119) is `review-feedback.test.tsx`'s two cases
 moving into `tests/ui/feedback.test.tsx`. The Node suite has no coverage runner, which is why it
 reports the test count above instead of a second percentage.
