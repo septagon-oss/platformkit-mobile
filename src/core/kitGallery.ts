@@ -405,8 +405,14 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
     };
     const images = [
       {
+        // The lead picture is the one surface the media screen opens with, and its
+        // own ratio decides how much of a phone's first screen is left for the words
+        // and the act beneath it: at two three-quarters the picture measured 537 of
+        // 844 px, so the page's own state control sat off the screen. The mix the
+        // gallery demonstrates is kept — four three beside three two — so a grid of
+        // matches still shows unlike pictures lining up.
         id: "image-1",
-        width: 600,
+        width: 1200,
         height: 900,
         description: c.photoPrintRoom,
         decorative: false,

@@ -13,7 +13,7 @@ import {
   galleryPages,
   pageFamily,
 } from "../src/core/galleryPages";
-import { kitCaseIds } from "../src/core/kitGallery";
+import { kitCaseIds, kitExamples } from "../src/core/kitGallery";
 import type { Presentation } from "../src/core/presentation";
 
 const english: Presentation = {
@@ -93,4 +93,22 @@ test("a page id the list does not hold refuses naming the page", () => {
     (result as { ok: false; issues: readonly { path: string }[] }).issues.map((i) => i.path),
     ["page"],
   );
+});
+
+/**
+ * The media screen leads with one picture, and that picture's own ratio decides how
+ * much of a phone's first screen is left for the words and the act beneath it. A
+ * picture taller than it is wide measured 537 of the 844 px a phone shows, so the
+ * screen kept its own state control below the fold. A wall of matches still
+ * demonstrates pictures of more than one shape: the mix is the specimen's point.
+ */
+test("the picture a phone screen leads with leaves its fold to the screen", () => {
+  const lead = kitExamples(english, "media-hero/default");
+  if (!lead.ok) throw new Error(JSON.stringify(lead.issues));
+  const item = lead.value.hero.item;
+  assert.ok(item.width >= item.height, `the lead picture is ${item.width}x${item.height}`);
+  const wall = kitExamples(english, "photo-gallery/mixed-ratios");
+  if (!wall.ok) throw new Error(JSON.stringify(wall.issues));
+  const ratios = new Set(wall.value.media.items.map((i) => i.width / i.height));
+  assert.ok(ratios.size > 1, "a wall of matches shows pictures of more than one shape");
 });
