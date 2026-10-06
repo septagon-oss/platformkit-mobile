@@ -132,6 +132,30 @@ describe("a bar chart is measured", () => {
     fireEvent.press(screen.getByRole("button", { name: "Courtyard" }));
     expect(onCategory).toHaveBeenCalledWith("courtyard");
   });
+
+  test("neighbouring columns are kept apart, and each name stays under its own", async () => {
+    await inLight(
+      <BarChart
+        model={bars({ print: -2, courtyard: 5 })}
+        onCategory={none}
+        onRange={none}
+        onRetry={none}
+      />,
+    );
+    const rule = (testID: string) =>
+      StyleSheet.flatten(screen.getByTestId(testID).props.style) ?? {};
+    const columns = rule("kit-chart-columns"),
+      labels = rule("kit-chart-labels");
+    // Two columns of one ink sharing an edge read as one shape: the plot would say
+    // one thing where it measured two.
+    expect(columns.gap).toBeGreaterThan(0);
+    // The gap is the band's, not the column's: the label row keeps the same cells,
+    // so a name stays centred under the column it names instead of sliding inward.
+    expect(labels.gap).toBe(columns.gap);
+    // And the gap costs the column nothing: each bar still fills the band it is given.
+    const column = rule("kit-bar:visitors:courtyard");
+    expect(column.width).toBe("100%");
+  });
 });
 
 describe("a plot names zero only where its scale holds it", () => {

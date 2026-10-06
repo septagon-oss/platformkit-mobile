@@ -54,7 +54,7 @@ export function BarChart({
         </View>
         <View style={s.grow}>
           <View style={s.chart}>
-            <View style={s.chartColumn} accessible={false}>
+            <View style={s.chartColumn} testID="kit-chart-columns" accessible={false}>
               {model.categories.map((category) => (
                 <View key={category.id} style={s.grow}>
                   {category.values.map((value) => (
@@ -81,7 +81,7 @@ export function BarChart({
               />
             )}
           </View>
-          <View style={s.chartLabels}>
+          <View style={s.chartLabels} testID="kit-chart-labels">
             {model.categories.map((category) => (
               <View key={category.id} style={s.chartLabel}>
                 <Button

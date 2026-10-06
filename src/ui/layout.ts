@@ -86,10 +86,14 @@ export const kitStyles = (t: Theme) =>
       height: StyleSheet.hairlineWidth,
       backgroundColor: t.color.textMuted,
     },
-    chartColumn: { flex: 1, height: "100%", flexDirection: "row" },
-    // A category label is centred in the column it names, so the gap between
-    // columns belongs to the plot and does not slide the names inward.
-    chartLabels: { flexDirection: "row", paddingTop: t.space.sm },
+    // Every column stands in its own category band and the bands are kept apart:
+    // two columns of one ink touching read as one shape rather than as two
+    // measurements. The gap belongs to the bands, so the bars still fill the band
+    // they are given and the plot's own scale does not move.
+    chartColumn: { flex: 1, height: "100%", flexDirection: "row", gap: t.space.lg },
+    // The label row keeps the same gap and the same cells, so a name stays centred
+    // under the column it names instead of sliding inward with the plot.
+    chartLabels: { flexDirection: "row", paddingTop: t.space.sm, gap: t.space.lg },
     chartLabel: { flex: 1, alignItems: "center" },
     /**
      * A group says what it is, how many it holds and whether it is open in one
