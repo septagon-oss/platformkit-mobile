@@ -765,7 +765,17 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       hero: v.take(
         // The frame already carries the photograph's own line; the heading names
         // the room, so the screen does not say the same sentence twice.
-        deriveMediaHero({ item: images[0]!, title: c.placePrintRoom, action: secondary }, p),
+        // The secondary verb opens this picture, so it is offered over this picture:
+        // while the frame is still a skeleton, or has failed, the specimen would
+        // otherwise print an enabled control for an act its own state refuses.
+        deriveMediaHero(
+          {
+            item: images[0]!,
+            title: c.placePrintRoom,
+            ...(images[0]!.state === "ready" ? { action: secondary } : {}),
+          },
+          p,
+        ),
       ),
       viewer: v.take(deriveViewer({ ...mediaInput, open: held.open ?? true }, p)),
       spark: v.take(deriveSparkline(chartInput, p)),
