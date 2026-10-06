@@ -110,7 +110,7 @@ export async function check(): Promise<string> {
     throw new Error(
       `${FIXTURE} is not what ${SOURCE} says it is:\n  recorded ${source.sha256}\n  on disk  ${got}\n` +
         `It is copied from ${source.upstream.commit.slice(0, 12)}. Either restore that file or run ` +
-        `tsx scripts/catalog.ts refresh and review the diff.`,
+        `node --import tsx scripts/catalog.ts refresh and review the diff.`,
     );
   return `${FIXTURE} matches ${source.upstream.tag} (${got.slice(0, 12)}…)`;
 }
@@ -163,7 +163,7 @@ export function report(
   const lines = [
     hash(local) === hash(pinned)
       ? `ok  ${FIXTURE} still matches ${source.upstream.tag}`
-      : `DRIFT ${FIXTURE} differs from ${source.upstream.tag}; run tsx scripts/catalog.ts refresh`,
+      : `DRIFT ${FIXTURE} differs from ${source.upstream.tag}; run node --import tsx scripts/catalog.ts refresh`,
   ];
   if (latest.state === "unreachable") {
     lines.push(`note  cannot tell whether a newer version is published: ${latest.detail}`);
@@ -239,7 +239,10 @@ async function main(): Promise<void> {
   const { positionals } = parseArgs({ allowPositionals: true });
   const command = positionals[0] ?? "check";
   const run = { check, refresh, drift }[command];
-  if (!run) throw new Error(`usage: tsx scripts/catalog.ts [check|refresh|drift] (got ${command})`);
+  if (!run)
+    throw new Error(
+      `usage: node --import tsx scripts/catalog.ts [check|refresh|drift] (got ${command})`,
+    );
   console.log(await run());
 }
 
