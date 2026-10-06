@@ -4,9 +4,10 @@ import React from "react";
 import type { Entry } from "../../src/core/catalog";
 import { useResourceDetail } from "../../src/screens/useResourceDetail";
 import { useResourceForm } from "../../src/screens/useResourceForm";
+import { useSingleton } from "../../src/screens/useSingleton";
 import { confirm } from "../../src/ui/chooser";
 import { reset } from "../fakes/router";
-import { fakeApi, note, shell, shellValue } from "../fakes/shell";
+import { fakeApi, note, setting, shell, shellValue } from "../fakes/shell";
 
 jest.mock("expo-router", () => require("../fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("../fakes/router").reactNavigation);
@@ -27,6 +28,7 @@ beforeEach(() => {
   reset();
   api.create.mockClear();
   api.remove.mockClear();
+  api.replace.mockClear();
   asked.mockClear();
   shell.value = shellValue(api);
 });
@@ -52,4 +54,22 @@ test("a remove asked for on a resource with no delete asks no question", async (
   expect(asked).not.toHaveBeenCalled();
   expect(api.remove).not.toHaveBeenCalled();
   expect(result.current.error).toBe("This record cannot be deleted here.");
+});
+
+test("a singleton opened for an update the resource does not mount sends no PUT", async () => {
+  // The third of the three write hooks. A singleton's whole write is one PUT,
+  // which the kernel names `update`, and its Edit is drawn from the same
+  // `doors` this check consults — so a sheet reached any other way still sends
+  // nothing, counts no write, and says what is not mounted.
+  const noUpdate: Entry = { ...setting, operations: ["list", "read"] };
+  const { result } = await renderHook(() => useSingleton(noUpdate));
+  await act(async () => {
+    result.current.edit();
+  });
+  await act(async () => {
+    await result.current.save();
+  });
+  expect(api.replace).not.toHaveBeenCalled();
+  expect(shell.value!.wrote).not.toHaveBeenCalled();
+  expect(result.current.detail).toBe("This record cannot be edited here.");
 });
