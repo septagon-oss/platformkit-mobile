@@ -581,7 +581,7 @@ test("calendar retains parallel lanes while they fit, and groups them when the c
   assert.equal(d.calendarTargets(model.week.days[0]!, 1440, 44, 60)[0]!.grouped, true);
 });
 
-test("a series with no values in the domain and gaps keeps its bounds and splits its segments", () => {
+test("a series that dips below zero keeps its own bounds and a missing sample splits its line", () => {
   // A negative minimum is what a chart of changes needs: rescaling to zero would
   // draw a fall as a rise. A null is a missing sample, so the line breaks there
   // instead of drawing a straight segment through the gap.
