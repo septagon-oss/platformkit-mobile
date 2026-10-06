@@ -113,6 +113,8 @@ const tabGlyph: Readonly<Record<string, IconName>> = {
   search: "search",
   library: "image",
   you: "person",
+  passes: "ticket",
+  billing: "receipt",
 };
 
 interface Props {

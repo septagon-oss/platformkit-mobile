@@ -918,8 +918,9 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                   // The middle destination is the one drawn selected, so the page may
                   // stand the pass beneath the bar that leads to it: a bar with Search
                   // chosen over an admission pass names one screen and shows another.
-                  // Search remains a destination of this bar — it is where the kit
-                  // demonstrates a destination's glyph — it is simply not chosen here.
+                  // Selection is written in the bar's own treatment — a tinted slot, a
+                  // heavier name, the glyph in the accent — never by taking the selected
+                  // destination's glyph away and leaving its neighbours standing alone.
                   tabs: [
                     { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
                     { id: "passes", label: "Passes" },

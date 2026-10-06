@@ -23,11 +23,16 @@ const glyphs = {
   more: "ellipsis-horizontal",
   offline: "cloud-offline-outline",
   person: "person-circle-outline",
+  // A receipt is what a charge is itemised on: the mark a Billing destination wears.
+  receipt: "receipt-outline",
   refresh: "refresh",
   server: "server-outline",
   signOut: "log-out-outline",
   sort: "swap-vertical-outline",
   trash: "trash-outline",
+  // A ticket is what an admission is written on: the mark a Passes destination
+  // wears so its name is not the only tab in the bar without one.
+  ticket: "ticket-outline",
   warning: "alert-circle-outline",
   search: "search",
   home: "home",
