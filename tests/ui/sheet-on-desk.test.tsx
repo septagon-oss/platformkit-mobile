@@ -7,11 +7,10 @@
 // hidden by the browser's own white. Here the sheet is set down as a dialog: the
 // height of what it holds, on the page it opened from.
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, Text } from "react-native";
 import { expect, jest, test } from "@jest/globals";
 import { render, screen } from "@testing-library/react-native";
-import { Text } from "react-native";
-import { kitExamples, type Result } from "../../src/core/derive";
+import { kitExamples } from "../../src/core/derive";
 import { DetailSheet } from "../../src/ui/templates/DetailSheet";
 import { themeFor, ThemeProvider } from "../../src/ui/theme";
 import { presentation } from "../fakes/presentation";

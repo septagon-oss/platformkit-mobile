@@ -54,7 +54,11 @@ test("loaded selection is ordered, deduplicated, and lost targets disable bulk a
   const before = JSON.stringify(input),
     model = ok(d.deriveDataList(input, p));
   assert.deepEqual(model.selectedIds, ["nine", "six"]);
-  assert.match(model.sections[0]!.count, /2.*8/);
+  // Two groups: each states its own figure (a lone group would say nothing the
+  // list's own count does not already say).
+  const stated = model.sections[0]!.count;
+  assert.ok(stated, "a group among others names its own figure");
+  assert.match(stated, /2.*8/);
   assert.equal(JSON.stringify(input), before);
   assert.equal(Object.isFrozen(input), false);
   assert.equal(Object.isFrozen(model.sections[0]!.rows), true);

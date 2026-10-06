@@ -135,7 +135,7 @@ export function DataList({
               <Text role="title" accessibilityRole="header">
                 {section.title}
               </Text>
-              <Text>{section.count}</Text>
+              {section.count ? <Text>{section.count}</Text> : null}
             </View>
             {section.collapse && onCollapse ? (
               <Button

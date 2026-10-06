@@ -130,6 +130,9 @@ export const kitEnglish = {
   // like every other word: no screen, case or rule branches on them, and no
   // consumer of the kit is named by them.
   specimenPass: "Riverside Gallery annual pass",
+  /** specimenGroup names a collection by what it holds. A group that takes the name
+   * of one of its own members says the same words twice on the same screen. */
+  specimenGroup: "Pass options",
   benefitTours: "Guided tour of the print room",
   variantIndividual: "Individual",
   variantTwoAdults: "Two adults",
@@ -285,6 +288,7 @@ export const kitPortuguese: KitWords = {
   cancel: "Cancelar",
   dismiss: "Dispensar",
   specimenPass: "Passe anual da Galeria do Rio",
+  specimenGroup: "Opções de passe",
   benefitTours: "Visita guiada à sala de gravuras",
   variantIndividual: "Individual",
   variantTwoAdults: "Dois adultos",

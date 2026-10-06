@@ -163,25 +163,37 @@ export function deriveDataList(input: DataListInput, p: Presentation) {
       input.collapsedIds.every((id) => groups.some((g) => g.id === id && g.collapsible)),
       "collapsedIds",
     );
-    const total = (n: number | undefined, loaded: number, path: string) => {
+    // A count counts what is here, and how many exist when something else does.
+    // The figure is checked whether or not it is drawn: a server that names fewer
+    // records than arrived is refused by the name of the field that lied.
+    const figure = (n: number | undefined, loaded: number, path: string) => {
       if (n !== undefined) v.need(Number.isSafeInteger(n) && n >= loaded, path);
       return n === undefined
         ? countText(loaded, p)
         : `${countText(loaded, p)} ${p.copy.kit.of} ${countText(n, p)}`;
     };
-    // The figure is checked whether or not it is drawn: a server that names a total
-    // smaller than what arrived is refused by the name of the field that lied.
-    const listed = total(input.total, all.length, "total");
-    // A count counts what is here. While the list has not arrived there is nothing
-    // it counts, and "0 loaded" reads as a figure of zero rather than as no figure
-    // — the same rule that keeps an absent table cell from being drawn as a zero.
+    // Each group's figure is checked at its own path first: when a group's total
+    // contradicts its own rows it is that field which is named, not the list above.
+    const stated = groups.map((g, i) => figure(g.total, g.rows.length, `sections.${i}.total`));
+    // The list's own figure is the one a person reads to know what arrived. With a
+    // single group the group's total is the list's — one group holds what the list
+    // holds — so the fraction is written in the list's header rather than twice.
+    const only = groups.length === 1 ? groups[0] : undefined;
+    const whole = input.total ?? (only ? only.total : undefined);
+    const listed = figure(whole, all.length, "total");
+    // While the list has not arrived there is nothing a count counts, and "0 loaded"
+    // reads as a figure of zero rather than as no figure — the rule that keeps an
+    // absent table cell from being drawn as a zero.
     const count = all.length === 0 ? undefined : listed;
+    // A group states a figure when there is more than one group to tell apart.
+    const many = groups.length > 1;
     const sections = groups.map((g, i) => {
       v.text(g.title, `sections.${i}.title`);
       return {
         id: g.id,
         title: g.title,
-        count: total(g.total, g.rows.length, `sections.${i}.total`),
+        // Checked at its own path whether or not the figure is drawn.
+        count: many ? stated[i] : undefined,
         collapsed: input.collapsedIds.includes(g.id),
         collapse: g.collapsible
           ? {

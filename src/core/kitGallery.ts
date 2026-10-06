@@ -494,7 +494,9 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             content: sample([
               {
                 id: "group",
-                title: name,
+                // A group is named for what it holds. Named for one of its rows, the
+                // same sentence was printed as the heading and as the first card.
+                title: c.specimenGroup,
                 rows: [row, { ...row, id: "row-2", title: choice.choices[1]!.label }],
                 total: 4,
                 collapsible: true,
