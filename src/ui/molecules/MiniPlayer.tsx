@@ -109,7 +109,7 @@ export function MiniPlayer({
           </View>
         </View>
       )}
-      <View style={s.controls}>
+      <View style={[s.controls, !collapsed && s.controlsCard]}>
         {controls.back ? (
           <Control
             glyph="rewind"
@@ -124,6 +124,10 @@ export function MiniPlayer({
           intent={toggle}
           word={playing ? model.words.pause : model.words.play}
           filled={emphasised}
+          // The card is stopped on one record and answers one verb right now, so
+          // that control is drawn as the largest thing on the card. The strip over
+          // a list is one line tall by design and holds three fingertip controls.
+          dominant={!collapsed}
           onIntent={onIntent}
           testID={testID ? `${testID}-toggle` : undefined}
         />
@@ -146,6 +150,7 @@ function Control({
   intent,
   word,
   filled = false,
+  dominant = false,
   onIntent,
   testID,
 }: {
@@ -154,13 +159,18 @@ function Control({
   /** word is the control's name in the person's language, from the model core derived. */
   readonly word: string;
   readonly filled?: boolean;
+  /** dominant is the one control of this card: it is drawn at the size of the answer it carries. */
+  readonly dominant?: boolean;
   readonly onIntent: (intent: PlayerIntent) => void;
   readonly testID?: string | undefined;
 }) {
   const s = useStyles(styles);
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const shape: ViewStyle[] = [s.control, filled ? s.controlFilled : s.controlPlain];
+  const shape: ViewStyle[] = [
+    dominant ? s.controlDominant : s.control,
+    filled ? s.controlFilled : s.controlPlain,
+  ];
   return (
     <Pressable
       onPress={() => onIntent(intent)}
@@ -185,7 +195,7 @@ function Control({
         focused && s.focused,
       ]}
     >
-      <Icon name={glyph} size="md" tone={filled ? "on" : "accent"} />
+      <Icon name={glyph} size={dominant ? "lg" : "md"} tone={filled ? "on" : "accent"} />
     </Pressable>
   );
 }
@@ -232,9 +242,21 @@ const styles = (t: Theme) =>
     fill: { height: "100%", borderRadius: t.radius.full },
     unseekable: { borderWidth: 1, borderStyle: "dashed", borderColor: t.state.outline },
     controls: { flexDirection: "row", alignItems: "center", gap: t.space.xs },
+    // The card's transport runs under the scrubber it belongs to, its one
+    // dominant control in the middle of the line rather than three crowding a corner.
+    controlsCard: { justifyContent: "center", gap: t.space.md },
     control: {
       width: t.hit,
       height: t.hit,
+      borderRadius: t.radius.full,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: t.extent.focus,
+      borderColor: t.color.surfacePrimary,
+    },
+    controlDominant: {
+      width: t.hit + t.space.xl,
+      height: t.hit + t.space.xl,
       borderRadius: t.radius.full,
       alignItems: "center",
       justifyContent: "center",
