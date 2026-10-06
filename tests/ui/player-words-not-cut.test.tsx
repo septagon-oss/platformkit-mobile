@@ -53,4 +53,20 @@ describe("the player gives its words the space the transport takes", () => {
     const strip = StyleSheet.flatten(screen.getByTestId("player").props.style) ?? {};
     expect(strip.flexDirection).not.toBe("column");
   });
+
+  /**
+   * The scrubber measures the whole track, so it is drawn across the card. Held in
+   * the text column it was as wide as the words left over beside the picture — at
+   * 390px, 194 of the card's 334 — and the picture and the progress fought over one
+   * row. The strip owns no scrubber at all, so it keeps its one line.
+   */
+  test("the card's scrubber runs the card's width, and the strip draws no scrubber", async () => {
+    await card(false);
+    const track = screen.getByTestId("kit-player-track");
+    expect((track.parent as { props?: { testID?: string } })?.props?.testID).toBe("player");
+    const cardStyle = StyleSheet.flatten(screen.getByTestId("player").props.style) ?? {};
+    expect(cardStyle.alignItems).toBe("stretch");
+    await card(true);
+    expect(screen.queryByTestId("kit-player-track")).toBeNull();
+  });
 });

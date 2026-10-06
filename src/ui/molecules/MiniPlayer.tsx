@@ -82,29 +82,33 @@ export function MiniPlayer({
           <Text role="caption" tone="muted" numberOfLines={lines}>
             {position}
           </Text>
-          {collapsed ? null : (
-            <View style={s.track}>
-              <View
-                style={[
-                  s.bar,
-                  { backgroundColor: t.color.surfaceMuted },
-                  !model.seekable && s.unseekable,
-                ]}
-              >
-                <View
-                  style={[
-                    s.fill,
-                    {
-                      backgroundColor: t.color.accentDefault,
-                      width: `${Math.round((model.fraction ?? 0) * 1000) / 10}%`,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          )}
         </View>
       </View>
+      {/* The scrubber is the card's own measure of how far the track has run, so it
+          spans the card. Held in the column beside the artwork it was as wide as the
+          words left over — too narrow to read a position off, and it made the picture
+          and the progress fight for one row. The strip owns no scrubber at all. */}
+      {collapsed ? null : (
+        <View testID="kit-player-track">
+          <View
+            style={[
+              s.bar,
+              { backgroundColor: t.color.surfaceMuted },
+              !model.seekable && s.unseekable,
+            ]}
+          >
+            <View
+              style={[
+                s.fill,
+                {
+                  backgroundColor: t.color.accentDefault,
+                  width: `${Math.round((model.fraction ?? 0) * 1000) / 10}%`,
+                },
+              ]}
+            />
+          </View>
+        </View>
+      )}
       <View style={s.controls}>
         {controls.back ? (
           <Control
@@ -201,7 +205,9 @@ const styles = (t: Theme) =>
     },
     expanded: {
       flexDirection: "column",
-      alignItems: "flex-start",
+      // Every line of the card — the words, the scrubber, the transport — runs the
+      // card's width; only the words beside the picture share a row.
+      alignItems: "stretch",
       padding: t.space.md,
       borderRadius: t.radius.xl,
       gap: t.space.sm,
@@ -222,7 +228,6 @@ const styles = (t: Theme) =>
       overflow: "hidden",
     },
     text: { flex: 1, gap: t.space.xs / 2 },
-    track: { paddingTop: t.space.xs },
     bar: { height: t.extent.meter, borderRadius: t.radius.full, overflow: "hidden" },
     fill: { height: "100%", borderRadius: t.radius.full },
     unseekable: { borderWidth: 1, borderStyle: "dashed", borderColor: t.state.outline },
