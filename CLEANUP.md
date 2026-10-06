@@ -82,7 +82,7 @@ Three assertion blocks were deleted, each after the kept side was read line by l
 * the decorative-item block in `tests/shared-kit.test.ts` — `tests/viewer-lost-selection.test.ts:31-47` covers both causes and compares the whole `selectionIssue`.
 
 The line-by-line read above missed two blocks that left a file with no owner. A review read the
-deleted copies against the kept side and found them; both are named tests again.
+deleted copies against the kept side and found them; both are asserted again.
 
 * `review-shared-components`' cart-totals case ended at its two minor-unit sums at head. The
   assertions that a cart total carries the cart's own currency, and that `cartTotals` leaves the
