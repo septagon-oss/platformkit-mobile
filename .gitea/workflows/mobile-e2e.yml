@@ -1,0 +1,281 @@
+# Every flow in e2e/flows, on an emulator, against a kernel this job serves —
+# on each push to main and nightly. `npm run check` proves what can be proven of
+# a flow without a device (its package, that every id it taps is a testID a
+# component sets, that every route screen is named by a flow); it cannot prove a
+# journey passes. That is this job, and until it ran, the coverage those flows
+# claim was a promise nothing checked.
+#
+# Why this runner and not a hosted farm: the label's host was measured on
+# 2026-10-04 to answer scripts/e2e/mobile_ci.sh --probe with adb, the emulator
+# and Maestro found under the SDK prefixes, /dev/kvm world-readable, an android-36
+# system image, two AVDs and a debug keystore. A hosted farm needs an account, a
+# secret and a queue outside this loop, to prove one flow.
+#
+# Nothing here continues on error. A journey that quietly skipped would leave the
+# coverage number reading like a figure nobody earned — the same objection the
+# repository's own README states against a suite that skips the transport it
+# ships, and the reason platformkit's mobile job gives for the same rule.
+#
+# The step list is composed from platformkit's .gitea/workflows/mobile.yml (the
+# probe with the paths it found, :81-120; the emulator booted headless with its
+# pid recorded, :147-167; the report step that refuses when the JUnit is absent,
+# :172-180; teardown by recorded pid, :182-192; concurrency, :26-30) and
+# this repository's own nightly precedent, .gitea/workflows/drift.yml:8-10. The
+# server half is not copied from anything here: no unit in this repository has
+# ever started a server (scripts/e2e/android.sh required one somebody else had
+# started), so scripts/e2e/mobile_ci.sh carries the part taken from
+# platformkit's scripts/mobile_e2e.sh, cited in its own header.
+name: mobile-e2e
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Nightly, at a different minute from the weekly drift report so the two
+    # never want the same runner at the same moment. Whether this forge runs
+    # `schedule:` at all is unverified — drift.yml declares a weekly cron and no
+    # run of it is visible from a checkout — so the job carries
+    # workflow_dispatch too and the first run can be started by hand.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One journey at a time on a machine, whichever ref started it. The group is
+  # named for the device and not for the ref, because what needs the exclusion is
+  # host-level: adb reverse, the booted emulator and the served kernel's ports are
+  # one per host. A group per ref — the shape platformkit's mobile job uses — lets
+  # a workflow_dispatch on a branch run beside the nightly on main, which is the
+  # collision itself. Queued, not cancelled: killing a journey mid-write leaves a
+  # device, a reversed port and a served kernel for the next run to trip over.
+  # What this cannot reach is a job that is not this workflow's: another
+  # repository's mobile job on the same runner is outside the group, and a
+  # workflow file has no way to hold a host, so the step that boots the emulator
+  # refuses a device that is already attached — in any state adb lists it — and
+  # publishes only the serial whose console port it claimed for itself.
+  group: ${{ github.workflow }}-device
+  cancel-in-progress: false
+
+jobs:
+  journey:
+    runs-on: pkit-ci-linux-amd64
+    timeout-minutes: 60
+    env:
+      # The service names, not localhost, and for the reason platformkit's job
+      # gives: the configuration file this job writes is read by a process that
+      # reaches the database and the broker over this job's Docker network,
+      # where those containers answer by these names.
+      PLATFORMKIT_TEST_ADMIN_URL: postgres://postgres:platformkit@postgres:5432/platformkit?sslmode=disable
+      PLATFORMKIT_TEST_DATABASE_URL: postgres://platformkit_app:platformkit@postgres:5432/platformkit?sslmode=disable
+      PLATFORMKIT_TEST_NATS_URL: nats://nats:4222
+      PLATFORMKIT_MOBILE_PORT: '8098'
+      # Which kernel build to serve, and which Android Virtual Device to boot:
+      # both are repository variables, and the harness refuses by name when
+      # either is missing rather than serving something it cannot name. No
+      # secret belongs to this job — the tenant, its administrator and that
+      # administrator's password are created by the run and dropped with it.
+      PK_KERNEL_IMAGE: ${{ vars.PK_KERNEL_IMAGE }}
+      PK_MOBILE_AVD: ${{ vars.PK_MOBILE_AVD }}
+      # Where the harness leaves the report so the step below can print it: the
+      # work directory is removed whichever step failed, and the report outlives it.
+      PK_MOBILE_REPORT: e2e/out/report.xml
+      # The served kernel's vocabulary, named once, here: a writable resource and
+      # its first writable string field (the one a row is recognised by), and a
+      # lifecycle command, its one argument and the summary the API document
+      # gives it. These are facts about the build PK_KERNEL_IMAGE names, which is
+      # why no flow and no script defaults them.
+      MODULE: task
+      ENTITY: task
+      KNOWN: title
+      VERB: resolve
+      VERB_FIELD: resolution
+      VERB_TITLE: Resolve a task
+    services:
+      postgres:
+        image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
+        env:
+          POSTGRES_PASSWORD: platformkit
+          POSTGRES_DB: platformkit
+        options: >-
+          --health-cmd "pg_isready -U postgres -d platformkit"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+
+      - name: Name what this host owes a device journey
+        # First, because it decides whether the rest can mean anything. The
+        # search, the refusal and the paths are scripts/e2e/tools.sh — the same
+        # prefixes platformkit's harness searches, because "missing" means
+        # nowhere it was looked for — and the step writes them to $GITHUB_PATH so
+        # the emulator step below has adb and emulator to call.
+        run: scripts/e2e/mobile_ci.sh --probe
+
+      - name: The flows are complete before a device is rented
+        # Three things, all cheap, all before a device is rented: the package every
+        # flow names, that every id it taps is a testID a component sets and that no
+        # route screen is left unclaimed (check:flows, the repository's own gate), and
+        # that Maestro's schema accepts each file — check-syntax takes a file and not
+        # a directory, so the set is asked for from the same gate rather than globbed
+        # here: check_flows.ts --list answers with the journeys `maestro test
+        # e2e/flows` will run, at either YAML spelling and in that directory
+        # itself, the directory's own `config.yaml` selection applied — a journey
+        # in a folder is refused, because Maestro plans none there. A step verb
+        # Maestro does not know is a refusal at this line and not forty emulator
+        # minutes later.
+        run: |
+          npm ci --no-audit --no-fund
+          npm run check:flows
+          for flow in $(npm run --silent check:flows -- --list); do maestro check-syntax "$flow"; done
+
+      - name: The verification APK for this architecture
+        # The emulator is x86_64, and only the verification profile carries the
+        # gallery route and its own package, so it can sit beside a real install.
+        # The debug keystore is generated by whoever needs it and never committed.
+        run: |
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" \
+              -storepass android -keypass android -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          make apk ABIS=x86_64 PROFILE=ci
+          make apk-debug-sign
+
+      - name: Prepare the role the served kernel connects as
+        env:
+          PGPASSWORD: platformkit
+        # The role is created once per database; each journey run then makes a
+        # database of its own and re-grants what is per-database. NOBYPASSRLS is
+        # the point of it: the tenancy policies have to constrain this role or
+        # the isolation the journeys rest on proves nothing.
+        run: psql -h postgres -U postgres -d platformkit -v ON_ERROR_STOP=1 -f scripts/e2e/postgres-role.sql
+
+      - name: Start NATS with JetStream on this job's network
+        id: nats
+        env:
+          JOB_NETWORK: ${{ job.container.network }}
+        run: |
+          test -n "$JOB_NETWORK"
+          container=$(docker run -d --network "$JOB_NETWORK" --network-alias nats \
+            nats:2-alpine@sha256:ad7a43eb7e3337c3c38ce5d784d1461791f95f730f252d2b25eee699752a0ca3 \
+            --jetstream --http_port 8222)
+          echo "container=$container" >> "$GITHUB_OUTPUT"
+          for i in $(seq 1 30); do
+            if curl -fsS http://nats:8222/healthz >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          docker logs "$container"
+          exit 1
+
+      - name: Boot the emulator headless
+        id: emulator
+        run: |
+          if [ -z "$PK_MOBILE_AVD" ]; then
+            echo "PK_MOBILE_AVD names no Android Virtual Device on this image." >&2
+            exit 1
+          fi
+          # A device already on adb — in any state adb lists it — belongs to
+          # something this job cannot see. `device` is another job's running
+          # emulator; `offline` is a boot half done, and adb answers for that one
+          # too, so a filter that kept only `device` refused the host a step later
+          # than the host was already taken. The concurrency group above keeps this
+          # workflow's runs off each other; a workflow file cannot hold a host
+          # against another repository's job, so the job refuses the host instead of
+          # driving a device it did not boot.
+          attached=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+[^[:space:]]+$/\1/p')
+          if [ -n "$attached" ]; then
+            echo "a device is already attached to adb on this host:" >&2
+            echo "$attached" >&2
+            exit 1
+          fi
+          # The console port is this job's own, claimed before the process starts:
+          # the emulator answers as emulator-<port>, so the serial this step will
+          # publish is a number chosen here and not a name read off adb afterwards.
+          # Every adb call below carries it — an unqualified adb call is answered by
+          # whichever device the host happens to have, which is how a launch that
+          # failed could be reported as a device. A port someone else holds makes
+          # the emulator itself fail, and this step's log says so.
+          serial=emulator-5584
+          emulator -avd "$PK_MOBILE_AVD" -port "${serial#emulator-}" -no-window -no-audio \
+            -no-boot-anim -no-snapshot -gpu swiftshader_indirect >emulator.log 2>&1 &
+          pid=$!
+          echo "pid=$pid" >> "$GITHUB_OUTPUT"
+          # The launch is not the device, and a device on the host is not proof of
+          # this launch. A process that died has booted nothing, so its death ends
+          # this step before any answer — from this host or another's emulator —
+          # could be read as a boot that completed. Two seconds, 120 turns: the
+          # wait platformkit's own mobile job gives an emulator to come up.
+          ready=0
+          for i in $(seq 1 120); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "the emulator for $PK_MOBILE_AVD exited before $serial was ready:" >&2
+              tail -40 emulator.log >&2
+              exit 1
+            fi
+            if [ "$(adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != 1 ]; then
+            echo "the emulator did not finish booting $serial:" >&2
+            tail -40 emulator.log >&2
+            exit 1
+          fi
+          adb devices
+          # What the rest of the job drives is this step's own serial: scripts/e2e/
+          # run.sh installs the APK on it, reverses the server's port on it and runs
+          # the journeys that clear their state. So the host must hold exactly one
+          # device, it must be ready, and it must be this one — a second serial in
+          # any state is another job on this machine, which is the host this step
+          # refuses rather than the device it would share.
+          listed=$(adb devices | sed -nE 's/^([^[:space:]]+)[[:space:]]+([^[:space:]]+)$/\1 \2/p')
+          others=$(printf '%s\n' "$listed" | grep -v "^$serial " | grep . || true)
+          if [ -n "$others" ] || ! printf '%s\n' "$listed" | grep -qx "$serial device"; then
+            echo "this job expects $serial to be the only device adb has; it sees:" >&2
+            echo "$listed" >&2
+            exit 1
+          fi
+          echo "serial=$serial" >> "$GITHUB_OUTPUT"
+
+      - name: Run every journey in e2e/flows
+        # The served kernel, its own database, one tenant and one administrator,
+        # then the flows — all ten of them, read from the directory and never
+        # from a list beside it. Maestro runs one invocation serially, so the
+        # journeys share a device; they do not share a record, because each names
+        # its own `${TITLE} <journey>` and deletes it.
+        env:
+          ANDROID_SERIAL: ${{ steps.emulator.outputs.serial }}
+        run: scripts/e2e/mobile_ci.sh "$(ls out/apk/release/*-debug-signed.apk | head -1)"
+
+      - name: The report, in the job's own log
+        if: always()
+        run: |
+          if [ -s "$PK_MOBILE_REPORT" ]; then
+            cat "$PK_MOBILE_REPORT"
+          else
+            echo "no Maestro report at $PK_MOBILE_REPORT: the journey did not reach its report." >&2
+            exit 1
+          fi
+
+      - name: Remove this job's emulator and NATS container
+        if: always()
+        env:
+          EMULATOR_PID: ${{ steps.emulator.outputs.pid }}
+          NATS_CONTAINER: ${{ steps.nats.outputs.container }}
+        run: |
+          status=0
+          if [ -n "$EMULATOR_PID" ]; then kill "$EMULATOR_PID" 2>/dev/null || true; fi
+          if [ -n "$NATS_CONTAINER" ]; then docker rm -f "$NATS_CONTAINER" || status=1; fi
+          exit "$status"

@@ -48,23 +48,17 @@ export function ResourceDetail({
       ) : null}
       {row ? (
         <Section>
-          {detailItems(entry, row, feedback).map((item, i) => {
-            const field = entry.fields[i];
-            return (
-              <DetailRow
-                key={item.label}
-                term={item.label}
-                value={item.value}
-                {...(field
-                  ? {
-                      shown: (
-                        <Value presentation={feedback} field={field} value={row[field.name]} />
-                      ),
-                    }
-                  : {})}
-              />
-            );
-          })}
+          {detailItems(entry, row, feedback).map((item) => (
+            <DetailRow
+              key={item.field.name}
+              testID={`field-${item.field.name}`}
+              term={item.label}
+              value={item.value}
+              shown={
+                <Value presentation={feedback} field={item.field} value={row[item.field.name]} />
+              }
+            />
+          ))}
         </Section>
       ) : error ? null : (
         <Section>

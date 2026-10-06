@@ -1,0 +1,42 @@
+# One record as a screen: every field the schema names, in its order, with the
+# record's own name in the header and the destructive row at its foot. The
+# record is made here and deleted by the end of the journey.
+# screen: app/[module]/[entity]/[id]/index.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE} record
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- assertVisible: ${TITLE} record
+- assertVisible:
+    id: "field-${KNOWN}"
+- assertVisible: "Edit"
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- assertVisible: "Deleting cannot be undone."
+- tapOn:
+    id: "delete"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} record

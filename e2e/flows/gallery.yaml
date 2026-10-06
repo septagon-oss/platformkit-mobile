@@ -1,5 +1,6 @@
 # The library on one screen, in both modes. The gallery route exists only in
 # the verification profile, which is the build these flows run on.
+# screen: app/gallery.tsx
 appId: ${APP_ID}
 env:
   APP_ID: dev.septagon.platformkit.ci

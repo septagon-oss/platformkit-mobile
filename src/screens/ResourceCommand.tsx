@@ -2,11 +2,22 @@
 // sheet a form is, with the command's own controls in it and its own verb on
 // the button. Everything about it comes from the catalog — the title, the
 // controls, the help under each — so a module that adds a command gets a
-// screen without anybody writing one.
-import { Stack } from "expo-router";
+// screen without anybody writing one. The address says whether the command is
+// about a row or about the list, and a command opened where it does not belong
+// is refused rather than drawn.
+import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
-import React, { useMemo } from "react";
-import { commandOf, commandTitle, humanize, type Clock } from "../core/derive";
+import React, { useCallback, useMemo } from "react";
+import {
+  commandOf,
+  commandScope,
+  commandTitle,
+  humanize,
+  otherScope,
+  screenPath,
+  type Clock,
+  type CommandScope,
+} from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Notice } from "../ui/atoms/Notice";
 import { Button } from "../ui/atoms/Button";
@@ -21,17 +32,53 @@ export function ResourceCommand({
   verb = "",
   clock = systemClock,
 }: ScreenProps & { readonly clock?: Clock }) {
-  const command = commandOf(entry, verb);
-  if (!command) return <Missing entity={entry.entity} verb={verb} />;
+  const at = commandScope(id);
+  const command = commandOf(entry, verb, at);
+  if (!command) return <Refused entry={entry} verb={verb} at={at} />;
   return <Sheet entry={entry} id={id} command={command} clock={clock} />;
 }
 
-function Missing({ entity, verb }: { readonly entity: string; readonly verb: string }) {
+/**
+ * Refused is a command that cannot run from where it was called. Two mistakes,
+ * two sentences, because they send a person to different places: the verb may
+ * not be one this entry offers at all, or it is one and belongs to the other
+ * address — a command about one record opened where there is no row to send,
+ * which would POST to an address the server mounts only for a command about the
+ * whole list. The sheet is never offered for that, because a sheet you can fill
+ * in is an invitation, and the only answer it could give is a refusal after the
+ * typing.
+ */
+function Refused({
+  entry,
+  verb,
+  at,
+}: {
+  readonly entry: ScreenProps["entry"];
+  readonly verb: string;
+  readonly at: CommandScope;
+}) {
+  const router = useRouter();
+  // The way out is the one every sheet here uses: back over whatever pushed it,
+  // and where a link opened the sheet on an empty stack there is nothing to go
+  // back over, so the screen lands on the resource list the refusal is about.
+  // An enabled control that did nothing would be a door with no room behind it.
+  const done = useCallback(() => {
+    if (router.canGoBack()) router.back();
+    else router.replace(screenPath(entry));
+  }, [router, entry]);
+  const other = commandOf(entry, verb, otherScope(at));
+  const text = other
+    ? at === "collection"
+      ? `${commandTitle(other)} acts on one ${entry.entity}, not the whole list. Open it from the ${entry.entity} it acts on.`
+      : `${commandTitle(other)} acts on every ${entry.entity}, not one. Open it from the list of them.`
+    : `${entry.entity} has no ${verb || "such"} command, or you may not run it.`;
   return (
     <Screen>
       <Notice
         announcement="urgent"
-        text={`${entity} has no ${verb || "such"} command, or you may not run it.`}
+        text={text}
+        testID="command-refused"
+        action={{ label: "Close", onPress: done }}
       />
     </Screen>
   );

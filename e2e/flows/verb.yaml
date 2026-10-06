@@ -1,0 +1,82 @@
+# A lifecycle command, in both of the forms the routes give it. VERB names the
+# verb, VERB_FIELD its one argument, VERB_TITLE the summary the API document
+# gives it.
+#
+# The two forms differ by whether the path holds a row, and a command says
+# which it is about — `collection`. Nothing the reference kernel composes mounts
+# a command about the collection (each command in modules/task passes a bare
+# rest.CommandOptions{}, so `grep -rn 'rest.CommandOptions{Collection: true}'
+# --include=*.go .` is empty), so what the collection address can be shown
+# proving here is the refusal it owes a command about one record: the screen
+# named command-refused is drawn and resource-form is not, so nobody is handed a
+# sheet to fill in and run at an address the server never mounted. The day a
+# module ships a collection command, this leg goes red, and the sheet is what
+# belongs in it. The record form is run to its end below.
+# screen: app/[module]/[entity]/run/[verb].tsx
+# screen: app/[module]/[entity]/[id]/run/[verb].tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- waitForAnimationToEnd:
+    timeout: 5000
+- openLink: platformkit://${MODULE}/${ENTITY}/run/${VERB}
+- extendedWaitUntil:
+    visible:
+      id: "command-refused"
+    timeout: 15000
+- assertNotVisible:
+    id: "resource-form"
+- tapOn: "Close"
+- extendedWaitUntil:
+    visible:
+      id: "home"
+    timeout: 15000
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE} verb
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "command-${VERB}"
+- tapOn:
+    id: "command-${VERB}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-form"
+    timeout: 15000
+- assertVisible: ${VERB_TITLE}
+- tapOn:
+    id: "input-${VERB_FIELD}"
+- inputText: ${TITLE} resolved
+- hideKeyboard
+- tapOn:
+    id: "run"
+- extendedWaitUntil:
+    visible: ${TITLE} resolved
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: "Delete"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} verb

@@ -453,8 +453,26 @@ package against the ranges the pinned `expo` bundles, read from
 rules), `format:check` (Prettier), `test` (the Node suite, `tsx --test
 tests/*.test.ts`, then the Jest suite, every `tests/**/*.test.tsx` rendering
 components, the shell, the route dispatcher and the screen hooks),
-`check:fingerprint`, `check:flows` (every id a device flow names is a testID a
-component sets) and `check:source` (the manifest and lockfile install from the
+`check:fingerprint`, `check:flows` (the journeys counted are the ones
+`maestro test e2e/flows` takes — either YAML spelling, in that directory itself,
+the workspace's own `config.yaml` aside: Maestro's planner keeps what the
+workspace's `flows:` glob matches and its default is `*`, a name and not a path,
+so the gate refuses a folder that holds a journey rather than count coverage no
+run makes. The configuration narrows the count only as far as it narrows the
+run: a journey `flows:` leaves out covers nothing, a selection is read in every
+spelling that planner reads it (a quoted key, a space before the colon, a
+leading byte-order mark) and the last `flows:` key is the one that wins — its
+empty value included, because `flows:` with nothing after it, or that same value
+spelled `~` or `null`, plans the whole directory and takes the run back from a
+selection written above it — and one
+written any other way — a flow mapping, a scalar where a list belongs, a list
+with an item left empty, unclosed or tab-indented, a filter pointing at no file
+beside it, a `tags:` read out of each flow's own header, an `excludeFlows:` no
+Maestro run applies at all — is refused by name rather than read as agreement;
+every id one of them names is a testID a component sets, every route screen under
+`app/` is named by some flow's `# screen:` header, and every flow names the
+screen it proves) and
+`check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the
 lockfile and their config plugins, the Android recipe, the bundler
@@ -538,6 +556,88 @@ screen hooks over a fake Api (`tests/screens/`). Neither suite launches Expo,
 exercises a native device or connects to a live server. For a screen or session
 change, also exercise the affected journey on the target platform and report
 what you ran.
+
+### Run the device journeys
+
+A flow is a journey a person takes on a device: `e2e/flows/` holds one per
+screen this app draws, and `make e2e-android` runs them on an emulator against a
+server you already have. It needs the verification build signed for an emulator
+(`make apk ABIS=x86_64 PROFILE=ci && make apk-debug-sign`), a device on `adb`,
+the Maestro CLI, and the values the flows read, which `scripts/e2e/run.sh`
+names: `SERVER`, `EMAIL`, `PASSWORD`, a writable resource `MODULE`/`ENTITY`
+whose first writable string field is `KNOWN`, a lifecycle command `VERB` with
+its argument `VERB_FIELD` and the summary the API document gives it
+`VERB_TITLE`, and optionally `TITLE` (a per-run stamp by default). Nothing is
+committed, no flow names a tenant, and no journey runs against a mocked API.
+Both runners end at `scripts/e2e/run.sh` — the workstation's
+`scripts/e2e/android.sh` and the CI job's `scripts/e2e/mobile_ci.sh` — so
+neither keeps a flow list of its own: the spec list is the directory, and
+`check:flows` is what makes that honest. That gate proves what is provable
+without Maestro, and `check:flows -- --list` answers with the same set, which is
+what the job walks for `maestro check-syntax <file>` — it takes one flow, not the
+directory — so gate, job and runner name one set of journeys. `ANDROID_SERIAL`
+names the device to adb, and `scripts/e2e/run.sh` names it to Maestro too
+(`--device`): Maestro reads no `ANDROID_SERIAL` and falls back to every device it
+finds connected, so a second emulator would otherwise install on one device and
+run the journeys on another. A flow says which screens it proves with
+`# screen:` lines in its header comment, above the `---` that starts its steps;
+a line like that among the steps is a remark about one step and covers nothing.
+
+The verb journey is the one that reads two ways. At the record's address
+(`app/[module]/[entity]/[id]/run/[verb].tsx`) it runs a lifecycle command to its
+end: the sheet, its argument, `run`, and the field the command wrote in the
+record afterward. At the collection's address
+(`app/[module]/[entity]/run/[verb].tsx`) it proves the refusal: a command says
+whether it is about one record or about the list, the reference kernel composes
+no command about a collection, so the screen owes that address a named refusal
+and not a sheet a person could fill in and run at a path the server never
+mounted.
+
+The `mobile-e2e` workflow runs every flow on each push to main and nightly,
+against a kernel it serves itself, and carries no `continue-on-error`: a journey
+that skipped would leave the coverage the gate above counts looking like a
+figure nobody earned. It needs two repository variables and no secret —
+`PK_KERNEL_IMAGE`, the kernel to serve, pinned to a digest because this
+repository has no Go toolchain and cannot build one, and `PK_MOBILE_AVD`, the
+Android Virtual Device to boot — and it refuses by name when either is missing.
+Its own database, tenant, administrator and password are created by the run and
+dropped with it, and the Maestro report is printed in the job log. The device is
+host-level, so the job's concurrency group is named for the device and not the
+ref, and the step that boots the emulator refuses a host that already has a
+device attached — in any state adb lists it, because an `offline` entry is
+another job's emulator mid-boot, and adb answers for it — then asks every
+question of adb with the one serial whose console port it claimed, and publishes
+that serial only while it is the sole device the host has: a launch that failed
+cannot then be read as a device somebody else booted. A workflow file cannot
+hold a machine against a job that is not its own, so it declines the machine
+instead of sharing one. What a checkout cannot see is whether this forge fires
+`schedule:` or whether the label answers `actions/setup-node` and
+`services:` — the first run is what will tell, and
+until then no journey here has been shown passing on a device. What that job
+proves is these journeys; the kernel's `mobile_flow_pass_rate` is read from the
+kernel's own manifest, and stays where that manifest puts it until a kernel-side
+change reads this repository's report.
+
+**Reused** — the four journeys that already existed (`sign-in.yaml` as a
+sub-flow every new one opens with, `gallery.yaml`'s deep-link and scroll
+vocabulary, `record.yaml`'s create-edit-delete spine), the testIDs and header
+words the components already set, `scripts/source.ts`'s exported-check-plus
+module-run-guard shape for `scripts/check_flows.ts`, `tests/scale.test.ts`'s
+guard-with-its-own-fixtures shape for `tests/flow-coverage.test.ts`, and —
+copied and cited in each file's header — the kernel's `scripts/mobile_e2e.sh`
+serve-and-wait fixture, its `.gitea/workflows/mobile.yml` step list, its
+`postgres-init.sql` role, and the tool search and refusal of its
+`e2e/maestro/README.md`. **Added** — `scripts/e2e/mobile_ci.sh`, because nothing
+in this repository has ever started a server (`android.sh` required one somebody
+else had started) and no existing unit could state the claim that a device which
+signed in can use what the served catalog published; and
+`.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all.
+**Made reusable** — `scripts/e2e/run.sh`, one last mile (install, reverse, run
+the directory, write the JUnit) that any future runner calls instead of
+repeating, `scripts/e2e/tools.sh`, the tool search and the refusal that says
+where it looked, and `# screen:` as the way a journey says what it proves — so
+the next screen added under `app/` arrives with a journey or with a failing
+check.
 
 [testdata/catalog.json](testdata/catalog.json) is a checked-in copy of
 PlatformKit's `ui/screens/testdata/catalog.json`, and

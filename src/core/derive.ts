@@ -173,12 +173,18 @@ export function listPreview(e: Entry): Field | undefined {
 }
 
 export interface DetailItem {
+  /** field is the schema entry this fact is about, as `Control.field` is. */
+  readonly field: Field;
   readonly label: string;
   readonly value: string;
 }
 
 export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  return e.fields.map((f) => ({ label: humanize(f.name), value: display(f, row[f.name], format) }));
+  return e.fields.map((f) => ({
+    field: f,
+    label: humanize(f.name),
+    value: display(f, row[f.name], format),
+  }));
 }
 
 export type ControlKind =
@@ -271,9 +277,41 @@ export const rowCommands = (e: Entry): readonly Command[] =>
 export const collectionCommands = (e: Entry): readonly Command[] =>
   e.commands.filter((c) => c.collection === true);
 
-/** commandOf finds a command by its verb, which is how a route names one. */
-export const commandOf = (e: Entry, verb: string): Command | undefined =>
-  e.commands.find((c) => c.verb === verb);
+/**
+ * CommandScope is the address a command was opened at, which is the whole of
+ * what "about one record" and "about the collection" mean on screen: the
+ * address either has a row to name or it does not.
+ *
+ * The command and the address have to agree, because the POST is derived from
+ * both — `{entry.path}/{id}/{verb}`, or `{entry.path}/{verb}` when collection
+ * (catalog.Command). A record command opened at the collection's address would
+ * POST to the address only a collection command mounts, and a collection command
+ * opened at a record's would name a row to a door that takes none. The sheet is
+ * drawn from the catalog alone, so nothing else would notice until the write
+ * came back 404 with the argument somebody typed still in the box.
+ *
+ * The test is the one `api.command` already makes of the id it is handed
+ * (`id ? path/id : path`); naming it here is what lets the screen refuse before
+ * anybody fills in a sheet. The two screens that *navigate* to these addresses
+ * already scope themselves (`rowCommands` from a record, `collectionCommands`
+ * from a list): only an address typed or deep-linked from outside can mismatch.
+ */
+export type CommandScope = "record" | "collection";
+
+/** commandAt says whether a command belongs at an address; otherScope is the other one. */
+export const commandAt = (c: Command, at: CommandScope): boolean =>
+  at === "collection" ? c.collection === true : !c.collection;
+
+export const otherScope = (at: CommandScope): CommandScope =>
+  at === "record" ? "collection" : "record";
+
+/** commandScope is the address a route holds: with a row in the path, a record's. */
+export const commandScope = (id: string | undefined): CommandScope =>
+  id ? "record" : "collection";
+
+/** commandOf finds the command a route's verb names at the address it was opened at. */
+export const commandOf = (e: Entry, verb: string, at: CommandScope): Command | undefined =>
+  e.commands.find((c) => c.verb === verb && commandAt(c, at));
 
 /** listValues retains the element types the server declared, or refuses the whole list. */
 function listValues(field: Field, raw: string): (string | number | boolean)[] | undefined {

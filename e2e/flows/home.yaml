@@ -1,0 +1,19 @@
+# The first screen a signed-in person is given: the catalog the server named,
+# one row per entry the caller may reach, and the account door in the header.
+# It names nothing of its own — the entry comes from the environment.
+# screen: app/index.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- assertVisible:
+    id: "open-${MODULE}-${ENTITY}"
+- assertVisible: "In ${MODULE}"
+- tapOn:
+    id: "account"
+- assertVisible: "Refresh"
+- assertVisible: "Sign out"
+- tapOn: "Cancel"
+- assertVisible:
+    id: "home"
