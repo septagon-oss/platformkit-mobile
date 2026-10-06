@@ -172,6 +172,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       tone: "secondary",
       state: "ready",
     };
+    // A step that leads to a screen the person cannot see names that screen. "Next" is
+    // the stepper's word, for moving along stages already on the screen; on a card or a
+    // cart it left the next screen unnamed, which is what a capture of each page read as
+    // a primary action that does not say what it does. The id stays the one the intent
+    // carries: the verb's word is not its identity.
+    const onward = (label: string): Action => ({ ...action, label });
     // An offer's amount, in the currency the presentation is drawn in: read where the
     // tiers are built, not where this helper is written, because the currency is decided
     // further down.
@@ -298,7 +304,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       availability: state === "sold-out" ? ("sold-out" as const) : ("available" as const),
       status: productStatus,
       open: secondary,
-      primary: action,
+      primary: onward(c.reviewSelection),
     };
     const line = {
       id: "line-1",
@@ -701,7 +707,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             currency,
             adjustments: [],
             quote,
-            checkout: action,
+            checkout: onward(c.reviewOrder),
           },
           p,
         ),
@@ -717,7 +723,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
           p,
         ),
       ),
-      buy: v.take(deriveBuyBar({ price: safePrice, action }, p)),
+      buy: v.take(deriveBuyBar({ price: safePrice, action: onward(c.reviewOrder) }, p)),
       pricing: v.take(
         derivePricing(
           {

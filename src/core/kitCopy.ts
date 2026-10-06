@@ -22,6 +22,11 @@ export const kitEnglish = {
   more: "Load more",
   summary: "Summary",
   details: "Full details",
+  // The two verbs that end a step someone is inside. A stepper's "Next" moves along
+  // stages the person can already see; a card's or a cart's step leads to a screen
+  // they cannot, so the word names the place.
+  reviewSelection: "Review selection",
+  reviewOrder: "Review order",
   activity: "Activity",
   system: "the system",
   unknownActor: "Unknown actor",
@@ -191,6 +196,8 @@ export const kitPortuguese: KitWords = {
   more: "Carregar mais",
   summary: "Resumo",
   details: "Detalhes completos",
+  reviewSelection: "Revisar a seleção",
+  reviewOrder: "Revisar o pedido",
   activity: "Atividade",
   system: "O sistema",
   unknownActor: "Autor desconhecido",
