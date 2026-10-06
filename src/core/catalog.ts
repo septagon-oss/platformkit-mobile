@@ -5,9 +5,9 @@
 //
 // It mirrors kit/crud.Schema and ui/screens.Entry in the public repository.
 // testdata/catalog.json is that repository's golden file, and
-// testdata/catalog.source.json names the published version it was taken from:
-// one copy, from one version, with the two compared on a schedule in
-// .gitea/workflows/drift.yml rather than trusted because nobody looked.
+// testdata/catalog.source.json names the commit it was taken from: one copy,
+// from one revision, with the two compared by `scripts/catalog.ts check` on
+// every run rather than trusted because nobody looked.
 
 export const FIELD_TYPES = [
   "string",
@@ -39,9 +39,6 @@ export interface Field {
  * an event of its own, which is what a form cannot express. A command the
  * caller may not call is absent from the document, so one that is here is one
  * this caller may run.
- *
- * There is no path, because it is derived the way every other path is: POST
- * {entry.path}/{id}/{verb}, or {entry.path}/{verb} when collection.
  */
 export interface Command {
   readonly verb: string;
@@ -49,9 +46,26 @@ export interface Command {
   readonly description?: string;
   /** collection says the command is about the whole list, so it takes no row. */
   readonly collection?: boolean;
+  /**
+   * path is where the command is answered: the whole endpoint, `{id}` and verb
+   * included, printed only when {entry.path}/{id}/{verb} — or
+   * {entry.path}/{verb} when collection — is no longer where the server mounted
+   * it. Absent means the derivation still holds, so the phone derives it; a
+   * printed path already ends in the verb and is never extended with it again.
+   */
+  readonly path?: string;
   /** fields is the shape of the argument; a command that takes none has no fields. */
   readonly fields: readonly Field[];
 }
+
+/**
+ * CRUD_VERBS are the verbs the kernel counts operations in
+ * (kit/httpx/operations.go). They are spelled here because the document names
+ * them, not because the phone has five methods: a verb this list does not hold
+ * is a document this build refuses rather than one it quietly offers.
+ */
+export const CRUD_VERBS = ["list", "read", "create", "update", "delete"] as const;
+export type CrudVerb = (typeof CRUD_VERBS)[number];
 
 export interface Entry {
   readonly module: string;
@@ -60,6 +74,20 @@ export interface Entry {
   readonly fields: readonly Field[];
   readonly immutable: readonly string[];
   readonly writable: boolean;
+  /**
+   * writePath is where the writes of this resource are answered, printed only
+   * when they are answered somewhere other than path — a control plane whose
+   * reads sit behind one host and its writes behind another. Absent means
+   * path, and it is never a permission: the server prints it only for a caller
+   * that may write, so its absence says nothing about whether one may.
+   */
+  readonly writePath?: string;
+  /**
+   * operations names the verbs this resource offers. Absent, or an empty list,
+   * means all five — kit/rest's own rule — so a document that says nothing is
+   * read exactly as it always was.
+   */
+  readonly operations?: readonly CrudVerb[];
   /** commands is empty for an entity that has none, and for a server too old to say. */
   readonly commands: readonly Command[];
   /**
@@ -82,7 +110,7 @@ export interface Entry {
  * learned to render the new shape, which is the same rule the server applies from
  * its side, and the two numbers meeting in the middle is the whole contract.
  */
-export const SUPPORTED_CATALOG_VERSION = 1;
+export const SUPPORTED_CATALOG_VERSION = 2;
 
 export interface Catalog {
   /**
@@ -138,6 +166,23 @@ function strings(
   return v as string[];
 }
 
+/**
+ * absolute reads an address the transport can be asked to send. Every path in
+ * the document — the read path, the write path, a command's own endpoint — is
+ * checked here and nowhere else, so a missing slash names its field at the
+ * document rather than failing as an unsendable URL at request time.
+ */
+function absolute(
+  o: Record<string, unknown>,
+  key: string,
+  at: string,
+  required: boolean,
+): string | undefined {
+  const v = str(o, key, at, required);
+  if (v === undefined || v.startsWith("/")) return v;
+  throw new CatalogError(`${at}.${key}`, `is ${JSON.stringify(v)}, not an absolute path`);
+}
+
 function fieldType(v: unknown, at: string): FieldType {
   if (typeof v !== "string" || !(FIELD_TYPES as readonly string[]).includes(v)) {
     throw new CatalogError(at, `type ${JSON.stringify(v)} is not one of ${FIELD_TYPES.join(", ")}`);
@@ -176,6 +221,7 @@ function command(v: unknown, at: string): Command {
     ...opt("summary", str(v, "summary", at, false)),
     ...opt("description", str(v, "description", at, false)),
     ...opt("collection", bool(v, "collection", at)),
+    ...opt("path", absolute(v, "path", at, false)),
     fields: (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`)),
   };
 }
@@ -184,7 +230,7 @@ function entry(v: unknown, at: string): Entry {
   if (!isRecord(v)) throw new CatalogError(at, "is not an object");
   const module = str(v, "module", at, true)!;
   const entity = str(v, "entity", at, true)!;
-  const path = str(v, "path", at, true)!;
+  const path = absolute(v, "path", at, true)!;
   const fields = v.fields;
   if (!Array.isArray(fields)) throw new CatalogError(`${at}.fields`, "is not a list");
   const writable = bool(v, "writable", at);
@@ -202,6 +248,8 @@ function entry(v: unknown, at: string): Entry {
     fields: fields.map((f, i) => field(f, `${at}.fields[${i}]`)),
     immutable: strings(v, "immutable", at) ?? [],
     writable,
+    ...opt("writePath", absolute(v, "write_path", at, false)),
+    ...opt("operations", verbs(v, "operations", at)),
     commands: (commands ?? []).map((c, i) => command(c, `${at}.commands[${i}]`)),
     singleton: bool(v, "singleton", at) ?? false,
   };
@@ -245,5 +293,60 @@ function catalogVersion(v: unknown): number {
   return v;
 }
 
+/**
+ * verbs reads an operation set: the words CRUD_VERBS holds, each at most once.
+ * An empty list is kept as an empty list — the parser invents no value the
+ * document did not print — and means all five in `offers`. A repeated word is
+ * a server that mounted the same verb twice, so it is refused here rather than
+ * read as a shorter set.
+ */
+function verbs(
+  o: Record<string, unknown>,
+  key: string,
+  at: string,
+): readonly CrudVerb[] | undefined {
+  const listed = strings(o, key, at);
+  if (listed === undefined) return undefined;
+  return listed.map((word, i) => {
+    if (!(CRUD_VERBS as readonly string[]).includes(word)) {
+      throw new CatalogError(
+        `${at}.${key}[${i}]`,
+        `is ${JSON.stringify(word)}, not one of ${CRUD_VERBS.join(", ")}`,
+      );
+    }
+    if (listed.indexOf(word) !== i) {
+      throw new CatalogError(`${at}.${key}`, `names ${JSON.stringify(word)} twice`);
+    }
+    return word as CrudVerb;
+  });
+}
+
 /** key is how a renderer pack names a resource: "module/entity". */
 export const key = (e: Entry): string => `${e.module}/${e.entity}`;
+
+/**
+ * offers reports whether this entry names a verb. No set, and an empty set,
+ * are both "all five", which is why a v1 document needs no re-stamping to keep
+ * every door it always had.
+ */
+export const offers = (e: Entry, verb: CrudVerb): boolean =>
+  e.operations === undefined || e.operations.length === 0 || e.operations.includes(verb);
+
+/**
+ * Doors are the write controls an entry may draw. `writable` says this caller
+ * may write at all; `operations` says which doors the server actually mounted.
+ * Neither decides alone, so no screen reads either one by itself: a caller who
+ * may write gets no New button on a resource with no create, and a resource
+ * with create gets none for a caller who may not.
+ */
+export interface Doors {
+  readonly create: boolean;
+  readonly update: boolean;
+  readonly delete: boolean;
+}
+
+export const doors = (e: Entry): Doors => ({
+  create: e.writable && offers(e, "create"),
+  update: e.writable && offers(e, "update"),
+  delete: e.writable && offers(e, "delete"),
+});

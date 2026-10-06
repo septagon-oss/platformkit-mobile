@@ -1,6 +1,8 @@
 // api.ts is every request the shell makes. The kernel's routes are the same
-// ones the web shell's screens call — list, read, create, patch, delete on the
-// entry's own path — so there is no second API to keep honest.
+// ones the web shell's screens call — list and read at the entry's own path,
+// and every write at the address the entry names for writes (writePath in
+// src/core/derive.ts, which is the entry's own path unless the server printed
+// another) — so there is no second API to keep honest.
 //
 // The session is the auth module's cookie. A native client is not a browser:
 // it keeps the Set-Cookie value it was given and sends it back as Cookie, and
@@ -8,6 +10,7 @@
 // nor Origin, because a caller that is not a browser presents what it presents
 // deliberately (kit/httpx.SameSite).
 import { type Catalog, type Entry, parseCatalog } from "../core/catalog";
+import { commandPath, writePath } from "../core/derive";
 
 export const PER_PAGE = 20;
 
@@ -327,20 +330,22 @@ export function createApi(
       return json("GET", e.path);
     },
     async replace(e, values) {
-      return json("PUT", e.path, values);
+      // A singleton prints no operation set and no write path of its own, but
+      // kit/rest mounts its PUT where it mounts any other write: follow the
+      // entry, do not assume the read address.
+      return json("PUT", writePath(e), values);
     },
     async create(e, values) {
-      return json("POST", e.path, values);
+      return json("POST", writePath(e), values);
     },
     async update(e, id, values) {
-      return json("PATCH", `${e.path}/${encodeURIComponent(id)}`, values);
+      return json("PATCH", `${writePath(e)}/${encodeURIComponent(id)}`, values);
     },
     async remove(e, id) {
-      await call("DELETE", `${e.path}/${encodeURIComponent(id)}`);
+      await call("DELETE", `${writePath(e)}/${encodeURIComponent(id)}`);
     },
     async command(e, id, verb, values) {
-      const at = id ? `${e.path}/${encodeURIComponent(id)}` : e.path;
-      return json("POST", `${at}/${encodeURIComponent(verb)}`, values);
+      return json("POST", commandPath(e, verb, id), values);
     },
   };
 }

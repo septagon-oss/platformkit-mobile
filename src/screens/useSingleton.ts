@@ -7,8 +7,8 @@
 // on it, which is exactly what the catalog's `singleton` flag exists to say.
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { key, type Entry } from "../core/catalog";
-import { formControls, problems, values, type Row } from "../core/derive";
+import { key, offers, type Entry } from "../core/catalog";
+import { formControls, problems, values, verbRefusal, type Row } from "../core/derive";
 import { ApiError } from "../effects/api";
 import { useShell } from "../shell";
 import type { Phase } from "../ui/organisms/ResourceForm";
@@ -72,6 +72,13 @@ export function useSingleton(entry: Entry) {
   const cancel = useCallback(() => setEditing(false), []);
 
   const save = useCallback(async () => {
+    // Edit is drawn from doors(entry); this is the same check for the sheet
+    // reached by any other way. A singleton's PUT is an update of its one row,
+    // and a resource that mounts no update has no address for it.
+    if (!offers(entry, "update")) {
+      setDetail(verbRefusal("update"));
+      return;
+    }
     const wrong = problems(controls, held);
     if (Object.keys(wrong).length > 0) {
       setErrors(wrong);

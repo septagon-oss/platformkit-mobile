@@ -98,7 +98,7 @@ test("a malformed document is refused by name", () => {
 test("the stamp decides what the build does with the answer", () => {
   // The golden file is the contract this build was written against, so its shape is
   // in range by definition — and if the copy ever stops saying so, the copy changed.
-  assert.equal(parseCatalog(fixture()).version, 1);
+  assert.equal(parseCatalog(fixture()).version, 2);
 
   // A server old enough not to stamp is a server this shell was built against, and
   // refusing it would turn an older deployment into a broken app. The commands
@@ -143,15 +143,21 @@ test("the stamp is read before the body, so a newer server is named as a newer s
   );
 });
 
-test("the copy names a published commit, and the bytes still match it", async () => {
+const PINNED = "7fc4b0abd547f4e30ad4e5b8b87ef6cc34138bb0";
+
+test("the copy names the commit it was fetched from, and the bytes still match it", async () => {
   // Every screen is derived from this fixture, so "copied by hand" has to stay a
   // checked claim: the hash is why editing the copy to make a test pass fails instead.
-  await assert.match(await check(), /matches v1\.1\.0/);
+  // The revision is main, which is where the version-2 stamp lives; no tag carries it
+  // yet, so the record names a commit, which cannot move under the bytes the way a
+  // branch would, and provenance() reads it as its own tag.
+  await assert.match(await check(), /matches 7fc4b0ab/);
   const source = await readSource();
-  assert.equal(source.upstream.tag, "v1.1.0");
+  assert.equal(source.upstream.commit, PINNED);
+  assert.equal(source.upstream.tag, PINNED);
   assert.equal(
     raw(source),
-    "https://raw.githubusercontent.com/septagon-oss/platformkit/893cf2ae79a7f5b6a9b8618fd3586e237fea85ea/ui/screens/testdata/catalog.json",
+    `https://raw.githubusercontent.com/septagon-oss/platformkit/${PINNED}/ui/screens/testdata/catalog.json`,
   );
 });
 
@@ -245,11 +251,11 @@ test("the drift report says the six things it can say, and only the true one", a
   const ours = Buffer.from('{"catalogVersion":1}');
   const lines = (latest?: LatestLookup) => report(source, ours, ours, latest).join("\n");
 
-  assert.match(lines(), /^ok  testdata\/catalog\.json still matches v1\.1\.0/);
-  assert.match(lines(), /^ok .*\nok  v1\.1\.0 is the version/m);
+  assert.match(lines(), /^ok  testdata\/catalog\.json still matches 7fc4b0ab/);
+  assert.match(lines(), /^ok .*\nok  7fc4b0abd547f4e30ad4e5b8b87ef6cc34138bb0 is the version/m);
   assert.match(
     report(source, ours, Buffer.from('{"catalogVersion":2}')).join("\n"),
-    /^DRIFT .*differs from v1\.1\.0/,
+    /^DRIFT .*differs from 7fc4b0ab/,
   );
   assert.match(
     lines({ state: "ahead", version: "v1.2.0", bytes: Buffer.from('{"catalogVersion":2}') }),
@@ -280,4 +286,164 @@ test("the proxy is asked about the module path, not the repository path", async 
     "latest",
     "the live proxy resolves this module; a 404 here means the path is wrong again",
   );
+});
+
+// ---------------------------------------------------------------------------
+// Version 2: the three addresses a document may name, and the five words it
+// may narrow the write doors to.
+// ---------------------------------------------------------------------------
+
+const controlPlane = () =>
+  JSON.parse(
+    readFileSync(
+      new URL("../testdata/catalog.control-plane.json", import.meta.url).pathname,
+      "utf8",
+    ),
+  );
+
+test("the copy is a version-2 document and adds no key this build ignores", () => {
+  const c = parseCatalog(fixture());
+  assert.equal(c.version, 2);
+  assert.deepEqual(
+    c.resources.map((e) => `${e.module}/${e.entity}`),
+    ["note/note", "note/tag", "note/setting"],
+  );
+  // `screen` is the web workspace's page address. Every one of the kernel's own
+  // three resources names /app/note/notes, which no router could serve as three
+  // screens, so the phone's routes stay its own file tree. The key is in the
+  // bytes and not in the entry: reading it is a decision somebody has to make.
+  assert.ok(
+    readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8").includes(
+      '"screen": "/app/note/notes"',
+    ),
+  );
+  assert.equal("screen" in c.resources[0]!, false);
+});
+
+test("an entry keeps the write address it was given, and one that has none keeps its own", () => {
+  const c = parseCatalog(controlPlane());
+  const priceLists = c.resources[3]!;
+  assert.equal(priceLists.path, "/api/v1/pricing/price-lists");
+  assert.equal(priceLists.writePath, "/api/v1/ops/pricing/price-lists");
+  assert.deepEqual(priceLists.operations, ["list", "read", "create", "update"]);
+  assert.equal(priceLists.commands[0]!.path, "/api/v1/ops/pricing/price-lists/{id}/retire");
+  // A singleton's PUT may live on another surface too, so it carries the field
+  // for the same reason a collection does.
+  assert.equal(c.resources[4]!.singleton, true);
+  assert.equal(c.resources[4]!.writePath, "/api/v1/ops/pricing/currency");
+  // And the resources the kernel itself published say nothing, which means
+  // path — never "you may not write", which is what the field's absence is
+  // often mistaken for.
+  assert.equal(c.resources[0]!.writePath, undefined);
+  assert.equal(c.resources[0]!.operations, undefined);
+});
+
+test("the extension fixture is the pinned copy plus the case it does not carry", () => {
+  // One fixture is the kernel's bytes, the other is this repository's, and the
+  // relation between them is asserted rather than remembered: the extension is
+  // the copy with entries added to it, so it cannot quietly drift off the
+  // document every screen is derived from.
+  assert.equal(controlPlane().catalogVersion, 2);
+  assert.deepEqual(
+    parseCatalog(controlPlane()).resources.slice(0, 3),
+    parseCatalog(fixture()).resources,
+  );
+});
+
+test("an address without a leading slash is refused naming its own field", () => {
+  for (const bad of ["api/v1/x", "", "note/notes"]) {
+    for (const key of ["path", "write_path"]) {
+      const doc = fixture();
+      doc.resources[0][key] = bad;
+      assert.throws(
+        () => parseCatalog(doc),
+        (e: unknown) => e instanceof CatalogError && e.message.includes(`resources[0].${key}`),
+        `${key} = ${JSON.stringify(bad)} was accepted`,
+      );
+    }
+    const command = fixture();
+    command.resources[0].commands[0].path = bad;
+    assert.throws(
+      () => parseCatalog(command),
+      (e: unknown) =>
+        e instanceof CatalogError &&
+        e.message.includes("resources[0].commands[0].path") &&
+        e.message.includes("not an absolute path"),
+      `command path = ${JSON.stringify(bad)} was accepted`,
+    );
+  }
+});
+
+test("an address that is not a string is refused as the wrong kind of thing", () => {
+  for (const bad of [42, ["a"], {}, true, null]) {
+    const doc = fixture();
+    doc.resources[0].write_path = bad;
+    assert.throws(
+      () => parseCatalog(doc),
+      (e: unknown) =>
+        e instanceof CatalogError &&
+        e.message.includes("resources[0].write_path") &&
+        e.message.includes("is not a string"),
+      `write_path = ${JSON.stringify(bad)} was accepted`,
+    );
+  }
+});
+
+test("operations holds the five words, and a sixth is refused by number and by name", () => {
+  const doc = fixture();
+  doc.resources[0].operations = ["list", "read", "create", "update"];
+  assert.deepEqual(parseCatalog(doc).resources[0]!.operations, [
+    "list",
+    "read",
+    "create",
+    "update",
+  ]);
+  // An empty list is the server's own spelling of "all five" (kit/rest reads a
+  // nil and an empty slice the same way), so the parser keeps it rather than
+  // inventing a set the document did not print.
+  const empty = fixture();
+  empty.resources[0].operations = [];
+  assert.deepEqual(parseCatalog(empty).resources[0]!.operations, []);
+  // A word this build has no door for is the event catalogVersion exists to
+  // catch; the message says which member and what the vocabulary is.
+  for (const [operations, why] of [
+    [
+      ["list", "read", "remove"],
+      /operations\[2\] is "remove", not one of list, read, create, update, delete/,
+    ],
+    [["read", "read"], /operations names "read" twice/],
+    ["list", /operations is not a list of strings/],
+    [{ 0: "list" }, /operations is not a list of strings/],
+  ] as const) {
+    const bad = fixture();
+    bad.resources[0].operations = operations;
+    assert.throws(
+      () => parseCatalog(bad),
+      (e: unknown) => e instanceof CatalogError && why.test(e.message),
+      `${JSON.stringify(operations)} was accepted`,
+    );
+  }
+});
+
+test("a v2 document carrying the keys this build does not act on still parses", () => {
+  // Every one of these is listed in the brief as a key the phone sees in a
+  // version-2 document and decides to ignore. The decision is only real while a
+  // case refuses a parse that starts acting on one; if this test ever fails
+  // because the entry grew the field, the decision has moved and this says so.
+  const doc = fixture();
+  doc.resources[0].screen = "/app/note/notes";
+  doc.resources[0].fields[1].maxLength = 80;
+  doc.resources[0].fields[1].present = "badge";
+  doc.resources[0].fields[1].display = true;
+  doc.resources[0].fields[2].widget = "richtext";
+  const c = parseCatalog(doc);
+  const note = c.resources[0]!;
+  assert.equal("screen" in note, false, "screen reached the entry");
+  for (const f of note.fields) {
+    for (const ignored of ["maxLength", "present", "display"]) {
+      assert.equal(ignored in f, false, `${ignored} reached a field`);
+    }
+  }
+  // A widget the phone has no control for is still the widget the server named.
+  assert.equal(note.fields[2]!.widget, "richtext");
 });

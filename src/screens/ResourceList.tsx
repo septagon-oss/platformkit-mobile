@@ -4,7 +4,7 @@ import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
-import type { Command } from "../core/catalog";
+import { doors, type Command } from "../core/catalog";
 import { collectionCommands, humanize, plural, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
@@ -22,6 +22,12 @@ export function ResourceList({ entry }: ScreenProps) {
   const open = (id: string) => router.push(`${at}/${encodeURIComponent(id)}`);
   const add = useCallback(() => router.push(`${at}/new`), [router, at]);
   const { toggleOrdering } = list;
+  // New is drawn when this caller may write *and* the server mounted a create
+  // for the resource; one gate is not enough and neither is drawn alone. The
+  // plain boolean is what the header memo below depends on: `doors` answers a
+  // fresh object each render, which is the fresh instruction that stops the
+  // navigator settling.
+  const mayCreate = doors(entry).create;
   // The same two shapes as a record's commands: one with an argument opens a
   // sheet, one without is a question. The sheet's path has no row in it,
   // which is the whole of what "about the collection" means.
@@ -42,13 +48,11 @@ export function ResourceList({ entry }: ScreenProps) {
       headerRight: () => (
         <View style={styles.actions}>
           <Button placement="header" label="Order" icon="sort" onPress={toggleOrdering} />
-          {entry.writable ? (
-            <Button placement="header" label="New" icon="add" onPress={add} />
-          ) : null}
+          {mayCreate ? <Button placement="header" label="New" icon="add" onPress={add} /> : null}
         </View>
       ),
     }),
-    [entry.entity, entry.writable, toggleOrdering, add],
+    [entry.entity, mayCreate, toggleOrdering, add],
   );
   return (
     <>
@@ -68,7 +72,7 @@ export function ResourceList({ entry }: ScreenProps) {
         onOpen={open}
         onMore={list.loadMore}
         onRefresh={list.refresh}
-        {...(entry.writable ? { onNew: add } : {})}
+        {...(mayCreate ? { onNew: add } : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}
       />
     </>

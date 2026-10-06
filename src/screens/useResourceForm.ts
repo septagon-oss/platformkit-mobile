@@ -10,8 +10,16 @@ import { useNavigation, useRouter } from "expo-router";
 // own re-export of react-navigation in SDK 57.
 import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { key, type Entry } from "../core/catalog";
-import { formControls, problems, screenPath, text, values, type Row } from "../core/derive";
+import { key, offers, type Entry } from "../core/catalog";
+import {
+  formControls,
+  problems,
+  screenPath,
+  text,
+  values,
+  verbRefusal,
+  type Row,
+} from "../core/derive";
 import { ApiError } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
@@ -117,6 +125,14 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
 
   const save = useCallback(async () => {
     if (phase !== "editing") return;
+    // The header's New/Edit button is the door for this write, and it is drawn
+    // from doors(entry). A sheet can also be reached by a link or a restored
+    // stack, so the verb is checked again here: a create the resource does not
+    // mount has no address to POST to, and nothing is sent to find out.
+    if (!offers(entry, create ? "create" : "update")) {
+      setDetail(verbRefusal(create ? "create" : "update"));
+      return;
+    }
     const refused = problems(controls, held);
     if (Object.keys(refused).length > 0) {
       setErrors(refused);
