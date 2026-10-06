@@ -243,9 +243,10 @@ test("the two provenance records have not forked in the fields they share", () =
 });
 
 test("the drift report says the six things it can say, and only the true one", async () => {
-  // This is the scheduled half, so its branches are chosen here rather than waited
-  // for: a report nobody has watched speak is the unconnected mechanism this change
-  // exists to remove. Six outcomes, because "no newer version" and "I could not tell
+  // This is the half that speaks only when somebody runs `drift` — no schedule
+  // calls it, as the head of scripts/catalog.ts says — so its branches are chosen
+  // here rather than waited for: a report nobody has watched speak is the
+  // unconnected mechanism this change exists to remove. Six outcomes, because "no newer version" and "I could not tell
   // you" are different answers and used to be the same line.
   const source = await readSource();
   const ours = Buffer.from('{"catalogVersion":1}');

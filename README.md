@@ -646,11 +646,13 @@ was copied from, in the same shape the design-token provenance uses. The suite
 checks the bytes against that record offline, so editing the copy to make a test
 pass fails instead of fixing anything. `node --import tsx scripts/catalog.ts refresh` rewrites
 both files; the pin itself moves only by editing the recorded commit, which is a
-diff somebody reviews. What no local check can see is whether the server has moved,
-so the `contract-drift` schedule asks the public repository and the module proxy and
-reports without blocking, for the reason at the head of
-[.gitea/workflows/drift.yml](.gitea/workflows/drift.yml). A proxy it cannot reach is
-reported as _unknown_ and never as agreement: the first version of
+diff somebody reviews. What no local check can see is whether the server has moved.
+`node --import tsx scripts/catalog.ts drift` asks the recorded commit and the
+public module proxy and reports without blocking, and nothing runs it on a
+schedule: the weekly [drift workflow](.gitea/workflows/drift.yml) reports what the
+SDK, the dependency tree, the advisory database and the fingerprint say today,
+and holds no catalogue step — the nightly that would run this is T-0298's.
+A proxy it cannot reach is reported as _unknown_ and never as agreement: the first version of
 `scripts/catalog.ts` asked the proxy for `septagon-oss/platformkit` instead of
 `github.com/septagon-oss/platformkit`, took a 404, and printed "ok, this is the latest
 version".

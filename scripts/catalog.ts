@@ -10,11 +10,14 @@
 //
 //   check    (offline, run by the suite) the bytes here hash to what the record
 //            says, so editing the copy to make a test pass is a failure.
-//   drift    (scheduled, reports) fetch the recorded commit and compare; then ask
+//   drift    (by hand, reports) fetch the recorded commit and compare; then ask
 //            the public module proxy which version an outside `go get` would take
-//            and whether its catalog differs. The second question cannot be
-//            answered offline, so it reports rather than blocks — see the head of
-//            .gitea/workflows/drift.yml.
+//            and whether its catalog differs. Neither question can be answered
+//            offline, so it reports rather than blocks — and nothing runs it on a
+//            schedule today: .gitea/workflows/drift.yml is the weekly report of
+//            what the SDK, the dependency tree, the advisories and the fingerprint
+//            say, and holds no catalog step. The nightly that would run this is
+//            T-0298's.
 //   refresh  (deliberate) rewrite the fixture from the recorded commit. The pin
 //            itself only moves by editing that commit field, which is a diff.
 //
