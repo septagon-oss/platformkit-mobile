@@ -667,6 +667,54 @@ build has never seen, so `parseCatalog` refuses a `catalogVersion` newer than
 drawing a screen from the fields it happens to recognise; a server old enough not to
 stamp is the server this shell was built against, and is accepted.
 
+The stamp this build answers to is 2, which is `ui/screens.CatalogVersion` on
+kernel main, and version 2 says three things version 1 did not. `write_path` is
+where a resource's writes are answered when they are not answered at its read
+address — a control plane whose rows read from the tenant host and are written on
+the ops one. `operations` names the verbs the server actually mounted for the
+resource, and a command's `path` is its whole endpoint, `{id}` and the verb
+already in it. One function owns each derivation: `writePath` and `commandPath`
+in [src/core/derive.ts](src/core/derive.ts). The transport builds no write
+address of its own — a list, a read and a singleton read go to `path`; a POST,
+PATCH, PUT and DELETE to `writePath`, which is `path` unless the document printed
+another; and a command to the address it printed, with the row substituted and
+the verb never appended a second time. Which doors a screen draws is one rule
+too: `doors(entry)` is `writable` — this caller may write — times `operations` —
+this verb is mounted — and it is what the three generated screens and the three
+hooks that send a write consult, so a form reached by a deep link for a verb
+nobody mounts says so and sends nothing. An absent or empty `operations` means
+all five, exactly as in version 1, so a server that says nothing keeps every door
+it always had.
+
+The pinned copy carries none of those three keys — no resource in the kernel's
+golden has its writes elsewhere — so
+[testdata/catalog.control-plane.json](testdata/catalog.control-plane.json) sits
+beside it: the copy's three resources, then a resource written on another
+surface, a command at a printed address of its own, and a singleton whose PUT
+follows it. The copy is not extended in place, because the hash that makes it
+trustworthy is a hash of the kernel's bytes; a test asserts the extension is
+those bytes plus those entries instead. The version-2 keys this build ignores on
+purpose are `screen` (the web workspace's page address, where the phone's routes
+are its own file tree), `display`, `present` and `maxLength` (no control here
+draws them yet) and the `richtext` widget, which stays T-0192's; a case in
+`tests/catalog.test.ts` refuses any of them an unintended reader.
+
+**Reused** — `parseCatalog`'s own validators (`str`, `strings`, `CatalogError`) and
+the `writable` gate the screens already consulted; the New, Edit, Delete and Save
+buttons, their copy and their testIDs; `createApi`'s `call`/`json` and its `/api/v1/`
+guard; `scripts/catalog.ts`'s `provenance`, `check` and `refresh` with the
+`platformkit.catalog-source.v1` record unchanged; `fakeFetch` and the fakes in
+`tests/fakes/`. **Added** — `writePath`, `operations` and a command's `path` on the
+parsed entry, one `absolute()` rule shared by every address the document prints, the
+verb set `offers`/`doors`, the two derivations, and the extension fixture — nothing
+existing carried an address that is not the read path, and the extension is a second
+file because widening the pinned copy would break the very hash that vouches for it.
+**Made reusable** — one named owner per address, so a renderer pack or the next
+screen asks `writePath`/`commandPath` instead of joining `entry.path` by hand;
+`absolute()` is the rule the generated types (T-0287) will have to answer to; and
+`testdata/catalog.control-plane.json` is the fixture any later control-plane work —
+and the cross-pin nightly (T-0298) — runs against.
+
 [testdata/design-tokens.json](testdata/design-tokens.json) is the palette's
 source and a build input: the native fingerprint hashes it, so a token change
 is a binary change the `android` workflow rebuilds for. To refresh it, project
