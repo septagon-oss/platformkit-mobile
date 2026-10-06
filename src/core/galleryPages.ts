@@ -182,6 +182,29 @@ export const galleryPageIds = Object.keys(galleryPages) as readonly GalleryPageI
 /** A page's family is what its specimen's id says it is: the part before the state. */
 export const pageFamily = (caseId: string): string => caseId.split("/")[0] ?? caseId;
 
+/** The heading a specimen's own surface writes for itself, family by family. Most
+ * specimens take their heading from the records they draw — a list is titled by what
+ * it holds, a plan comparison by the plan it compares — so the page's family line is
+ * the only heading above them. One family's specimen titles itself from the kit's own
+ * words, read from the same bundle the page would read. */
+const specimenHeading: Readonly<Record<string, (p: Presentation) => string>> = {
+  activity: (p) => p.copy.kit.activity,
+};
+
+/** The line the page draws above a group of specimens: the family's name, unless the
+ * one specimen under it already writes those words for itself. A heading is read as a
+ * heading twice over by anyone who navigates a screen by them, so the page keeps out
+ * of the way where the specimen names itself. A group of more than one specimen is
+ * still named: that line says what the examples below it share. */
+export function groupHeading(
+  group: { readonly id: string; readonly cases: readonly string[] },
+  p: Presentation,
+): string | undefined {
+  const family = humanize(group.id);
+  const own = specimenHeading[group.id]?.(p);
+  return group.cases.length === 1 && own === family ? undefined : family;
+}
+
 export function deriveGalleryPage(id: string, _p: Presentation) {
   return build(_p, (v: Validation) => {
     const spec = (galleryPages as Record<string, PageSpec | undefined>)[id];

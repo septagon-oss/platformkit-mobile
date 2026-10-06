@@ -24,7 +24,12 @@ import {
   type MapCanvasProps,
   type Presentation,
 } from "../core/derive";
-import { deriveGalleryPage, pageFamily, type GalleryPageModel } from "../core/galleryPages";
+import {
+  deriveGalleryPage,
+  groupHeading,
+  pageFamily,
+  type GalleryPageModel,
+} from "../core/galleryPages";
 import { deriveDisclosure } from "../core/surfaces";
 import { Badge } from "./atoms/Badge";
 import { Button } from "./atoms/Button";
@@ -332,12 +337,12 @@ function Page({
   const rest = model.cases.filter((id) => !shown.includes(id));
   // One section per family, in the order the page names them: a page reads as
   // the screen it stands for, not as a list of specimen ids.
-  const groups: { readonly id: string; readonly family: string; readonly cases: string[] }[] = [];
+  const groups: { readonly id: string; readonly cases: string[] }[] = [];
   for (const caseId of rest) {
     const id = pageFamily(caseId);
     const group = groups.find((entry) => entry.id === id);
     if (group) group.cases.push(caseId);
-    else groups.push({ id, family: humanize(id), cases: [caseId] });
+    else groups.push({ id, cases: [caseId] });
   }
   const lead = (
     <VerbStage lead>
@@ -360,25 +365,32 @@ function Page({
   // second inset behind a heading and left a page with three left edges.
   const statesOf = (shown: typeof groups) => (
     <VerbStage lead={false}>
-      {shown.map((group) => (
-        <View key={group.id} style={s.group}>
-          <Text role="caption" tone="muted" uppercase accessibilityRole="header">
-            {group.family}
-          </Text>
-          {group.cases.map((caseId) => (
-            <View key={caseId} style={stand && ownSurface.has(group.id) ? s.hang : undefined}>
-              <KitSamples
-                aside
-                presentation={presentation}
-                caseId={caseId}
-                onAction={setAction}
-                {...(renderImage ? { renderImage } : {})}
-                {...(renderZoom ? { renderZoom } : {})}
-              />
-            </View>
-          ))}
-        </View>
-      ))}
+      {shown.map((group) => {
+        // The specimen may already name itself, in which case the family line above
+        // it would be the same heading twice.
+        const heading = groupHeading(group, presentation);
+        return (
+          <View key={group.id} style={s.group}>
+            {heading ? (
+              <Text role="caption" tone="muted" uppercase accessibilityRole="header">
+                {heading}
+              </Text>
+            ) : null}
+            {group.cases.map((caseId) => (
+              <View key={caseId} style={stand && ownSurface.has(group.id) ? s.hang : undefined}>
+                <KitSamples
+                  aside
+                  presentation={presentation}
+                  caseId={caseId}
+                  onAction={setAction}
+                  {...(renderImage ? { renderImage } : {})}
+                  {...(renderZoom ? { renderZoom } : {})}
+                />
+              </View>
+            ))}
+          </View>
+        );
+      })}
     </VerbStage>
   );
   const states = statesOf(groups);
