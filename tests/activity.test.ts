@@ -123,6 +123,8 @@ for (const language of ["en", "pt"] as const) {
     assert.equal(result.ok, true, "withdrawn cached data is not a new readable snapshot");
     if (!result.ok) return;
     assert.deepEqual(result.value.rows, []);
+    assert.equal(result.value.more, undefined);
+    assert.equal(result.value.pageError, undefined);
     assert.equal(result.value.state?.body, p.copy.kit.unavailable);
     assert.deepEqual(result.value.state?.actions, []);
     assert.equal(JSON.stringify(result.value).includes("Withdrawn actor"), false);
