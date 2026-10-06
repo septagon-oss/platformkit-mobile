@@ -116,5 +116,37 @@ export const kitStyles = (t: Theme) =>
       Platform.OS === "web"
         ? { maxWidth: t.extent.pageColumn, width: "100%", alignSelf: "center" }
         : {},
+    /**
+     * sheetDialog is that surface's own height and edge once it is set down on a
+     * desk. `flex: 1` — right on a device, where the sheet is the screen — made it
+     * fill the browser's viewport: a tall empty column with the action stranded at
+     * its foot, half a screen below the sentence it belongs to. Here it takes the
+     * height of what it holds up to most of the canvas, rounds the corner the rest
+     * of the kit's floating surfaces round, and keeps its action under its words.
+     */
+    sheetDialog: {
+      flexGrow: 0,
+      flexShrink: 1,
+      flexBasis: "auto",
+      maxHeight: "82%",
+      overflow: "hidden",
+      borderRadius: t.radius.xl,
+      borderWidth: 1,
+      borderColor: t.state.divider,
+      ...t.state.raised,
+    },
+    /**
+     * scrim is the canvas a dialog is set on: the page it opened from, kept back,
+     * and the dialog centred on it. A backdrop of the browser's own white hid the
+     * page a person came from and made the sheet read as a second screen rather
+     * than as a surface over the one they were on.
+     */
+    scrim: {
+      flex: 1,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      padding: t.space.lg,
+      backgroundColor: t.state.scrim,
+    },
     column: { minWidth: t.extent.calendarDay, flex: 1 },
   });

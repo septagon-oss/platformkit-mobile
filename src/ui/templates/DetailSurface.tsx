@@ -45,12 +45,18 @@ export function DetailSurface({
   // surface a phone's sheet is — see sheetColumn in layout.ts for why a device and
   // a browser answer that differently.
   const column: StyleProp<ViewStyle> = s.sheetColumn;
+  // A browser is not a device with more room: it is where the kit is looked at, and
+  // a surface that fills a phone's screen fills a monitor's too, so its foot's
+  // action ends up a screenful below its own words. Only there is the sheet set
+  // down as a dialog — on a device it is the system's surface and stays the system's.
+  const desk = Platform.OS === "web";
+  const framed = desk ? [canvas.page, column, s.sheetDialog] : [canvas.page, column];
   const close = (source: "button" | "back" | "escape" | "gesture") => {
     if (model.canRequestClose) onRequestClose(source);
   };
   const body = (
     <KeyboardAvoidingView
-      style={[canvas.page, column]}
+      style={framed}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       accessibilityViewIsModal={mode === "modal"}
       onAccessibilityEscape={() => close("escape")}
@@ -98,8 +104,9 @@ export function DetailSurface({
       onDismiss={onClosed}
       onRequestClose={() => close("back")}
       allowSwipeDismissal={false}
+      {...(desk ? { transparent: true } : {})}
     >
-      {body}
+      {desk ? <View style={s.scrim}>{body}</View> : body}
     </Modal>
   );
 }
