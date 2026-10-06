@@ -104,7 +104,7 @@ not this repository's history.
 | | base | head |
 | --- | --- | --- |
 | `npm run test` Jest suites / tests | 46 / 232 | 45 / 232 (one suite moved into another) |
-| `node --import tsx --test tests/*.test.ts` | 189 | 193 (191 from the fold, + 2 pins a review added) |
+| `node --import tsx --test tests/*.test.ts` | 189 | 194 (191 from the fold, + 2 pins a review added, + 1 Node-glob pin) |
 | root Node test files | 33 | 39 (37 from the fold, + the two review pins) |
 | review-named files (`pillars.REVIEW_NAMED` over `git ls-files`) | 48 | **0** |
 | `grep -rn "T0180" tests/` | 55 lines | no output |
@@ -133,12 +133,14 @@ reports the test count above instead of a second percentage.
 
 Every root Node file was run on its own (`node --import tsx --test tests/<f>.test.ts`) in both
 trees, so the arithmetic names every case rather than summarising it. Base: 189 in 33 files; the
-fold left 191 in 37 files; the two review pins take head to 193 in 39 files. Of the 189, 27 sat in
+fold left 191 in 37 files; the two review pins and one case added to `component-suite-gate.test.ts`
+take head to 194 in 39 files. Of the 189, 27 sat in
 the ten review-named files; six `.spec.ts` bodies held 7 more cases that no gate executed.
 
 `189 − 27` (the review-named files' cases leave their names) `+ 26` (the same cases under their new
 names, plus what was carried to them) `+ 3` (new cases inside two files that never moved) `= 191`
-`+ 2` (the two pins named below, one case each) `= 193`.
+`+ 2` (the two pins named below, one case each) `+ 1` (the Node glob and the files it reaches, now
+pinned beside the Jest discovery it sits next to in `package.json`) `= 194`.
 
 | Head file | Cases | Where its cases come from |
 | --- | --- | --- |
@@ -230,13 +232,19 @@ per root file plus one run of the six `.spec.ts` bodies no gate globs, and `npx 
 the exported `31dc830`; the same lists were taken at head; and the two were compared after removing
 the `T0180: ` prefix and the `en`/`pt` prefix each locale-paired case carries:
 
+The comparison is a one-off measurement, so the rule it checked is pinned by machine as well: beside
+the Jest discovery it already held, `tests/component-suite-gate.test.ts` now refuses a `test` script
+that stopped globbing `tests/*.test.ts` with the loader flag, and any file that glob reaches which
+holds no `test(` or `describe(` of its own — the one-line `import "./x.spec"` shim shape this fold
+deleted, which is discovered, runs green and asserts nothing.
+
 * **Jest: 232 cases at base, 232 at head; 169 distinct behaviours after stripping the `T0180: ` and
   the `en`/`pt`/`light`/`dark`/`day`/`week`/`agenda` prefixes each table-driven case carries — equal
   on both sides, name by name and count by count.** Not one component, screen or shell case was
   renamed away, dropped or run fewer times.
 * **Node: the required check ran 189 cases at the merge base, and the six `.spec.ts` bodies no gate
   ran held 7 more — 196 executed, 187 distinct behaviours. The fold left 191 and 182; head now runs
-  193 and 184** (the two review pins, one case and one new name each). Ten names
+  194 and 185** (the two review pins and the Node-glob pin, one case and one new name each). Ten names
   stopped being separate cases and five new ones appeared; **no name runs fewer times at head than
   at base**, which is the check that a case did not dissolve inside a rename. The ten are accounted
   for above: four reappear under a new name here — the overnight civil day and the negative-domain
@@ -246,10 +254,11 @@ the `T0180: ` prefix and the `en`/`pt` prefix each locale-paired case carries:
   lines that cover them. A further two cases at base (`review-activity-denied-snapshot`) shared their
   names verbatim with `activity.test.ts`, so a name comparison cannot see them leave and only the
   line-by-line read above can: their two unique inputs are now cases there. The head side of this
-  comparison was re-taken after the two pins landed (`node --import tsx --test --test-reporter=tap
-  tests/*.test.ts`, names stripped of `T0180: ` and the `en`/`pt` prefix, then counted): 193 lines,
-  184 distinct, the extra two being `a cart total carries the cart's currency and leaves the caller's
-  lines untouched` and `a test file states the rules it holds before it imports`. The base side is as
+  comparison was re-taken after those three cases landed (`node --import tsx --test --test-reporter=tap
+  tests/*.test.ts`, names stripped of `T0180: ` and the `en`/`pt` prefix, then counted): 194 lines,
+  185 distinct, the extra three being `a cart total carries the cart's currency and leaves the caller's
+  lines untouched`, `a test file states the rules it holds before it imports` and `the Node suite still
+  runs by the glob its counts were taken from, over files that hold cases`. The base side is as
   measured in the exported `31dc830`, which this fix did not rebuild. Nothing else differs.
 
 ## Left as it was, on purpose
