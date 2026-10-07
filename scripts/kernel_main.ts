@@ -282,6 +282,41 @@ const ended = (d: Deps, url: string, cause: unknown): string =>
   `fetch: GET ${url} did not answer within the job's ${String(d.timeoutMs)}ms bound, so the read was ended rather than waited for and nothing was decided: ${why(cause)}`;
 
 /**
+ * Bound is the read's budget as a timer this script holds: the signal every request
+ * is asked with, and the one call that puts the timer down once the read has answered.
+ */
+export interface Bound {
+  readonly signal: AbortSignal | undefined;
+  readonly end: () => void;
+}
+
+/**
+ * startBound turns the budget into a timer. It is deliberately not
+ * `AbortSignal.timeout`, whose timer Node leaves unref'd: a run whose only pending
+ * work is the hang the bound exists to end then has nothing left to run, and the
+ * process ends without the bound ever firing — exit 0, no verdict, no line in the job
+ * log. Measured on the Node the ci job runs (`.github/workflows/ci.yml` pins 22, which
+ * is `engines.node`'s floor while a hand run here is on 26): a script whose only work
+ * is `AbortSignal.timeout(300)` and its abort listener is gone in under 40 ms on
+ * either, never having aborted. A ref'd timer is what makes the bound a promise the
+ * process keeps rather than an intention; `end` puts it down the moment the read
+ * answers, so a green run — or a refused one — still exits at once instead of waiting
+ * out the two minutes.
+ */
+export function startBound(timeoutMs: number | undefined): Bound {
+  if (timeoutMs === undefined) return { signal: undefined, end: () => {} };
+  const control = new AbortController();
+  const timer = setTimeout(
+    () =>
+      control.abort(
+        new DOMException(`the job's ${String(timeoutMs)}ms bound expired`, "TimeoutError"),
+      ),
+    timeoutMs,
+  );
+  return { signal: control.signal, end: () => clearTimeout(timer) };
+}
+
+/**
  * get is the only place this file touches the network: one attempt per read, the
  * job's token, and a sentence that names the URL, the status and what the status
  * means for this job. A cause is printed because undici puts the reason there and a
@@ -335,34 +370,40 @@ const refusedToken = (repository: string): string =>
 export async function readKernelMain(d: Deps): Promise<Verdict> {
   const where = endpoints(d);
   // Started here, at the first request, so the whole read — three of them, and the
-  // two bodies inside them — has one budget rather than three.
-  const bound = d.timeoutMs === undefined ? undefined : AbortSignal.timeout(d.timeoutMs);
-  const head = await get(d, bound, where.commits, (status) =>
-    status === 401 || status === 403
-      ? refusedToken(d.repository)
-      : status === 404
-        ? `${REF} is not a branch of ${d.repository}`
-        : `the forge did not answer for ${d.repository} ${REF}`,
-  );
-  if (head.refusal !== undefined) return refused(null, null, head.refusal);
-  const learned = tip(where.commits, head.bytes);
-  if (learned.refusal !== null) return refused(null, null, learned.refusal);
-  const kernelCommit = learned.sha;
-  // To the second, UTC with the Z: the instant names which run this was, and the
-  // milliseconds of a job start are nobody's question. The clock is injected, so
-  // the assertion in tests/kernel-main.test.ts says which instant it asserts.
-  const checkedAt = `${d.now().toISOString().slice(0, 19)}Z`;
-  const at = (file: string) => (status: number) =>
-    status === 401 || status === 403
-      ? refusedToken(d.repository)
-      : status === 404
-        ? `${file} is not in ${d.repository} at ${kernelCommit}`
-        : `${file} could not be read at ${kernelCommit}`;
-  const catalog = await get(d, bound, where.raw(CATALOG_FILE, kernelCommit), at(CATALOG_FILE));
-  if (catalog.refusal !== undefined) return refused(kernelCommit, checkedAt, catalog.refusal);
-  const openapi = await get(d, bound, where.raw(OPENAPI_FILE, kernelCommit), at(OPENAPI_FILE));
-  if (openapi.refusal !== undefined) return refused(kernelCommit, checkedAt, openapi.refusal);
-  return decide({ kernelCommit, checkedAt, catalog: catalog.bytes, openapi: openapi.bytes });
+  // two bodies inside them — has one budget rather than three. Held by this function
+  // and put down by the `finally` below, so the timer cannot outlive the read it bounds.
+  const timer = startBound(d.timeoutMs);
+  const bound = timer.signal;
+  try {
+    const head = await get(d, bound, where.commits, (status) =>
+      status === 401 || status === 403
+        ? refusedToken(d.repository)
+        : status === 404
+          ? `${REF} is not a branch of ${d.repository}`
+          : `the forge did not answer for ${d.repository} ${REF}`,
+    );
+    if (head.refusal !== undefined) return refused(null, null, head.refusal);
+    const learned = tip(where.commits, head.bytes);
+    if (learned.refusal !== null) return refused(null, null, learned.refusal);
+    const kernelCommit = learned.sha;
+    // To the second, UTC with the Z: the instant names which run this was, and the
+    // milliseconds of a job start are nobody's question. The clock is injected, so
+    // the assertion in tests/kernel-main.test.ts says which instant it asserts.
+    const checkedAt = `${d.now().toISOString().slice(0, 19)}Z`;
+    const at = (file: string) => (status: number) =>
+      status === 401 || status === 403
+        ? refusedToken(d.repository)
+        : status === 404
+          ? `${file} is not in ${d.repository} at ${kernelCommit}`
+          : `${file} could not be read at ${kernelCommit}`;
+    const catalog = await get(d, bound, where.raw(CATALOG_FILE, kernelCommit), at(CATALOG_FILE));
+    if (catalog.refusal !== undefined) return refused(kernelCommit, checkedAt, catalog.refusal);
+    const openapi = await get(d, bound, where.raw(OPENAPI_FILE, kernelCommit), at(OPENAPI_FILE));
+    if (openapi.refusal !== undefined) return refused(kernelCommit, checkedAt, openapi.refusal);
+    return decide({ kernelCommit, checkedAt, catalog: catalog.bytes, openapi: openapi.bytes });
+  } finally {
+    timer.end();
+  }
 }
 
 /** kernelMain is the whole nightly: refuse by name, then read. */
