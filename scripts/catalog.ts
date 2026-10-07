@@ -255,10 +255,11 @@ const live: Deps = {
 
 /**
  * An attempt ends three ways: the version, an answer about the path, and silence.
- * Only silence is asked again — a connect that times out, a socket that closes,
- * a 5xx from a cache and a 408 or 429 that say "later" all say nothing about
- * whether a newer version is published. A status that does answer — a 404 above
- * all, which is what a wrong module path looks like — is returned at once, so
+ * Only silence is asked again — a connect that times out, a socket that closes, one
+ * that closes after the headers and part-way through the body, a 5xx from a cache and
+ * a 408 or 429 that say "later" all say nothing about whether a newer version is
+ * published. A status that does answer — a 404 above all, which is what a wrong
+ * module path looks like — is returned at once, so
  * asking twice cannot turn the one failure this lookup exists to report into a
  * note three attempts late.
  */
@@ -291,7 +292,21 @@ async function ask(deps: Deps, target: string): Promise<Answer> {
       kind: later(response.status) ? "silence" : "answered",
       detail: `${target} answered ${String(response.status)}`,
     };
-  const body = await response.text();
+  let body: string;
+  try {
+    body = await response.text();
+  } catch (cause: unknown) {
+    // Headers arriving is not a read finishing. A body that dies mid-flight says
+    // nothing about whether a newer version is published, which is exactly what
+    // `silence` means, so the attempt is asked again rather than thrown past — a
+    // socket closed during the body is the same moment as a connect that never
+    // completed, and `drift` printing a bare exception is how a schedule stops
+    // meaning anything.
+    return {
+      kind: "silence",
+      detail: `${target} answered ${String(response.status)} and then stopped sending: ${why(cause)}`,
+    };
+  }
   let parsed: unknown;
   try {
     parsed = JSON.parse(body);

@@ -6,7 +6,9 @@
 // questions put to the proxy and the line `report` draws from the answer. A status
 // that answers about the module path (a 404, which is what a path spelled without
 // its host looks like) is asked once, so a retry cannot spend three attempts
-// turning the one failure this lookup exists to report into a note.
+// turning the one failure this lookup exists to report into a note. Silence has two
+// shapes and both are asked again: a request that never completes, and a 200 whose
+// body stops arriving — headers are the start of an answer, not the whole of one.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -140,4 +142,42 @@ test("a 200 that names no version is an answer, and a 200 that is not JSON is no
   const [html, ph] = await ask([page(), page(), page()]);
   assert.match(silence(html), /a body that is not JSON/);
   assert.equal(ph.asked.length, 3, "a green status wearing a page answered nothing");
+});
+
+test("a 200 whose body stops arriving is silence, asked again, and never thrown", async () => {
+  // The second half of a response is a read that can fail. Measured before this
+  // case existed, a socket closed mid-body threw out of `lookupLatest` — headers
+  // arrive, `response.text()` rejects, and the throw sat outside the transport's
+  // catch — so `drift` printed a bare exception with no host, no path and no
+  // attempt count, and the workflow that runs it had no line to read. A body that
+  // dies says nothing about whether a newer version is published, which is what
+  // `silence` means: ask again, and be `unreachable` when asking runs out.
+  const cutMidBody = (): Response =>
+    new Response(
+      new ReadableStream<Uint8Array>({
+        start: (controller) => controller.error(new Error("socket closed during body")),
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
+
+  const [gone, pg] = await ask([cutMidBody(), cutMidBody(), cutMidBody()]);
+  assert.equal(gone.state, "unreachable");
+  assert.equal(pg.asked.length, 3, "a body that died is an attempt, not a verdict");
+  assert.deepEqual(pg.waited, [500, 500]);
+  const detail = silence(gone);
+  assert.match(
+    detail,
+    /attempt 1: https:\/\/proxy\.golang\.org\/.*@latest answered 200 and then stopped sending: socket closed during body/,
+    "the sentence names the host, the path, the status it stopped at and why",
+  );
+  assert.match(detail, /attempt 3: /);
+  const lines = report(source, pinned, pinned, gone).join("\n");
+  assert.match(lines, /^note  cannot tell whether a newer version is published: /m);
+  assert.equal(/^ok .*\nok /m.test(lines), false, "three cut bodies cannot report two oks");
+
+  // The half only a retry can show: the next attempt's body does arrive.
+  const [back, pb] = await ask([cutMidBody(), answered(200, '{"Version":"v9.9.9"}')]);
+  assert.deepEqual(back, { state: "latest", version: "v9.9.9" });
+  assert.equal(pb.asked.length, 2);
+  assert.deepEqual(pb.waited, [500]);
 });
