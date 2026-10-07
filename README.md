@@ -127,7 +127,9 @@ Documented requests use their generated operation's response validator. Core
 owns supported catalog versions and field kinds, nullable-array normalization,
 and the compatibility extension for version-2 `operations`. It retains generated
 metadata without making web `screen` addresses into native routes. An unstamped
-catalog retains public `version: 0`; an explicit zero or future version refuses.
+catalog retains public `version: 0` through `api.catalog()`; an explicit zero or
+future version refuses. `api.operations.appResources()` uses the strict generated
+wire schema and refuses an unstamped catalog with a path-named `ApiError`.
 Generated schemas keep JSON numbers as numbers, without string coercion; this
 does not establish lossless support for every int64 monetary value.
 
