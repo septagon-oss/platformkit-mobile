@@ -7,10 +7,12 @@
 // invocation `npm run check:kernel-main` is, against a forge on loopback that accepts
 // the request and never answers it); the refusal names the URL, the budget and the
 // commit already learned; and a budget that cannot be parsed is refused by name
-// instead of ignored, because a bound nobody parsed is a run with no bound. The bound
-// a spawned run is given is sized to the runner rather than to the desk — BOUND_MS
-// says why — and the harness's own kill is a multiple of it, so losing the bound shows
-// up as a killed child with no exit code rather than a green that waited for nothing.
+// instead of ignored, because a bound nobody parsed is a run with no bound — and so is
+// one no timer can be set for, which would end the read at once and print the number it
+// refused to hold as the time it waited. The bound a spawned run is given is sized to
+// the runner rather than to the desk — BOUND_MS says why — and the harness's own kill
+// is a multiple of it, so losing the bound shows up as a killed child with no exit code
+// rather than a green that waited for nothing.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import http from "node:http";
@@ -23,6 +25,7 @@ import {
   DEFAULT_TIMEOUT_MS,
   endpoints,
   fromEnv,
+  MAX_TIMER_MS,
   readKernelMain,
   type Deps,
 } from "../scripts/kernel_main";
@@ -164,7 +167,7 @@ test("the shipped run ends its read at the bound and returns 1", async (t) => {
   );
 });
 
-test("a budget that cannot be read is refused by name, and an absent one is the default", () => {
+test("a budget that cannot be read, or cannot be held, is refused by name, and an absent one is the default", () => {
   for (const raw of ["0", "-1000", "12s", "  "]) {
     // A value that is not a number of milliseconds must not become "no bound": the
     // whole point of the budget is that every run has one.
@@ -186,8 +189,24 @@ test("a budget that cannot be read is refused by name, and an absent one is the 
   assert.equal(budget(undefined), DEFAULT_TIMEOUT_MS);
   assert.equal(fromEnv({}).timeoutMs, DEFAULT_TIMEOUT_MS);
   assert.equal(fromEnv({ PK_KERNEL_TIMEOUT_MS: "45000" }).timeoutMs, 45_000);
+  // A budget longer than a timer can be set for is not a generous bound. `setTimeout`
+  // and `AbortSignal.timeout` both clamp it to one millisecond — `3000000000` measured
+  // 3 ms to the abort on Node 22 and 26 — so the run would refuse its first request at
+  // once and print the giant number as the time it waited. A bound that says the
+  // opposite of what happened is refused by name, and the last value a timer can hold
+  // stays the job's to ask for.
+  for (const raw of [String(MAX_TIMER_MS + 1), "3000000000", "99999999999"]) {
+    assert.throws(
+      () => budget(raw),
+      new RegExp(`PK_KERNEL_TIMEOUT_MS is "${raw}", above the ${String(MAX_TIMER_MS)}ms`),
+      `"${raw}" cannot become a bound`,
+    );
+  }
+  assert.equal(budget(String(MAX_TIMER_MS)), MAX_TIMER_MS);
+  assert.equal(fromEnv({ PK_KERNEL_TIMEOUT_MS: String(MAX_TIMER_MS) }).timeoutMs, MAX_TIMER_MS);
   // The bound is inside the job's own ceiling: 20 minutes of runner, two minutes here.
   assert.ok(DEFAULT_TIMEOUT_MS < 20 * 60_000);
+  assert.ok(MAX_TIMER_MS > DEFAULT_TIMEOUT_MS, "the default is a value the job may name");
 });
 
 test("a first read that never answers is refused with the URL and the budget", async () => {

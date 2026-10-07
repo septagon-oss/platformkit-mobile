@@ -443,9 +443,22 @@ export function report(
 export const DEFAULT_TIMEOUT_MS = 120_000;
 
 /**
+ * MAX_TIMER_MS is the longest delay a timer can be given. A longer one is not a
+ * generous bound: both the timer this script holds and the `AbortSignal.timeout` it
+ * replaced clamp it to one millisecond — measured on both Nodes, `3000000000` fires
+ * about 3 ms later, and above 2^32 `AbortSignal.timeout` threw ERR_OUT_OF_RANGE
+ * outright. So a job that set a budget beyond a timer would refuse its first request
+ * almost immediately with the giant number in the sentence, which is a refusal that
+ * says the opposite of what happened. Refused by name is the other answer.
+ */
+export const MAX_TIMER_MS = 2_147_483_647;
+
+/**
  * budget reads PK_KERNEL_TIMEOUT_MS. A value that is not a whole number of
  * milliseconds is refused rather than ignored: a bound nobody parsed is a run with
- * no bound, which is the thing this exists to prevent.
+ * no bound, which is the thing this exists to prevent. A value no timer can hold is
+ * refused for the mirror reason — it would be a bound that fires at once and claims
+ * it waited for the number the job wrote down.
  */
 export function budget(raw: string | undefined): number {
   if (raw === undefined || raw === "") return DEFAULT_TIMEOUT_MS;
@@ -453,6 +466,10 @@ export function budget(raw: string | undefined): number {
   if (!/^\d+$/.test(raw.trim()) || !Number.isFinite(ms) || ms <= 0)
     throw new Error(
       `PK_KERNEL_TIMEOUT_MS is not a positive whole number of milliseconds: "${raw}"`,
+    );
+  if (ms > MAX_TIMER_MS)
+    throw new Error(
+      `PK_KERNEL_TIMEOUT_MS is "${raw}", above the ${String(MAX_TIMER_MS)}ms a timer can be set for; a longer bound would end the read at once and print this number as the time it waited`,
     );
   return ms;
 }
