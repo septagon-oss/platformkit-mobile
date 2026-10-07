@@ -90,9 +90,14 @@ export function Button({
   // the member of a set the screen is on, `checked` names the box, chip or slot a
   // person has marked. The drawing reads both, because a state the accessibility
   // tree alone can read is not a state — the aria spelling says it to a reader, this
-  // line says it to everyone else. The screen's one filled verb already stands by
-  // being filled, so it keeps its fill rather than trading it for the tint.
-  const picked = selected === true || (checked === true && !filled);
+  // line says it to everyone else. Neither spelling buys the tint over a filled verb,
+  // because the fill and the ink are one decision: state.selected is the accent mixed
+  // into the page's surface, so it is a pair for the page's own ink, while a filled
+  // verb writes its label in the accent's on-accent ink — the chosen day measured
+  // 1.08:1 light and 1.53:1 dark where the tint was laid over that fill. The fill is
+  // already the standing (DayStrip, SlotPicker and ChoiceChips spell their chosen
+  // member by asking for the filled tone), so a filled verb keeps it in both spellings.
+  const picked = (selected === true || checked === true) && !filled;
   const textTone: TextTone = off
     ? "primary"
     : filled
