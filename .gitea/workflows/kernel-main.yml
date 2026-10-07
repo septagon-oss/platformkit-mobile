@@ -1,0 +1,65 @@
+# Kernel main, read by this build: the catalogue and the API document fetched at
+# main's own tip and put through the rules this phone actually enforces. The two
+# pinned journeys answer "does this build work against the build we named"; this
+# answers "can the build in main read the server in main", which is the question
+# no pin can ask — a pin freezes one side precisely so the other side cannot
+# move. It fails when the answer is no, because a contract that only breaks a
+# report is a contract nobody has to keep: catalogue version 2 moved the server
+# on 2026-10-01 and every phone built from main went on passing (T-0285).
+#
+# The pinned journeys stay exactly as they are; this adds a reading, it does not
+# replace one. Nothing here continues on error: a nightly that printed a refusal
+# as a note would be the drift report again, with a cron.
+name: kernel-main
+
+on:
+  schedule:
+    # Nightly, at a minute no other scheduled job of this repository wants:
+    # mobile-e2e holds 03:17 and drift 06:17 on Mondays. Whether this forge runs
+    # `schedule:` at all is unverified from a checkout — mobile-e2e.yml says the
+    # same of its own cron — so the job carries workflow_dispatch too and the
+    # first green is expected from a manual dispatch whose run the commit names.
+    - cron: '47 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Per ref: a dispatch on a branch checks that branch's parser against kernel
+  # main, which is a different answer from the nightly's and needs no exclusion
+  # from it. Queued, not cancelled: a run that is cancelled publishes no verdict,
+  # and a verdict is the only thing this job produces.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  read:
+    runs-on: pkit-ci-linux-amd64
+    timeout-minutes: 20 # ci.yml's figure; npm ci measured 17 s here, three GETs after it
+    env:
+      # Which server this build is checked against is the job's to name, and the
+      # script refuses by name when any of the three is missing — the reason
+      # scripts/e2e/mobile_ci.sh gives for the image pin, applied to a moving ref
+      # instead of a digest. No repository variable is needed, so the first
+      # dispatch needs no setup beyond the job token this forge already gives.
+      PK_KERNEL_SERVER: ${{ github.server_url }}
+      PK_KERNEL_REPOSITORY: septagon-oss/platformkit
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+      - run: npm ci --no-audit --no-fund
+
+      - name: This build can read kernel main
+        # Three reads at one commit — the tip first, then both files at that
+        # object id, so a commit landing mid-run cannot mix two readings — and
+        # this repository's own parseCatalog over the catalogue it fetched. The
+        # install is the same tsx and the same tsc `npm run check` uses, so the
+        # rule the nightly enforces is the rule the app ships.
+        run: npm run check:kernel-main

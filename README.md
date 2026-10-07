@@ -479,8 +479,11 @@ lockfile and their config plugins, the Android recipe, the bundler
 configuration and the design export. When a change moves it, run
 `npm run fingerprint` and say why in the commit, because that change needs a
 new binary. CI also exports both bundles, refuses a dependency advisory no
-review covers (see below), scans the history for secrets, and a weekly workflow
-reports what drifted without blocking anything. Node is pinned once, in
+review covers (see below), scans the history for secrets, runs the device
+journeys against a pinned kernel image, and a weekly workflow reports what
+drifted without blocking anything. A nightly one blocks: [kernel-main.yml](.gitea/workflows/kernel-main.yml)
+reads kernel main and fails when this build cannot read it, which is the part no
+pin covers — see below. Node is pinned once, in
 [.nvmrc](.nvmrc).
 Use `expo install` for native dependencies so they match that SDK. The app owns
 the native font, module core, Reanimated and Worklets dependencies used by its
@@ -648,10 +651,14 @@ pass fails instead of fixing anything. `node --import tsx scripts/catalog.ts ref
 both files; the pin itself moves only by editing the recorded commit, which is a
 diff somebody reviews. What no local check can see is whether the server has moved.
 `node --import tsx scripts/catalog.ts drift` asks the recorded commit and the
-public module proxy and reports without blocking, and nothing runs it on a
-schedule: the weekly [drift workflow](.gitea/workflows/drift.yml) reports what the
+public module proxy and reports without blocking, and no schedule runs even that:
+the weekly [drift workflow](.gitea/workflows/drift.yml) reports what the
 SDK, the dependency tree, the advisory database and the fingerprint say today,
-and holds no catalogue step — the nightly that would run this is T-0298's.
+and holds no catalogue step. The nightly
+[kernel-main workflow](.gitea/workflows/kernel-main.yml) asks a different question
+and does not run this command — `drift` answers "has the commit this file recorded
+moved?", `kernel-main` answers "can a build cut today read the server in main?"
+against kernel main's own bytes, and refuses. See below for the second question.
 A proxy it cannot reach is reported as _unknown_ and never as agreement: the first version of
 `scripts/catalog.ts` asked the proxy for `septagon-oss/platformkit` instead of
 `github.com/septagon-oss/platformkit`, took a 404, and printed "ok, this is the latest
@@ -725,7 +732,63 @@ half a document can be refused for: what makes a path sendable at all (under
 document printing `/elsewhere` stops at send time, not at the parser — and this is
 what the generated types (T-0287) will have to answer to; and
 `testdata/catalog.control-plane.json` is the fixture any later control-plane work —
-and the cross-pin nightly (T-0298) — runs against.
+and the next control-plane refusal — runs against.
+
+Kernel main is a different question from a pin, and
+[kernel-main.yml](.gitea/workflows/kernel-main.yml) asks it every night and on
+dispatch: the job learns the kernel's branch tip over the forge API with its own
+token, fetches `ui/screens/testdata/catalog.json` and
+`apps/platformkit/testdata/openapi.json` at that one object id — never at
+`ref=main`, so a commit landing mid-run cannot mix two readings — and hands the
+bytes to `npm run check:kernel-main`, which is
+[scripts/kernel_main.ts](scripts/kernel_main.ts). The two pinned journeys answer
+"does this build work against the build we named", which is a question a pin can
+only answer by freezing one side so the other cannot move; this answers "can the
+build in main read the server in main", and catalogue version 2 is the price of
+never having asked it — the server moved the document shape on 2026-10-01 and
+every phone built from main went on passing (T-0285). Nothing there continues on
+error: a nightly that printed a refusal as a note would be the drift report with
+a cron. A red names the kernel commit, the sha256 and byte count of both
+documents, and the first refused path — the commit and the digest together
+re-fetch exactly the bytes that were refused, so the job log is the whole
+post-mortem and the run itself stores nothing. It is not part of `npm run check`,
+which is a decision rather than an omission: `check` runs on every change with no
+token and sometimes no network, so a gate that needs a credential would refuse
+every change for a reason that is not the change. By hand, with a token that can
+read the kernel repository:
+
+```sh
+PK_KERNEL_SERVER=https://forge.example PK_KERNEL_REPOSITORY=septagon-oss/platformkit \
+  GITHUB_TOKEN=$token npm run --silent check:kernel-main
+```
+
+**Reused** — `parseCatalog` and the `Catalog` type from
+[src/core/catalog.ts](src/core/catalog.ts), imported and not wrapped, and
+`CatalogError`'s own sentence printed verbatim rather than re-formatted, so the
+line a red night prints is the runtime's and the nightly gains every rule the
+parser gains (`SUPPORTED_CATALOG_VERSION` is imported where a refused document
+is *built* — the test raises the stamp from it instead of writing the number, and
+the script never needs it because the parser is what consults it); `hash` and
+`isRecord` from
+[scripts/catalog.ts](scripts/catalog.ts), which had both and exported one; that
+file's exported-pure-plus-thin-`main`-behind-a-module-run-guard shape; the
+`fakeFetch` shape of `tests/api.test.ts`, copied rather than shared because this
+port answers `text/plain` bytes where that one answers JSON; `ci.yml`'s
+checkout and setup-node pins, `drift.yml`'s `schedule:`-plus-`workflow_dispatch:`
+header and `mobile-e2e.yml`'s concurrency block and its "nothing continues on
+error" rule. **Added** — `scripts/kernel_main.ts` and the workflow, because
+nothing here could read a moving `main`: `catalog.ts`'s `raw()` refuses any host
+but `github.com`, its `fetchAt` carries no authorisation and every caller hands it
+a *recorded* commit, and `drift` prints what moved and exits 0 whatever it finds,
+so an existing unit could fetch a pin but not a tip; `endpoints()`, the one owner
+of a kernel fetch address; and the two document judges. **Made reusable** —
+`endpoints(d).raw(file,
+commit)`, so the generated client (T-0287) feeds its generator the same bytes at
+the same commit instead of growing a second address rule; `isRecord`, now exported
+where a third copy would otherwise have been written; and a workflow file held to
+its own rule by a case in `tests/kernel-main.test.ts`, which is the shape
+`tests/advisories.test.ts` already used for `drift.yml` and is how this repository
+keeps a check from dying by somebody switching it off.
 
 [testdata/design-tokens.json](testdata/design-tokens.json) is the palette's
 source and a build input: the native fingerprint hashes it, so a token change
