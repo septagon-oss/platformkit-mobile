@@ -8,9 +8,13 @@
 // catalogue half is `parseCatalog`'s own sentence, which is why no catalogue case
 // here is answered by a rule this file wrote.
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import http from "node:http";
+import { createRequire } from "node:module";
+import type { AddressInfo } from "node:net";
 import path from "node:path";
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import {
   CATALOG_FILE,
   configRefusal,
@@ -22,6 +26,7 @@ import {
   kernelMain,
   OPENAPI_FILE,
   readKernelMain,
+  REF,
   report,
   tip,
   type Deps,
@@ -404,6 +409,114 @@ test("the workflow is scheduled, blocking, and asks for nothing but a read", () 
   // protects. A comment that says the words would fail here too, which is the
   // point — the file states the rule as `mobile-e2e.yml` states it instead.
   assert.doesNotMatch(text, /continue-on-error/);
+});
+
+// A nightly's verdict is the exit status its step returns: a job that printed a refusal and exited
+// 0 would be the drift report with a cron. The cases above call the pair the script calls; these
+// two run the script the workflow step runs, as a child process, against a forge on loopback that
+// answers the three reads — so the env it reads, the guard that decides whether the CLI runs, what
+// it prints on each stream and the code it returns are all asserted together, none hand-picked.
+function stubForge(t: TestContext, catalog: unknown) {
+  const asked: string[] = [];
+  const server = http.createServer((req, res) => {
+    const url = req.url ?? "";
+    asked.push(url);
+    const body = url.includes("/commits")
+      ? JSON.stringify([{ sha: COMMIT }])
+      : url.includes(CATALOG_FILE)
+        ? JSON.stringify(catalog)
+        : JSON.stringify(openapi);
+    res.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
+    res.end(body);
+  });
+  t.after(() => new Promise<void>((done) => server.close(() => done())));
+  const listen = () =>
+    new Promise<string>((resolve) => {
+      server.listen(0, "127.0.0.1", () =>
+        resolve(`http://127.0.0.1:${(server.address() as AddressInfo).port}`),
+      );
+    });
+  return { asked, listen };
+}
+
+// The shipped invocation, not a function chosen by this file: the same tsx, the same cwd, the
+// three names the job sets, and the caller's own credential in the slot the job's token occupies.
+// Spawned and awaited rather than run to completion synchronously, because the forge it asks lives
+// in this process and a synchronous wait would block the server answering it.
+function shipped(server: string): Promise<Spawned> {
+  return new Promise((resolve) => {
+    const child = spawn(
+      process.execPath,
+      [
+        "--import",
+        createRequire(import.meta.url).resolve("tsx"),
+        path.join(root, "scripts/kernel_main.ts"),
+      ],
+      {
+        cwd: root,
+        stdio: ["ignore", "pipe", "pipe"],
+        env: {
+          ...process.env,
+          PK_KERNEL_SERVER: server,
+          PK_KERNEL_REPOSITORY: "septagon-oss/platformkit",
+          GITHUB_TOKEN: TOKEN,
+        },
+      },
+    );
+    // A child that never closes would otherwise take the suite with it.
+    const kill = setTimeout(() => child.kill("SIGKILL"), 60_000);
+    kill.unref();
+    let out = "";
+    let err = "";
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk: string) => (out += chunk));
+    child.stderr.on("data", (chunk: string) => (err += chunk));
+    child.on("close", (code) => {
+      clearTimeout(kill);
+      resolve({ status: code ?? -1, out, err });
+    });
+  });
+}
+
+interface Spawned {
+  readonly status: number;
+  readonly out: string;
+  readonly err: string;
+}
+
+async function runShipped(
+  t: TestContext,
+  catalog: unknown,
+): Promise<Spawned & { asked: string[] }> {
+  const forge = stubForge(t, catalog);
+  const run = await shipped(await forge.listen());
+  return { ...run, asked: forge.asked };
+}
+
+test("the shipped script exits 0 when this build reads what kernel main serves", async (t) => {
+  const run = await runShipped(t, golden());
+  assert.equal(run.status, 0, run.out + run.err);
+  assert.match(run.out, new RegExp(`^kernel-main: kernel ${COMMIT} read at `, "m"));
+  assert.match(run.out, /^kernel-main: this build reads kernel main$/m);
+  assert.equal(run.err, "");
+  assert.deepEqual(
+    run.asked.map((url) => {
+      const query = new URL(url, "http://forge.test").searchParams;
+      return query.get("ref") ?? query.get("sha");
+    }),
+    [REF, COMMIT, COMMIT],
+    "the tip is asked for first and both files are read at the commit it named",
+  );
+});
+
+test("the shipped script exits 1 on the refusal, and the credential stays out of both streams", async (t) => {
+  const run = await runShipped(t, { ...golden(), catalogVersion: SUPPORTED_CATALOG_VERSION + 1 });
+  assert.equal(run.status, 1, "a refusal that exits 0 is a nightly that never went red");
+  assert.match(run.out, new RegExp(`^kernel-main: kernel ${COMMIT} read at `, "m"));
+  assert.match(run.err, /^kernel-main: refused catalog: catalogVersion is /m);
+  assert.ok(!run.out.includes("this build reads kernel main"), "a red night prints no agreement");
+  assert.ok(!(run.out + run.err).includes(TOKEN), "the token never reaches a job log");
 });
 
 test("the tip's own shape is the guard, so a 200 cannot answer for two commits", () => {
