@@ -371,12 +371,6 @@ export function createApi(
       bodies.set(request, (getValidRequestBody(options) as BodyInit | undefined) ?? null);
       const route = documentedRoute(request.method, new URL(request.url).pathname);
       if (route?.json) options.parseAs = "json";
-      // Catalog alone admits an unstamped legacy response and the v2 operation
-      // extension. The core adapter still runs the generated structural schema.
-      if (request.method === "GET" && new URL(request.url).pathname === "/api/v1/app/resources")
-        options.responseValidator = async (value) => {
-          parseCatalog(value);
-        };
       return request;
     });
     client.interceptors.error.use((error, response, request) => {
@@ -479,7 +473,18 @@ export function createApi(
       }
     },
     async catalog() {
-      return json("GET", "/api/v1/app/resources", parseCatalog);
+      // Legacy compatibility belongs to the normalized core view. The public
+      // generated operation must keep its stricter wire response validator.
+      const result = await documented((client) =>
+        client.get<unknown, unknown, true>({
+          url: "/api/v1/app/resources",
+          throwOnError: true,
+          responseValidator: async (value) => {
+            parseCatalog(value);
+          },
+        }),
+      );
+      return parseCatalog(result.data);
     },
     async list(e, { offset = 0, limit = PER_PAGE, sort = "", filters = [] } = {}) {
       const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
