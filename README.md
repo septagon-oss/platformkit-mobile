@@ -72,8 +72,9 @@ SHA-256. Both files are build inputs the native fingerprint hashes. Refresh
 them deliberately, as [Verify a change](#verify-a-change) describes; the token
 tests fail when the fixture, its provenance and the generated file disagree.
 Distances live in `src/ui/scale.ts`. The gallery
-(`src/ui/gallery.tsx`, served by `app/gallery.tsx` in development or in a build
-with `EXPO_PUBLIC_GALLERY=1`) shows every atom and molecule in both modes.
+(`src/ui/gallery.tsx`, served by `app/gallery.tsx` whenever the app is running in
+development, or in a build made with `PK_PROFILE=ci`, the profile that sets
+`extra.gallery` in `app.config.ts`) shows every atom and molecule in both modes.
 
 The [shared mobile components specification](docs/shared-mobile-components.md)
 defines the richer components, their APIs, reuse, gallery states and delivery
