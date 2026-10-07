@@ -7,7 +7,7 @@ import type {
   Field as WireField,
   Command as WireCommand,
 } from "../generated/types.gen";
-import { zCatalog, zEntry } from "../generated/zod.gen";
+import { zCatalog } from "../generated/zod.gen";
 import { issuePath } from "./responses";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
@@ -51,14 +51,16 @@ export type Command = View<Omit<WireCommand, "fields">> & {
 export const CRUD_VERBS = ["list", "read", "create", "update", "delete"] as const;
 export type CrudVerb = (typeof CRUD_VERBS)[number];
 
-export type Entry = View<Omit<WireEntry, "fields" | "commands" | "immutable" | "singleton">> & {
+export type Entry = View<
+  Omit<WireEntry, "fields" | "commands" | "immutable" | "singleton" | "operations">
+> & {
   readonly fields: readonly Field[];
   readonly commands: readonly Command[];
   readonly immutable: readonly string[];
   readonly singleton: boolean;
   readonly writePath?: string;
-  // Catalog v2's operations postdates this document pin. This compatibility
-  // extension stays with the existing core owner, not a fabricated operation.
+  // The document prints a list of words; this type holds only the verbs
+  // CRUD_VERBS names, because verbs() refuses every other word at parse.
   readonly operations?: readonly CrudVerb[];
 };
 
@@ -105,11 +107,7 @@ function fieldType(v: unknown, at: string): FieldType {
   return v as FieldType;
 }
 
-const catalogSchema = zCatalog.extend({
-  resources: z.array(zEntry.extend({ operations: z.array(z.string()).optional() })).nullable(),
-});
-
-type ParsedEntry = NonNullable<z.output<typeof catalogSchema>["resources"]>[number];
+type ParsedEntry = NonNullable<z.output<typeof zCatalog>["resources"]>[number];
 function field(v: View<WireField>, at: string): Field {
   const { type, elem, enum: values, ...rest } = v;
   return {
@@ -130,7 +128,9 @@ function entry(v: ParsedEntry, at: string): Entry {
       : { writePath: absolute(v.write_path, `${at}.write_path`) }),
     fields: (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`)),
     immutable: immutable ?? [],
-    ...(operations === undefined ? {} : { operations: verbs(operations, `${at}.operations`) }),
+    // A nil operation set prints as null and is the absent set: kit/rest reads
+    // a nil slice and an empty one as all five, and so does `offers`.
+    ...(operations == null ? {} : { operations: verbs(operations, `${at}.operations`) }),
     commands: (commands ?? []).map(({ fields, path, ...command }, i) => ({
       ...command,
       ...(path === undefined ? {} : { path: absolute(path, `${at}.commands[${i}].path`) }),
@@ -144,7 +144,7 @@ function entry(v: ParsedEntry, at: string): Entry {
 export function parseCatalog(input: unknown): Catalog {
   if (!isRecord(input)) throw new CatalogError("document", "is not an object");
   const version = catalogVersion(input.catalogVersion);
-  const result = catalogSchema.safeParse({ ...input, catalogVersion: version });
+  const result = zCatalog.safeParse({ ...input, catalogVersion: version });
   if (!result.success) {
     const issue = result.error.issues[0]!;
     const at = issuePath(result.error);

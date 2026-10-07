@@ -427,8 +427,8 @@ test("operations holds the five words, and a sixth is refused by number and by n
 });
 
 test("a v2 document retains generated metadata without inventing controls", () => {
-  // Generated wire metadata is retained; only members absent from this pin
-  // remain outside the native view. The renderer still owns no metadata rules.
+  // Generated wire metadata is retained; only members this pin does not print
+  // stay outside the native view. The renderer still owns no metadata rules.
   const doc = fixture();
   doc.resources[0].screen = "/app/note/notes";
   doc.resources[0].fields[1].maxLength = 80;
@@ -439,9 +439,15 @@ test("a v2 document retains generated metadata without inventing controls", () =
   const note = c.resources[0]!;
   assert.equal(note.screen, "/app/note/notes");
   assert.equal(note.fields[1]!.present, "badge");
+  // The document names both of these now, so each arrives exactly as printed:
+  // the parser keeps the server's word and the renderer decides what to draw.
+  assert.equal(note.fields[1]!.maxLength, 80);
+  assert.equal(note.fields[1]!.display, true);
   for (const f of note.fields) {
-    for (const ignored of ["maxLength", "display"]) {
-      assert.equal(ignored in f, false, `${ignored} reached a field`);
+    // Neither word appears in the pinned Field, so a field carrying one would
+    // be this build inventing a control the server never named.
+    for (const invented of ["options", "step"]) {
+      assert.equal(invented in f, false, `${invented} reached a field`);
     }
   }
   // A widget the phone has no control for is still the widget the server named.

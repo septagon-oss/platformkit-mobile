@@ -118,7 +118,7 @@ cannot express.
 The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
 with its public commit and SHA-256 in
 [testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
-55 paths and 71 operations. `npm run api` generates the TypeScript types, Zod
+82 paths and 101 operations. `npm run api` generates the TypeScript types, Zod
 validators, SDK and documented route table in `src/generated/`; `npm run
 check:api` regenerates into a temporary directory and refuses changed, missing
 or extra files. It runs offline as part of `npm run check`. Refresh the public

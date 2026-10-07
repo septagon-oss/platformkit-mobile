@@ -21,6 +21,21 @@ import type {
   AuditEventReadData,
   AuditEventReadErrors,
   AuditEventReadResponses,
+  AuthChallengeVerifyData,
+  AuthChallengeVerifyErrors,
+  AuthChallengeVerifyResponses,
+  AuthFactorListData,
+  AuthFactorListErrors,
+  AuthFactorListResponses,
+  AuthFactorTotpBeginData,
+  AuthFactorTotpBeginErrors,
+  AuthFactorTotpBeginResponses,
+  AuthFactorTotpFinishData,
+  AuthFactorTotpFinishErrors,
+  AuthFactorTotpFinishResponses,
+  AuthFactorWithdrawData,
+  AuthFactorWithdrawErrors,
+  AuthFactorWithdrawResponses,
   AuthLoginData,
   AuthLoginErrors,
   AuthLoginResponses,
@@ -30,6 +45,12 @@ import type {
   AuthMeData,
   AuthMeErrors,
   AuthMeResponses,
+  AuthOidcCallbackData,
+  AuthOidcCallbackErrors,
+  AuthOidcCallbackResponses,
+  AuthOidcStartData,
+  AuthOidcStartErrors,
+  AuthOidcStartResponses,
   AuthPasswordChangeData,
   AuthPasswordChangeErrors,
   AuthPasswordChangeResponses,
@@ -39,6 +60,9 @@ import type {
   AuthPasswordResetData,
   AuthPasswordResetErrors,
   AuthPasswordResetResponses,
+  AuthRecoveryCodesRotateData,
+  AuthRecoveryCodesRotateErrors,
+  AuthRecoveryCodesRotateResponses,
   AuthRegisterData,
   AuthRegisterErrors,
   AuthRegisterResponses,
@@ -51,6 +75,24 @@ import type {
   AuthRoleSetData,
   AuthRoleSetErrors,
   AuthRoleSetResponses,
+  AuthSessionListData,
+  AuthSessionListErrors,
+  AuthSessionListResponses,
+  AuthSessionRevokeAllData,
+  AuthSessionRevokeAllErrors,
+  AuthSessionRevokeAllResponses,
+  AuthSessionRevokeData,
+  AuthSessionRevokeErrors,
+  AuthSessionRevokeResponses,
+  AuthTokenIssueData,
+  AuthTokenIssueErrors,
+  AuthTokenIssueResponses,
+  AuthTokenListData,
+  AuthTokenListErrors,
+  AuthTokenListResponses,
+  AuthTokenRevokeData,
+  AuthTokenRevokeErrors,
+  AuthTokenRevokeResponses,
   AuthVerifyEmailData,
   AuthVerifyEmailErrors,
   AuthVerifyEmailResponses,
@@ -78,6 +120,24 @@ import type {
   BillingSubscriptionSubscribeData,
   BillingSubscriptionSubscribeErrors,
   BillingSubscriptionSubscribeResponses,
+  ChangeProposalApplyData,
+  ChangeProposalApplyErrors,
+  ChangeProposalApplyResponses,
+  ChangeProposalListData,
+  ChangeProposalListErrors,
+  ChangeProposalListResponses,
+  ChangeProposalProposeData,
+  ChangeProposalProposeErrors,
+  ChangeProposalProposeResponses,
+  ChangeProposalReadData,
+  ChangeProposalReadErrors,
+  ChangeProposalReadResponses,
+  ChangeProposalReviewData,
+  ChangeProposalReviewErrors,
+  ChangeProposalReviewResponses,
+  ChangeProposalWithdrawData,
+  ChangeProposalWithdrawErrors,
+  ChangeProposalWithdrawResponses,
   ContentContentArchiveData,
   ContentContentArchiveErrors,
   ContentContentArchiveResponses,
@@ -114,6 +174,12 @@ import type {
   FileFileDeleteData,
   FileFileDeleteErrors,
   FileFileDeleteResponses,
+  FileFileEraseData,
+  FileFileEraseErrors,
+  FileFileEraseResponses,
+  FileFileGrantData,
+  FileFileGrantErrors,
+  FileFileGrantResponses,
   FileFileListData,
   FileFileListErrors,
   FileFileListResponses,
@@ -126,6 +192,12 @@ import type {
   FileFileReadData,
   FileFileReadErrors,
   FileFileReadResponses,
+  FileFileReleaseData,
+  FileFileReleaseErrors,
+  FileFileReleaseResponses,
+  FileFileRetainData,
+  FileFileRetainErrors,
+  FileFileRetainResponses,
   FileFileUploadData,
   FileFileUploadErrors,
   FileFileUploadResponses,
@@ -171,21 +243,39 @@ import type {
   TenantTenantAddHostData,
   TenantTenantAddHostErrors,
   TenantTenantAddHostResponses,
+  TenantTenantClearOidcData,
+  TenantTenantClearOidcErrors,
+  TenantTenantClearOidcResponses,
   TenantTenantCreateData,
   TenantTenantCreateErrors,
   TenantTenantCreateResponses,
+  TenantTenantDeleteData,
+  TenantTenantDeleteErrors,
+  TenantTenantDeleteResponses,
   TenantTenantInviteData,
   TenantTenantInviteErrors,
   TenantTenantInviteResponses,
   TenantTenantListData,
   TenantTenantListErrors,
   TenantTenantListResponses,
+  TenantTenantReactivateData,
+  TenantTenantReactivateErrors,
+  TenantTenantReactivateResponses,
   TenantTenantReadData,
   TenantTenantReadErrors,
   TenantTenantReadResponses,
+  TenantTenantRemoveHostData,
+  TenantTenantRemoveHostErrors,
+  TenantTenantRemoveHostResponses,
+  TenantTenantRenameData,
+  TenantTenantRenameErrors,
+  TenantTenantRenameResponses,
   TenantTenantSetLocaleData,
   TenantTenantSetLocaleErrors,
   TenantTenantSetLocaleResponses,
+  TenantTenantSetOidcData,
+  TenantTenantSetOidcErrors,
+  TenantTenantSetOidcResponses,
   TenantTenantSuspendData,
   TenantTenantSuspendErrors,
   TenantTenantSuspendResponses,
@@ -227,16 +317,30 @@ import {
   zAppResourcesResponse,
   zAuditEventListResponse,
   zAuditEventReadResponse,
+  zAuthChallengeVerifyResponse,
+  zAuthFactorListResponse,
+  zAuthFactorTotpBeginResponse,
+  zAuthFactorTotpFinishResponse,
+  zAuthFactorWithdrawResponse,
   zAuthLoginResponse,
   zAuthLogoutResponse,
   zAuthMeResponse,
+  zAuthOidcCallbackResponse,
+  zAuthOidcStartResponse,
   zAuthPasswordChangeResponse,
   zAuthPasswordForgotResponse,
   zAuthPasswordResetResponse,
+  zAuthRecoveryCodesRotateResponse,
   zAuthRegisterResponse,
   zAuthResendVerificationResponse,
   zAuthRoleListResponse,
   zAuthRoleSetResponse,
+  zAuthSessionListResponse,
+  zAuthSessionRevokeAllResponse,
+  zAuthSessionRevokeResponse,
+  zAuthTokenIssueResponse,
+  zAuthTokenListResponse,
+  zAuthTokenRevokeResponse,
   zAuthVerifyEmailResponse,
   zBillingPlanCreateResponse,
   zBillingPlanDeleteResponse,
@@ -246,6 +350,12 @@ import {
   zBillingSubscriptionCancelResponse,
   zBillingSubscriptionReadResponse,
   zBillingSubscriptionSubscribeResponse,
+  zChangeProposalApplyResponse,
+  zChangeProposalListResponse,
+  zChangeProposalProposeResponse,
+  zChangeProposalReadResponse,
+  zChangeProposalReviewResponse,
+  zChangeProposalWithdrawResponse,
   zContentContentArchiveResponse,
   zContentContentCreateResponse,
   zContentContentDeleteResponse,
@@ -256,8 +366,12 @@ import {
   zContentContentUnpublishResponse,
   zContentContentUpdateResponse,
   zFileFileDeleteResponse,
+  zFileFileEraseResponse,
+  zFileFileGrantResponse,
   zFileFileListResponse,
   zFileFileReadResponse,
+  zFileFileReleaseResponse,
+  zFileFileRetainResponse,
   zFileFileUploadResponse,
   zNotificationNotificationListResponse,
   zNotificationNotificationReadResponse,
@@ -272,11 +386,17 @@ import {
   zTaskTaskResolveResponse,
   zTaskTaskUpdateResponse,
   zTenantTenantAddHostResponse,
+  zTenantTenantClearOidcResponse,
   zTenantTenantCreateResponse,
+  zTenantTenantDeleteResponse,
   zTenantTenantInviteResponse,
   zTenantTenantListResponse,
+  zTenantTenantReactivateResponse,
   zTenantTenantReadResponse,
+  zTenantTenantRemoveHostResponse,
+  zTenantTenantRenameResponse,
   zTenantTenantSetLocaleResponse,
+  zTenantTenantSetOidcResponse,
   zTenantTenantSuspendResponse,
   zUserInvitationCreateResponse,
   zUserUserApproveRegistrationResponse,
@@ -343,7 +463,7 @@ export const appResources = <ThrowOnError extends boolean = false>(
 /**
  * List the audit trail
  *
- * Every event this tenant's modules published, newest first. Filterable by name, by the user who caused it, by the row it is about, and by when it happened.
+ * Every event this tenant's modules published, newest first. Filterable by name, by the user who caused it, by the row it is about, by when it happened, and by the request or the trace that caused it.
  */
 export const auditEventList = <ThrowOnError extends boolean = false>(
   options: Options<AuditEventListData, ThrowOnError>,
@@ -363,6 +483,102 @@ export const auditEventRead = <ThrowOnError extends boolean = false>(
   options.client.get<AuditEventReadResponses, AuditEventReadErrors, ThrowOnError>({
     responseValidator: async (data) => await zAuditEventReadResponse.parseAsync(data),
     url: "/api/v1/audit/events/{id}",
+    ...options,
+  });
+
+/**
+ * Answer a second factor
+ *
+ * The second half of a sign-in, and only ever of one. The caller is somebody /login or the provider leg just refused to finish without a code, and that refusal is what makes this answer spendable; a code presented by itself - a recovery code from a leaked file, a TOTP read out to whoever phished it - is refused as one answer and at one cost with a wrong code, and spends nothing. For an address that was just refused, this takes the address and the code, or the address and a recovery code, and opens the session the first half had already earned. A wrong code, a replayed step, a spent recovery code, an address with no factor and an address nobody has are one answer at one cost.
+ */
+export const authChallengeVerify = <ThrowOnError extends boolean = false>(
+  options: Options<AuthChallengeVerifyData, ThrowOnError>,
+): RequestResult<AuthChallengeVerifyResponses, AuthChallengeVerifyErrors, ThrowOnError> =>
+  options.client.post<AuthChallengeVerifyResponses, AuthChallengeVerifyErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthChallengeVerifyResponse.parseAsync(data),
+    url: "/api/v1/auth/challenge/verify",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * List my second factors
+ *
+ * What this account proves beside its password, with no secret and no material of any kind: an empty list means the password still signs this person in alone.
+ */
+export const authFactorList = <ThrowOnError extends boolean = false>(
+  options: Options<AuthFactorListData, ThrowOnError>,
+): RequestResult<AuthFactorListResponses, AuthFactorListErrors, ThrowOnError> =>
+  options.client.get<AuthFactorListResponses, AuthFactorListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthFactorListResponse.parseAsync(data),
+    url: "/api/v1/auth/factors",
+    ...options,
+  });
+
+/**
+ * Replace my recovery codes
+ *
+ * Retires every unused code and issues a fresh set, shown once. For the person who has reason to think the set leaked. An account with no factor is refused: codes stand in for a factor and are not one.
+ */
+export const authRecoveryCodesRotate = <ThrowOnError extends boolean = false>(
+  options: Options<AuthRecoveryCodesRotateData, ThrowOnError>,
+): RequestResult<AuthRecoveryCodesRotateResponses, AuthRecoveryCodesRotateErrors, ThrowOnError> =>
+  options.client.post<
+    AuthRecoveryCodesRotateResponses,
+    AuthRecoveryCodesRotateErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zAuthRecoveryCodesRotateResponse.parseAsync(data),
+    url: "/api/v1/auth/factors/recovery/rotate",
+    ...options,
+  });
+
+/**
+ * Begin enrolling a TOTP authenticator
+ *
+ * Mints a secret and shows it once, as base32 and as an otpauth URI. Nothing is enrolled: the factor exists only when a code proves the secret reached the device, so closing this tab leaves no row and changes nothing about how this person signs in.
+ */
+export const authFactorTotpBegin = <ThrowOnError extends boolean = false>(
+  options: Options<AuthFactorTotpBeginData, ThrowOnError>,
+): RequestResult<AuthFactorTotpBeginResponses, AuthFactorTotpBeginErrors, ThrowOnError> =>
+  options.client.post<AuthFactorTotpBeginResponses, AuthFactorTotpBeginErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthFactorTotpBeginResponse.parseAsync(data),
+    url: "/api/v1/auth/factors/totp/begin",
+    ...options,
+  });
+
+/**
+ * Finish enrolling a TOTP authenticator
+ *
+ * Enrols the secret, having checked a code against it, and hands back the recovery codes — the only time any of this is written down, and the response a person is meant to save. A wrong code enrols nothing and issues no codes.
+ */
+export const authFactorTotpFinish = <ThrowOnError extends boolean = false>(
+  options: Options<AuthFactorTotpFinishData, ThrowOnError>,
+): RequestResult<AuthFactorTotpFinishResponses, AuthFactorTotpFinishErrors, ThrowOnError> =>
+  options.client.post<AuthFactorTotpFinishResponses, AuthFactorTotpFinishErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthFactorTotpFinishResponse.parseAsync(data),
+    url: "/api/v1/auth/factors/totp/finish",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Withdraw one of my second factors
+ *
+ * Stops one factor working. The last one on the account is refused: a person cannot, by one click, turn their account back into a password — enrol another first, then retire this one.
+ */
+export const authFactorWithdraw = <ThrowOnError extends boolean = false>(
+  options: Options<AuthFactorWithdrawData, ThrowOnError>,
+): RequestResult<AuthFactorWithdrawResponses, AuthFactorWithdrawErrors, ThrowOnError> =>
+  options.client.delete<AuthFactorWithdrawResponses, AuthFactorWithdrawErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthFactorWithdrawResponse.parseAsync(data),
+    url: "/api/v1/auth/factors/{id}",
     ...options,
   });
 
@@ -413,6 +629,34 @@ export const authMe = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Finish single sign-on
+ *
+ * Exchanges the code, verifies the id token, and opens a session for the user whose verified address it names. An address this tenant does not have is refused: nobody is created here. A person whose account answers with a second factor is refused here too: the provider proved the first half, and the second is asked for at /challenge/verify.
+ */
+export const authOidcCallback = <ThrowOnError extends boolean = false>(
+  options: Options<AuthOidcCallbackData, ThrowOnError>,
+): RequestResult<AuthOidcCallbackResponses, AuthOidcCallbackErrors, ThrowOnError> =>
+  options.client.get<AuthOidcCallbackResponses, AuthOidcCallbackErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthOidcCallbackResponse.parseAsync(data),
+    url: "/api/v1/auth/oidc/callback",
+    ...options,
+  });
+
+/**
+ * Begin single sign-on
+ *
+ * Redirects to the identity provider with PKCE and a state cookie.
+ */
+export const authOidcStart = <ThrowOnError extends boolean = false>(
+  options: Options<AuthOidcStartData, ThrowOnError>,
+): RequestResult<AuthOidcStartResponses, AuthOidcStartErrors, ThrowOnError> =>
+  options.client.get<AuthOidcStartResponses, AuthOidcStartErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthOidcStartResponse.parseAsync(data),
+    url: "/api/v1/auth/oidc/start",
+    ...options,
+  });
+
+/**
  * Change my password
  *
  * Requires the password in force. Every other session of this person ends; the one making the request does not, so changing a password does not sign you out of the page you changed it on.
@@ -433,7 +677,7 @@ export const authPasswordChange = <ThrowOnError extends boolean = false>(
 /**
  * Set a password with a link
  *
- * Consumes the token the link carried and sets the password. Every session this person had ends, including any the caller holds. A token that is unknown, spent or expired is one answer.
+ * Consumes the token the link carried and sets the password. Every session this person had ends, including any the caller holds, and this browser is signed in — an invitation that left the invited person back at the sign-in form was half a door. The one account left signed out is a person who enrolled a second factor: their password changes and their other sessions end, and the sign-in finishes with the code. A token that is unknown, spent or expired is one answer.
  */
 export const authPasswordReset = <ThrowOnError extends boolean = false>(
   options: Options<AuthPasswordResetData, ThrowOnError>,
@@ -478,6 +722,94 @@ export const authRoleSet = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * List my sessions
+ *
+ * Every live session this person has, most recently seen first, with the browser and address each was opened with and the one making the request marked. A session is named by its ref and never by its id: this list is something a person reads, not something a client presents.
+ */
+export const authSessionList = <ThrowOnError extends boolean = false>(
+  options: Options<AuthSessionListData, ThrowOnError>,
+): RequestResult<AuthSessionListResponses, AuthSessionListErrors, ThrowOnError> =>
+  options.client.get<AuthSessionListResponses, AuthSessionListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthSessionListResponse.parseAsync(data),
+    url: "/api/v1/auth/sessions",
+    ...options,
+  });
+
+/**
+ * Sign out everywhere
+ *
+ * Ends every session this person has, including the one making the request, and clears the cookie, so the browser lands on the sign-in page rather than holding a credential that names nothing.
+ */
+export const authSessionRevokeAll = <ThrowOnError extends boolean = false>(
+  options: Options<AuthSessionRevokeAllData, ThrowOnError>,
+): RequestResult<AuthSessionRevokeAllResponses, AuthSessionRevokeAllErrors, ThrowOnError> =>
+  options.client.post<AuthSessionRevokeAllResponses, AuthSessionRevokeAllErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthSessionRevokeAllResponse.parseAsync(data),
+    url: "/api/v1/auth/sessions/revoke-all",
+    ...options,
+  });
+
+/**
+ * Revoke one of my sessions
+ *
+ * Ends the session this person names by its ref. A ref that is not one of their live sessions is a 404 whether it was never there, is somebody else's, or belongs to another tenant. POST rather than DELETE so the page's form can make the write as a CSRF-covered request.
+ */
+export const authSessionRevoke = <ThrowOnError extends boolean = false>(
+  options: Options<AuthSessionRevokeData, ThrowOnError>,
+): RequestResult<AuthSessionRevokeResponses, AuthSessionRevokeErrors, ThrowOnError> =>
+  options.client.post<AuthSessionRevokeResponses, AuthSessionRevokeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthSessionRevokeResponse.parseAsync(data),
+    url: "/api/v1/auth/sessions/{ref}/revoke",
+    ...options,
+  });
+
+/**
+ * List my bearer tokens
+ *
+ * This person's own keys: what each may do, when each dies, and which are already stopped. No token, hash or prefix appears in it — a list of keys would be a list of credentials, and this list is a screen somebody reads.
+ */
+export const authTokenList = <ThrowOnError extends boolean = false>(
+  options: Options<AuthTokenListData, ThrowOnError>,
+): RequestResult<AuthTokenListResponses, AuthTokenListErrors, ThrowOnError> =>
+  options.client.get<AuthTokenListResponses, AuthTokenListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthTokenListResponse.parseAsync(data),
+    url: "/api/v1/auth/tokens",
+    ...options,
+  });
+
+/**
+ * Issue a bearer token
+ *
+ * Mints a key a script or a mobile shell presents as Authorization: Bearer. Every scope must be one some module defines and one this person's own roles already grant, so a key can never hold authority its holder does not have, and an operator scope is refused outside the operator's own tenant. The token appears once, in this response; the table keeps only its hash.
+ */
+export const authTokenIssue = <ThrowOnError extends boolean = false>(
+  options: Options<AuthTokenIssueData, ThrowOnError>,
+): RequestResult<AuthTokenIssueResponses, AuthTokenIssueErrors, ThrowOnError> =>
+  options.client.post<AuthTokenIssueResponses, AuthTokenIssueErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthTokenIssueResponse.parseAsync(data),
+    url: "/api/v1/auth/tokens",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Revoke one of my bearer tokens
+ *
+ * Stops one key of this person's own and leaves their sessions alone: a stolen key and a stolen laptop are different incidents with different answers. An id that is not one of theirs is a 404 whether it never existed, is a colleague's, or belongs to another tenant.
+ */
+export const authTokenRevoke = <ThrowOnError extends boolean = false>(
+  options: Options<AuthTokenRevokeData, ThrowOnError>,
+): RequestResult<AuthTokenRevokeResponses, AuthTokenRevokeErrors, ThrowOnError> =>
+  options.client.post<AuthTokenRevokeResponses, AuthTokenRevokeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthTokenRevokeResponse.parseAsync(data),
+    url: "/api/v1/auth/tokens/{id}/revoke",
+    ...options,
   });
 
 /**
@@ -565,6 +897,104 @@ export const billingSubscriptionSubscribe = <ThrowOnError extends boolean = fals
   >({
     responseValidator: async (data) => await zBillingSubscriptionSubscribeResponse.parseAsync(data),
     url: "/api/v1/billing/subscription/subscribe",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * List proposals
+ *
+ * Change proposals, newest first, filterable by state and by the row they are about.
+ */
+export const changeProposalList = <ThrowOnError extends boolean = false>(
+  options: Options<ChangeProposalListData, ThrowOnError>,
+): RequestResult<ChangeProposalListResponses, ChangeProposalListErrors, ThrowOnError> =>
+  options.client.get<ChangeProposalListResponses, ChangeProposalListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeProposalListResponse.parseAsync(data),
+    url: "/api/v1/change/proposals",
+    ...options,
+  });
+
+/**
+ * Propose a change
+ *
+ * Puts one change to one row forward for somebody else to decide. The proposal records the subject's revision it was made against and the digest of the exact bytes; the same change proposed again while one is open is the same proposal.
+ */
+export const changeProposalPropose = <ThrowOnError extends boolean = false>(
+  options: Options<ChangeProposalProposeData, ThrowOnError>,
+): RequestResult<ChangeProposalProposeResponses, ChangeProposalProposeErrors, ThrowOnError> =>
+  options.client.post<ChangeProposalProposeResponses, ChangeProposalProposeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeProposalProposeResponse.parseAsync(data),
+    url: "/api/v1/change/proposals",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Read one proposal
+ */
+export const changeProposalRead = <ThrowOnError extends boolean = false>(
+  options: Options<ChangeProposalReadData, ThrowOnError>,
+): RequestResult<ChangeProposalReadResponses, ChangeProposalReadErrors, ThrowOnError> =>
+  options.client.get<ChangeProposalReadResponses, ChangeProposalReadErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeProposalReadResponse.parseAsync(data),
+    url: "/api/v1/change/proposals/{id}",
+    ...options,
+  });
+
+/**
+ * Apply an approved change
+ *
+ * Writes the diff to the subject. Refuses unless the proposal is approved, the actor is not its proposer, and the subject is still on the revision the diff was made against; applies once, however often it is asked.
+ */
+export const changeProposalApply = <ThrowOnError extends boolean = false>(
+  options: Options<ChangeProposalApplyData, ThrowOnError>,
+): RequestResult<ChangeProposalApplyResponses, ChangeProposalApplyErrors, ThrowOnError> =>
+  options.client.post<ChangeProposalApplyResponses, ChangeProposalApplyErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeProposalApplyResponse.parseAsync(data),
+    url: "/api/v1/change/proposals/{id}/apply",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Decide a proposal
+ *
+ * Approves or declines it. The person who proposed it cannot be the one who decides, and the decision has to name the revision it was made about.
+ */
+export const changeProposalReview = <ThrowOnError extends boolean = false>(
+  options: Options<ChangeProposalReviewData, ThrowOnError>,
+): RequestResult<ChangeProposalReviewResponses, ChangeProposalReviewErrors, ThrowOnError> =>
+  options.client.post<ChangeProposalReviewResponses, ChangeProposalReviewErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeProposalReviewResponse.parseAsync(data),
+    url: "/api/v1/change/proposals/{id}/review",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Withdraw a proposal
+ *
+ * Takes a proposal back. Only the person who put it forward may, and only before it is decided.
+ */
+export const changeProposalWithdraw = <ThrowOnError extends boolean = false>(
+  options: Options<ChangeProposalWithdrawData, ThrowOnError>,
+): RequestResult<ChangeProposalWithdrawResponses, ChangeProposalWithdrawErrors, ThrowOnError> =>
+  options.client.post<ChangeProposalWithdrawResponses, ChangeProposalWithdrawErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeProposalWithdrawResponse.parseAsync(data),
+    url: "/api/v1/change/proposals/{id}/withdraw",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -738,9 +1168,27 @@ export const fileFileUpload = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Erase a subject's files
+ *
+ * Removes every file this subject uploaded and the bytes beside each one, and leaves one proof row per blob with the digest that is gone and the reason it was asked for. One held file refuses the whole erasure with 409 and names it; a subject with no files answers a receipt of zero and writes nothing.
+ */
+export const fileFileErase = <ThrowOnError extends boolean = false>(
+  options: Options<FileFileEraseData, ThrowOnError>,
+): RequestResult<FileFileEraseResponses, FileFileEraseErrors, ThrowOnError> =>
+  options.client.post<FileFileEraseResponses, FileFileEraseErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileFileEraseResponse.parseAsync(data),
+    url: "/api/v1/file/files/erase",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Delete a file
  *
- * Removes the record now and the bytes once this commits: a blob delete cannot be rolled back, so it is done by whoever handles file.deleted.
+ * Removes the record now and the bytes once this commits: a blob delete cannot be rolled back, so it is done by whoever handles file.deleted. A file under a live hold is refused with 409 and nothing is written.
  */
 export const fileFileDelete = <ThrowOnError extends boolean = false>(
   options: Options<FileFileDeleteData, ThrowOnError>,
@@ -789,6 +1237,52 @@ export const fileFileContentHead = <ThrowOnError extends boolean = false>(
   options.client.head<FileFileContentHeadResponses, FileFileContentHeadErrors, ThrowOnError>({
     url: "/api/v1/file/files/{id}/content",
     ...options,
+  });
+
+/**
+ * Mint a time-limited URL for a private file
+ *
+ * A URL that serves the bytes until it expires, with no request to this application in the path. A public file is refused: it already has an open door. A store that cannot sign one is refused with 501.
+ */
+export const fileFileGrant = <ThrowOnError extends boolean = false>(
+  options: Options<FileFileGrantData, ThrowOnError>,
+): RequestResult<FileFileGrantResponses, FileFileGrantErrors, ThrowOnError> =>
+  options.client.get<FileFileGrantResponses, FileFileGrantErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileFileGrantResponse.parseAsync(data),
+    url: "/api/v1/file/files/{id}/grant",
+    ...options,
+  });
+
+/**
+ * Release a retention hold
+ *
+ * The file goes back to its class's policy. No hold is not an error.
+ */
+export const fileFileRelease = <ThrowOnError extends boolean = false>(
+  options: Options<FileFileReleaseData, ThrowOnError>,
+): RequestResult<FileFileReleaseResponses, FileFileReleaseErrors, ThrowOnError> =>
+  options.client.delete<FileFileReleaseResponses, FileFileReleaseErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileFileReleaseResponse.parseAsync(data),
+    url: "/api/v1/file/files/{id}/hold",
+    ...options,
+  });
+
+/**
+ * Place or replace a retention hold
+ *
+ * Keeps one file past whatever its retention class says. An until in the past is refused: a hold that has already expired holds nothing.
+ */
+export const fileFileRetain = <ThrowOnError extends boolean = false>(
+  options: Options<FileFileRetainData, ThrowOnError>,
+): RequestResult<FileFileRetainResponses, FileFileRetainErrors, ThrowOnError> =>
+  options.client.post<FileFileRetainResponses, FileFileRetainErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileFileRetainResponse.parseAsync(data),
+    url: "/api/v1/file/files/{id}/hold",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -928,9 +1422,27 @@ export const tenantTenantRead = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Retire a tenant
+ *
+ * Writes deleted_at: the tenant's own row and every row it owns stay where they are, and the two names the platform routes on are released — the slug, and the hosts it answered at — so both can be given to a new customer later. The body repeats the slug, because a request that ends a customer is asked for twice. This installation's own tenant is refused, and a retired tenant is not found.
+ */
+export const tenantTenantDelete = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantDeleteData, ThrowOnError>,
+): RequestResult<TenantTenantDeleteResponses, TenantTenantDeleteErrors, ThrowOnError> =>
+  options.client.post<TenantTenantDeleteResponses, TenantTenantDeleteErrors, ThrowOnError>({
+    responseValidator: async (data) => await zTenantTenantDeleteResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/delete",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Give a tenant another host
  *
- * Adding a host the tenant already answers at changes nothing, unless it makes it the primary one. The primary host is what every absolute URL for this tenant is built on, so a link in a mail is a link to the name its people know.
+ * Adding a host the tenant already answers at changes nothing, unless it makes it the primary one. The primary host is what every absolute URL for this tenant is built on, so a link in a mail is a link to the name its people know. A new name and a promotion both publish.
  */
 export const tenantTenantAddHost = <ThrowOnError extends boolean = false>(
   options: Options<TenantTenantAddHostData, ThrowOnError>,
@@ -943,6 +1455,24 @@ export const tenantTenantAddHost = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * Stop serving one host
+ *
+ * A tenant's primary host, and its last one, are refused: the first is what every absolute URL for this tenant is built on, the second is the name a person signs in at. Removing a host the tenant does not answer at changes nothing and publishes nothing.
+ */
+export const tenantTenantRemoveHost = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantRemoveHostData, ThrowOnError>,
+): RequestResult<TenantTenantRemoveHostResponses, TenantTenantRemoveHostErrors, ThrowOnError> =>
+  options.client.delete<
+    TenantTenantRemoveHostResponses,
+    TenantTenantRemoveHostErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zTenantTenantRemoveHostResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/hosts/{host}",
+    ...options,
   });
 
 /**
@@ -966,7 +1496,7 @@ export const tenantTenantInvite = <ThrowOnError extends boolean = false>(
 /**
  * Say which languages a tenant is served in
  *
- * Sets the language a request with no usable preference is answered in, and the set the browser's list is intersected with. Setting the same pair again changes nothing and publishes nothing. The languages a tenant may be answered in are a declaration about a customer, which is why this is the operator's route and not the tenant's: a tenant's own copy is a different capability, in a table a tenant can write.
+ * Sets the language a request with no usable preference is answered in, and the set the browser's list is intersected with. Setting the same pair again changes nothing and publishes nothing. The languages a tenant may be answered in are a declaration about a customer, which is why this is the operator's route and not the tenant's: a tenant's own copy is a different capability, in a table a tenant can write. When the installation's shared store does not accept the invalidation this route answers 503 rather than promising the next page in the new languages: the row stands, and a process holding an older resolution serves the page it names.
  */
 export const tenantTenantSetLocale = <ThrowOnError extends boolean = false>(
   options: Options<TenantTenantSetLocaleData, ThrowOnError>,
@@ -982,9 +1512,73 @@ export const tenantTenantSetLocale = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Say which identity provider a tenant signs in against
+ *
+ * Sets the issuer, the client and the secret reference for one tenant, and what an address the provider vouches for and this tenant has no account for does: disabled, existing or provision. Setting the same values again changes nothing and publishes nothing. The secret itself is never written here: the reference names where it is kept, because a row is copied into the audit trail and a secret in a payload is a secret in the trail.
+ */
+export const tenantTenantSetOidc = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantSetOidcData, ThrowOnError>,
+): RequestResult<TenantTenantSetOidcResponses, TenantTenantSetOidcErrors, ThrowOnError> =>
+  options.client.post<TenantTenantSetOidcResponses, TenantTenantSetOidcErrors, ThrowOnError>({
+    responseValidator: async (data) => await zTenantTenantSetOidcResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/oidc",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Take a tenant's identity provider away
+ *
+ * After this the tenant's single sign-on answers 404 and its people sign in with a password. People already signed in stay signed in: taking a company's single sign-on away is not a revocation of anybody's session, and revocations are somebody else's decision.
+ */
+export const tenantTenantClearOidc = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantClearOidcData, ThrowOnError>,
+): RequestResult<TenantTenantClearOidcResponses, TenantTenantClearOidcErrors, ThrowOnError> =>
+  options.client.post<TenantTenantClearOidcResponses, TenantTenantClearOidcErrors, ThrowOnError>({
+    responseValidator: async (data) => await zTenantTenantClearOidcResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/oidc/clear",
+    ...options,
+  });
+
+/**
+ * Resume serving a suspended tenant
+ *
+ * The inverse of a suspension: the tenant's hosts resolve again. Reactivating a tenant that is already served changes nothing and publishes nothing. A deleted tenant is not found — a delete releases the slug and the hosts, and what brings a retired customer back is a restore, not this.
+ */
+export const tenantTenantReactivate = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantReactivateData, ThrowOnError>,
+): RequestResult<TenantTenantReactivateResponses, TenantTenantReactivateErrors, ThrowOnError> =>
+  options.client.post<TenantTenantReactivateResponses, TenantTenantReactivateErrors, ThrowOnError>({
+    responseValidator: async (data) => await zTenantTenantReactivateResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/reactivate",
+    ...options,
+  });
+
+/**
+ * Change what a tenant is called
+ *
+ * The display name only. A slug is a DNS label and the base of every URL this platform builds for the tenant, so it has no field here: changing one is another tenant's create, not this tenant's rename. Renaming a tenant to the name it already has changes nothing and publishes nothing.
+ */
+export const tenantTenantRename = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantRenameData, ThrowOnError>,
+): RequestResult<TenantTenantRenameResponses, TenantTenantRenameErrors, ThrowOnError> =>
+  options.client.post<TenantTenantRenameResponses, TenantTenantRenameErrors, ThrowOnError>({
+    responseValidator: async (data) => await zTenantTenantRenameResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/rename",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Suspend a tenant
  *
- * Stops the tenant being served: its hosts answer as though no site were there. Suspending it again changes nothing.
+ * Stops the tenant being served: its hosts answer as though no site were there. Suspending it again changes nothing. When the installation's shared store does not accept the invalidation this route answers 503: the suspension stands in the record, but a process that had already resolved these hosts may serve them until those resolutions expire, and repeating the request finishes the change.
  */
 export const tenantTenantSuspend = <ThrowOnError extends boolean = false>(
   options: Options<TenantTenantSuspendData, ThrowOnError>,

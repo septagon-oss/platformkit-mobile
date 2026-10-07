@@ -4,6 +4,17 @@ export type ClientOptions = {
   baseUrl: "https://platformkit.example" | (string & {});
 };
 
+export type ApiToken = {
+  createdAt: string;
+  createdBy: string;
+  expiresAt: string;
+  id: string;
+  lastUsedAt: string;
+  name: string;
+  revokedAt?: string;
+  scopes: Array<string> | null;
+};
+
 export type AccessBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -70,6 +81,7 @@ export type ClearOutputBody = {
    * A URL to the JSON Schema for this object.
    */
   readonly $schema?: string;
+  signedIn?: boolean;
   signedOut: boolean;
 };
 
@@ -127,6 +139,17 @@ export type Content = {
   readonly updatedAt?: string;
 };
 
+export type Delete = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The tenant's slug, repeated
+   */
+  confirm: string;
+};
+
 export type DoneOutputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -141,11 +164,39 @@ export type Entry = {
   fields: Array<Field> | null;
   immutable?: Array<string> | null;
   module: string;
+  operations?: Array<string> | null;
   path: string;
   screen?: string;
   singleton?: boolean;
   writable: boolean;
   write_path?: string;
+};
+
+export type EraseBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Why, for the audit trail: kept with every removal this erasure makes, in the work order and in the proof row beside the digest
+   */
+  reason: string;
+  /**
+   * The subject whose files are being erased
+   */
+  subject: string;
+};
+
+export type ErasureReceipt = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  at: string;
+  bytes: number;
+  files: number;
+  held?: Array<string> | null;
+  subject: string;
 };
 
 export type Event = {
@@ -157,6 +208,10 @@ export type Event = {
    * The user who caused it, absent for system work
    */
   actor?: string;
+  /**
+   * The address the call arrived from
+   */
+  clientIp?: string;
   /**
    * The event this row records
    */
@@ -177,14 +232,43 @@ export type Event = {
    * The event's payload, as its module published it
    */
   payload: unknown;
+  /**
+   * The call that caused this, as its caller was told it
+   */
+  requestId?: string;
+  /**
+   * The trace this event happened in, absent when nobody traced it
+   */
+  traceId?: string;
+  /**
+   * The W3C trace context of the call that caused this
+   */
+  traceparent?: string;
+};
+
+export type Factor = {
+  enrolledAt: string;
+  id: string;
+  kind: string;
+};
+
+export type FactorsOutputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Factor> | null;
+  total: number;
 };
 
 export type Field = {
   default?: string;
+  display?: boolean;
   doc?: string;
   elem?: string;
   enum?: Array<string> | null;
   hideList?: boolean;
+  maxLength?: number;
   name: string;
   present?: string;
   readOnly?: boolean;
@@ -204,6 +288,10 @@ export type File = {
   contentType?: string;
   readonly createdAt?: string;
   readonly id?: string;
+  /**
+   * Retention class, as the product names it
+   */
+  kind?: string;
   /**
    * The name the file was uploaded under
    */
@@ -227,6 +315,21 @@ export type File = {
   visibility?: "private" | "public";
 };
 
+export type FinishTotpInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The six-digit code the app is showing
+   */
+  code: string;
+  /**
+   * The secret the enrolment showed, as the authenticator app received it
+   */
+  secret: string;
+};
+
 export type ForgotInputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -238,6 +341,15 @@ export type ForgotInputBody = {
   email: string;
 };
 
+export type Grant = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  expiresAt: string;
+  url: string;
+};
+
 export type HandleBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -247,6 +359,32 @@ export type HandleBody = {
    * Lower-case letters, digits and interior . _ -, three to thirty-two characters, and not a name that stands for the platform
    */
   handle: string;
+};
+
+export type Hold = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  readonly createdAt?: string;
+  /**
+   * The file held
+   */
+  readonly file: string;
+  readonly id?: string;
+  /**
+   * Who placed it
+   */
+  readonly placedBy?: string;
+  /**
+   * Why it is held
+   */
+  reason: string;
+  /**
+   * When the hold expires, or never
+   */
+  until?: string;
+  readonly updatedAt?: string;
 };
 
 export type HostInputBody = {
@@ -310,6 +448,44 @@ export type InviteInputBody = {
   email: string;
 };
 
+export type IssueTokenInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * When the key stops working. Omit for the default of 30 days; the maximum is 180 and nothing extends either
+   */
+  expiresAt?: string;
+  /**
+   * What this key is, in the words whoever reads the list would use: "Deploy bot", "Ada's laptop"
+   */
+  name: string;
+  /**
+   * Permission keys this key may use. Each must be one some module defines and one the issuer's own roles already grant; an empty list is refused rather than meaning everything
+   */
+  scopes: Array<string> | null;
+};
+
+export type IssuedToken = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  createdAt: string;
+  createdBy: string;
+  expiresAt: string;
+  id: string;
+  lastUsedAt: string;
+  name: string;
+  revokedAt?: string;
+  scopes: Array<string> | null;
+  /**
+   * Shown once, in this response and no other
+   */
+  token: string;
+};
+
 export type ListOutputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -343,6 +519,23 @@ export type NavItem = {
    * Path within this site
    */
   path: string;
+};
+
+export type NewProposal = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  diff: {
+    [key: string]: unknown;
+  };
+  subjectEntity: string;
+  /**
+   * The row; the nil uuid for an entity with one per tenant
+   */
+  subjectId: string;
+  subjectModule: string;
+  summary: string;
 };
 
 export type NewTenant = {
@@ -392,6 +585,37 @@ export type Notification = {
    */
   title: string;
   readonly updatedAt?: string;
+};
+
+export type OidcSettings = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The client this application registers as at that provider
+   */
+  clientId: string;
+  /**
+   * The provider's own URL, https unless it is local
+   */
+  issuer: string;
+  /**
+   * The path the provider sends the browser back to; empty is this installation's own
+   */
+  redirectPath?: string;
+  /**
+   * disabled, existing or provision: what an address the provider vouches for and this tenant has no account for does
+   */
+  registration?: string;
+  /**
+   * What a provisioned person is given, and only under provision
+   */
+  roles?: Array<string> | null;
+  /**
+   * Where the client secret is kept — an environment variable's name, never the secret
+   */
+  secretRef: string;
 };
 
 export type Page = {
@@ -459,6 +683,17 @@ export type PagePlanBody = {
    */
   readonly $schema?: string;
   items: Array<Plan> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
+export type PageProposalBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Proposal> | null;
   limit: number;
   offset: number;
   total: number;
@@ -567,6 +802,98 @@ export type Problem = {
   type: string;
 };
 
+export type Proposal = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The subject revision this proposal caused
+   */
+  readonly appliedRevision: number;
+  /**
+   * The subject's revision this diff was made against
+   */
+  readonly baseRevision: number;
+  /**
+   * Why, in the reviewer's words
+   */
+  comment?: string;
+  readonly createdAt?: string;
+  /**
+   * The change, as an RFC 7386 merge patch
+   */
+  diff: {
+    [key: string]: unknown;
+  };
+  /**
+   * sha256 of the canonical diff, which is what a verdict is about
+   */
+  readonly diffDigest: string;
+  readonly id?: string;
+  /**
+   * Who put it forward, from their own credentials
+   */
+  readonly proposer: string;
+  /**
+   * When the decision was made
+   */
+  readonly reviewedAt?: string;
+  /**
+   * Who decided
+   */
+  readonly reviewer?: string;
+  /**
+   * This row's own revision, which every command rechecks
+   */
+  readonly revision: number;
+  /**
+   * Where it is in the lifecycle
+   */
+  readonly state: "proposed" | "approved" | "declined" | "withdrawn" | "applied";
+  /**
+   * The entity inside it
+   */
+  subjectEntity: string;
+  /**
+   * The row, or nil for a one-per-tenant entity
+   */
+  subjectId: string;
+  /**
+   * The module that owns the row
+   */
+  subjectModule: string;
+  /**
+   * One line on what the change is
+   */
+  summary: string;
+  readonly updatedAt?: string;
+  /**
+   * The decision, empty until one is made
+   */
+  readonly verdict: "" | "approved" | "declined";
+};
+
+export type RecoveryCodesOutputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  codes: Array<string> | null;
+  factor?: Factor;
+};
+
+export type Rename = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Display name
+   */
+  name: string;
+};
+
 export type ResendVerificationInputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -602,6 +929,42 @@ export type ResolveBody = {
    * How the task was resolved
    */
   resolution?: string;
+};
+
+export type RetainBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Why it is held
+   */
+  reason: string;
+  /**
+   * When the hold expires; omit to hold until released
+   */
+  until?: string;
+};
+
+export type Review = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  comment?: string;
+  expectedRevision: number;
+  verdict: "approved" | "declined";
+};
+
+export type RevisionInput = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The revision this decision was made about
+   */
+  expectedRevision: number;
 };
 
 export type Role = {
@@ -652,6 +1015,28 @@ export type RolesOutputBody = {
   total: number;
 };
 
+export type SessionListing = {
+  createdAt: string;
+  current: boolean;
+  expiresAt: string;
+  ip?: string;
+  lastSeenAt: string;
+  /**
+   * hex(sha256(session id)); what revoking takes
+   */
+  ref: string;
+  userAgent?: string;
+};
+
+export type SessionsOutputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<SessionListing> | null;
+  total: number;
+};
+
 export type SetLocale = {
   /**
    * A URL to the JSON Schema for this object.
@@ -690,6 +1075,10 @@ export type SiteSettings = {
    * Brand colour, #rrggbb
    */
   primaryColor?: string;
+  /**
+   * This row's own write count, from 1
+   */
+  readonly revision?: number;
   /**
    * The line under the name
    */
@@ -770,6 +1159,17 @@ export type Subscription = {
   readonly updatedAt?: string;
 };
 
+export type TotpEnrolment = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  account: string;
+  generatedAt: string;
+  secret: string;
+  uri?: string;
+};
+
 export type Task = {
   /**
    * A URL to the JSON Schema for this object.
@@ -845,6 +1245,15 @@ export type Tenant = {
   updatedAt: string;
 };
 
+export type TokensOutputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<ApiToken> | null;
+  total: number;
+};
+
 export type User = {
   /**
    * A URL to the JSON Schema for this object.
@@ -884,6 +1293,21 @@ export type VerifyEmailInputBody = {
    * The verification link's one-time credential
    */
   token: string;
+};
+
+export type VerifyFactorInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The code from the app, or one of the recovery codes
+   */
+  code: string;
+  /**
+   * The address that was signed in with
+   */
+  email: string;
 };
 
 export type AccessBodyWritable = {
@@ -928,6 +1352,7 @@ export type ChangeInputBodyWritable = {
 };
 
 export type ClearOutputBodyWritable = {
+  signedIn?: boolean;
   signedOut: boolean;
 };
 
@@ -954,8 +1379,34 @@ export type ContentWritable = {
   title: string;
 };
 
+export type DeleteWritable = {
+  /**
+   * The tenant's slug, repeated
+   */
+  confirm: string;
+};
+
 export type DoneOutputBodyWritable = {
   done: boolean;
+};
+
+export type EraseBodyWritable = {
+  /**
+   * Why, for the audit trail: kept with every removal this erasure makes, in the work order and in the proof row beside the digest
+   */
+  reason: string;
+  /**
+   * The subject whose files are being erased
+   */
+  subject: string;
+};
+
+export type ErasureReceiptWritable = {
+  at: string;
+  bytes: number;
+  files: number;
+  held?: Array<string> | null;
+  subject: string;
 };
 
 export type EventWritable = {
@@ -963,6 +1414,10 @@ export type EventWritable = {
    * The user who caused it, absent for system work
    */
   actor?: string;
+  /**
+   * The address the call arrived from
+   */
+  clientIp?: string;
   /**
    * The event this row records
    */
@@ -983,6 +1438,23 @@ export type EventWritable = {
    * The event's payload, as its module published it
    */
   payload: unknown;
+  /**
+   * The call that caused this, as its caller was told it
+   */
+  requestId?: string;
+  /**
+   * The trace this event happened in, absent when nobody traced it
+   */
+  traceId?: string;
+  /**
+   * The W3C trace context of the call that caused this
+   */
+  traceparent?: string;
+};
+
+export type FactorsOutputBodyWritable = {
+  items: Array<Factor> | null;
+  total: number;
 };
 
 export type FileWritable = {
@@ -990,6 +1462,10 @@ export type FileWritable = {
    * Media type, as the upload declared it
    */
   contentType?: string;
+  /**
+   * Retention class, as the product names it
+   */
+  kind?: string;
   /**
    * The name the file was uploaded under
    */
@@ -1000,6 +1476,17 @@ export type FileWritable = {
   visibility?: "private" | "public";
 };
 
+export type FinishTotpInputBodyWritable = {
+  /**
+   * The six-digit code the app is showing
+   */
+  code: string;
+  /**
+   * The secret the enrolment showed, as the authenticator app received it
+   */
+  secret: string;
+};
+
 export type ForgotInputBodyWritable = {
   /**
    * The address to send a reset link to
@@ -1007,11 +1494,27 @@ export type ForgotInputBodyWritable = {
   email: string;
 };
 
+export type GrantWritable = {
+  expiresAt: string;
+  url: string;
+};
+
 export type HandleBodyWritable = {
   /**
    * Lower-case letters, digits and interior . _ -, three to thirty-two characters, and not a name that stands for the platform
    */
   handle: string;
+};
+
+export type HoldWritable = {
+  /**
+   * Why it is held
+   */
+  reason: string;
+  /**
+   * When the hold expires, or never
+   */
+  until?: string;
 };
 
 export type HostInputBodyWritable = {
@@ -1059,6 +1562,36 @@ export type InviteInputBodyWritable = {
   email: string;
 };
 
+export type IssueTokenInputBodyWritable = {
+  /**
+   * When the key stops working. Omit for the default of 30 days; the maximum is 180 and nothing extends either
+   */
+  expiresAt?: string;
+  /**
+   * What this key is, in the words whoever reads the list would use: "Deploy bot", "Ada's laptop"
+   */
+  name: string;
+  /**
+   * Permission keys this key may use. Each must be one some module defines and one the issuer's own roles already grant; an empty list is refused rather than meaning everything
+   */
+  scopes: Array<string> | null;
+};
+
+export type IssuedTokenWritable = {
+  createdAt: string;
+  createdBy: string;
+  expiresAt: string;
+  id: string;
+  lastUsedAt: string;
+  name: string;
+  revokedAt?: string;
+  scopes: Array<string> | null;
+  /**
+   * Shown once, in this response and no other
+   */
+  token: string;
+};
+
 export type ListOutputBodyWritable = {
   items: Array<TenantWritable> | null;
   total: number;
@@ -1073,6 +1606,19 @@ export type LoginInputBodyWritable = {
    * The password
    */
   password: string;
+};
+
+export type NewProposalWritable = {
+  diff: {
+    [key: string]: unknown;
+  };
+  subjectEntity: string;
+  /**
+   * The row; the nil uuid for an entity with one per tenant
+   */
+  subjectId: string;
+  subjectModule: string;
+  summary: string;
 };
 
 export type NewTenantWritable = {
@@ -1107,6 +1653,33 @@ export type NotificationWritable = {
    * One-line summary
    */
   title: string;
+};
+
+export type OidcSettingsWritable = {
+  /**
+   * The client this application registers as at that provider
+   */
+  clientId: string;
+  /**
+   * The provider's own URL, https unless it is local
+   */
+  issuer: string;
+  /**
+   * The path the provider sends the browser back to; empty is this installation's own
+   */
+  redirectPath?: string;
+  /**
+   * disabled, existing or provision: what an address the provider vouches for and this tenant has no account for does
+   */
+  registration?: string;
+  /**
+   * What a provisioned person is given, and only under provision
+   */
+  roles?: Array<string> | null;
+  /**
+   * Where the client secret is kept — an environment variable's name, never the secret
+   */
+  secretRef: string;
 };
 
 export type PageWritable = {
@@ -1150,6 +1723,13 @@ export type PageNotificationBodyWritable = {
 
 export type PagePlanBodyWritable = {
   items: Array<PlanWritable> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
+export type PageProposalBodyWritable = {
+  items: Array<ProposalWritable> | null;
   limit: number;
   offset: number;
   total: number;
@@ -1239,6 +1819,47 @@ export type ProblemWritable = {
   type: string;
 };
 
+export type ProposalWritable = {
+  /**
+   * Why, in the reviewer's words
+   */
+  comment?: string;
+  /**
+   * The change, as an RFC 7386 merge patch
+   */
+  diff: {
+    [key: string]: unknown;
+  };
+  /**
+   * The entity inside it
+   */
+  subjectEntity: string;
+  /**
+   * The row, or nil for a one-per-tenant entity
+   */
+  subjectId: string;
+  /**
+   * The module that owns the row
+   */
+  subjectModule: string;
+  /**
+   * One line on what the change is
+   */
+  summary: string;
+};
+
+export type RecoveryCodesOutputBodyWritable = {
+  codes: Array<string> | null;
+  factor?: Factor;
+};
+
+export type RenameWritable = {
+  /**
+   * Display name
+   */
+  name: string;
+};
+
 export type ResendVerificationInputBodyWritable = {
   /**
    * The address awaiting verification
@@ -1262,6 +1883,30 @@ export type ResolveBodyWritable = {
    * How the task was resolved
    */
   resolution?: string;
+};
+
+export type RetainBodyWritable = {
+  /**
+   * Why it is held
+   */
+  reason: string;
+  /**
+   * When the hold expires; omit to hold until released
+   */
+  until?: string;
+};
+
+export type ReviewWritable = {
+  comment?: string;
+  expectedRevision: number;
+  verdict: "approved" | "declined";
+};
+
+export type RevisionInputWritable = {
+  /**
+   * The revision this decision was made about
+   */
+  expectedRevision: number;
 };
 
 export type RoleWritable = {
@@ -1293,6 +1938,11 @@ export type RolesBodyWritable = {
 
 export type RolesOutputBodyWritable = {
   items: Array<RoleWritable> | null;
+  total: number;
+};
+
+export type SessionsOutputBodyWritable = {
+  items: Array<SessionListing> | null;
   total: number;
 };
 
@@ -1360,6 +2010,13 @@ export type SubscriptionWritable = {
   status?: "trial" | "active" | "past_due" | "cancelled";
 };
 
+export type TotpEnrolmentWritable = {
+  account: string;
+  generatedAt: string;
+  secret: string;
+  uri?: string;
+};
+
 export type TaskWritable = {
   /**
    * User responsible for the task
@@ -1420,6 +2077,11 @@ export type TenantWritable = {
   updatedAt: string;
 };
 
+export type TokensOutputBodyWritable = {
+  items: Array<ApiToken> | null;
+  total: number;
+};
+
 export type UserWritable = {
   /**
    * Name to show
@@ -1441,6 +2103,17 @@ export type UserWritable = {
    * Lifecycle state
    */
   status?: "invited" | "pending" | "unverified" | "active" | "inactive";
+};
+
+export type VerifyFactorInputBodyWritable = {
+  /**
+   * The code from the app, or one of the recovery codes
+   */
+  code: string;
+  /**
+   * The address that was signed in with
+   */
+  email: string;
 };
 
 export type AppAccessRequestData = {
@@ -1519,6 +2192,14 @@ export type AuditEventListData = {
      * Only events about this row, whatever its payload calls it
      */
     record?: string;
+    /**
+     * Only events this request caused (the X-Request-ID value)
+     */
+    request?: string;
+    /**
+     * Only events this trace id touched
+     */
+    trace?: string;
     /**
      * Only events at or after this instant
      */
@@ -1610,6 +2291,224 @@ export type AuditEventReadResponses = {
 };
 
 export type AuditEventReadResponse = AuditEventReadResponses[keyof AuditEventReadResponses];
+
+export type AuthChallengeVerifyData = {
+  body: VerifyFactorInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/challenge/verify";
+};
+
+export type AuthChallengeVerifyErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthChallengeVerifyError = AuthChallengeVerifyErrors[keyof AuthChallengeVerifyErrors];
+
+export type AuthChallengeVerifyResponses = {
+  /**
+   * OK
+   */
+  200: Identity;
+};
+
+export type AuthChallengeVerifyResponse =
+  AuthChallengeVerifyResponses[keyof AuthChallengeVerifyResponses];
+
+export type AuthFactorListData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/factors";
+};
+
+export type AuthFactorListErrors = {
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthFactorListError = AuthFactorListErrors[keyof AuthFactorListErrors];
+
+export type AuthFactorListResponses = {
+  /**
+   * OK
+   */
+  200: FactorsOutputBody;
+};
+
+export type AuthFactorListResponse = AuthFactorListResponses[keyof AuthFactorListResponses];
+
+export type AuthRecoveryCodesRotateData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/factors/recovery/rotate";
+};
+
+export type AuthRecoveryCodesRotateErrors = {
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthRecoveryCodesRotateError =
+  AuthRecoveryCodesRotateErrors[keyof AuthRecoveryCodesRotateErrors];
+
+export type AuthRecoveryCodesRotateResponses = {
+  /**
+   * Created
+   */
+  201: RecoveryCodesOutputBody;
+};
+
+export type AuthRecoveryCodesRotateResponse =
+  AuthRecoveryCodesRotateResponses[keyof AuthRecoveryCodesRotateResponses];
+
+export type AuthFactorTotpBeginData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/factors/totp/begin";
+};
+
+export type AuthFactorTotpBeginErrors = {
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthFactorTotpBeginError = AuthFactorTotpBeginErrors[keyof AuthFactorTotpBeginErrors];
+
+export type AuthFactorTotpBeginResponses = {
+  /**
+   * OK
+   */
+  200: TotpEnrolment;
+};
+
+export type AuthFactorTotpBeginResponse =
+  AuthFactorTotpBeginResponses[keyof AuthFactorTotpBeginResponses];
+
+export type AuthFactorTotpFinishData = {
+  body: FinishTotpInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/factors/totp/finish";
+};
+
+export type AuthFactorTotpFinishErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthFactorTotpFinishError =
+  AuthFactorTotpFinishErrors[keyof AuthFactorTotpFinishErrors];
+
+export type AuthFactorTotpFinishResponses = {
+  /**
+   * Created
+   */
+  201: RecoveryCodesOutputBody;
+};
+
+export type AuthFactorTotpFinishResponse =
+  AuthFactorTotpFinishResponses[keyof AuthFactorTotpFinishResponses];
+
+export type AuthFactorWithdrawData = {
+  body?: never;
+  path: {
+    /**
+     * The factor to withdraw, as the list showed it
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/auth/factors/{id}";
+};
+
+export type AuthFactorWithdrawErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthFactorWithdrawError = AuthFactorWithdrawErrors[keyof AuthFactorWithdrawErrors];
+
+export type AuthFactorWithdrawResponses = {
+  /**
+   * OK
+   */
+  200: DoneOutputBody;
+};
+
+export type AuthFactorWithdrawResponse =
+  AuthFactorWithdrawResponses[keyof AuthFactorWithdrawResponses];
 
 export type AuthLoginData = {
   body: LoginInputBodyWritable;
@@ -1713,6 +2612,85 @@ export type AuthMeResponses = {
 };
 
 export type AuthMeResponse = AuthMeResponses[keyof AuthMeResponses];
+
+export type AuthOidcCallbackData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * The authorization code
+     */
+    code?: string;
+    /**
+     * The state that went out with the redirect
+     */
+    state?: string;
+  };
+  url: "/api/v1/auth/oidc/callback";
+};
+
+export type AuthOidcCallbackErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthOidcCallbackError = AuthOidcCallbackErrors[keyof AuthOidcCallbackErrors];
+
+export type AuthOidcCallbackResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type AuthOidcCallbackResponse = AuthOidcCallbackResponses[keyof AuthOidcCallbackResponses];
+
+export type AuthOidcStartData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/oidc/start";
+};
+
+export type AuthOidcStartErrors = {
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthOidcStartError = AuthOidcStartErrors[keyof AuthOidcStartErrors];
+
+export type AuthOidcStartResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type AuthOidcStartResponse = AuthOidcStartResponses[keyof AuthOidcStartResponses];
 
 export type AuthPasswordChangeData = {
   body: ChangeInputBodyWritable;
@@ -1860,6 +2838,213 @@ export type AuthRoleSetResponses = {
 };
 
 export type AuthRoleSetResponse = AuthRoleSetResponses[keyof AuthRoleSetResponses];
+
+export type AuthSessionListData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/sessions";
+};
+
+export type AuthSessionListErrors = {
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthSessionListError = AuthSessionListErrors[keyof AuthSessionListErrors];
+
+export type AuthSessionListResponses = {
+  /**
+   * OK
+   */
+  200: SessionsOutputBody;
+};
+
+export type AuthSessionListResponse = AuthSessionListResponses[keyof AuthSessionListResponses];
+
+export type AuthSessionRevokeAllData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/sessions/revoke-all";
+};
+
+export type AuthSessionRevokeAllErrors = {
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthSessionRevokeAllError =
+  AuthSessionRevokeAllErrors[keyof AuthSessionRevokeAllErrors];
+
+export type AuthSessionRevokeAllResponses = {
+  /**
+   * OK
+   */
+  200: ClearOutputBody;
+};
+
+export type AuthSessionRevokeAllResponse =
+  AuthSessionRevokeAllResponses[keyof AuthSessionRevokeAllResponses];
+
+export type AuthSessionRevokeData = {
+  body?: never;
+  path: {
+    /**
+     * The session's ref, as the list shows it. Not the session id, which is the cookie credential and never appears in a response.
+     */
+    ref: string;
+  };
+  query?: never;
+  url: "/api/v1/auth/sessions/{ref}/revoke";
+};
+
+export type AuthSessionRevokeErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthSessionRevokeError = AuthSessionRevokeErrors[keyof AuthSessionRevokeErrors];
+
+export type AuthSessionRevokeResponses = {
+  /**
+   * OK
+   */
+  200: DoneOutputBody;
+};
+
+export type AuthSessionRevokeResponse =
+  AuthSessionRevokeResponses[keyof AuthSessionRevokeResponses];
+
+export type AuthTokenListData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/tokens";
+};
+
+export type AuthTokenListErrors = {
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthTokenListError = AuthTokenListErrors[keyof AuthTokenListErrors];
+
+export type AuthTokenListResponses = {
+  /**
+   * OK
+   */
+  200: TokensOutputBody;
+};
+
+export type AuthTokenListResponse = AuthTokenListResponses[keyof AuthTokenListResponses];
+
+export type AuthTokenIssueData = {
+  body: IssueTokenInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/tokens";
+};
+
+export type AuthTokenIssueErrors = {
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthTokenIssueError = AuthTokenIssueErrors[keyof AuthTokenIssueErrors];
+
+export type AuthTokenIssueResponses = {
+  /**
+   * Created
+   */
+  201: IssuedToken;
+};
+
+export type AuthTokenIssueResponse = AuthTokenIssueResponses[keyof AuthTokenIssueResponses];
+
+export type AuthTokenRevokeData = {
+  body?: never;
+  path: {
+    /**
+     * The key to stop, as the list showed it
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/auth/tokens/{id}/revoke";
+};
+
+export type AuthTokenRevokeErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthTokenRevokeError = AuthTokenRevokeErrors[keyof AuthTokenRevokeErrors];
+
+export type AuthTokenRevokeResponses = {
+  /**
+   * OK
+   */
+  200: DoneOutputBody;
+};
+
+export type AuthTokenRevokeResponse = AuthTokenRevokeResponses[keyof AuthTokenRevokeResponses];
 
 export type BillingPlanListData = {
   body?: never;
@@ -2093,6 +3278,306 @@ export type BillingSubscriptionSubscribeResponses = {
 
 export type BillingSubscriptionSubscribeResponse =
   BillingSubscriptionSubscribeResponses[keyof BillingSubscriptionSubscribeResponses];
+
+export type ChangeProposalListData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Only proposals in this state
+     */
+    state?: "proposed" | "approved" | "declined" | "withdrawn" | "applied";
+    /**
+     * Only proposals for this module's rows
+     */
+    subjectModule?: string;
+    /**
+     * Only proposals for this entity
+     */
+    subjectEntity?: string;
+    /**
+     * Only proposals about this row
+     */
+    subjectId?: string;
+    /**
+     * Rows per page
+     */
+    limit?: number;
+    /**
+     * Rows to skip
+     */
+    offset?: number;
+  };
+  url: "/api/v1/change/proposals";
+};
+
+export type ChangeProposalListErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ChangeProposalListError = ChangeProposalListErrors[keyof ChangeProposalListErrors];
+
+export type ChangeProposalListResponses = {
+  /**
+   * OK
+   */
+  200: PageProposalBody;
+};
+
+export type ChangeProposalListResponse =
+  ChangeProposalListResponses[keyof ChangeProposalListResponses];
+
+export type ChangeProposalProposeData = {
+  body: NewProposalWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/change/proposals";
+};
+
+export type ChangeProposalProposeErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ChangeProposalProposeError =
+  ChangeProposalProposeErrors[keyof ChangeProposalProposeErrors];
+
+export type ChangeProposalProposeResponses = {
+  /**
+   * OK
+   */
+  200: Proposal;
+};
+
+export type ChangeProposalProposeResponse =
+  ChangeProposalProposeResponses[keyof ChangeProposalProposeResponses];
+
+export type ChangeProposalReadData = {
+  body?: never;
+  path: {
+    /**
+     * The proposal
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/change/proposals/{id}";
+};
+
+export type ChangeProposalReadErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ChangeProposalReadError = ChangeProposalReadErrors[keyof ChangeProposalReadErrors];
+
+export type ChangeProposalReadResponses = {
+  /**
+   * OK
+   */
+  200: Proposal;
+};
+
+export type ChangeProposalReadResponse =
+  ChangeProposalReadResponses[keyof ChangeProposalReadResponses];
+
+export type ChangeProposalApplyData = {
+  body: RevisionInputWritable;
+  path: {
+    /**
+     * The proposal
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/change/proposals/{id}/apply";
+};
+
+export type ChangeProposalApplyErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ChangeProposalApplyError = ChangeProposalApplyErrors[keyof ChangeProposalApplyErrors];
+
+export type ChangeProposalApplyResponses = {
+  /**
+   * OK
+   */
+  200: Proposal;
+};
+
+export type ChangeProposalApplyResponse =
+  ChangeProposalApplyResponses[keyof ChangeProposalApplyResponses];
+
+export type ChangeProposalReviewData = {
+  body: ReviewWritable;
+  path: {
+    /**
+     * The proposal
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/change/proposals/{id}/review";
+};
+
+export type ChangeProposalReviewErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ChangeProposalReviewError =
+  ChangeProposalReviewErrors[keyof ChangeProposalReviewErrors];
+
+export type ChangeProposalReviewResponses = {
+  /**
+   * OK
+   */
+  200: Proposal;
+};
+
+export type ChangeProposalReviewResponse =
+  ChangeProposalReviewResponses[keyof ChangeProposalReviewResponses];
+
+export type ChangeProposalWithdrawData = {
+  body: RevisionInputWritable;
+  path: {
+    /**
+     * The proposal
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/change/proposals/{id}/withdraw";
+};
+
+export type ChangeProposalWithdrawErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ChangeProposalWithdrawError =
+  ChangeProposalWithdrawErrors[keyof ChangeProposalWithdrawErrors];
+
+export type ChangeProposalWithdrawResponses = {
+  /**
+   * OK
+   */
+  200: Proposal;
+};
+
+export type ChangeProposalWithdrawResponse =
+  ChangeProposalWithdrawResponses[keyof ChangeProposalWithdrawResponses];
 
 export type ContentContentListData = {
   body?: never;
@@ -2550,6 +4035,10 @@ export type FileFileUploadData = {
      * Who may read the file once it is stored
      */
     visibility?: "private" | "public";
+    /**
+     * Retention class, as the product names it
+     */
+    kind?: string;
   };
   url: "/api/v1/file/files";
 };
@@ -2588,6 +4077,51 @@ export type FileFileUploadResponses = {
 
 export type FileFileUploadResponse = FileFileUploadResponses[keyof FileFileUploadResponses];
 
+export type FileFileEraseData = {
+  body?: EraseBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/file/files/erase";
+};
+
+export type FileFileEraseErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileFileEraseError = FileFileEraseErrors[keyof FileFileEraseErrors];
+
+export type FileFileEraseResponses = {
+  /**
+   * OK
+   */
+  200: ErasureReceipt;
+};
+
+export type FileFileEraseResponse = FileFileEraseResponses[keyof FileFileEraseResponses];
+
 export type FileFileDeleteData = {
   body?: never;
   path: {
@@ -2605,6 +4139,10 @@ export type FileFileDeleteErrors = {
    * Not Found
    */
   404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
   /**
    * Request Entity Too Large
    */
@@ -2767,6 +4305,153 @@ export type FileFileContentHeadResponses = {
    */
   200: unknown;
 };
+
+export type FileFileGrantData = {
+  body?: never;
+  path: {
+    /**
+     * The file's id
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * How long the URL lives, as a Go duration; at most 24h
+     */
+    expires?: number;
+  };
+  url: "/api/v1/file/files/{id}/grant";
+};
+
+export type FileFileGrantErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Not Implemented
+   */
+  501: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileFileGrantError = FileFileGrantErrors[keyof FileFileGrantErrors];
+
+export type FileFileGrantResponses = {
+  /**
+   * OK
+   */
+  200: Grant;
+};
+
+export type FileFileGrantResponse = FileFileGrantResponses[keyof FileFileGrantResponses];
+
+export type FileFileReleaseData = {
+  body?: never;
+  path: {
+    /**
+     * The file's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/file/files/{id}/hold";
+};
+
+export type FileFileReleaseErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileFileReleaseError = FileFileReleaseErrors[keyof FileFileReleaseErrors];
+
+export type FileFileReleaseResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type FileFileReleaseResponse = FileFileReleaseResponses[keyof FileFileReleaseResponses];
+
+export type FileFileRetainData = {
+  body?: RetainBodyWritable;
+  path: {
+    /**
+     * The file to hold
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/file/files/{id}/hold";
+};
+
+export type FileFileRetainErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileFileRetainError = FileFileRetainErrors[keyof FileFileRetainErrors];
+
+export type FileFileRetainResponses = {
+  /**
+   * OK
+   */
+  200: Hold;
+};
+
+export type FileFileRetainResponse = FileFileRetainResponses[keyof FileFileRetainResponses];
 
 export type NotificationNotificationListData = {
   body?: never;
@@ -3134,6 +4819,53 @@ export type TenantTenantReadResponses = {
 
 export type TenantTenantReadResponse = TenantTenantReadResponses[keyof TenantTenantReadResponses];
 
+export type TenantTenantDeleteData = {
+  body: DeleteWritable;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/delete";
+};
+
+export type TenantTenantDeleteErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantDeleteError = TenantTenantDeleteErrors[keyof TenantTenantDeleteErrors];
+
+export type TenantTenantDeleteResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantDeleteResponse =
+  TenantTenantDeleteResponses[keyof TenantTenantDeleteResponses];
+
 export type TenantTenantAddHostData = {
   body: HostInputBodyWritable;
   path: {
@@ -3180,6 +4912,58 @@ export type TenantTenantAddHostResponses = {
 
 export type TenantTenantAddHostResponse =
   TenantTenantAddHostResponses[keyof TenantTenantAddHostResponses];
+
+export type TenantTenantRemoveHostData = {
+  body?: never;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+    /**
+     * The host this tenant stops answering at
+     */
+    host: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/hosts/{host}";
+};
+
+export type TenantTenantRemoveHostErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantRemoveHostError =
+  TenantTenantRemoveHostErrors[keyof TenantTenantRemoveHostErrors];
+
+export type TenantTenantRemoveHostResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantRemoveHostResponse =
+  TenantTenantRemoveHostResponses[keyof TenantTenantRemoveHostResponses];
 
 export type TenantTenantInviteData = {
   body: InviteInputBodyWritable;
@@ -3275,6 +5059,196 @@ export type TenantTenantSetLocaleResponses = {
 
 export type TenantTenantSetLocaleResponse =
   TenantTenantSetLocaleResponses[keyof TenantTenantSetLocaleResponses];
+
+export type TenantTenantSetOidcData = {
+  body: OidcSettingsWritable;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/oidc";
+};
+
+export type TenantTenantSetOidcErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantSetOidcError = TenantTenantSetOidcErrors[keyof TenantTenantSetOidcErrors];
+
+export type TenantTenantSetOidcResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantSetOidcResponse =
+  TenantTenantSetOidcResponses[keyof TenantTenantSetOidcResponses];
+
+export type TenantTenantClearOidcData = {
+  body?: never;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/oidc/clear";
+};
+
+export type TenantTenantClearOidcErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantClearOidcError =
+  TenantTenantClearOidcErrors[keyof TenantTenantClearOidcErrors];
+
+export type TenantTenantClearOidcResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantClearOidcResponse =
+  TenantTenantClearOidcResponses[keyof TenantTenantClearOidcResponses];
+
+export type TenantTenantReactivateData = {
+  body?: never;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/reactivate";
+};
+
+export type TenantTenantReactivateErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantReactivateError =
+  TenantTenantReactivateErrors[keyof TenantTenantReactivateErrors];
+
+export type TenantTenantReactivateResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantReactivateResponse =
+  TenantTenantReactivateResponses[keyof TenantTenantReactivateResponses];
+
+export type TenantTenantRenameData = {
+  body: RenameWritable;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/rename";
+};
+
+export type TenantTenantRenameErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantRenameError = TenantTenantRenameErrors[keyof TenantTenantRenameErrors];
+
+export type TenantTenantRenameResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantRenameResponse =
+  TenantTenantRenameResponses[keyof TenantTenantRenameResponses];
 
 export type TenantTenantSuspendData = {
   body?: never;
