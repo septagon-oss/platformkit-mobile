@@ -5,19 +5,30 @@
 import { jest } from "@jest/globals";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
-import type { Api } from "../../src/effects/api";
+import { createApi, type Api } from "../../src/effects/api";
 import type { ShellValue } from "../../src/shell";
 
 export const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 export const note = catalog.resources.find((r) => r.entity === "note")!;
 export const setting = catalog.resources.find((r) => r.entity === "setting")!;
 
-export type FakeApi = { readonly [K in keyof Api]: jest.MockedFunction<Api[K]> };
+export type FakeApi = {
+  readonly [K in keyof Api]: Api[K] extends (...args: never[]) => unknown
+    ? jest.MockedFunction<Api[K]>
+    : Api[K];
+};
 
 /** fakeApi answers every request with nothing much and records the call; a test overrides what it needs. */
 export function fakeApi(): FakeApi {
   return {
-    request: jest.fn<Api["request"]>(async () => undefined),
+    operations: createApi("https://fake.test", (async () => {
+      throw new Error("Supply the generated operation fake explicitly.");
+    }) as typeof fetch).operations,
+    // Jest erases the generic return parameter; this implementation obtains T
+    // only from the caller's validator, just like the real request boundary.
+    request: jest.fn<Api["request"]>(async (_method, _path, validate) =>
+      validate(undefined),
+    ) as jest.MockedFunction<Api["request"]>,
     me: jest.fn<Api["me"]>(async () => undefined),
     events: jest.fn<Api["events"]>(async () => ({ items: [], total: 0 })),
     login: jest.fn<Api["login"]>(async () => undefined),

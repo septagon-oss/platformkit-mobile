@@ -1,6 +1,7 @@
 // A directory refusal empties the actor names a trail shows, and a response to a request the
 // screen no longer wants cannot put them back: the detail keeps its own history, refuses to
 // enrich it from a stale lookup, and writes nothing.
+import { pageResponse as response } from "../fakes/wire";
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react-native";
@@ -27,9 +28,9 @@ jest.mock("../../src/shell", () => ({
 
 beforeEach(reset);
 
-const actor = "actor-91";
+const actor = "fdca3092-a84d-5b52-8792-31c10e76d9f6";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
-const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+
 const trail = (id: string) => ({
   items: [
     {
@@ -50,13 +51,13 @@ for (const mode of ["light", "dark"] as const) {
       const privateName = "Previously readable actor ninety-one";
       const fetch = jest.fn<typeof globalThis.fetch>();
       fetch
-        .mockResolvedValueOnce(response(trail("event-91")))
+        .mockResolvedValueOnce(response(trail("cc9007ec-0553-5afc-8f85-a2f4788093df")))
         .mockResolvedValueOnce(
           response({ items: [{ id: actor, displayName: privateName }], total: 1 }),
         )
-        .mockResolvedValueOnce(response(trail("event-92")))
+        .mockResolvedValueOnce(response(trail("b20c3e2e-b5e9-54d5-b416-80f537de72c5")))
         .mockResolvedValueOnce(response({ detail: "Directory unavailable" }, status))
-        .mockResolvedValueOnce(response(trail("event-93")))
+        .mockResolvedValueOnce(response(trail("69a4313a-a214-581f-b7d4-787646b537a8")))
         .mockResolvedValueOnce(
           response({ items: [{ id: actor, displayName: "Newly authorized name" }], total: 1 }),
         );
@@ -122,11 +123,11 @@ test("an obsolete actor response cannot revive a session-denied trail", async ()
   const oldDirectory = Promise.withResolvers<Response>();
   const fetch = jest.fn<typeof globalThis.fetch>();
   fetch
-    .mockResolvedValueOnce(response(trail("event-before-denial")))
+    .mockResolvedValueOnce(response(trail("687bf9ef-9fe9-566d-94b1-5b0856416f34")))
     .mockReturnValueOnce(oldDirectory.promise)
     .mockResolvedValueOnce(response({ detail: "Session unavailable" }, 401))
     .mockResolvedValueOnce(response({ detail: "Temporarily unavailable" }, 503))
-    .mockResolvedValueOnce(response(trail("event-after-recovery")))
+    .mockResolvedValueOnce(response(trail("f3e81523-f844-5cf5-8ff0-4d99f8a92088")))
     .mockResolvedValueOnce(
       response({ items: [{ id: actor, displayName: "Fresh actor" }], total: 1 }),
     );
@@ -165,7 +166,9 @@ test("an obsolete actor response cannot revive a session-denied trail", async ()
   await act(async () => result.current.reload());
   await waitFor(() => expect(result.current.names[actor]).toBe("Fresh actor"));
   expect(result.current.denied).toBe(false);
-  expect(result.current.events.map((event) => event.id)).toEqual(["event-after-recovery"]);
+  expect(result.current.events.map((event) => event.id)).toEqual([
+    "f3e81523-f844-5cf5-8ff0-4d99f8a92088",
+  ]);
   expect(api.create).not.toHaveBeenCalled();
   expect(api.update).not.toHaveBeenCalled();
   expect(api.remove).not.toHaveBeenCalled();

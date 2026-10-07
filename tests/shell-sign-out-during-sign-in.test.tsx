@@ -1,3 +1,4 @@
+import { loginResponse, logoutResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -47,9 +48,14 @@ test("signing out while a login is pending keeps the app signed out", async () =
       case "pending.test POST /api/v1/auth/login":
         return login.promise;
       case "pending.test POST /api/v1/auth/logout":
-        return new Response(null, { status: 204 });
+        return logoutResponse();
       case "pending.test GET /api/v1/auth/me":
-        return json({ userId: "pending", email: "pending@example.test" });
+        return json({
+          userId: "00000005-1111-4111-8111-111111111111",
+          roles: [],
+          permissions: [],
+          email: "pending@example.test",
+        });
       case "pending.test GET /api/v1/app/resources":
         return json(catalog);
       default:
@@ -76,7 +82,7 @@ test("signing out while a login is pending keeps the app signed out", async () =
   await waitFor(() => expect(screen.getByTestId("session-phase")).toHaveTextContent("anonymous"));
 
   await act(async () => {
-    login.resolve(new Response(null, { status: 204, headers: { "Set-Cookie": "pk=pending" } }));
+    login.resolve(loginResponse({ headers: { "Set-Cookie": "pk=pending" } }));
     await pending;
   });
   expect(screen.getByTestId("session-phase")).toHaveTextContent("anonymous");

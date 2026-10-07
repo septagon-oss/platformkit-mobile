@@ -1,13 +1,24 @@
-// catalog.ts is the seam: the JSON GET /api/v1/app/resources answers, as
-// types, and one validator that refuses a document the shell cannot render
-// from — by the path of the first field that is wrong, so a server change is
-// one line to read rather than a screen that is mysteriously empty.
-//
-// It mirrors kit/crud.Schema and ui/screens.Entry in the public repository.
-// testdata/catalog.json is that repository's golden file, and
-// testdata/catalog.source.json names the commit it was taken from: one copy,
-// from one revision, with the two compared by `scripts/catalog.ts check` on
-// every run rather than trusted because nobody looked.
+// Generated schemas own the wire shape; this module owns the supported kinds,
+// catalog version, address semantics and the native normalized view.
+import { z } from "zod";
+import type {
+  Catalog as WireCatalog,
+  Entry as WireEntry,
+  Field as WireField,
+  Command as WireCommand,
+} from "../generated/types.gen";
+import { zCatalog, zEntry } from "../generated/zod.gen";
+import { issuePath } from "./responses";
+
+// Zod retains explicitly undefined optional properties on in-memory inputs.
+// Required wire members remain required; JSON itself never contains undefined.
+type View<T> = Readonly<
+  {
+    [K in keyof T as undefined extends T[K] ? K : never]?: T[K] | undefined;
+  } & {
+    [K in keyof T as undefined extends T[K] ? never : K]: T[K];
+  }
+>;
 
 export const FIELD_TYPES = [
   "string",
@@ -21,42 +32,15 @@ export const FIELD_TYPES = [
 ] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
 
-export interface Field {
-  readonly name: string;
+export type Field = View<Omit<WireField, "type" | "elem" | "enum">> & {
   readonly type: FieldType;
   readonly elem?: FieldType;
-  readonly widget?: string;
   readonly enum?: readonly string[];
-  readonly required?: boolean;
-  readonly readOnly?: boolean;
-  readonly hideList?: boolean;
-  readonly default?: string;
-  readonly doc?: string;
-}
+};
 
-/**
- * Command is a door beyond the five: a rule about the state a row is in, with
- * an event of its own, which is what a form cannot express. A command the
- * caller may not call is absent from the document, so one that is here is one
- * this caller may run.
- */
-export interface Command {
-  readonly verb: string;
-  readonly summary?: string;
-  readonly description?: string;
-  /** collection says the command is about the whole list, so it takes no row. */
-  readonly collection?: boolean;
-  /**
-   * path is where the command is answered: the whole endpoint, `{id}` and verb
-   * included, printed only when {entry.path}/{id}/{verb} — or
-   * {entry.path}/{verb} when collection — is no longer where the server mounted
-   * it. Absent means the derivation still holds, so the phone derives it; a
-   * printed path already ends in the verb and is never extended with it again.
-   */
-  readonly path?: string;
-  /** fields is the shape of the argument; a command that takes none has no fields. */
+export type Command = View<Omit<WireCommand, "fields">> & {
   readonly fields: readonly Field[];
-}
+};
 
 /**
  * CRUD_VERBS are the verbs the kernel counts operations in
@@ -67,37 +51,16 @@ export interface Command {
 export const CRUD_VERBS = ["list", "read", "create", "update", "delete"] as const;
 export type CrudVerb = (typeof CRUD_VERBS)[number];
 
-export interface Entry {
-  readonly module: string;
-  readonly entity: string;
-  readonly path: string;
+export type Entry = View<Omit<WireEntry, "fields" | "commands" | "immutable" | "singleton">> & {
   readonly fields: readonly Field[];
-  readonly immutable: readonly string[];
-  readonly writable: boolean;
-  /**
-   * writePath is where the writes of this resource are answered, printed only
-   * when they are answered somewhere other than path — a control plane whose
-   * reads sit behind one host and its writes behind another. Absent means
-   * path, and it is never a permission: the server prints it only for a caller
-   * that may write, so its absence says nothing about whether one may.
-   */
-  readonly writePath?: string;
-  /**
-   * operations names the verbs this resource offers. Absent, or an empty list,
-   * means all five — kit/rest's own rule — so a document that says nothing is
-   * read exactly as it always was.
-   */
-  readonly operations?: readonly CrudVerb[];
-  /** commands is empty for an entity that has none, and for a server too old to say. */
   readonly commands: readonly Command[];
-  /**
-   * singleton says a tenant has exactly one of these, at the path itself: a
-   * GET and a PUT, with no list, no id, no create and no delete. A shell that
-   * ignored it would draw a list of one row with a New button on it and no
-   * route to serve either.
-   */
+  readonly immutable: readonly string[];
   readonly singleton: boolean;
-}
+  readonly writePath?: string;
+  // Catalog v2's operations postdates this document pin. This compatibility
+  // extension stays with the existing core owner, not a fabricated operation.
+  readonly operations?: readonly CrudVerb[];
+};
 
 /**
  * SUPPORTED_CATALOG_VERSION is the newest document shape this build can render.
@@ -112,17 +75,16 @@ export interface Entry {
  */
 export const SUPPORTED_CATALOG_VERSION = 2;
 
-export interface Catalog {
-  /**
-   * version is the stamped shape, or 0 for a server old enough not to stamp one —
-   * which is the shape every screen here was written against anyway.
-   */
+export type Catalog = View<Omit<WireCatalog, "catalogVersion" | "resources">> & {
   readonly version: number;
   readonly resources: readonly Entry[];
-}
+};
 
 export class CatalogError extends Error {
-  constructor(at: string, why: string) {
+  constructor(
+    readonly at: string,
+    why: string,
+  ) {
     super(`catalog: ${at} ${why}`);
     this.name = "CatalogError";
   }
@@ -131,62 +93,9 @@ export class CatalogError extends Error {
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
-function str(
-  o: Record<string, unknown>,
-  key: string,
-  at: string,
-  required: boolean,
-): string | undefined {
-  const v = o[key];
-  if (v === undefined) {
-    if (required) throw new CatalogError(`${at}.${key}`, "is missing");
-    return undefined;
-  }
-  if (typeof v !== "string") throw new CatalogError(`${at}.${key}`, "is not a string");
-  return v;
-}
-
-function bool(o: Record<string, unknown>, key: string, at: string): boolean | undefined {
-  const v = o[key];
-  if (v === undefined) return undefined;
-  if (typeof v !== "boolean") throw new CatalogError(`${at}.${key}`, "is not a boolean");
-  return v;
-}
-
-function strings(
-  o: Record<string, unknown>,
-  key: string,
-  at: string,
-): readonly string[] | undefined {
-  const v = o[key];
-  if (v === undefined) return undefined;
-  if (!Array.isArray(v) || v.some((s) => typeof s !== "string")) {
-    throw new CatalogError(`${at}.${key}`, "is not a list of strings");
-  }
-  return v as string[];
-}
-
-/**
- * absolute reads an address shaped like one of this app's own. Every path the
- * document prints — the read path, the write path, a command's own endpoint —
- * passes through here, so a relative one names its field at the document rather
- * than reaching a screen to be resolved against whatever the request happened to
- * be built on. This is the document-shape half of the address rule only: whether
- * a path is sendable at all — under `/api/v1/`, no fragment, no backslash,
- * fully encoded — is one rule with one owner, the guard inside `createApi` in
- * src/effects/api.ts, and a document printing `/elsewhere` or `//example/x` is
- * refused there, before any request leaves. Carrying that half in here would be
- * a second copy of a URL rule in a layer that names no transport.
- */
-function absolute(
-  o: Record<string, unknown>,
-  key: string,
-  at: string,
-  required: boolean,
-): string | undefined {
-  const v = str(o, key, at, required);
-  if (v === undefined || v.startsWith("/")) return v;
-  throw new CatalogError(`${at}.${key}`, `is ${JSON.stringify(v)}, not an absolute path`);
+function absolute(value: string, at: string): string {
+  if (!value.startsWith("/")) throw new CatalogError(at, "is not an absolute path");
+  return value;
 }
 
 function fieldType(v: unknown, at: string): FieldType {
@@ -196,68 +105,38 @@ function fieldType(v: unknown, at: string): FieldType {
   return v as FieldType;
 }
 
-function opt<K extends string, V>(key: K, v: V | undefined): Partial<Record<K, V>> {
-  return v === undefined ? {} : ({ [key]: v } as Record<K, V>);
-}
+const catalogSchema = zCatalog.extend({
+  resources: z.array(zEntry.extend({ operations: z.array(z.string()).optional() })).nullable(),
+});
 
-function field(v: unknown, at: string): Field {
-  if (!isRecord(v)) throw new CatalogError(at, "is not an object");
+type ParsedEntry = NonNullable<z.output<typeof catalogSchema>["resources"]>[number];
+function field(v: View<WireField>, at: string): Field {
+  const { type, elem, enum: values, ...rest } = v;
   return {
-    name: str(v, "name", at, true)!,
-    type: fieldType(v.type, `${at}.type`),
-    ...(v.elem !== undefined ? { elem: fieldType(v.elem, `${at}.elem`) } : {}),
-    ...opt("widget", str(v, "widget", at, false)),
-    ...opt("enum", strings(v, "enum", at)),
-    ...opt("required", bool(v, "required", at)),
-    ...opt("readOnly", bool(v, "readOnly", at)),
-    ...opt("hideList", bool(v, "hideList", at)),
-    ...opt("default", str(v, "default", at, false)),
-    ...opt("doc", str(v, "doc", at, false)),
+    ...rest,
+    type: fieldType(type, `${at}.type`),
+    ...(elem === undefined ? {} : { elem: fieldType(elem, `${at}.elem`) }),
+    ...(values == null ? {} : { enum: values }),
   };
 }
 
-function command(v: unknown, at: string): Command {
-  if (!isRecord(v)) throw new CatalogError(at, "is not an object");
-  const fields = v.fields;
-  if (fields !== undefined && !Array.isArray(fields)) {
-    throw new CatalogError(`${at}.fields`, "is not a list");
-  }
+function entry(v: ParsedEntry, at: string): Entry {
+  const { fields, commands, immutable, operations, singleton, ...rest } = v;
   return {
-    verb: str(v, "verb", at, true)!,
-    ...opt("summary", str(v, "summary", at, false)),
-    ...opt("description", str(v, "description", at, false)),
-    ...opt("collection", bool(v, "collection", at)),
-    ...opt("path", absolute(v, "path", at, false)),
+    ...rest,
+    path: absolute(v.path, `${at}.path`),
+    ...(v.write_path === undefined
+      ? {}
+      : { writePath: absolute(v.write_path, `${at}.write_path`) }),
     fields: (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`)),
-  };
-}
-
-function entry(v: unknown, at: string): Entry {
-  if (!isRecord(v)) throw new CatalogError(at, "is not an object");
-  const module = str(v, "module", at, true)!;
-  const entity = str(v, "entity", at, true)!;
-  const path = absolute(v, "path", at, true)!;
-  const fields = v.fields;
-  if (!Array.isArray(fields)) throw new CatalogError(`${at}.fields`, "is not a list");
-  const writable = bool(v, "writable", at);
-  if (writable === undefined) throw new CatalogError(`${at}.writable`, "is missing");
-  // Absent is none: a server that predates commands still renders every screen
-  // it did before, with no door on it.
-  const commands = v.commands;
-  if (commands !== undefined && !Array.isArray(commands)) {
-    throw new CatalogError(`${at}.commands`, "is not a list");
-  }
-  return {
-    module,
-    entity,
-    path,
-    fields: fields.map((f, i) => field(f, `${at}.fields[${i}]`)),
-    immutable: strings(v, "immutable", at) ?? [],
-    writable,
-    ...opt("writePath", absolute(v, "write_path", at, false)),
-    ...opt("operations", verbs(v, "operations", at)),
-    commands: (commands ?? []).map((c, i) => command(c, `${at}.commands[${i}]`)),
-    singleton: bool(v, "singleton", at) ?? false,
+    immutable: immutable ?? [],
+    ...(operations === undefined ? {} : { operations: verbs(operations, `${at}.operations`) }),
+    commands: (commands ?? []).map(({ fields, path, ...command }, i) => ({
+      ...command,
+      ...(path === undefined ? {} : { path: absolute(path, `${at}.commands[${i}].path`) }),
+      fields: (fields ?? []).map((f, n) => field(f, `${at}.commands[${i}].fields[${n}]`)),
+    })),
+    singleton: singleton ?? false,
   };
 }
 
@@ -265,9 +144,24 @@ function entry(v: unknown, at: string): Entry {
 export function parseCatalog(input: unknown): Catalog {
   if (!isRecord(input)) throw new CatalogError("document", "is not an object");
   const version = catalogVersion(input.catalogVersion);
-  const resources = input.resources;
-  if (!Array.isArray(resources)) throw new CatalogError("resources", "is not a list");
-  return { version, resources: resources.map((r, i) => entry(r, `resources[${i}]`)) };
+  const result = catalogSchema.safeParse({ ...input, catalogVersion: version });
+  if (!result.success) {
+    const issue = result.error.issues[0]!;
+    const at = issuePath(result.error);
+    const why =
+      issue.code === "invalid_type" && issue.expected === "string"
+        ? "is not a string"
+        : at.endsWith(".operations")
+          ? "is not a list of strings"
+          : "failed validation";
+    throw new CatalogError(at, why);
+  }
+  const { resources, catalogVersion: _stamp, ...metadata } = result.data;
+  return {
+    ...metadata,
+    version,
+    resources: (resources ?? []).map((r, i) => entry(r, `resources[${i}]`)),
+  };
 }
 
 /**
@@ -306,23 +200,15 @@ function catalogVersion(v: unknown): number {
  * a server that mounted the same verb twice, so it is refused here rather than
  * read as a shorter set.
  */
-function verbs(
-  o: Record<string, unknown>,
-  key: string,
-  at: string,
-): readonly CrudVerb[] | undefined {
-  const listed = strings(o, key, at);
-  if (listed === undefined) return undefined;
+function verbs(listed: readonly string[], at: string): readonly CrudVerb[] {
   return listed.map((word, i) => {
-    if (!(CRUD_VERBS as readonly string[]).includes(word)) {
+    if (!(CRUD_VERBS as readonly string[]).includes(word))
       throw new CatalogError(
-        `${at}.${key}[${i}]`,
+        `${at}[${i}]`,
         `is ${JSON.stringify(word)}, not one of ${CRUD_VERBS.join(", ")}`,
       );
-    }
-    if (listed.indexOf(word) !== i) {
-      throw new CatalogError(`${at}.${key}`, `names ${JSON.stringify(word)} twice`);
-    }
+    if (listed.indexOf(word) !== i)
+      throw new CatalogError(at, `names ${JSON.stringify(word)} twice`);
     return word as CrudVerb;
   });
 }

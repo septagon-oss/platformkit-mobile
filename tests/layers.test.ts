@@ -183,3 +183,18 @@ test("the transport is named once, in effects; everywhere else speaks through an
     [],
   );
 });
+
+test("generated schemas are pure but generated transports stay behind effect boundaries", async () => {
+  for (const file of ["src/core/example.ts", "src/ui/atoms/Example.tsx", "app/example.tsx"]) {
+    for (const source of [
+      'export { authMe } from "@/generated/sdk.gen";',
+      'export { createClient } from "@/generated/client";',
+      'export { authMe } from "platformkit-mobile/generated";',
+    ])
+      assert.ok((await boundaries(file, source)).length > 0, `${file}: ${source}`);
+  }
+  assert.deepEqual(
+    await boundaries("src/core/example.ts", 'export { zCatalog } from "@/generated/zod.gen";'),
+    [],
+  );
+});

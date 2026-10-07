@@ -1,5 +1,6 @@
 // Recovery must not restore enrichment by halves. After a directory refusal, later pages and a
 // later successful lookup for one actor restore only what the current read authorises.
+import { pageResponse as response } from "../fakes/wire";
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
@@ -24,15 +25,19 @@ jest.mock("../../src/shell", () => ({
 beforeEach(reset);
 
 const record = "note-217";
-const named = "actor-217";
-const self = "actor-218";
-const emailed = "actor-219";
+const named = "a046ea82-488e-58e5-a491-d971d2fefc39";
+const self = "e8a8560c-1311-551c-acc4-2bc92d9110f9";
+const emailed = "5cf6c551-621b-54e0-b58f-5d4c6b9dc04e";
 const priorName = "Previously readable person 217";
 const priorEmail = "prior-219@example.test";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
-const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+
 const events = [named, self, emailed].map((actor, index) => ({
-  id: `event-${217 + index}`,
+  id: [
+    "dee02fa3-e5d0-5ac2-b7ae-16879ca8ff6f",
+    "968842ba-7f0e-59c8-94e3-f978046cd445",
+    "cb6a2221-4be2-598f-ba4a-d2ca16d8e775",
+  ][index]!,
   name: "note.note.updated",
   occurredAt: `2026-08-12T09:0${index}:00Z`,
   actor,

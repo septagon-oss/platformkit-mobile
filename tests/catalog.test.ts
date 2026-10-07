@@ -302,7 +302,7 @@ const controlPlane = () =>
     ),
   );
 
-test("the copy is a version-2 document and adds no key this build ignores", () => {
+test("the copy is a version-2 document and retains its published screen metadata", () => {
   const c = parseCatalog(fixture());
   assert.equal(c.version, 2);
   assert.deepEqual(
@@ -312,13 +312,13 @@ test("the copy is a version-2 document and adds no key this build ignores", () =
   // `screen` is the web workspace's page address. Every one of the kernel's own
   // three resources names /app/note/notes, which no router could serve as three
   // screens, so the phone's routes stay its own file tree. The key is in the
-  // bytes and not in the entry: reading it is a decision somebody has to make.
+  // entry as metadata: retaining it does not make it a native route.
   assert.ok(
     readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8").includes(
       '"screen": "/app/note/notes"',
     ),
   );
-  assert.equal("screen" in c.resources[0]!, false);
+  assert.equal(c.resources[0]!.screen, "/app/note/notes");
 });
 
 test("an entry keeps the write address it was given, and one that has none keeps its own", () => {
@@ -426,11 +426,9 @@ test("operations holds the five words, and a sixth is refused by number and by n
   }
 });
 
-test("a v2 document carrying the keys this build does not act on still parses", () => {
-  // Every one of these is listed in the brief as a key the phone sees in a
-  // version-2 document and decides to ignore. The decision is only real while a
-  // case refuses a parse that starts acting on one; if this test ever fails
-  // because the entry grew the field, the decision has moved and this says so.
+test("a v2 document retains generated metadata without inventing controls", () => {
+  // Generated wire metadata is retained; only members absent from this pin
+  // remain outside the native view. The renderer still owns no metadata rules.
   const doc = fixture();
   doc.resources[0].screen = "/app/note/notes";
   doc.resources[0].fields[1].maxLength = 80;
@@ -439,9 +437,10 @@ test("a v2 document carrying the keys this build does not act on still parses", 
   doc.resources[0].fields[2].widget = "richtext";
   const c = parseCatalog(doc);
   const note = c.resources[0]!;
-  assert.equal("screen" in note, false, "screen reached the entry");
+  assert.equal(note.screen, "/app/note/notes");
+  assert.equal(note.fields[1]!.present, "badge");
   for (const f of note.fields) {
-    for (const ignored of ["maxLength", "present", "display"]) {
+    for (const ignored of ["maxLength", "display"]) {
       assert.equal(ignored in f, false, `${ignored} reached a field`);
     }
   }

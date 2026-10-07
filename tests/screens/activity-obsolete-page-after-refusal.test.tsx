@@ -1,5 +1,6 @@
 // A page requested before a refusal must not repopulate the trail after it. The current refusal
 // stands, and only a fresh read from the start restores history and identity.
+import { pageResponse as response } from "../fakes/wire";
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
@@ -24,9 +25,9 @@ jest.mock("../../src/shell", () => ({
 beforeEach(reset);
 
 const record = "note-347";
-const actor = "actor-347";
+const actor = "2892084b-6f6f-52ff-aaab-d5f79095a454";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
-const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+
 const trail = (id: string, name: string, total: number) => ({
   items: [{ id, name, actor, occurredAt: "2026-07-21T13:17:00Z", payload: { id: record } }],
   total,
@@ -39,10 +40,14 @@ for (const mode of ["light", "dark"] as const) {
       const obsolete = Promise.withResolvers<Response>();
       const fetch = jest.fn<typeof globalThis.fetch>();
       fetch
-        .mockResolvedValueOnce(response(trail("event-347", "note.note.reviewed", 2)))
+        .mockResolvedValueOnce(
+          response(trail("40c0c817-1a3a-5c75-aa1a-be9e92e294f1", "note.note.reviewed", 2)),
+        )
         .mockReturnValueOnce(obsolete.promise)
         .mockResolvedValueOnce(response({ detail: "Current trail refused" }, status))
-        .mockResolvedValueOnce(response(trail("event-349", "note.note.recovered", 1)));
+        .mockResolvedValueOnce(
+          response(trail("1135725e-db30-57b8-ad80-1f3c862f48da", "note.note.recovered", 1)),
+        );
       const transport = createApi("https://example.test", fetch);
       const api = fakeApi();
       api.events.mockImplementation(transport.events);
@@ -82,7 +87,9 @@ for (const mode of ["light", "dark"] as const) {
       const directoryReads = api.list.mock.calls.length;
 
       await act(async () => {
-        obsolete.resolve(response(trail("event-348", "note.note.obsolete", 2)));
+        obsolete.resolve(
+          response(trail("5bcd893f-a008-5691-9fd9-6401212ec66e", "note.note.obsolete", 2)),
+        );
         await api.events.mock.results[1]!.value;
       });
       for (const value of ["earlier-347@example.test", actor, "Reviewed", "Obsolete"]) {

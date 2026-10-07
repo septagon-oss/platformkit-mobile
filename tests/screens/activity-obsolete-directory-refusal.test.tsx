@@ -1,5 +1,6 @@
 // An old request's refusal says nothing about the current one. When it fails after a newer read
 // has succeeded, the trail keeps its rows and the identities that newer read resolved.
+import { pageResponse as response } from "../fakes/wire";
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
@@ -23,10 +24,10 @@ jest.mock("../../src/shell", () => ({
 
 beforeEach(reset);
 
-const actor = "actor-263";
+const actor = "1ca919bd-d673-55b9-b715-e59c310a5ca5";
 const record = "note-263";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
-const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+
 const trail = (id: string) => ({
   items: [
     {
@@ -47,13 +48,13 @@ for (const mode of ["light", "dark"] as const) {
       const obsolete = Promise.withResolvers<Response>();
       const fetch = jest.fn<typeof globalThis.fetch>();
       fetch
-        .mockResolvedValueOnce(response(trail("event-263")))
+        .mockResolvedValueOnce(response(trail("d6d62cdd-4063-5826-8dda-2bd8205c4309")))
         .mockResolvedValueOnce(
           response({ items: [{ id: actor, displayName: "Initial actor 263" }], total: 1 }),
         )
-        .mockResolvedValueOnce(response(trail("event-264")))
+        .mockResolvedValueOnce(response(trail("a2b4734b-24a7-5e37-a033-32fa0e663362")))
         .mockReturnValueOnce(obsolete.promise)
-        .mockResolvedValueOnce(response(trail("event-265")))
+        .mockResolvedValueOnce(response(trail("2a40524e-8b92-5c00-9e02-f8d6a307bd9b")))
         .mockResolvedValueOnce(
           response({ items: [{ id: actor, displayName: "Current actor 263" }], total: 1 }),
         );
