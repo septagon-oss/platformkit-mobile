@@ -17,7 +17,11 @@ export type FakeApi = { readonly [K in keyof Api]: jest.MockedFunction<Api[K]> }
 /** fakeApi answers every request with nothing much and records the call; a test overrides what it needs. */
 export function fakeApi(): FakeApi {
   return {
-    request: jest.fn<Api["request"]>(async () => undefined),
+    // Jest erases the generic return parameter; this implementation obtains T
+    // only from the caller's validator, just like the real request boundary.
+    request: jest.fn<Api["request"]>(async (_method, _path, validate) =>
+      validate(undefined),
+    ) as jest.MockedFunction<Api["request"]>,
     me: jest.fn<Api["me"]>(async () => undefined),
     events: jest.fn<Api["events"]>(async () => ({ items: [], total: 0 })),
     login: jest.fn<Api["login"]>(async () => undefined),
