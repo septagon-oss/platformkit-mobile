@@ -4,7 +4,8 @@
 // the composition a route file would otherwise repeat four times.
 import { Redirect, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { key } from "./core/catalog";
+import { View } from "react-native";
+import { packKey, shellReady } from "./core/catalog";
 import { humanize } from "./core/derive";
 import type { Renderer } from "./renderers";
 import { ResourceCommand } from "./screens/ResourceCommand";
@@ -17,7 +18,10 @@ import { useShell } from "./shell";
 import { Button } from "./ui/atoms/Button";
 import { Notice as NoticeView, retry } from "./ui/atoms/Notice";
 import { Spinner } from "./ui/atoms/Spinner";
+import { Text } from "./ui/atoms/Text";
+import { kitStyles } from "./ui/layout";
 import { Screen } from "./ui/templates/Screen";
+import { useStyles } from "./ui/theme";
 
 const generated: Required<Renderer> = {
   list: ResourceList,
@@ -63,17 +67,51 @@ export function ResourceRoute({ kind, withID = false, withVerb = false }: Props)
   // A tenant has one of a singleton, at the entry's own path, so its list
   // route is the record itself: a list of one row with a New button on it
   // would be three doors the API does not have.
+  //
+  // The pack is looked up by the key the *entry* names (its own "module/entity"
+  // unless it asks for another pack's screen), and it is drawn only when this
+  // build's shell can draw it. An entry that wants a newer shell, or a pack this
+  // binary does not carry, gets the generated screens: which pack draws a row
+  // changes nothing about what may be read or written — every address, door and
+  // permission below it still comes from the entry and the server's answer.
+  const pack = renderers[packKey(found)];
+  const asked = pack?.[kind];
+  const behind = asked !== undefined && !shellReady(found);
   const Screen =
-    renderers[key(found)]?.[kind] ??
-    (kind === "list" && found.singleton ? Singleton : generated[kind]);
+    asked === undefined || behind
+      ? kind === "list" && found.singleton
+        ? Singleton
+        : generated[kind]
+      : asked;
   const id = withID ? params.id : undefined;
   const verb = withVerb ? params.verb : undefined;
   return (
-    <Screen
-      entry={found}
-      {...(id !== undefined ? { id } : {})}
-      {...(verb !== undefined ? { verb } : {})}
-    />
+    <>
+      <Screen
+        entry={found}
+        {...(id !== undefined ? { id } : {})}
+        {...(verb !== undefined ? { verb } : {})}
+      />
+      {behind ? <ShellUpdate /> : null}
+    </>
+  );
+}
+
+/**
+ * ShellUpdate is the one thing this build says about a screen it cannot draw.
+ * It is a line in the page's foot, not a Notice: a Notice announces a refusal
+ * and offers to put it right, and there is nothing here to retry — the record
+ * is being drawn, by the generic screens, until the app is updated.
+ */
+function ShellUpdate() {
+  const feedback = useFeedback();
+  const s = useStyles(kitStyles);
+  return (
+    <View style={s.footer}>
+      <Text role="caption" tone="muted" testID="shell-update">
+        {feedback.copy.kit.shellUpdate}
+      </Text>
+    </View>
   );
 }
 

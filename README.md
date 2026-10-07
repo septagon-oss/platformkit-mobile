@@ -108,10 +108,12 @@ A custom screen belongs in the renderer pack passed to `Shell` in
 `app/_layout.tsx`. The [Renderers type](src/renderers.ts) maps `module/entity`
 to optional `list`, `detail`, `form` and `command` components. Each receives an
 `entry` and, when applicable, an `id`; command screens also receive the `verb`.
-Any omitted component falls back to the generated screen. Custom components
-belong in `src/screens/`, where effects become props for the atomic UI layers.
-Add a custom screen when the workflow needs something the resource schema
-cannot express.
+Any omitted component falls back to the generated screen. A product's custom
+screens belong in `src/screens/`, where effects become props for the atomic UI
+layers. Add a custom screen when the workflow needs something the resource
+schema cannot express, and read
+[the pack contract](#a-modules-own-screen) first: it names what a screen may
+read, how an entry asks for it, and which screens the schema already does well.
 
 ## HTTP contract
 
@@ -142,7 +144,8 @@ Generated schemas keep JSON numbers as numbers, without string coercion; this
 does not establish lossless support for every int64 monetary value.
 
 Custom renderers receive the generated methods on the current shell API's
-`operations` property, already bound to its connection and validators:
+`operations` property, already bound to its connection and validators, and a
+screen's own accessor over them is `useOperation` above:
 
 ```ts
 const result = await api.operations.taskTaskRead({ path: { id } });
@@ -226,6 +229,80 @@ not a control that renders, and the kit commits to six things the checks name:
   promises.
 
 ## Consume the shared native source
+
+### A module's own screen
+
+A catalogue entry can name the screen it wants. `renderer` on an entry is
+presentation only: `{ "name": "task/tasks", "min_shell": 1 }` says draw this
+resource with the pack keyed `task/tasks`, and that only a shell from version 1
+onward can draw it. `packKey` picks the pack; `key` still names the resource, so
+one module's screen may be another module's row, and every read, write, door and
+permission keeps coming from the entry, the session and the server's answer —
+which pack draws a row is not an authorisation and cannot widen what a caller may
+do. A name this build does not carry, or a `min_shell` above this build's
+`SHELL_VERSION`, draws the generated screens; only the second case adds a quiet
+line in the page's foot, because that one is a screen a person can get by
+updating the app. `SHELL_VERSION` belongs to the kit rather than to a product:
+a pack ships inside the app binary, so a product cannot claim a capability the
+shell it composes lacks. A malformed `renderer` — no name, a `min_shell` that is
+not a whole number at least 1 — is read as no pack rather than refused: a slip in
+a screen's name may cost a person the screen made for them, not the catalogue.
+Whether a server ever prints the key is the kernel's; this build reads it as
+optional, on the same terms as version-2 `operations`.
+
+A pack screen reaches typed data by naming a generated operation, which is the
+reason a bespoke screen is worth writing at all:
+
+```tsx
+import { useOperation } from "platformkit-mobile/screens/useOperation";
+
+const read = useOperation("taskTaskRead", id === undefined ? undefined : { path: { id } });
+const title = read.data?.title ?? "";
+```
+
+`useOperation(name, input)` answers `ReadState` — `requested`, `data`, `error`
+and `reload` — and an `input` of `undefined` asks for nothing. The name must be a
+key of the generated `Operations`, and the body is what that operation's own
+generated validator accepted (see [HTTP contract](#http-contract)); a field the
+pinned document does not print fails `tsc` rather than drawing an empty line on a
+phone weeks later. `OperationName`, `OperationInput`, `OperationData` and
+`ReadState` come from `platformkit-mobile/renderers`, and a pack reaches the
+document through them rather than through the generated client. A write is the
+same surface, `api.operations.taskTaskAssign({ path: { id }, body })`, and
+`platformkit-mobile/screens/useCommand` exports the two hooks the generated
+screens use: `useCommandRun` sends a command with an argument to its own sheet
+and asks about one without, `useCommandAsk` is the asking half. So a pack that
+draws the entry's commands asks the same questions, posts to the same address and
+re-reads on the same write count. What stays internal is the generated screens'
+own hooks — a pack composes a screen, it does not take over the shell's.
+
+The kit's one example is
+[`src/examples/taskRenderers.tsx`](src/examples/taskRenderers.tsx), exported as
+`platformkit-mobile/examples/taskRenderers`. It is a pattern a product copies,
+not product UI: `app/_layout.tsx` keeps passing `defaultRenderers`, so no screen
+a person walks comes from it. It shows the one thing that earns a bespoke screen
+— `slaDeadline` and `slaBreached` read as one line, which no column can say —
+and nothing else: its title, priority and state are the columns the schema
+already describes, and its commands come from the entry through `Actions`.
+
+**Reused** — `parseCatalog` and its additive-optional extension, `Entry`, `key`
+and the version rule in `core/catalog.ts`, the `Notice`/`Spinner`/`Badge`/`DetailRow`/`Section`
+atoms and molecules, the `Actions` organism and the `Screen` template,
+`useFeedback` and the copy table, `rowCommands`, `useCommandAsk`, and the
+`createApi(url, fetchLike)` double the contract tests already drove.
+**Added** — `RendererRef`, `SHELL_VERSION`, `packKey` and `shellReady` in core,
+`OperationName`/`OperationInput`/`OperationData`/`ReadState` in the pack
+contract, `useOperation` and `useCommandRun` in `src/screens/`, and the example
+pack — because `defaultRenderers` was empty and no screen read a generated
+operation at all (`grep -rn "api.operations" src/screens` printed nothing on the
+commit this change starts from), so there was no accessor to extend and nothing
+existing could carry a read whose type comes from the document. **Made
+reusable** — `useOperation`, exported as `platformkit-mobile/screens/useOperation`
+for every pack a product writes, and the one shared `useCommandRun` now behind
+both the generated detail and a pack's own screen,
+`fakeApi(operations)` with `answering`/`recorded` in `tests/fakes/shell.ts` so
+the next screen is tested over a transport and its validators rather than a
+stub, and the exported example itself.
 
 ### Shared feedback
 
