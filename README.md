@@ -760,15 +760,12 @@ because a job that hangs answers neither red nor green: the bound arrives as a
 refusal naming the URL, the budget and the commit already learned, where the job's
 `timeout-minutes: 20` would only have stopped a silent process. A red names the
 kernel commit, the sha256 and byte count of both documents, and the first refused
-path — the commit and the digest together
-names the kernel commit, the sha256 and byte count of both documents, and the first
-refused path — the commit and the digest together
-re-fetch exactly the bytes that were refused, so the job log is the whole
-post-mortem and the run itself stores nothing. It is not part of `npm run check`,
-which is a decision rather than an omission: `check` runs on every change with no
-token and sometimes no network, so a gate that needs a credential would refuse
-every change for a reason that is not the change. By hand, with a token that can
-read the kernel repository:
+path — the commit and the digest together re-fetch exactly the bytes that
+were refused, so the job log is the whole post-mortem and the run itself stores
+nothing. It is not part of `npm run check`, which is a decision rather than an
+omission: `check` runs on every change with no token and sometimes no network, so
+a gate that needs a credential would refuse every change for a reason that is not
+the change. By hand, with a token that can read the kernel repository:
 
 ```sh
 PK_KERNEL_SERVER=https://forge.example PK_KERNEL_REPOSITORY=septagon-oss/platformkit \
