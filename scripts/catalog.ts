@@ -12,7 +12,10 @@
 //            says, so editing the copy to make a test pass is a failure.
 //   drift    (by hand, reports) fetch the recorded commit and compare; then ask
 //            the public module proxy which version an outside `go get` would take
-//            and whether its catalog differs. Neither question can be answered
+//            and whether its catalog differs. The proxy is asked up to three times
+//            when an attempt says nothing at all — a connect that times out is a
+//            moment on this machine, not a fact about the module — and once when it
+//            answers about the path. Neither question can be answered
 //            offline, so it reports rather than blocks, and no schedule runs even
 //            that: .gitea/workflows/drift.yml is the weekly report of what the
 //            SDK, the dependency tree, the advisories and the fingerprint say, and
@@ -57,6 +60,20 @@ export const hash = (bytes: Buffer): string => createHash("sha256").update(bytes
 /** isRecord is the one shape test every document read here has to pass. */
 export const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
+
+/**
+ * why names what a transport actually said. undici puts the reason a fetch failed
+ * — the unreachable address, the closed socket, the timeout — on `cause`, so a
+ * refusal that reads only `message` says "fetch failed" and nothing anyone can act
+ * on. The nightly and the drift report read the same kind of transport, so they
+ * read it with the one sentence.
+ */
+export const why = (cause: unknown): string => {
+  if (!(cause instanceof Error)) return String(cause);
+  const inner = (cause as { cause?: unknown }).cause;
+  const detail = inner instanceof Error ? inner.message : inner === undefined ? "" : String(inner);
+  return detail === "" ? cause.message : `${cause.message}: ${detail}`;
+};
 
 /**
  * provenance reads a record that can vouch for the fixture, refusing one that
@@ -221,25 +238,92 @@ export function proxyPath(source: Source): string {
     .toLowerCase();
 }
 
-/** lookupLatest asks the proxy which version an outside `go get` would take. */
-export async function lookupLatest(source: Source): Promise<LatestLookup> {
-  const target = `https://proxy.golang.org/${proxyPath(source)}/@latest`;
+/**
+ * Deps is what the proxy question needs from outside itself: a transport and a
+ * way to wait between attempts. Both arrive from the caller so the asking below
+ * is a case in tests/catalog-drift.test.ts rather than a wait for one.
+ */
+export interface Deps {
+  readonly fetch: typeof fetch;
+  readonly wait: (ms: number) => Promise<void>;
+}
+
+const live: Deps = {
+  fetch,
+  wait: (ms) => new Promise<void>((done) => setTimeout(done, ms)),
+};
+
+/**
+ * An attempt ends three ways: the version, an answer about the path, and silence.
+ * Only silence is asked again — a connect that times out, a socket that closes,
+ * a 5xx from a cache and a 408 or 429 that say "later" all say nothing about
+ * whether a newer version is published. A status that does answer — a 404 above
+ * all, which is what a wrong module path looks like — is returned at once, so
+ * asking twice cannot turn the one failure this lookup exists to report into a
+ * note three attempts late.
+ */
+type Answer =
+  | { kind: "version"; version: string }
+  | { kind: "answered"; detail: string }
+  | { kind: "silence"; detail: string };
+
+/**
+ * silence is what a host running many suites at once does to a public cache: the
+ * measured shape of the failure is undici giving up on the connect after ten
+ * seconds — `fetch failed: Connect Timeout Error (…, timeout: 10000ms)` — which
+ * is a moment on this machine, not a fact about the module. ATTEMPTS asks a
+ * second and third time for that reason; the pause is small because the failed
+ * attempt has already waited the ten seconds the transport allows.
+ */
+const ATTEMPTS = 3;
+const PAUSE_MS = 500;
+const later = (status: number): boolean => status >= 500 || status === 408 || status === 429;
+
+async function ask(deps: Deps, target: string): Promise<Answer> {
   let response: Response;
   try {
-    response = await fetch(target, { headers: { "user-agent": "platformkit-mobile" } });
-  } catch (cause) {
-    return {
-      state: "unreachable",
-      detail: `${target}: ${cause instanceof Error ? cause.message : cause}`,
-    };
+    response = await deps.fetch(target, { headers: { "user-agent": "platformkit-mobile" } });
+  } catch (cause: unknown) {
+    return { kind: "silence", detail: `${target}: ${why(cause)}` };
   }
   if (!response.ok)
-    return { state: "unreachable", detail: `${target} answered ${response.status}` };
-  const parsed = JSON.parse(await response.text()) as unknown;
+    return {
+      kind: later(response.status) ? "silence" : "answered",
+      detail: `${target} answered ${String(response.status)}`,
+    };
+  const body = await response.text();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    // A 200 that is not JSON — a captive portal, an error page wearing a green
+    // status — says nothing either, and is not the proxy's answer about the path.
+    return { kind: "silence", detail: `${target} answered 200 with a body that is not JSON` };
+  }
   const version = isRecord(parsed) && typeof parsed.Version === "string" ? parsed.Version : "";
   return version
-    ? { state: "latest", version }
-    : { state: "unreachable", detail: `${target} returned no version` };
+    ? { kind: "version", version }
+    : { kind: "answered", detail: `${target} returned no version` };
+}
+
+/**
+ * lookupLatest asks the proxy which version an outside `go get` would take, and
+ * only stops asking when it has an answer or has run out of attempts. Every
+ * attempt that was ignored goes into the detail, because `unreachable` is read as
+ * "nothing newer was published" by whoever skims the report, and three sentences
+ * naming the host, the path and the transport error are what make it checkable.
+ */
+export async function lookupLatest(source: Source, deps: Deps = live): Promise<LatestLookup> {
+  const target = `https://proxy.golang.org/${proxyPath(source)}/@latest`;
+  const ignored: string[] = [];
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt += 1) {
+    if (attempt > 1) await deps.wait(PAUSE_MS);
+    const answer = await ask(deps, target);
+    if (answer.kind === "version") return { state: "latest", version: answer.version };
+    if (answer.kind === "answered") return { state: "unreachable", detail: answer.detail };
+    ignored.push(`attempt ${String(attempt)}: ${answer.detail}`);
+  }
+  return { state: "unreachable", detail: ignored.join("; ") };
 }
 
 async function main(): Promise<void> {

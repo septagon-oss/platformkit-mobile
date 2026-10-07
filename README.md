@@ -662,7 +662,11 @@ against kernel main's own bytes, and refuses. See below for the second question.
 A proxy it cannot reach is reported as _unknown_ and never as agreement: the first version of
 `scripts/catalog.ts` asked the proxy for `septagon-oss/platformkit` instead of
 `github.com/septagon-oss/platformkit`, took a 404, and printed "ok, this is the latest
-version".
+version". A proxy that answers nothing at all is asked again — three attempts, because
+a connect that times out after the transport's ten seconds is a moment on a busy host
+rather than a fact about the module, and "we could not ask" is a claim worth spending
+two attempts on. A status that answers about the path is asked once, so the retry
+cannot be a second way of missing the 404 above.
 
 Unlike the design tokens, this fixture is a test input and not a build input — no app
 code reads it, and `scripts/fingerprint.ts` names its sources rather than sweeping
@@ -736,20 +740,29 @@ and the next control-plane refusal — runs against.
 
 Kernel main is a different question from a pin, and
 [kernel-main.yml](.gitea/workflows/kernel-main.yml) asks it every night and on
-dispatch: the job learns the kernel's branch tip over the forge API with its own
-token, fetches `ui/screens/testdata/catalog.json` and
+dispatch: the job runs `npm run check:kernel-main`, which is
+[scripts/kernel_main.ts](scripts/kernel_main.ts) — three GETs with the job's own
+token: the kernel's branch tip first, then `ui/screens/testdata/catalog.json` and
 `apps/platformkit/testdata/openapi.json` at that one object id — never at
-`ref=main`, so a commit landing mid-run cannot mix two readings — and hands the
-bytes to `npm run check:kernel-main`, which is
-[scripts/kernel_main.ts](scripts/kernel_main.ts). The two pinned journeys answer
-"does this build work against the build we named", which is a question a pin can
-only answer by freezing one side so the other cannot move; this answers "can the
-build in main read the server in main", and catalogue version 2 is the price of
-never having asked it — the server moved the document shape on 2026-10-01 and
-every phone built from main went on passing (T-0285). Nothing there continues on
-error: a nightly that printed a refusal as a note would be the drift report with
-a cron. A red names the kernel commit, the sha256 and byte count of both
-documents, and the first refused path — the commit and the digest together
+`ref=main`, so a commit landing mid-run cannot mix two readings. The two pinned
+journeys answer "does this build work against the build we named", which is a
+question a pin can only answer by freezing one side so the other cannot move; this
+answers "can the build in main read the server in main", and catalogue version 2
+is the price of never having asked it — the server moved the document shape on
+2026-10-01 and every phone built from main went on passing (T-0285). Nothing there
+continues on error: a nightly that printed a refusal as a note would be the drift
+report with a cron. A nightly's verdict is the exit status its step returns, so
+`tests/kernel-main.test.ts` runs that step as a child process against a forge on
+loopback and pins both codes — 0 with the agreement last, 1 with the refusal on
+stderr and the kernel commit on stdout, and the token on neither stream. The read
+carries its own bound, two minutes by default and `PK_KERNEL_TIMEOUT_MS` to move it,
+because a job that hangs answers neither red nor green: the bound arrives as a
+refusal naming the URL, the budget and the commit already learned, where the job's
+`timeout-minutes: 20` would only have stopped a silent process. A red names the
+kernel commit, the sha256 and byte count of both documents, and the first refused
+path — the commit and the digest together
+names the kernel commit, the sha256 and byte count of both documents, and the first
+refused path — the commit and the digest together
 re-fetch exactly the bytes that were refused, so the job log is the whole
 post-mortem and the run itself stores nothing. It is not part of `npm run check`,
 which is a decision rather than an omission: `check` runs on every change with no

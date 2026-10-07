@@ -36,6 +36,9 @@ concurrency:
 jobs:
   read:
     runs-on: pkit-ci-linux-amd64
+    # The backstop, not the bound: the script ends its own read at two minutes with a
+    # refusal naming the URL and the budget, because a job that hangs answers neither
+    # red nor green and a killed process leaves no sentence in the log.
     timeout-minutes: 20 # ci.yml's figure; npm ci measured 17 s here, three GETs after it
     env:
       # Which server this build is checked against is the job's to name, and the

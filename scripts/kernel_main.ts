@@ -35,13 +35,24 @@
 // refresh a fixture, retry a call, or store anything. The job log is the
 // artefact; the sha256 and commit it prints re-fetch exactly these bytes.
 //
+// Each question is asked once, and the whole read is bounded. A hang is the one
+// failure mode that answers neither red nor green: the job's runner would kill it
+// after twenty minutes with no sentence to read, and a hand run would sit there, so
+// PK_KERNEL_TIMEOUT_MS (default two minutes) ends it with a refusal naming the URL
+// and the budget. A forge that answers nothing is a red night either way, which is
+// the safe direction and says so again tomorrow until somebody reads it. The public-
+// proxy question in scripts/catalog.ts is asked up to three times for the opposite
+// reason: its answer to silence is a note that reads like agreement, so there a
+// retried attempt is what keeps `unreachable` meaning "we could not ask"
+// (tests/catalog-drift.test.ts holds both halves).
+//
 // It is not part of `npm run check`, which runs on every PR with no token and
 // sometimes no network: a gate that needs a credential refuses every change for
 // a reason that is not the change. The nightly workflow runs it, and a nightly's
 // red is the point of it — which is also why nothing here continues on error.
 import { pathToFileURL } from "node:url";
 import { type Catalog, parseCatalog } from "../src/core/catalog";
-import { hash, isRecord } from "./catalog";
+import { hash, isRecord, why } from "./catalog";
 
 export const CATALOG_FILE = "ui/screens/testdata/catalog.json";
 export const OPENAPI_FILE = "apps/platformkit/testdata/openapi.json";
@@ -58,6 +69,14 @@ export interface Deps {
   readonly token: string;
   readonly fetch: typeof fetch;
   readonly now: () => Date;
+  /**
+   * timeoutMs ends the read rather than wait for it. A nightly that hangs is a
+   * nightly that never goes red, and the job's runner kills it after twenty minutes
+   * with no sentence to read; inside the script the bound arrives as a refusal that
+   * names the URL and the budget (fromEnv always sets it; a test that answers from a
+   * double leaves it absent, which means unbounded).
+   */
+  readonly timeoutMs?: number;
 }
 
 export interface Endpoints {
@@ -253,35 +272,56 @@ interface Stop {
   readonly refusal: string;
 }
 
-const why = (cause: unknown): string => {
-  if (!(cause instanceof Error)) return String(cause);
-  const inner = (cause as { cause?: unknown }).cause;
-  const detail = inner instanceof Error ? inner.message : inner === undefined ? "" : String(inner);
-  return detail === "" ? cause.message : `${cause.message}: ${detail}`;
-};
+/**
+ * ended is what the job's bound says when it runs out: the request it stopped, the
+ * budget it stopped it at, and the fact that nothing was decided. It is a refusal
+ * rather than an exception for the same reason every other refusal is one — the run
+ * still prints what it had learned and returns 1 through the one line `main` prints.
+ */
+const ended = (d: Deps, url: string, cause: unknown): string =>
+  `fetch: GET ${url} did not answer within the job's ${String(d.timeoutMs)}ms bound, so the read was ended rather than waited for and nothing was decided: ${why(cause)}`;
 
 /**
- * get is the only place this file touches the network: one attempt, the job's
- * token, and a sentence that names the URL, the status and what the status means
- * for this job. A cause is printed because undici puts the reason there and a
- * refusal naming neither the forge nor the endpoint cannot be acted on.
+ * get is the only place this file touches the network: one attempt per read, the
+ * job's token, and a sentence that names the URL, the status and what the status
+ * means for this job. A cause is printed because undici puts the reason there and a
+ * refusal naming neither the forge nor the endpoint cannot be acted on; `why` is the
+ * same sentence scripts/catalog.ts prints a proxy silence with. `bound` is the one
+ * timer for all three reads, so the second read cannot spend the budget the first
+ * one already used, and a body that stops arriving is refused where it stopped.
  */
 async function get(
   d: Deps,
+  bound: AbortSignal | undefined,
   url: string,
   denied: (status: number) => string,
 ): Promise<Bytes | Stop> {
+  const overdue = (cause: unknown): string | null =>
+    bound?.aborted === true ? ended(d, url, cause) : null;
   let response: Response;
   try {
-    response = await d.fetch(url, { headers: { authorization: `token ${d.token}` } });
+    response = await d.fetch(url, {
+      headers: { authorization: `token ${d.token}` },
+      signal: bound ?? null,
+    });
   } catch (cause: unknown) {
-    return { refusal: `fetch: GET ${url} could not be reached: ${why(cause)}` };
+    return {
+      refusal: overdue(cause) ?? `fetch: GET ${url} could not be reached: ${why(cause)}`,
+    };
   }
   if (!response.ok)
     return {
       refusal: `fetch: GET ${url} answered ${String(response.status)} — ${denied(response.status)}`,
     };
-  return { bytes: Buffer.from(await response.arrayBuffer()) };
+  try {
+    return { bytes: Buffer.from(await response.arrayBuffer()) };
+  } catch (cause: unknown) {
+    return {
+      refusal:
+        overdue(cause) ??
+        `fetch: GET ${url} answered ${String(response.status)} and then stopped sending: ${why(cause)}`,
+    };
+  }
 }
 
 const refusedToken = (repository: string): string =>
@@ -294,7 +334,10 @@ const refusedToken = (repository: string): string =>
  */
 export async function readKernelMain(d: Deps): Promise<Verdict> {
   const where = endpoints(d);
-  const head = await get(d, where.commits, (status) =>
+  // Started here, at the first request, so the whole read — three of them, and the
+  // two bodies inside them — has one budget rather than three.
+  const bound = d.timeoutMs === undefined ? undefined : AbortSignal.timeout(d.timeoutMs);
+  const head = await get(d, bound, where.commits, (status) =>
     status === 401 || status === 403
       ? refusedToken(d.repository)
       : status === 404
@@ -315,9 +358,9 @@ export async function readKernelMain(d: Deps): Promise<Verdict> {
       : status === 404
         ? `${file} is not in ${d.repository} at ${kernelCommit}`
         : `${file} could not be read at ${kernelCommit}`;
-  const catalog = await get(d, where.raw(CATALOG_FILE, kernelCommit), at(CATALOG_FILE));
+  const catalog = await get(d, bound, where.raw(CATALOG_FILE, kernelCommit), at(CATALOG_FILE));
   if (catalog.refusal !== undefined) return refused(kernelCommit, checkedAt, catalog.refusal);
-  const openapi = await get(d, where.raw(OPENAPI_FILE, kernelCommit), at(OPENAPI_FILE));
+  const openapi = await get(d, bound, where.raw(OPENAPI_FILE, kernelCommit), at(OPENAPI_FILE));
   if (openapi.refusal !== undefined) return refused(kernelCommit, checkedAt, openapi.refusal);
   return decide({ kernelCommit, checkedAt, catalog: catalog.bytes, openapi: openapi.bytes });
 }
@@ -349,6 +392,30 @@ export function report(
     : { out, err: [`kernel-main: refused ${v.refusal}`] };
 }
 
+/**
+ * DEFAULT_TIMEOUT_MS is the job's whole read in milliseconds: three GETs, each of
+ * which undici gives up on its own after ten seconds. Two minutes is that, with room
+ * for a slow forge, and a tenth of the job's `timeout-minutes: 20` — so the script's
+ * refusal, which names the URL and the budget, is what a log shows rather than a
+ * runner killing a silent process.
+ */
+export const DEFAULT_TIMEOUT_MS = 120_000;
+
+/**
+ * budget reads PK_KERNEL_TIMEOUT_MS. A value that is not a whole number of
+ * milliseconds is refused rather than ignored: a bound nobody parsed is a run with
+ * no bound, which is the thing this exists to prevent.
+ */
+export function budget(raw: string | undefined): number {
+  if (raw === undefined || raw === "") return DEFAULT_TIMEOUT_MS;
+  const ms = Number.parseInt(raw, 10);
+  if (!/^\d+$/.test(raw.trim()) || !Number.isFinite(ms) || ms <= 0)
+    throw new Error(
+      `PK_KERNEL_TIMEOUT_MS is not a positive whole number of milliseconds: "${raw}"`,
+    );
+  return ms;
+}
+
 /** fromEnv reads the three names the job sets; every one is refused by kernelMain. */
 export function fromEnv(env: Record<string, string | undefined> = process.env): Deps {
   return {
@@ -357,6 +424,7 @@ export function fromEnv(env: Record<string, string | undefined> = process.env): 
     token: env.GITHUB_TOKEN ?? "",
     fetch,
     now: () => new Date(),
+    timeoutMs: budget(env.PK_KERNEL_TIMEOUT_MS),
   };
 }
 
