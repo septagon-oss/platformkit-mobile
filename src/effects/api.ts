@@ -83,14 +83,18 @@ export interface Window {
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface RequestOptions {
-  readonly method?: RequestMethod;
-  readonly body?: unknown;
   readonly signal?: AbortSignal;
 }
 
 export interface Api {
-  /** Module-owned JSON on this server; callers validate domain data before rendering it. */
-  request(path: string, options?: RequestOptions): Promise<unknown>;
+  /** Module-owned JSON; every successful response passes the caller's validator. */
+  request<T>(
+    method: RequestMethod,
+    path: string,
+    validate: (value: unknown) => T,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<T>;
   /** me is who this session belongs to, or nothing when it belongs to nobody. */
   me(): Promise<Identity | undefined>;
   /**
@@ -162,7 +166,7 @@ export function createApi(
     path: string,
     body?: unknown,
     signal?: AbortSignal,
-  ): Promise<string> {
+  ): Promise<{ text: string; status: number }> {
     if (
       !path.startsWith("/api/v1/") ||
       path.includes("#") ||
@@ -217,7 +221,7 @@ export function createApi(
       signal?.removeEventListener("abort", cancel);
     }
     if (status >= 400) throw problem(status, text);
-    return text;
+    return { text, status };
   }
 
   function problem(status: number, text: string): ApiError {
@@ -260,18 +264,29 @@ export function createApi(
     return error;
   }
 
-  async function request(
+  async function request<T>(
+    method: RequestMethod,
     path: string,
-    { method = "GET", body, signal }: RequestOptions = {},
-  ): Promise<unknown> {
-    const text = await call(method, path, body, signal);
-    return text === "" ? undefined : JSON.parse(text);
+    validate: (value: unknown) => T,
+    body?: unknown,
+    { signal }: RequestOptions = {},
+  ): Promise<T> {
+    if (typeof validate !== "function") throw new TypeError("A response validator is required.");
+    const { text, status } = await call(method, path, body, signal);
+    try {
+      const value: unknown = text === "" ? undefined : JSON.parse(text);
+      return validate(value);
+    } catch {
+      // A validator's exception can contain private response values. Report
+      // the endpoint and status without copying its message into the UI.
+      throw new ApiError(status, `Invalid response at ${path}: response validation failed.`);
+    }
   }
 
   async function json<T>(method: RequestMethod, path: string, body?: unknown): Promise<T> {
-    const value = await request(path, { method, body });
-    if (value === undefined) throw new SyntaxError("The server returned an empty JSON response.");
-    return value as T;
+    const { text } = await call(method, path, body);
+    if (text === "") throw new SyntaxError("The server returned an empty JSON response.");
+    return JSON.parse(text) as T;
   }
 
   return {

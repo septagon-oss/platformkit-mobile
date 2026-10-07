@@ -112,17 +112,20 @@ belong in `src/screens/`, where effects become props for the atomic UI layers.
 Add a custom screen when the workflow needs something the resource schema
 cannot express.
 
-Custom screens use `api.request(path, options)` from the current shell API for
-module-owned JSON routes. `path` is an encoded path under `/api/v1/`, with an
-optional query string; the selected server and session stay with the shell.
-The method defaults to GET. Writes specify POST, PUT, PATCH or DELETE and may
-include a JSON `body`; an omitted body sends no content. Responses are `unknown`
-(or `undefined` for an empty body), so validate domain data in `src/core/` before
-turning it into UI props. The request uses the same cookie, deadline and
-`ApiError` decoding as resource operations.
+Custom screens use `api.request(method, path, validate, body?)` from the current
+shell API for module-owned JSON routes. `path` is an encoded path under
+`/api/v1/`, with an optional query string; the selected server and session stay
+with the shell. The method is explicit: GET, POST, PUT, PATCH or DELETE. An
+omitted body sends no content. Supply a validator `(value: unknown) => T` from
+`src/core/`, such as a hand-written guard or a Zod schema's `parse`. The result
+is `Promise<T>`; the validator also receives `undefined` for an empty body and
+must explicitly accept it. Invalid JSON and validator exceptions become
+`ApiError` with the response status and request path, without copying response
+values or validator messages. HTTP problems retain their existing decoding.
+The request uses the same cookie and deadline as resource operations.
 
-Pass an `AbortSignal` to cancel a screen's obsolete request; cancellation rejects
-with `AbortError`. A timeout remains an `ApiError` with status 0. Neither the
+Pass `{ signal }` as the fifth argument to cancel a screen's obsolete request;
+cancellation rejects with `AbortError`. A timeout remains an `ApiError` with status 0. Neither the
 transport nor cancellation proves that a write was rolled back, and the client
 does not retry requests automatically. Recover uncertain writes through the
 module's persisted read contract before offering another submission. Screen
