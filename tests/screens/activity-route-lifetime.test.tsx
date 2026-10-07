@@ -1,6 +1,7 @@
 // Leaving this route, or replacing the session inside it, ends the enrichment in flight. A
 // directory response that lands afterwards cannot name a row in the new route's trail, even
 // when the event ids are identical.
+import { pageResponse as response } from "../fakes/wire";
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
@@ -28,14 +29,14 @@ beforeEach(() => {
   setParams({ module: "note", entity: "note", id: "note-319" });
 });
 
-const actor = "actor-319";
+const actor = "4f7eec96-be9d-5864-b9e4-6bacf3a9e16e";
 const record = "note-319";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
-const response = (body: unknown) => new Response(JSON.stringify(body), { status: 200 });
+
 const trail = {
   items: [
     {
-      id: "event-319",
+      id: "b02277b4-46c9-5744-ab3c-df57a172a900",
       name: "note.note.updated",
       occurredAt: "2026-07-13T08:41:00Z",
       actor,

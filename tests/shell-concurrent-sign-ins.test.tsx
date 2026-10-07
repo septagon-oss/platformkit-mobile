@@ -1,3 +1,4 @@
+import { loginResponse, logoutResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -52,11 +53,16 @@ test("a late first sign-in cannot replace the second session", async () => {
       case "first.test POST /api/v1/auth/login":
         return firstLogin.promise;
       case "first.test POST /api/v1/auth/logout":
-        return new Response(null, { status: 204 });
+        return logoutResponse();
       case "second.test POST /api/v1/auth/login":
-        return new Response(null, { status: 204, headers: { "Set-Cookie": "pk=second" } });
+        return loginResponse({ headers: { "Set-Cookie": "pk=second" } });
       case "second.test GET /api/v1/auth/me":
-        return json({ userId: "second", email: "second@example.test" });
+        return json({
+          userId: "00000004-1111-4111-8111-111111111111",
+          roles: [],
+          permissions: [],
+          email: "second@example.test",
+        });
       case "second.test GET /api/v1/app/resources":
         return json(laterCatalog);
       default:
@@ -81,17 +87,17 @@ test("a late first sign-in cannot replace the second session", async () => {
     await latest!.signIn("https://second.test", "second@example.test", "password");
   });
   await waitFor(() => expect(screen.getByTestId("session-phase")).toHaveTextContent("ready"));
-  expect(latest?.identity?.userId).toBe("second");
+  expect(latest?.identity?.userId).toBe("00000004-1111-4111-8111-111111111111");
   expect(latest?.entry("note", "note")?.path).toBe(laterPath);
 
   await act(async () => {
-    firstLogin.resolve(new Response(null, { status: 204, headers: { "Set-Cookie": "pk=first" } }));
+    firstLogin.resolve(loginResponse({ headers: { "Set-Cookie": "pk=first" } }));
     await first;
   });
   expect(screen.getByTestId("session-phase")).toHaveTextContent("ready");
   expect(latest?.baseURL).toBe("https://second.test");
   expect(latest?.api.cookie()).toBe("pk=second");
-  expect(latest?.identity?.userId).toBe("second");
+  expect(latest?.identity?.userId).toBe("00000004-1111-4111-8111-111111111111");
   expect(latest?.entry("note", "note")?.path).toBe(laterPath);
   expect(calls).not.toContain("first.test GET /api/v1/app/resources");
   expect(JSON.parse(mockSaved.get("platformkit.session")!)).toEqual({

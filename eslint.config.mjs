@@ -29,8 +29,17 @@ const react = ["react", "react-native", "react-native/*", "expo", "expo/*", "exp
 // its subpaths, every expo-* module and the @expo scope are one list, so a
 // bare `import from "expo"` is refused like the rest.
 const expoButSecureStore = ["expo", "expo/*", "expo-*", "!expo-secure-store", "@expo/*"];
+const generatedEffects = [
+  "**/generated/*", "**/generated/index", "**/generated/index.ts",
+  "**/generated/client", "**/generated/client/**", "**/generated/core/**",
+  "**/generated/sdk.gen", "**/generated/sdk.gen.ts", "**/generated/routes.gen", "**/generated/routes.gen.ts",
+  "platformkit-mobile/generated",
+  "!**/generated/zod.gen", "!**/generated/zod.gen.ts",
+  "!**/generated/types.gen", "!**/generated/types.gen.ts",
+];
 const uiBoundary = [{
   group: [
+    ...generatedEffects,
     "**/effects/**",
     "**/screens/**",
     "**/shell",
@@ -62,7 +71,7 @@ export default [
   { ignores: ["node_modules/", ".expo/", "dist/", "android/", "ios/", "e2e/out/"] },
   forbid(["src/**", "app/**"], []),
   forbid(["src/core/**"], [
-    { group: [...react, "**/effects/**", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "core is plain functions; it imports nothing outside src/core." },
+    { group: [...generatedEffects, ...react, "**/effects/**", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "core is plain functions; it imports nothing outside src/core." },
   ]),
   forbid(["src/effects/**"], [
     { group: ["react", "react-native", "react-native/*", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "effects know the network and the store, not React or the UI." },
@@ -78,7 +87,7 @@ export default [
     ignores: ["src/ui/gallery.tsx"],
   },
   forbid(["app/**"], [
-    { group: ["**/effects/**", "**/core/**"], message: "a route composes a screen; it holds no rule and no effect." },
+    { group: [...generatedEffects, "**/effects/**", "**/core/**"], message: "a route composes a screen; it holds no rule and no effect." },
     { group: ["**/ui/**", "!**/ui/theme", "!**/ui/gallery"], message: "a route composes a screen; the theme provider and the gallery are the composition root's two exceptions." },
   ]),
   // src/route.tsx is the dispatcher every resource route delegates to: it
@@ -87,7 +96,7 @@ export default [
   // shares with a route is that it performs no effect: everything it needs
   // arrives through useShell, and an effect becomes a prop in src/screens.
   forbid(["src/route.tsx"], [
-    { group: ["**/effects/**"], message: "the route dispatcher composes screens and names them from the catalog; an effect becomes a prop in src/screens." },
+    { group: [...generatedEffects, "**/effects/**"], message: "the route dispatcher composes screens and names them from the catalog; an effect becomes a prop in src/screens." },
   ]),
   // Transport is an effect. src/effects/api.ts is the one module that names
   // the platform's fetch, as the default it composes an Api around, so the

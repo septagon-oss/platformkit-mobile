@@ -113,8 +113,46 @@ belong in `src/screens/`, where effects become props for the atomic UI layers.
 Add a custom screen when the workflow needs something the resource schema
 cannot express.
 
-Custom screens use `api.request(method, path, validate, body?)` from the current
-shell API for module-owned JSON routes. `path` is an encoded path under
+The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
+with its public commit and SHA-256 in
+[testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
+55 paths and 71 operations. `npm run api` generates the TypeScript types, Zod
+validators, SDK and documented route table in `src/generated/`; `npm run
+check:api` regenerates into a temporary directory and refuses changed, missing
+or extra files. It runs offline as part of `npm run check`. Refresh the public
+document and provenance deliberately before regenerating. Node 22.18 or newer
+is required by the pinned generator.
+
+Documented requests use their generated operation's response validator. Core
+owns supported catalog versions and field kinds, nullable-array normalization,
+and the compatibility extension for version-2 `operations`. It retains generated
+metadata without making web `screen` addresses into native routes. An unstamped
+catalog retains public `version: 0`; an explicit zero or future version refuses.
+Generated schemas keep JSON numbers as numbers, without string coercion; this
+does not establish lossless support for every int64 monetary value.
+
+Custom renderers receive the generated methods on the current shell API's
+`operations` property, already bound to its connection and validators:
+
+```ts
+const result = await api.operations.taskTaskRead({ path: { id } });
+const task = result.data;
+```
+
+Each method accepts its generated body, path, query and header inputs, plus an
+optional `signal`. It does not accept a different URL, transport or validator.
+Generated types are also exported from `platformkit-mobile/generated`.
+
+There is no shared client instance or per-composition regeneration. The generated
+client covers only the pinned document. Catalog entries outside that document
+retain the generic record/page contract: rows must be objects, and pages require
+`items` (an array or null) and integer `total`. Their domain fields are not
+validated by a reference operation. Documented pages additionally require their
+operation's row schema, integer `limit` and integer `offset`. A client's own
+composition document and generated client remain downstream work.
+
+For module-owned JSON and recovery routes outside the document, custom screens
+use `api.request(method, path, validate, body?)` from the current shell API. `path` is an encoded path under
 `/api/v1/`, with an optional query string; the selected server and session stay
 with the shell. The method is explicit: GET, POST, PUT, PATCH or DELETE. An
 omitted body sends no content. Supply a validator `(value: unknown) => T` from
@@ -122,12 +160,13 @@ omitted body sends no content. Supply a validator `(value: unknown) => T` from
 is `Promise<T>`; the validator also receives `undefined` for an empty body and
 must explicitly accept it. Invalid JSON and validator exceptions become
 `ApiError` with the response status and request path, without copying response
-values or validator messages. HTTP problems retain their existing decoding.
+values or validator messages. A 2xx status on `ApiError` means the server answered
+but its success response was malformed. HTTP problems retain their existing decoding.
 The request uses the same cookie and deadline as resource operations.
 
 Pass `{ signal }` as the fifth argument to cancel a screen's obsolete request;
-cancellation rejects with `AbortError`. A timeout remains an `ApiError` with status 0. Neither the
-transport nor cancellation proves that a write was rolled back, and the client
+cancellation rejects with `AbortError`. A timeout remains an `ApiError` with
+status 0. Neither transport nor cancellation proves that a write was rolled back, and the client
 does not retry requests automatically. Recover uncertain writes through the
 module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
@@ -769,11 +808,10 @@ beside it: the copy's three resources, then a resource written on another
 surface, a command at a printed address of its own, and a singleton whose PUT
 follows it. The copy is not extended in place, because the hash that makes it
 trustworthy is a hash of the kernel's bytes; a test asserts the extension is
-those bytes plus those entries instead. The version-2 keys this build ignores on
-purpose are `screen` (the web workspace's page address, where the phone's routes
-are its own file tree), `display`, `present` and `maxLength` (no control here
-draws them yet) and the `richtext` widget, which stays T-0192's; a case in
-`tests/catalog.test.ts` refuses any of them an unintended reader.
+those bytes plus those entries instead. The generated catalog types retain `screen` and `present` as metadata. Neither
+changes a native route or draws a new control. `display` and `maxLength` are not
+in this document pin; the `richtext` widget still has no native control. The
+catalog tests distinguish retained metadata from rendered behavior.
 
 **Reused** — `parseCatalog`'s own validators (`str`, `strings`, `CatalogError`) and
 the `writable` gate the screens already consulted; the New, Edit, Delete and Save

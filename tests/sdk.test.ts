@@ -42,6 +42,7 @@ test("the SDK gate reads the pinned expo, not the network", () => {
 // Dependencies outside Expo have literal, exact version owners. Unknown packages
 // still fail closed; pure JS dependencies must contain no native build metadata.
 const independent = {
+  zod: { version: "4.6.5", native: false },
   "@js-temporal/polyfill": { version: "0.5.1", native: false },
   "d3-scale": { version: "4.0.2", native: false },
   "d3-shape": { version: "3.2.0", native: false },

@@ -26,7 +26,7 @@ beforeEach(reset);
 test.each(["light", "dark"] as const)(
   "%s generated detail withdraws its audit history when the session is refused",
   async (mode) => {
-    const actor = "private-audit-actor-73";
+    const actor = "69964b8e-72c9-52de-a6ce-515ecf17bad0";
     const fetch = jest.fn<typeof globalThis.fetch>();
     fetch
       .mockResolvedValueOnce(
@@ -34,14 +34,17 @@ test.each(["light", "dark"] as const)(
           JSON.stringify({
             items: [
               {
-                id: "event-73",
+                id: "022fdf02-f58f-5bac-9262-f4310bea7e0d",
                 name: "note.note.reviewed",
+                eventId: "77777777-7777-4777-8777-777777777777",
                 occurredAt: "2026-07-18T09:00:00Z",
                 actor,
                 payload: { id: "note-73" },
               },
             ],
             total: 2,
+            limit: 20,
+            offset: 0,
           }),
           { status: 200 },
         ),

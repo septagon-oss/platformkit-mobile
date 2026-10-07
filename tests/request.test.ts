@@ -228,7 +228,10 @@ test("a late custom response cannot restore a signed-out session", async () => {
     "https://example.test",
     (async (url) =>
       String(url).endsWith("/logout")
-        ? new Response(null, { status: 204 })
+        ? new Response(JSON.stringify({ signedOut: true }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          })
         : response.promise) as typeof fetch,
     "platformkit_session=old",
   );
