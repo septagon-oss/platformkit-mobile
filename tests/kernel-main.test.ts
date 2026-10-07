@@ -161,7 +161,7 @@ test("a sign-in wall answering 200 is refused where it lands, and the byte count
   const envelope = '{"message":"Only signed in user is allowed to call APIs."}';
   const { d } = wired([head(), { status: 200, text: envelope }, { status: 200, body: openapi }]);
   const verdict = await kernelMain(d);
-  assert.equal(verdict.refusal, "catalog: resources is not a list");
+  assert.equal(verdict.refusal, "catalog: resources failed validation");
   assert.match(verdict.read[0]!, new RegExp(`bytes=${String(envelope.length)}$`));
 });
 
@@ -334,7 +334,7 @@ test("the document half refuses at the fields that make it a document", () => {
 test("the first refused path is the catalogue's, and both documents are still printed", () => {
   const catalog = judgeCatalog(Buffer.from(JSON.stringify({ ...golden(), resources: "none" })));
   const document = judgeOpenApi(Buffer.from(JSON.stringify({ openapi: "2.0" })));
-  assert.equal(catalog.refusal, "catalog: resources is not a list");
+  assert.equal(catalog.refusal, "catalog: resources failed validation");
   assert.equal(document.refusal, 'openapi: openapi is "2.0", not a 3.x document');
   const verdict = decide({
     kernelCommit: COMMIT,
