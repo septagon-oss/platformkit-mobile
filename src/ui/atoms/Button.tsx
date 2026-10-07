@@ -86,6 +86,13 @@ export function Button({
   // Only the subtree that holds the screen's one filled verb is drawn filled;
   // everywhere else the same tone is offered in the outlined ink.
   const filled = !header && stage && (tone === "primary" || tone === "destructive");
+  // A control holds "this is the one that stands" in two spellings: `selected` names
+  // the member of a set the screen is on, `checked` names the box, chip or slot a
+  // person has marked. The drawing reads both, because a state the accessibility
+  // tree alone can read is not a state — the aria spelling says it to a reader, this
+  // line says it to everyone else. The screen's one filled verb already stands by
+  // being filled, so it keeps its fill rather than trading it for the tint.
+  const picked = selected === true || (checked === true && !filled);
   const textTone: TextTone = off
     ? "primary"
     : filled
@@ -125,14 +132,17 @@ export function Button({
         ...shape,
         glyphOnly && s.mark,
         controlInk(toneColor(t, textTone)),
+        // The mark is laid under the interaction states, not over them: a control that
+        // is marked still answers a hover and a press.
+        picked && s.picked,
         hovered && !off && !filled && s.hover,
         pressed && !off && (filled ? s.activeFilled : s.press),
         focused && s.focused,
-        // A selected member of a set is the one the screen is on. Saying it cannot be
-        // pressed (there is nowhere to press *to*) does not make it the member that
-        // is out of reach, so it is never drawn in the unavailable outline.
-        off && !selected && s.off,
-        selected && s.picked,
+        // A control that stands is the one the screen is on or the one a person
+        // marked. Saying it cannot be pressed now (there is nothing left to press *to*)
+        // does not make it out of reach, so it is never drawn in the unavailable
+        // outline: the dash would erase the very fact the control is showing.
+        off && !picked && s.off,
       ]}
       {...testable(testID)}
     >
@@ -212,9 +222,10 @@ const styles = (t: Theme) =>
     // around them, which is what the captures of those specimens named.
     plainContent: { justifyContent: "flex-start" },
     label: { flexShrink: 1 },
-    // The member the screen is on: the accent ring the kit already uses for what
-    // a person has chosen, on the surface it is drawn in.
-    picked: { borderColor: t.color.accentDefault, backgroundColor: t.color.surfacePrimary },
+    // The one that stands: the kit's selection tint under the label, with the accent
+    // edge saying the same fact a second way. Both pairs are in the theme's registry
+    // — the label's ink and the accent edge are each measured on state.selected.
+    picked: { borderColor: t.color.accentDefault, backgroundColor: t.state.selected },
     // A glyph alone keeps the whole hit area and spends none of it on padding
     // around a word that is not printed.
     mark: { paddingHorizontal: t.space.sm, minWidth: t.hit },

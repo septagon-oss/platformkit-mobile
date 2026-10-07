@@ -34,6 +34,9 @@ const painted: readonly [string, Role, Role, AAKind][] = [
   ["chart series, danger", (t) => t.color.statusDanger, (t) => t.color.surfaceCanvas, "graphic"],
   // The zero line every bar stands on, in the same muted ink as the numbers naming it.
   ["chart zero line", (t) => t.color.textMuted, (t) => t.color.surfaceCanvas, "graphic"],
+  // A control drawn chosen (a marked checkbox, a chosen chip or slot): its accent edge
+  // over the selection tint it is filled with. Button.tsx paints the pair.
+  ["chosen control's edge", (t) => t.color.accentDefault, (t) => t.state.selected, "graphic"],
 ];
 
 describe("pairs the shared components paint reach AA", () => {
