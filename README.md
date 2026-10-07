@@ -125,6 +125,12 @@ or extra files. It runs offline as part of `npm run check`. Refresh the public
 document and provenance deliberately before regenerating. Node 22.18 or newer
 is required by the pinned generator.
 
+The generator's `@hey-api/json-schema-ref-parser` dependency pins `js-yaml`
+4.2.0. A scoped npm override uses the patched 4.3.2 release for that parser
+to fix its YAML denial-of-service advisories. Remove the override when the
+generator's dependency accepts a patched release; `check:api` must still
+confirm identical generated output after any tooling update.
+
 Documented requests use their generated operation's response validator. Core
 owns supported catalog versions and field kinds, nullable-array normalization,
 and the compatibility extension for version-2 `operations`. It retains generated
