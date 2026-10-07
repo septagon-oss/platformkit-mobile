@@ -7,7 +7,10 @@
 // invocation `npm run check:kernel-main` is, against a forge on loopback that accepts
 // the request and never answers it); the refusal names the URL, the budget and the
 // commit already learned; and a budget that cannot be parsed is refused by name
-// instead of ignored, because a bound nobody parsed is a run with no bound.
+// instead of ignored, because a bound nobody parsed is a run with no bound. The bound
+// a spawned run is given is sized to the runner rather than to the desk — BOUND_MS
+// says why — and the harness's own kill is a multiple of it, so losing the bound shows
+// up as a killed child with no exit code rather than a green that waited for nothing.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import http from "node:http";
@@ -27,6 +30,28 @@ import {
 const root = path.resolve(import.meta.dirname, "..");
 const COMMIT = "83b496784db2b5f9df3c4164b8049022b0ae8dc5";
 const TOKEN = "job-token-sentinel";
+
+/**
+ * BOUND_MS is the budget the shipped run is asked to end itself at, and BACKSTOP_MS the
+ * harness's own kill of the child. The ratio between them is the rule.
+ *
+ * A bound is a wall clock, so a case that ends a read at one is only as tight as the
+ * slowest machine it runs on, and the runner the ci job gets is not the desk. In that
+ * job's log of b4783b6 the child this file spawns took 2.6 s to reach the point where it
+ * starts its bound, where the same spawn costs 0.12 s here, and the run went red saying
+ * the forge had been asked 0 questions: 250 ms had expired before the request ever left
+ * the process, so the case was measuring the harness rather than the rule. Both of that
+ * job's failures reproduce on the ci Node with the suite pinned to one core and sixteen
+ * CPU burners running beside it, which is also where one loopback GET and its answer
+ * measured 212 ms against 12 ms here. 10 s is ten times the read that failed and fifty
+ * of the slowest exchange measured there; the backstop is four bounds, so a run that
+ * ignored its budget is killed long after it would have refused, and a killed child
+ * closes on a signal with no exit code, which `run.status === 1` refuses — while the
+ * stderr must still name the number the job set. Those two assertions, not a stopwatch,
+ * are what this case holds.
+ */
+const BOUND_MS = 10_000;
+const BACKSTOP_MS = 4 * BOUND_MS;
 
 /**
  * deaf is the forge that never answers: it accepts the connection, reads the request
@@ -72,8 +97,8 @@ function shipped(server: string, timeoutMs: string): Promise<Spawned> {
       },
     );
     // A child that never closes would take the suite with it; the bound is the thing
-    // under test, so this one is only the harness's own backstop.
-    const kill = setTimeout(() => child.kill("SIGKILL"), 30_000);
+    // under test, so this one is only the harness's own backstop, well outside it.
+    const kill = setTimeout(() => child.kill("SIGKILL"), BACKSTOP_MS);
     kill.unref();
     let out = "";
     let err = "";
@@ -107,7 +132,7 @@ test("the shipped run ends its read at the bound and returns 1", async (t) => {
   const forge = deaf(t);
   const server = await forge.listening;
   const started = Date.now();
-  const run = await shipped(server, "250");
+  const run = await shipped(server, String(BOUND_MS));
   const elapsed = Date.now() - started;
   assert.equal(
     run.status,
@@ -117,7 +142,7 @@ test("the shipped run ends its read at the bound and returns 1", async (t) => {
   assert.match(
     run.err,
     new RegExp(
-      `^kernel-main: refused fetch: GET ${escapeRegExp(`${server}/api/v1/repos/septagon-oss/platformkit/commits`)}\\?sha=main&limit=1 did not answer within the job's 250ms bound`,
+      `^kernel-main: refused fetch: GET ${escapeRegExp(`${server}/api/v1/repos/septagon-oss/platformkit/commits`)}\\?sha=main&limit=1 did not answer within the job's ${String(BOUND_MS)}ms bound`,
       "m",
     ),
   );
@@ -131,7 +156,12 @@ test("the shipped run ends its read at the bound and returns 1", async (t) => {
     1,
     "and it is the bound that stopped the run, not a fourth question",
   );
-  assert.ok(elapsed < 5_000, `the bound ended the run in ${String(elapsed)}ms, not the harness`);
+  // The harness kills at four bounds; a run that closed inside three of them was ended
+  // by its own budget, spawn and tsx start-up included (2.6 s on the runner, measured).
+  assert.ok(
+    elapsed < BACKSTOP_MS - BOUND_MS,
+    `the bound ended the run in ${String(elapsed)}ms; the harness's own kill is ${String(BACKSTOP_MS)}ms`,
+  );
 });
 
 test("a budget that cannot be read is refused by name, and an absent one is the default", () => {
