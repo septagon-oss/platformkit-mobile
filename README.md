@@ -113,6 +113,8 @@ belong in `src/screens/`, where effects become props for the atomic UI layers.
 Add a custom screen when the workflow needs something the resource schema
 cannot express.
 
+## HTTP contract
+
 The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
 with its public commit and SHA-256 in
 [testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
@@ -142,7 +144,8 @@ const task = result.data;
 ```
 
 Each method accepts its generated body, path, query and header inputs, plus an
-optional `signal`. It does not accept a different URL, transport or validator.
+optional `signal`. Its types do not accept a different URL, transport or validator.
+These types are not a runtime security boundary for a caller that bypasses them.
 Generated types are also exported from `platformkit-mobile/generated`.
 
 There is no shared client instance or per-composition regeneration. The generated
@@ -545,7 +548,8 @@ locally either way.
 ## Verify a change
 
 The repository CI runs `npm run check` on pull requests and main pushes.
-`npm run check` runs eight gates in order, and stops at the first that fails:
+`npm run check` runs nine gates in order, and stops at the first that fails:
+`check:api` (offline generated source comparison),
 `check:sdk` (`EXPO_OFFLINE=1 expo install --check`: every installed native
 package against the ranges the pinned `expo` bundles, read from
 `node_modules/expo/bundledNativeModules.json`), `typecheck` (TypeScript),
@@ -815,7 +819,7 @@ changes a native route or draws a new control. `display` and `maxLength` are not
 in this document pin; the `richtext` widget still has no native control. The
 catalog tests distinguish retained metadata from rendered behavior.
 
-**Reused** — `parseCatalog`'s own validators (`str`, `strings`, `CatalogError`) and
+**Reused** — `parseCatalog`'s supported-version and path checks, `CatalogError`, and
 the `writable` gate the screens already consulted; the New, Edit, Delete and Save
 buttons, their copy and their testIDs; `createApi`'s `call`/`json` and its `/api/v1/`
 guard; `scripts/catalog.ts`'s `provenance`, `check` and `refresh` with the
@@ -918,3 +922,23 @@ refuses when the fixture is no longer the export its provenance describes.
 Commit the fixture, its provenance, the generated palette and the fingerprint
 together, and say in the commit which commit the export came from and what
 changed in the palette. Read [AGENTS.md](AGENTS.md) before contributing.
+
+## Limits and reuse
+
+The generated HTTP client covers the pinned document only; composition-specific
+clients remain downstream work. Outside that document, the generic page adapter
+checks `items` and `total`, the fields its consumers read, but does not check
+`limit` or `offset`; this is a limit relative to the full documented page envelope.
+The six generated ESLint array-style warnings remain accepted warnings; the lint
+rules and generated source have not been relaxed to hide them. Native Request,
+FormData and device journeys still need platform verification.
+
+**Reused** — the existing per-API cookie, deadline and cancellation transport,
+core catalog compatibility rules, path derivations and shell generation guards
+carry the generated operations into the current screens.
+**Added** — the pinned public OpenAPI document, offline generation and drift check,
+generated TypeScript and Zod contracts, and required custom-response validators
+make response acceptance explicit before data reaches a screen.
+**Made reusable** — `platformkit-mobile/generated`, each shell API's bound
+`operations`, and `request(method, path, validate, body?)` let renderer packs consume
+the documented operations and validate their own JSON routes through that transport.
