@@ -132,9 +132,9 @@ export function DateTimeRow({
         disabled={disabled}
         accessibilityRole="button"
         accessibilityLabel={label}
-        accessibilityValue={{ text: value ? text(value) : copy.notSet }}
+        aria-valuetext={value ? text(value) : copy.notSet}
         accessibilityHint={copy.openHint}
-        accessibilityState={{ disabled }}
+        aria-disabled={disabled}
       >
         <Text style={s.label} maxFontSizeMultiplier={0}>
           {label}

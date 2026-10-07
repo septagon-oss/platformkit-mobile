@@ -32,7 +32,7 @@ test("the zoom adapter displays the selected ready Gallery media", async () => {
   await gallery(async (page) => {
     await page.getByTestId("gallery-case").locator("select").selectOption("photo-viewer/middle");
     await page.getByRole("button", { name: "Close", exact: true }).waitFor();
-    const image = page.getByText("Landscape shape", { exact: true });
+    const image = page.getByText("The courtyard from the upper landing", { exact: true });
     // Give the actual zoom/layout adapter time to measure, including after its first render.
     await image.waitFor({ state: "visible", timeout: 3000 }).catch(() => undefined);
     const bounds = await image.boundingBox();
@@ -50,10 +50,12 @@ test("disclosure exposes its expanded state in the browser accessibility tree", 
       .getByTestId("gallery-case")
       .locator("select")
       .selectOption("disclosure-section/default");
-    const expand = page.getByRole("button", { name: "Expand", exact: true });
+    // The control is named for what it reveals and what it hides, in the words the
+    // bundle supplies ("Show the details", "Hide the details"), not for a bare verb.
+    const expand = page.getByRole("button", { name: /^Show / });
     await expand.focus();
     await page.keyboard.press("Space");
-    const collapse = page.getByRole("button", { name: "Collapse", exact: true });
+    const collapse = page.getByRole("button", { name: /^Hide / });
     await collapse.waitFor();
     assert.equal(await collapse.getAttribute("aria-expanded"), "true");
     await page.keyboard.press("Space");

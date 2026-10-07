@@ -112,7 +112,7 @@ export function DataList({
           {model.saveView && onSaveView ? (
             <ActionControl model={model.saveView} onAction={() => onSaveView(model.saveTarget)} />
           ) : null}
-          <Text accessibilityLiveRegion="polite">{model.count}</Text>
+          {model.count ? <Text accessibilityLiveRegion="polite">{model.count}</Text> : null}
           {model.selectionIssue ? (
             <Notice text={model.selectionIssue.message} announcement="polite" />
           ) : null}
@@ -130,11 +130,13 @@ export function DataList({
       renderHeading={(id) => {
         const section = model.sections.find((item) => item.id === id)!;
         return (
-          <View style={s.header}>
-            <Text role="title" accessibilityRole="header">
-              {section.title}
-            </Text>
-            <Text>{section.count}</Text>
+          <View style={s.groupHeader}>
+            <View style={s.groupWords}>
+              <Text role="title" accessibilityRole="header">
+                {section.title}
+              </Text>
+              {section.count ? <Text>{section.count}</Text> : null}
+            </View>
             {section.collapse && onCollapse ? (
               <Button
                 label={section.collapse.label}

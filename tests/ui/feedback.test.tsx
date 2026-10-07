@@ -13,10 +13,11 @@ import {
   type Action,
   type StateInput,
 } from "../../src/core/derive";
+import { mix } from "../../src/core/color";
 import { Skeleton } from "../../src/ui/atoms/Skeleton";
 import { Gallery } from "../../src/ui/gallery";
 import { StateView } from "../../src/ui/molecules/StateView";
-import { ThemeProvider } from "../../src/ui/theme";
+import { ThemeProvider, themeFor } from "../../src/ui/theme";
 import { palette } from "../../src/ui/tokens";
 import { presentation } from "../fakes/presentation";
 
@@ -145,10 +146,16 @@ describe("StateView", () => {
       await fireEvent(button, "focus");
       expect(button).toHaveStyle({ borderColor: palette[mode].focus });
       await fireEvent(button, "hoverIn");
-      expect(button).toHaveStyle({ backgroundColor: palette[mode].surfaceMuted });
+      // A hover is the derived role, measured from the palette it sits on: the
+      // theme owns the mix, so the test asks the theme's own rule for the number.
+      expect(button).toHaveStyle({
+        backgroundColor: mix(palette[mode].surfacePrimary, palette[mode].accentDefault, 0.06),
+      });
       await fireEvent(button, "hoverOut");
       await fireEvent(button, "blur");
-      expect(button).toHaveStyle({ borderColor: palette[mode].borderDefault });
+      // The resting edge is the theme's outline role — the line that says a
+      // control can be used, measured against the surface it is drawn on.
+      expect(button).toHaveStyle({ borderColor: themeFor(mode).state.outline });
       expect(screen.getByText("Continue with a longer explanation")).toHaveProp(
         "maxFontSizeMultiplier",
         0,

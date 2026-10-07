@@ -31,26 +31,48 @@ export function Cart({
       <ModelState model={model} onRetry={onRefresh} />
       {cart ? (
         <>
+          {/* One thing in the basket is one card: its name with the price of one
+              beside it, and beneath that the two acts a line offers — how many,
+              and take it away — in one row instead of one row each. */}
           {cart.lines.map((line) => (
             <View key={line.id} style={s.panel}>
-              <Text role="title">{line.title}</Text>
-              {line.optionsText ? <Text>{line.optionsText}</Text> : null}
-              <Text>{line.unit}</Text>
-              {line.reason ? <Text>{line.reason}</Text> : null}
-              <QuantityControl
-                model={line.quantity}
-                onChange={(value) => onQuantity(line.id, value)}
-              />
+              <View style={s.row}>
+                <Text role="title" style={s.grow}>
+                  {line.title}
+                </Text>
+                <Text tone="muted">{line.unit}</Text>
+              </View>
+              {line.optionsText ? (
+                <Text role="caption" tone="muted">
+                  {line.optionsText}
+                </Text>
+              ) : null}
+              {line.reason ? (
+                <Text role="caption" tone="muted">
+                  {line.reason}
+                </Text>
+              ) : null}
+              <View style={s.row}>
+                <QuantityControl
+                  model={line.quantity}
+                  onChange={(value) => onQuantity(line.id, value)}
+                />
+                {line.remove ? (
+                  <ActionControl model={line.remove} onAction={() => onRemove(line.id)} />
+                ) : null}
+              </View>
               {line.open ? (
                 <ActionControl model={line.open} onAction={() => onOpen(line.id)} />
-              ) : null}
-              {line.remove ? (
-                <ActionControl model={line.remove} onAction={() => onRemove(line.id)} />
               ) : null}
             </View>
           ))}
           <Text>{cart.kindLabel}</Text>
-          <DetailRow term={cart.subtotalLabel} value={cart.subtotal} />
+          {/* A subtotal the total repeats says nothing the total has not said, so
+              the line appears only when the two differ — a discount, a fee, a tax.
+              Adjustments always stand between them as what makes them differ. */}
+          {cart.adjustments.length > 0 || cart.subtotal !== cart.total ? (
+            <DetailRow term={cart.subtotalLabel} value={cart.subtotal} />
+          ) : null}
           {cart.adjustments.map((a) => (
             <DetailRow key={a.id} term={a.label} value={a.text} />
           ))}

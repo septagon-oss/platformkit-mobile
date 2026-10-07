@@ -37,6 +37,9 @@ export interface DisclosureInput {
   readonly id: string;
   readonly title: string;
   readonly summary: string;
+  /** What is behind the control, in the words a screen would use. A control that says
+   * only "Expand" leaves a person to open it to find out whether it is worth opening. */
+  readonly reveals: string;
   readonly expanded: boolean;
   readonly depth: 1 | 2;
   readonly enabled: boolean;
@@ -47,6 +50,7 @@ export function deriveDisclosure(input: DisclosureInput, p: Presentation) {
     v.text(input.id, "id");
     v.text(input.title, "title");
     v.text(input.summary, "summary");
+    v.text(input.reveals, "reveals");
     v.need(input.depth === 1 || input.depth === 2, "depth", "unsupported-format");
     if (!input.enabled) v.text(input.reason, "reason");
     return {
@@ -54,7 +58,9 @@ export function deriveDisclosure(input: DisclosureInput, p: Presentation) {
       control: action(
         {
           id: input.id,
-          label: input.expanded ? p.copy.kit.collapse : p.copy.kit.expand,
+          label: input.expanded
+            ? p.copy.disclosure.conceal(input.reveals)
+            : p.copy.disclosure.reveal(input.reveals),
           state: input.enabled ? "ready" : "disabled",
           tone: "plain",
           ...(input.reason ? { reason: input.reason } : {}),

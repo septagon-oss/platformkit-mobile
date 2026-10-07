@@ -15,9 +15,12 @@ import {
   deriveBuyBar,
 } from "./commerce";
 import { derivePricing } from "./pricing";
+import { deriveMeter, derivePlayback } from "./progress";
+import { deriveSearch, deriveTabs } from "./navigation";
 import { deriveMap } from "./map";
 import { deriveMedia, deriveMediaHero, deriveViewer } from "./media";
 import { deriveSparkline, deriveChart, deriveBars, deriveStat } from "./charts";
+import { deriveTable } from "./table";
 import { deriveState, type Action } from "./feedback";
 import type { Presentation } from "./presentation";
 import { build, type Validation, type Content } from "./shared";
@@ -37,6 +40,7 @@ export const kitCaseIds = [
   "action-bar/busy",
   "action-bar/disabled",
   "model-state/loading",
+  "model-state/empty",
   "data-list/grouped",
   "data-list/collapsed",
   "data-list/selection-some",
@@ -75,6 +79,8 @@ export const kitCaseIds = [
   "agenda-list/range",
   "calendar/week",
   "calendar/agenda",
+  "data-table/populated",
+  "data-table/absent-figure",
   "price/fraction",
   "price/large-int64",
   "price/negative",
@@ -99,6 +105,7 @@ export const kitCaseIds = [
   "map-with-list/points",
   "map-with-list/same-coordinate",
   "map-with-list/provider-offline",
+  "map-with-list/provider-unsupported",
   "map-with-list/selected-removed",
   "media-hero/default",
   "media-hero/loading",
@@ -115,6 +122,20 @@ export const kitCaseIds = [
   "bar-chart/negative",
   "stat-tile/lower-is-better",
   "stat-tile/zero-baseline",
+  "progress-meter/fraction",
+  "progress-meter/percent",
+  "progress-meter/steps",
+  "progress-meter/unmeasured",
+  "tab-bar/three",
+  "tab-bar/five",
+  "tab-bar/unavailable",
+  "search-field/clear",
+  "search-field/query",
+  "search-field/busy",
+  "mini-player/track",
+  "mini-player/live",
+  "confirm-dialog/delete",
+  "confirm-dialog/keep",
 ] as const;
 export interface GallerySelection {
   readonly open?: boolean;
@@ -125,12 +146,16 @@ export interface GallerySelection {
   readonly slot?: string | undefined;
   readonly media?: string;
   readonly point?: string | undefined;
+  /** period is the billing period the pricing specimen is drawn on: a chip a person taps changes the amounts they are choosing between. */
+  readonly period?: string;
+  /** plan is the tier the person chose on the pricing specimen: the card they chose is the one drawn chosen. */
+  readonly plan?: string;
 }
 export function kitExamples(p: Presentation, caseId: string, held: GallerySelection = {}) {
   return build(p, (v: Validation) => {
     const c = p.copy.kit,
       pt = p.copy.language === "pt",
-      name = pt ? "Exemplo" : "Example",
+      name = c.specimenPass,
       state = caseId.split("/")[1],
       busy = state === "busy" || state === "checkout-busy",
       disabled = state === "disabled";
@@ -147,7 +172,30 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       tone: "secondary",
       state: "ready",
     };
-    const empty = v.take(deriveState({ kind: "empty" }, p));
+    // A step that leads to a screen the person cannot see names that screen. "Next" is
+    // the stepper's word, for moving along stages already on the screen; on a card or a
+    // cart it left the next screen unnamed, which is what a capture of each page read as
+    // a primary action that does not say what it does. The id stays the one the intent
+    // carries: the verb's word is not its identity.
+    const onward = (label: string): Action => ({ ...action, label });
+    // An offer's amount, in the currency the presentation is drawn in: read where the
+    // tiers are built, not where this helper is written, because the currency is decided
+    // further down.
+    const money = (minor: string) => ({ kind: "price" as const, amount: { minor, currency } });
+    // An empty collection that offers the verb which would fill it is the state
+    // a person can act on; one that only says so is a notice.
+    const empty = v.take(
+      deriveState(
+        {
+          kind: "empty",
+          action: {
+            intent: "next",
+            control: { id: "add", label: p.copy.gallery.add, tone: "primary", state: "ready" },
+          },
+        },
+        p,
+      ),
+    );
     const sample = <T>(value: T): Content<T> =>
       state === "loading"
         ? { phase: "loading" }
@@ -178,10 +226,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       id: "option",
       label: pt ? "Opção" : "Option",
       choices: [
-        { id: "first", label: pt ? "Primeira" : "First", enabled: true },
+        { id: "first", label: c.variantIndividual, enabled: true },
         {
           id: "second",
-          label: pt ? "Segunda" : "Second",
+          label: c.variantTwoAdults,
           enabled: state !== "disabled-option",
           ...(state === "disabled-option" ? { reason: c.unavailable } : {}),
         },
@@ -191,7 +239,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         ? { selectedId: held.choice }
         : state === "selected"
           ? { selectedId: "second" }
-          : {}),
+          : // The card draws a quantity and an enabled next step, so one of these
+            // two variants already is the one on the screen. Two outlined chips and
+            // a quantity of six state neither.
+            state === "default" || state === "options"
+            ? { selectedId: "first" }
+            : {}),
     };
     const quantity = {
       value: held.quantity ?? (state === "max" ? 10 : state === "invalid" ? 7 : 6),
@@ -238,28 +291,43 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       validUntil: state === "expired-snapshot" ? p.now : instant.add({ hours: 1 }).toString(),
     };
     const status = { label: c.available, tone: "ok" as const, symbol: "check" as const };
+    // A badge and an availability are the same statement: a specimen that says a
+    // thing is sold out paints no pill saying it can still be had.
+    const productStatus =
+      state === "sold-out"
+        ? { label: c.soldOut, tone: "warning" as const, symbol: "none" as const }
+        : status;
     const product = {
       id: "product-1",
       title: name,
       price: safePrice,
       availability: state === "sold-out" ? ("sold-out" as const) : ("available" as const),
-      status,
+      status: productStatus,
       open: secondary,
-      primary: action,
+      primary: onward(c.reviewSelection),
     };
     const line = {
       id: "line-1",
       productId: product.id,
       title: name,
       unitPrice: unit,
-      quantity: { ...quantity, value: 2 },
+      // A cart is a screen someone is partway through a task on: both halves of its
+      // stepper have somewhere to go. Where a step has reached its floor the kit says
+      // so on the quantity specimens, which are about that state; drawn on the page's
+      // one cart it was an order that looked as though it could not be edited.
+      quantity: { ...quantity, value: 4 },
       availability: "available" as const,
       remove: { ...secondary, id: "remove", label: c.remove },
     };
     const quote = {
       id: "quote-1",
       revision: "revision-1",
-      total: { minor: state === "multiple-lines" ? "3897" : "2598", currency },
+      // A quote's total is its lines: the cart refuses a quote whose figure contradicts
+      // what it is a quote for, so the fixture moves both together.
+      total: {
+        minor: state === "multiple-lines" ? "7794" : "5196",
+        currency,
+      },
       expiresAt: state === "quote-expired" ? p.now : instant.add({ hours: 1 }).toString(),
     };
     const row = {
@@ -278,6 +346,11 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         : state === "selection-unavailable"
           ? ["removed"]
           : []);
+    // Grouping and bulk selection are two demonstrations of two things. Only the
+    // specimens named for selection carry tick boxes and a bar of actions: drawn on
+    // every list, they pushed the first row of /gallery/list down the fold by the
+    // height of a control the person on that screen has not asked for.
+    const selecting = state === "selection-some" || state === "selection-unavailable";
     const surface = {
       open: held.open ?? true,
       title: name,
@@ -294,14 +367,14 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
     const steps = [
       {
         id: "first",
-        label: choice.choices[0]!.label,
+        label: c.stepDetails,
         optional: false,
         completion: state === "first" ? ("incomplete" as const) : ("complete" as const),
         problems: [],
       },
       {
         id: "second",
-        label: choice.choices[1]!.label,
+        label: c.stepVisit,
         optional: true,
         completion: "incomplete" as const,
         problems: state === "invalid" ? [{ fieldId: "quantity", message: c.validation }] : [],
@@ -333,22 +406,32 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         },
       ]),
       view:
-        state === "agenda"
+        state === "agenda" || state === "range"
           ? ("agenda" as const)
           : state === "dst-short" || state === "dst-long"
             ? ("day" as const)
             : ("week" as const),
       anchorDate: calendarDate,
       selectedDate: calendarDate,
-      agendaEndDate: Temporal.PlainDate.from(calendarDate).add({ days: 7 }).toString(),
+      // The agenda the page leads with reaches the next two days: what is coming,
+      // with one empty day on either side of it, which is what a plan is read for.
+      // The whole week is the page's other view, not its first screen.
+      agendaEndDate: Temporal.PlainDate.from(calendarDate).add({ days: 2 }).toString(),
     };
     const images = [
       {
+        // The lead picture is the one surface the media screen opens with, and its
+        // own ratio decides how much of a phone's first screen is left for the words
+        // and the act beneath it: at two three-quarters the picture measured 537 of
+        // 844 px, so the page's own state control sat off the screen. The mix the
+        // gallery demonstrates is kept — four three beside three two — so a grid of
+        // matches still shows unlike pictures lining up.
         id: "image-1",
-        width: 600,
+        width: 1200,
         height: 900,
-        description: pt ? "Forma vertical" : "Portrait shape",
+        description: c.photoPrintRoom,
         decorative: false,
+        scene: "print-room",
         state:
           state === "error"
             ? ("error" as const)
@@ -360,8 +443,9 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         id: "image-2",
         width: 1200,
         height: 800,
-        description: pt ? "Forma horizontal" : "Landscape shape",
+        description: c.photoCourtyard,
         decorative: false,
+        scene: "courtyard",
         state: "ready" as const,
       },
     ];
@@ -371,12 +455,19 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       page: { more: false, loading: false },
     };
     const points = [
-      { id: "point-1", longitude: 0, latitude: 0, title: name, status, actions: [secondary] },
+      {
+        id: "point-1",
+        longitude: 0,
+        latitude: 0,
+        title: c.placePrintRoom,
+        status,
+        actions: [secondary],
+      },
       {
         id: "point-2",
         longitude: state === "same-coordinate" ? 0 : 1,
         latitude: 0,
-        title: choice.choices[1]!.label,
+        title: c.placeCourtyard,
         status,
         actions: [],
       },
@@ -385,22 +476,22 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       content: sample([
         {
           id: "series-1",
-          label: name,
+          label: c.seriesVisitors,
           tone: "info" as const,
           points:
             state === "one-point"
-              ? [{ id: "p1", x: 7, y: 5 }]
+              ? [{ id: "p1", x: 12, y: 5 }]
               : [
-                  { id: "p1", x: 0, y: 2 },
-                  { id: "p2", x: 1, y: state === "gap" || state === "gaps" ? null : 4 },
-                  { id: "p3", x: 2, y: 3 },
+                  { id: "p1", x: 10, y: 2 },
+                  { id: "p2", x: 11, y: state === "gap" || state === "gaps" ? null : 4 },
+                  { id: "p3", x: 12, y: 3 },
                 ],
         },
       ]),
       xKind: "number" as const,
-      xLabel: pt ? "Tempo" : "Time",
-      yLabel: c.quantity,
-      unitLabel: pt ? "itens" : "items",
+      xLabel: c.axisHour,
+      yLabel: c.axisVisitors,
+      unitLabel: c.unitVisitors,
       fractionDigits: 0,
       ranges: [],
     };
@@ -424,7 +515,9 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             content: sample([
               {
                 id: "group",
-                title: name,
+                // A group is named for what it holds. Named for one of its rows, the
+                // same sentence was printed as the heading and as the first card.
+                title: c.specimenGroup,
                 rows: [row, { ...row, id: "row-2", title: choice.choices[1]!.label }],
                 total: 4,
                 collapsible: true,
@@ -434,10 +527,10 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             filters: [],
             views: [],
             viewDirty: false,
-            selection: "multiple",
+            selection: selecting ? "multiple" : "none",
             selectedIds,
             collapsedIds: state === "collapsed" ? ["group"] : [],
-            bulkActions: [action],
+            bulkActions: selecting ? [action] : [],
             page: { more: false, loading: false },
           },
           p,
@@ -448,8 +541,13 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         deriveDisclosure(
           {
             id: "section",
-            title: c.details,
-            summary: p.copy.gallery.longBody,
+            // A section named "Full details" with a paragraph of guidance under it
+            // is a shape with nothing in it: the section is about the pass, so it
+            // says the pass's name and one true line about it, and the verb that
+            // opens it still says what the person will see.
+            title: name,
+            summary: c.detailBody,
+            reveals: c.details,
             expanded: held.expanded ?? state === "expanded",
             depth: 1,
             enabled: true,
@@ -517,10 +615,78 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         ),
       ),
       calendar: v.take(deriveCalendar(calendarInput, p)),
+      // The same four records read across rather than down: the quote line, how
+      // many, and what each one costs. One row of `absent-figure` carries no
+      // price, which the table draws as nothing rather than as zero.
+      table: v.take(
+        deriveTable(
+          {
+            caption: c.table,
+            columns: [
+              { id: "quote", label: c.quote, kind: "text" },
+              { id: "quantity", label: c.quantity, kind: "number" },
+              { id: "price", label: c.price, kind: "money" },
+            ],
+            rows: [
+              {
+                id: "summary",
+                cells: [
+                  { columnId: "quote", value: c.summary },
+                  { columnId: "quantity", value: 2 },
+                  { columnId: "price", value: { minor: "1299", currency } },
+                ],
+              },
+              {
+                id: "details",
+                cells: [
+                  { columnId: "quote", value: c.details },
+                  { columnId: "quantity", value: 1 },
+                  { columnId: "price", value: { minor: "4500", currency } },
+                ],
+              },
+              {
+                id: "receipt",
+                cells: [
+                  { columnId: "quote", value: c.receipt },
+                  { columnId: "quantity", value: 5 },
+                  { columnId: "price", value: { minor: "7250", currency } },
+                ],
+              },
+              {
+                id: "estimate",
+                cells: [
+                  { columnId: "quote", value: c.estimate },
+                  { columnId: "quantity", value: 3 },
+                  // No figure at all, which is a value the cell holds: a zero
+                  // here would claim a line that costs nothing.
+                  {
+                    columnId: "price",
+                    ...(state === "absent-figure" ? {} : { value: { minor: "3100", currency } }),
+                  },
+                ],
+              },
+            ],
+          },
+          p,
+        ),
+      ),
       price: v.take(derivePrice(price, p)),
       quantity: v.take(deriveQuantity(quantity, p)),
       product: v.take(
-        deriveProductCard({ content: sample({ product, options: [choice], quantity }) }, p),
+        deriveProductCard(
+          {
+            content: sample({
+              product,
+              options: [choice],
+              // A card is the kit's first-use example: a party of four, with room on the
+              // step for both halves of the stepper to move. Six is where the quantity
+              // specimen sits because it is the middle of its range, not a number anyone
+              // arriving at a pass would have chosen.
+              quantity: { ...quantity, value: 4 },
+            }),
+          },
+          p,
+        ),
       ),
       cart: v.take(
         deriveCart(
@@ -533,7 +699,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                       ...line,
                       id: "line-2",
                       title: choice.choices[1]!.label,
-                      quantity: { ...line.quantity, value: 1, min: 1, step: 1 },
+                      quantity: { ...line.quantity, value: 2, min: 1, step: 1 },
                     },
                   ]
                 : [line],
@@ -541,7 +707,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             currency,
             adjustments: [],
             quote,
-            checkout: action,
+            checkout: onward(c.reviewOrder),
           },
           p,
         ),
@@ -549,7 +715,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       summary: v.take(
         deriveSummary(
           {
-            lines: [{ id: "summary-1", label: name, amount: unit }],
+            lines: [{ id: "summary-1", label: c.specimenPass, amount: unit }],
             adjustments: [],
             currency,
             kind: "receipt",
@@ -557,16 +723,24 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
           p,
         ),
       ),
-      buy: v.take(deriveBuyBar({ price: safePrice, action }, p)),
+      buy: v.take(deriveBuyBar({ price: safePrice, action: onward(c.reviewOrder) }, p)),
       pricing: v.take(
         derivePricing(
           {
             content: sample([
               {
                 id: "plan-1",
-                title: name,
-                offers: [{ periodId: "period-1", price: safePrice, action }],
-                features: { feature: { kind: "included" } },
+                title: c.variantIndividual,
+                // A tier offered for both periods carries the amount of each, so the
+                // figure a person reads is the one for the period they selected.
+                // A tier card holds one control: the card's own selection. An offer
+                // that carries a verb of its own puts a second way to choose -- or,
+                // worse, the page's own continuation -- inside a choice.
+                offers: [
+                  { periodId: "period-month", price: safePrice },
+                  { periodId: "period-year", price: money("12990") },
+                ],
+                features: { feature: { kind: "excluded" } },
               },
               {
                 id: "plan-2",
@@ -575,18 +749,23 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                   state === "missing-offer"
                     ? []
                     : [
-                        {
-                          periodId: "period-1",
-                          price: { kind: "contact", label: c.details },
-                          action: secondary,
-                        },
+                        { periodId: "period-month", price: money("2199") },
+                        // Both cards state a price: a plan whose price is the word
+                        // "Full details" repeats its own row label and chooses nothing.
+                        { periodId: "period-year", price: money("21990") },
                       ],
-                features: {},
+                features: { feature: { kind: "included" } },
               },
             ]),
-            periods: [{ id: "period-1", label: c.period }],
-            selectedPeriodId: "period-1",
-            features: [{ id: "feature", label: c.details }],
+            periods: [
+              { id: "period-month", label: c.periodMonthly, unitLabel: c.unitMonthly },
+              { id: "period-year", label: c.periodAnnual, unitLabel: c.unitYearly },
+            ],
+            selectedPeriodId: held.period ?? "period-year",
+            // The card a person chose is the card drawn chosen; the page holds it the
+            // way it holds the chosen chip, point and period.
+            ...(held.plan ? { selectedPlanId: held.plan } : {}),
+            features: [{ id: "feature", label: c.benefitTours }],
           },
           p,
         ),
@@ -604,15 +783,36 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             viewport: { longitude: 0, latitude: 0, zoom: 4 },
             legend: [status],
             capabilities: { latitudeBounds: [-85, 85], zoomBounds: [0, 22] },
-            providerState: state === "provider-offline" ? "offline" : "unsupported",
-            providerMessage: p.copy.issue.unsupported,
-            attribution: name,
+            // The map the page leads with is the one that works: an unsupported
+            // provider is a state of its own, not the shape of every map screen.
+            providerState:
+              state === "provider-offline"
+                ? "offline"
+                : state === "provider-unsupported"
+                  ? "unsupported"
+                  : "ready",
+            ...(state === "provider-offline" ? { providerMessage: p.copy.state.offline.body } : {}),
+            attribution: c.sourceFloorPlan,
           },
           p,
         ),
       ),
       media: v.take(deriveMedia(mediaInput, p)),
-      hero: v.take(deriveMediaHero({ item: images[0]!, title: name, action: secondary }, p)),
+      hero: v.take(
+        // The frame already carries the photograph's own line; the heading names
+        // the room, so the screen does not say the same sentence twice.
+        // The secondary verb opens this picture, so it is offered over this picture:
+        // while the frame is still a skeleton, or has failed, the specimen would
+        // otherwise print an enabled control for an act its own state refuses.
+        deriveMediaHero(
+          {
+            item: images[0]!,
+            title: c.placePrintRoom,
+            ...(images[0]!.state === "ready" ? { action: secondary } : {}),
+          },
+          p,
+        ),
+      ),
       viewer: v.take(deriveViewer({ ...mediaInput, open: held.open ?? true }, p)),
       spark: v.take(deriveSparkline(chartInput, p)),
       chart: v.take(
@@ -623,22 +823,27 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 content: sample([
                   {
                     id: "series-1",
-                    label: name,
+                    label: c.seriesVisitors,
                     tone: "info",
+                    // Open to close in whole hours, so the axis names hours and
+                    // not the half-hours between the counts.
                     points: [
-                      { id: "a", x: 0, y: 4 },
-                      { id: "b", x: 1, y: 8 },
-                      { id: "c", x: 2, y: 6 },
+                      { id: "a", x: 10, y: 4 },
+                      { id: "b", x: 12, y: 8 },
+                      { id: "c", x: 14, y: 6 },
                     ],
                   },
                   {
+                    // One chart, one unit: a second series of the same thing, named
+                    // for where it is counted. "Passes sold" beside a y axis of
+                    // visitors is the same sentence reading two ways at once.
                     id: "series-2",
-                    label: choice.choices[1]!.label,
+                    label: c.seriesCourtyard,
                     tone: "ok",
                     points: [
-                      { id: "d", x: 0, y: 2 },
-                      { id: "e", x: 1, y: 3 },
-                      { id: "f", x: 2, y: 5 },
+                      { id: "d", x: 10, y: 2 },
+                      { id: "e", x: 12, y: 3 },
+                      { id: "f", x: 14, y: 5 },
                     ],
                   },
                 ]),
@@ -655,11 +860,28 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
                 { id: "a", label: choice.choices[0]!.label },
                 { id: "b", label: choice.choices[1]!.label },
               ],
-              series: [{ id: "values", label: name, tone: "info", values: { a: -2, b: 5 } }],
+              series: [
+                state === "negative"
+                  ? {
+                      // A change is the one thing about passes that is honestly
+                      // negative. A count of them is not, and a bar chart showing -2
+                      // of a thing that cannot go below zero reads as a broken chart.
+                      id: "change",
+                      label: c.seriesChange,
+                      tone: "info",
+                      values: { a: -2, b: 5 },
+                    }
+                  : {
+                      id: "values",
+                      label: c.seriesPassesSold,
+                      tone: "info",
+                      values: { a: 3, b: 5 },
+                    },
+              ],
             }),
-            xLabel: chartInput.xLabel,
-            yLabel: chartInput.yLabel,
-            unitLabel: chartInput.unitLabel,
+            xLabel: c.axisVariant,
+            yLabel: state === "negative" ? c.seriesChange : c.seriesPassesSold,
+            unitLabel: c.unitPasses,
             fractionDigits: 0,
             ranges: [],
           },
@@ -669,12 +891,94 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       stat: v.take(
         deriveStat(
           {
-            label: name,
+            label: c.seriesVisitors,
             value: 90,
             comparison: state === "zero-baseline" ? 0 : 120,
             fractionDigits: 0,
             preference: "lower",
           },
+          p,
+        ),
+      ),
+      // The four interaction shapes the phone owes the most: how far through,
+      // where you can go, what the query found, and what is still playing.
+      meter: v.take(
+        deriveMeter(
+          state === "unmeasured"
+            ? { value: 7, label: c.meterStorage }
+            : state === "percent"
+              ? { value: 1, max: 4, format: "percent", label: pt ? "Carregamento" : "Upload" }
+              : state === "steps"
+                ? { value: 2, max: 3, format: "steps", label: c.step }
+                : { value: 3, max: 8, label: c.meterStorage },
+          p,
+        ),
+      ),
+      tabs: v.take(
+        deriveTabs(
+          state === "five"
+            ? {
+                tabs: [
+                  { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
+                  { id: "sets", label: pt ? "Conjuntos" : "Sets" },
+                  { id: "search", label: c.search },
+                  { id: "library", label: pt ? "Biblioteca" : "Library", badge: 128 },
+                  { id: "you", label: pt ? "Tu" : "You" },
+                ],
+                selected: "library",
+              }
+            : state === "unavailable"
+              ? {
+                  tabs: [
+                    { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
+                    {
+                      id: "billing",
+                      label: pt ? "Fatura" : "Billing",
+                      unavailable: pt
+                        ? "Peça o acesso a um responsável"
+                        : "Ask an owner for access",
+                    },
+                    { id: "you", label: pt ? "Tu" : "You" },
+                  ],
+                  selected: "today",
+                }
+              : {
+                  // The middle destination is the one drawn selected, so the page may
+                  // stand the pass beneath the bar that leads to it: a bar with Search
+                  // chosen over an admission pass names one screen and shows another.
+                  // Selection is written in the bar's own treatment — a tinted slot, a
+                  // heavier name, the glyph in the accent — never by taking the selected
+                  // destination's glyph away and leaving its neighbours standing alone.
+                  tabs: [
+                    { id: "today", label: pt ? "Hoje" : "Today", badge: 4 },
+                    { id: "passes", label: "Passes" },
+                    { id: "search", label: c.search },
+                  ],
+                  selected: "passes",
+                },
+          p,
+        ),
+      ),
+      search: v.take(
+        deriveSearch(
+          state === "clear"
+            ? { value: "", placeholder: c.search }
+            : state === "busy"
+              ? {
+                  value: c.queryPrint,
+                  placeholder: c.search,
+                  busy: true,
+                  count: images.length,
+                }
+              : { value: c.queryPrint, placeholder: c.search, count: images.length },
+          p,
+        ),
+      ),
+      playback: v.take(
+        derivePlayback(
+          state === "live"
+            ? { position: 95, label: c.nowPlaying }
+            : { position: 67, total: 247, label: c.nowPlaying },
           p,
         ),
       ),

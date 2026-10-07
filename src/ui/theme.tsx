@@ -4,8 +4,10 @@
 // export's fallback stacks resolved to what each platform ships; the sizes are
 // scale.ts. Nothing else reads a colour.
 import React, { createContext, useContext, useMemo } from "react";
-import { Platform, StyleSheet, useColorScheme } from "react-native";
-import { extent, hit, icon, radius, space, type } from "./scale";
+import { Platform, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
+import { alpha, mix, type AAKind } from "../core/color";
+import type { Status } from "../core/shared";
+import { elevation, extent, hit, icon, radius, space, type } from "./scale";
 import { palette, type Mode, type Palette } from "./tokens";
 
 export type { Mode, Palette } from "./tokens";
@@ -26,8 +28,65 @@ export interface Theme {
   readonly icon: typeof icon;
   readonly extent: typeof extent;
   readonly type: typeof type;
+  readonly elevation: typeof elevation;
+  readonly state: Interaction;
   readonly hit: number;
 }
+
+/** Shadow is how a strip says it floats: RN asks for a shadow, Android for an elevation. */
+export interface Shadow {
+  readonly shadowColor: string;
+  readonly shadowOpacity: number;
+  readonly shadowRadius: number;
+  readonly shadowOffset: { readonly width: number; readonly height: number };
+  readonly elevation: number;
+}
+
+/**
+ * Interaction is the seven states a control can be in, each derived from the
+ * palette it sits on. Nothing else may invent a press, a hover or a scrim: a
+ * mix over the surface underneath is the one implementation, so AA is a
+ * property of the mix rather than a hope (tests/ui/contrast.test.tsx).
+ */
+export interface Interaction {
+  readonly hovered: string;
+  readonly pressed: string;
+  readonly selected: string;
+  readonly disabled: { readonly fill: string; readonly text: string };
+  readonly divider: string;
+  /** outline is a control's own edge: the line that says something here can be used. */
+  readonly outline: string;
+  readonly scrim: string;
+  readonly raised: Shadow;
+}
+
+const raisedShadow = (color: string, strength: number): Shadow => ({
+  shadowColor: color,
+  shadowOpacity: strength === 2 ? 0.18 : 0.12,
+  shadowRadius: strength === 2 ? 20 : 12,
+  shadowOffset: { width: 0, height: strength === 2 ? 6 : 4 },
+  elevation: strength,
+});
+
+const interaction = (c: Palette): Interaction => ({
+  hovered: mix(c.surfacePrimary, c.accentDefault, 0.06),
+  // A press is the faintest shade that leaves every ink on it legible, counted
+  // in the pair registry below: the ripple and the fill of a solid button carry
+  // the rest. A darker press would strand a row's secondary line.
+  pressed: mix(c.surfacePrimary, c.textPrimary, 0.04),
+  // A selection is the accent tinted into the surface it sits on. 0.08 is the most
+  // tint that leaves every ink a control paints on it at full strength above AA — a
+  // destructive row's title is the binding pair, and the registry below counts it in
+  // both palettes. A selection never rests on the tint alone: the accent glyph and
+  // the semibold label carry it, so the gap between a hover and a selection is not
+  // the only thing a person has.
+  selected: mix(c.surfacePrimary, c.accentDefault, 0.08),
+  disabled: { fill: mix(c.surfacePrimary, c.surfaceMuted, 0.5), text: c.textMuted },
+  divider: c.borderDefault,
+  outline: c.textMuted,
+  scrim: alpha(c.textPrimary, extent.scrim),
+  raised: raisedShadow(c.textPrimary, elevation.raised),
+});
 
 // The export's stacks name Iowan Old Style and IBM Plex; iOS ships the first,
 // neither ships the second, and a face the phone does not have is the system
@@ -43,8 +102,117 @@ export function themeFor(
   colors: Readonly<Record<Mode, Palette>> = palette,
   faces: Fonts = fonts,
 ): Theme {
-  return { mode, color: colors[mode], font: faces, space, radius, icon, extent, type, hit };
+  return {
+    mode,
+    color: colors[mode],
+    font: faces,
+    space,
+    radius,
+    icon,
+    extent,
+    type,
+    elevation,
+    state: interaction(colors[mode]),
+    hit,
+  };
 }
+
+/**
+ * statusInk is what a tone looks like when it is drawn rather than written: the
+ * colour a chart's series, a bar or any other mark wears for its tone. The core
+ * decides which tone a value carries; only this function decides the ink, so a
+ * series that says "warning" cannot be blue on one screen and amber on another.
+ */
+export function statusInk(t: Theme, tone: Status["tone"]): string {
+  switch (tone) {
+    case "info":
+      return t.color.statusInfo;
+    case "ok":
+      return t.color.statusOk;
+    case "warning":
+      return t.color.statusWarning;
+    case "danger":
+      return t.color.statusDanger;
+    default:
+      return t.color.textPrimary;
+  }
+}
+
+/**
+ * contrastPairs is the registry the theme owes AA to: every role it hands a
+ * component, on the surface that role is drawn over, with the minimum the
+ * acceptance names. A new role with no row here fails the suite, so an
+ * interaction state cannot be added faster than it is measured.
+ */
+export const contrastPairs: readonly [string, string, AAKind][] = [
+  ["color.textPrimary", "color.surfacePrimary", "text"],
+  ["color.textPrimary", "color.surfaceCanvas", "text"],
+  ["color.textPrimary", "color.surfaceMuted", "text"],
+  ["color.textMuted", "color.surfacePrimary", "text"],
+  ["color.textMuted", "color.surfaceCanvas", "text"],
+  ["color.textMuted", "color.statusOkBg", "text"],
+  ["color.textMuted", "color.statusDangerBg", "text"],
+  ["color.accentDefault", "color.surfacePrimary", "text"],
+  ["color.accentDefault", "color.surfaceCanvas", "text"],
+  ["color.accentOn", "color.accentDefault", "text"],
+  ["color.statusOk", "color.statusOkBg", "text"],
+  ["color.statusWarning", "color.statusWarningBg", "text"],
+  ["color.statusDanger", "color.statusDangerBg", "text"],
+  ["color.statusInfo", "color.statusInfoBg", "text"],
+  ["color.sidebarText", "color.sidebarBg", "text"],
+  ["color.sidebarMuted", "color.sidebarBg", "text"],
+  ["color.textPrimary", "state.hovered", "text"],
+  ["color.textPrimary", "state.pressed", "text"],
+  ["color.textPrimary", "state.selected", "text"],
+  ["color.textMuted", "state.hovered", "text"],
+  ["color.textMuted", "state.pressed", "text"],
+  ["color.textMuted", "state.selected", "text"],
+  // A destructive row keeps its danger ink through every interaction state it can
+  // be in, so each of those three is measured with that ink on it, not only the
+  // plain surface. Row.tsx paints all three.
+  ["color.statusDanger", "state.hovered", "text"],
+  ["color.statusDanger", "state.pressed", "text"],
+  ["color.statusDanger", "state.selected", "text"],
+  // A plain or secondary button's label is accent ink over a hover or a press.
+  ["color.accentDefault", "state.pressed", "text"],
+  // A destructive button's own label, and a dialog's reason in danger ink.
+  ["color.accentOn", "color.statusDanger", "text"],
+  ["color.statusDanger", "color.surfacePrimary", "text"],
+  // A meter's fill is a graphic that carries how far through the work is, so the
+  // three tones it offers are measured against its track.
+  ["color.accentDefault", "color.surfaceMuted", "graphic"],
+  ["color.statusOk", "color.surfaceMuted", "graphic"],
+  ["color.statusWarning", "color.surfaceMuted", "graphic"],
+  ["state.disabled.text", "state.disabled.fill", "text"],
+  // A selected tab's glyph and a selected row's tick: an icon that carries the
+  // selection, not the label, which is drawn in full-strength ink.
+  ["color.accentDefault", "state.selected", "graphic"],
+  ["color.accentDefault", "state.hovered", "text"],
+  ["color.accentOn", "color.accentHover", "text"],
+  // A control's edge is drawn in outline, never in the hairline a section rule
+  // uses: borderDefault carries no meaning on its own, so nothing claims a
+  // ratio for it. borderStrong edges a disabled control, which 1.4.3 exempts.
+  ["state.outline", "color.surfacePrimary", "graphic"],
+  ["state.outline", "color.surfaceCanvas", "graphic"],
+  ["state.outline", "color.surfaceMuted", "graphic"],
+  ["color.focus", "color.surfacePrimary", "graphic"],
+  ["color.accentDefault", "color.surfacePrimary", "graphic"],
+  ["color.statusDanger", "color.surfacePrimary", "graphic"],
+  ["color.statusOk", "color.surfacePrimary", "graphic"],
+  // A chart series is a mark whose tone is the only thing saying which series a
+  // bar or a line is, so every ink statusInk can hand out is measured over both
+  // surfaces a plot is drawn on. BarChart.tsx and AreaChart.tsx paint all four.
+  ["color.statusInfo", "color.surfacePrimary", "graphic"],
+  ["color.statusWarning", "color.surfacePrimary", "graphic"],
+  ["color.statusInfo", "color.surfaceCanvas", "graphic"],
+  ["color.statusWarning", "color.surfaceCanvas", "graphic"],
+  ["color.statusOk", "color.surfaceCanvas", "graphic"],
+  ["color.statusDanger", "color.surfaceCanvas", "graphic"],
+  // A bar is measured from zero, so the plot draws the zero line; it is a graphic
+  // a reader needs to tell a bar above nothing from one below it.
+  ["color.textMuted", "color.surfacePrimary", "graphic"],
+  ["color.textMuted", "color.surfaceCanvas", "graphic"],
+];
 
 const Context = createContext<Theme>(themeFor("light"));
 
@@ -80,3 +248,14 @@ export function useStyles<T extends StyleSheet.NamedStyles<T>>(make: (t: Theme) 
   const theme = useTheme();
   return useMemo(() => StyleSheet.create(make(theme)), [theme, make]);
 }
+
+/**
+ * controlInk puts the label's own colour on the element a press lands on.
+ * On the web that element is a box which, left alone, inherits the browser's
+ * black: a filled button then measures as black-on-accent (2.7:1) at its own
+ * edge even though the word drawn inside it is near-white. Native has no colour
+ * to put on a View — the Text that draws the word carries it there — so the
+ * style is written only where it means something.
+ */
+export const controlInk = (color: string): ViewStyle =>
+  (Platform.select({ web: { color }, default: undefined }) ?? {}) as ViewStyle;

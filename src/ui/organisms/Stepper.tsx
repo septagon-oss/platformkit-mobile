@@ -35,16 +35,27 @@ export function Stepper({
       <Text
         accessibilityRole="progressbar"
         accessibilityLabel={model.progressLabel}
-        accessibilityValue={{ min: 0, max: 100, now: model.progress * 100 }}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={model.progress * 100}
       >
-        {model.progressLabel}
+        {model.progressText}
       </Text>
       <View style={s.row}>
         {model.steps.map((step) => (
+          // A stage is named by the thing it asks for; its state is drawn, not
+          // appended to its name. The stage a person is standing on carries the
+          // ring the kit uses for what is chosen, a stage they finished carries
+          // the check that says so, and a stage this task will not let them jump
+          // to keeps the outline that means exactly that — which is not the one
+          // they are on. The full words, "Your details · Complete", are what the
+          // control announces, in the language the screen was asked for.
           <Button
             key={step.id}
-            label={step.displayLabel}
+            label={step.label}
+            name={step.displayLabel}
             tone="secondary"
+            {...(step.completion === "complete" ? { icon: "check" as const } : {})}
             selected={step.selected}
             disabled={!step.canGo}
             onPress={() => {
@@ -59,11 +70,16 @@ export function Stepper({
         <Notice text={model.firstProblem.message} announcement="urgent" />
       ) : null}
       {children}
-      <View style={s.row}>
-        {model.back ? <ActionControl model={model.back} onAction={onBack} /> : null}
+      {/* Moving the stage on and leaving it are different acts, so they are not
+          offered in one line: what the stage asks for now stands on its own, and
+          going back, saving the draft or resolving a lost write follow beneath. */}
+      <View style={s.row} testID="stepper-verbs">
         {model.next ? <ActionControl model={model.next} onAction={onNext} /> : null}
-        {model.skip ? <ActionControl model={model.skip} onAction={onSkip} /> : null}
         {model.finish ? <ActionControl model={model.finish} onAction={onFinish} /> : null}
+        {model.skip ? <ActionControl model={model.skip} onAction={onSkip} /> : null}
+      </View>
+      <View style={s.row} testID="stepper-exit">
+        {model.back ? <ActionControl model={model.back} onAction={onBack} /> : null}
         {model.saveAndExit ? (
           <ActionControl model={model.saveAndExit} onAction={onSaveAndExit} />
         ) : null}

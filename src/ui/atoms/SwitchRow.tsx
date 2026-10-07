@@ -25,7 +25,8 @@ export function SwitchRow({ label, value, onValueChange, disabled = false, help,
       disabled={disabled}
       accessibilityRole="switch"
       accessibilityLabel={label}
-      accessibilityState={{ checked: value, disabled }}
+      aria-checked={value}
+      aria-disabled={disabled}
       {...testable(testID)}
     >
       <View style={s.text}>
@@ -40,7 +41,7 @@ export function SwitchRow({ label, value, onValueChange, disabled = false, help,
         value={value}
         onValueChange={onValueChange}
         disabled={disabled}
-        trackColor={{ true: t.color.accentDefault, false: t.color.borderDefault }}
+        trackColor={{ true: t.color.accentDefault, false: t.state.outline }}
         thumbColor={t.color.surfacePrimary}
         importantForAccessibility="no"
       />

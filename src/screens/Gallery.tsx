@@ -10,7 +10,17 @@ import { systemClock } from "./clock";
 
 const stateFeedback = (props: StateViewProps) => <StateFeedback {...props} />;
 
-export function Gallery({ clock = systemClock }: { readonly clock?: Clock } = {}) {
+export function Gallery({
+  clock = systemClock,
+  page,
+  initialCaseId,
+}: {
+  readonly clock?: Clock;
+  /** page shows one screen-shaped composition; the index screen keeps the pickers. */
+  readonly page?: string;
+  /** initialCaseId opens the index screen on one specimen, so a specimen can be pointed at, photographed and linked. */
+  readonly initialCaseId?: string;
+}) {
   const feedback = useFeedback();
   const { locale, timeZone } = Intl.DateTimeFormat().resolvedOptions();
   const presentation: Presentation = {
@@ -24,6 +34,8 @@ export function Gallery({ clock = systemClock }: { readonly clock?: Clock } = {}
   return (
     <GalleryView
       presentation={presentation}
+      {...(page === undefined ? {} : { page })}
+      {...(initialCaseId === undefined ? {} : { initialCaseId })}
       renderState={stateFeedback}
       renderZoom={(props) => <NativeZoom {...props} />}
     />

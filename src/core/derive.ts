@@ -497,8 +497,10 @@ export * from "./pricing";
 export * from "./map";
 export * from "./media";
 export * from "./charts";
+export * from "./table";
 export type { Content, ContentModel, Page, Status, Control as ActionModel } from "./shared";
 
 export * from "./catalogActivity";
 export * from "./catalogList";
 export { kitExamples, kitCaseIds, type KitExamples, type GallerySelection } from "./kitGallery";
+export { sceneFor, sceneNames, type Scene } from "./kitScenes";

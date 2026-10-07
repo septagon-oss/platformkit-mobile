@@ -2,7 +2,7 @@
 // development and in a build whose configuration asked for it (the ci
 // profile in app.config.ts); a release has no such route.
 import Constants from "expo-constants";
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Gallery } from "../src/screens/Gallery";
 
@@ -10,11 +10,16 @@ const shown = __DEV__ || Constants.expoConfig?.extra?.gallery === true;
 const options = { title: "Gallery", headerLargeTitleEnabled: false } as const;
 
 export default function GalleryRoute() {
+  const { case: chosen } = useLocalSearchParams<{ case?: string }>();
+  const specimen = Array.isArray(chosen) ? chosen[0] : chosen;
   if (!shown) return <Redirect href="/" />;
   return (
     <>
       <Stack.Screen options={options} />
-      <Gallery />
+      {/* ?case=<specimen> opens the library on one specimen. A reference row in
+          design/references/refs.json names the specimen it was photographed
+          from, so the picture and the row it came from are the same link. */}
+      <Gallery {...(specimen === undefined ? {} : { initialCaseId: specimen })} />
     </>
   );
 }

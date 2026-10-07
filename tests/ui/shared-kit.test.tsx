@@ -85,7 +85,10 @@ test("controlled choice, clear and quantity emit only eligible changed targets",
 });
 
 test("selection and inline row actions do not activate the row", async () => {
-  const model = ok(kitExamples(presentation, "data-list/grouped")).list,
+  // The specimen that demonstrates selection, with nothing ticked yet — the grouped
+  // specimen carries no tick boxes at all, since grouping and bulk selection are
+  // two demonstrations and one screen does not make both points at once.
+  const model = ok(kitExamples(presentation, "data-list/selection-some", { selectedIds: [] })).list,
     onOpen = jest.fn(),
     onSelection = jest.fn(),
     onRowAction = jest.fn();
@@ -99,13 +102,17 @@ test("selection and inline row actions do not activate the row", async () => {
       />,
     ),
   );
-  await fireEvent.press(screen.getByRole("checkbox", { name: "Select: Example" }));
+  await fireEvent.press(
+    screen.getByRole("checkbox", { name: `Select: ${presentation.copy.kit.specimenPass}` }),
+  );
   expect(onSelection.mock.calls).toEqual([[["row-1"]]]);
   expect(onOpen).not.toHaveBeenCalled();
   await fireEvent.press(screen.getAllByRole("button", { name: "Full details" })[0]!);
   expect(onRowAction.mock.calls).toEqual([["row-1", "inspect"]]);
   expect(onOpen).not.toHaveBeenCalled();
-  await fireEvent.press(screen.getByRole("button", { name: "Example, Quantity: 2" }));
+  await fireEvent.press(
+    screen.getByRole("button", { name: `${presentation.copy.kit.specimenPass}, Quantity: 2` }),
+  );
   expect(onOpen.mock.calls).toEqual([["row-1"]]);
 });
 
@@ -214,9 +221,13 @@ test("a loading image keeps its renderer mounted so the native load can complete
 });
 
 test("unsupported map providers retain the list without offering a retry", async () => {
-  await render(<Gallery presentation={presentation} initialCaseId="map-with-list/points" />);
+  await render(
+    <Gallery presentation={presentation} initialCaseId="map-with-list/provider-unsupported" />,
+  );
   expect(
-    within(screen.getByTestId("gallery-kit")).getByRole("button", { name: "Example" }),
+    within(screen.getByTestId("gallery-kit")).getByRole("button", {
+      name: presentation.copy.kit.placePrintRoom,
+    }),
   ).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
   await screen.rerender(

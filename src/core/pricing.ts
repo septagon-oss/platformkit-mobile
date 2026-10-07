@@ -15,6 +15,13 @@ import {
 export interface BillingPeriod {
   readonly id: string;
   readonly label: string;
+  /**
+   * What an amount chosen under this period is charged in — "per month", "per
+   * year". A figure beside a period name does not say which: the same 12.99 is
+   * a monthly direct debit and an annual bill, and the person choosing between
+   * two plans cannot tell them apart without the unit.
+   */
+  readonly unitLabel: string;
 }
 export interface Feature {
   readonly id: string;
@@ -48,6 +55,7 @@ export function derivePricing(input: PricingInput, p: Presentation) {
   return build(p, (v: Validation) => {
     const base = content(input.content, v);
     v.ids(input.periods, "periods");
+    input.periods.forEach((period, i) => v.text(period.unitLabel, `periods.${i}.unitLabel`));
     v.ids(input.features, "features");
     input.features.forEach((f) => v.text(f.label, "features.label"));
     const periods = v.take(
@@ -76,9 +84,22 @@ export function derivePricing(input: PricingInput, p: Presentation) {
         seen.add(offer.periodId);
         if (offer.price.kind === "contact")
           v.text(offer.price.label, `plans.${i}.offers.${j}.price`);
+        // The offer is priced *for a period*, so the amount it draws carries that
+        // period's unit unless the offer names a unit of its own.
+        const unit = input.periods.find((period) => period.id === offer.periodId)!;
         return {
           periodId: offer.periodId,
-          price: offer.price.kind === "contact" ? undefined : v.take(derivePrice(offer.price, p)),
+          price:
+            offer.price.kind === "contact"
+              ? undefined
+              : v.take(
+                  derivePrice(
+                    offer.price.unitLabel
+                      ? offer.price
+                      : { ...offer.price, unitLabel: unit.unitLabel },
+                    p,
+                  ),
+                ),
           contact: offer.price.kind === "contact" ? offer.price.label : undefined,
           action: offer.action
             ? action(

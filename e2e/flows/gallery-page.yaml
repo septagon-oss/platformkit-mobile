@@ -1,0 +1,30 @@
+# One page of the library, at its own route. The page names itself in its display
+# line, the states it holds arrive behind the disclosure a phone puts them in, and
+# an id the kit does not draw is refused on the screen a person asked for instead
+# of showing them another screen. The gallery routes exist only in the
+# verification profile, which is the build these flows run on.
+# screen: app/gallery/[page].tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- launchApp
+# A link that arrives while the app is still starting is lost; let it settle first.
+- waitForAnimationToEnd:
+    timeout: 5000
+- openLink: platformkit://gallery/table
+- extendedWaitUntil:
+    visible: "Table"
+    timeout: 10000
+- tapOn:
+    id: "gallery-page-later-states"
+- scrollUntilVisible:
+    element: "Quantity control"
+    direction: DOWN
+- assertVisible: "Quantity control"
+# The route keeps its refusal on the screen that was asked for: the id is the
+# kit's to own, and a name it does not have says so rather than falling back.
+- openLink: platformkit://gallery/notebook
+- assertVisible: "This information is not valid."
+- assertNotVisible:
+    id: "sign-in"

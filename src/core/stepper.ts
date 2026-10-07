@@ -78,12 +78,17 @@ export function deriveStepper(input: StepperInput, p: Presentation) {
     const current = input.steps[index];
     return {
       steps: input.steps.map((s, i) => {
+        // The word under a stage is its own. An optional stage that is not done
+        // yet is not "Required": that sentence is about what a person owes, and a
+        // stage which can be skipped owes nothing.
         const stateLabel =
           s.completion === "complete"
             ? p.copy.kit.complete
             : s.completion === "skipped"
               ? p.copy.kit.skipped
-              : p.copy.kit.required;
+              : s.optional
+                ? p.copy.kit.optional
+                : p.copy.kit.required;
         return {
           ...s,
           selected: i === index,
@@ -94,7 +99,12 @@ export function deriveStepper(input: StepperInput, p: Presentation) {
       }),
       currentId: input.currentId,
       progress: input.steps.length ? done / input.steps.length : 0,
+      // What the screen says is where the person is, not the arithmetic behind it:
+      // "Steps: 1/2; Skipped: 0" is a readout, and a skipped count of nothing is noise.
       progressLabel: `${p.copy.kit.steps}: ${done}/${input.steps.length}; ${p.copy.kit.skipped}: ${skipped}`,
+      progressText: skipped
+        ? `${p.copy.kit.step} ${index + 1} ${p.copy.kit.of} ${input.steps.length} · ${skipped} ${p.copy.kit.skipped.toLowerCase()}`
+        : `${p.copy.kit.step} ${index + 1} ${p.copy.kit.of} ${input.steps.length}`,
       dirty: input.dirty ? p.copy.kit.unsaved : undefined,
       dismissal: input.dirty ? ("confirm" as const) : ("allowed" as const),
       firstProblem: current?.problems[0],

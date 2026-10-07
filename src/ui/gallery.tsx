@@ -1,26 +1,41 @@
-// Gallery is every atom and molecule with sample props, in both modes, on one
-// screen: the place a person looks at the library rather than at a resource,
-// as the web shell's component gallery is. It ships only in builds that ask
-// for it (app/gallery.tsx); nothing here names an entity.
+// Gallery is the kit looked at rather than used: the index screen audits every
+// case of every atom, molecule, organism and template in both modes, and a page
+// id draws one screen-shaped composition of them. It ships only in builds that
+// ask for it (app/gallery.tsx); nothing here names an entity, and no rule of a
+// screen lives in this file rather than in core.
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, useWindowDimensions, type ViewStyle } from "react-native";
 import {
   kitCaseIds,
   kitExamples,
+  posterFor,
+  sceneFor,
+  sceneNames,
   type GallerySelection,
+  type ImageSlotProps,
+  type PosterMark,
   deriveCopy,
   deriveFeedback,
+  humanize,
   stateExamples,
   timeText,
   type Feedback,
   type Language,
+  type MapCanvasProps,
   type Presentation,
 } from "../core/derive";
+import {
+  deriveGalleryPage,
+  groupHeading,
+  pageFamily,
+  type GalleryPageModel,
+} from "../core/galleryPages";
+import { deriveDisclosure } from "../core/surfaces";
 import { Badge } from "./atoms/Badge";
 import { Button } from "./atoms/Button";
 import { ChoiceRow } from "./atoms/ChoiceRow";
 import { DateTimeRow } from "./atoms/DateTimeRow";
-import { Icon } from "./atoms/Icon";
+import { Icon, type IconName } from "./atoms/Icon";
 import { Notice } from "./atoms/Notice";
 import { Spinner } from "./atoms/Spinner";
 import { SwitchRow } from "./atoms/SwitchRow";
@@ -35,7 +50,8 @@ import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
 import { Screen } from "./templates/Screen";
-import { ThemeProvider, useStyles, type Theme, type Palette, type Fonts } from "./theme";
+import { VerbStage } from "./verb";
+import { ThemeProvider, useStyles, useTheme, type Theme, type Palette, type Fonts } from "./theme";
 import { StateView, type Props as StateViewProps } from "./molecules/StateView";
 import type { Mode } from "./tokens";
 
@@ -47,12 +63,18 @@ import { ChoiceChips } from "./molecules/ChoiceChips";
 import { DisclosureSection } from "./molecules/DisclosureSection";
 import { DayStrip } from "./molecules/DayStrip";
 import { QuantityControl } from "./molecules/QuantityControl";
+import { ProgressMeter } from "./molecules/ProgressMeter";
+import { TabBar } from "./molecules/TabBar";
+import { SearchField } from "./molecules/SearchField";
+import { MiniPlayer } from "./molecules/MiniPlayer";
+import { ConfirmDialog } from "./molecules/ConfirmDialog";
 import { SlotOption } from "./molecules/SlotOption";
 import { MapLegend } from "./molecules/MapLegend";
 import { MediaHero, type ImageRenderer } from "./molecules/MediaHero";
 import { ModelState } from "./molecules/ModelState";
 import { Sparkline } from "./molecules/Sparkline";
 import { StatTile } from "./molecules/StatTile";
+import { DataTable } from "./organisms/DataTable";
 import { Activity } from "./organisms/Activity";
 import { DataList } from "./organisms/DataList";
 import { Stepper } from "./organisms/Stepper";
@@ -82,12 +104,27 @@ const choices = [
   { value: "done", label: "Done" },
 ];
 
+// A tab's glyph says what its label says, so it belongs to the destination and
+// never to the order a list of glyphs was written in. A destination absent here
+// draws no glyph rather than whichever one came next.
+const tabGlyph: Readonly<Record<string, IconName>> = {
+  today: "calendar",
+  sets: "grid",
+  search: "search",
+  library: "image",
+  you: "person",
+  passes: "ticket",
+  billing: "receipt",
+};
+
 interface Props {
   readonly presentation: Presentation;
   readonly palette?: Readonly<Record<Mode, Palette>>;
   readonly fonts?: Fonts;
   readonly initialCaseId?: string;
   readonly initialMode?: Mode;
+  /** page shows one screen-shaped composition instead of the pickers; the index screen keeps the audit of every case. */
+  readonly page?: string;
   /** Screen composition can supply its native announcement adapter. */
   readonly renderImage?: ImageRenderer;
   readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
@@ -102,6 +139,7 @@ export function Gallery({
   fonts,
   initialCaseId = "primitives/default",
   initialMode = "light",
+  page,
   renderState = stateView,
   renderImage,
   renderZoom,
@@ -117,6 +155,29 @@ export function Gallery({
   const example = cases.ok ? cases.value.find((item) => item.id === caseId) : undefined;
   const words = copy.gallery;
   const feedback = deriveFeedback(copy, shown.motion, shown);
+  if (page !== undefined) {
+    const derived = deriveGalleryPage(page, shown);
+    return (
+      <ThemeProvider
+        mode={initialMode}
+        {...(palette ? { palette } : {})}
+        {...(fonts ? { fonts } : {})}
+      >
+        <Screen testID={derived.ok ? derived.value.testID : "gallery-page:invalid"}>
+          {derived.ok ? (
+            <Page
+              model={derived.value}
+              presentation={shown}
+              {...(renderImage ? { renderImage } : {})}
+              {...(renderZoom ? { renderZoom } : {})}
+            />
+          ) : (
+            <Notice text={derived.issues[0]!.message} announcement="urgent" />
+          )}
+        </Screen>
+      </ThemeProvider>
+    );
+  }
   return (
     <ThemeProvider mode={mode} {...(palette ? { palette } : {})} {...(fonts ? { fonts } : {})}>
       <Screen
@@ -218,6 +279,201 @@ export function Gallery({
   );
 }
 
+/**
+ * The states rail keeps one plane for ink: the name of a family, the words of
+ * the specimen under it and the figures in it all start at the same left. A
+ * family that draws its own surface — a card, a table, a wall of pictures —
+ * hangs from the rail's edge instead and holds its words one step inside that
+ * surface, which is the plane the rest of the column stands on. The set is the
+ * kit's own surfaces: leave a family out of it and its card, and the words it
+ * keeps inside, land on a third line down the page at a desk's width, which
+ * tests/gallery-desktop-alignment.case.mjs measures on every page this branch
+ * creates.
+ */
+const ownSurface = new Set([
+  "data-table",
+  "product-card",
+  "pricing-tiers",
+  "plan-comparison",
+  "photo-gallery",
+]);
+
+/**
+ * Page is one gallery page: a display line naming what the screen is, the lead
+ * specimen that carries it, then the page's other cases, one section each under
+ * the family that owns them. No case id, no picker, no caption — a page has to
+ * read as the screen it stands for, which is what the review looks at.
+ */
+function Page({
+  model,
+  presentation,
+  renderImage,
+  renderZoom,
+}: {
+  readonly model: GalleryPageModel;
+  readonly presentation: Presentation;
+  readonly renderImage?: ImageRenderer;
+  readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
+}) {
+  const s = useStyles(pageStyles);
+  const t = useTheme();
+  const viewport = useWindowDimensions();
+  const [action, setAction] = useState("");
+  // A phone's fold holds one screen. What else the page demonstrates — the same
+  // family's other states — opens on request under the disclosure the kit already
+  // has, so the fold is a screen rather than a screen's scaffolding. On a desk two
+  // columns fit, and the states stand beside the screen where they are read.
+  const [statesOpen, setStatesOpen] = useState(false);
+  // Phone components are drawn at a phone's width wherever they are looked at:
+  // a specimen is never stretched across a desk until its gaps stop meaning
+  // anything. A monitor still gets a desk-sized page: the screen the page stands
+  // for in one phone column and its labelled states beside it in another, which
+  // is what the fold of a monitor is for. `stand` says two columns fit; between
+  // one column and two the page keeps its single centred column.
+  const stand = viewport.width > t.extent.stand + 2 * t.space.xl;
+  const column =
+    !stand && viewport.width > t.extent.pageColumn + 2 * t.space.xl
+      ? { alignSelf: "center" as const, width: t.extent.pageColumn }
+      : undefined;
+  const shown = [model.lead, ...model.withLead];
+  const rest = model.cases.filter((id) => !shown.includes(id));
+  // One section per family, in the order the page names them: a page reads as
+  // the screen it stands for, not as a list of specimen ids.
+  const groups: { readonly id: string; readonly cases: string[] }[] = [];
+  for (const caseId of rest) {
+    const id = pageFamily(caseId);
+    const group = groups.find((entry) => entry.id === id);
+    if (group) group.cases.push(caseId);
+    else groups.push({ id, cases: [caseId] });
+  }
+  const lead = (
+    <VerbStage lead>
+      <View style={s.lead}>
+        {shown.map((caseId) => (
+          <KitSamples
+            key={caseId}
+            presentation={presentation}
+            caseId={caseId}
+            onAction={setAction}
+            {...(renderImage ? { renderImage } : {})}
+            {...(renderZoom ? { renderZoom } : {})}
+          />
+        ))}
+      </View>
+    </VerbStage>
+  );
+  // A family name sits at the column's own edge and the specimen keeps its
+  // card: the page never draws a card around a card, which is what put a
+  // second inset behind a heading and left a page with three left edges.
+  const statesOf = (shown: typeof groups) => (
+    <VerbStage lead={false}>
+      {shown.map((group) => {
+        // The specimen may already name itself, in which case the family line above
+        // it would be the same heading twice.
+        const heading = groupHeading(group, presentation);
+        return (
+          <View key={group.id} style={s.group}>
+            {heading ? (
+              <Text role="caption" tone="muted" uppercase accessibilityRole="header">
+                {heading}
+              </Text>
+            ) : null}
+            {group.cases.map((caseId) => (
+              <View key={caseId} style={stand && ownSurface.has(group.id) ? s.hang : undefined}>
+                <KitSamples
+                  aside
+                  presentation={presentation}
+                  caseId={caseId}
+                  onAction={setAction}
+                  {...(renderImage ? { renderImage } : {})}
+                  {...(renderZoom ? { renderZoom } : {})}
+                />
+              </View>
+            ))}
+          </View>
+        );
+      })}
+    </VerbStage>
+  );
+  const states = statesOf(groups);
+  // A monitor's second column holds the screen's other states, read beside the
+  // screen they belong to. One state per family stands there openly; the rest of a
+  // family's examples open under the same disclosure a phone puts them behind.
+  // Showing every example at once turned that column into a wall of variants —
+  // three "Step 1 of 2" screens, one admission fact written four times — and a
+  // person could not tell which of them the page was.
+  const openGroups = stand
+    ? groups.map((group) => ({ ...group, cases: group.cases.slice(0, 1) }))
+    : groups;
+  const laterGroups = stand
+    ? groups
+        .map((group) => ({ ...group, cases: group.cases.slice(1) }))
+        .filter((group) => group.cases.length > 0)
+    : [];
+  const statesSection = deriveDisclosure(
+    {
+      id: "gallery-page-states",
+      title: presentation.copy.gallery.states,
+      summary: presentation.copy.gallery.statesHint,
+      reveals: presentation.copy.gallery.statesContent,
+      expanded: statesOpen,
+      depth: 1,
+      enabled: true,
+    },
+    presentation,
+  );
+  return (
+    <View style={[s.page, stand ? s.stand : column]}>
+      {/* One screen, one thing to do: the lead holds the page's one filled verb,
+          and every other specimen on the page is drawn in the outlined ink. On a
+          monitor the lead and the states it is shown beside stand in two phone
+          columns, so the fold holds a screen and its states rather than a strip
+          of one in the middle of an empty canvas. */}
+      <Text role="display">{model.title}</Text>
+      <View style={stand ? s.columns : s.stack}>
+        <View style={stand ? s.phone : undefined}>{lead}</View>
+        <View style={stand ? [s.phone, s.rail] : s.states}>
+          {stand && statesSection.ok && laterGroups.length > 0 ? (
+            // The column spaces what stands in it; these two are its rows. The
+            // disclosure is one of those rows, so its own words stand on the plane
+            // the column already set, and what it reveals takes that plane too —
+            // the names it opens land beside the names already standing there.
+            <>
+              {statesOf(openGroups)}
+              <View style={s.rule}>
+                <DisclosureSection
+                  model={statesSection.value}
+                  onExpanded={setStatesOpen}
+                  testID="gallery-page-later-states"
+                  summaryInside
+                >
+                  {statesOf(laterGroups)}
+                </DisclosureSection>
+              </View>
+            </>
+          ) : stand || !statesSection.ok ? (
+            states
+          ) : (
+            <View style={s.rule}>
+              <DisclosureSection
+                model={statesSection.value}
+                onExpanded={setStatesOpen}
+                testID="gallery-page-later-states"
+                summaryInside
+              >
+                {states}
+              </DisclosureSection>
+            </View>
+          )}
+        </View>
+      </View>
+      <Text accessibilityLiveRegion="polite" testID="gallery-page-action">
+        {action ? presentation.copy.gallery.actionReceived(action) : ""}
+      </Text>
+    </View>
+  );
+}
+
 function Samples({
   feedback,
   initialDate,
@@ -283,7 +539,10 @@ function Samples({
         </View>
       </Section>
 
-      <Section title="Fields">
+      {/* The fields block carries an id because design/references/refs.json
+          photographs it: a refused field is the kit's drawing of that bar, and
+          the picture has to name the block it came from. */}
+      <Section title="Fields" testID="gallery-block:primitives-fields">
         <FormField label="Words" required help="Some help under the field.">
           <TextField
             value={words}
@@ -405,13 +664,104 @@ function Samples({
   );
 }
 
+// SpecimenPoster is the gallery's own media renderer: a composition drawn from the
+// specimen's own scene where it names one (src/core/kitScenes.ts) and from its id
+// where it does not (src/core/media.ts/posterFor), so the same specimen is the same
+// artwork on every page and in every run, and two specimens of one shape are told
+// apart at a glance. It is the gallery's, not the kit's: a screen with a picture of
+// its own passes a renderer, and a picture that failed to load is still reported as
+// one with its reason and a retry (molecules/MediaHero).
+function SpecimenPoster(props: ImageSlotProps & { readonly caption?: boolean }) {
+  const t = useTheme();
+  const s = useStyles(styles);
+  const scene = props.scene ? sceneFor(props.scene) : undefined;
+  const poster = scene ? { layout: scene.name, marks: scene.marks } : posterFor(props.id);
+  const fill: Record<PosterMark["tone"], string> = {
+    accent: t.color.accentDefault,
+    ink: t.color.borderStrong,
+    sheet: t.color.surfaceMuted,
+  };
+  return (
+    <View
+      style={s.fixture}
+      accessible={!props.decorative}
+      accessibilityLabel={props.description}
+      testID={`poster:${poster.layout}`}
+    >
+      {/* The marks carry no meaning of their own: the slot's name is the
+          description, spoken once as the element's label and written below. */}
+      <View
+        style={s.field}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {poster.marks.map((mark) => (
+          <View
+            key={mark.id}
+            style={[
+              s.mark,
+              mark.shape === "disc" && s.disc,
+              mark.shape === "frame" && s.frame,
+              {
+                left: `${mark.left * 100}%`,
+                top: `${mark.top * 100}%`,
+                width: `${mark.width * 100}%`,
+                ...(mark.height === undefined
+                  ? { aspectRatio: 1 }
+                  : { height: `${mark.height * 100}%` }),
+                ...(mark.shape === "frame"
+                  ? { borderColor: fill[mark.tone] }
+                  : { backgroundColor: fill[mark.tone] }),
+              },
+            ]}
+          />
+        ))}
+      </View>
+      {/* A cover thumbnail carries no caption: its name is spoken as the slot's
+          label, and written where a line of it can be read in full. */}
+      {props.caption === false ? null : (
+        <View style={s.caption}>
+          <Text role="caption" tone="muted">
+            {props.description}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 const styles = (t: Theme) =>
   StyleSheet.create({
+    // A media slot is the one place a page shows a picture the kit does not own.
+    // The gallery owns none, so it draws one (SpecimenPoster) rather than a patch
+    // of the page's own colour, which reads as a picture that failed to load.
     fixture: {
       flex: 1,
-      padding: t.space.lg,
+      gap: t.space.xs,
+      padding: t.space.sm,
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: 1,
+      borderColor: t.state.outline,
+      borderRadius: t.radius.md,
+      overflow: "hidden",
+    },
+    field: { flex: 1, position: "relative" },
+    mark: { position: "absolute" },
+    disc: { borderRadius: t.radius.full },
+    // An opening is an edge with nothing in it: the window, the doorway and the
+    // sheet on the rack are the shapes a filled rectangle cannot be.
+    frame: { borderWidth: 1, borderStyle: "solid", backgroundColor: "transparent" },
+    caption: { paddingTop: t.space.xs },
+    // The player's artwork slot: the picture fills it, as it fills every media
+    // frame. Centring its child would collapse the frame to the width of its
+    // content, and a poster drawn as marks on a field has no content of its own
+    // to hold a width with, so the marks would be drawn into nothing.
+    artwork: {
+      width: "100%",
+      height: "100%",
+      borderRadius: t.radius.md,
+      overflow: "hidden",
       backgroundColor: t.color.surfaceMuted,
-      justifyContent: "center",
     },
     stack: { gap: t.space.xs, paddingVertical: t.space.sm },
     wrap: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm, paddingVertical: t.space.sm },
@@ -421,16 +771,26 @@ function KitSamples({
   presentation,
   caseId,
   onAction,
+  aside = false,
   renderImage,
   renderZoom,
 }: {
   readonly presentation: Presentation;
   readonly caseId: string;
   readonly onAction: (id: string) => void;
+  /**
+   * aside says this specimen is not the page's lead: a surface it opens is shut
+   * until the verb opens it, so a page never presents two screens at once, and
+   * the strip it draws takes the outlined control, because the page's one filled
+   * verb already belongs to the lead.
+   */
+  readonly aside?: boolean;
   readonly renderImage?: ImageRenderer;
   readonly renderZoom?: (props: ZoomSlotProps) => React.ReactNode;
 }) {
-  const [held, setHeld] = useState<GallerySelection>({});
+  const [held, setHeld] = useState<GallerySelection>(() => (aside ? { open: false } : {}));
+  // A dialog is met by doing something, so the specimen offers the verb first.
+  const [asked, setAsked] = useState(false);
   const result = kitExamples(presentation, caseId, held),
     s = useStyles(styles);
   if (!result.ok) return <Notice text={result.issues[0]!.message} announcement="urgent" />;
@@ -438,14 +798,9 @@ function KitSamples({
     c = presentation.copy.kit,
     family = caseId.split("/")[0];
   const action = (id: string) => onAction(id),
+    specimen = presentation.copy.gallery,
     send = (value: unknown) => onAction(JSON.stringify(value));
-  const image: ImageRenderer =
-    renderImage ??
-    ((props) => (
-      <View style={s.fixture} accessible={!props.decorative} accessibilityLabel={props.description}>
-        <Text>{props.description}</Text>
-      </View>
-    ));
+  const image: ImageRenderer = renderImage ?? ((props) => <SpecimenPoster {...props} />);
   const zoom =
     renderZoom ??
     ((props: ZoomSlotProps) => (
@@ -466,10 +821,34 @@ function KitSamples({
     setHeld({ ...held, open: false });
     action("close");
   };
-  const details = <Text>{presentation.copy.gallery.longBody}</Text>;
+  // The body of a sheet or panel is the record the sheet is about. The kit's empty
+  // collection stays where an empty collection is the specimen, and not under a title
+  // that already names what is in it.
+  const details = (
+    <View>
+      <Text>{presentation.copy.kit.detailBody}</Text>
+      <DetailRow
+        term={presentation.copy.kit.detailAdmission}
+        value={presentation.copy.kit.placePrintRoom}
+      />
+      <DetailRow
+        term={presentation.copy.kit.detailVisitors}
+        value={presentation.copy.kit.variantTwoAdults}
+      />
+    </View>
+  );
   const pricing = {
-    onPeriod: action,
-    onSelect: action,
+    // The period chips change the figures: a control over a price redraws the
+    // prices rather than announcing that something happened.
+    onPeriod: (id: string) => {
+      setHeld({ ...held, period: id });
+      action(id);
+    },
+    onSelect: (id: string) => {
+      // Choosing a tier marks it: the card a person chose is the card drawn chosen.
+      setHeld({ ...held, plan: id });
+      action(id);
+    },
     onAction: send,
     onRetry: () => action("retry"),
   };
@@ -499,6 +878,18 @@ function KitSamples({
         />
       );
     case "detail-sheet":
+      if (aside && !held.open)
+        return (
+          <Button
+            label={c.open}
+            tone="secondary"
+            onPress={() => {
+              setHeld({ ...held, open: true });
+              action("open");
+            }}
+            testID="gallery-surface-open"
+          />
+        );
       return caseId.endsWith("busy") ? (
         <SidePanel mode="docked" model={k.surface} onAction={action} onRequestClose={close}>
           {details}
@@ -524,6 +915,18 @@ function KitSamples({
         </DisclosureSection>
       );
     case "more-filters":
+      if (aside && !held.open)
+        return (
+          <Button
+            label={c.moreFilters}
+            tone="secondary"
+            onPress={() => {
+              setHeld({ ...held, open: true });
+              action("open");
+            }}
+            testID="gallery-surface-open"
+          />
+        );
       return (
         <MoreFilters
           model={k.surface}
@@ -555,7 +958,31 @@ function KitSamples({
           onSaveAndExit={() => action("save-exit")}
           onReconcile={() => action("reconcile")}
         >
-          {details}
+          {(() => {
+            // A stage is drawn with the thing it asks for, before the verbs that
+            // move past it. The specimens speak of one task, and the stage that
+            // asks when is the one that shows the times on offer; a stage that
+            // asks who is coming shows the visit, not a slot grid.
+            const stage = k.stepper.steps.find((step) => step.selected);
+            if (stage?.label !== c.stepVisit) return details;
+            return (
+              <View>
+                <Text role="title" accessibilityRole="header">
+                  {stage.label}
+                </Text>
+                {k.slots.slots.slice(0, 2).map((option) => (
+                  <SlotOption
+                    key={option.id}
+                    model={option}
+                    onSelect={(id) => {
+                      setHeld({ ...held, slot: id });
+                      send(id);
+                    }}
+                  />
+                ))}
+              </View>
+            );
+          })()}
         </Stepper>
       );
     case "slot-option":
@@ -589,6 +1016,8 @@ function KitSamples({
       return (
         <WeekCalendar
           model={k.calendar.week}
+          navigation={k.calendar.strip.navigation}
+          onNavigate={send}
           onDate={action}
           onEvent={action}
           onMoreEvents={send}
@@ -648,7 +1077,9 @@ function KitSamples({
       return (
         <MapWithList
           model={k.map.map}
-          renderMap={() => null}
+          renderMap={(canvas) => (
+            <MapCanvasFixture {...canvas} entrance={presentation.copy.gallery.entrance} />
+          )}
           renderDetail={(id) => (
             <Section title={c.details}>
               <Text>{id}</Text>
@@ -729,9 +1160,338 @@ function KitSamples({
           onRetry={() => action("retry")}
         />
       );
+    case "data-table":
+      return <DataTable model={k.table} />;
     case "stat-tile":
       return <StatTile model={k.stat} />;
+    case "progress-meter":
+      return (
+        <ProgressMeter
+          model={k.meter}
+          marks={caseId.endsWith("/steps")}
+          tone={caseId.endsWith("/unmeasured") ? "warning" : "accent"}
+          testID="gallery-meter"
+        />
+      );
+    case "tab-bar":
+      return (
+        <TabBar
+          model={k.tabs}
+          icons={k.tabs.items.map((item) => tabGlyph[item.id])}
+          onSelect={(id) => {
+            setHeld({ ...held, choice: id });
+            action(id);
+          }}
+          testID="gallery-tabs"
+        />
+      );
+    case "search-field":
+      return (
+        <SearchField
+          model={k.search}
+          onChangeText={(value) => send({ query: value })}
+          onSubmit={() => action("search")}
+          onClear={() => {
+            setHeld({ ...held, choice: undefined });
+            action("clear");
+          }}
+          testID="gallery-search"
+        />
+      );
+    case "mini-player":
+      return (
+        <MiniPlayer
+          model={k.playback}
+          // What is playing, in words a person would recognise — the room the
+          // recording is of and the kind of track it is — not the gallery's own
+          // word for "specimen", which names the page and not the audio.
+          title={c.photoPrintRoom}
+          subtitle={c.audioTour}
+          artwork={
+            <View style={s.artwork} testID="gallery-player-art">
+              <SpecimenPoster
+                id="audio-tour"
+                scene="print-room"
+                description={`${c.audioTour}: ${c.photoPrintRoom}`}
+                decorative={false}
+                fit="cover"
+                aspectRatio={1}
+                caption={false}
+              />
+            </View>
+          }
+          playing={caseId.endsWith("/track")}
+          controls={{ back: true, forward: true }}
+          collapsed={caseId.endsWith("/live")}
+          onIntent={send}
+          testID="gallery-player"
+        />
+      );
+    case "confirm-dialog":
+      return (
+        <View style={s.stack}>
+          <Button
+            label={caseId.endsWith("/keep") ? c.close : c.remove}
+            tone={caseId.endsWith("/keep") ? "secondary" : "destructive"}
+            {...(caseId.endsWith("/keep") ? {} : { icon: "trash" as const })}
+            onPress={() => {
+              setAsked(true);
+              action("ask");
+            }}
+            testID="gallery-confirm-open"
+          />
+          <ConfirmDialog
+            open={asked}
+            title={caseId.endsWith("/keep") ? c.close : c.remove}
+            body={specimen.longBody}
+            reason={c.unsaved}
+            confirm={caseId.endsWith("/keep") ? c.close : c.remove}
+            cancel={c.cancel}
+            tone={caseId.endsWith("/keep") ? "primary" : "destructive"}
+            motion={presentation.motion}
+            onConfirm={() => {
+              setAsked(false);
+              action("confirm");
+            }}
+            onCancel={() => {
+              setAsked(false);
+              action("cancel");
+            }}
+            testID="gallery-confirm"
+          />
+        </View>
+      );
     default:
       return null;
   }
+}
+
+const pageStyles = (t: Theme) =>
+  StyleSheet.create({
+    page: { gap: t.space.md, paddingTop: t.space.sm },
+    /**
+     * stand is the page at a desk's width: two phone columns, centred as one
+     * composition rather than one column centred in an empty canvas. The width
+     * is the two columns and the gap between them, so nothing inside stretches
+     * past the width a phone composition was drawn at.
+     */
+    stand: { alignSelf: "center" as const, width: t.extent.stand },
+    columns: { flexDirection: "row" as const, alignItems: "flex-start", gap: t.space.xl },
+    /**
+     * stack is the same two blocks at a phone's width, one under the other, and it
+     * owes the gap the row gets for free: the screen the page stands for and the
+     * states beside it at a desk are the screen and the states below it here, and
+     * without a step between them a table ends and its own states begin on the
+     * very line its last rule is drawn.
+     */
+    stack: { gap: t.space.xl },
+    /** states is what the stack puts under the screen: one step between its groups. */
+    states: { gap: t.space.lg },
+    phone: { width: t.extent.pageColumn, gap: t.space.xl },
+    lead: { gap: t.space.sm },
+    group: { gap: t.space.xs },
+    /**
+     * rule is the one step the page's state disclosure takes from the screen above
+     * it: a hairline and a step, so the row that asks for the page's other states
+     * reads as the screen's own quiet row rather than as a second screen.
+     */
+    rule: {
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: t.color.borderDefault,
+      paddingTop: t.space.lg,
+    },
+    /**
+     * rail is the state column's one step in from its edge, taken by the column
+     * once rather than by every line in it: a family's name, the words of a
+     * specimen that draws no surface, and a disclosure's own heading then stand on
+     * one plane by construction, instead of each row being asked to remember the
+     * step. On a phone the states share the screen's column, so nothing is inset
+     * and they stand where every other word on the screen stands.
+     */
+    rail: { paddingLeft: t.space.lg },
+    /**
+     * hang is that step taken back: a family that draws its own surface starts from
+     * the column's edge, so the words inside its surface — which is where a person
+     * reads — come back to the plane the column holds.
+     */
+    hang: { marginLeft: -t.space.lg },
+    // The plan draws a building, not a field for pins: a muted floor, the rooms cut
+    // out of it in the page's own surface, the walk to them kept clear, and the
+    // threshold a person enters by in the one accent. The geometry is PLAN below.
+    canvas: {
+      height: t.extent.chart,
+      borderRadius: t.radius.md,
+      backgroundColor: t.color.surfaceMuted,
+      borderWidth: 1,
+      borderColor: t.state.outline,
+      overflow: "hidden",
+      gap: t.space.xs,
+    },
+    plan: { flex: 1 },
+    room: {
+      position: "absolute",
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: 1,
+      borderColor: t.state.outline,
+      // A plan says which room is which: the name is written where the room is,
+      // so the drawing carries the same words the list below it carries.
+      alignItems: "center",
+      justifyContent: "center",
+      padding: t.space.xs,
+    },
+    roomName: { textAlign: "center" },
+    // The walk is floor with a wall either side of it, which is how a plan says
+    // "this is where you go" without drawing an arrow.
+    walk: {
+      position: "absolute",
+      backgroundColor: t.color.surfacePrimary,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: t.state.outline,
+    },
+    entrance: {
+      position: "absolute",
+      backgroundColor: t.color.surfacePrimary,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: t.state.outline,
+      justifyContent: "flex-end",
+      alignItems: "center",
+      gap: t.space.xs,
+      paddingBottom: t.space.xs,
+    },
+    entranceName: { textAlign: "center" },
+    threshold: { height: t.extent.focus, backgroundColor: t.color.accentDefault },
+    pin: {
+      position: "absolute",
+      alignItems: "center",
+      gap: t.space.xs,
+      // The point is the middle of the dot, not its top-left corner: a pin whose
+      // label sits under it has to hang from the place it names.
+      transform: [{ translateX: -t.icon.md / 2 }, { translateY: -t.icon.md / 2 }],
+    },
+    marker: {
+      width: t.icon.md,
+      height: t.icon.md,
+      borderRadius: t.radius.full,
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: t.extent.focus,
+      borderColor: t.color.accentDefault,
+    },
+    markerSelected: { backgroundColor: t.color.accentDefault },
+    /** pinLabel is the place's name in words: a dot with no name is a defect a person sees at once. */
+    pinLabel: {
+      borderRadius: t.radius.full,
+      paddingHorizontal: t.space.sm,
+      paddingVertical: t.space.xs,
+      backgroundColor: t.color.surfacePrimary,
+      borderWidth: 1,
+      borderColor: t.state.outline,
+    },
+    // The plan's source is its own line under the drawing, where a map keeps its
+    // attribution. Painted inside the drawing it reads as a status the map reports
+    // about itself.
+    attribution: { paddingHorizontal: t.space.sm, paddingBottom: t.space.xs },
+  });
+
+/**
+ * PLAN is the building the specimen's points stand in, in fractions of the canvas:
+ * rooms, the walk that reaches them and the threshold a person enters by. The
+ * gallery owns no map provider, so it draws a plan it can name rather than an
+ * empty field for pins to float in. Fixed geometry, so one page is one building in
+ * every capture, in every run.
+ */
+const PLAN = {
+  rooms: [
+    { id: "print-room", left: 0.05, top: 0.08, width: 0.35, height: 0.32 },
+    { id: "upper-landing", left: 0.44, top: 0.08, width: 0.2, height: 0.32 },
+    { id: "courtyard", left: 0.68, top: 0.08, width: 0.27, height: 0.32 },
+    { id: "frame-hall", left: 0.05, top: 0.64, width: 0.35, height: 0.28 },
+    { id: "bindery", left: 0.68, top: 0.64, width: 0.27, height: 0.28 },
+  ],
+  walk: { left: 0.05, top: 0.46, width: 0.9, height: 0.1 },
+  entrance: { left: 0.44, top: 0.56, width: 0.2, height: 0.36 },
+};
+
+/**
+ * worldWindow is how many degrees of the world the gallery's canvas shows. It is
+ * the zoom the page's own points need to sit apart from one another by more than
+ * a label's width: at 12° the two places landed 8% of the canvas apart and their
+ * names overprinted each other, which reads as a broken map rather than as two
+ * pins. The window is clamped into the canvas so a name at its edge stays a name.
+ */
+const worldWindow = 4;
+const clamp = (pct: number, from: number, to: number) => Math.min(to, Math.max(from, pct));
+
+/**
+ * mapCanvas is the surface a map provider is handed where the gallery owns no
+ * provider: the same box, the page's own points placed in it, its attribution
+ * kept. A map page then shows a map screen doing its work — canvas, points, list
+ * — instead of the hole a provider that is not there leaves.
+ */
+function MapCanvasFixture(props: MapCanvasProps & { readonly entrance: string }) {
+  const s = useStyles(pageStyles);
+  // A place the plan already names is drawn where that name is, not at a pin of
+  // its own with the same word under it: the dot stands in the room and the room's
+  // own name says what it is. A marker the plan does not name — two points under
+  // one marker, a point outside the building — keeps its coordinates and its word.
+  const named = (marker: MapCanvasProps["markers"][number]) =>
+    PLAN.rooms.find((room) => humanize(room.id) === marker.label);
+  const place = (marker: MapCanvasProps["markers"][number]): ViewStyle => {
+    const room = named(marker);
+    if (room)
+      return {
+        left: `${(room.left + room.width / 2) * 100}%`,
+        top: `${(room.top + room.height - 0.1) * 100}%`,
+      };
+    return {
+      left: `${clamp(50 + ((marker.longitude - props.viewport.longitude) / worldWindow) * 100, 4, 74)}%`,
+      top: `${clamp(50 - ((marker.latitude - props.viewport.latitude) / worldWindow) * 100, 8, 56)}%`,
+    };
+  };
+  const box = (part: { left: number; top: number; width: number; height: number }): ViewStyle => ({
+    left: `${part.left * 100}%`,
+    top: `${part.top * 100}%`,
+    width: `${part.width * 100}%`,
+    height: `${part.height * 100}%`,
+  });
+  return (
+    <View style={s.canvas} accessible accessibilityLabel={props.attribution}>
+      <View style={s.plan}>
+        {PLAN.rooms.map((room) => (
+          <View key={room.id} style={[s.room, box(room)]}>
+            <Text role="caption" tone="muted" style={s.roomName} numberOfLines={2}>
+              {humanize(room.id)}
+            </Text>
+          </View>
+        ))}
+        <View style={[s.walk, box(PLAN.walk)]} />
+        <View style={[s.entrance, box(PLAN.entrance)]}>
+          <Text role="caption" tone="muted" style={s.entranceName} numberOfLines={1}>
+            {props.entrance}
+          </Text>
+          <View style={s.threshold} />
+        </View>
+        {props.markers.map((marker) => (
+          <Pressable
+            key={marker.id}
+            accessibilityRole="button"
+            accessibilityLabel={marker.label}
+            onPress={() => props.onMarker(marker.id)}
+            style={[s.pin, place(marker)]}
+          >
+            <View style={[s.marker, marker.selected && s.markerSelected]} />
+            {named(marker) ? null : (
+              <Text style={s.pinLabel} role="caption">
+                {marker.label}
+              </Text>
+            )}
+          </Pressable>
+        ))}
+      </View>
+      <Text style={s.attribution} role="caption" tone="muted">
+        {props.attribution}
+      </Text>
+    </View>
+  );
 }

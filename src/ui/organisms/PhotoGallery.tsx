@@ -23,9 +23,12 @@ export function PhotoGallery({ model, renderImage, onOpen, onMore, onRetry }: Pr
           {model.title}
         </Text>
       )}
+      // Each result is named above the metadata it carries, the way the masonry
+      // wall names it: a picture with no words of its own under the frame is a
+      // thumbnail, not a search result.
       render={(item) => (
         <MediaHero
-          model={{ item, title: undefined, subtitle: undefined, action: undefined }}
+          model={{ item, title: item.description, subtitle: undefined, action: undefined }}
           renderImage={renderImage}
           onOpen={onOpen}
           onRetry={onRetry}

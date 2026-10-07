@@ -37,7 +37,7 @@ export function Skeleton({ label, motion, variant = "lines", lines = 3, testID }
       accessible
       accessibilityLabel={label}
       accessibilityRole="progressbar"
-      accessibilityState={{ busy: true }}
+      aria-busy
       {...testable(testID)}
     >
       <Animated.View

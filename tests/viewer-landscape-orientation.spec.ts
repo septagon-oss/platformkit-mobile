@@ -25,7 +25,7 @@ test("selected media stays visible when a small phone rotates to landscape", asy
     await page.getByTestId("gallery-language").locator("select").selectOption("en");
     await page.getByTestId("gallery-case").locator("select").selectOption("photo-viewer/middle");
     const close = page.getByRole("button", { name: "Close", exact: true });
-    const media = page.getByText("Landscape shape", { exact: true });
+    const media = page.getByText("The courtyard from the upper landing", { exact: true });
     await close.waitFor();
     await media.waitFor({ state: "visible" });
     const portrait = await media.boundingBox();
@@ -41,7 +41,8 @@ test("selected media stays visible when a small phone rotates to landscape", asy
         () => {
           const text = Array.from(document.querySelectorAll("div")).find(
             (element) =>
-              element.childElementCount === 0 && element.textContent === "Landscape shape",
+              element.childElementCount === 0 &&
+              element.textContent === "The courtyard from the upper landing",
           );
           const box = text?.getBoundingClientRect();
           return box && box.width > 0 && box.height > 0;

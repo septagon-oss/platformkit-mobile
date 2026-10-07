@@ -1,5 +1,14 @@
 import React from "react";
-import { KeyboardAvoidingView, Modal, Platform, ScrollView, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import type { SurfaceModel } from "../../core/derive";
 import { ActionControl } from "../atoms/ActionControl";
 import { Text } from "../atoms/Text";
@@ -7,6 +16,7 @@ import { ActionBar } from "../molecules/ActionBar";
 import { StateView } from "../molecules/StateView";
 import { kitStyles } from "../layout";
 import { useStyles } from "../theme";
+import type { Theme } from "../theme";
 import { useCanvas } from "./canvas";
 export interface DetailSurfaceProps {
   readonly model: SurfaceModel;
@@ -28,26 +38,47 @@ export function DetailSurface({
   mode = "modal",
 }: { readonly mode?: "modal" | "docked" } & DetailSurfaceProps) {
   const s = useStyles(kitStyles),
+    own = useStyles(surfaceStyles),
     canvas = useCanvas();
+  // Which column the sheet's own surface holds. `canvas.page` says what ink its
+  // words are drawn in and fills whatever it is given; here it is told how wide a
+  // surface a phone's sheet is — see sheetColumn in layout.ts for why a device and
+  // a browser answer that differently.
+  const column: StyleProp<ViewStyle> = s.sheetColumn;
+  // A browser is not a device with more room: it is where the kit is looked at, and
+  // a surface that fills a phone's screen fills a monitor's too, so its foot's
+  // action ends up a screenful below its own words. Only there is the sheet set
+  // down as a dialog — on a device it is the system's surface and stays the system's.
+  const desk = Platform.OS === "web";
+  const framed = desk ? [canvas.page, column, s.sheetDialog] : [canvas.page, column];
   const close = (source: "button" | "back" | "escape" | "gesture") => {
     if (model.canRequestClose) onRequestClose(source);
   };
   const body = (
     <KeyboardAvoidingView
-      style={canvas.page}
+      style={framed}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       accessibilityViewIsModal={mode === "modal"}
       onAccessibilityEscape={() => close("escape")}
       testID={testID}
     >
-      <View style={s.header}>
-        <Text role="title" accessibilityRole="header">
-          {model.title}
-        </Text>
-        {model.subtitle ? <Text>{model.subtitle}</Text> : null}
+      <View style={own.header}>
+        {/* The close control belongs at the edge the title ends at, not on a row of
+            its own: a sheet that opens with a full-width band tells the person to
+            leave before it has shown them what it holds. */}
+        <View style={own.headline}>
+          <Text role="title" accessibilityRole="header">
+            {model.title}
+          </Text>
+          {model.subtitle ? <Text>{model.subtitle}</Text> : null}
+        </View>
         <ActionControl model={model.close} onAction={() => close("button")} />
-        {model.reason ? <Text>{model.reason}</Text> : null}
       </View>
+      {model.reason ? (
+        <View style={s.header}>
+          <Text>{model.reason}</Text>
+        </View>
+      ) : null}
       <ScrollView contentContainerStyle={canvas.content} keyboardShouldPersistTaps="handled">
         {model.state ? (
           <StateView model={model.state} onAction={(id) => onAction?.(id)} />
@@ -73,8 +104,27 @@ export function DetailSurface({
       onDismiss={onClosed}
       onRequestClose={() => close("back")}
       allowSwipeDismissal={false}
+      {...(desk ? { transparent: true } : {})}
     >
-      {body}
+      {desk ? <View style={s.scrim}>{body}</View> : body}
     </Modal>
   );
 }
+
+/**
+ * A sheet's header is one row: what the surface is called, and the way out of it,
+ * at the same glance. Stacking them cost the title its prominence and gave a
+ * dismissed surface the widest control on the screen.
+ */
+const surfaceStyles = (t: Theme) =>
+  StyleSheet.create({
+    header: {
+      flexDirection: "row" as const,
+      alignItems: "flex-start" as const,
+      gap: t.space.sm,
+      paddingHorizontal: t.space.lg,
+      paddingTop: t.space.lg,
+      paddingBottom: t.space.sm,
+    },
+    headline: { flex: 1, gap: t.space.xs },
+  });

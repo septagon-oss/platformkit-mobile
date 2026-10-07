@@ -1,6 +1,6 @@
 import { Temporal } from "@js-temporal/polyfill";
 import type { Action } from "./feedback";
-import { instantValue, presentedTime, type Presentation } from "./presentation";
+import { instantValue, presentedRange, presentedTime, type Presentation } from "./presentation";
 import { civilDate, dateAt, type LocalDate } from "./slots";
 import {
   action,
@@ -39,6 +39,8 @@ interface Segment {
   readonly id: string;
   readonly title: string;
   readonly label: string;
+  /** time is when the appointment is, on its own, so a list can write the name above it instead of welding the two into one long control label. */
+  readonly time: string;
   readonly start: number;
   readonly end: number;
   readonly top: number;
@@ -131,6 +133,18 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
         month: "short",
         day: "numeric",
       }).format(new Date(`${date.toString()}T12:00:00Z`));
+    // The strip's own cell: the weekday over the number, which is what fits a whole
+    // week across one phone column. The whole date remains the name the cell
+    // announces, so the compact cell costs nothing to a screen reader, and today is
+    // named for what it is instead of wearing its date plus the word beside it —
+    // eleven words, which is what sent the strip wrapping down the column in three
+    // uneven rows and lost the week as a sequence.
+    const cellLabel = (date: Temporal.PlainDate) =>
+      new Intl.DateTimeFormat(p.locale, {
+        timeZone: "UTC",
+        weekday: "short",
+        day: "numeric",
+      }).format(new Date(`${date.toString()}T12:00:00Z`));
     const days = Array.from({ length }, (_, i) => {
       const date = start.add({ days: i }),
         id = date.toString();
@@ -154,6 +168,7 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
           if (e.startDate <= id && id < e.endDate)
             allDay.push({
               ...common,
+              time: p.copy.kit.allDay,
               label: `${e.title} · ${p.copy.kit.allDay}`,
               start: begin,
               end,
@@ -169,12 +184,13 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
           if (finish > s)
             timed.push({
               ...common,
+              time: `${presentedRange(new Date(actualStart), new Date(actualEnd), p)}${actualStart < begin || actualEnd > end ? ` · ${p.copy.kit.continues}` : ""}`,
               start: s,
               end: finish,
               top: (s - begin) / duration,
               height: (finish - s) / duration,
               kind: "timed",
-              label: `${e.title} · ${presentedTime(new Date(actualStart), p)} – ${presentedTime(new Date(actualEnd), p)}${actualStart < begin || actualEnd > end ? ` · ${p.copy.kit.continues}` : ""}`,
+              label: `${e.title} · ${presentedRange(new Date(actualStart), new Date(actualEnd), p)}${actualStart < begin || actualEnd > end ? ` · ${p.copy.kit.continues}` : ""}`,
             });
         }
       }
@@ -241,7 +257,7 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
           selected: id === input.selectedDate,
           today: id === today,
           todayLabel: p.copy.kit.today,
-          label: id === today ? `${dateLabel(d)} · ${p.copy.kit.today}` : dateLabel(d),
+          label: id === today ? p.copy.kit.today : cellLabel(d),
           enabled: inBounds(id),
         };
       }),
@@ -283,7 +299,11 @@ export function deriveCalendar(input: CalendarInput, p: Presentation) {
       !days.some((d) => d.events.some((e) => e.id === input.selectedEventId))
         ? issue(p, "selectedEventId", "unavailable")
         : undefined;
-    const week = { ...base, days, selectionIssue };
+    // Seven days do not fit a phone's column, so the kit draws them sideways.
+    // The row says so in words: a grid that ends mid-Tuesday reads as a broken table
+    // rather than as the first part of a week, which is what a person scrolling
+    // sideways needs to know before they try it.
+    const week = { ...base, days, selectionIssue, sideways: p.copy.kit.weekSideways };
     const agenda = {
       ...week,
       more: input.page ? pageControl(input.page, v, input.content.phase === "ready") : undefined,

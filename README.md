@@ -72,8 +72,9 @@ SHA-256. Both files are build inputs the native fingerprint hashes. Refresh
 them deliberately, as [Verify a change](#verify-a-change) describes; the token
 tests fail when the fixture, its provenance and the generated file disagree.
 Distances live in `src/ui/scale.ts`. The gallery
-(`src/ui/gallery.tsx`, served by `app/gallery.tsx` in development or in a build
-with `EXPO_PUBLIC_GALLERY=1`) shows every atom and molecule in both modes.
+(`src/ui/gallery.tsx`, served by `app/gallery.tsx` whenever the app is running in
+development, or in a build made with `PK_PROFILE=ci`, the profile that sets
+`extra.gallery` in `app.config.ts`) shows every atom and molecule in both modes.
 
 The [shared mobile components specification](docs/shared-mobile-components.md)
 defines the richer components, their APIs, reuse, gallery states and delivery
@@ -127,6 +128,49 @@ transport nor cancellation proves that a write was rolled back, and the client
 does not retry requests automatically. Recover uncertain writes through the
 module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
+
+## Design
+
+Every PlatformKit phone app is composed from this directory, so the kit is why
+one app looks like the family. Its bar is a screen a person would keep using,
+not a control that renders, and the kit commits to six things the checks name:
+
+- **The palette is the token fixture's.** No component writes a colour.
+  `src/ui/theme.tsx` names roles, `src/ui/tokens.ts` is generated, and an
+  interaction state is a linear-light mix of two palette roles
+  (`src/core/color.ts`), so both modes move together.
+- **Ink is legible on what it sits on.** Every pairing the theme hands a
+  component is measured in `tests/ui/contrast.test.tsx` against WCAG 2.2 §1.4.3
+  in both modes. A control's edge is `state.outline`, which holds 3:1 on paper,
+  on canvas and on the muted surface; a hairline between two rows is
+  `borderDefault` and claims nothing it does not identify.
+- **Type says what a thing is.** Display, title, body, caption, eyebrow and mono
+  are named roles in `src/ui/scale.ts`; money, clocks and counts are
+  `type.numeric`, whose tabular figures line up down a column.
+- **One control body.** A button, a field, a search strip, a switch row and a
+  choice row all take `hit` as their height and `state.outline` as their edge, so
+  a screen reads as one instrument rather than five.
+- **A state is visible or it is not a state.** Hover, press, selection, busy,
+  disabled and loading come from `Theme.state` and are drawn by every control
+  that can take them; `prefers-reduced-motion` stills what moves.
+- **The gallery is the measure.** `src/core/galleryPages.ts` names fifteen pages,
+  each led by the one specimen its screen is about — the page's other states beside
+  it where two phone columns fit, and behind the kit's own disclosure on a phone,
+  where a fold holds one screen rather than a screen's variants — and every family the
+  kit owns is the specimen of exactly one page. Photograph `/gallery/<page>` at
+  390 and 1440 and judge those pictures against a reference screen the kit is
+  held to; a component nobody has photographed is not finished. The bar those
+  photographs are judged against is named row by row in
+  `design/references/refs.json` — the screen, why it was chosen for the pattern,
+  what the kit draws against it today — and each row carries its own picture:
+  the kit's specimen for that pattern, committed beside the manifest at 390 px
+  (`ours_case` names it, `?case=<specimen>` opens it, and
+  `tests/references-capture.case.mjs` re-photographs every row). Mobbin licences
+  a screenshot to its subscriber, so no reference image byte is copied into this
+  public source; `source` with `store_sha256`/`store_bytes` names the bar in the
+  reference store, and `npm run check:references` proves the store still holds
+  exactly those bytes and that every committed picture is the bytes its row
+  promises.
 
 ## Consume the shared native source
 
@@ -227,6 +271,18 @@ The existing UI export patterns now include `DataList`, `Activity`, `Stepper`,
 `SidePanel`, `BuyBar`, `MoreFilters` and `SummaryDetail`. `DisclosureSection` permits
 at most two levels; move a third level to an explicit detail page or sibling sheet.
 Keep essential fields and primary actions visible without opening a disclosure.
+
+**Reused** — the generated palette, `themeFor`, `scale`, `Section`, `Row`, `Text`,
+`Button`, `TextField`, `Notice`, `Spinner`, `Icon` and the gallery's own case
+vocabulary carry the phone's interaction states. **Added** — `ProgressMeter`,
+`TabBar`, `SearchField`, `MiniPlayer` and `ConfirmDialog`, with `core/progress`
+holding the one ratio rule a meter and a player share and `core/navigation` the
+tab ceiling and the search count; `core/color` holds the linear-light blend and
+the WCAG 2.2 §1.4.3 ratio. **Made reusable** — `Theme.state` (hovered, pressed,
+selected, disabled, divider, outline, scrim, raised) is the only place an
+interaction colour is mixed, `themeFor`'s `contrastPairs` registry is measured
+over both palettes by the suite, and the fifteen `/gallery/<page>` pages show
+every family in screen-shaped compositions.
 
 `ResourceList` now requires `presentation` in place of `feedback` and delegates
 to `deriveCatalogList` and `DataList`. `Activity` requires `model` from

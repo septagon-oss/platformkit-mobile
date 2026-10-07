@@ -63,8 +63,8 @@ export function ChoiceRow({
         disabled={disabled}
         accessibilityRole="button"
         accessibilityLabel={label}
-        accessibilityValue={{ text: shown }}
-        accessibilityState={{ disabled }}
+        aria-valuetext={shown}
+        aria-disabled={disabled}
         accessibilityHint={copy.hint}
         {...testable(testID)}
       >
