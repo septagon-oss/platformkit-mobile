@@ -1,3 +1,4 @@
+import { loginResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -66,7 +67,7 @@ test("a new ready catalog does not expose a failed session identity", async () =
       case "former.test GET /api/v1/app/resources":
         return formerCatalog.promise;
       case "current.test POST /api/v1/auth/login":
-        return new Response(null, { status: 204, headers: { "Set-Cookie": "pk=current" } });
+        return loginResponse({ headers: { "Set-Cookie": "pk=current" } });
       case "current.test GET /api/v1/auth/me":
         return currentIdentity.promise;
       case "current.test GET /api/v1/app/resources":
@@ -84,7 +85,14 @@ test("a new ready catalog does not expose a failed session identity", async () =
   await waitFor(() => expect(calls).toContain("former.test GET /api/v1/auth/me"));
   await waitFor(() => expect(calls).toContain("former.test GET /api/v1/app/resources"));
   await act(async () => {
-    formerIdentity.resolve(json({ userId: "former", email: "former@example.test" }));
+    formerIdentity.resolve(
+      json({
+        userId: "00000002-1111-4111-8111-111111111111",
+        roles: [],
+        permissions: [],
+        email: "former@example.test",
+      }),
+    );
     await formerIdentity.promise;
   });
   await act(async () => {
@@ -93,20 +101,32 @@ test("a new ready catalog does not expose a failed session identity", async () =
   });
   await waitFor(() => expect(screen.getByTestId("session-state")).toHaveTextContent("failed:none"));
 
+  let signingIn!: Promise<void>;
   await act(async () => {
-    await shell!.signIn("https://current.test", "current@example.test", "password");
+    signingIn = shell!.signIn("https://current.test", "current@example.test", "password");
   });
-  await waitFor(() =>
-    expect(screen.getByTestId("session-state")).toHaveTextContent(`ready:${currentPath}`),
-  );
+  await waitFor(() => expect(calls).toContain("current.test GET /api/v1/app/resources"));
+  // Readiness now requires both contracts; a pending identity keeps loading.
+  expect(screen.getByTestId("session-state")).toHaveTextContent("loading:none");
   expect(calls).toContain("current.test GET /api/v1/auth/me");
   expect(shell?.api.cookie()).toBe("pk=current");
   try {
     expect(shell?.identity).toBeUndefined();
   } finally {
     await act(async () => {
-      currentIdentity.resolve(json({ userId: "current", email: "current@example.test" }));
+      currentIdentity.resolve(
+        json({
+          userId: "00000003-1111-4111-8111-111111111111",
+          roles: [],
+          permissions: [],
+          email: "current@example.test",
+        }),
+      );
       await currentIdentity.promise;
+      await signingIn;
     });
   }
+  await waitFor(() =>
+    expect(screen.getByTestId("session-state")).toHaveTextContent(`ready:${currentPath}`),
+  );
 });

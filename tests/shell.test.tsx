@@ -1,3 +1,4 @@
+import { loginResponse, logoutResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -19,7 +20,7 @@ jest.mock("expo-secure-store", () => ({
 const KEY = "platformkit.session";
 const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
 const saved = { version: 1, baseURL: "https://saved.test", cookie: "pk=saved" };
-const identity = { userId: "u1", email: "a@saved.test" };
+const identity = { userId: "00000001-1111-4111-8111-111111111111", email: "a@saved.test" };
 const routes = {
   me: "GET /api/v1/auth/me",
   resources: "GET /api/v1/app/resources",
@@ -39,7 +40,6 @@ const json = (body: unknown, init: ResponseInit = {}) =>
     headers: { "Content-Type": "application/json" },
     ...init,
   });
-const empty = (init: ResponseInit = {}) => new Response(null, { status: 204, ...init });
 
 /** server is the network as one test allows it: named routes, every call recorded, anything else 404. */
 function server(answers: Record<string, Route>): Call[] {
@@ -88,7 +88,7 @@ describe("Shell", () => {
   test("a saved sign-in is restored: its server, its cookie, then the catalog and who it belongs to", async () => {
     mockStore.set(KEY, JSON.stringify(saved));
     const calls = server({
-      [routes.me]: () => json(identity),
+      [routes.me]: () => json({ ...identity, roles: [], permissions: [] }),
       [routes.resources]: () => json(catalogDoc),
     });
     await mount();
@@ -124,9 +124,9 @@ describe("Shell", () => {
     mockStore.set(KEY, JSON.stringify(saved));
     const gate = Promise.withResolvers<Response>();
     const calls = server({
-      [routes.me]: () => json(identity),
+      [routes.me]: () => json({ ...identity, roles: [], permissions: [] }),
       [routes.resources]: () => gate.promise,
-      [routes.logout]: () => empty(),
+      [routes.logout]: () => logoutResponse(),
     });
     await mount();
     await phase("loading");
@@ -150,8 +150,9 @@ describe("Shell", () => {
 
   test("signing in keeps the cookie the server set, saves it with its server and loads the catalog", async () => {
     const calls = server({
-      [routes.login]: () => empty({ headers: { "Set-Cookie": "pk=fresh; Path=/; HttpOnly" } }),
-      [routes.me]: () => json(identity),
+      [routes.login]: () =>
+        loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/; HttpOnly" } }),
+      [routes.me]: () => json({ ...identity, roles: [], permissions: [] }),
       [routes.resources]: () => json(catalogDoc),
     });
     await mount();
@@ -174,7 +175,10 @@ describe("Shell", () => {
   });
 
   test("a server that sets no session is refused, and nothing is saved or loaded", async () => {
-    const calls = server({ [routes.login]: () => empty(), [routes.logout]: () => empty() });
+    const calls = server({
+      [routes.login]: () => loginResponse(),
+      [routes.logout]: () => logoutResponse(),
+    });
     await mount();
     await phase("anonymous");
     let refused: unknown;

@@ -1,3 +1,4 @@
+import { loginIdentity } from "./fakes/wire";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
@@ -34,7 +35,11 @@ const entry = {
 
 test("login keeps the session cookie and sends it back", async () => {
   const { fetch, calls } = fakeFetch([
-    { status: 204, headers: { "Set-Cookie": "platformkit_session=abc; Path=/; HttpOnly" } },
+    {
+      status: 200,
+      body: loginIdentity,
+      headers: { "Set-Cookie": "platformkit_session=abc; Path=/; HttpOnly" },
+    },
     { status: 200, body: { resources: [] } },
   ]);
   const api = createApi("https://acme.test", fetch);
@@ -200,9 +205,12 @@ test("logout clears immediately and late responses cannot restore its cookie", a
   await loading;
   assert.equal(api.cookie(), undefined);
   logout.resolve(
-    new Response(null, {
-      status: 204,
-      headers: { "Set-Cookie": "platformkit_session=logout; HttpOnly" },
+    new Response(JSON.stringify({ signedOut: true }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Set-Cookie": "platformkit_session=logout; HttpOnly",
+      },
     }),
   );
   await leaving;
@@ -260,7 +268,23 @@ test("a command posts to the row's own verb, and one that takes nothing sends no
 
 test("the trail is asked for one record, a page at a time, and a caller who may not read it has none", async () => {
   const { fetch, calls } = fakeFetch([
-    { status: 200, body: { items: [{ id: "e1", name: "n", occurredAt: "now" }], total: 42 } },
+    {
+      status: 200,
+      body: {
+        items: [
+          {
+            id: "55555555-1111-4111-8111-111111111111",
+            eventId: "66666666-1111-4111-8111-111111111111",
+            name: "n",
+            occurredAt: "2026-10-01T12:00:00Z",
+            payload: {},
+          },
+        ],
+        total: 42,
+        limit: 20,
+        offset: 20,
+      },
+    },
     { status: 403, body: { status: 403, detail: "AUTH_DENIED" } },
   ]);
   const api = createApi("https://acme.test", fetch);

@@ -1,3 +1,4 @@
+import { loginResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -49,13 +50,23 @@ test("signing in clears the previous identity before login returns", async () =>
     calls.push(call);
     switch (call) {
       case "former.test GET /api/v1/auth/me":
-        return json({ userId: "former", email: "former@example.test" });
+        return json({
+          userId: "00000002-1111-4111-8111-111111111111",
+          roles: [],
+          permissions: [],
+          email: "former@example.test",
+        });
       case "former.test GET /api/v1/app/resources":
         return new Response(null, { status: 503 });
       case "current.test POST /api/v1/auth/login":
         return login.promise;
       case "current.test GET /api/v1/auth/me":
-        return json({ userId: "current", email: "current@example.test" });
+        return json({
+          userId: "00000003-1111-4111-8111-111111111111",
+          roles: [],
+          permissions: [],
+          email: "current@example.test",
+        });
       case "current.test GET /api/v1/app/resources":
         return json(catalog);
       default:
@@ -69,7 +80,9 @@ test("signing in clears the previous identity before login returns", async () =>
     </Shell>,
   );
   await waitFor(() => expect(screen.getByTestId("session-phase")).toHaveTextContent("failed"));
-  await waitFor(() => expect(current?.identity?.userId).toBe("former"));
+  await waitFor(() =>
+    expect(current?.identity?.userId).toBe("00000002-1111-4111-8111-111111111111"),
+  );
 
   let signIn!: Promise<void>;
   await act(async () => {
@@ -81,10 +94,12 @@ test("signing in clears the previous identity before login returns", async () =>
     expect(current?.identity).toBeUndefined();
   } finally {
     await act(async () => {
-      login.resolve(new Response(null, { status: 204, headers: { "Set-Cookie": "pk=current" } }));
+      login.resolve(loginResponse({ headers: { "Set-Cookie": "pk=current" } }));
       await signIn;
     });
   }
   await waitFor(() => expect(screen.getByTestId("session-phase")).toHaveTextContent("ready"));
-  await waitFor(() => expect(current?.identity?.userId).toBe("current"));
+  await waitFor(() =>
+    expect(current?.identity?.userId).toBe("00000003-1111-4111-8111-111111111111"),
+  );
 });

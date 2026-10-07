@@ -45,7 +45,17 @@ function recording() {
   const sent: string[] = [];
   const f = async (url: string, init: RequestInit = {}) => {
     sent.push(`${init.method} ${url.replace("https://acme.test", "")}`);
-    return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
+    // Responses meet the pinned wire contracts; the assertions below still
+    // exercise only T-0285's read/write addresses and encoded row substitution.
+    const status =
+      init.method === "DELETE" ? 204 : init.method === "POST" && url.endsWith("/plans") ? 201 : 200;
+    const body = url.includes("?limit=")
+      ? { items: [], total: 0, limit: 20, offset: 0 }
+      : { code: "pro", name: "Pro", currency: "USD", active: true };
+    return new Response(status === 204 ? null : JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    });
   };
   return { fetch: f as unknown as typeof fetch, sent };
 }

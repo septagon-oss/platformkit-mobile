@@ -1,3 +1,4 @@
+import { pageResponse as response } from "../fakes/wire";
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
@@ -22,10 +23,10 @@ jest.mock("../../src/shell", () => ({
 beforeEach(reset);
 
 const record = "note-587";
-const actor = "actor-587";
+const actor = "9742e7b5-9ead-5ffa-80da-74ec84f3dca3";
 const email = "previous-587@example.test";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
-const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+
 const trail = (id: string, name: string, total = 4): Trail => ({
   items: [{ id, name, actor, occurredAt: "2026-08-11T17:23:00Z", payload: { id: record } }],
   total,
@@ -46,9 +47,9 @@ for (const mode of ["light", "dark"] as const) {
       const api = fakeApi();
       api.list.mockImplementation(createApi("https://example.test", fetch).list);
       api.events
-        .mockResolvedValueOnce(trail("event-587", "note.note.created"))
+        .mockResolvedValueOnce(trail("351fde52-3fad-5a8e-95ca-9c9a2b7fb0dd", "note.note.created"))
         .mockReturnValueOnce(older.promise)
-        .mockResolvedValue(trail("event-589", "note.note.refreshed"));
+        .mockResolvedValue(trail("04479117-12ac-58e8-bfda-af75c0d05a7f", "note.note.refreshed"));
       api.get.mockResolvedValue({ id: record, title: "Activity record" });
       const scope = shellValue(api);
       const ready = {
@@ -74,7 +75,7 @@ for (const mode of ["light", "dark"] as const) {
       // Complete the older event page while the current directory is pending.
       // Its finally block must not enable another page to obsolete that lookup.
       await act(async () => {
-        older.resolve(trail("event-588", "note.note.obsolete"));
+        older.resolve(trail("dbaf80e2-bf23-50b0-b67f-8bacee69e57f", "note.note.obsolete"));
         await api.events.mock.results[1]!.value;
       });
       const more = screen.queryByTestId("activity-more");
@@ -100,7 +101,9 @@ for (const mode of ["light", "dark"] as const) {
       }
 
       // A successful event read alone does not restore withdrawn directory fields.
-      api.events.mockResolvedValue(trail("event-590", "note.note.recovered", 1));
+      api.events.mockResolvedValue(
+        trail("226897cf-a9e1-5723-b144-bc9153c789f2", "note.note.recovered", 1),
+      );
       shell.value = { ...ready, writes: { "note/note": 2 } };
       await rerender(detail());
       await waitFor(() => expect(api.list).toHaveBeenCalledTimes(3));

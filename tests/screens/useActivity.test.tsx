@@ -1,3 +1,4 @@
+import { pageResponse as response } from "../fakes/wire";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { deriveEventActivity } from "../../src/core/derive";
@@ -20,16 +21,15 @@ beforeEach(reset);
 const first: Trail = {
   items: [
     {
-      id: "event-14",
+      id: "c7a78f10-73e6-574a-a2e7-b23ced3d0842",
       name: "note.note.updated",
       occurredAt: "2026-09-07T10:00:00Z",
-      actor: "actor-6",
+      actor: "63b9a861-2c2d-58fd-a66e-c323e3f186cb",
       payload: { id: "note-14" },
     },
   ],
   total: 3,
 };
-const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
 
 test("session denial clears actor names and history through a pending reload until fresh content arrives", async () => {
   const fetch = jest.fn<typeof globalThis.fetch>();
@@ -41,7 +41,7 @@ test("session denial clears actor names and history through a pending reload unt
   const api = fakeApi();
   api.events.mockImplementation(createApi("https://example.test", fetch).events);
   api.list.mockResolvedValue({
-    items: [{ id: "actor-6", displayName: "Earlier actor" }],
+    items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", displayName: "Earlier actor" }],
     total: 1,
   });
   const users = { ...note, module: "user", entity: "user" };
@@ -51,7 +51,9 @@ test("session denial clears actor names and history through a pending reload unt
     state: { ...scope.state, catalog: { ...scope.state.catalog!, resources: [note, users] } },
   };
   const { result } = await renderHook(() => useActivity(note, "note-14"));
-  await waitFor(() => expect(result.current.names["actor-6"]).toBe("Earlier actor"));
+  await waitFor(() =>
+    expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe("Earlier actor"),
+  );
   expect(result.current.events).toEqual(first.items);
   await act(async () => result.current.loadMore());
   await waitFor(() => expect(result.current.error).toBe("Session refused"));
@@ -68,10 +70,15 @@ test("session denial clears actor names and history through a pending reload unt
   expect(result.current.events).toEqual([]);
   expect(api.events).toHaveBeenLastCalledWith({ record: "note-14", offset: 0, limit: 20 });
   api.list.mockResolvedValue({ items: [], total: 0 });
-  recovered.resolve(response({ items: [{ ...first.items[0]!, id: "fresh-event" }], total: 1 }));
+  recovered.resolve(
+    response({
+      items: [{ ...first.items[0]!, id: "1b1ec132-86f1-5b73-be9a-e81fd18e4846" }],
+      total: 1,
+    }),
+  );
   await waitFor(() => expect(result.current.loading).toBe(false));
   expect(result.current.denied).toBe(false);
-  expect(result.current.events.map((e) => e.id)).toEqual(["fresh-event"]);
+  expect(result.current.events.map((e) => e.id)).toEqual(["1b1ec132-86f1-5b73-be9a-e81fd18e4846"]);
   expect(result.current.names).toEqual({});
   expect(result.current.error).toBe("");
 });
@@ -82,7 +89,10 @@ test("an ordinary page failure retains readable history and retries the same off
     .mockResolvedValueOnce(response(first))
     .mockResolvedValueOnce(response({ detail: "Temporarily unavailable" }, 503))
     .mockResolvedValueOnce(
-      response({ items: [{ ...first.items[0]!, id: "older-event" }], total: 2 }),
+      response({
+        items: [{ ...first.items[0]!, id: "4a0b7293-0b09-5d5c-b06a-fdf785d7e62f" }],
+        total: 2,
+      }),
     );
   const api = fakeApi();
   api.events.mockImplementation(createApi("https://example.test", fetch).events);
@@ -154,7 +164,10 @@ test.each([403, 404])(
     const recovered = Promise.withResolvers<Response>();
     fetch
       .mockResolvedValueOnce(
-        response({ items: [{ id: "actor-6", email: "earlier@example.test" }], total: 1 }),
+        response({
+          items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", email: "earlier@example.test" }],
+          total: 1,
+        }),
       )
       .mockResolvedValueOnce(response({ detail: "Temporary directory failure" }, 503))
       .mockResolvedValueOnce(response({ detail: "Directory access withdrawn" }, status))
@@ -170,11 +183,17 @@ test.each([403, 404])(
       state: { ...scope.state, catalog: { ...scope.state.catalog!, resources: [note, users] } },
     };
     const { result } = await renderHook(() => useActivity(note, "note-14"));
-    await waitFor(() => expect(result.current.names["actor-6"]).toBe("earlier@example.test"));
+    await waitFor(() =>
+      expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe(
+        "earlier@example.test",
+      ),
+    );
 
     await act(async () => result.current.reload());
     await waitFor(() => expect(result.current.error).toBe("Temporary directory failure"));
-    expect(result.current.names["actor-6"]).toBe("earlier@example.test");
+    expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe(
+      "earlier@example.test",
+    );
 
     await act(async () => result.current.reload());
     await waitFor(() => expect(result.current.error).toBe("Directory access withdrawn"));
@@ -185,12 +204,14 @@ test.each([403, 404])(
     const activity = deriveEventActivity(result.current, presentation);
     expect(activity.ok).toBe(true);
     if (activity.ok) {
-      expect(activity.value.rows.map((row) => row.actor)).toEqual(["actor-6"]);
+      expect(activity.value.rows.map((row) => row.actor)).toEqual([
+        "63b9a861-2c2d-58fd-a66e-c323e3f186cb",
+      ]);
       expect(activity.value.more).toBeDefined();
     }
 
     api.events.mockResolvedValueOnce({
-      items: [{ ...first.items[0]!, id: "older-event-15" }],
+      items: [{ ...first.items[0]!, id: "831f9205-139e-5518-bf01-60e00c2588f5" }],
       total: 2,
     });
     await act(async () => result.current.loadMore());
@@ -209,10 +230,13 @@ test.each([403, 404])(
     expect(result.current.loading).toBe(true);
     expect(result.current.names).toEqual({});
     recovered.resolve(
-      response({ items: [{ id: "actor-6", email: "fresh@example.test" }], total: 1 }),
+      response({
+        items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", email: "fresh@example.test" }],
+        total: 1,
+      }),
     );
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.names["actor-6"]).toBe("fresh@example.test");
+    expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe("fresh@example.test");
     expect(result.current.error).toBe("");
   },
 );
@@ -224,7 +248,10 @@ test.each([403, 404])(
     const fetch = jest.fn<typeof globalThis.fetch>();
     fetch
       .mockResolvedValueOnce(
-        response({ items: [{ id: "actor-6", displayName: "Earlier actor" }], total: 1 }),
+        response({
+          items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", displayName: "Earlier actor" }],
+          total: 1,
+        }),
       )
       .mockReturnValueOnce(obsolete.promise)
       .mockResolvedValueOnce(response({ detail: "Directory access withdrawn" }, status));
@@ -243,14 +270,19 @@ test.each([403, 404])(
       },
     };
     const { result } = await renderHook(() => useActivity(note, "note-14"));
-    await waitFor(() => expect(result.current.names["actor-6"]).toBe("Earlier actor"));
+    await waitFor(() =>
+      expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe("Earlier actor"),
+    );
     await act(async () => result.current.reload());
     await waitFor(() => expect(api.list).toHaveBeenCalledTimes(2));
     await act(async () => result.current.reload());
     await waitFor(() => expect(result.current.error).toBe("Directory access withdrawn"));
     await act(async () => {
       obsolete.resolve(
-        response({ items: [{ id: "actor-6", displayName: "Obsolete actor" }], total: 1 }),
+        response({
+          items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", displayName: "Obsolete actor" }],
+          total: 1,
+        }),
       );
       await api.list.mock.results[1]!.value;
     });
@@ -268,7 +300,10 @@ test.each([401, 403, 404, 503])(
     const fetch = jest.fn<typeof globalThis.fetch>();
     fetch
       .mockResolvedValueOnce(
-        response({ items: [{ id: "actor-6", email: "earlier@example.test" }], total: 1 }),
+        response({
+          items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", email: "earlier@example.test" }],
+          total: 1,
+        }),
       )
       .mockReturnValueOnce(directory.promise);
     const api = fakeApi();
@@ -287,7 +322,9 @@ test.each([401, 403, 404, 503])(
     };
     const { result } = await renderHook(() => useActivity(note, "note-14"));
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.names["actor-6"]).toBe("earlier@example.test");
+    expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe(
+      "earlier@example.test",
+    );
     const more = result.current.loadMore;
 
     // A callback retained by a consumer must observe the new read even before
@@ -320,18 +357,21 @@ test.each([401, 403, 404, 503])(
     expect(result.current.loadingMore).toBe(false);
     expect(result.current.error).toBe("Directory read failed");
     expect(result.current.names).toEqual(
-      status === 503 ? { "actor-6": "earlier@example.test" } : {},
+      status === 503 ? { "63b9a861-2c2d-58fd-a66e-c323e3f186cb": "earlier@example.test" } : {},
     );
     expect(result.current.events).toEqual(status === 401 ? [] : first.items);
     expect(result.current.denied).toBe(status === 401);
 
     api.events.mockResolvedValue(first);
     fetch.mockResolvedValue(
-      response({ items: [{ id: "actor-6", displayName: "Current actor" }], total: 1 }),
+      response({
+        items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", displayName: "Current actor" }],
+        total: 1,
+      }),
     );
     await act(async () => result.current.reload());
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.names["actor-6"]).toBe("Current actor");
+    expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe("Current actor");
     expect(result.current.denied).toBe(false);
     expect(result.current.error).toBe("");
     const ready = deriveEventActivity(result.current, presentation);
@@ -348,9 +388,15 @@ test.each([401, 403, 404, 503])(
     expect(api.events).toHaveBeenLastCalledWith({ record: "note-14", offset: 1, limit: 20 });
     expect(result.current.loadingMore).toBe(true);
     await act(async () =>
-      older.resolve({ items: [{ ...first.items[0]!, id: "older-event-73" }], total: 2 }),
+      older.resolve({
+        items: [{ ...first.items[0]!, id: "28ce5fd3-865e-5523-b021-54b4c16e1af3" }],
+        total: 2,
+      }),
     );
-    expect(result.current.events.map((event) => event.id)).toEqual(["event-14", "older-event-73"]);
+    expect(result.current.events.map((event) => event.id)).toEqual([
+      "c7a78f10-73e6-574a-a2e7-b23ced3d0842",
+      "28ce5fd3-865e-5523-b021-54b4c16e1af3",
+    ]);
     expect(result.current.loadingMore).toBe(false);
     expect(result.current.more).toBe(false);
     expect(api.list).toHaveBeenCalledTimes(3);
@@ -363,7 +409,10 @@ test("an obsolete read cannot unlock pagination while a newer directory read is 
   const fetch = jest.fn<typeof globalThis.fetch>();
   fetch
     .mockResolvedValueOnce(
-      response({ items: [{ id: "actor-6", displayName: "Earlier actor" }], total: 1 }),
+      response({
+        items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", displayName: "Earlier actor" }],
+        total: 1,
+      }),
     )
     .mockReturnValueOnce(obsolete.promise)
     .mockReturnValueOnce(current.promise);
@@ -389,20 +438,30 @@ test("an obsolete read cannot unlock pagination while a newer directory read is 
   await waitFor(() => expect(api.list).toHaveBeenCalledTimes(3));
 
   await act(async () => {
-    obsolete.resolve(response({ items: [{ id: "actor-6", displayName: "Obsolete" }], total: 1 }));
+    obsolete.resolve(
+      response({
+        items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", displayName: "Obsolete" }],
+        total: 1,
+      }),
+    );
     await api.list.mock.results[1]!.value;
   });
   await act(async () => result.current.loadMore());
   expect(api.events).toHaveBeenCalledTimes(3);
   expect(result.current.loading).toBe(true);
-  expect(result.current.names["actor-6"]).toBe("Earlier actor");
+  expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe("Earlier actor");
 
   await act(async () => {
-    current.resolve(response({ items: [{ id: "actor-6", displayName: "Current" }], total: 1 }));
+    current.resolve(
+      response({
+        items: [{ id: "63b9a861-2c2d-58fd-a66e-c323e3f186cb", displayName: "Current" }],
+        total: 1,
+      }),
+    );
     await api.list.mock.results[2]!.value;
   });
   expect(result.current.loading).toBe(false);
-  expect(result.current.names["actor-6"]).toBe("Current");
+  expect(result.current.names["63b9a861-2c2d-58fd-a66e-c323e3f186cb"]).toBe("Current");
   api.events.mockResolvedValueOnce({ items: [{ ...first.items[0]!, id: "older-74" }], total: 2 });
   await act(async () => result.current.loadMore());
   expect(api.events).toHaveBeenLastCalledWith({ record: "note-14", offset: 1, limit: 20 });

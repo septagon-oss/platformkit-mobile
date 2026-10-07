@@ -77,15 +77,15 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
     if (generation.current !== started) return;
     dispatch({ type: "session", generation: started });
     try {
-      // Who the session belongs to is asked for beside the catalog and is not
-      // allowed to decide whether there is one: a trail that cannot say "you"
-      // is still a trail.
-      void a.me().then((who) => {
+      // Observe both responses together. A malformed identity fails this load
+      // in either arrival order, and neither request may reject unobserved.
+      const identity = a.me().then((who) => {
         if (generation.current === started) setIdentity(who);
       });
-      const catalog = await a.catalog();
-      if (generation.current === started)
+      const [, catalog] = await Promise.all([identity, a.catalog()]);
+      if (generation.current === started) {
         dispatch({ type: "catalog", generation: started, catalog });
+      }
     } catch (e) {
       if (generation.current === started)
         dispatch({ type: "failed", generation: started, error: message(e) });

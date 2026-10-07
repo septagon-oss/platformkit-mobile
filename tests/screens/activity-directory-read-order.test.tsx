@@ -1,3 +1,4 @@
+import { pageResponse as response } from "../fakes/wire";
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
@@ -22,9 +23,9 @@ jest.mock("../../src/shell", () => ({
 beforeEach(reset);
 
 const record = "note-643";
-const actor = "actor-643";
+const actor = "577c7b06-5049-57af-af89-78acdafc6f63";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
-const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+
 const trail = (id: string, name: string, total = 2): Trail => ({
   items: [{ id, name, actor, occurredAt: "2026-07-19T15:38:00Z", payload: { id: record } }],
   total,
@@ -48,8 +49,8 @@ for (const mode of ["light", "dark"] as const) {
       const api = fakeApi();
       api.list.mockImplementation(createApi("https://example.test", fetch).list);
       api.events
-        .mockResolvedValueOnce(trail("event-643", "note.note.created"))
-        .mockResolvedValueOnce(trail("event-644", "note.note.updated"))
+        .mockResolvedValueOnce(trail("b1004291-4ba6-5549-875c-91efe7034f5e", "note.note.created"))
+        .mockResolvedValueOnce(trail("bb5764a5-3438-5005-889a-7a9df8a1547f", "note.note.updated"))
         .mockReturnValueOnce(refreshed.promise)
         .mockReturnValueOnce(older.promise);
       api.get.mockResolvedValue({ id: record, title: "Activity record" });
@@ -84,7 +85,9 @@ for (const mode of ["light", "dark"] as const) {
       if (pendingEvents) await fireEvent.press(pendingEvents);
       expect(api.events).toHaveBeenCalledTimes(3);
 
-      await act(async () => refreshed.resolve(trail("event-645", "note.note.refreshed")));
+      await act(async () =>
+        refreshed.resolve(trail("1894c654-9644-5ff1-8d5e-898cdc571fd5", "note.note.refreshed")),
+      );
       await waitFor(() => expect(api.list).toHaveBeenCalledTimes(3));
       const pendingDirectory = screen.queryByTestId("activity-more");
       if (pendingDirectory) await fireEvent.press(pendingDirectory);
@@ -114,7 +117,9 @@ for (const mode of ["light", "dark"] as const) {
       if (pendingPage) await fireEvent.press(pendingPage);
       expect(api.events).toHaveBeenCalledTimes(4);
       expect(api.events).toHaveBeenLastCalledWith({ record, offset: 1, limit: 20 });
-      await act(async () => older.resolve(trail("event-642", "note.note.older")));
+      await act(async () =>
+        older.resolve(trail("cd7bb39a-5e6b-5e0e-9fea-71f5d38e0772", "note.note.older")),
+      );
       expect(screen.getByText("Older")).toBeOnTheScreen();
       expect(screen.getAllByText("Current person 643")).toHaveLength(2);
       expect(screen.queryByTestId("activity-more")).toBeNull();

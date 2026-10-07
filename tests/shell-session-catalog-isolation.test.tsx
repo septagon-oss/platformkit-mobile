@@ -1,3 +1,4 @@
+import { loginResponse } from "./fakes/wire";
 import { afterEach, beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -61,13 +62,23 @@ test("an obsolete session catalog cannot replace a newer session catalog", async
     calls.push(call);
     switch (call) {
       case "former.test GET /api/v1/auth/me":
-        return json({ userId: "former", email: "former@example.test" });
+        return json({
+          userId: "00000002-1111-4111-8111-111111111111",
+          roles: [],
+          permissions: [],
+          email: "former@example.test",
+        });
       case "former.test GET /api/v1/app/resources":
         return formerCatalog.promise;
       case "current.test POST /api/v1/auth/login":
-        return new Response(null, { status: 204, headers: { "Set-Cookie": "pk=current" } });
+        return loginResponse({ headers: { "Set-Cookie": "pk=current" } });
       case "current.test GET /api/v1/auth/me":
-        return json({ userId: "current", email: "current@example.test" });
+        return json({
+          userId: "00000003-1111-4111-8111-111111111111",
+          roles: [],
+          permissions: [],
+          email: "current@example.test",
+        });
       case "current.test GET /api/v1/app/resources":
         return json(currentCatalog);
       default:
@@ -89,14 +100,14 @@ test("an obsolete session catalog cannot replace a newer session catalog", async
   await waitFor(() =>
     expect(screen.getByTestId("session")).toHaveTextContent(`ready:${currentPath}`),
   );
-  expect(latest?.identity?.userId).toBe("current");
+  expect(latest?.identity?.userId).toBe("00000003-1111-4111-8111-111111111111");
 
   await act(async () => {
     formerCatalog.resolve(json(catalog));
     await formerCatalog.promise;
   });
   expect(screen.getByTestId("session")).toHaveTextContent(`ready:${currentPath}`);
-  expect(latest?.identity?.userId).toBe("current");
+  expect(latest?.identity?.userId).toBe("00000003-1111-4111-8111-111111111111");
   expect(latest?.api.cookie()).toBe("pk=current");
   expect(JSON.parse(mockStore.get("platformkit.session")!)).toEqual({
     version: 1,
