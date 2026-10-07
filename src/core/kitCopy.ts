@@ -9,6 +9,10 @@ export const kitEnglish = {
   select: "Select",
   selected: "Selected",
   unavailable: "No longer available. Choose again or refresh.",
+  // A catalogue entry may name a screen this build does not hold. The generic
+  // screens still draw the record, so this is the app saying it is behind, not a
+  // refusal — quiet, one line, and the only thing said about it.
+  shellUpdate: "Update the app for this record's full screen.",
   allLoaded: "Select loaded items",
   of: "of",
   selection: "Selection",
@@ -183,6 +187,7 @@ export const kitPortuguese: KitWords = {
   select: "Selecionar",
   selected: "Selecionado",
   unavailable: "Já não está disponível. Escolha novamente ou atualize.",
+  shellUpdate: "Atualize a aplicação para o ecrã completo deste registo.",
   allLoaded: "Selecionar itens carregados",
   of: "de",
   selection: "Seleção",

@@ -198,3 +198,34 @@ test("generated schemas are pure but generated transports stay behind effect bou
     [],
   );
 });
+
+test("an example pack is composed by no route and reads its data through useOperation", async () => {
+  // src/examples holds the kit's example of a renderer pack. Nothing composes
+  // it — a product's own pack lives with the product — and it reaches the pinned
+  // document through the pack contract rather than by holding the transport, so
+  // the screen it demonstrates is the screen a product can actually copy.
+  for (const [file, source] of [
+    ["src/screens/Probe.tsx", 'export { taskRenderers } from "../examples/taskRenderers";'],
+    ["src/route.tsx", 'export { taskRenderers } from "./examples/taskRenderers";'],
+    ["app/probe.tsx", 'export { taskRenderers } from "../src/examples/taskRenderers";'],
+    ["app/probe.tsx", 'export { taskRenderers } from "platformkit-mobile/examples/taskRenderers";'],
+    ["src/examples/probe.tsx", 'export { createClient } from "../generated/client";'],
+    ["src/examples/probe.tsx", 'export { ApiError } from "../effects/api";'],
+    ["src/examples/probe.tsx", 'export { api } from "platformkit-mobile/effects/api";'],
+  ]) {
+    assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source!}`);
+  }
+  for (const source of [
+    'export { taskRenderers } from "platformkit-mobile/examples/taskRenderers";',
+    'export { taskRenderers } from "../examples/taskRenderers";',
+  ]) {
+    assert.deepEqual(await boundaries("tests/screens/probe.test.tsx", source), [], source);
+  }
+  for (const source of [
+    'export { useOperation } from "../screens/useOperation";',
+    'export { Actions } from "../ui/organisms/Actions";',
+    'export { zCatalog } from "../generated/zod.gen";',
+  ]) {
+    assert.deepEqual(await boundaries("src/examples/probe.tsx", source), [], source);
+  }
+});

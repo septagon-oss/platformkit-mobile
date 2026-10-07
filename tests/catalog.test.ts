@@ -11,7 +11,15 @@ import {
   report,
   type LatestLookup,
 } from "../scripts/catalog";
-import { CatalogError, parseCatalog, SUPPORTED_CATALOG_VERSION } from "../src/core/catalog";
+import {
+  CatalogError,
+  key,
+  packKey,
+  parseCatalog,
+  SHELL_VERSION,
+  shellReady,
+  SUPPORTED_CATALOG_VERSION,
+} from "../src/core/catalog";
 
 const fixture = () =>
   JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
@@ -141,6 +149,112 @@ test("the stamp is read before the body, so a newer server is named as a newer s
     () => parseCatalog({ catalogVersion: SUPPORTED_CATALOG_VERSION + 2, resources: "nope" }),
     (e: unknown) => e instanceof CatalogError && e.message.includes("catalogVersion"),
   );
+});
+
+// A renderer an entry names is presentation, so its parser has one job: say which
+// pack the screen wants, or say that no pack was named. Every spelling that is not
+// a name and a whole shell version says "none" — the entry keeps its fields,
+// commands, path and doors, and the catalogue keeps its other entries. A slip in a
+// screen's name may cost a person the screen made for them, never the app.
+const naming = (renderer: unknown) => {
+  const doc = fixture();
+  doc.resources[0].renderer = renderer;
+  return parseCatalog(doc);
+};
+
+test("an entry that names a renderer pack and a shell keeps everything else it said", () => {
+  const c = naming({ name: "task/tasks", min_shell: 2 });
+  const note = c.resources[0]!;
+  assert.deepEqual(note.renderer, { name: "task/tasks", minShell: 2 });
+  // The half that makes the refusal above worth having: the pack is a screen,
+  // not a permission, so naming one moves no field, no command and no address.
+  assert.equal(note.path, "/api/v1/note/notes");
+  assert.deepEqual(
+    note.fields.map((f) => f.name),
+    fixture().resources[0].fields.map((f: { name: string }) => f.name),
+  );
+  assert.deepEqual(
+    note.commands.map((cmd) => cmd.verb),
+    ["publish", "archive"],
+  );
+  assert.equal(c.resources.length, 3);
+});
+
+test("an entry that names no renderer carries no renderer member at all", () => {
+  // Not `{ name: undefined }`: exactOptionalPropertyTypes makes the difference
+  // visible to a screen, and a member that is present and empty would be a pack
+  // whose name is nothing.
+  const note = parseCatalog(fixture()).resources[0]!;
+  assert.equal("renderer" in note, false);
+  const doc = fixture();
+  doc.resources[0].renderer = undefined;
+  assert.equal("renderer" in parseCatalog(doc).resources[0]!, false);
+});
+
+test("a renderer spelled any wrong way names no pack and refuses no catalogue", () => {
+  for (const wrong of [
+    null,
+    7,
+    "task/tasks",
+    [],
+    { name: "", min_shell: 1 },
+    { name: 4, min_shell: 1 },
+    // min_shell is required once the object is present: a pack with no floor
+    // would be drawn by a shell that cannot draw it.
+    { name: "task/tasks" },
+    { name: "task/tasks", min_shell: 0 },
+    { name: "task/tasks", min_shell: -1 },
+    { name: "task/tasks", min_shell: 1.5 },
+    { name: "task/tasks", min_shell: "2" },
+    { min_shell: 1 },
+  ]) {
+    const c = naming(wrong);
+    assert.equal(c.resources.length, 3, `${JSON.stringify(wrong)} lost an entry`);
+    const note = c.resources[0]!;
+    assert.equal(note.renderer, undefined, `${JSON.stringify(wrong)} was read as a pack`);
+    assert.deepEqual(
+      note.commands.map((cmd) => cmd.verb),
+      ["publish", "archive"],
+      `${JSON.stringify(wrong)} cost the entry its commands`,
+    );
+    assert.equal(packKey(note), "note/note", `${JSON.stringify(wrong)} chose a pack`);
+  }
+});
+
+test("a member inside a renderer this build has never read is ignored, not refused", () => {
+  // A key the server added is a key the phone has no opinion about: it names no
+  // pack any better than the two it does read, and it loses no screen.
+  const note = naming({ name: "task/tasks", min_shell: 1, max_shell: 9 }).resources[0]!;
+  assert.deepEqual(note.renderer, { name: "task/tasks", minShell: 1 });
+});
+
+test("the pack a route draws is the one the entry names, and the resource it names", () => {
+  const c = parseCatalog(fixture());
+  const note = c.resources[0]!;
+  assert.equal(packKey(note), "note/note");
+  assert.equal(packKey({ ...note, renderer: { name: "task/tasks", minShell: 1 } }), "task/tasks");
+  // Data identity does not move with it: the read still goes to the entry's own
+  // path, so one module's screen may be another module's row.
+  assert.equal(key(note), "note/note");
+});
+
+test("a shell draws the pack it was built for and falls back for one it was not", () => {
+  const c = parseCatalog(fixture());
+  const note = c.resources[0]!;
+  assert.equal(shellReady(note), true, "an entry naming no pack needs nothing");
+  const asking = (minShell: number): typeof note => ({
+    ...note,
+    renderer: { name: "task/tasks", minShell },
+  });
+  assert.equal(shellReady(asking(SHELL_VERSION)), true, "this build is the floor it asks for");
+  assert.equal(shellReady(asking(SHELL_VERSION + 1)), false, "a newer shell is not this one");
+});
+
+test("the shell version is a whole number the screens may depend on", () => {
+  assert.ok(Number.isInteger(SHELL_VERSION) && SHELL_VERSION >= 1);
+  // And the pinned catalogue names no pack, which is why nothing about a real
+  // server's answer moves when this key is read: the fixture stays as fetched.
+  for (const entry of parseCatalog(fixture()).resources) assert.equal(entry.renderer, undefined);
 });
 
 const PINNED = "7fc4b0abd547f4e30ad4e5b8b87ef6cc34138bb0";

@@ -15,7 +15,14 @@ import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Command, type Entry } from "../core/catalog";
-import { commandControls, commandTitle, humanize, problems, values } from "../core/derive";
+import {
+  commandControls,
+  commandTitle,
+  humanize,
+  problems,
+  screenPath,
+  values,
+} from "../core/derive";
 import { ApiError } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
@@ -168,4 +175,27 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
   );
 
   return { ask, busy };
+}
+
+/**
+ * useCommandRun is what a record screen does with the commands its entry names:
+ * one with no argument is asked here, one with an argument opens its own sheet.
+ * That difference is one rule — where the command is going decides which door it
+ * is behind — so it has one owner, and the generated detail and a renderer pack
+ * both call this rather than each spelling the address out again.
+ */
+export function useCommandRun(entry: Entry, id: string | undefined) {
+  const { ask, busy } = useCommandAsk(entry, id);
+  const router = useRouter();
+  const run = useCallback(
+    (c: Command) => {
+      if (c.fields.length === 0) return ask(c);
+      if (id)
+        router.push(
+          `${screenPath(entry)}/${encodeURIComponent(id)}/run/${encodeURIComponent(c.verb)}`,
+        );
+    },
+    [ask, id, router, entry],
+  );
+  return { run, busy };
 }

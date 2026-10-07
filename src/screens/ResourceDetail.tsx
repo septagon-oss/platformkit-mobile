@@ -4,14 +4,14 @@
 import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
-import { doors, type Command } from "../core/catalog";
+import { doors } from "../core/catalog";
 import { deriveEventActivity, label, rowCommands, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
 import { systemClock } from "./clock";
 import { useActivity } from "./useActivity";
-import { useCommandAsk } from "./useCommand";
+import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
@@ -23,7 +23,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     now: systemClock.now(),
     weekStartsOn: 1,
   });
-  const { ask, busy } = useCommandAsk(entry, id);
+  const { run, busy } = useCommandRun(entry, id);
   const router = useRouter();
   // Edit and Delete are separate doors: a resource may mount PATCH without
   // DELETE, and a caller who may amend a row may not be one who may erase it.
@@ -35,17 +35,8 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     [router, entry, id],
   );
   // A command with an argument is a sheet of its own; one without is a
-  // question the platform asks here.
-  const run = useCallback(
-    (c: Command) => {
-      if (c.fields.length === 0) return ask(c);
-      if (id)
-        router.push(
-          `${screenPath(entry)}/${encodeURIComponent(id)}/run/${encodeURIComponent(c.verb)}`,
-        );
-    },
-    [ask, id, router, entry],
-  );
+  // question the platform asks here. useCommandRun is that rule, shared with
+  // every renderer pack that draws a record's actions.
   const commands = rowCommands(entry);
   const title = detail.row ? label(entry, detail.row) : "";
   // The options are memoised because the navigator is told them on every

@@ -45,6 +45,8 @@ test("a packed dependency resolves the shared composition and atomic layers with
     "screens/Home",
     "screens/SignIn",
     "screens/StateFeedback",
+    "screens/useOperation",
+    "screens/useCommand",
     "screens/ResourceDetail",
     "ui/theme",
     "ui/scale",
