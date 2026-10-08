@@ -157,6 +157,16 @@ psql "$(swap "$admin_url" "$database")" -v ON_ERROR_STOP=1 -q \
   -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO platformkit_app;" \
   -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO platformkit_app;"
 
+# The key the served kernel seals its enrolled factors with, generated before the
+# config that names it: this script runs under `set -u`, so a value read at the
+# line where it is written would abort the whole harness at the config instead of
+# telling anyone why no factor route exists. Generated per run, written to the
+# config and nowhere else: it has no life beyond these minutes, which is why
+# generating it beats naming one. Without it the auth module mounts no factor
+# route at all, and the check after the server is up is what says so — before the
+# emulator boots, not forty minutes into a journey. python3 rather than openssl
+# because it is already a tool this script demands.
+factor_key="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
 app_dsn="$(swap "$app_url" "$database")"
 migrate_dsn="$(swap "$admin_url" "$database")"
 cat >"$work/config.yaml" <<YAML
@@ -180,13 +190,6 @@ files:
 YAML
 
 password="mobile-$(date +%s)-password"
-# The key the served kernel seals its enrolled factors with. Generated per run,
-# written to the config below and nowhere else: it has no life beyond these
-# minutes, which is why generating it beats naming one. Without it the auth
-# module mounts no factor route at all, and the check after the server is up is
-# what says so — before the emulator boots, not forty minutes into a journey.
-# python3 rather than openssl because it is already a tool this script demands.
-factor_key="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
 factor_email="factor@e2e.test"
 factor_password="mobile-$(date +%s)-factor"
 # The sentence modules/auth answers a right password with when the account also
@@ -310,9 +313,10 @@ factor_code="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["
 
 # Prove the time-based leg while its code is fresh, before Maestro starts: the
 # password must be answered by the challenge, and a code computed at this instant
-# must be accepted by the operation the phone's code step calls. This spends the
-# first-factor-proof window — the device journey re-mints one by itself — and
-# spends no recovery code, so what the journey types is still good.
+# must be accepted by the operation the phone's code step calls. The device
+# journey opens its own window by giving the password again, so whether this leg
+# leaves one open changes nothing for it; what it must not do is spend the
+# recovery code the journey types, and a refused code spends nothing.
 echo "mobile_ci: the second factor answers over HTTP"
 proof="$(api POST /api/v1/auth/login "{\"email\":\"$factor_email\",\"password\":\"$factor_password\"}" "$work/prove.jar")"
 [ "$proof" = "401" ] ||
