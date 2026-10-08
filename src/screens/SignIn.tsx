@@ -57,9 +57,13 @@ export function SignIn({ title }: Props = {}) {
     try {
       await answerFactor(challenged, typed);
     } catch (e) {
-      // A refused code spent the window it came from, so the field empties
-      // rather than offer the same answer twice: the way to another challenge
-      // is the password link under the field, and the phone never re-mints one.
+      // A wrong code spends nothing — the pinned document answers a wrong code,
+      // a replayed step and a spent recovery code as one answer at one cost — so
+      // the window the password opened stays open and another code may still be
+      // right. The field empties anyway rather than offer the same answer twice:
+      // a recovery code is spent by the attempt that reached it, and no answer
+      // says which kind this was. The way back to a fresh window is the password
+      // link under the field, and the phone never re-mints one itself.
       setCode("");
       setError(
         e instanceof ApiError && e.status === 401 ? feedback.copy.kit.codeWrong : message(e),

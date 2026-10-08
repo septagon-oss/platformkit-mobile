@@ -32,19 +32,22 @@ must contain no secret.
 `npm run ios` build and run native projects using the corresponding local
 platform toolchain. `npm run web` starts a browser preview, but the credential
 is a native one: a sign-in mints a scoped bearer key (`POST /auth/tokens`) and
-every later request presents `Authorization: Bearer` alone — the phone reads no
-`Set-Cookie` and sends no `Cookie`, so the session a login opens lives in the one
-call that bought the key. Browser cookie restrictions make that preview
-unsuitable as proof that sign-in works on a device.
+every later request presents `Authorization: Bearer` alone. The one cookie this
+client reads is the session the password leg or the challenge leg answers with,
+kept in the call frame that mints with it and sent on that mint and nothing
+after: no cookie is stored, and no request that presents a bearer presents a
+cookie too, because a request carrying both is answered as anonymous
+(kit/httpx/authenticate.go's ambiguousCredential). Browser cookie restrictions
+make that preview unsuitable as proof that sign-in works on a device.
 
 ## Find the owner of a change
 
 `app/_layout.tsx` supplies the server URL and renderer pack to `Shell`, wraps
 the screens in the theme that follows the device's appearance, and configures
 the native stack whose headers every screen uses.
-`src/shell.tsx` owns session restoration, sign-in, sign-out, catalog loading
-and a count of what this app wrote to each resource, so a list or a detail
-knows when what it shows is stale.
+`src/shell.tsx` owns session restoration, sign-in, the answer to a second
+factor, sign-out, catalog loading and a count of what this app wrote to each
+resource, so a list or a detail knows when what it shows is stale.
 The resource route files delegate to `src/route.tsx`, which finds the catalog
 entry and chooses a custom or generated screen.
 
@@ -177,7 +180,8 @@ must explicitly accept it. Invalid JSON and validator exceptions become
 `ApiError` with the response status and request path, without copying response
 values or validator messages. A 2xx status on `ApiError` means the server answered
 but its success response was malformed. HTTP problems retain their existing decoding.
-The request uses the same cookie and deadline as resource operations.
+The request uses the same bearer key and deadline as resource operations; a
+sign-in's session cookie belongs to the mint alone and never reaches here.
 
 Pass `{ signal }` as the fifth argument to cancel a screen's obsolete request;
 cancellation rejects with `AbortError`. A timeout remains an `ApiError` with
@@ -394,7 +398,12 @@ name over the form, and draws the shell's phases itself: a spinner while a
 saved sign-in is restored, and, when a saved sign-in could not be opened, the
 reason with Retry and a way to another server. A product that composes its
 own sign-in screen gets the same from `SignInForm` through `title`, `booting`,
-`failed` and `onRetry`; without them it renders the form as before.
+`failed` and `onRetry`; without them it renders the form as before. When the
+server asks for a second factor, `signIn` answers
+`{ kind: "factor-required", email }` and the same form draws the code step
+through `step`, `code`, `onCodeChange`, `onSubmitCode` and `onEditCredentials`;
+`answerFactor` returns that code to the server that asked for it, because that
+server holds the window it spends, whatever the address field says by then.
 
 Pass `palette` to `ThemeProvider` to use the application's complete light and
 dark palettes. Pass `fonts` for native display, body and mono faces already
@@ -951,7 +960,7 @@ The six generated ESLint array-style warnings remain accepted warnings; the lint
 rules and generated source have not been relaxed to hide them. Native Request,
 FormData and device journeys still need platform verification.
 
-**Reused** — the existing per-API cookie, deadline and cancellation transport,
+**Reused** — the existing per-API bearer, deadline and cancellation transport,
 core catalog compatibility rules, path derivations and shell generation guards
 carry the generated operations into the current screens.
 **Added** — the pinned public OpenAPI document, offline generation and drift check,
