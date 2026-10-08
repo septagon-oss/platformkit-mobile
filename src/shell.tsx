@@ -47,7 +47,12 @@ export interface ShellValue {
     email: string,
     password: string,
   ) => Promise<SignInStep | undefined>;
-  /** answerFactor spends the code the person typed; a refused one leaves the step open. */
+  /**
+   * answerFactor spends the code the person typed at the server that refused to
+   * finish signing in, which is the only one holding the window it spends. A
+   * refused one leaves the step open; a code with no challenge open on this phone
+   * is refused here, before any request leaves.
+   */
   readonly answerFactor: (email: string, code: string) => Promise<void>;
   readonly signOut: () => Promise<void>;
   readonly refresh: () => Promise<void>;
@@ -81,6 +86,19 @@ function message(e: unknown): string {
  * alone. Half a key never reaches here: the record that carries one is refused
  * before the shell sees it (src/effects/session.ts).
  */
+/**
+ * challenge is the connection that accepted a password and answered that it
+ * needs a second factor. The window that refusal opened lives on that server's
+ * clock and in no table this phone can read, so the code goes back along the same
+ * connection: the address field is where the *next* sign-in goes, not where this
+ * one is answered. It is held for one sign-in — until a key is minted, a password
+ * is refused, this phone signs out, or a newer attempt opens a window of its own.
+ */
+interface Challenge {
+  readonly api: Api;
+  readonly baseURL: string;
+}
+
 function held(session: Session | undefined): Bearer | undefined {
   return session?.token && session?.tokenId
     ? { token: session.token, id: session.tokenId }
@@ -95,6 +113,7 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
   }));
   const active = useRef(connection);
   const generation = useRef(0);
+  const challenge = useRef<Challenge | undefined>(undefined);
   const [identity, setIdentity] = useState<Identity | undefined>();
   const [writes, setWrites] = useState<Readonly<Record<string, number>>>({});
   const wrote = useCallback(
@@ -188,11 +207,15 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
         try {
           const answer = await a.signIn(email, password);
           if (answer.kind === "factor-required") {
-            // Nothing was minted and nothing is kept: the five-minute window
-            // the server opened belongs to its clock, and the code step is the
-            // screen's, not a phase of the session.
-            if (generation.current === started)
+            // Nothing was minted and nothing is kept: the window the server
+            // opened belongs to its clock, and the code step is the screen's,
+            // not a phase of the session. What this phone does hold is the
+            // refusal itself — the answer to a code spends a window only the
+            // server that refused can open.
+            if (generation.current === started) {
+              challenge.current = { api: a, baseURL: url };
               dispatch({ type: "no-session", generation: started });
+            }
             return answer;
           }
           if (generation.current !== started) {
@@ -202,6 +225,8 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
             void a.logout().catch(() => undefined);
             return undefined;
           }
+          // This password was the whole answer, so no window is open anywhere.
+          challenge.current = undefined;
           await sessions.save({
             baseURL: url,
             token: answer.bearer.token,
@@ -217,30 +242,42 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
         } catch (e) {
           void a.logout().catch(() => undefined);
           if (generation.current !== started) return undefined;
+          // The last thing this phone did was not open a window, so the code step
+          // has nothing left to answer and the person is back at the password.
+          challenge.current = undefined;
           dispatch({ type: "no-session", generation: started });
           throw e;
         }
       },
       async answerFactor(email, code) {
+        // Refused here, before a request: a code sent to a server that never
+        // refused this person's password is a wrong code on somebody else's
+        // tenant, and the person would read the refusal as their own mistake.
+        const open = challenge.current;
+        if (!open) throw new Error(kitEnglish.noChallenge);
         const started = begin();
-        const a = createApi(baseURL, undefined, undefined, undefined, tokenName);
+        const a = open.api;
         try {
           const key = await a.answerFactor(email, code);
           if (generation.current !== started) {
             void a.logout().catch(() => undefined);
             return;
           }
+          // The key is the answer to the refusal; the refusal is spent with it.
+          challenge.current = undefined;
           setIdentity(undefined);
-          await sessions.save({ baseURL, token: key.token, tokenId: key.id });
+          await sessions.save({ baseURL: open.baseURL, token: key.token, tokenId: key.id });
           if (generation.current !== started) {
             void a.logout().catch(() => undefined);
             return;
           }
-          connect(baseURL, a);
-          await load(a, started, baseURL);
+          connect(open.baseURL, a);
+          await load(a, started, open.baseURL);
         } catch (e) {
-          // A refused code spends the window it came from and mints nothing.
-          // The step stays open on the screen that asked; nothing is stored.
+          // A refused code costs what a wrong password costs and mints nothing.
+          // The server keeps the window it opened — the pinned document says a
+          // wrong code "spends nothing" — so the challenge stays open on the
+          // same connection and the step stays where the person is.
           void a.logout().catch(() => undefined);
           if (generation.current === started) dispatch({ type: "no-session", generation: started });
           throw e;
@@ -249,6 +286,8 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
       async signOut() {
         const started = begin();
         const previous = active.current;
+        // A window this phone walked away from is not one it comes back to.
+        challenge.current = undefined;
         connect(previous.baseURL, createApi(previous.baseURL));
         setIdentity(undefined);
         dispatch({ type: "signed-out", generation: started });

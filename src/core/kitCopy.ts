@@ -184,6 +184,10 @@ export const kitEnglish = {
   backToPassword: "Back to the password",
   sessionExpired: "Your sign-in has expired. Sign in again.",
   noScopes: "This account grants nothing this app can open.",
+  // A code answers a refusal this phone was given. With no refusal open there is
+  // no window anywhere for it to spend, so the phone says so rather than send a
+  // code to whichever server the field names now.
+  noChallenge: "No code step is open on this phone. Sign in with the password again.",
 } as const;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
 export const kitPortuguese: KitWords = {
@@ -349,4 +353,6 @@ export const kitPortuguese: KitWords = {
   backToPassword: "Voltar à palavra-passe",
   sessionExpired: "O seu início de sessão expirou. Inicie sessão novamente.",
   noScopes: "Esta conta não concede nada que esta aplicação possa abrir.",
+  noChallenge:
+    "Nenhuma etapa de código está aberta neste telemóvel. Inicie sessão novamente com a palavra-passe.",
 };
