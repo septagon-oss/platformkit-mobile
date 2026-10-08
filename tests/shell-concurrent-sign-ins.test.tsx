@@ -1,4 +1,4 @@
-import { issuedTokenResponse, loginResponse, revokeResponse } from "./fakes/wire";
+import { issuedToken, issuedTokenResponse, loginResponse, revokeResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -20,6 +20,12 @@ const laterPath = "/api/v1/note/later-notes";
 const laterCatalog = {
   ...catalog,
   resources: [{ ...catalog.resources[0], path: laterPath }],
+};
+// The key the sign-in that won the race minted. The one that lost minted
+// issuedToken, so the two keys and the two ids say which session is in force.
+const secondToken = {
+  id: "33333333-3333-4333-8333-333333333333",
+  token: "pk_live_second_phone",
 };
 const json = (value: unknown) =>
   new Response(JSON.stringify(value), {
@@ -55,12 +61,12 @@ test("a late first sign-in cannot replace the second session", async () => {
         return firstLogin.promise;
       case "first.test POST /api/v1/auth/tokens":
         return issuedTokenResponse();
-      case "first.test POST /api/v1/auth/tokens/{id}/revoke":
+      case `first.test POST /api/v1/auth/tokens/${issuedToken.id}/revoke`:
         return revokeResponse();
       case "second.test POST /api/v1/auth/login":
         return loginResponse({ headers: { "Set-Cookie": "pk=second" } });
       case "second.test POST /api/v1/auth/tokens":
-        return issuedTokenResponse();
+        return issuedTokenResponse({}, secondToken);
       case "second.test GET /api/v1/auth/me":
         return json({
           userId: "00000004-1111-4111-8111-111111111111",
@@ -101,13 +107,16 @@ test("a late first sign-in cannot replace the second session", async () => {
   });
   expect(screen.getByTestId("session-phase")).toHaveTextContent("ready");
   expect(latest?.baseURL).toBe("https://second.test");
-  expect(latest?.api.bearer()?.token).toBe("pk=second");
+  expect(latest?.api.bearer()).toEqual(secondToken);
+  // The key the superseded attempt learned is taken back rather than left live.
+  expect(calls).toContain(`first.test POST /api/v1/auth/tokens/${issuedToken.id}/revoke`);
   expect(latest?.identity?.userId).toBe("00000004-1111-4111-8111-111111111111");
   expect(latest?.entry("note", "note")?.path).toBe(laterPath);
   expect(calls).not.toContain("first.test GET /api/v1/app/resources");
   expect(JSON.parse(mockSaved.get("platformkit.session")!)).toEqual({
-    version: 1,
+    version: 2,
     baseURL: "https://second.test",
-    token: "pk=second",
+    token: secondToken.token,
+    tokenId: secondToken.id,
   });
 });

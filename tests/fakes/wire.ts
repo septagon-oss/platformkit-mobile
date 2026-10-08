@@ -9,7 +9,7 @@ export const loginIdentity = {
 };
 
 /**
- * issuedToken is auth-token-issue's 201 answer: the key appears here and nowhere
+ * issuedToken is auth-token-issue's answer: the key appears here and nowhere
  * else, and the id is what the revoke at sign-out addresses.
  */
 export const issuedToken = {
@@ -28,8 +28,15 @@ export const loginResponse = (init: ResponseInit = {}) =>
     headers: { "Content-Type": "application/json" },
     ...init,
   });
-export const issuedTokenResponse = (init: ResponseInit = {}) =>
-  new Response(JSON.stringify(issuedToken), {
+/**
+ * issuedTokenResponse wraps that answer in the 201 the operation prints. `over`
+ * replaces a member for a test that needs two distinct mints.
+ */
+export const issuedTokenResponse = (
+  init: ResponseInit = {},
+  over: Partial<typeof issuedToken> = {},
+) =>
+  new Response(JSON.stringify({ ...issuedToken, ...over }), {
     status: 201,
     headers: { "Content-Type": "application/json" },
     ...init,

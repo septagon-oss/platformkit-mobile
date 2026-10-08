@@ -1,4 +1,4 @@
-import { issuedTokenResponse, loginResponse } from "./fakes/wire";
+import { issuedToken, issuedTokenResponse, loginResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -52,7 +52,12 @@ afterEach(() => {
 test("a new ready catalog does not expose a failed session identity", async () => {
   mockSaved.set(
     "platformkit.session",
-    JSON.stringify({ version: 2, baseURL: "https://former.test", token: "pk=former" }),
+    JSON.stringify({
+      version: 2,
+      baseURL: "https://former.test",
+      token: "pk_live_former",
+      tokenId: "00000000-0000-4000-8000-000000000002",
+    }),
   );
   const formerIdentity = Promise.withResolvers<Response>();
   const formerCatalog = Promise.withResolvers<Response>();
@@ -112,7 +117,8 @@ test("a new ready catalog does not expose a failed session identity", async () =
   // Readiness now requires both contracts; a pending identity keeps loading.
   expect(screen.getByTestId("session-state")).toHaveTextContent("loading:none");
   expect(calls).toContain("current.test GET /api/v1/auth/me");
-  expect(shell?.api.bearer()?.token).toBe("pk=current");
+  // The key in hand is the one this sign-in minted, not the one the record restored.
+  expect(shell?.api.bearer()).toEqual({ token: issuedToken.token, id: issuedToken.id });
   try {
     expect(shell?.identity).toBeUndefined();
   } finally {

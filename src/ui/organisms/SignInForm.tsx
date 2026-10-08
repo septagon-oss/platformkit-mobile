@@ -5,7 +5,7 @@
 // the same frame: a saved sign-in being restored, and one that could not be
 // opened, so a product need not draw those screens itself.
 import type { Feedback } from "../../core/derive";
-import React, { useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../atoms/Button";
@@ -78,16 +78,18 @@ export function SignInForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   /**
-   * typed is what each field holds the moment a control is pressed, which the
-   * screen may not have drawn yet: state says what is on screen, and a person
-   * who types and taps in one gesture submits what they typed rather than the
-   * value from before they typed. The code arrives as a prop, because a refusal
-   * spends it and only the caller can empty the field.
+   * typed is what each field holds the moment a control is pressed. A pressed
+   * control is handed the callback from the render the person saw, so a value
+   * read from that closure is the value from before they typed: each field's own
+   * handler writes this object and each control reads it back, so a person who
+   * types and taps in one gesture submits what they typed. A code the caller
+   * takes back — a refusal empties the field — is reconciled in the frame the
+   * form draws it empty, the way ActionControl keeps its current model.
    */
   const typed = useRef({ url: "", email: "", password: "", code: "" });
-  typed.current.email = email;
-  typed.current.password = password;
-  typed.current.code = code;
+  useLayoutEffect(() => {
+    typed.current.code = code;
+  }, [code]);
   const submit = () => {
     if (!busy)
       onSubmit(
@@ -138,7 +140,10 @@ export function SignInForm({
           <Notice
             announcement="urgent"
             text={error}
-            action={retry(feedback, sendCode)}
+            // Built here rather than by retry(feedback, sendCode): the control
+            // that re-sends must read the field as it is pressed, and a call
+            // during render may not hand a ref-reading callback to a helper.
+            action={{ label: feedback.retryLabel, onPress: () => sendCode() }}
             testID="challenge-error"
           />
         ) : null}
@@ -188,7 +193,7 @@ export function SignInForm({
         <Notice
           announcement="urgent"
           text={error}
-          action={retry(feedback, submit)}
+          action={{ label: feedback.retryLabel, onPress: () => submit() }}
           testID="sign-in-error"
         />
       ) : null}

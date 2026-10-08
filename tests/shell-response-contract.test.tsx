@@ -9,8 +9,15 @@ import { loginIdentity } from "./fakes/wire";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 
 jest.mock("expo-secure-store", () => ({
+  // A saved key, so this shell starts signed in and both read contracts are
+  // asked: the file is about what their answers may do to readiness.
   getItemAsync: async () =>
-    JSON.stringify({ version: 1, baseURL: "https://contract.test", cookie: "pk=synthetic" }),
+    JSON.stringify({
+      version: 2,
+      baseURL: "https://contract.test",
+      token: "pk_live_synthetic",
+      tokenId: "00000000-0000-4000-8000-000000000003",
+    }),
   setItemAsync: async () => undefined,
 }));
 let shell: ShellValue | undefined;

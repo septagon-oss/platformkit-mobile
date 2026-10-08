@@ -41,7 +41,12 @@ afterEach(() => {
 test("signing in clears the previous identity before login returns", async () => {
   mockSaved.set(
     "platformkit.session",
-    JSON.stringify({ version: 2, baseURL: "https://former.test", token: "pk=former" }),
+    JSON.stringify({
+      version: 2,
+      baseURL: "https://former.test",
+      token: "pk_live_former",
+      tokenId: "00000000-0000-4000-8000-000000000002",
+    }),
   );
   const login = Promise.withResolvers<Response>();
   const calls: string[] = [];

@@ -36,7 +36,9 @@ const routes = {
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
   tokens: "POST /api/v1/auth/tokens",
-  logout: "POST /api/v1/auth/tokens/22222222-2222-4222-8222-222222222222/revoke",
+  // The revoke addresses the id the saved record names, which is not the id a
+  // mint in this file answers with.
+  logout: `POST /api/v1/auth/tokens/${saved.tokenId}/revoke`,
 };
 
 type Route = () => Response | Promise<Response>;
@@ -96,7 +98,7 @@ afterEach(() => {
 });
 
 describe("Shell", () => {
-  test("a saved sign-in is restored: its server, its cookie, then the catalog and who it belongs to", async () => {
+  test("a saved sign-in is restored: its server, its key, then the catalog and who it belongs to", async () => {
     mockStore.set(KEY, JSON.stringify(saved));
     const calls = server({
       [routes.me]: () => json({ ...identity, roles: [], permissions: [] }),
@@ -114,7 +116,12 @@ describe("Shell", () => {
     expect(latest?.entry("note", "note")?.path).toBe("/api/v1/note/notes");
     expect(latest?.entry("note", "invoice")).toBeUndefined();
     expect(calls.map((c) => c.key).sort()).toEqual([routes.resources, routes.me]);
-    for (const call of calls) expect(call.headers.Cookie).toBe("pk=saved");
+    // Every request after the restore presents the saved key and no cookie: the
+    // record holds no cookie to present, and nothing read it if it did.
+    for (const call of calls) {
+      expect(call.headers.Authorization).toBe("Bearer pk_live_saved");
+      expect(call.headers.Cookie).toBeUndefined();
+    }
   });
 
   test("no saved sign-in is anonymous at the configured server; an unreadable one says so and asks nothing of the network", async () => {
@@ -172,9 +179,11 @@ describe("Shell", () => {
     });
     await mount();
     await phase("anonymous");
+    let step: SignInStep | undefined;
     await act(async () => {
-      await latest!.signIn("https://acme.test", "a@acme.test", "pw");
+      step = await latest!.signIn("https://acme.test", "a@acme.test", "pw");
     });
+    expect(step).toEqual({ kind: "signed-in" });
     await phase("ready");
     expect(latest?.baseURL).toBe("https://acme.test");
     expect(calls.find((c) => c.key === routes.login)?.body).toEqual({
