@@ -1,11 +1,15 @@
-// The publish contract, in four refusals. One scoped name and one version, in a
-// manifest that can travel; the changelog entry that version's release documents
-// itself by; the tag `kit-v<version>` that names exactly it; and a registry that
-// already holds that version. Each refusal has to land before the one write, so
-// the cases below run the job's own steps rather than a description of them: the
+// The publish contract, in five refusals. One scoped name and one version — a
+// released one — in a manifest that can travel; the changelog entry that
+// version's release documents itself by; the tag `kit-v<version>` that names
+// exactly it; a registry that already holds that version; and a registry whose
+// answer cannot be read. Each refusal has to land before the one write, so the
+// cases below run the job's own steps rather than a description of them: the
 // guard step is the workflow's own `run:` body, and the publish step is that body
-// with `npm` as a shell function that records what it was asked for — no
-// registry, no credential and no published version is involved anywhere.
+// with `npm` as a shell function that records what it was asked for and answers
+// the way npm answers — no registry, no credential and no published version is
+// involved anywhere. What the step decides is read from that: `view` exit 0 means
+// the registry holds the version, `E404` means it does not, anything else is a
+// question the run could not read the answer to.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
@@ -134,8 +138,11 @@ test("the tree being checked answers for itself", () => {
   assert.throws(() => checkPublish(root, "kit-v9.9.9"));
 });
 
-test("the workflow's own tag step refuses a tag that names another version", (t) =>
+test("the workflow's own tag step accepts the tag this version is released by", (t) =>
   runTagStep(t, `kit-v${manifest.version}`, 0));
+
+test("the workflow's own tag step refuses a tag that names another version", (t) =>
+  runTagStep(t, "kit-v9.9.9", 1));
 
 test("the workflow's own tag step refuses a build tag", (t) =>
   runTagStep(t, `v${manifest.version}`, 1));
@@ -158,17 +165,28 @@ function runTagStep(t: TestContext, tag: string, expected: number): void {
 }
 
 /**
+ * asked matches an npm verb in a recorded call line. The word is matched as a
+ * command and not anywhere in the line: the line carries the paths the harness
+ * handed the step, and those spell whatever the case's directory is called.
+ */
+function asked(verb: string): RegExp {
+  return new RegExp(`(?:^|\\s)${verb}(?:\\s|$)`);
+}
+
+/**
  * publish runs the job's one write step with `npm` as a shell function: the
- * stub records each call, answers `view` from whether the version is meant to
- * exist, and lets nothing reach a registry. `TMPDIR` is a directory of the
- * case's own, so what the step leaves behind — the private directory holding the
- * credential — is visible from outside it.
+ * stub records each call, answers `view` the way npm answers it — the version is
+ * there, or the read fails and says `E404`, or it fails for some other reason —
+ * and lets nothing reach a registry. The step reads *why* the question failed,
+ * so an answer that says nothing would be read as one. `TMPDIR` is a directory
+ * of the case's own, so what the step leaves behind — the private directory
+ * holding the credential — is visible from outside it.
  */
 function publish(
   t: TestContext,
-  given: { token?: string; registry?: string; published?: boolean },
+  given: { token?: string; registry?: string; published?: boolean | "down" },
 ): { status: number | null; calls: string; log: string; left: string[] } {
-  const temp = mkdtempSync(path.join(os.tmpdir(), "pk-publish-"));
+  const temp = mkdtempSync(path.join(os.tmpdir(), "pk-step-"));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const body = step(
     ".gitea/workflows/publish.yml",
@@ -183,9 +201,20 @@ function publish(
   printf '%s\\n' "$*" >> "$STUB"
   case "$*" in
     *view*)
-      if [ "$PUBLISHED" = 1 ]; then return 0; else return 1; fi ;;
+      if [ "$PUBLISHED" = 1 ]; then
+        printf '%s\\n' "$HELD"
+      elif [ "$PUBLISHED" = down ]; then
+        printf 'npm error code E401\\nnpm error 401 Unauthorized - GET %s\\n' "$NPM_REGISTRY" >&2
+        return 1
+      else
+        printf 'npm error code E404\\nnpm error 404 Not Found - GET %s\\n' "$NPM_REGISTRY" >&2
+        return 1
+      fi ;;
     *publish*)
-      if [ -f "\${NPM_CONFIG_USERCONFIG:-}" ]; then printf 'userconfig\\n' >> "$STUB"; fi
+      case "$1" in
+        --userconfig)
+          if [ -f "\${2:-}" ]; then printf 'userconfig\\n' >> "$STUB"; fi ;;
+      esac
       return 0 ;;
   esac
 }
@@ -198,7 +227,8 @@ ${body}`,
         ...process.env,
         TMPDIR: temp,
         STUB: path.join(temp, "calls"),
-        PUBLISHED: given.published ? "1" : "0",
+        HELD: manifest.version,
+        PUBLISHED: given.published === "down" ? "down" : given.published ? "1" : "0",
         NPM_PUBLISH_TOKEN: given.token ?? "",
         NPM_REGISTRY: given.registry ?? "https://forge.example/api/packages/septagon-oss/npm/",
       },
@@ -224,7 +254,7 @@ test("a publish without the credential refuses on its first line and writes noth
   const run = publish(t, {});
   assert.notEqual(run.status, 0, `an unset secret must refuse the publish; logged ${run.log}`);
   assert.match(run.log, /NPM_PUBLISH_TOKEN/, "the refusal names the secret to create");
-  assert.doesNotMatch(run.calls, /publish/, "nothing reached a registry");
+  assert.doesNotMatch(run.calls, asked("publish"), "nothing reached a registry");
   assert.equal(run.calls, "", "the step refuses before it asks the registry anything");
 });
 
@@ -234,8 +264,28 @@ test("a version the registry already holds is never written again", (t) => {
   const run = publish(t, { token: TOKEN, published: true });
   assert.notEqual(run.status, 0, "an existing version refuses the publish");
   assert.match(run.log, /already published/);
-  assert.match(run.calls, /view/, "the step did ask, which is what made the refusal say a version");
-  assert.doesNotMatch(run.calls, /publish/, "the refusal writes nothing");
+  assert.match(
+    run.calls,
+    asked("view"),
+    "the step did ask, which is what made the refusal say a version",
+  );
+  assert.doesNotMatch(run.calls, asked("publish"), "the refusal writes nothing");
+  assert.deepEqual(run.left, [], "the private directory the step made is gone with it");
+});
+
+test("a registry that answers nothing about the version refuses the publish", (t) => {
+  // The question is asked with the credential, and an answer that is not "this
+  // version is not here" is not permission to write: a read the step could not
+  // understand leaves the version unpublished and says so.
+  const run = publish(t, { token: TOKEN, published: "down" });
+  assert.notEqual(run.status, 0, "an unreadable answer must not become a write");
+  assert.match(
+    run.log,
+    /could not answer whether @septagon-oss\/platformkit-mobile@0\.2\.0 is published/,
+    `the refusal names the question it could not read: ${run.log}`,
+  );
+  assert.match(run.log, /E401/, "the answer the registry did give reaches the log");
+  assert.doesNotMatch(run.calls, asked("publish"), "the refusal writes nothing");
   assert.deepEqual(run.left, [], "the private directory the step made is gone with it");
 });
 
@@ -259,7 +309,8 @@ test("a version nobody holds publishes to the registry the forge named, with its
 test("a job the forge gave no registry to is refused rather than pointed at npmjs.org", (t) => {
   const run = publish(t, { token: TOKEN, registry: "/api/packages//npm/" });
   assert.notEqual(run.status, 0, "an empty forge context must not become a default registry");
-  assert.doesNotMatch(run.calls, /publish|view/, "nothing is asked of any registry");
+  assert.doesNotMatch(run.calls, asked("publish"), "nothing is written to any registry");
+  assert.doesNotMatch(run.calls, asked("view"), "nothing is asked of any registry");
 });
 
 test("the publish comes after every check, and reads exactly one secret", () => {

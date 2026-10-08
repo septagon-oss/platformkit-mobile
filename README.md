@@ -550,8 +550,13 @@ the same guard with the tag it was cut from
 — the kit to this
 forge's npm registry, authenticated by the repository secret
 `NPM_PUBLISH_TOKEN`. Until that secret exists every run refuses on the step that
-reads it and nothing reaches the registry. A version the registry already holds
-is never written again: the fix for that refusal is a new version and a new tag.
+reads it and nothing reaches the registry. Before the write, that step asks the
+registry — with the same credential the write carries, because an anonymous read
+of this scope is refused and so answers nothing — whether it holds the version.
+A version the registry already holds is never written again: the fix for that
+refusal is a new version and a new tag. Any other answer, including no answer,
+refuses the run as well, because a publish may not rest on a question the run
+could not read the answer to.
 The `v*` namespace stays `release.yml`'s — it builds binaries and publishes no
 package, and Gitea anchors a ref glob, so neither tag namespace reaches the
 other's runs. [CHANGELOG.md](CHANGELOG.md) carries one section per version and
@@ -561,8 +566,8 @@ catalogue version, so an entry cannot be skipped by the commit that bumps it.
 
 For local review, `npm pack --ignore-scripts --pack-destination /tmp` creates a
 source dependency archive. Its contents are `src/`, `scripts/tokens.ts`, the
-shared `scripts/android/` recipe, `CHANGELOG.md`, `NOTICE` and npm's package
-metadata and documentation.
+shared `scripts/android/` recipe, `CHANGELOG.md`, `NOTICE`, `LICENSE` and npm's
+package metadata and documentation.
 It contains the shared implementation, including generated design tokens. The
 reference application's routes, Docker setup and test tooling belong to the
 complete application handoff below. `npm run check` packs the dependency

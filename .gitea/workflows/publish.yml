@@ -89,11 +89,27 @@ jobs:
           umask 077
           printf '%s\n' "//${NPM_REGISTRY#*://}:_authToken=${NPM_PUBLISH_TOKEN}" > "$home/.npmrc"
           unset NPM_PUBLISH_TOKEN
-          # Never the write that takes the last one away. The registry refuses an
-          # existing version too; this says which version it refused and that the
-          # fix is a new version and a new tag, so the run explains itself.
-          if npm --registry "$NPM_REGISTRY" view "${name}@${version}" > /dev/null 2>&1; then
+          # Named on each command line, not exported: a step started by `npm run`
+          # inherits an `npm_config_userconfig` that outranks anything this step
+          # exports, and npm would then read some other file for the credential.
+          npm_at=(--userconfig "$home/.npmrc" --registry "$NPM_REGISTRY")
+          # Never the write that takes the last one away. The question is asked
+          # with the credential, because the forge answers an anonymous read of
+          # this scope with 401: asked without it, every answer — including the
+          # version already being there — reads as "not published", and the
+          # refusal below could never fire. Only the answer that says this
+          # version is not here permits the write; anything else — a 401, a
+          # registry that is not answering — refuses the run too, because
+          # nothing here may write on a question it could not read the answer to.
+          if seen=$(npm "${npm_at[@]}" view "${name}@${version}" 2>&1); then
             echo "::error::${name}@${version} is already published; bump package.json and cut a new tag"
             exit 1
           fi
-          NPM_CONFIG_USERCONFIG="$home/.npmrc" npm --registry "$NPM_REGISTRY" publish --access public
+          case "$seen" in
+            *E404*) ;;
+            *)
+              printf '%s\n' "$seen" >&2
+              echo "::error::the registry could not answer whether ${name}@${version} is published; nothing was published"
+              exit 1 ;;
+          esac
+          npm "${npm_at[@]}" publish --access public
