@@ -30,10 +30,12 @@ must contain no secret.
 
 `npm start` starts Expo's development server. `npm run android` and
 `npm run ios` build and run native projects using the corresponding local
-platform toolchain. `npm run web` starts a browser preview, but the current
-session transport is native: it reads `Set-Cookie` and sends `Cookie`
-explicitly. Browser cookie restrictions make that preview unsuitable as proof
-that sign-in works on a device.
+platform toolchain. `npm run web` starts a browser preview, but the credential
+is a native one: a sign-in mints a scoped bearer key (`POST /auth/tokens`) and
+every later request presents `Authorization: Bearer` alone — the phone reads no
+`Set-Cookie` and sends no `Cookie`, so the session a login opens lives in the one
+call that bought the key. Browser cookie restrictions make that preview
+unsuitable as proof that sign-in works on a device.
 
 ## Find the owner of a change
 
@@ -52,7 +54,9 @@ server does) and the lifecycle reducer. These functions run in plain Node
 without React.
 `src/effects/api.ts` owns HTTP requests and API error decoding;
 `src/effects/session.ts` orders secure-storage operations and binds the server
-URL and session cookie in one versioned record. `src/effects/native-session.ts`
+URL, the bearer key and that key's id in one versioned record; a record from the
+format that held a session cookie loads as the server it names, so an upgrade
+signs in again rather than failing. `src/effects/native-session.ts`
 supplies Expo SecureStore. Each shell operation has a generation; the core
 rejects obsolete responses after sign-out, another sign-in or a newer refresh.
 
@@ -682,6 +686,14 @@ whose first writable string field is `KNOWN`, a lifecycle command `VERB` with
 its argument `VERB_FIELD` and the summary the API document gives it
 `VERB_TITLE`, and optionally `TITLE` (a per-run stamp by default). Nothing is
 committed, no flow names a tenant, and no journey runs against a mocked API.
+`sign-in-factor.yaml` reads three more — `TOTP_EMAIL`, `TOTP_PASSWORD` and
+`FACTOR_CODE` — for the account that answers with a second factor:
+`scripts/e2e/mobile_ci.sh` creates that person on the served kernel (the
+administrator stays password-only, so no other journey gains a step), enrols a
+factor over HTTP with `scripts/e2e/totp.py` printing the code for the current
+step, proves the challenge leg there while the code is fresh, and exports one of
+the account's recovery codes for the journey to spend, because Maestro starts
+once for every flow and a time-based code is right for thirty seconds.
 Both runners end at `scripts/e2e/run.sh` — the workstation's
 `scripts/e2e/android.sh` and the CI job's `scripts/e2e/mobile_ci.sh` — so
 neither keeps a flow list of its own: the spec list is the directory, and

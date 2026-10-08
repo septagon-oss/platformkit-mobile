@@ -35,7 +35,8 @@
 # share a name.
 #
 #   SERVER=http://localhost:8080 EMAIL=… PASSWORD=… MODULE=… ENTITY=… KNOWN=… \
-#   VERB=… VERB_FIELD=… VERB_TITLE=… scripts/e2e/run.sh <apk>
+#   VERB=… VERB_FIELD=… VERB_TITLE=… TOTP_EMAIL=… TOTP_PASSWORD=… FACTOR_CODE=… \
+#   scripts/e2e/run.sh <apk>
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 . "$(dirname "${BASH_SOURCE[0]}")/tools.sh"
@@ -43,6 +44,14 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 : "${SERVER:?the server URL as the phone reaches it, e.g. http://localhost:8080}"
 : "${EMAIL:?an account on that tenant}"
 : "${PASSWORD:?its password}"
+# The second-factor journey signs in as its own person (scripts/e2e/mobile_ci.sh
+# creates that person, enrols the factor and exports all three). Required here,
+# in the same words as EMAIL and PASSWORD, because a missing code would otherwise
+# surface as a Maestro assertion forty minutes into a run rather than at the line
+# that could have said so.
+: "${TOTP_EMAIL:?an account on that tenant that also answers with a second factor}"
+: "${TOTP_PASSWORD:?its password}"
+: "${FACTOR_CODE:?a code that account answers the challenge with}"
 : "${MODULE:?the module of a writable resource}"
 : "${ENTITY:?its entity}"
 : "${KNOWN:?its first writable string field}"
@@ -109,6 +118,7 @@ echo "run.sh: installed $apk, running e2e/flows against $SERVER"
 mkdir -p "$(dirname "$report")"
 "$MAESTRO" test e2e/flows "${maestro_device[@]}" \
   -e SERVER="$SERVER" -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" \
+  -e TOTP_EMAIL="$TOTP_EMAIL" -e TOTP_PASSWORD="$TOTP_PASSWORD" -e FACTOR_CODE="$FACTOR_CODE" \
   -e MODULE="$MODULE" -e ENTITY="$ENTITY" -e KNOWN="$KNOWN" \
   -e VERB="$VERB" -e VERB_FIELD="$VERB_FIELD" -e VERB_TITLE="$VERB_TITLE" \
   -e TITLE="$TITLE" \
