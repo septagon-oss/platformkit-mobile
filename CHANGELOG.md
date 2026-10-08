@@ -8,9 +8,14 @@ manifest version with no entry here, or an entry that states a catalogue version
 this build does not render.
 
 Below `1.0.0` the minor carries breaking changes to an exported subpath; from
-`1.0.0` a breaking change to any `exports` entry is a major. Every entry names
-the catalogue version the release renders, because that is what decides whether a
-server's document can be drawn at all.
+`1.0.0` a breaking change to any `exports` entry is a major. Below a published
+1.0.0 there is no consumer with a version to break from, so that is the share the
+minor carries; the rule the first release plan stated in other words — a breaking
+change to an export is a major — takes effect with the first `1.0.0` release.
+Every entry names the catalogue version the release renders, because that is what
+decides whether a server's document can be drawn at all; an entry for a version
+that was never published states none, and `check:publish` reads only the section
+for the version being released.
 
 ## 0.2.0
 
@@ -34,5 +39,9 @@ server's document can be drawn at all.
 
 ## 0.1.0
 
+- catalogVersion: none.
+
 Never published. The kit set `"private": true` and every consumer depended on an
-HTTPS archive of one commit; that is the state this release ends.
+HTTPS archive of one commit; that is the state this release ends. No version was
+offered to a consumer, so this entry states no catalogue version: the range of
+commits that carried `0.1.0` is wider than any one release.
