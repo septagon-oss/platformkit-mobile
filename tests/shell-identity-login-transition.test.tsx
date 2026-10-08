@@ -1,10 +1,11 @@
-import { loginResponse } from "./fakes/wire";
+import { issuedTokenResponse, loginResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
+import type { SignInStep } from "../src/effects/api";
 
 const mockSaved = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -40,7 +41,7 @@ afterEach(() => {
 test("signing in clears the previous identity before login returns", async () => {
   mockSaved.set(
     "platformkit.session",
-    JSON.stringify({ version: 1, baseURL: "https://former.test", cookie: "pk=former" }),
+    JSON.stringify({ version: 2, baseURL: "https://former.test", token: "pk=former" }),
   );
   const login = Promise.withResolvers<Response>();
   const calls: string[] = [];
@@ -60,6 +61,8 @@ test("signing in clears the previous identity before login returns", async () =>
         return new Response(null, { status: 503 });
       case "current.test POST /api/v1/auth/login":
         return login.promise;
+      case "current.test POST /api/v1/auth/tokens":
+        return issuedTokenResponse();
       case "current.test GET /api/v1/auth/me":
         return json({
           userId: "00000003-1111-4111-8111-111111111111",
@@ -84,7 +87,7 @@ test("signing in clears the previous identity before login returns", async () =>
     expect(current?.identity?.userId).toBe("00000002-1111-4111-8111-111111111111"),
   );
 
-  let signIn!: Promise<void>;
+  let signIn!: Promise<SignInStep | undefined>;
   await act(async () => {
     signIn = current!.signIn("https://current.test", "current@example.test", "password");
   });

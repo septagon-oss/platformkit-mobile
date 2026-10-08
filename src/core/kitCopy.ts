@@ -171,6 +171,19 @@ export const kitEnglish = {
   unitYearly: "per year",
   sourceFloorPlan: "Gallery floor plan",
   audioTour: "Audio tour",
+  // The second factor. The step belongs to the person who enrolled one: the
+  // words say what is owed and what went wrong, and never the arithmetic of
+  // why the password was not enough. The server's own sentence about a refused
+  // code stays the server's and is quoted as it answers.
+  confirmItIsYou: "Confirm it is you",
+  codePrompt: "Enter the six-digit code from your authenticator, or one of your recovery codes.",
+  code: "Code",
+  checkCode: "Check code",
+  codeWrong: "That code is not right.",
+  checking: "Checking…",
+  backToPassword: "Back to the password",
+  sessionExpired: "Your sign-in has expired. Sign in again.",
+  noScopes: "This account grants nothing this app can open.",
 } as const;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
 export const kitPortuguese: KitWords = {
@@ -326,4 +339,14 @@ export const kitPortuguese: KitWords = {
   unitYearly: "por ano",
   sourceFloorPlan: "Planta do piso da galeria",
   audioTour: "Audioguia",
+  confirmItIsYou: "Confirme que é você",
+  codePrompt:
+    "Introduza o código de seis dígitos da sua aplicação autenticadora, ou um dos seus códigos de recuperação.",
+  code: "Código",
+  checkCode: "Verificar código",
+  codeWrong: "Esse código não está certo.",
+  checking: "A verificar…",
+  backToPassword: "Voltar à palavra-passe",
+  sessionExpired: "O seu início de sessão expirou. Inicie sessão novamente.",
+  noScopes: "Esta conta não concede nada que esta aplicação possa abrir.",
 };

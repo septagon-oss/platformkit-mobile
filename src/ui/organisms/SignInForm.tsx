@@ -5,7 +5,7 @@
 // the same frame: a saved sign-in being restored, and one that could not be
 // opened, so a product need not draw those screens itself.
 import type { Feedback } from "../../core/derive";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../atoms/Button";
@@ -29,6 +29,19 @@ export interface Props {
   readonly error: string;
   readonly onSubmit: (baseURL: string, email: string, password: string) => void;
   readonly onClear: () => void;
+  /**
+   * step is where the person is: their password, or the code the server asked
+   * about. It is a step of this one form, not a state of the session — the
+   * window a challenge opens is the server's five minutes, and the phone keeps
+   * no copy of it.
+   */
+  readonly step?: "credentials" | "code";
+  /** code is what is typed now, held by the caller so a refusal can empty the field. */
+  readonly code?: string;
+  readonly onCodeChange?: (code: string) => void;
+  readonly onSubmitCode?: (code: string) => void;
+  /** onEditCredentials goes back to the password, the only way to open another challenge. */
+  readonly onEditCredentials?: () => void;
   /** title is the word over the form: the product's name, or "Sign in" when it has none to say. */
   readonly title?: string;
   /** booting says a saved sign-in is being restored: the form waits behind a spinner rather than asking again. */
@@ -50,34 +63,56 @@ export function SignInForm({
   booting = false,
   failed = "",
   onRetry,
+  step = "credentials",
+  code = "",
+  onCodeChange,
+  onSubmitCode,
+  onEditCredentials,
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const insets = useSafeAreaInsets();
+  const kit = feedback.copy.kit;
   const [enteredURL, setURL] = useState<string>();
   const url = enteredURL ?? baseURL;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  /**
+   * typed is what each field holds the moment a control is pressed, which the
+   * screen may not have drawn yet: state says what is on screen, and a person
+   * who types and taps in one gesture submits what they typed rather than the
+   * value from before they typed. The code arrives as a prop, because a refusal
+   * spends it and only the caller can empty the field.
+   */
+  const typed = useRef({ url: "", email: "", password: "", code: "" });
+  typed.current.email = email;
+  typed.current.password = password;
+  typed.current.code = code;
   const submit = () => {
-    if (!busy) onSubmit(url.trim(), email.trim(), password);
+    if (!busy)
+      onSubmit(
+        (typed.current.url || url).trim(),
+        typed.current.email.trim(),
+        typed.current.password,
+      );
   };
-  const head = (text: string) => (
+  const head = (heading: string, text: string) => (
     <View style={[s.head, { paddingTop: insets.top + t.space.xl }]}>
-      <Text role="display">{title}</Text>
+      <Text role="display">{heading}</Text>
       <Text tone="muted">{text}</Text>
     </View>
   );
   if (booting)
     return (
       <Screen testID="sign-in-booting">
-        {head("Restoring your saved sign-in…")}
+        {head(title, "Restoring your saved sign-in…")}
         <Spinner label={feedback.loadingLabel} motion={feedback.motion} size="large" />
       </Screen>
     );
   if (failed)
     return (
       <Screen testID="sign-in-failed">
-        {head("Your saved sign-in could not be opened.")}
+        {head(title, "Your saved sign-in could not be opened.")}
         <Notice
           announcement="urgent"
           text={failed}
@@ -92,9 +127,63 @@ export function SignInForm({
         />
       </Screen>
     );
+  if (step === "code") {
+    const sendCode = () => {
+      if (!busy) onSubmitCode?.(typed.current.code);
+    };
+    return (
+      <Screen form testID="challenge">
+        {head(kit.confirmItIsYou, kit.codePrompt)}
+        {error ? (
+          <Notice
+            announcement="urgent"
+            text={error}
+            action={retry(feedback, sendCode)}
+            testID="challenge-error"
+          />
+        ) : null}
+        <Section>
+          <FormField label={kit.code}>
+            <TextField
+              // A recovery code is not six digits, so the field stays text: a
+              // number pad would close the door a person whose authenticator is
+              // dead comes through. The only rules are the document's own
+              // maxLength and the server's trim.
+              kind="text"
+              value={code}
+              onChangeText={(v) => {
+                typed.current.code = v;
+                onCodeChange?.(v);
+              }}
+              maxLength={40}
+              autoComplete="one-time-code"
+              textContentType="oneTimeCode"
+              accessibilityLabel={kit.code}
+              disabled={busy}
+              onSubmitEditing={sendCode}
+              returnKeyType="go"
+              testID="code"
+            />
+          </FormField>
+        </Section>
+        <Button
+          label={busy ? kit.checking : kit.checkCode}
+          onPress={sendCode}
+          busy={busy}
+          testID="verify"
+        />
+        <Button
+          label={kit.backToPassword}
+          tone="secondary"
+          onPress={() => onEditCredentials?.()}
+          testID="back-to-password"
+        />
+      </Screen>
+    );
+  }
   return (
     <Screen form testID="sign-in">
-      {head("Use the address this tenant knows you by.")}
+      {head(title, "Use the address this tenant knows you by.")}
       {error ? (
         <Notice
           announcement="urgent"
@@ -113,12 +202,22 @@ export function SignInForm({
         />
       ) : null}
       <Section>
-        <ServerField value={url} onChange={setURL} disabled={busy} />
+        <ServerField
+          value={url}
+          onChange={(v) => {
+            typed.current.url = v;
+            setURL(v);
+          }}
+          disabled={busy}
+        />
         <FormField label="Email">
           <TextField
             kind="email"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(v) => {
+              typed.current.email = v;
+              setEmail(v);
+            }}
             placeholder="you@example.com"
             autoComplete="username"
             textContentType="username"
@@ -132,7 +231,10 @@ export function SignInForm({
           <TextField
             kind="password"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(v) => {
+              typed.current.password = v;
+              setPassword(v);
+            }}
             autoComplete="current-password"
             textContentType="password"
             accessibilityLabel="Password"

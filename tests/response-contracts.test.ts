@@ -4,9 +4,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createApi, ApiError } from "../src/effects/api";
+import { identity } from "../src/core/responses";
 import { parseCatalog } from "../src/core/catalog";
 import type { Catalog } from "../src/generated/types.gen";
-import { loginIdentity } from "./fakes/wire";
+import { issuedToken, loginIdentity } from "./fakes/wire";
 
 // If generated types become any, TypeScript refuses the unused expectation.
 // @ts-expect-error The document does not publish this property.
@@ -25,13 +26,19 @@ const entry = {
 const validPage = { items: [{ title: "Inspect pump" }], total: 3, limit: 2, offset: 1 };
 function responding(body: unknown, status = 200, contentType = "application/json") {
   let calls = 0;
-  const api = createApi("https://contract.test", (async () => {
-    calls++;
-    return new Response(status === 204 ? null : JSON.stringify(body), {
-      status,
-      headers: { "Content-Type": contentType },
-    });
-  }) as typeof fetch);
+  const api = createApi(
+    "https://contract.test",
+    (async () => {
+      calls++;
+      return new Response(status === 204 ? null : JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": contentType },
+      });
+    }) as typeof fetch,
+    // Sign-out is a signed-in request: the phone only ever makes it while it
+    // holds a key, and that key is what the request presents.
+    { token: "pk_live_contract", id: "00000000-0000-4000-8000-000000000003" },
+  );
   return { api, calls: () => calls };
 }
 const refused = (field: string) => (error: unknown) => {
@@ -120,11 +127,27 @@ test("identity and audit contract failures are never optional-identity or empty-
   assert.equal(await responding({}, 401).api.me(), undefined);
 });
 
-test("login and logout validate even void public results and reject undocumented success statuses", async () => {
-  await responding(loginIdentity).api.login("member@example.test", "password");
-  await responding({ signedOut: true }).api.logout();
+test("sign-in and sign-out validate their own answers and reject undocumented success statuses", async () => {
+  // The handshake is two answers: the identity the session is for, then the key
+  // minted with it. Both are validated by their own generated operation.
+  let handoff = 0;
+  await createApi("https://contract.test", (async () => {
+    handoff++;
+    return new Response(JSON.stringify(handoff === 1 ? loginIdentity : issuedToken), {
+      status: handoff === 1 ? 200 : 201,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch)
+    .signIn("member@example.test", "password")
+    .then((answer) =>
+      assert.deepEqual(answer, {
+        kind: "signed-in",
+        bearer: { token: issuedToken.token, id: issuedToken.id },
+      }),
+    );
+  await responding({ done: true }).api.logout();
   for (const action of [
-    (api: ReturnType<typeof createApi>) => api.login("m@example.test", "p"),
+    (api: ReturnType<typeof createApi>) => api.signIn("m@example.test", "p"),
     (api: ReturnType<typeof createApi>) => api.logout(),
   ]) {
     await assert.rejects(action(responding({}, 204).api), refused("unexpected response status"));
@@ -201,12 +224,19 @@ test("the React Native Request polyfill sends JSON and bodyless reads without a 
         headers: { "Content-Type": "application/json" },
       });
     }) as typeof fetch);
-    await api.login("member@example.test", "secret");
+    await api.request("POST", "/api/v1/auth/login", identity.parse, {
+      email: "member@example.test",
+      password: "secret",
+    });
     assert.equal(
       calls[0]?.body,
       JSON.stringify({ email: "member@example.test", password: "secret" }),
     );
-    assert.deepEqual(await api.me(), { userId: loginIdentity.userId, email: loginIdentity.email });
+    assert.deepEqual(await api.me(), {
+      userId: loginIdentity.userId,
+      email: loginIdentity.email,
+      permissions: loginIdentity.permissions,
+    });
     assert.equal(calls[1]?.body, undefined);
   } finally {
     Object.assign(globalThis, originals);

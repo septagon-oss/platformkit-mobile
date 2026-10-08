@@ -1,10 +1,11 @@
-import { loginResponse } from "./fakes/wire";
+import { issuedTokenResponse, loginResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
+import type { SignInStep } from "../src/effects/api";
 
 const mockSaved = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -51,7 +52,7 @@ afterEach(() => {
 test("a new ready catalog does not expose a failed session identity", async () => {
   mockSaved.set(
     "platformkit.session",
-    JSON.stringify({ version: 1, baseURL: "https://former.test", cookie: "pk=former" }),
+    JSON.stringify({ version: 2, baseURL: "https://former.test", token: "pk=former" }),
   );
   const formerIdentity = Promise.withResolvers<Response>();
   const formerCatalog = Promise.withResolvers<Response>();
@@ -68,6 +69,8 @@ test("a new ready catalog does not expose a failed session identity", async () =
         return formerCatalog.promise;
       case "current.test POST /api/v1/auth/login":
         return loginResponse({ headers: { "Set-Cookie": "pk=current" } });
+      case "current.test POST /api/v1/auth/tokens":
+        return issuedTokenResponse();
       case "current.test GET /api/v1/auth/me":
         return currentIdentity.promise;
       case "current.test GET /api/v1/app/resources":
@@ -101,7 +104,7 @@ test("a new ready catalog does not expose a failed session identity", async () =
   });
   await waitFor(() => expect(screen.getByTestId("session-state")).toHaveTextContent("failed:none"));
 
-  let signingIn!: Promise<void>;
+  let signingIn!: Promise<SignInStep | undefined>;
   await act(async () => {
     signingIn = shell!.signIn("https://current.test", "current@example.test", "password");
   });
@@ -109,7 +112,7 @@ test("a new ready catalog does not expose a failed session identity", async () =
   // Readiness now requires both contracts; a pending identity keeps loading.
   expect(screen.getByTestId("session-state")).toHaveTextContent("loading:none");
   expect(calls).toContain("current.test GET /api/v1/auth/me");
-  expect(shell?.api.cookie()).toBe("pk=current");
+  expect(shell?.api.bearer()?.token).toBe("pk=current");
   try {
     expect(shell?.identity).toBeUndefined();
   } finally {

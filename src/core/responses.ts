@@ -2,7 +2,7 @@
 // rows keep only the generic record/envelope contract; they do not become
 // operations in the reference document by sharing that shape.
 import { z } from "zod";
-import { zIdentity, zPageEventBody, zPageTaskBody } from "../generated/zod.gen";
+import { zIdentity, zIssuedToken, zPageEventBody, zPageTaskBody } from "../generated/zod.gen";
 
 export const row = z.record(z.string(), z.unknown());
 export const page = zPageTaskBody
@@ -11,7 +11,14 @@ export const page = zPageTaskBody
     items: z.array(row).nullable(),
   })
   .transform((value) => ({ items: value.items ?? [], total: value.total }));
-export const identity = zIdentity.transform(({ userId, email }) => ({ userId, email }));
+export const identity = zIdentity.transform(({ userId, email, permissions }) => ({
+  userId,
+  email,
+  permissions,
+}));
+// The mint's answer carries the key once, beside the id its own revoke takes.
+// Nothing else of it is kept: expiresAt is the server's, not a countdown.
+export const issuedToken = zIssuedToken.transform(({ token, id }) => ({ token, id }));
 export const trail = zPageEventBody.transform(({ items, total }) => ({
   items: (items ?? []).map(({ id, name, occurredAt, payload, actor }) => ({
     id,

@@ -4,14 +4,19 @@
 // src/core/derive.ts, which is the entry's own path unless the server printed
 // another) — so there is no second API to keep honest.
 //
-// The session is the auth module's cookie. A native client is not a browser:
-// it keeps the Set-Cookie value it was given and sends it back as Cookie, and
-// the kernel's CSRF rule accepts a request that carries neither Sec-Fetch-Site
-// nor Origin, because a caller that is not a browser presents what it presents
-// deliberately (kit/httpx.SameSite).
+// The credential is a bearer key of the auth module's api_tokens, never the
+// session cookie. A native client is not a browser: it presents
+// `Authorization: Bearer` on every request and reads no Set-Cookie at all,
+// because a request that carries both a cookie and a bearer is answered as
+// anonymous (kit/httpx/authenticate.go's ambiguousCredential), and the kernel's
+// CSRF rule accepts a caller that sends neither Sec-Fetch-Site nor Origin
+// (kit/httpx.SameSite). The session a sign-in opens lives in the one call
+// frame that mints the key with it and is not held anywhere else.
 import { type Catalog, type Entry, parseCatalog, CatalogError } from "../core/catalog";
-import { row, page, identity, trail, issuePath } from "../core/responses";
+import { row, page, identity, trail, issuedToken, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
+import { factorRequired } from "../core/signInOutcome";
+import { kitEnglish } from "../core/kitCopy";
 
 import { createClient, type Client } from "../generated/client";
 import { getValidRequestBody } from "../generated/core/utils.gen";
@@ -31,6 +36,10 @@ export class ApiError extends Error {
     readonly status: number,
     readonly detail: string,
     readonly fields: Readonly<Record<string, string>> = {},
+    /** type is the problem document's `type`, which says whether the status
+     * code says everything there is to say (kit/problem). It is what
+     * src/core/signInOutcome.ts reads before it reads any sentence. */
+    readonly type?: string,
   ) {
     super(detail || `HTTP ${status}`);
     this.name = "ApiError";
@@ -49,8 +58,40 @@ export class ApiError extends Error {
 
 class ResponseError extends ApiError {}
 
-/** Identity is who a session belongs to, as the auth module answers. */
-export type Identity = Readonly<Pick<WireIdentity, "userId" | "email">>;
+/**
+ * Identity is who a sign-in belongs to, as the auth module answers.
+ * permissions is the set the server computed for this person; the mint asks for
+ * exactly those scopes and the kit names no permission of its own.
+ */
+export type Identity = Readonly<Pick<WireIdentity, "userId" | "email" | "permissions">>;
+
+/**
+ * Bearer is the key this phone signs with: the secret to present and the id
+ * the server revokes it by. The token is never stored beside anything else and
+ * the id is read by nothing but the revoke at sign-out.
+ */
+export interface Bearer {
+  readonly token: string;
+  readonly id: string;
+}
+
+/**
+ * SignInAnswer is what the password leg returns. A second factor is an
+ * outcome rather than a fault (modules/auth/contracts/factors.go), so it comes
+ * back as a case the screen branches on, not an exception every caller would
+ * have to recognise in its own words.
+ */
+export type SignInAnswer =
+  | { readonly kind: "signed-in"; readonly bearer: Bearer }
+  | { readonly kind: "factor-required"; readonly email: string };
+
+/**
+ * SignInStep is SignInAnswer with the key taken out: what the shell may hand a
+ * screen. Only the shell holds a credential; a screen is told which step to
+ * draw and about which address.
+ */
+export type SignInStep =
+  { readonly kind: "signed-in" } | { readonly kind: "factor-required"; readonly email: string };
 
 /** Screen projection; wire events are validated in full before reaching it. */
 export type AuditEvent = Readonly<Pick<WireEvent, "id" | "name" | "occurredAt" | "actor">> & {
@@ -111,7 +152,14 @@ export interface Api {
    * an error: a record whose history is none of your business still shows.
    */
   events(q?: Since): Promise<Trail>;
-  login(email: string, password: string): Promise<void>;
+  /**
+   * signIn offers the password. It returns either the key this phone will
+   * sign with, or the address the server wants a code about.
+   */
+  signIn(email: string, password: string): Promise<SignInAnswer>;
+  /** answerFactor spends the code — from an app or a recovery card — and returns a key. */
+  answerFactor(email: string, code: string): Promise<Bearer>;
+  /** logout revokes this connection's key on the server and forgets it here. */
   logout(): Promise<void>;
   catalog(): Promise<Catalog>;
   /** list is a window of rows, in an order, through equality filters spelled field:value. */
@@ -140,8 +188,8 @@ export interface Api {
     verb: string,
     values?: Record<string, unknown>,
   ): Promise<Record<string, unknown>>;
-  /** cookie is the session the shell should persist, or undefined when signed out. */
-  readonly cookie: () => string | undefined;
+  /** bearer is the key this connection signs with, or undefined when signed out. */
+  readonly bearer: () => Bearer | undefined;
 }
 
 /**
@@ -152,14 +200,37 @@ export interface Api {
  */
 export const TIMEOUT = 15_000;
 
+/** TOKENS is where this phone mints its key and where it spends it. */
+const TOKENS = "/api/v1/auth/tokens";
+const CHALLENGE_VERIFY = "/api/v1/auth/challenge/verify";
+/** NO_SCOPES is the phone's own refusal, and the kit owns its words. */
+const NO_SCOPES = kitEnglish.noScopes;
+
+/**
+ * KEY_NAME is what this phone calls its own key on someone else's list of
+ * keys ("What this key is, in the words whoever reads the list would use",
+ * modules/auth/internal/token_routes.go). It names the class of device, no
+ * product and no tenant; a composing app supplies its own word.
+ */
+export const KEY_NAME = "This phone";
+
+/**
+ * SessionFrame is the session one sign-in opened, held for the length of that
+ * call alone. Nothing outside the frame can read it and no exported member
+ * returns it: the key it mints is the only credential that survives the call.
+ */
+interface SessionFrame {
+  cookie?: string | undefined;
+}
+
 export function createApi(
   baseURL: string,
   fetchImpl: typeof fetch = fetch,
-  initialCookie?: string,
+  initialBearer?: Bearer,
   timeout: number = TIMEOUT,
+  tokenName: string = KEY_NAME,
 ): Api {
-  let cookie = initialCookie;
-  let generation = 0;
+  let bearer: Bearer | undefined = initialBearer;
   const base = baseURL.replace(/\/+$/, "");
 
   function apiPath(path: string): void {
@@ -189,14 +260,18 @@ export function createApi(
       body: BodyInit | null;
       headers: Headers;
       cookie: string | undefined;
-      generation: number;
+      /** frame is the sign-in whose session this request carries; the answer's
+       * Set-Cookie belongs to it and to nothing else. */
+      frame?: SessionFrame;
+      /** key is the bearer this request presents in place of the held one —
+       * the one request a sign-out makes to spend a key it is about to forget. */
+      key?: Bearer;
     },
   ): Promise<{ text: string; status: number; headers: Headers; bytes?: ArrayBuffer }> {
     apiPath(path);
     if (method === "GET" && body !== undefined)
       throw new TypeError("A GET request cannot have a body.");
     if (signal?.aborted) throw cancelled();
-    const started = prepared?.generation ?? generation;
     const headers: Record<string, string> = prepared
       ? Object.fromEntries(prepared.headers.entries())
       : {};
@@ -205,8 +280,14 @@ export function createApi(
     delete headers.origin;
     delete headers["sec-fetch-site"];
     if (body !== undefined) headers["Content-Type"] = "application/json";
-    const sendingCookie = prepared ? prepared.cookie : cookie;
+    // One credential per request, never both: the session belongs to the frame
+    // that is minting its key, and every other request carries the key alone.
+    const sendingCookie = prepared?.cookie;
     if (sendingCookie) headers.Cookie = sendingCookie;
+    else {
+      const presenting = prepared?.key ?? bearer;
+      if (presenting) headers.Authorization = `Bearer ${presenting.token}`;
+    }
     const stop = new AbortController();
     const cancel = () => stop.abort();
     signal?.addEventListener("abort", cancel, { once: true });
@@ -227,10 +308,11 @@ export function createApi(
         if (init.body === undefined) throw new TypeError("The request body is not JSON.");
       }
       const res = await fetchImpl(base + path, init);
-      // The cookie comes off the response this call was answered with, before
-      // anything else, because it is what the next call presents.
-      const set = res.headers.get("Set-Cookie");
-      if (set && started === generation) cookie = set.split(";")[0];
+      // A session is kept only for the sign-in frame that was answered with it,
+      // and only long enough to mint with it. No response sets a credential any
+      // later request presents.
+      const sent = res.headers.get("Set-Cookie")?.split(";")[0];
+      if (sent && prepared?.frame) prepared.frame.cookie = sent;
       status = res.status;
       responseHeaders = res.headers;
       if (
@@ -262,12 +344,14 @@ export function createApi(
 
   function problem(status: number, text: string): ApiError {
     let detail = "";
+    let type: string | undefined;
     const fields: [string, string][] = [];
     try {
       const p: unknown = JSON.parse(text);
       if (!p || typeof p !== "object" || Array.isArray(p)) return new ApiError(status, "");
       const body = p as Record<string, unknown>;
       if (typeof body.detail === "string") detail = body.detail.replace(/^crud: invalid: /, "");
+      if (typeof body.type === "string") type = body.type;
       for (const entry of Array.isArray(body.errors) ? body.errors : []) {
         let name = "";
         let message = "";
@@ -291,7 +375,7 @@ export function createApi(
     } catch {
       // not a problem document; the status is what there is to say
     }
-    return new ApiError(status, detail, Object.fromEntries(fields));
+    return new ApiError(status, detail, Object.fromEntries(fields), type);
   }
 
   function cancelled(): Error {
@@ -318,9 +402,12 @@ export function createApi(
     }
   }
 
-  async function documented<T>(operation: (client: Client) => Promise<T>): Promise<T> {
-    const sessionCookie = cookie;
-    const sessionGeneration = generation;
+  async function documented<T>(
+    operation: (client: Client) => Promise<T>,
+    session?: SessionFrame,
+    key?: Bearer,
+  ): Promise<T> {
+    const sendingCookie = session?.cookie;
     const bodies = new WeakMap<Request, BodyInit | null>();
     const nativeFetch: typeof fetch = async (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
@@ -341,8 +428,9 @@ export function createApi(
       const result = await call(method, path, undefined, request.signal, {
         body,
         headers: request.headers,
-        cookie: sessionCookie,
-        generation: sessionGeneration,
+        cookie: sendingCookie,
+        ...(session ? { frame: session } : {}),
+        ...(key ? { key } : {}),
       });
       const status = result.status;
       if (!route.statuses.includes(status))
@@ -395,6 +483,8 @@ export function createApi(
     path: string,
     body?: unknown,
     signal?: AbortSignal,
+    session?: SessionFrame,
+    key?: Bearer,
   ): Promise<{ value: unknown; status: number }> {
     apiPath(path);
     if (method === "GET" && body !== undefined)
@@ -409,10 +499,20 @@ export function createApi(
         if (serialized === undefined) throw new TypeError("The request body is not JSON.");
         wireBody = JSON.parse(serialized);
       }
-      const result = await documented((client) => route.run(client, path, wireBody, signal));
+      const result = await documented(
+        (client) => route.run(client, path, wireBody, signal),
+        session,
+        key,
+      );
       return { status: result.response.status, value: result.data };
     }
-    const { text, status } = await call(method, path, body, signal);
+    const { text, status } = await call(
+      method,
+      path,
+      body,
+      signal,
+      key ? { body: null, headers: new Headers(), cookie: undefined, key } : undefined,
+    );
     try {
       return { status, value: text === "" ? undefined : JSON.parse(text) };
     } catch {
@@ -425,8 +525,10 @@ export function createApi(
     path: string,
     validate: (value: unknown) => T,
     body?: unknown,
+    session?: SessionFrame,
+    key?: Bearer,
   ): Promise<T> {
-    const { value, status } = await read(method, path, body);
+    const { value, status } = await read(method, path, body, undefined, session, key);
     try {
       return validate(value);
     } catch (error) {
@@ -437,17 +539,82 @@ export function createApi(
     }
   }
 
+  /**
+   * mint exchanges the session one sign-in leg opened for the key this phone
+   * will hold. It runs inside that leg's frame and the frame dies with the
+   * call, so the session is never this connection's to present again.
+   */
+  async function mint(who: Identity, session: SessionFrame): Promise<Bearer> {
+    const scopes = who.permissions ?? [];
+    // An empty scope list is refused rather than read as everything
+    // (contracts/tokens.go), so a person granted nothing signs in to nothing:
+    // keeping the session instead would be a half credential whose every read
+    // is a 401 on a key this phone never minted.
+    if (scopes.length === 0) throw new ApiError(403, NO_SCOPES);
+    // expiresAt is left out: the server applies its own default lifetime and
+    // the phone cannot judge its own clock against it.
+    return json("POST", TOKENS, issuedToken.parse, { name: tokenName, scopes }, session);
+  }
+
   return {
     request,
     operations: bindOperations(documented),
-    cookie: () => cookie,
-    async login(email, password) {
-      await json("POST", "/api/v1/auth/login", identity.parse, { email, password });
+    bearer: () => bearer,
+    async signIn(email, password) {
+      const session: SessionFrame = {};
+      let who: Identity;
+      try {
+        who = await json(
+          "POST",
+          "/api/v1/auth/login",
+          identity.parse,
+          { email, password },
+          session,
+        );
+      } catch (e) {
+        // The kernel answers a missing second factor with a 401 shaped exactly
+        // like a wrong password, and the sentence is the discriminator it has
+        // not named yet (src/core/signInOutcome.ts). Nothing was minted and
+        // nothing is kept: the person is one step further along the same form.
+        if (e instanceof ApiError && factorRequired(e)) return { kind: "factor-required", email };
+        throw e;
+      }
+      const key = await mint(who, session);
+      bearer = key;
+      return { kind: "signed-in", bearer: key };
+    },
+    async answerFactor(email, code) {
+      const session: SessionFrame = {};
+      // The door is public (httpx.Public): this leg needs no session to answer
+      // with. The code goes as it came, trimmed of what a paste added, because
+      // a recovery code is not six digits and the phone invents no grammar.
+      const who = await json(
+        "POST",
+        CHALLENGE_VERIFY,
+        identity.parse,
+        { email, code: code.trim() },
+        session,
+      );
+      const key = await mint(who, session);
+      bearer = key;
+      return key;
     },
     async logout() {
-      const request = json("POST", "/api/v1/auth/logout", () => undefined);
-      generation++;
-      cookie = undefined;
+      const key = bearer;
+      if (!key) return;
+      // The key is revoked at its own address, addressed by its id and never by
+      // its secret. Local forgetting does not wait for the answer.
+      // The request names the key it is spending, so forgetting it here does
+      // not depend on the answer, and the answer never arrives unheld.
+      const request = json(
+        "POST",
+        `${TOKENS}/${encodeURIComponent(key.id)}/revoke`,
+        () => undefined,
+        undefined,
+        undefined,
+        key,
+      );
+      bearer = undefined;
       await request;
     },
     async me() {

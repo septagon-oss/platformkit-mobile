@@ -1,10 +1,11 @@
-import { loginResponse } from "./fakes/wire";
+import { issuedTokenResponse, loginResponse } from "./fakes/wire";
 import { afterEach, beforeEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
+import type { SignInStep } from "../src/effects/api";
 
 const mockStore = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -52,7 +53,7 @@ afterEach(() => {
 test("an obsolete session catalog cannot replace a newer session catalog", async () => {
   mockStore.set(
     "platformkit.session",
-    JSON.stringify({ version: 1, baseURL: "https://former.test", cookie: "pk=former" }),
+    JSON.stringify({ version: 2, baseURL: "https://former.test", token: "pk=former" }),
   );
   const formerCatalog = Promise.withResolvers<Response>();
   const calls: string[] = [];
@@ -72,6 +73,8 @@ test("an obsolete session catalog cannot replace a newer session catalog", async
         return formerCatalog.promise;
       case "current.test POST /api/v1/auth/login":
         return loginResponse({ headers: { "Set-Cookie": "pk=current" } });
+      case "current.test POST /api/v1/auth/tokens":
+        return issuedTokenResponse();
       case "current.test GET /api/v1/auth/me":
         return json({
           userId: "00000003-1111-4111-8111-111111111111",
@@ -108,11 +111,11 @@ test("an obsolete session catalog cannot replace a newer session catalog", async
   });
   expect(screen.getByTestId("session")).toHaveTextContent(`ready:${currentPath}`);
   expect(latest?.identity?.userId).toBe("00000003-1111-4111-8111-111111111111");
-  expect(latest?.api.cookie()).toBe("pk=current");
+  expect(latest?.api.bearer()?.token).toBe("pk=current");
   expect(JSON.parse(mockStore.get("platformkit.session")!)).toEqual({
     version: 1,
     baseURL: "https://current.test",
-    cookie: "pk=current",
+    token: "pk=current",
   });
   expect(calls.filter((call) => call.includes("POST") && !call.includes("auth/login"))).toEqual([]);
 });

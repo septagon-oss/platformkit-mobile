@@ -4,8 +4,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createSessionStore, type SecureStorage } from "../src/effects/session";
 
-const first = { baseURL: "https://first.example.com", cookie: "test_session=first" };
-const second = { baseURL: "https://second.example.com", cookie: "test_session=second" };
+const first = {
+  baseURL: "https://first.example.com",
+  token: "pk_live_first",
+  tokenId: "00000000-0000-4000-8000-000000000001",
+};
+const second = {
+  baseURL: "https://second.example.com",
+  token: "pk_live_second",
+  tokenId: "00000000-0000-4000-8000-000000000002",
+};
 
 test("a later save queued behind a slow one is the session a relaunch restores", async () => {
   const values = new Map<string, string>();

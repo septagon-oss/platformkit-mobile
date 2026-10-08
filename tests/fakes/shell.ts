@@ -31,7 +31,8 @@ export function fakeApi(): FakeApi {
     ) as jest.MockedFunction<Api["request"]>,
     me: jest.fn<Api["me"]>(async () => undefined),
     events: jest.fn<Api["events"]>(async () => ({ items: [], total: 0 })),
-    login: jest.fn<Api["login"]>(async () => undefined),
+    signIn: jest.fn<Api["signIn"]>(async () => ({ kind: "signed-in", bearer })),
+    answerFactor: jest.fn<Api["answerFactor"]>(async () => bearer),
     logout: jest.fn<Api["logout"]>(async () => undefined),
     catalog: jest.fn<Api["catalog"]>(async () => catalog),
     list: jest.fn<Api["list"]>(async () => ({ items: [], total: 0 })),
@@ -42,9 +43,12 @@ export function fakeApi(): FakeApi {
     update: jest.fn<Api["update"]>(async (_e, id, v) => ({ id, ...v })),
     remove: jest.fn<Api["remove"]>(async () => undefined),
     command: jest.fn<Api["command"]>(async (_e, id) => ({ id: id ?? "" })),
-    cookie: jest.fn<Api["cookie"]>(() => "pk=1"),
+    bearer: jest.fn<Api["bearer"]>(() => bearer),
   };
 }
+
+/** bearer is the key a fake shell or Api holds; a test that cares about its text overrides the member. */
+export const bearer = { token: "pk_live_1", id: "00000000-0000-4000-8000-000000000001" };
 
 /** shellValue is a signed-in shell over the catalog fixture; a test overrides the phase, the pack or the writes. */
 export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue {
@@ -58,7 +62,8 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     wrote: jest.fn<ShellValue["wrote"]>(),
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),
-    signIn: jest.fn<ShellValue["signIn"]>(async () => undefined),
+    signIn: jest.fn<ShellValue["signIn"]>(async () => ({ kind: "signed-in" })),
+    answerFactor: jest.fn<ShellValue["answerFactor"]>(async () => undefined),
     signOut: jest.fn<ShellValue["signOut"]>(async () => undefined),
     refresh: jest.fn<ShellValue["refresh"]>(async () => undefined),
     ...over,

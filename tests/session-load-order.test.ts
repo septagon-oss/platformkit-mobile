@@ -22,12 +22,20 @@ test("a load queued during session replacement reads the replacement tenant", as
     },
   };
   const sessions = createSessionStore(storage);
-  await sessions.save({ baseURL: "https://first.example.test", cookie: "pk=first" });
+  await sessions.save({ baseURL: "https://first.example.test", token: "pk_live_first" });
   hold = true;
-  const save = sessions.save({ baseURL: "https://second.example.test", cookie: "pk=second" });
+  const save = sessions.save({
+    baseURL: "https://second.example.test",
+    token: "pk_live_second",
+    tokenId: "00000000-0000-4000-8000-000000000002",
+  });
   await writing.promise;
   const load = sessions.load();
   release.resolve();
   await save;
-  assert.deepEqual(await load, { baseURL: "https://second.example.test", cookie: "pk=second" });
+  assert.deepEqual(await load, {
+    baseURL: "https://second.example.test",
+    token: "pk_live_second",
+    tokenId: "00000000-0000-4000-8000-000000000002",
+  });
 });
