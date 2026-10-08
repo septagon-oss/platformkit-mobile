@@ -725,7 +725,9 @@ lockfile and their config plugins, the Android recipe, the bundler
 configuration and the design export. When a change moves it, run
 `npm run fingerprint` and say why in the commit, because that change needs a
 new binary. CI also exports both bundles, refuses a dependency advisory no
-review covers (see below), scans the history for secrets, runs the device
+review covers (see below), scans the history for secrets (one value is exempt,
+by its shape alone: the synthetic publish credential the release tests hand a
+fake npmrc, named in [.gitleaks.toml](.gitleaks.toml)), runs the device
 journeys against a pinned kernel image, and a weekly workflow reports what
 drifted without blocking anything. A nightly one blocks: [kernel-main.yml](.gitea/workflows/kernel-main.yml)
 reads kernel main and fails when this build cannot read it, which is the part no
