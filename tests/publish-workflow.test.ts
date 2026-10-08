@@ -100,6 +100,11 @@ test("a manifest that cannot be published is refused before the registry is aske
   );
   assert.throws(() => publishable({ ...publishableManifest, version: "0.2" }), /exact version/);
   assert.throws(
+    () => publishable({ ...publishableManifest, version: "0.3.0-rc.1" }),
+    /prerelease/,
+    "npm sends a prerelease under another dist-tag, and this release publishes no other",
+  );
+  assert.throws(
     () => publishable({ ...publishableManifest, files: ["src"] }),
     /CHANGELOG\.md/,
     "npm packs only its three mandatory files besides files: a changelog not named there does not travel",

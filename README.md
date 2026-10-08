@@ -556,7 +556,9 @@ of this scope is refused and so answers nothing — whether it holds the version
 A version the registry already holds is never written again: the fix for that
 refusal is a new version and a new tag. Any other answer, including no answer,
 refuses the run as well, because a publish may not rest on a question the run
-could not read the answer to.
+could not read the answer to. Only released versions are published: a prerelease
+is refused by `npm run check:publish`, because npm sends one under a dist-tag
+this release does not name.
 The `v*` namespace stays `release.yml`'s — it builds binaries and publishes no
 package, and Gitea anchors a ref glob, so neither tag namespace reaches the
 other's runs. [CHANGELOG.md](CHANGELOG.md) carries one section per version and

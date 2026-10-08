@@ -29,7 +29,13 @@ export const TAG_PREFIX = "kit-v";
 
 // The grammar scripts/source.ts requires of every dependency's version, asked
 // of this package's own: the registry's answer is an exact version too.
-const VERSION = /^\d+\.\d+\.\d+(?:[-+][\w.+-]+)?$/;
+const VERSION = /^\d+\.\d+\.\d+$/;
+
+// A version carrying a suffix: `-rc.1`, which npm publishes under a dist-tag of
+// its own and refuses without one, or `+build.7`, which is build metadata. This
+// release publishes the version a consumer pins and names no other tag, so such a
+// version is refused where that can be said, rather than by npm after the pack.
+const SUFFIXED = /^\d+\.\d+\.\d+[-+][\w.+-]+$/;
 
 export interface Manifest {
   name?: unknown;
@@ -46,10 +52,11 @@ export interface Manifest {
  * 12.2.0 exits 0 with `"private": true` still in the file, so the one gate that
  * notices is this one. A name with no scope is refused because the scope is what
  * binds a package to the organisation whose token publishes it — an unscoped
- * name lands wherever the job's registry points. And the changelog has to be in
- * `files`, because npm adds only package.json, README.md and LICENSE to an
- * archive on its own: named there or not, the entry a version documents itself
- * by travels with it or not.
+ * name lands wherever the job's registry points. A prerelease is refused for the
+ * same reason npm would refuse it later, in a sentence that names the version.
+ * And the changelog has to be in `files`, because npm adds only package.json,
+ * README.md and LICENSE to an archive on its own: named there or not, the entry a
+ * version documents itself by travels with it or not.
  */
 export function publishable(manifest: Manifest): void {
   if ("private" in manifest)
@@ -62,6 +69,10 @@ export function publishable(manifest: Manifest): void {
       `package.json: ${JSON.stringify(name)} is not a scoped name; the scope is what binds the kit to the organisation that publishes it`,
     );
   const version = manifest.version;
+  if (typeof version === "string" && SUFFIXED.test(version))
+    throw new Error(
+      `package.json: ${version} carries a prerelease or build suffix; npm publishes such a version under another dist-tag, and this release names no other`,
+    );
   if (typeof version !== "string" || !VERSION.test(version))
     throw new Error(`package.json: ${JSON.stringify(version)} is not an exact version`);
   const files = manifest.files;
@@ -78,6 +89,11 @@ export function publishable(manifest: Manifest): void {
  * section has to name the catalogue version, because that number is what a
  * client reads to know whether this release renders the document shape its
  * server sends. `src/core/catalog.ts` owns that number; nothing here restates it.
+ *
+ * One section is read, the one for the version being published, because that is
+ * the claim this write makes about the tree it comes from. An older section
+ * describes a release this tree cannot vouch for: `## 0.1.0` states no catalogue
+ * version, having never been published, and no guard is owed over it.
  */
 export function changelogEntry(changelog: string, version: string, catalogVersion: number): void {
   const heading = `## ${version}`.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
