@@ -82,11 +82,6 @@ function message(e: unknown): string {
 }
 
 /**
- * held is the key a saved record carries, or nothing when it names a server
- * alone. Half a key never reaches here: the record that carries one is refused
- * before the shell sees it (src/effects/session.ts).
- */
-/**
  * challenge is the connection that accepted a password and answered that it
  * needs a second factor. The window that refusal opened lives on that server's
  * clock and in no table this phone can read, so the code goes back along the same
@@ -99,6 +94,11 @@ interface Challenge {
   readonly baseURL: string;
 }
 
+/**
+ * held is the key a saved record carries, or nothing when it names a server
+ * alone. Half a key never reaches here: the record that carries one is refused
+ * before the shell sees it (src/effects/session.ts).
+ */
 function held(session: Session | undefined): Bearer | undefined {
   return session?.token && session?.tokenId
     ? { token: session.token, id: session.tokenId }
