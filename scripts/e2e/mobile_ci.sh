@@ -313,10 +313,12 @@ factor_code="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["
 
 # Prove the time-based leg while its code is fresh, before Maestro starts: the
 # password must be answered by the challenge, and a code computed at this instant
-# must be accepted by the operation the phone's code step calls. The device
-# journey opens its own window by giving the password again, so whether this leg
-# leaves one open changes nothing for it; what it must not do is spend the
-# recovery code the journey types, and a refused code spends nothing.
+# must be accepted by the operation the phone's code step calls. This leg succeeds,
+# and a success commits the DELETE that spends the first-factor proof (modules/auth
+# /internal/factors.go's RequireFirstFactorProof), so the window is gone afterwards
+# — the device journey re-mints one by giving the password again, which is what the
+# journey is for. It spends no recovery code, so what the journey types is still
+# good.
 echo "mobile_ci: the second factor answers over HTTP"
 proof="$(api POST /api/v1/auth/login "{\"email\":\"$factor_email\",\"password\":\"$factor_password\"}" "$work/prove.jar")"
 [ "$proof" = "401" ] ||

@@ -274,10 +274,13 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
           connect(open.baseURL, a);
           await load(a, started, open.baseURL);
         } catch (e) {
-          // A refused code costs what a wrong password costs and mints nothing.
-          // The server keeps the window it opened — the pinned document says a
-          // wrong code "spends nothing" — so the challenge stays open on the
-          // same connection and the step stays where the person is.
+          // A refused code mints nothing, and it does not close the window
+          // either: the server spends the proof of the first factor with a
+          // DELETE inside the sign-in's own transaction, so an answer it refuses
+          // rolls that spend back and a mistyped digit costs only the mistyped
+          // digit (modules/auth/internal/factors.go's RequireFirstFactorProof,
+          // at the commit this build's document came from). The challenge stays
+          // open on the connection that earned it, and the step stays open too.
           void a.logout().catch(() => undefined);
           if (generation.current === started) dispatch({ type: "no-session", generation: started });
           throw e;

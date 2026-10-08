@@ -57,13 +57,15 @@ export function SignIn({ title }: Props = {}) {
     try {
       await answerFactor(challenged, typed);
     } catch (e) {
-      // A wrong code spends nothing — the pinned document answers a wrong code,
-      // a replayed step and a spent recovery code as one answer at one cost — so
-      // the window the password opened stays open and another code may still be
-      // right. The field empties anyway rather than offer the same answer twice:
-      // a recovery code is spent by the attempt that reached it, and no answer
-      // says which kind this was. The way back to a fresh window is the password
-      // link under the field, and the phone never re-mints one itself.
+      // The server spends the proof of the first factor with a DELETE inside the
+      // sign-in's own transaction, so a code it refuses rolls that spend back and
+      // the window stays open for another try
+      // (modules/auth/internal/factors.go's RequireFirstFactorProof, at the commit
+      // this build's document came from). The field empties anyway rather than
+      // offer one text twice: a recovery code is spent by the answer that redeems
+      // it, and a wrong code and a spent code are one answer, so this screen has
+      // no way to say which is still good. The link under the field is the way
+      // back to the password, which is the only thing that opens a new window.
       setCode("");
       setError(
         e instanceof ApiError && e.status === 401 ? feedback.copy.kit.codeWrong : message(e),
