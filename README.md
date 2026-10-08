@@ -155,7 +155,7 @@ const task = result.data;
 Each method accepts its generated body, path, query and header inputs, plus an
 optional `signal`. Its types do not accept a different URL, transport or validator.
 These types are not a runtime security boundary for a caller that bypasses them.
-Generated types are also exported from `platformkit-mobile/generated`.
+Generated types are also exported from `@septagon-oss/platformkit-mobile/generated`.
 
 There is no shared client instance or per-composition regeneration. The generated
 client covers only the pinned document. Catalog entries outside that document
@@ -254,7 +254,7 @@ A pack screen reaches typed data by naming a generated operation, which is the
 reason a bespoke screen is worth writing at all:
 
 ```tsx
-import { useOperation } from "platformkit-mobile/screens/useOperation";
+import { useOperation } from "@septagon-oss/platformkit-mobile/screens/useOperation";
 
 const read = useOperation("taskTaskRead", id === undefined ? undefined : { path: { id } });
 const title = read.data?.title ?? "";
@@ -266,10 +266,10 @@ key of the generated `Operations`, and the body is what that operation's own
 generated validator accepted (see [HTTP contract](#http-contract)); a field the
 pinned document does not print fails `tsc` rather than drawing an empty line on a
 phone weeks later. `OperationName`, `OperationInput`, `OperationData` and
-`ReadState` come from `platformkit-mobile/renderers`, and a pack reaches the
+`ReadState` come from `@septagon-oss/platformkit-mobile/renderers`, and a pack reaches the
 document through them rather than through the generated client. A write is the
 same surface, `api.operations.taskTaskAssign({ path: { id }, body })`, and
-`platformkit-mobile/screens/useCommand` exports the two hooks the generated
+`@septagon-oss/platformkit-mobile/screens/useCommand` exports the two hooks the generated
 screens use: `useCommandRun` sends a command with an argument to its own sheet
 and asks about one without, `useCommandAsk` is the asking half. So a pack that
 draws the entry's commands asks the same questions, posts to the same address and
@@ -278,7 +278,7 @@ own hooks — a pack composes a screen, it does not take over the shell's.
 
 The kit's one example is
 [`src/examples/taskRenderers.tsx`](src/examples/taskRenderers.tsx), exported as
-`platformkit-mobile/examples/taskRenderers`. It is a pattern a product copies,
+`@septagon-oss/platformkit-mobile/examples/taskRenderers`. It is a pattern a product copies,
 not product UI: `app/_layout.tsx` keeps passing `defaultRenderers`, so no screen
 a person walks comes from it. It shows the one thing that earns a bespoke screen
 — `slaDeadline` and `slaBreached` read as one line, which no column can say —
@@ -297,7 +297,7 @@ pack — because `defaultRenderers` was empty and no screen read a generated
 operation at all (`grep -rn "api.operations" src/screens` printed nothing on the
 commit this change starts from), so there was no accessor to extend and nothing
 existing could carry a read whose type comes from the document. **Made
-reusable** — `useOperation`, exported as `platformkit-mobile/screens/useOperation`
+reusable** — `useOperation`, exported as `@septagon-oss/platformkit-mobile/screens/useOperation`
 for every pack a product writes, and the one shared `useCommandRun` now behind
 both the generated detail and a pack's own screen,
 `fakeApi(operations)` with `answering`/`recorded` in `tests/fakes/shell.ts` so
@@ -315,7 +315,7 @@ existing atoms had no common state or recovery contract. **Made reusable** —
 renderer pack use the same states, actions, tokens and conformance examples.
 
 Obtain an immutable English or Portuguese copy bundle with `deriveCopy('en')`
-or `deriveCopy('pt')` from `platformkit-mobile/core/derive`. Pass an explicit
+or `deriveCopy('pt')` from `@septagon-oss/platformkit-mobile/core/derive`. Pass an explicit
 `Presentation` with that bundle, locale, timezone, week start, sampled UTC clock
 value and motion preference to `deriveState(input, presentation)`. Language and
 formatting locale are independent; the gallery includes `en-GB`, `pt-PT` and
@@ -323,7 +323,7 @@ formatting locale are independent; the gallery includes `en-GB`, `pt-PT` and
 
 `deriveState` returns either `{ ok: true, value }` or `{ ok: false, issues }`, with
 no partial model. Render a successful value through
-`platformkit-mobile/screens/StateFeedback`, passing `model`, `onAction(id)` and
+`@septagon-oss/platformkit-mobile/screens/StateFeedback`, passing `model`, `onAction(id)` and
 an optional `testID`. This screen adapter composes the pure
 `ui/molecules/StateView` and performs iOS announcements when the message changes;
 Android and web use native live regions. The caller owns all reads, writes,
@@ -361,7 +361,7 @@ Direct consumers upgrading their source pin must migrate these required props:
   two also use its copy bundle. `Value` and `Labelled` receive that value as
   `presentation`. There is no mutable device-default date formatter.
 
-The public `platformkit-mobile/ui/gallery` export accepts `presentation`, optional
+The public `@septagon-oss/platformkit-mobile/ui/gallery` export accepts `presentation`, optional
 complete `palette`/`fonts`, `initialCaseId` and `initialMode`. Choose a rich-state
 case, language, locale and appearance in its controls. Hover, press and focus
 cases contain real controls to operate; their names do not simulate interaction.
@@ -453,16 +453,32 @@ source evidence; they do not establish those runtime results.
 
 ### Shared package
 
+**Reused** — `package.json`'s identity fields, the `files` allowlist
+[`tests/package.test.ts`](tests/package.test.ts) already enforces, the
+manifest/lockfile equality `scripts/source.ts` refuses on every check, and the
+pinned-action, read-only-permissions, checks-first skeleton of
+[`ci.yml`](.gitea/workflows/ci.yml) and
+[`release.yml`](.gitea/workflows/release.yml) carry this release. **Added** — a
+scoped name, a version, [`CHANGELOG.md`](CHANGELOG.md) and
+[`publish.yml`](.gitea/workflows/publish.yml), because this repository could not
+write to a registry at all, no existing file named a version a consumer may
+pin, and no YAML parser was a declared dependency of the check that has to read
+one. **Made reusable** — `npm run check:publish`, the one guard a push and a
+release both ask the same questions of; a changelog entry that states the
+catalogue version its release renders, which that guard reads; and a workflow
+whose only input is a tag, so the next version is a bump and an entry rather
+than a decision again.
+
 [package.json](package.json) exposes the existing implementation through package
-subpaths: `platformkit-mobile/shell`, `renderers`, `route`, `effects/api`,
+subpaths: `@septagon-oss/platformkit-mobile/shell`, `renderers`, `route`, `effects/api`,
 `core/catalog`, `core/derive`, `screens/<component>` and
 `ui/{atoms,molecules,organisms,templates}/<component>`. Theme and scale come from
-`platformkit-mobile/ui/theme` and `platformkit-mobile/ui/scale`. These exports
+`@septagon-oss/platformkit-mobile/ui/theme` and `@septagon-oss/platformkit-mobile/ui/scale`. These exports
 resolve directly to the TypeScript source used by this reference application.
 The consuming Expo application supplies its routes, identity, renderer pack and
 product screens, and composes one shared `Shell` and `ThemeProvider`.
 
-`platformkit-mobile/screens/SignIn` takes an optional `title`, the product's
+`@septagon-oss/platformkit-mobile/screens/SignIn` takes an optional `title`, the product's
 name over the form, and draws the shell's phases itself: a spinner while a
 saved sign-in is restored, and, when a saved sign-in could not be opened, the
 reason with Retry and a way to another server. A product that composes its
@@ -478,11 +494,11 @@ keep their objects stable between changes. The provider's `mode` prop still
 overrides the device appearance when the product requires it.
 
 Keep the application's design export in `testdata/design-tokens.json`. Reuse
-`render` from `platformkit-mobile/tools/tokens` in its `scripts/tokens.ts`:
+`render` from `@septagon-oss/platformkit-mobile/tools/tokens` in its `scripts/tokens.ts`:
 
 ```ts
 import { readFileSync, writeFileSync } from "node:fs";
-import { render } from "platformkit-mobile/tools/tokens";
+import { render } from "@septagon-oss/platformkit-mobile/tools/tokens";
 
 const document: unknown = JSON.parse(readFileSync("testdata/design-tokens.json", "utf8"));
 writeFileSync("src/ui/tokens.ts", render(document));
@@ -501,15 +517,51 @@ the build tool or Node APIs into runtime layers.
 The application owns its native dependencies and lockfile. Declare the native
 packages directly in that application at the versions used here so autolinking
 finds them and React, the router and their contexts have one installed instance.
-Pin the shared package to an exact published release or an HTTPS source archive
-whose URL names a full published commit ID. Commit the resulting application
-lockfile, including the resolved URL and integrity hash; branch archives and
-local checkout paths do not identify a fixed dependency.
+Pin the shared package to one published version, with no range:
 
-No npm registry release is published; `private: true` remains set.
+```json
+"@septagon-oss/platformkit-mobile": "0.2.0"
+```
+
+and name the registry that holds it in that application's own `.npmrc`, in the
+shape the forge documents for a scoped package. Which host the forge is belongs
+to the deployment, so this repository commits no registry address:
+
+```ini
+@septagon-oss:registry=https://<forge host>/api/packages/septagon-oss/npm/
+//<forge host>/api/packages/septagon-oss/npm/:_authToken=<read token>
+```
+
+Commit the resulting application lockfile, including the resolved URL and
+integrity hash; branch archives and local checkout paths do not identify a
+fixed dependency. Anonymous reads of the package scope are refused today, which
+is why the consumer's own line carries a token.
+
+An HTTPS source archive whose URL names a full published commit ID still
+installs, and is now the way to pin a commit from before this rename: an archive
+of this commit or later carries the scoped name above, and an older one answers
+only the unscoped `platformkit-mobile/...` spelling.
+
+The kit is published from the tag `kit-v<version>`, which has to name the
+version in `package.json`.
+[`publish.yml`](.gitea/workflows/publish.yml) runs `npm run check` first, then
+the same guard with the tag it was cut from
+(`node --import tsx scripts/publish.ts --check --tag <tag>`), then the one write
+— the kit to this
+forge's npm registry, authenticated by the repository secret
+`NPM_PUBLISH_TOKEN`. Until that secret exists every run refuses on the step that
+reads it and nothing reaches the registry. A version the registry already holds
+is never written again: the fix for that refusal is a new version and a new tag.
+The `v*` namespace stays `release.yml`'s — it builds binaries and publishes no
+package, and Gitea anchors a ref glob, so neither tag namespace reaches the
+other's runs. [CHANGELOG.md](CHANGELOG.md) carries one section per version and
+states the catalogue version that release renders; `npm run check:publish`
+refuses a manifest version with no section here, or a section that names another
+catalogue version, so an entry cannot be skipped by the commit that bumps it.
+
 For local review, `npm pack --ignore-scripts --pack-destination /tmp` creates a
 source dependency archive. Its contents are `src/`, `scripts/tokens.ts`, the
-shared `scripts/android/` recipe, `LICENSE`, `NOTICE` and npm's package
+shared `scripts/android/` recipe, `CHANGELOG.md`, `NOTICE` and npm's package
 metadata and documentation.
 It contains the shared implementation, including generated design tokens. The
 reference application's routes, Docker setup and test tooling belong to the
@@ -520,12 +572,12 @@ type checking, bundling and device journeys remain separate verification steps.
 
 ### Build a consuming Android application
 
-The exported `platformkit-mobile/tools/android` entry is the same Bash recipe
+The exported `@septagon-oss/platformkit-mobile/tools/android` entry is the same Bash recipe
 used by this repository. After installing the consuming app's locked
 dependencies, run this from that app's root in the Android build environment:
 
 ```sh
-bash "$(node -p "require.resolve('platformkit-mobile/tools/android')")" "$PWD"
+bash "$(node -p "require.resolve('@septagon-oss/platformkit-mobile/tools/android')")" "$PWD"
 ```
 
 The target needs `package.json`, `package-lock.json` and an Expo app
@@ -1022,6 +1074,6 @@ carry the generated operations into the current screens.
 **Added** — the pinned public OpenAPI document, offline generation and drift check,
 generated TypeScript and Zod contracts, and required custom-response validators
 make response acceptance explicit before data reaches a screen.
-**Made reusable** — `platformkit-mobile/generated`, each shell API's bound
+**Made reusable** — `@septagon-oss/platformkit-mobile/generated`, each shell API's bound
 `operations`, and `request(method, path, validate, body?)` let renderer packs consume
 the documented operations and validate their own JSON routes through that transport.

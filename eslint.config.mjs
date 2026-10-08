@@ -18,7 +18,7 @@ import { builtinModules } from "node:module";
 // example as product UI.
 const examplePack = [
   {
-    group: ["**/examples/**", "platformkit-mobile/examples/*"],
+    group: ["**/examples/**", "@septagon-oss/platformkit-mobile/examples/*"],
     message: "src/examples holds the kit's example pack: a pattern a product copies, composed by no route and rendered by no product.",
   },
 ];
@@ -27,7 +27,7 @@ const forbid = (files, patterns) => ({
   files,
   rules: {
     "no-restricted-imports": ["error", { patterns: [
-      { group: [...builtinModules, "node:*", "**/scripts/**", "platformkit-mobile/tools/**"], message: "build tools run in Node; native runtime code consumes their generated source." },
+      { group: [...builtinModules, "node:*", "**/scripts/**", "@septagon-oss/platformkit-mobile/tools/**"], message: "build tools run in Node; native runtime code consumes their generated source." },
       ...examplePack,
       ...patterns,
     ] }],
@@ -48,7 +48,7 @@ const generatedEffects = [
   "**/generated/*", "**/generated/index", "**/generated/index.ts",
   "**/generated/client", "**/generated/client/**", "**/generated/core/**",
   "**/generated/sdk.gen", "**/generated/sdk.gen.ts", "**/generated/routes.gen", "**/generated/routes.gen.ts",
-  "platformkit-mobile/generated",
+  "@septagon-oss/platformkit-mobile/generated",
   "!**/generated/zod.gen", "!**/generated/zod.gen.ts",
   "!**/generated/types.gen", "!**/generated/types.gen.ts",
 ];

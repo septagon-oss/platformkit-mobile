@@ -8,6 +8,10 @@ import test from "node:test";
 import ts from "typescript";
 
 const root = path.resolve(import.meta.dirname, "..");
+const manifest = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")) as {
+  name: string;
+  files: string[];
+};
 
 test("a packed dependency resolves the shared composition and atomic layers without a checkout", (t) => {
   const temporary = mkdtempSync(path.join(os.tmpdir(), "pk-mobile-package-test-"));
@@ -20,9 +24,11 @@ test("a packed dependency resolves the shared composition and atomic layers with
     }),
   ) as Packed[] | Record<string, Packed>;
   // npm 12 keys the pack report by package name; earlier versions return an array.
-  const packed = Array.isArray(result) ? result[0] : result["platformkit-mobile"];
+  // The name is read from the manifest rather than written here, so the pack, the
+  // install path and every subpath specifier below answer to the one owner of it.
+  const packed = Array.isArray(result) ? result[0] : result[manifest.name];
   assert.ok(packed);
-  const installed = path.join(temporary, "node_modules/platformkit-mobile");
+  const installed = path.join(temporary, "node_modules", ...manifest.name.split("/"));
   mkdirSync(installed, { recursive: true });
   execFileSync("tar", [
     "-xzf",
@@ -102,7 +108,7 @@ test("a packed dependency resolves the shared composition and atomic layers with
     "ui/templates/SummaryDetail",
   ];
   for (const name of names) {
-    const resolved = require.resolve(`platformkit-mobile/${name}`);
+    const resolved = require.resolve(`${manifest.name}/${name}`);
     assert.ok(resolved.startsWith(installed + path.sep), name);
     assert.ok(existsSync(resolved), name);
   }
@@ -112,20 +118,20 @@ test("a packed dependency resolves the shared composition and atomic layers with
     "screens/useResourceDetail",
     "app/_layout",
   ]) {
-    assert.throws(() => require.resolve(`platformkit-mobile/${name}`), name);
+    assert.throws(() => require.resolve(`${manifest.name}/${name}`), name);
   }
   const nativeMap = execFileSync(
     process.execPath,
     [
       "--conditions=react-native",
       "-e",
-      "process.stdout.write(require.resolve('platformkit-mobile/screens/NativeMap'))",
+      `process.stdout.write(require.resolve(${JSON.stringify(`${manifest.name}/screens/NativeMap`)}))`,
     ],
     { cwd: temporary, encoding: "utf8" },
   );
   assert.equal(nativeMap, path.join(installed, "src/screens/NativeMap.native.tsx"));
   assert.equal(
-    require.resolve("platformkit-mobile/screens/NativeMap"),
+    require.resolve(`${manifest.name}/screens/NativeMap`),
     path.join(installed, "src/screens/NativeMap.tsx"),
   );
   const files = new Set(packed.files.map((file) => file.path));
@@ -133,18 +139,19 @@ test("a packed dependency resolves the shared composition and atomic layers with
     JSON.parse(readFileSync(path.join(installed, "package.json"), "utf8")).dependencies,
   );
   assert.ok(files.has("src/ui/tokens.ts"), "generated design tokens travel with their components");
-  for (const file of ["LICENSE", "NOTICE"])
+  for (const file of ["LICENSE", "NOTICE", "CHANGELOG.md"])
     assert.ok(files.has(file), `${file} travels with the source`);
   for (const file of ["build.sh", "gradle-ci.properties", "signing.gradle"]) {
     assert.ok(files.has(`scripts/android/${file}`), `the Android recipe needs ${file}`);
   }
   for (const name of files) {
     assert.ok(
-      name.startsWith("src/") ||
-        ["build.sh", "gradle-ci.properties", "signing.gradle"].some(
-          (file) => name === `scripts/android/${file}`,
-        ) ||
-        ["scripts/tokens.ts", "package.json", "README.md", "LICENSE", "NOTICE"].includes(name),
+      // Everything in files, plus the three names npm adds to an archive on its
+      // own: the pack lists nothing else, so a file that arrives here unasked is
+      // a file nobody delivered.
+      [...manifest.files, "package.json", "README.md", "LICENSE"].some(
+        (entry) => name === entry || name.startsWith(`${entry}/`),
+      ),
       name,
     );
     assert.ok(
