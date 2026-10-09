@@ -33,7 +33,7 @@ export function fakeApi(): FakeApi {
     events: jest.fn<Api["events"]>(async () => ({ items: [], total: 0 })),
     signIn: jest.fn<Api["signIn"]>(async () => ({ kind: "signed-in", bearer })),
     answerFactor: jest.fn<Api["answerFactor"]>(async () => bearer),
-    logout: jest.fn<Api["logout"]>(async () => undefined),
+    logout: jest.fn<Api["logout"]>(async () => ({ revoked: true })),
     catalog: jest.fn<Api["catalog"]>(async () => catalog),
     list: jest.fn<Api["list"]>(async () => ({ items: [], total: 0 })),
     get: jest.fn<Api["get"]>(async (_e, id) => ({ id })),

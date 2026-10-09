@@ -4,18 +4,29 @@
 // src/core/derive.ts, which is the entry's own path unless the server printed
 // another) — so there is no second API to keep honest.
 //
-// The credential is a bearer key of the auth module's api_tokens, never the
-// session cookie. A native client is not a browser: it presents
-// `Authorization: Bearer` on every request and reads no Set-Cookie at all,
-// because a request that carries both a cookie and a bearer is answered as
-// anonymous (kit/httpx/authenticate.go's ambiguousCredential), and the kernel's
-// CSRF rule accepts a caller that sends neither Sec-Fetch-Site nor Origin
-// (kit/httpx.SameSite). The session a sign-in opens lives in the one call
-// frame that mints the key with it and is not held anywhere else.
+// The credential a signed-in phone works with is a bearer key of the auth
+// module's api_tokens, never the session cookie. A native client is not a
+// browser: it presents `Authorization: Bearer` on its requests and reads no
+// Set-Cookie, because a request that carries both a cookie and a bearer is
+// answered as anonymous (kit/httpx/authenticate.go's ambiguousCredential), and
+// the kernel's CSRF rule accepts a caller that sends neither Sec-Fetch-Site nor
+// Origin (kit/httpx.SameSite).
+//
+// The session a sign-in opens is held, in memory only, for as long as the key it
+// minted is held — never stored, never sent to work. It is what the four doors
+// that answer to the holder themselves take: the mint, who-this-is, the key's own
+// revoke, and the sign-out that closes it. A scoped key is refused at every
+// `httpx.SignedIn()` operation (kit/httpx/authorize.go: "this credential carries
+// its own scope, and this operation answers only to its holder"), so a phone that
+// kept only the key could neither ask who it is nor stop its own key. A key
+// restored from storage comes back with no session, which is why signing out says
+// whether the server stopped the key or only this phone forgot it.
 import { type Catalog, type Entry, parseCatalog, CatalogError } from "../core/catalog";
 import { row, page, identity, trail, issuedToken, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
 import { factorRequired } from "../core/signInOutcome";
+import { delegableScopes } from "../core/scopes";
+import { declaredGrants } from "../generated/grants.gen";
 import { kitEnglish } from "../core/kitCopy";
 
 import { createClient, type Client } from "../generated/client";
@@ -60,8 +71,9 @@ class ResponseError extends ApiError {}
 
 /**
  * Identity is who a sign-in belongs to, as the auth module answers.
- * permissions is the set the server computed for this person; the mint asks for
- * exactly those scopes and the kit names no permission of its own.
+ * permissions is the set the server computed for this person, wildcard included
+ * when their role grants it; src/core/scopes.ts turns that into the scopes the
+ * mint is allowed to accept, and the kit itself names no permission of its own.
  */
 export type Identity = Readonly<Pick<WireIdentity, "userId" | "email" | "permissions">>;
 
@@ -92,6 +104,18 @@ export type SignInAnswer =
  */
 export type SignInStep =
   { readonly kind: "signed-in" } | { readonly kind: "factor-required"; readonly email: string };
+
+/**
+ * SignOut is what a sign-out leaves: this phone has forgotten its key either way,
+ * and `revoked` says whether the server said it stopped that key too. The two
+ * differ for a key this phone restored from storage: it holds the secret but not
+ * the session its mint used, and the revoke answers only to the holder, so the
+ * forgotten key stays live until somebody stops it as themselves. A screen that
+ * said "signed out" over a revoked=false would be saying the credential is dead.
+ */
+export interface SignOut {
+  readonly revoked: boolean;
+}
 
 /** Screen projection; wire events are validated in full before reaching it. */
 export type AuditEvent = Readonly<Pick<WireEvent, "id" | "name" | "occurredAt" | "actor">> & {
@@ -159,8 +183,12 @@ export interface Api {
   signIn(email: string, password: string): Promise<SignInAnswer>;
   /** answerFactor spends the code — from an app or a recovery card — and returns a key. */
   answerFactor(email: string, code: string): Promise<Bearer>;
-  /** logout revokes this connection's key on the server and forgets it here. */
-  logout(): Promise<void>;
+  /**
+   * logout forgets this connection's key here and, when it holds the session that
+   * minted the key, stops it on the server and closes that session too. The answer
+   * says whether the server stopped it (SignOut); forgetting does not wait for one.
+   */
+  logout(): Promise<SignOut>;
   catalog(): Promise<Catalog>;
   /** list is a window of rows, in an order, through equality filters spelled field:value. */
   list(e: Entry, q?: Window): Promise<Page>;
@@ -203,6 +231,7 @@ export const TIMEOUT = 15_000;
 /** TOKENS is where this phone mints its key and where it spends it. */
 const TOKENS = "/api/v1/auth/tokens";
 const CHALLENGE_VERIFY = "/api/v1/auth/challenge/verify";
+const LOGOUT = "/api/v1/auth/logout";
 /** NO_SCOPES is the phone's own refusal, and the kit owns its words. */
 const NO_SCOPES = kitEnglish.noScopes;
 
@@ -215,9 +244,9 @@ const NO_SCOPES = kitEnglish.noScopes;
 export const KEY_NAME = "This phone";
 
 /**
- * SessionFrame is the session one sign-in opened, held for the length of that
- * call alone. Nothing outside the frame can read it and no exported member
- * returns it: the key it mints is the only credential that survives the call.
+ * SessionFrame is the session one sign-in leg opened, as the frame that mints
+ * with it. No exported member returns a frame or its cookie: the only credential
+ * that survives the leg by itself is the key it mints.
  */
 interface SessionFrame {
   cookie?: string | undefined;
@@ -231,6 +260,13 @@ export function createApi(
   tokenName: string = KEY_NAME,
 ): Api {
   let bearer: Bearer | undefined = initialBearer;
+  /**
+   * session is the cookie the sign-in that minted this connection's key answered
+   * with, held only while that key is held and only in memory. A key read back out
+   * of storage arrives here with none: nothing stores a session, and the doors
+   * above are the only ones it stands at.
+   */
+  let session: string | undefined;
   const base = baseURL.replace(/\/+$/, "");
 
   function apiPath(path: string): void {
@@ -376,6 +412,15 @@ export function createApi(
       // not a problem document; the status is what there is to say
     }
     return new ApiError(status, detail, Object.fromEntries(fields), type);
+  }
+
+  /**
+   * refused says the server answered this request with a verdict of its own (a
+   * 4xx) rather than failing to answer it, or answering with something this
+   * contract cannot read. Only a verdict may be turned into a returned answer.
+   */
+  function refused(error: unknown): boolean {
+    return error instanceof ApiError && error.status >= 400 && error.status < 500;
   }
 
   function cancelled(): Error {
@@ -541,19 +586,26 @@ export function createApi(
 
   /**
    * mint exchanges the session one sign-in leg opened for the key this phone
-   * will hold. It runs inside that leg's frame and the frame dies with the
-   * call, so the session is never this connection's to present again.
+   * will work with. It runs inside that leg's frame, and the frame dies with the
+   * call: what survives is the key, plus the session itself for as long as that
+   * key is held, because the revoke and who-this-is answer to the holder and not
+   * to the key (kit/httpx/authorize.go).
    */
-  async function mint(who: Identity, session: SessionFrame): Promise<Bearer> {
-    const scopes = who.permissions ?? [];
-    // An empty scope list is refused rather than read as everything
-    // (contracts/tokens.go), so a person granted nothing signs in to nothing:
-    // keeping the session instead would be a half credential whose every read
-    // is a 401 on a key this phone never minted.
+  async function mint(who: Identity, frame: SessionFrame): Promise<Bearer> {
+    // The scopes are not the identity's list: the mint refuses the wildcard the
+    // built-in administrator role grants by, and asks for every scope to be a
+    // permission its own catalogue declares (src/core/scopes.ts says what the
+    // phone asks for instead, and why). An empty answer is refused here rather
+    // than sent: a person granted nothing signs in to nothing, and keeping the
+    // session instead would be a half credential whose every read is a 401 on a
+    // key this phone never minted.
+    const scopes = delegableScopes(who.permissions ?? [], declaredGrants);
     if (scopes.length === 0) throw new ApiError(403, NO_SCOPES);
     // expiresAt is left out: the server applies its own default lifetime and
     // the phone cannot judge its own clock against it.
-    return json("POST", TOKENS, issuedToken.parse, { name: tokenName, scopes }, session);
+    const key = await json("POST", TOKENS, issuedToken.parse, { name: tokenName, scopes }, frame);
+    session = frame.cookie;
+    return key;
   }
 
   return {
@@ -601,25 +653,62 @@ export function createApi(
     },
     async logout() {
       const key = bearer;
-      if (!key) return;
-      // The key is revoked at its own address, addressed by its id and never by
-      // its secret. Local forgetting does not wait for the answer.
-      // The request names the key it is spending, so forgetting it here does
-      // not depend on the answer, and the answer never arrives unheld.
-      const request = json(
-        "POST",
-        `${TOKENS}/${encodeURIComponent(key.id)}/revoke`,
-        () => undefined,
-        undefined,
-        undefined,
-        key,
-      );
+      const sign = session;
       bearer = undefined;
-      await request;
+      session = undefined;
+      if (!key) return { revoked: false };
+      // The key is revoked at its own address, addressed by its id and never by
+      // its secret, and local forgetting does not wait for the answer. What the
+      // request presents is the question this ordering decides: auth-token-revoke
+      // is httpx.SignedIn(), which refuses a credential carrying its own scopes,
+      // so the session that minted the key presents it where this phone still has
+      // one, and a restored key presents itself and is refused. The refusal is not
+      // swallowed here: it is the revoked: false a screen then has to say out loud.
+      let revoked = true;
+      try {
+        await json(
+          "POST",
+          `${TOKENS}/${encodeURIComponent(key.id)}/revoke`,
+          () => undefined,
+          undefined,
+          sign === undefined ? undefined : { cookie: sign },
+          sign === undefined ? key : undefined,
+        );
+      } catch (error) {
+        // A refusal is the server's own no about this key, and the caller has to
+        // be able to say it: reported as revoked: false rather than thrown,
+        // because this phone's half of the sign-out is already done and a throw
+        // would be swallowed as if the two halves were one. Anything else — a
+        // server that answered 503, or answered in a shape this contract refuses —
+        // says nothing about the key and keeps its exception.
+        if (!refused(error)) throw error;
+        revoked = false;
+      }
+      // The session that signed in closes with the key it minted: a sign-out that
+      // left it standing would leave the person signed in somewhere. Its own
+      // refusal is not reported as the key's — the key was already stopped or not,
+      // and one sentence on screen answers one question.
+      if (sign !== undefined)
+        try {
+          await json("POST", LOGOUT, () => undefined, undefined, { cookie: sign });
+        } catch (error) {
+          if (!refused(error)) throw error;
+        }
+      return { revoked };
     },
     async me() {
+      // auth-me answers to the holder, so while this connection holds the session
+      // that signed in it asks with that. A restored key asks with its own secret,
+      // is refused, and the phone reads that as what it is: a key whose person it
+      // cannot ask.
       try {
-        return await json("GET", "/api/v1/auth/me", identity.parse);
+        return await json(
+          "GET",
+          "/api/v1/auth/me",
+          identity.parse,
+          undefined,
+          session === undefined ? undefined : { cookie: session },
+        );
       } catch (error) {
         if (error instanceof ResponseError) throw error;
         // A session that cannot say who it is still lists what it may read.

@@ -188,6 +188,10 @@ export const kitEnglish = {
   // no window anywhere for it to spend, so the phone says so rather than send a
   // code to whichever server the field names now.
   noChallenge: "No code step is open on this phone. Sign in with the password again.",
+  // A sign-out always forgets the key here. This is the other half saying it did
+  // not happen there: the key still answers for its holder until they stop it.
+  keyNotStopped:
+    "This phone forgot its key. The server did not stop it: sign in again, or from a browser, and stop it there.",
 } as const;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
 export const kitPortuguese: KitWords = {
@@ -355,4 +359,6 @@ export const kitPortuguese: KitWords = {
   noScopes: "Esta conta não concede nada que esta aplicação possa abrir.",
   noChallenge:
     "Nenhuma etapa de código está aberta neste telemóvel. Inicie sessão novamente com a palavra-passe.",
+  keyNotStopped:
+    "Este telemóvel esqueceu a sua chave. O servidor não a bloqueou: inicie sessão novamente, ou num navegador, e bloqueie-a aí.",
 };

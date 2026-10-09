@@ -10,6 +10,11 @@ test("an accepted factor mints only the granted scopes with the server default l
     if (String(url).endsWith("/challenge/verify"))
       return loginResponse({ headers: { "Set-Cookie": "pk=factor-session; HttpOnly" } });
     if (String(url).endsWith("/tokens")) return issuedTokenResponse();
+    if (String(url).endsWith("/app/resources"))
+      return new Response(JSON.stringify({ resources: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     return loginResponse();
   }) as typeof fetch);
   assert.deepEqual(await api.answerFactor(loginIdentity.email, " 123456 "), {
@@ -17,6 +22,7 @@ test("an accepted factor mints only the granted scopes with the server default l
     id: issuedToken.id,
   });
   await api.me();
+  await api.catalog();
   assert.deepEqual(JSON.parse(String(calls[0]!.init.body)), {
     email: loginIdentity.email,
     code: "123456",
@@ -28,7 +34,19 @@ test("an accepted factor mints only the granted scopes with the server default l
   const mint = new Headers(calls[1]!.init.headers);
   assert.equal(mint.get("cookie"), "pk=factor-session");
   assert.equal(mint.get("authorization"), null);
-  const read = new Headers(calls[2]!.init.headers);
+  // Who this is answers to the holder, not to a key narrowed to a list of
+  // permissions: auth-me is httpx.SignedIn(), and a scoped credential is refused
+  // at every one of those doors (kit/httpx/authorize.go). So the phone that wants
+  // an answer asks with the session its sign-in opened, and the alternative —
+  // asking with the key and reading the 403 as "nobody" — is the phone never
+  // knowing who it signed in as.
+  const who = new Headers(calls[2]!.init.headers);
+  assert.equal(who.get("cookie"), "pk=factor-session");
+  assert.equal(who.get("authorization"), null);
+  // The work is the other credential: the catalogue is the door a scoped key is
+  // written for (kit/httpx.AnyCredential says so by name), and no request that
+  // does work presents a session at all.
+  const read = new Headers(calls[3]!.init.headers);
   assert.equal(read.get("cookie"), null);
   assert.equal(read.get("authorization"), `Bearer ${issuedToken.token}`);
 });

@@ -294,11 +294,23 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
         connect(previous.baseURL, createApi(previous.baseURL));
         setIdentity(undefined);
         dispatch({ type: "signed-out", generation: started });
-        // Revoke remotely when reachable; local clearing must not wait for it.
-        void previous.api.logout().catch(() => undefined);
+        // Signing out means two things, and the phone does the first on its own:
+        // it forgets the key here, and it asks the server to stop it. Forgetting is
+        // not waiting for the asking — that is the half that works offline, and on a
+        // phone somebody is about to pick up. The asking is not swallowed either:
+        // a key the server still answers to after this phone forgot it is a live
+        // credential, and a signed-out screen that said nothing about it would let
+        // the person believe it dead. The revoke is one of the few doors that can
+        // honestly answer no: it stands at httpx.SignedIn(), which refuses a
+        // credential carrying its own scopes (kit/httpx/authorize.go), so a key
+        // restored from storage — which has no sign-in session behind it — cannot
+        // spend itself.
+        const stopped = previous.api.logout();
+        let cleared = true;
         try {
           await sessions.clear(previous.baseURL);
         } catch {
+          cleared = false;
           if (generation.current === started)
             dispatch({
               type: "signed-out",
@@ -307,6 +319,15 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
                 "The saved sign-in could not be cleared. Please try again before closing the app.",
             });
         }
+        const { revoked } = await stopped.catch(() => ({ revoked: false }));
+        // One notice slot: a phone that could not clear its own storage has that
+        // to say first, and it is about the phone.
+        if (!revoked && cleared && generation.current === started)
+          dispatch({
+            type: "signed-out",
+            generation: started,
+            error: kitEnglish.keyNotStopped,
+          });
       },
       refresh: () => {
         const current = active.current.api;

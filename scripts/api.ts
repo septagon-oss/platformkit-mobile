@@ -103,11 +103,20 @@ export async function generate(root: string, output: string): Promise<void> {
   }
 }
 
-/** The document is the only route inventory. This cannot add composition routes. */
+/**
+ * The document is the only route inventory. This cannot add composition routes.
+ *
+ * It is also the only inventory of what a key may be narrowed to: the mint
+ * refuses a scope no module declares and a scope its holder does not already
+ * grant (modules/auth/internal/tokens.go's IssueToken), so a phone that wants a
+ * key has to name permissions it did not invent. The declaration each operation
+ * prints (x-platformkit-auth) is where this build reads them.
+ */
 async function routeCalls(root: string, output: string): Promise<void> {
   const document = JSON.parse(await readFile(join(root, FIXTURE), "utf8"));
   const entries: string[] = [];
   const bound: string[] = [];
+  const grants = new Map<string, string>();
   for (const [path, item] of Object.entries(document.paths)) {
     for (const [method, operation] of Object.entries(
       item as Record<
@@ -116,6 +125,8 @@ async function routeCalls(root: string, output: string): Promise<void> {
           operationId: string;
           requestBody?: { content?: Record<string, unknown> };
           responses: Record<string, { content?: Record<string, unknown> }>;
+          "x-platformkit-auth"?: { kind?: string; permission?: string };
+          "x-platformkit-surface"?: string;
         }
       >,
     )) {
@@ -138,6 +149,17 @@ async function routeCalls(root: string, output: string): Promise<void> {
       const jsonResponse = Object.entries(operation.responses).some(
         ([status, response]) => /^2\d\d$/.test(status) && response.content?.["application/json"],
       );
+      // An operator grant is recorded with the flag the kernel asks with — that
+      // is what kind "operator_permission" means — and a surface is recorded
+      // because this phone is written against the app surface and no other.
+      const declared = operation["x-platformkit-auth"];
+      if (declared?.permission) {
+        const recorded = `${declared.kind === "operator_permission" ? "operator" : "tenant"} ${operation["x-platformkit-surface"] ?? ""}`;
+        const before = grants.get(declared.permission);
+        if (before !== undefined && before !== recorded)
+          throw new Error(`${declared.permission}: declared as ${before} and as ${recorded}`);
+        grants.set(declared.permission, recorded);
+      }
       const multipart = !!operation.requestBody?.content?.["multipart/form-data"];
       const statuses = Object.keys(operation.responses)
         .filter((status) => /^2\d\d$/.test(status))
@@ -151,6 +173,26 @@ async function routeCalls(root: string, output: string): Promise<void> {
     join(output, "operations.gen.ts"),
     `// Generated from the pinned document by scripts/api.ts. Every method supplies its own connection.\nimport * as sdk from "./sdk.gen";\nimport type * as types from "./types.gen";\nimport type { Client } from "./client";\nexport function bindOperations(invoke: <T>(operation: (client: Client) => Promise<T>) => Promise<T>) { return {${bound.join(",\n")}}; }\nexport type Operations = ReturnType<typeof bindOperations>;\n`,
   );
+  const grantEntries = [...grants.entries()]
+    .sort(([left], [right]) => (left < right ? -1 : 1))
+    .map(
+      ([permission, recorded]) =>
+        `{ permission: ${JSON.stringify(permission)}, operator: ${recorded.startsWith("operator")}, surface: ${JSON.stringify(recorded.slice(recorded.indexOf(" ") + 1))} }`,
+    );
+  const grantFile = [
+    "// Generated from the pinned document by scripts/api.ts: the permission each documented operation",
+    "// names, with the kernel's own flag for a grant held only by the installation's operator and the",
+    "// surface that asks for it. No permission outside the document is added, and none it names is",
+    "// dropped: this is what a caller may ask a key to be narrowed to.",
+    "export interface DeclaredGrant {",
+    "  readonly permission: string;",
+    "  readonly operator: boolean;",
+    "  readonly surface: string;",
+    "}",
+    `export const declaredGrants: readonly DeclaredGrant[] = [${grantEntries.join(",\n")}];`,
+    "",
+  ].join("\n");
+  await writeFile(join(output, "grants.gen.ts"), grantFile);
   await writeFile(
     join(output, "routes.gen.ts"),
     `// Generated from the pinned document by scripts/api.ts. No route outside it is added.\nimport * as sdk from "./sdk.gen";\nimport type { Client } from "./client";\nconst routes = [${entries.join(",\n")}];\nexport function documentedRoute(method: string, path: string) { return routes.find(route => route.method === method && route.pattern.test(path.split("?")[0]!)); }\n`,

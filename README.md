@@ -32,11 +32,21 @@ must contain no secret.
 `npm run ios` build and run native projects using the corresponding local
 platform toolchain. `npm run web` starts a browser preview, but the credential
 is a native one: a sign-in mints a scoped bearer key (`POST /auth/tokens`) and
-every later request presents `Authorization: Bearer` alone. The one cookie this
-client reads is the session the password leg or the challenge leg answers with,
-kept in the call frame that mints with it and sent on that mint and nothing
-after: no cookie is stored, and no request that presents a bearer presents a
-cookie too, because a request carrying both is answered as anonymous
+every request that does work presents `Authorization: Bearer` alone. The scopes
+are not the list the sign-in answered with: the mint refuses the wildcard by name,
+and the built-in administrator role grants nothing else
+(`modules/auth/internal/seed.go`), so `src/core/scopes.ts` turns what the account
+holds into the permissions the pinned document declares for this phone's own
+surface, and leaves out every grant the installation's operator holds alone. The other
+credential is the session the password leg or the challenge leg answers with. It
+is held in memory for as long as the key it minted is held, never written to
+storage, and sent at exactly the four doors that answer to the person rather than
+to a key: the mint, who-this-is (`GET /auth/me`), the key's own revoke
+(`POST /auth/tokens/{id}/revoke`) and the sign-out that closes it. Those four are
+`httpx.SignedIn()`, and a credential that carries its own scopes is refused at
+every one of them (kit/httpx/authorize.go), so a phone that kept only the key
+could neither ask who it is nor stop the key it is throwing away. No request ever
+presents both, because a request carrying both is answered as anonymous
 (kit/httpx/authenticate.go's ambiguousCredential). Browser cookie restrictions
 make that preview unsuitable as proof that sign-in works on a device.
 
@@ -907,7 +917,7 @@ PK_KERNEL_SERVER=https://forge.example PK_KERNEL_REPOSITORY=septagon-oss/platfor
 `CatalogError`'s own sentence printed verbatim rather than re-formatted, so the
 line a red night prints is the runtime's and the nightly gains every rule the
 parser gains (`SUPPORTED_CATALOG_VERSION` is imported where a refused document
-is *built* — the test raises the stamp from it instead of writing the number, and
+is _built_ — the test raises the stamp from it instead of writing the number, and
 the script never needs it because the parser is what consults it); `hash` and
 `isRecord` from
 [scripts/catalog.ts](scripts/catalog.ts), which had both and exported one; that
@@ -919,7 +929,7 @@ header and `mobile-e2e.yml`'s concurrency block and its "nothing continues on
 error" rule. **Added** — `scripts/kernel_main.ts` and the workflow, because
 nothing here could read a moving `main`: `catalog.ts`'s `raw()` refuses any host
 but `github.com`, its `fetchAt` carries no authorisation and every caller hands it
-a *recorded* commit, and `drift` prints what moved and exits 0 whatever it finds,
+a _recorded_ commit, and `drift` prints what moved and exits 0 whatever it finds,
 so an existing unit could fetch a pin but not a tip; `endpoints()`, the one owner
 of a kernel fetch address; and the two document judges. **Made reusable** —
 `endpoints(d).raw(file,
@@ -969,3 +979,35 @@ make response acceptance explicit before data reaches a screen.
 **Made reusable** — `platformkit-mobile/generated`, each shell API's bound
 `operations`, and `request(method, path, validate, body?)` let renderer packs consume
 the documented operations and validate their own JSON routes through that transport.
+
+A second factor, and the key a phone signs with, are this delivery's own, so
+they are named here rather than folded into the paragraph above. **Reused** —
+`documented()` and the generated operations for every request the handshake
+makes, `identity` and `issuedToken` as the two answers it validates,
+`factorRequired`'s reading of the server's own refusal rather than a status code,
+`SignInForm` (the code step is step props on the form that already existed, not a
+second form), `kitCopy` for every word the step speaks in both bundled languages,
+and `Session`'s versioned record, which gained the key's id and kept its
+shape. **Added** — `signIn`'s `SignInAnswer`, so a factor is an outcome a screen
+branches on rather than an exception each caller renames; `answerFactor`, which
+sends a code back to the server that refused; the mint of a scoped key at
+`auth-token-issue` and its spend at `auth-token-revoke`; `src/core/scopes.ts`,
+which decides what a key may be narrowed to out of the catalogue the pinned
+document prints; `grants.gen.ts`, that catalogue read out of the document by the
+generator that already reads everything else out of it; `scripts/e2e/totp.py` and
+the factor person `scripts/e2e/mobile_ci.sh` enrols; and `e2e/flows/sign-in-factor.yaml`.
+**Made reusable** — `delegableScopes(permissions, declared)` is a plain function
+over two arguments, so an app whose surface differs from this one passes its own
+catalogue to the same rule; `KEY_NAME` and the mint's `tokenName` let a composing
+app name its own key; and the sign-out answers `SignOut`, so a product's screen
+can say whether the server stopped the key or only the phone forgot it.
+
+Two limits belong with that. A key this phone _restored_ from secure storage
+carries no sign-in session with it — nothing here stores a session, and the brief
+stores only the key — and `auth-token-revoke` answers only to its holder, so
+signing out with a restored key forgets it here and cannot stop it there: the
+screen says that in so many words rather than letting the person believe the
+credential dead, and stopping such a key is a sign-in's or a browser's act. The
+device journey for the code step is a state behind a password, so
+`design gate` measures `/sign-in` and not the step, and no emulator ran on this
+delivery: SecureStore and native cookie behaviour remain unproven here.
