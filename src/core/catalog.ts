@@ -272,20 +272,27 @@ function hintWord(
   return value === "" ? undefined : value;
 }
 
-/** hintNames reads one declared list of names. An empty list is silence. */
+/**
+ * hintNames reads one declared list of names. An empty list is silence, and each
+ * name keeps the place it was served in: the line that says a name is none of this
+ * entry's fields quotes the document, not the list left after rubbish was filtered
+ * out of the front of it.
+ */
 function hintNames(
   hint: Record<string, unknown>,
   member: string,
   at: string,
   notice: HintNotice,
-): readonly string[] | undefined {
+): readonly { readonly name: string; readonly served: number }[] | undefined {
   const value = hint[member];
   if (value === undefined) return undefined;
   if (!Array.isArray(value)) {
     notice(`${at}.${member}`, "is not a list of field names: the default is used");
     return undefined;
   }
-  const named = value.filter((n): n is string => typeof n === "string" && n !== "");
+  const named = value.flatMap((n, i): { readonly name: string; readonly served: number }[] =>
+    typeof n === "string" && n !== "" ? [{ name: n, served: i }] : [],
+  );
   if (named.length < value.length)
     notice(`${at}.${member}`, "names something the schema does not hold: the rest is used");
   return named.length === 0 ? undefined : named;
@@ -354,9 +361,10 @@ function hintEntry(
     const declared = hintNames(raw, "summaryFields", at, notice);
     if (declared === undefined) return undefined;
     const kept: string[] = [];
-    for (const [i, field] of declared.entries()) {
-      if (named.includes(field)) kept.push(field);
-      else notice(`${at}.summaryFields[${i}]`, "names no field of this entry: it is not drawn");
+    for (const { name, served } of declared) {
+      if (named.includes(name)) kept.push(name);
+      else
+        notice(`${at}.summaryFields[${served}]`, "names no field of this entry: it is not drawn");
     }
     return kept.length === 0 ? undefined : kept;
   })();

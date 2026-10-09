@@ -258,6 +258,13 @@ test("every malformed hint falls back and names itself once", () => {
       "resources[0].presentation.summaryFields[1] names no field of this entry: it is not drawn",
     ],
     [
+      // A name that is not a name is dropped, and the place it leaves behind still
+      // belongs to the document: the sentence after it says which served entry was
+      // none of this entry's fields.
+      { summaryFields: ["title", 5, "nope"] },
+      "resources[0].presentation.summaryFields[2] names no field of this entry: it is not drawn",
+    ],
+    [
       { sections: [{ key: "billing" }] },
       "resources[0].presentation.sections holds a block with no key and label: the record stays flat",
     ],
