@@ -1184,7 +1184,7 @@ screen reports where it is and a sheet's typed values have one holder that any
 other sheet can be filed the same way (the next one is a command's arguments,
 named under **Limits** below);
 `navigations` in the router fake, which makes "did the app take the person
-where they meant" an assertion instead of an inference; and the five
+where they meant" an assertion instead of an inference; and the
 `tests/shell-expired-session-*.test.tsx` files as the shape of a session test:
 the real `<Shell>` over a recorded fetch, with the routes that walk the return
 leg mounted inside it.
