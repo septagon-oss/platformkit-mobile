@@ -70,7 +70,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
         title: noun(entry).plural,
         rows: input.rows.map((row) => ({
           id: text(row.id),
-          title: label(entry, row, p.copy.kit.untitled),
+          title: label(entry, row, p.copy.kit.untitled, "row"),
           ...(preview && text(row[preview.name]) ? { summary: text(row[preview.name]) } : {}),
           cells: fields.map((field) => ({
             id: field.name,

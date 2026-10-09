@@ -211,35 +211,67 @@ export function display(f: Field, v: unknown, format: Formatting): string {
 const nameLike: readonly string[] = ["title", "name", "displayName"];
 
 /**
- * primary is the field a row is recognised by.
- *
- * The chain is the kernel's own order of preference, spelled once: the field the
- * entry names, then a field *called* title/name/displayName, then the first
- * readable string that is not a closed set of values, then nothing. It answers
- * `undefined` rather than fabricating an `id` the schema does not hold: a row
- * with nothing to read says so (`label` below) instead of quoting an identifier
- * nobody chose to look at.
+ * neverShown is the one visibility no screen draws. `hidden` is integration
+ * plumbing: the value stays in the schema, the JSON and the PATCH, where nothing
+ * a person reads is drawn from it — so it is neither drawn nor named by anything
+ * that is. The kernel says the same thing at mount (`kit/rest/hints.go`,
+ * `namedFieldFault`: "a row is not named by its plumbing") and refuses the
+ * document; the phone refuses the pointer and keeps the screens, because one
+ * author's slip is not worth this app.
  */
-export function primary(e: Entry): Field | undefined {
+const neverShown = (f: Field): boolean => f.hints?.visibility === "hidden";
+
+/**
+ * namedBy is the chain that decides what a record is called, spelled once and
+ * asked of the fields the asking screen draws: the field the entry names, then a
+ * field *called* title/name/displayName, then the first readable string that is
+ * not a closed set of values, then nothing.
+ *
+ * Asking of one screen's fields is the whole of it: an identity chosen from the
+ * whole schema names a row by a field that screen does not draw, and the value
+ * comes back anyway through the column every row leads on. So the chain never
+ * checks a visibility of its own — the list it was handed already excludes what
+ * that screen keeps off.
+ */
+function namedBy(e: Entry, fields: readonly Field[]): Field | undefined {
   const declared = e.hints?.primaryField;
   return (
-    (declared === undefined ? undefined : e.fields.find((f) => f.name === declared)) ??
-    e.fields.find((f) => nameLike.includes(f.name)) ??
-    e.fields.find(
-      (f) =>
-        f.type === "string" && !(f.enum && f.enum.length > 0) && f.hints?.visibility !== "hidden",
-    )
+    (declared === undefined ? undefined : fields.find((f) => f.name === declared)) ??
+    fields.find((f) => nameLike.includes(f.name)) ??
+    fields.find((f) => f.type === "string" && !(f.enum && f.enum.length > 0))
   );
 }
 
 /**
- * label is a row's title. When the schema offers nothing to read, `untitled`
+ * primary is the field the record is recognised by: the chain over every field a
+ * person is shown, `detail` included, since the record answers a `detail` field
+ * and a row has no room for it. It answers `undefined` rather than fabricating an
+ * `id` the schema does not hold: a record with nothing to read says so (`label`
+ * below) instead of quoting an identifier nobody chose to look at.
+ */
+export function primary(e: Entry): Field | undefined {
+  return namedBy(
+    e,
+    e.fields.filter((f) => !neverShown(f)),
+  );
+}
+
+/**
+ * label is what one record is called, named by the fields of one screen: `record`
+ * is its own page, where a `detail` field answers, and `row` is a line on a list,
+ * which is made of the fields `onList` admits — a field its author kept off every
+ * row cannot title one either. When the screen has nothing to read, `untitled`
  * spells what the record is called instead — a noun the catalogue named and a
  * phrase the reader's own bundle holds, because a screen's title is said in the
  * phone's language and derive never asks which language that is.
  */
-export function label(e: Entry, row: Row, untitled: Copy["kit"]["untitled"]): string {
-  const at = primary(e);
+export function label(
+  e: Entry,
+  row: Row,
+  untitled: Copy["kit"]["untitled"],
+  where: "record" | "row" = "record",
+): string {
+  const at = where === "record" ? primary(e) : rowPrimary(e);
   return (at === undefined ? "" : text(row[at.name])) || untitled(noun(e).singular);
 }
 
@@ -271,13 +303,14 @@ export const badgeTone = (tone: HintTone): "ok" | "warning" | "danger" | "info" 
  * statusField is the field whose value the record's pill shows, or nothing.
  *
  * No status is ever inferred from "the first enum field": a pill that guesses
- * says something the document did not say. The declaration is read here and drawn
- * by whoever draws the pill (T-0323).
+ * says something the document did not say, and a pointer at plumbing names no
+ * pill either. The declaration is read here and drawn by whoever draws the pill
+ * (T-0323).
  */
 export const statusField = (e: Entry): Field | undefined =>
   e.hints?.statusField === undefined
     ? undefined
-    : e.fields.find((f) => f.name === e.hints?.statusField);
+    : e.fields.find((f) => f.name === e.hints?.statusField && !neverShown(f));
 
 /**
  * iconName is the word an entry asks for its glyph. It answers the word and draws
@@ -296,11 +329,30 @@ export const iconName = (e: Entry): string | undefined => e.hints?.icon;
 export const onList = (f: Field): boolean =>
   f.hints?.visibility === undefined ? f.hideList !== true : f.hints.visibility === "shown";
 
-/** listColumns: the primary field first, then every field the schema does not hide; never the id. */
+/**
+ * rowFields are the fields a row is made of: what the schema puts on a list, in
+ * schema order, never the id. This is the one place the list asks which fields it
+ * has, so the columns it draws, the field it leads a row with and the cells beside
+ * it cannot disagree about the answer.
+ */
+const rowFields = (e: Entry): readonly Field[] =>
+  e.fields.filter((f) => f.name !== "id" && onList(f));
+
+/**
+ * rowPrimary is the field a list leads with and calls a row by: the same chain as
+ * `primary`, asked of `rowFields` — a `detail` field is the record's answer and a
+ * `hidden` one nobody's, so neither names a row. The web shell selects the same
+ * way for the same reason (`ui/resource/resource.go`: `known(onList(…))`).
+ */
+export function rowPrimary(e: Entry): Field | undefined {
+  return namedBy(e, rowFields(e));
+}
+
+/** listColumns: the field the list names rows by first, then every other field it draws; never the id. */
 export function listColumns(e: Entry): readonly Field[] {
-  const named = primary(e);
-  const rest = e.fields.filter((f) => onList(f) && f.name !== named?.name && f.name !== "id");
-  return named === undefined ? rest : [named, ...rest];
+  const drawn = rowFields(e);
+  const named = rowPrimary(e);
+  return named === undefined ? drawn : [named, ...drawn.filter((f) => f.name !== named.name)];
 }
 
 /**
@@ -313,9 +365,10 @@ export function listColumns(e: Entry): readonly Field[] {
 export function listCells(e: Entry, limit = 3): readonly Field[] {
   const declared = e.hints?.summaryFields;
   if (declared !== undefined)
-    // Declared means exactly those, in the order the author gave them: `limit`
-    // is this build's budget for a ranking nobody asked for.
-    return declared.flatMap((name) => e.fields.filter((f) => f.name === name));
+    // Declared means exactly those, in the order the author gave them, minus any
+    // field no screen draws: `limit` is this build's budget for a ranking nobody
+    // asked for, and plumbing is not a cell whoever pointed at it.
+    return declared.flatMap((name) => e.fields.filter((f) => f.name === name && !neverShown(f)));
   const rank = (f: Field): number => {
     if (f.enum && f.enum.length > 0) return 0;
     if (f.type === "bool") return 1;
@@ -325,7 +378,7 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
     if (f.type === "time") return 5;
     return 6;
   };
-  const named = primary(e);
+  const named = rowPrimary(e);
   const preview = listPreview(e);
   return listColumns(e)
     .filter((f) => f.name !== named?.name && f.name !== preview?.name)
@@ -348,10 +401,14 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
  */
 export function listPreview(e: Entry): Field | undefined {
   const declared = e.hints?.previewField;
-  if (declared !== undefined) return e.fields.find((f) => f.name === declared);
-  const named = primary(e);
+  if (declared !== undefined) return e.fields.find((f) => f.name === declared && !neverShown(f));
+  const named = rowPrimary(e);
   return e.fields.find(
-    (f) => f.name !== named?.name && !f.readOnly && (f.type === "text" || f.widget === "textarea"),
+    (f) =>
+      f.name !== named?.name &&
+      !neverShown(f) &&
+      !f.readOnly &&
+      (f.type === "text" || f.widget === "textarea"),
   );
 }
 
@@ -385,12 +442,20 @@ export interface DetailItem {
   readonly spoken?: string;
 }
 
+/**
+ * detailItems is a record's own screen: every field a person is shown there, in
+ * schema order. `hideList` hides nothing here — that tag is about a table being
+ * readable, not about a field being secret — and `hidden` is the one declaration
+ * that is off this screen too, its value left in the JSON and the PATCH.
+ */
 export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  return e.fields.map((f) => ({
-    field: f,
-    label: fieldLabel(f),
-    ...saidValue(f, row[f.name], format),
-  }));
+  return e.fields
+    .filter((f) => !neverShown(f))
+    .map((f) => ({
+      field: f,
+      label: fieldLabel(f),
+      ...saidValue(f, row[f.name], format),
+    }));
 }
 
 export type ControlKind =

@@ -218,6 +218,20 @@ A declared word is the author's and is used as written — never humanised,
 re-cased or re-pluralised — so `copy.ts` holds one new string, `kit.untitled`, for
 the record whose schema names nothing to read from.
 
+A declared visibility is read on every screen it speaks about. `hidden` is the one
+visibility no screen draws — off the list, off the record's own page and off the
+form, its value left in the schema, the JSON and the PATCH where nothing a person
+reads is built from it — and `detail` is a record's own answer, which a row has no
+room for. A row's columns and the field that leads them are chosen from one list
+(`rowFields` in `derive.ts`), so a field its author kept off a row can neither be a
+column nor title one: an identity picked from the whole schema would put the value
+back through the column every row leads on, which is the web shell's rule for the
+same reason (`known(onList(…))` in `ui/resource/resource.go`). And a hint that
+points at plumbing — `primaryField`, `previewField`, `summaryFields` or
+`statusField` naming a `hidden` field — names nothing and lets the default read on:
+the reference kernel refuses that document at mount (`kit/rest/hints.go`,
+`namedFieldFault`), and one author's slip is not worth this app's screens.
+
 ## Design
 
 Every PlatformKit phone app is composed from this directory, so the kit is why
