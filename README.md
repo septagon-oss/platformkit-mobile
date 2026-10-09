@@ -228,6 +228,24 @@ not a control that renders, and the kit commits to six things the checks name:
   exactly those bytes and that every committed picture is the bytes its row
   promises.
 
+**Reused** — `Button`'s existing shape list and `s.plain`'s way of painting an edge
+in the surface the word sits on, `Section`'s `divided` line (now the kit's only row
+separator), `Badge`'s neutral tone, `copy`'s existing "Not set" words, `Clock` and
+the `now` a screen already hands `useFeedback`, and `Intl` for both the clock and
+the distance. **Added** — `ownZone` on `Presentation` and `presentedInstant` in
+`src/core/presentation.ts`, because a formatter that asked the device which zone it
+is would put a mutable default in the core and leave every zone test depending on
+the machine, and nothing existing could say one instant twice — the words a glance
+reads and the whole date-time a reader speaks; `ListScreen`'s `grouped` branch,
+because both list templates lay out each item on its own and cannot hold one card
+across the rows they recycle; `hostLabel` and `plural`'s mass-noun set, because the
+derivation layer held neither and a screen may not parse an address inline.
+**Made reusable** — `presentedInstant`'s shown/exact pair, so any value cell, any
+detail row and the activity trail state one instant in two spellings (the trail's
+own private relative-time table is gone with it), `civilDay` for any sentence that
+needs "yesterday" rather than a date, and `ListScreen`'s `grouped` flag for the next
+screen that holds a handful of things a person may open.
+
 ## Consume the shared native source
 
 ### A module's own screen

@@ -3,6 +3,7 @@ import { deriveCopy, deriveFeedback, type Presentation } from "../../src/core/de
 export const presentation: Presentation = {
   locale: "en-US",
   timeZone: "UTC",
+  ownZone: "UTC",
   now: "2026-07-18T09:00:00Z",
   weekStartsOn: 1,
   motion: "reduced",

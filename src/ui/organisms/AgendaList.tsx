@@ -47,7 +47,7 @@ export function AgendaList({
         // figures compete for one line of centred text.
         <Row
           title={event.title}
-          cells={[event.time]}
+          cells={[{ value: event.time }]}
           {...(event.enabled
             ? {
                 onPress: () => {

@@ -4,7 +4,7 @@ import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo, useState } from "react";
 import type { Entry } from "../core/catalog";
-import { screenPath } from "../core/derive";
+import { hostLabel, screenPath } from "../core/derive";
 import { useShell } from "../shell";
 import { Button } from "../ui/atoms/Button";
 import { choose } from "../ui/chooser";
@@ -17,7 +17,7 @@ interface Props {
 
 export function Home({ entries }: Props) {
   const feedback = useFeedback();
-  const { refresh, signOut } = useShell();
+  const { refresh, signOut, baseURL, identity } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
@@ -46,7 +46,11 @@ export function Home({ entries }: Props) {
   // each time and the renders never settle.
   const options = useMemo(
     () => ({
-      title: "PlatformKit",
+      // The address the session is held open at is the workspace's name until a
+      // name exists: it is what the person typed, port and all, and the one fact
+      // this app holds about where its records live. A product name in its place
+      // would say which app this is, which nobody reading their own list asks.
+      title: hostLabel(baseURL) || feedback.copy.kit.workspace,
       headerRight: () => (
         <Button
           placement="header"
@@ -57,7 +61,7 @@ export function Home({ entries }: Props) {
         />
       ),
     }),
-    [account],
+    [account, baseURL, feedback.copy.kit.workspace],
   );
   return (
     <>
@@ -66,6 +70,7 @@ export function Home({ entries }: Props) {
         feedback={feedback}
         entries={entries}
         refreshing={refreshing}
+        account={identity?.email}
         onOpen={(e) => router.push(screenPath(e))}
         onRefresh={() => void reload()}
       />

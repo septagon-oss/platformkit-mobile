@@ -1,5 +1,5 @@
 import type { Action } from "./feedback";
-import { instantValue, presentedTime, type Presentation } from "./presentation";
+import { instantValue, presentedInstant, type Presentation } from "./presentation";
 import {
   action,
   build,
@@ -46,6 +46,9 @@ export function deriveActivity(input: ActivityInput, p: Presentation) {
       .map((item, i) => {
         const at = instantValue(item.occurredAt);
         v.need(at, `events.${i}.occurredAt`);
+        // One call, two spellings: the row's own stamp and the words a trail reads
+        // aloud come from the same instant and cannot drift.
+        const instant = presentedInstant(at, p);
         v.text(item.verb, `events.${i}.verb`);
         v.ids(item.changes, `events.${i}.changes`);
         v.need(["person", "system", "unknown"].includes(item.actor.kind), `events.${i}.actor`);
@@ -70,10 +73,10 @@ export function deriveActivity(input: ActivityInput, p: Presentation) {
         return {
           ...item,
           occurredAt: at.toISOString(),
-          time: presentedTime(at, p),
+          time: instant.exact,
           actor,
-          relative: relativeTime(at, p),
-          accessibleLabel: `${item.verb} ${p.copy.kit.by} ${actor}, ${relativeTime(at, p)}`,
+          relative: instant.shown,
+          accessibleLabel: `${item.verb} ${p.copy.kit.by} ${actor}, ${instant.exact}`,
           open: item.open ? action(item.open, v, `events.${i}.open`) : undefined,
           changes: item.changes.map((c) => {
             v.text(c.label, `events.${i}.changes.label`);
@@ -105,14 +108,3 @@ export function deriveActivity(input: ActivityInput, p: Presentation) {
   });
 }
 export type ActivityModel = Extract<ReturnType<typeof deriveActivity>, { ok: true }>["value"];
-
-function relativeTime(at: Date, p: Presentation): string {
-  const elapsed = instantValue(p.now)!.getTime() - at.getTime();
-  if (elapsed < 0 || elapsed >= 7 * 86400000) return presentedTime(at, p);
-  const unit = elapsed < 3600000 ? "minute" : elapsed < 86400000 ? "hour" : "day";
-  const divisor = unit === "minute" ? 60000 : unit === "hour" ? 3600000 : 86400000;
-  return new Intl.RelativeTimeFormat(p.copy.language, { numeric: "auto" }).format(
-    -Math.floor(elapsed / divisor),
-    unit,
-  );
-}

@@ -13,18 +13,20 @@ interface Props {
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly disabled?: boolean;
+  /** caption names what the address is, in the words the app's language holds: a field for the workspace's address is captioned as one. */
+  readonly caption: string;
   /** testID names the field; the input inside it is always "server", which the sign-in flow types into. */
   readonly testID?: string;
 }
 
-export function ServerField({ value, onChange, disabled = false, testID }: Props) {
+export function ServerField({ value, onChange, disabled = false, caption, testID }: Props) {
   const s = useStyles(styles);
   return (
     <View style={s.field} {...testable(testID)}>
       <View style={s.head}>
         <Icon name="server" size="sm" tone="muted" />
         <Text role="caption" tone="muted" weight="semibold">
-          Server
+          {caption}
         </Text>
       </View>
       <TextField
@@ -32,7 +34,7 @@ export function ServerField({ value, onChange, disabled = false, testID }: Props
         value={value}
         onChangeText={onChange}
         placeholder="https://acme.example.com"
-        accessibilityLabel="Server"
+        accessibilityLabel={caption}
         textContentType="URL"
         disabled={disabled}
         testID="server"

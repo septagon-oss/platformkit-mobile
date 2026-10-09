@@ -54,6 +54,7 @@ export function ResourceDetail({
               testID={`field-${item.field.name}`}
               term={item.label}
               value={item.value}
+              {...(item.spoken === undefined ? {} : { spoken: item.spoken })}
               shown={
                 <Value presentation={feedback} field={item.field} value={row[item.field.name]} />
               }

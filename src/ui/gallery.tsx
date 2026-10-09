@@ -594,12 +594,23 @@ function Samples({
         <FormField label="Tags" help="Comma separated.">
           <TagsField label="Tags" value={tags} onChange={setTags} />
         </FormField>
-        <ServerField value={server} onChange={setServer} />
+        <ServerField
+          caption={feedback.copy.kit.workspaceAddress}
+          value={server}
+          onChange={setServer}
+        />
       </Section>
 
       <Section title="Rows" footer="A footer says something about the group.">
-        <Row title="A row that opens" cells={["Status: Open", "Rank: 2"]} onPress={none} />
-        <Row title="A row that does not" cells={["Read only"]} />
+        <Row
+          title="A row that opens"
+          cells={[
+            { label: "Status", value: "Open" },
+            { label: "Rank", value: "2" },
+          ]}
+          onPress={none}
+        />
+        <Row title="A row that does not" cells={[{ value: "Read only" }]} />
         <Row title="Delete" tone="destructive" onPress={none} />
       </Section>
 

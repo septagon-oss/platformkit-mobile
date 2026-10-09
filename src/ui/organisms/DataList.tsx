@@ -152,7 +152,7 @@ export function DataList({
         <View style={s.panel}>
           <Row
             title={row.title}
-            cells={row.cellLabels}
+            cells={row.cells}
             {...(row.summary ? { summary: row.summary } : {})}
             {...(row.open?.enabled && onOpen ? { onPress: () => onOpen(row.id) } : {})}
             {...(testID

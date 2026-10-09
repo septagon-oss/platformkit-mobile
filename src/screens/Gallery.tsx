@@ -26,6 +26,7 @@ export function Gallery({
   const presentation: Presentation = {
     locale,
     timeZone,
+    ownZone: timeZone,
     now: clock.now(),
     weekStartsOn: 1,
     copy: deriveCopy("en"),

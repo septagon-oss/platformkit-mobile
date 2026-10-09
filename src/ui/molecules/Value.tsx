@@ -10,23 +10,11 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import type { Field } from "../../core/catalog";
 import { type Formatting, display, humanize, splitList, text } from "../../core/derive";
-import { Badge, type BadgeTone } from "../atoms/Badge";
+import { Badge } from "../atoms/Badge";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
-
-/**
- * tone gives each value of a closed set its own colour. The schema orders
- * those values and the order is the only signal there is, so the first is
- * informational and the rest walk the status colours; nothing here pretends
- * to know that "done" is good or "archived" is bad.
- */
-const tones: readonly BadgeTone[] = ["info", "ok", "warning", "danger"];
-export function enumTone(f: Field, value: string): BadgeTone {
-  const i = (f.enum ?? []).indexOf(value);
-  return i < 0 ? "neutral" : (tones[i % tones.length] ?? "neutral");
-}
 
 interface Props {
   readonly presentation: Formatting;
@@ -46,13 +34,18 @@ export function Value({ presentation, field, value, compact = false, testID }: P
 
   if (raw === "")
     return (
+      // The core's word for an empty value: a dash for a field with nothing in it,
+      // "Not set" for the switch that was never answered — a pill would claim a
+      // state, and there is none to claim.
       <Text role={compact ? "caption" : "body"} tone="muted" {...id}>
-        —
+        {shown}
       </Text>
     );
 
-  if (field.enum && field.enum.length > 0)
-    return <Badge label={shown} tone={enumTone(field, raw)} {...id} />;
+  // A closed set is a word, and a word of its own colour is a claim about it: the
+  // catalogue's `Field` carries no tone, so the pill stays neutral until the
+  // document says which value is good. Position in a list is no such fact.
+  if (field.enum && field.enum.length > 0) return <Badge label={shown} {...id} />;
 
   if (field.type === "bool")
     return <Badge label={shown} tone={value === true ? "ok" : "neutral"} {...id} />;
