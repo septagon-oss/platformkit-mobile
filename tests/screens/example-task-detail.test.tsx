@@ -108,7 +108,10 @@ describe("the example renderer pack's detail", () => {
     // generated validator refuses the answer before the screen sees a field.
     shellOver(fakeApi(answering({ id: "task-1041", title: "Re-key", priority: 9 })));
     await render(detail());
-    expect(await screen.findByRole("alert")).toHaveTextContent(/\/api\/v1\/task\/tasks\/task-1041/);
+    // A body this build cannot read is not a path to read out: it is one sentence.
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Update the app to open this workspace.",
+    );
     for (const drawn of ["task-title", "task-priority", "task-status", "task-sla"])
       expect(screen.queryByTestId(drawn)).toBeNull();
   });

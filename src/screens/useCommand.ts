@@ -125,7 +125,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
       const said = refusalOf(e, "command", failureSubject(entry, commandTitle(c)), copy);
       if (said.verdict.outcome === "silent") return;
       setErrors(refusalFields(said.verdict));
-      setDetail(said.text || copy.kit.validation);
+      setDetail(said.text);
     }
   }, [api, entry, id, c, controls, held, wrote, leave, copy]);
 
