@@ -209,7 +209,14 @@ test("a past instant is a distance while a distance is the answer", () => {
     ["2026-06-30T23:30:00Z", "2026-07-01T00:20:00Z", "50 minutes ago", "1 Jul 2026, 00:30"],
     ["2026-06-30T23:00:00Z", "2026-07-01T01:00:00Z", "2 hours ago", "1 Jul 2026, 00:00"],
     ["2026-07-05T12:00:00Z", "2026-07-08T12:00:00Z", "3 days ago", "5 Jul 2026, 13:00"],
-    // A week off is a date: nobody counts days that far back.
+    // A distance is counted in the reader's calendar days, so an instant written
+    // later in its day than the moment reading it is still the day it is on.
+    ["2026-06-29T20:00:00Z", "2026-07-01T12:00:00Z", "2 days ago", "29 Jun 2026, 21:00"],
+    ["2026-06-25T22:00:00Z", "2026-07-01T12:00:00Z", "6 days ago", "25 Jun 2026, 23:00"],
+    // A week off is a date: nobody counts days that far back. The week is the
+    // reader's week of calendar days, so a seventh day is a date even when fewer
+    // than 168 hours have passed.
+    ["2026-06-24T22:30:00Z", "2026-07-01T12:00:00Z", "24 Jun, 23:30", "24 Jun 2026, 23:30"],
     ["2026-07-01T12:00:00Z", "2026-07-08T12:00:00Z", "1 Jul, 13:00", "1 Jul 2026, 13:00"],
     ["2026-02-01T09:00:00Z", "2026-07-08T12:00:00Z", "1 Feb, 09:00", "1 Feb 2026, 09:00"],
   ];
@@ -230,6 +237,12 @@ test("a past instant is a distance while a distance is the answer", () => {
 });
 
 test("a future instant is a date, because it has not happened", () => {
+  // A server clock a little ahead of the phone is no further off than one a
+  // little behind it: a minute either side of now is still now.
+  assert.equal(
+    read("2026-07-01T09:00:30Z", { ...lisbon, now: "2026-07-01T09:00:00Z" }).shown,
+    "Just now",
+  );
   // A deadline tomorrow is tomorrow and the hour it is due at.
   const tomorrow = read("2026-07-02T16:00:00Z", { ...lisbon, now: "2026-07-01T09:00:00Z" });
   assert.equal(tomorrow.shown, "Tomorrow, 17:00");

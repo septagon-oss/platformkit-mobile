@@ -238,8 +238,7 @@ export function civilDay(at: Date, zone: string): number {
 }
 
 const MINUTE = 60_000,
-  HOUR = 3_600_000,
-  DAY = 86_400_000;
+  HOUR = 3_600_000;
 
 /** A value cell is the whole sentence it prints, so a day-word from ICU begins as a sentence does. */
 const sentence = (words: string): string =>
@@ -250,13 +249,17 @@ const sentence = (words: string): string =>
  * `exact` the whole local date-time a screen reader says. Two facts about one
  * instant may not disagree, so both come from this call.
  *
- * A value is read as a distance while the distance is still the answer — "5 minutes
- * ago" for a minute, "Yesterday, 15:12" once the clock has moved into yesterday,
- * a plain date from a week off, when nobody counts days. An instant that has not
- * happened is never called ago: the kit cannot know which field a deadline is, but
- * it knows which way an instant points, so a future one reads as the day it falls
- * on — "Tomorrow, 17:00" at the nearest. A spelling that prints no clock never
- * names a zone, because a duration is the same instant for every reader.
+ * A value is read as a distance while the distance is still the answer — "Just now"
+ * for a minute either side of it, "5 minutes ago" for the minute after, "Yesterday,
+ * 15:12" once the clock has moved into yesterday, a plain date from a week off, when
+ * nobody counts days. A counted distance is counted in the reader's calendar days,
+ * never in whole 24-hour spans: a record written late on Monday is two days old on
+ * Wednesday morning, however few hours have passed, and the week that ends the
+ * counting is the reader's week of days. An instant that has not happened is never
+ * called ago: the kit cannot know which field a deadline is, but it knows which way
+ * an instant points, so a future one reads as the day it falls on — "Tomorrow, 17:00"
+ * at the nearest. A spelling that prints no clock never names a zone, because a
+ * duration is the same instant for every reader.
  */
 export function presentedInstant(
   at: Date,
@@ -288,12 +291,14 @@ export function presentedInstant(
         ? {}
         : { year: "numeric" }),
     }).format(at);
+  // A minute either side of now is now: a server clock a little ahead of the
+  // phone is no further off than one a little behind it.
+  if (Math.abs(elapsed) < MINUTE) return { shown: sentence(p.copy.kit.justNow), exact };
   if (elapsed < 0) {
     if (days === 0) return { shown: sentence(clock()), exact };
     if (days === -1) return { shown: sentence(`${relative.format(1, "day")}, ${clock()}`), exact };
     return { shown: sentence(dated()), exact };
   }
-  if (elapsed < MINUTE) return { shown: sentence(p.copy.kit.justNow), exact };
   if (elapsed < HOUR)
     return { shown: sentence(relative.format(-Math.floor(elapsed / MINUTE), "minute")), exact };
   // Recency under a day is told as a duration whatever the calendar says; the day
@@ -301,7 +306,9 @@ export function presentedInstant(
   if (days === 0)
     return { shown: sentence(relative.format(-Math.floor(elapsed / HOUR), "hour")), exact };
   if (days === 1) return { shown: sentence(`${relative.format(-1, "day")}, ${clock()}`), exact };
-  if (elapsed < 7 * DAY)
-    return { shown: sentence(relative.format(-Math.floor(elapsed / DAY), "day")), exact };
+  // From two days off the count is the calendar's, so the number of days a person
+  // reads is the number of days the sentence's own date falls on. The week that
+  // ends the counting is the reader's week of calendar days for the same reason.
+  if (days < 7) return { shown: sentence(relative.format(-days, "day")), exact };
   return { shown: sentence(dated()), exact };
 }
