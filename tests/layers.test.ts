@@ -94,18 +94,30 @@ test("package subpaths preserve the same atomic and effect boundaries", async ()
   for (const [file, source] of [
     [
       "src/ui/atoms/Probe.tsx",
-      'export { Section } from "platformkit-mobile/ui/molecules/Section";',
+      'export { Section } from "@septagon-oss/platformkit-mobile/ui/molecules/Section";',
     ],
-    ["src/ui/organisms/Probe.tsx", 'export { useShell } from "platformkit-mobile/shell";'],
-    ["src/core/probe.ts", 'export { ApiError } from "platformkit-mobile/effects/api";'],
-    ["app/probe.tsx", 'export { Button } from "platformkit-mobile/ui/atoms/Button";'],
+    [
+      "src/ui/organisms/Probe.tsx",
+      'export { useShell } from "@septagon-oss/platformkit-mobile/shell";',
+    ],
+    [
+      "src/core/probe.ts",
+      'export { ApiError } from "@septagon-oss/platformkit-mobile/effects/api";',
+    ],
+    ["app/probe.tsx", 'export { Button } from "@septagon-oss/platformkit-mobile/ui/atoms/Button";'],
   ]) {
     assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source}`);
   }
   for (const [file, source] of [
-    ["src/ui/molecules/Probe.tsx", 'export { Button } from "platformkit-mobile/ui/atoms/Button";'],
-    ["src/ui/organisms/Probe.tsx", 'export { useTheme } from "platformkit-mobile/ui/theme";'],
-    ["src/screens/Probe.tsx", 'export { useShell } from "platformkit-mobile/shell";'],
+    [
+      "src/ui/molecules/Probe.tsx",
+      'export { Button } from "@septagon-oss/platformkit-mobile/ui/atoms/Button";',
+    ],
+    [
+      "src/ui/organisms/Probe.tsx",
+      'export { useTheme } from "@septagon-oss/platformkit-mobile/ui/theme";',
+    ],
+    ["src/screens/Probe.tsx", 'export { useShell } from "@septagon-oss/platformkit-mobile/shell";'],
   ]) {
     assert.deepEqual(await boundaries(file!, source!), [], `${file}: ${source}`);
   }
@@ -120,7 +132,7 @@ test("native runtime layers cannot import the packaged token generator or Node t
     "app/probe.tsx",
   ]) {
     for (const source of [
-      'export { render } from "platformkit-mobile/tools/tokens";',
+      'export { render } from "@septagon-oss/platformkit-mobile/tools/tokens";',
       'export { render } from "../scripts/tokens";',
       'export { readFile } from "node:fs/promises";',
       'export { readFile } from "fs/promises";',
@@ -134,7 +146,7 @@ test("the route dispatcher composes screens from the catalog and performs no eff
   for (const source of [
     'export { ApiError } from "./effects/api";',
     'export { sessions } from "./effects/native-session";',
-    'export { createApi } from "platformkit-mobile/effects/api";',
+    'export { createApi } from "@septagon-oss/platformkit-mobile/effects/api";',
   ]) {
     assert.ok((await boundaries("src/route.tsx", source)).length > 0, source);
   }
@@ -189,7 +201,7 @@ test("generated schemas are pure but generated transports stay behind effect bou
     for (const source of [
       'export { authMe } from "@/generated/sdk.gen";',
       'export { createClient } from "@/generated/client";',
-      'export { authMe } from "platformkit-mobile/generated";',
+      'export { authMe } from "@septagon-oss/platformkit-mobile/generated";',
     ])
       assert.ok((await boundaries(file, source)).length > 0, `${file}: ${source}`);
   }
@@ -208,15 +220,21 @@ test("an example pack is composed by no route and reads its data through useOper
     ["src/screens/Probe.tsx", 'export { taskRenderers } from "../examples/taskRenderers";'],
     ["src/route.tsx", 'export { taskRenderers } from "./examples/taskRenderers";'],
     ["app/probe.tsx", 'export { taskRenderers } from "../src/examples/taskRenderers";'],
-    ["app/probe.tsx", 'export { taskRenderers } from "platformkit-mobile/examples/taskRenderers";'],
+    [
+      "app/probe.tsx",
+      'export { taskRenderers } from "@septagon-oss/platformkit-mobile/examples/taskRenderers";',
+    ],
     ["src/examples/probe.tsx", 'export { createClient } from "../generated/client";'],
     ["src/examples/probe.tsx", 'export { ApiError } from "../effects/api";'],
-    ["src/examples/probe.tsx", 'export { api } from "platformkit-mobile/effects/api";'],
+    [
+      "src/examples/probe.tsx",
+      'export { api } from "@septagon-oss/platformkit-mobile/effects/api";',
+    ],
   ]) {
     assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source!}`);
   }
   for (const source of [
-    'export { taskRenderers } from "platformkit-mobile/examples/taskRenderers";',
+    'export { taskRenderers } from "@septagon-oss/platformkit-mobile/examples/taskRenderers";',
     'export { taskRenderers } from "../examples/taskRenderers";',
   ]) {
     assert.deepEqual(await boundaries("tests/screens/probe.test.tsx", source), [], source);

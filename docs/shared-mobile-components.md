@@ -93,7 +93,7 @@ integration-error and state-gallery words; subsequent families add the typed EN/
 This extends the existing native library. `src/core/derive.ts` remains the public
 owner of the values, labels, controls and decisions that UI draws. It may delegate
 to focused pure files inside `src/core/` and re-export their types; consumers use
-the existing `platformkit-mobile/core/derive` subpath. Neither React, native APIs,
+the existing `@septagon-oss/platformkit-mobile/core/derive` subpath. Neither React, native APIs,
 network access, storage, the clock nor mutable configuration enters core.
 
 The existing consumer is `src/screens/useResourceList.ts` →

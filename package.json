@@ -1,7 +1,6 @@
 {
-  "name": "platformkit-mobile",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@septagon-oss/platformkit-mobile",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "main": "expo-router/entry",
   "exports": {
@@ -35,7 +34,8 @@
     "src",
     "scripts/tokens.ts",
     "scripts/android",
-    "NOTICE"
+    "NOTICE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "start": "expo start",
@@ -47,7 +47,7 @@
     "format": "prettier --write \"{app,src,tests,scripts}/**/*.{ts,tsx}\" \"app.config.ts\"",
     "format:check": "prettier --check \"{app,src,tests,scripts}/**/*.{ts,tsx}\" \"app.config.ts\"",
     "test": "node --import tsx --test tests/*.test.ts && jest",
-    "check": "npm run check:api && npm run check:sdk && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:fingerprint && npm run check:flows && npm run check:source",
+    "check": "npm run check:api && npm run check:sdk && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run check:fingerprint && npm run check:flows && npm run check:publish && npm run check:source",
     "check:sdk": "EXPO_OFFLINE=1 expo install --check",
     "sdk:latest": "expo install --check",
     "fingerprint": "node --import tsx scripts/fingerprint.ts",
@@ -57,6 +57,7 @@
     "test:ui": "jest",
     "check:flows": "node --import tsx scripts/check_flows.ts",
     "source": "node --import tsx scripts/source.ts",
+    "check:publish": "node --import tsx scripts/publish.ts --check",
     "check:source": "node --import tsx scripts/source.ts --check",
     "check:kernel-main": "node --import tsx scripts/kernel_main.ts",
     "check:advisories": "node --import tsx scripts/advisories.ts --check",
@@ -115,7 +116,8 @@
     "prettier": "^3.3.0",
     "test-renderer": "^1.2.0",
     "tsx": "^4.19.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "yaml": "^2.9.0"
   },
   "overrides": {
     "@hey-api/json-schema-ref-parser": {
