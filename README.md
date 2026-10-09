@@ -42,7 +42,10 @@ the screens in the theme that follows the device's appearance, and configures
 the native stack whose headers every screen uses.
 `src/shell.tsx` owns session restoration, sign-in, sign-out, catalog loading
 and a count of what this app wrote to each resource, so a list or a detail
-knows when what it shows is stale.
+knows when what it shows is stale. It also owns the expired-session boundary: the
+transport reports that a server answered 401, and the shell alone decides that
+this session is over, what the person was doing when it ended, and who that
+belongs to (`src/core/reentry.ts` holds the rule; no screen is asked to notice).
 The resource route files delegate to `src/route.tsx`, which finds the catalog
 entry and chooses a custom or generated screen.
 
@@ -1148,3 +1151,27 @@ same table the classifier is written against and is run through the real
 or as a caution;
 `screenCopy`, the one place the phone's language becomes words; and
 `FailureSubject`, so a screen that has a noun to name has one way to hand it over.
+
+## Asked to sign in again
+
+**Reused** — `src/core/state.ts`'s phases, generation drop and reducer, the
+generation discipline in `src/shell.tsx`, `ShellValue` and `useShell`,
+`createApi`'s single line where a status becomes a throw, `copy.failure.signedOut`
+through `sentence()` (the sentence already existed in `en` and `pt`; none was
+added), `src/effects/session.ts`'s versioned `clear(baseURL)`, `src/core/derive.ts`'s
+`screenPath`, `useFocusEffect` as the screens already use it, `Notice` (its
+`action` is already optional), and `tests/fakes/router.ts`'s `Redirect`.
+**Added** — one `expired` event and one `reason: "expired"` field, because a
+session the server refused is not the ordinary sign-in screen and every existing
+phase already meant something; the `refused` notice on `createApi`, because a
+per-hook 401 branch is a rule repeated in every hook and the brief forbids it;
+and `src/core/reentry.ts`, because nothing in the tree compared who a session
+belonged to with who is signing in now, or spelt a screen's address beyond
+`screenPath`. **Made reusable** — `saw`/`typed`/`keep` on `ShellValue`, so a
+screen reports where it is and a sheet's typed values have one holder that any
+other sheet (a command's arguments next) can be filed the same way;
+`navigations` in the router fake, which makes "did the app take the person
+where they meant" an assertion instead of an inference; and the four
+`tests/shell-expired-session-*.test.tsx` cases as the shape of a session test:
+the real `<Shell>` over a recorded fetch, with the routes that walk the return
+leg mounted inside it.
