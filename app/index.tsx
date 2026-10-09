@@ -11,11 +11,7 @@ export default function Index() {
   if (state.phase === "booting" || state.phase === "loading") return <Waiting />;
   if (state.phase === "failed")
     return (
-      <Notice
-        text={state.error ?? "The catalog could not be read."}
-        onRetry={() => void refresh()}
-        onSignIn={() => void signOut()}
-      />
+      <Notice text={state.error} onRetry={() => void refresh()} onSignIn={() => void signOut()} />
     );
   return <Home entries={state.catalog?.resources ?? []} />;
 }

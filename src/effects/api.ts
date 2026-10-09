@@ -47,7 +47,13 @@ export class ApiError extends Error {
   }
 }
 
-class ResponseError extends ApiError {}
+/**
+ * ResponseError is a refusal whose body this build could not read — a malformed
+ * document or a catalogue newer than it understands. The status it carries is
+ * still the server's answer; the class says the *body* is what failed, which is
+ * the difference between "the server is down" and "update the app".
+ */
+export class ResponseError extends ApiError {}
 
 /** Identity is who a session belongs to, as the auth module answers. */
 export type Identity = Readonly<Pick<WireIdentity, "userId" | "email">>;

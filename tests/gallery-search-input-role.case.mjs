@@ -23,9 +23,7 @@ test("the search field exposes an editable searchbox instead of a landmark", asy
     assert.ok(query.length > 0, "the query specimen contains a query");
     const cdp = await page.context().newCDPSession(page);
     const { nodes } = await cdp.send("Accessibility.getFullAXTree");
-    const editable = nodes.find(
-      (node) => !node.ignored && node.value?.value === query,
-    );
+    const editable = nodes.find((node) => !node.ignored && node.value?.value === query);
     assert.ok(editable, "the field's value is present in the accessibility tree");
     assert.equal(editable.role?.value, "searchbox");
   } finally {

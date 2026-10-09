@@ -56,7 +56,10 @@ describe("useCommandAsk", () => {
       asked.mock.calls[0]![1].onPress();
     });
     await waitFor(() =>
-      expect(alert).toHaveBeenCalledWith(commandTitle(archive), "Nothing to archive."),
+      expect(alert).toHaveBeenCalledWith(
+        commandTitle(archive),
+        "Archive every resolved note did not run.",
+      ),
     );
     expect(shell.value!.wrote).not.toHaveBeenCalled();
     expect(result.current.busy).toBe("");
@@ -95,7 +98,8 @@ describe("useCommandForm", () => {
     });
     expect(result.current.phase).toBe("editing");
     expect(result.current.errors).toEqual({ at: "must be in the future" });
-    expect(result.current.detail).toBe("Too early.");
+    // A 422 that named its field colours that field and adds no sentence above it.
+    expect(result.current.detail).toBe("");
     expect(router.back).not.toHaveBeenCalled();
     expect(shell.value!.wrote).not.toHaveBeenCalled();
   });

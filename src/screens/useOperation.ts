@@ -13,7 +13,9 @@
 // fourth is refused); converting the three into one is its own change, and a
 // pack screen that has just run a command re-reads by calling `reload()`.
 import { useCallback, useEffect, useRef, useState } from "react";
+import { recordSubject } from "../core/derive";
 import { useShell } from "../shell";
+import { refusalOf, screenCopy } from "./failure";
 import type { OperationData, OperationInput, OperationName, ReadState } from "../renderers";
 
 /**
@@ -85,11 +87,12 @@ export function useOperation<K extends OperationName>(
     } catch (e) {
       if (!settle()) return;
       // A refusal withdraws the row: a stale value under a fresh refusal would
-      // read as the server having agreed a thing it refused.
+      // read as the server having agreed a thing it refused. A named operation
+      // carries no entry to name, so the sentence names the record it read.
       setState({
         requested: false,
         data: undefined,
-        error: e instanceof Error ? e.message : "This record could not be read.",
+        error: refusalOf(e, "read", recordSubject, screenCopy()).text,
       });
     }
   }, [api]);

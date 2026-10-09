@@ -14,7 +14,7 @@ import { useResourceList } from "./useResourceList";
 
 export function ResourceList({ entry }: ScreenProps) {
   const feedback = useFeedback();
-  const list = useResourceList(entry);
+  const list = useResourceList(entry, feedback);
   const { ask, busy } = useCommandAsk(entry, undefined);
   const router = useRouter();
   const at = screenPath(entry);

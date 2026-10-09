@@ -8,9 +8,10 @@ import "./gallery-visual-pages.case.mjs";
 test("gallery visual evidence postdates the source revision being judged", () => {
   const reports = JSON.parse(process.env.GALLERY_VISUAL_REPORTS ?? "[]");
   assert.ok(reports.length > 0, "supply the fresh visual report paths");
-  const sourceTime = Number(
-    execFileSync("git", ["show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim(),
-  ) * 1000;
+  const sourceTime =
+    Number(
+      execFileSync("git", ["show", "-s", "--format=%ct", "HEAD"], { encoding: "utf8" }).trim(),
+    ) * 1000;
   for (const file of reports) {
     const report = readFileSync(file, "utf8");
     const timestamp = report.match(/^# Visual review .* — (\d{4}-\d{2}-\d{2}T[^\s]+)$/m)?.[1];

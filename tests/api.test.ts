@@ -4,7 +4,8 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { ApiError, createApi } from "../src/effects/api";
 import { parseCatalog } from "../src/core/catalog";
-import { formControls, values } from "../src/core/derive";
+import { deriveCopy, failureSubject, formControls, values } from "../src/core/derive";
+import { refusalOf } from "../src/screens/failure";
 
 type Call = { url: string; init: RequestInit };
 function fakeFetch(
@@ -345,6 +346,29 @@ test("the deadline covers reading the body, not only getting the headers", async
     assert.match(e.message, /did not answer within/);
     return true;
   });
+});
+
+test("a write the deadline took is one nobody answered, and is never offered again", async () => {
+  // Whether the same write may go out a second time turns on one fact: did anybody
+  // answer? The deadline's own error has to carry that fact to the classifier, or a
+  // save that timed out reads "we couldn't save your changes" and invites the send
+  // that may already have landed.
+  const hang = ((_url: string, init: RequestInit = {}) =>
+    new Promise<Response>((_resolve, reject) => {
+      init.signal?.addEventListener("abort", () => reject(new Error("aborted")));
+    })) as unknown as typeof fetch;
+  const api = createApi("https://gone.test", hang, undefined, 20);
+  const thrown = await api.update(entry, "1", { title: "later" }).then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  assert.ok(thrown instanceof ApiError && thrown.status === 0, "nothing answered the write");
+  const refusal = refusalOf(thrown, "update", failureSubject(entry), deriveCopy("en"));
+  assert.equal(refusal.text, deriveCopy("en").failure.uncertain);
+  const verdict = refusal.verdict;
+  if (verdict.outcome !== "notice") throw new Error(`expected a notice, got ${verdict.outcome}`);
+  assert.equal(verdict.code, "write-unknown");
+  assert.equal(verdict.action, "reconcile", "an unanswered write is never retried");
 });
 
 test("a singleton is read and written at the path itself", async () => {

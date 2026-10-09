@@ -8,10 +8,17 @@
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
-import { formControls, problems, values, verbRefusal, type Row } from "../core/derive";
-import { ApiError } from "../effects/api";
+import {
+  failureSubject,
+  formControls,
+  problems,
+  values,
+  verbRefusal,
+  type Row,
+} from "../core/derive";
 import { useShell } from "../shell";
 import type { Phase } from "../ui/organisms/ResourceForm";
+import { refusalFields, refusalOf, screenCopy } from "./failure";
 
 export function useSingleton(entry: Entry) {
   const { api, wrote } = useShell();
@@ -21,6 +28,7 @@ export function useSingleton(entry: Entry) {
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [detail, setDetail] = useState("");
   const [editing, setEditing] = useState(false);
+  const copy = screenCopy();
   const generation = useRef(0);
   const alive = useRef(true);
   useEffect(() => {
@@ -46,10 +54,12 @@ export function useSingleton(entry: Entry) {
       setDetail("");
     } catch (e) {
       if (generation.current !== started) return;
+      const said = refusalOf(e, "read", failureSubject(entry), copy);
+      if (said.verdict.outcome === "silent") return;
       setPhase("failed");
-      setDetail(e instanceof Error ? e.message : "This could not be read.");
+      setDetail(said.text);
     }
-  }, [api, entry]);
+  }, [api, entry, copy]);
 
   useEffect(() => {
     void (async () => {
@@ -100,14 +110,12 @@ export function useSingleton(entry: Entry) {
     } catch (e) {
       if (!alive.current) return;
       setPhase("editing");
-      if (e instanceof ApiError) {
-        setErrors(e.fields);
-        setDetail(e.detail || "That could not be saved.");
-        return;
-      }
-      setDetail(e instanceof Error ? e.message : "That could not be saved.");
+      const said = refusalOf(e, "update", failureSubject(entry), copy);
+      if (said.verdict.outcome === "silent") return;
+      setErrors(refusalFields(said.verdict));
+      setDetail(said.text);
     }
-  }, [api, entry, controls, held, wrote]);
+  }, [api, entry, controls, held, wrote, copy]);
 
   return {
     row,

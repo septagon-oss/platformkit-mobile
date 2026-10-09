@@ -4,10 +4,27 @@
 // resource since the list last looked. A re-read asks for as many rows as are
 // shown and replaces them, so a row somebody deleted goes and the place a
 // person scrolled to stays.
+//
+// A refusal is classified, not printed: the verdict decides whether the window
+// stays, so a refresh answered 403 takes the rows away and one answered 503
+// keeps them under the instant they were last read — which is why the hook
+// remembers that instant and formats it in the reader's own words.
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { key, type Entry } from "../core/catalog";
-import { noOrder, queryFilters, type Order, type Row } from "../core/derive";
+import {
+  failureSubject,
+  instantValue,
+  noOrder,
+  presentedTime,
+  queryFilters,
+  type Clock,
+  type Formatting,
+  type Order,
+  type Row,
+} from "../core/derive";
+import { refusalOf } from "./failure";
+import { systemClock } from "./clock";
 import { PER_PAGE } from "../effects/api";
 import { useShell } from "../shell";
 
@@ -17,9 +34,13 @@ const MAX_ROWS = 200;
 
 type Why = "first" | "more" | "refresh" | "stale";
 
-export function useResourceList(entry: Entry) {
+export function useResourceList(entry: Entry, format: Formatting, clock: Clock = systemClock) {
   const { api, writes } = useShell();
   const k = key(entry);
+  // Strings and a frozen bundle, so they stay stable between renders; the
+  // `format` object itself is new every render, and a load keyed by it would
+  // re-read the window forever.
+  const { copy, locale, timeZone, ownZone } = format;
   const [rows, setRows] = useState<readonly Row[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
@@ -30,6 +51,9 @@ export function useResourceList(entry: Entry) {
   const generation = useRef(0);
   const shown = useRef(0);
   const seen = useRef(writes[k] ?? 0);
+  // The instant of the last window that answered: a refresh names it, and while
+  // it is empty there is nothing to name, which is what makes it a first read.
+  const read = useRef("");
 
   const load = useCallback(
     async (why: Why) => {
@@ -55,9 +79,28 @@ export function useResourceList(entry: Entry) {
         });
         setTotal(got.total);
         setError("");
+        read.current = clock.now();
       } catch (e) {
         if (generation.current !== started) return;
-        setError(e instanceof Error ? e.message : "The list could not be read.");
+        // Rows already shown stay under a failure to get more of them; a read
+        // that named no rows, or one the server took away, leaves none.
+        const at = instantValue(read.current);
+        const lastSeen = at ? presentedTime(at, { locale, timeZone, ownZone }) : "";
+        const said = refusalOf(
+          e,
+          why === "first" ? "read" : "refresh",
+          failureSubject(entry, "", lastSeen),
+          copy,
+        );
+        if (said.verdict.outcome === "silent") return;
+        if (said.withdraws) {
+          setRows([]);
+          shown.current = 0;
+          setTotal(0);
+          // Nothing is on screen to call "the last update" any more.
+          read.current = "";
+        }
+        setError(said.text);
       } finally {
         if (generation.current === started) {
           setLoading(false);
@@ -65,7 +108,7 @@ export function useResourceList(entry: Entry) {
         }
       }
     },
-    [api, entry, order],
+    [api, entry, order, copy, locale, timeZone, ownZone, clock],
   );
 
   // The first window, and again whenever the order changes.

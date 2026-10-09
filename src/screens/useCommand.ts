@@ -18,12 +18,13 @@ import { key, type Command, type Entry } from "../core/catalog";
 import {
   commandControls,
   commandTitle,
+  failureSubject,
   humanize,
   problems,
   screenPath,
   values,
 } from "../core/derive";
-import { ApiError } from "../effects/api";
+import { refusalFields, refusalOf, screenCopy } from "./failure";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import { useTheme } from "../ui/theme";
@@ -52,6 +53,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
   // and a fresh array on every render makes both of those memos a lie — which
   // is the shape of the navigator loop this app has already been bitten by.
   const controls = useMemo(() => commandControls(c), [c]);
+  const copy = screenCopy();
   const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [detail, setDetail] = useState("");
@@ -120,14 +122,12 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     } catch (e) {
       if (!alive.current) return;
       setPhase("editing");
-      if (e instanceof ApiError) {
-        setErrors(e.fields);
-        setDetail(e.detail || `${commandTitle(c)} was refused.`);
-        return;
-      }
-      setDetail(e instanceof Error ? e.message : `${commandTitle(c)} did not run.`);
+      const said = refusalOf(e, "command", failureSubject(entry, commandTitle(c)), copy);
+      if (said.verdict.outcome === "silent") return;
+      setErrors(refusalFields(said.verdict));
+      setDetail(said.text);
     }
-  }, [api, entry, id, c, controls, held, wrote, leave]);
+  }, [api, entry, id, c, controls, held, wrote, leave, copy]);
 
   return { controls, held, errors, detail, phase, change, run, cancel: leave };
 }
@@ -160,8 +160,13 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
             } catch (e) {
               // A report, not a question: the platform's alert with its one OK,
               // because there is no form on screen to put the refusal under.
-              const why = e instanceof ApiError ? e.detail : "";
-              Alert.alert(title, why || (e instanceof Error ? e.message : "That did not run."));
+              // The report is the classified sentence, so an unanswered command
+              // says nothing is known rather than claiming the command failed.
+              Alert.alert(
+                title,
+                refusalOf(e, "command", failureSubject(entry, title), screenCopy()).text ||
+                  screenCopy().failure.commandFailed(title),
+              );
             } finally {
               setBusy("");
             }

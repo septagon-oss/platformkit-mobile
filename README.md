@@ -1104,3 +1104,47 @@ make response acceptance explicit before data reaches a screen.
 **Made reusable** — `@septagon-oss/platformkit-mobile/generated`, each shell API's bound
 `operations`, and `request(method, path, validate, body?)` let renderer packs consume
 the documented operations and validate their own JSON routes through that transport.
+
+## Say what went wrong in plain words
+
+A person reads a sentence, never a status code. `src/core/failure.ts` classifies
+one refusal together with the reason the screen asked for it — a first read, a
+refresh, a create, an update, a delete, a command, the catalogue — and answers
+with one copy key, one `IssueCode`, one action and whether the record stays on
+the screen. A refusal the server answered may be asked again; a write nobody
+answered is never sent again, which is why an unanswered save offers "Check the
+result" or "Dismiss" and never "Retry". `src/screens/failure.ts` is the single
+adapter from a thrown error to those facts, and the record, list, form, singleton,
+command and named-operation hooks, the shell's catalogue load and both generated
+screens draw the verdict instead of `e.message`. The activity trail's hook is the
+one read that still classifies its failure inline, so its sentence is the last
+wire text a phone can still be shown.
+
+**Reused** — `ApiError` with its `status` and `fields`, `IssueCode` and the
+immutable/correctable split `src/core/presentation.ts` already owns, the state
+machine in `deriveState` — whose rule that an immutable code carries no retry is
+what the grid's (code, action) pairs are held against in `tests/failure.test.ts`,
+while `refusalAction` is what picks the one button a screen shows,
+`issue()`'s recovery rule, `presentedTime` for the instant a refresh quotes,
+`plural`/`humanize` for the nouns a sentence names, `Notice`'s existing props, and
+`copy.state`'s `retry`/`dismiss`/`reconcile`/`unknownWrite` words. **Added** —
+`src/core/failure.ts`, because the tree could report a failure and could not
+classify one: no existing unit reads a status *and* a context, and a new module
+would have duplicated the closed `IssueCode` vocabulary; `Words.failure` (seventeen
+keys in `en` and `pt`, of which `thisRecord` and `thisWorkspace` are the two nouns
+a sentence names when no catalogue entry describes what it addressed), because the
+copy table held state words but no sentence
+that names what failed; `copyForLocale`, because a device locale is not one of the
+two languages the table holds and `deriveCopy` stays closed — and the phone itself
+is asked in `src/screens`, never in the core; `ResponseError`
+exported, because a body this build cannot read was indistinguishable from a
+server that answered, and the alternative was pattern-matching the English string
+`Invalid response at` — a wire string on screen. **Made reusable** — the
+(kind x context) grid as a test fixture in `tests/failure.test.ts`, which is the
+same table the classifier is written against and is run through the real
+`deriveState`, so the next sentence is added as a row and not a rumour;
+`refusalAction`, the one place that decides which button a refusal offers;
+`failureTone`, the one place that decides whether a sentence is drawn as an error
+or as a caution;
+`screenCopy`, the one place the phone's language becomes words; and
+`FailureSubject`, so a screen that has a noun to name has one way to hand it over.

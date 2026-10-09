@@ -9,11 +9,27 @@ test("the visual acceptance run captures every gallery page at both required wid
   const reports = JSON.parse(process.env.GALLERY_VISUAL_REPORTS ?? "[]");
   assert.ok(reports.length > 0, "supply the fresh visual report paths");
   const pages = [
-    "list", "table", "media", "home", "sheet", "navigate", "search", "form",
-    "steps", "states", "player", "commerce", "schedule", "maps", "charts",
+    "list",
+    "table",
+    "media",
+    "home",
+    "sheet",
+    "navigate",
+    "search",
+    "form",
+    "steps",
+    "states",
+    "player",
+    "commerce",
+    "schedule",
+    "maps",
+    "charts",
   ];
   for (const page of pages) {
-    for (const [width, height] of [[390, 844], [1440, 900]]) {
+    for (const [width, height] of [
+      [390, 844],
+      [1440, 900],
+    ]) {
       const name = `visual-kit-gallery-${page}-${width}.png`;
       let bytes;
       for (const report of reports) {

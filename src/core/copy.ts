@@ -28,6 +28,30 @@ interface Words {
     readonly updatedAt: (instant: string) => string;
   };
   readonly issue: { readonly invalid: string; readonly unsupported: string };
+  /** What went wrong, in plain words. Nouns and the quoted instant arrive from the
+   * catalogue and the reader's clock: no sentence here names a product or a resource. */
+  readonly failure: {
+    readonly connection: string;
+    readonly loadFailed: (plural: string) => string;
+    readonly refreshFailed: (instant: string) => string;
+    readonly saveFailed: string;
+    readonly deleteFailed: (singular: string) => string;
+    readonly commandFailed: (title: string) => string;
+    readonly uncertain: string;
+    readonly signedOut: string;
+    readonly excluded: (feature: string) => string;
+    readonly noAccess: string;
+    readonly gone: string;
+    readonly revision: (singular: string) => string;
+    readonly backTo: (plural: string) => string;
+    readonly update: string;
+    readonly loadCatalog: string;
+    /** The noun a refusal names when the call addressed no catalogue entry: a named
+     * operation reads a record, the catalogue load opens a workspace. A person reads
+     * these words, so the table holds them; a Portuguese phone reads Portuguese. */
+    readonly thisRecord: string;
+    readonly thisWorkspace: string;
+  };
   /** A disclosure control names what it holds, not how it behaves: "Expand" describes
    * the control, "Show loading, empty and unavailable examples" describes the screen. */
   readonly disclosure: {
@@ -98,6 +122,25 @@ const en: Words = {
     invalid: "This information is not valid.",
     unsupported: "This format is not supported.",
   },
+  failure: {
+    connection: "We couldn't connect. Check your connection and try again.",
+    loadFailed: (plural) => `We couldn't load ${plural}.`,
+    refreshFailed: (instant) => `Couldn't refresh. Showing the last update from ${instant}.`,
+    saveFailed: "We couldn't save your changes.",
+    deleteFailed: (singular) => `We couldn't delete this ${singular}.`,
+    commandFailed: (title) => `${title} did not run.`,
+    uncertain: "We couldn't confirm whether your changes were saved.",
+    signedOut: "Sign in again to continue.",
+    excluded: (feature) => `This account's plan does not include ${feature}.`,
+    noAccess: "You no longer have access to this item.",
+    gone: "This item is no longer available.",
+    revision: (singular) => `This ${singular} changed while you were editing.`,
+    backTo: (plural) => `Back to ${plural}`,
+    update: "Update the app to open this workspace.",
+    loadCatalog: "We couldn't open this workspace.",
+    thisRecord: "this record",
+    thisWorkspace: "this workspace",
+  },
   disclosure: {
     reveal: (what) => `Show ${what}`,
     conceal: (what) => `Hide ${what}`,
@@ -155,6 +198,26 @@ const pt: Words = {
     updatedAt: (instant) => `Última atualização: ${instant}`,
   },
   issue: { invalid: "Esta informação não é válida.", unsupported: "Este formato não é suportado." },
+  failure: {
+    connection: "Não foi possível ligar-nos. Verifique a sua ligação e tente novamente.",
+    loadFailed: (plural) => `Não foi possível carregar ${plural}.`,
+    refreshFailed: (instant) =>
+      `Não foi possível atualizar. A mostrar a última atualização de ${instant}.`,
+    saveFailed: "Não foi possível guardar as suas alterações.",
+    deleteFailed: (singular) => `Não foi possível eliminar ${singular}.`,
+    commandFailed: (title) => `${title} não foi executado.`,
+    uncertain: "Não foi possível confirmar se as suas alterações foram guardadas.",
+    signedOut: "Inicie novamente a sessão para continuar.",
+    excluded: (feature) => `O plano desta conta não inclui ${feature}.`,
+    noAccess: "Já não tem acesso a este item.",
+    gone: "Este item já não está disponível.",
+    revision: (singular) => `Este ${singular} mudou enquanto estava a editar.`,
+    backTo: (plural) => `Voltar a ${plural}`,
+    update: "Atualize a aplicação para abrir esta área de trabalho.",
+    loadCatalog: "Não foi possível abrir esta área de trabalho.",
+    thisRecord: "este registo",
+    thisWorkspace: "esta área de trabalho",
+  },
   disclosure: {
     reveal: (what) => `Mostrar ${what}`,
     conceal: (what) => `Ocultar ${what}`,
@@ -201,6 +264,7 @@ function bundle(language: Language, words: Words): Copy {
       success: Object.freeze(words.state.success),
     }),
     issue: Object.freeze(words.issue),
+    failure: Object.freeze(words.failure),
     disclosure: Object.freeze(words.disclosure),
     gallery: Object.freeze(words.gallery),
   });
@@ -212,4 +276,25 @@ const copies = Object.freeze({ en: bundle("en", en), pt: bundle("pt", pt) });
 export function deriveCopy(language: Language): Copy {
   if (language !== "en" && language !== "pt") throw new RangeError("unsupported-format: copy");
   return copies[language];
+}
+
+/**
+ * The bundle a locale tag reads in: the words follow the tag, with English behind
+ * every other language. This is the whole reconciliation between a locale tag and
+ * the two languages the table holds — a tag is not a language, so it cannot be
+ * handed to `deriveCopy` directly. Who supplies the tag is the caller's business:
+ * a screen asks its phone, a test decides for itself. The core never asks.
+ */
+export function copyForLocale(locale: string | undefined): Copy {
+  return deriveCopy(copyLanguage(locale));
+}
+
+/**
+ * The language a locale tag reads in: the primary subtag decides, so "pt-BR",
+ * "pt_PT" and "PT" are Portuguese and anything else reads in English. A locale tag
+ * is not a language, so it cannot be handed to `deriveCopy` directly — this is the
+ * one place the two are reconciled.
+ */
+export function copyLanguage(locale: string | undefined): Language {
+  return typeof locale === "string" && locale.toLowerCase().startsWith("pt") ? "pt" : "en";
 }

@@ -45,7 +45,7 @@ export function SignIn({ title }: Props = {}) {
         baseURL={baseURL}
         notice={failed ? "" : (state.error ?? "")}
         booting={state.phase === "booting" || state.phase === "loading"}
-        failed={failed ? (state.error ?? "The catalog could not be read.") : ""}
+        failed={failed ? (state.error ?? feedback.copy.failure.loadCatalog) : ""}
         onRetry={() => void refresh()}
         busy={busy}
         error={error}

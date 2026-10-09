@@ -3,9 +3,10 @@
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
 import type { Command, CrudVerb, Entry, Field } from "./catalog";
+import type { FailureSubject } from "./failure";
 import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
-export { deriveCopy, type Copy, type Language } from "./copy";
+export { copyForLocale, copyLanguage, deriveCopy, type Copy, type Language } from "./copy";
 export { stateExamples, type StateExample } from "./stateGallery";
 export {
   deriveFeedback,
@@ -70,6 +71,20 @@ const massNouns = new Set([
 /** plural is a screen's name for many of an entity: "task" is "tasks", "settings" is "settings". */
 export function plural(noun: string): string {
   return massNouns.has(noun) || noun.endsWith("s") ? noun : noun + "s";
+}
+
+/**
+ * What a refusal's sentence names. The nouns are the catalogue's own — never a
+ * word written into a failure rule — and `lastSeen` is the reader-formatted
+ * instant of the last good read, which a refresh quotes and a first read cannot.
+ */
+export function failureSubject(entry: Entry, command = "", lastSeen = ""): FailureSubject {
+  return {
+    singular: humanize(entry.entity).toLowerCase(),
+    plural: humanize(plural(entry.entity)).toLowerCase(),
+    command,
+    lastSeen,
+  };
 }
 
 /**
@@ -567,5 +582,6 @@ export type { Content, ContentModel, Page, Status, Control as ActionModel } from
 
 export * from "./catalogActivity";
 export * from "./catalogList";
+export * from "./failure";
 export { kitExamples, kitCaseIds, type KitExamples, type GallerySelection } from "./kitGallery";
 export { sceneFor, sceneNames, type Scene } from "./kitScenes";

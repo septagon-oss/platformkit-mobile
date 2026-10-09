@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { AccessibilityInfo } from "react-native";
 import {
-  deriveCopy,
   deriveFeedback,
   type Clock,
   type Copy,
@@ -11,9 +10,14 @@ import {
   type Motion,
 } from "../core/derive";
 import { systemClock } from "./clock";
+import { screenCopy } from "./failure";
 
 export function useFeedback(
-  copy: Copy = deriveCopy("en"),
+  // The words follow the phone: a Portuguese device reads Portuguese sentences,
+  // and every other tag falls back to English. `deriveCopy` stays closed to the
+  // two languages this table holds; `copyLanguage` is what reconciles a device's
+  // locale tag with them.
+  copy: Copy = screenCopy(),
   format?: Pick<Formatting, "locale" | "timeZone">,
   clock: Clock = systemClock,
 ): Feedback {

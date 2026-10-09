@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import * as Haptics from "expo-haptics";
 import { useResourceDetail } from "../../src/screens/useResourceDetail";
+import { ApiError } from "../../src/effects/api";
+import { feedback } from "../fakes/presentation";
 import { confirm } from "../../src/ui/chooser";
 import { reset, router } from "../fakes/router";
 import { fakeApi, note, shell, shellValue } from "../fakes/shell";
@@ -25,7 +27,7 @@ describe("useResourceDetail", () => {
     const api = fakeApi();
     api.get.mockResolvedValue({ id: "1", title: "Buy milk" });
     shell.value = shellValue(api);
-    const { result, rerender } = await renderHook(() => useResourceDetail(note, "1"));
+    const { result, rerender } = await renderHook(() => useResourceDetail(note, "1", feedback));
     await waitFor(() => expect(result.current.row?.title).toBe("Buy milk"));
     expect(api.get).toHaveBeenCalledTimes(1);
     expect(api.get).toHaveBeenCalledWith(note, "1");
@@ -44,7 +46,7 @@ describe("useResourceDetail", () => {
     const second = Promise.withResolvers<Record<string, unknown>>();
     api.get.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
     shell.value = shellValue(api);
-    const { result } = await renderHook(() => useResourceDetail(note, "1"));
+    const { result } = await renderHook(() => useResourceDetail(note, "1", feedback));
     await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1));
     await act(async () => {
       void result.current.reload();
@@ -63,7 +65,7 @@ describe("useResourceDetail", () => {
     const api = fakeApi();
     api.get.mockResolvedValue({ id: "1", title: "Buy milk" });
     shell.value = shellValue(api);
-    const { result } = await renderHook(() => useResourceDetail(note, "1"));
+    const { result } = await renderHook(() => useResourceDetail(note, "1", feedback));
     await waitFor(() => expect(result.current.row).toBeDefined());
     await act(async () => result.current.remove());
     expect(felt).toHaveBeenCalledWith(Haptics.NotificationFeedbackType.Warning);
@@ -85,16 +87,22 @@ describe("useResourceDetail", () => {
   test("a refused delete is reported on the screen; a detail with nothing behind it leaves for the list", async () => {
     const api = fakeApi();
     api.get.mockResolvedValue({ id: "1" });
-    api.remove.mockRejectedValueOnce(new Error("Not yours to delete."));
+    api.remove.mockRejectedValueOnce(new Error("Network request failed"));
     router.canGoBack.mockReturnValue(false);
     shell.value = shellValue(api);
-    const { result } = await renderHook(() => useResourceDetail(note, "1"));
+    const { result } = await renderHook(() => useResourceDetail(note, "1", feedback));
     await waitFor(() => expect(result.current.row).toBeDefined());
     await act(async () => result.current.remove());
     await act(async () => {
       asked.mock.calls[0]![1].onPress();
     });
-    await waitFor(() => expect(result.current.error).toBe("Not yours to delete."));
+    // An unanswered delete is not a failed one: the phone says it could not tell.
+    await waitFor(() =>
+      expect(result.current.error).toBe("We couldn't confirm whether your changes were saved."),
+    );
+    const said = result.current.refusal;
+    expect(said && said.outcome === "notice" ? said.code : "").toBe("write-unknown");
+    expect(said && said.outcome === "notice" ? said.action : "").toBe("reconcile");
     expect(shell.value!.wrote).not.toHaveBeenCalled();
     expect(router.back).not.toHaveBeenCalled();
     expect(router.replace).not.toHaveBeenCalled();
@@ -104,5 +112,58 @@ describe("useResourceDetail", () => {
     });
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/note/note"));
     expect(router.back).not.toHaveBeenCalled();
+  });
+
+  test("a refresh answered 403 withdraws the record and says the access went", async () => {
+    const api = fakeApi();
+    api.get.mockResolvedValueOnce({ id: "1", title: "Buy milk" });
+    shell.value = shellValue(api);
+    const { result, rerender } = await renderHook(() => useResourceDetail(note, "1", feedback));
+    await waitFor(() => expect(result.current.row?.title).toBe("Buy milk"));
+    api.get.mockRejectedValueOnce(new ApiError(403, "not yours"));
+    // Coming back to a record this app wrote to is a refresh, not a first read.
+    shell.value = shellValue(api, { writes: { "note/note": 1 } });
+    await rerender(undefined);
+    await waitFor(() =>
+      expect(result.current.error).toBe("You no longer have access to this item."),
+    );
+    expect(result.current.row).toBeUndefined();
+    const said = result.current.refusal;
+    expect(said && said.outcome === "notice" ? said.code : "").toBe("forbidden");
+    expect(said && said.outcome === "notice" ? said.action : "").toBe("back");
+  });
+
+  test("a refresh answered 503 keeps the record and says when it was last read", async () => {
+    const api = fakeApi();
+    api.get.mockResolvedValueOnce({ id: "1", title: "Buy milk" });
+    shell.value = shellValue(api);
+    const { result, rerender } = await renderHook(() => useResourceDetail(note, "1", feedback));
+    await waitFor(() => expect(result.current.row?.title).toBe("Buy milk"));
+    api.get.mockRejectedValueOnce(new ApiError(503, "upstream"));
+    shell.value = shellValue(api, { writes: { "note/note": 1 } });
+    await rerender(undefined);
+    await waitFor(() => expect(result.current.error).toMatch(/^Couldn't refresh\./));
+    expect(result.current.row?.title).toBe("Buy milk");
+    const said = result.current.refusal;
+    expect(said && said.outcome === "notice" ? said.action : "").toBe("retry");
+  });
+
+  test("a request the screen abandoned says nothing at all", async () => {
+    const api = fakeApi();
+    api.get.mockResolvedValueOnce({ id: "1", title: "Buy milk" });
+    shell.value = shellValue(api);
+    const { result, rerender } = await renderHook(() => useResourceDetail(note, "1", feedback));
+    await waitFor(() => expect(result.current.row?.title).toBe("Buy milk"));
+    const abandoned = new Error("The request was cancelled.");
+    abandoned.name = "AbortError";
+    api.get.mockRejectedValueOnce(abandoned);
+    shell.value = shellValue(api, { writes: { "note/note": 1 } });
+    await rerender(undefined);
+    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(result.current.error).toBe("");
+    expect(result.current.row?.title).toBe("Buy milk");
   });
 });

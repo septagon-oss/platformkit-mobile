@@ -54,7 +54,8 @@ for (const first of ["identity", "catalog"] as const) {
       else identity.resolve(json({ ...loginIdentity, userId: 5 }));
     });
     await waitFor(() => expect(screen.getByTestId("phase")).toHaveTextContent(/^failed:/));
-    expect(shell?.state.error).toContain("userId");
+    // The person reads the sentence the copy table holds, not the field that failed.
+    expect(shell?.state.error).toBe("Update the app to open this workspace.");
     expect(shell?.state.catalog).toBeUndefined();
   });
 }

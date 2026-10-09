@@ -12,6 +12,7 @@ import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
 import {
+  failureSubject,
   formControls,
   problems,
   screenPath,
@@ -20,11 +21,11 @@ import {
   verbRefusal,
   type Row,
 } from "../core/derive";
-import { ApiError } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import type { Phase } from "../ui/organisms/ResourceForm";
 import { useTheme } from "../ui/theme";
+import { refusalFields, refusalOf, screenCopy } from "./failure";
 
 export function useResourceForm(entry: Entry, id: string | undefined) {
   const { api, wrote } = useShell();
@@ -32,6 +33,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   const router = useRouter();
   const navigation = useNavigation();
   const create = !id;
+  const copy = screenCopy();
   const [row, setRow] = useState<Row | undefined>();
   const [phase, setPhase] = useState<Phase>(create ? "editing" : "loading");
   const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
@@ -71,7 +73,9 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setPhase("editing");
     } catch (e) {
       if (generation.current !== started) return;
-      setDetail(e instanceof Error ? e.message : "This record could not be read.");
+      const said = refusalOf(e, "read", failureSubject(entry), copy);
+      if (said.verdict.outcome === "silent") return;
+      setDetail(said.text);
       setPhase("failed");
     }
   }, [api, entry, id]);
@@ -137,7 +141,8 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     const refused = problems(controls, held);
     if (Object.keys(refused).length > 0) {
       setErrors(refused);
-      setDetail("Some fields need attention.");
+      // The kit's own word for it: the sentence is the one the copy table holds.
+      setDetail(copy.kit.validation);
       return;
     }
     setPhase("saving");
@@ -152,15 +157,15 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setPhase("saved");
     } catch (e) {
       if (!alive.current) return;
-      if (e instanceof ApiError) {
-        setErrors(e.fields);
-        setDetail(e.detail || "That could not be saved.");
-      } else {
-        setDetail(e instanceof Error ? e.message : "That could not be saved.");
-      }
+      const said = refusalOf(e, create ? "create" : "update", failureSubject(entry), copy);
+      if (said.verdict.outcome === "silent") return;
+      // A 422 that named fields colours those fields and adds no sentence; an
+      // unanswered save says what is honest — that nothing is known.
+      setErrors(refusalFields(said.verdict));
+      setDetail(said.text);
       setPhase("editing");
     }
-  }, [phase, controls, held, id, api, entry, wrote]);
+  }, [phase, controls, held, id, api, entry, wrote, copy, create]);
 
   const cancel = useCallback(() => {
     if (router.canGoBack()) router.back();

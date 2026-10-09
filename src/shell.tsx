@@ -15,6 +15,7 @@ import { initial, reduce, type State } from "./core/state";
 import { createApi, type Api, type Identity } from "./effects/api";
 import { sessions } from "./effects/native-session";
 import type { Renderers } from "./renderers";
+import { catalogFailure } from "./screens/failure";
 
 export interface ShellValue {
   readonly api: Api;
@@ -88,7 +89,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       }
     } catch (e) {
       if (generation.current === started)
-        dispatch({ type: "failed", generation: started, error: message(e) });
+        dispatch({ type: "failed", generation: started, error: catalogFailure(e) || message(e) });
     }
   }, []);
 
