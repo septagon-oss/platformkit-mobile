@@ -59,8 +59,6 @@ export interface Refusal {
   readonly verdict: FailureVerdict;
   readonly text: string;
   readonly withdraws: boolean;
-  /** The plan line is not a refusal of this person's action, so it is not red. */
-  readonly tone: "danger" | "warning";
 }
 
 export function refusalOf(
@@ -70,12 +68,7 @@ export function refusalOf(
   copy: Copy,
 ): Refusal {
   const verdict = failureOf(error, context, subject, copy);
-  return {
-    verdict,
-    text: notice(verdict),
-    withdraws: withdraws(verdict),
-    tone: verdict.outcome === "plan" ? ("warning" as const) : ("danger" as const),
-  };
+  return { verdict, text: notice(verdict), withdraws: withdraws(verdict) };
 }
 
 /** What a screen puts in its notice: nothing for a request it abandoned and

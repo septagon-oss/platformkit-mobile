@@ -363,6 +363,18 @@ export function withdraws(verdict: FailureVerdict): boolean {
   return (verdict.outcome === "notice" || verdict.outcome === "plan") && verdict.retains === "gone";
 }
 
+/** Whether a sentence is drawn as an error or as a caution. */
+export type FailureTone = "danger" | "warning";
+
+/**
+ * A refusal of what this person just did is an error. A plan that does not include
+ * the feature is a fact about the account, said in the same breath but not in the
+ * same colour, so the notice draws it as a caution.
+ */
+export function failureTone(verdict: FailureVerdict | undefined): FailureTone {
+  return verdict?.outcome === "plan" ? "warning" : "danger";
+}
+
 /**
  * The one button a refusal offers, wired to the door the screen already has.
  * Silence and the plan line offer nothing, field issues say nothing under the

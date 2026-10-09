@@ -6,6 +6,7 @@ import type { Entry } from "../../core/catalog";
 import {
   detailItems,
   failureSubject,
+  failureTone,
   refusalAction,
   type Feedback,
   type FailureVerdict,
@@ -59,6 +60,8 @@ export function ResourceDetail({
   // Which button a refusal offers is the classifier's answer, not this
   // component's: a forbidden record is left, an unanswered write is checked
   // rather than sent again, and a sentence with no way out is only a sentence.
+  // Its colour is the classifier's answer too — the one refusal that is not of
+  // this person's doing is drawn as a caution.
   const notice = refusal
     ? refusalAction(
         refusal,
@@ -75,7 +78,13 @@ export function ResourceDetail({
   return (
     <Screen testID="resource-detail">
       {error ? (
-        <Notice announcement="urgent" text={error} {...(notice ? { action: notice } : {})} />
+        <Notice
+          testID="refusal"
+          tone={failureTone(refusal)}
+          announcement="urgent"
+          text={error}
+          {...(notice ? { action: notice } : {})}
+        />
       ) : null}
       {row ? (
         <Section>
