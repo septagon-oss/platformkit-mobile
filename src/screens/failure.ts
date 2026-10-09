@@ -2,10 +2,7 @@
 // a request rejected with into the four facts a `catch` arm can honestly state,
 // and asks the pure rule. Every hook calls this rather than reading `e.message`,
 // because a second chain of instanceof tests is a second classification.
-import { screenCopy, type Copy } from "../core/copy";
-
-// Re-exported so a hook takes its words and its classifier from one module.
-export { screenCopy } from "../core/copy";
+import { copyForLocale, type Copy } from "../core/copy";
 import {
   classifyFailure,
   noFields,
@@ -17,6 +14,16 @@ import {
   type FailureVerdict,
 } from "../core/failure";
 import { ApiError, ResponseError } from "../effects/api";
+
+/**
+ * The phone's own words. The device is asked here, at the boundary between a
+ * request and a screen, and nowhere below it: the core classifies and draws with a
+ * bundle somebody handed it, so a test decides the language and not the machine.
+ * A hook takes its words and its classifier from this one module.
+ */
+export function screenCopy(locale?: string): Copy {
+  return copyForLocale(locale ?? Intl.DateTimeFormat().resolvedOptions().locale);
+}
 
 /**
  * A cancellation is the screen leaving, not the server refusing: the transport

@@ -279,22 +279,21 @@ export function deriveCopy(language: Language): Copy {
 }
 
 /**
- * The phone's own bundle: the words follow the language the device reports, with
- * English behind every other tag. The device is asked at this boundary and the
- * answer is passed in by any caller that already has one, so a test decides the
- * language rather than the machine.
+ * The bundle a locale tag reads in: the words follow the tag, with English behind
+ * every other language. This is the whole reconciliation between a locale tag and
+ * the two languages the table holds — a tag is not a language, so it cannot be
+ * handed to `deriveCopy` directly. Who supplies the tag is the caller's business:
+ * a screen asks its phone, a test decides for itself. The core never asks.
  */
-export function screenCopy(
-  locale: string | undefined = Intl.DateTimeFormat().resolvedOptions().locale,
-): Copy {
+export function copyForLocale(locale: string | undefined): Copy {
   return deriveCopy(copyLanguage(locale));
 }
 
 /**
- * The phone's own language, from the locale the device reports: the primary
- * subtag decides, so "pt-BR", "pt_PT" and "PT" are Portuguese and anything else
- * reads in English. A locale tag is not a language, so it cannot be handed to
- * `deriveCopy` directly — this is the one place the two are reconciled.
+ * The language a locale tag reads in: the primary subtag decides, so "pt-BR",
+ * "pt_PT" and "PT" are Portuguese and anything else reads in English. A locale tag
+ * is not a language, so it cannot be handed to `deriveCopy` directly — this is the
+ * one place the two are reconciled.
  */
 export function copyLanguage(locale: string | undefined): Language {
   return typeof locale === "string" && locale.toLowerCase().startsWith("pt") ? "pt" : "en";

@@ -6,7 +6,7 @@ import type { Command, CrudVerb, Entry, Field } from "./catalog";
 import type { FailureSubject } from "./failure";
 import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
-export { copyLanguage, deriveCopy, screenCopy, type Copy, type Language } from "./copy";
+export { copyForLocale, copyLanguage, deriveCopy, type Copy, type Language } from "./copy";
 export { stateExamples, type StateExample } from "./stateGallery";
 export {
   deriveFeedback,
