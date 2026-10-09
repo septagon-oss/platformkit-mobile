@@ -15,12 +15,58 @@ export function bindOperations(
       invoke((client) => sdk.auditEventList({ ...options, client, throwOnError: true })),
     auditEventRead: (options: Omit<types.AuditEventReadData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.auditEventRead({ ...options, client, throwOnError: true })),
+    authChallengePasskeyBegin: (
+      options: Omit<types.AuthChallengePasskeyBeginData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.authChallengePasskeyBegin({ ...options, client, throwOnError: true })),
+    authChallengePasskeyVerify: (
+      options: Omit<types.AuthChallengePasskeyVerifyData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) =>
+        sdk.authChallengePasskeyVerify({ ...options, client, throwOnError: true }),
+      ),
+    authChallengeVerify: (
+      options: Omit<types.AuthChallengeVerifyData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authChallengeVerify({ ...options, client, throwOnError: true })),
+    authFactorList: (options: Omit<types.AuthFactorListData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.authFactorList({ ...options, client, throwOnError: true })),
+    authFactorPasskeyBegin: (
+      options: Omit<types.AuthFactorPasskeyBeginData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authFactorPasskeyBegin({ ...options, client, throwOnError: true })),
+    authFactorPasskeyFinish: (
+      options: Omit<types.AuthFactorPasskeyFinishData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.authFactorPasskeyFinish({ ...options, client, throwOnError: true })),
+    authRecoveryCodesRotate: (
+      options: Omit<types.AuthRecoveryCodesRotateData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.authRecoveryCodesRotate({ ...options, client, throwOnError: true })),
+    authFactorTotpBegin: (
+      options: Omit<types.AuthFactorTotpBeginData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authFactorTotpBegin({ ...options, client, throwOnError: true })),
+    authFactorTotpFinish: (
+      options: Omit<types.AuthFactorTotpFinishData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authFactorTotpFinish({ ...options, client, throwOnError: true })),
+    authFactorWithdraw: (
+      options: Omit<types.AuthFactorWithdrawData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authFactorWithdraw({ ...options, client, throwOnError: true })),
     authLogin: (options: Omit<types.AuthLoginData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.authLogin({ ...options, client, throwOnError: true })),
+    authLoginPasskeyBegin: (
+      options: Omit<types.AuthLoginPasskeyBeginData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authLoginPasskeyBegin({ ...options, client, throwOnError: true })),
+    authLoginPasskeyVerify: (
+      options: Omit<types.AuthLoginPasskeyVerifyData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authLoginPasskeyVerify({ ...options, client, throwOnError: true })),
     authLogout: (options: Omit<types.AuthLogoutData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.authLogout({ ...options, client, throwOnError: true })),
     authMe: (options: Omit<types.AuthMeData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.authMe({ ...options, client, throwOnError: true })),
+    authOidcCallback: (
+      options: Omit<types.AuthOidcCallbackData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authOidcCallback({ ...options, client, throwOnError: true })),
+    authOidcStart: (options: Omit<types.AuthOidcStartData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.authOidcStart({ ...options, client, throwOnError: true })),
     authPasswordChange: (
       options: Omit<types.AuthPasswordChangeData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.authPasswordChange({ ...options, client, throwOnError: true })),
@@ -31,6 +77,31 @@ export function bindOperations(
       invoke((client) => sdk.authRoleList({ ...options, client, throwOnError: true })),
     authRoleSet: (options: Omit<types.AuthRoleSetData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.authRoleSet({ ...options, client, throwOnError: true })),
+    authSamlCallback: (
+      options: Omit<types.AuthSamlCallbackData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authSamlCallback({ ...options, client, throwOnError: true })),
+    authSamlMetadata: (
+      options: Omit<types.AuthSamlMetadataData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authSamlMetadata({ ...options, client, throwOnError: true })),
+    authSamlStart: (options: Omit<types.AuthSamlStartData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.authSamlStart({ ...options, client, throwOnError: true })),
+    authSessionList: (options: Omit<types.AuthSessionListData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.authSessionList({ ...options, client, throwOnError: true })),
+    authSessionRevokeAll: (
+      options: Omit<types.AuthSessionRevokeAllData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authSessionRevokeAll({ ...options, client, throwOnError: true })),
+    authSessionRevoke: (
+      options: Omit<types.AuthSessionRevokeData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authSessionRevoke({ ...options, client, throwOnError: true })),
+    authPasskeySignInSet: (
+      options: Omit<types.AuthPasskeySignInSetData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authPasskeySignInSet({ ...options, client, throwOnError: true })),
+    authTokenList: (options: Omit<types.AuthTokenListData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.authTokenList({ ...options, client, throwOnError: true })),
+    authTokenIssue: (options: Omit<types.AuthTokenIssueData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.authTokenIssue({ ...options, client, throwOnError: true })),
+    authTokenRevoke: (options: Omit<types.AuthTokenRevokeData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.authTokenRevoke({ ...options, client, throwOnError: true })),
     billingPlanList: (options: Omit<types.BillingPlanListData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.billingPlanList({ ...options, client, throwOnError: true })),
     billingPlanRead: (options: Omit<types.BillingPlanReadData, "url"> & { signal?: AbortSignal }) =>
@@ -49,6 +120,24 @@ export function bindOperations(
       invoke((client) =>
         sdk.billingSubscriptionSubscribe({ ...options, client, throwOnError: true }),
       ),
+    changeProposalList: (
+      options: Omit<types.ChangeProposalListData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.changeProposalList({ ...options, client, throwOnError: true })),
+    changeProposalPropose: (
+      options: Omit<types.ChangeProposalProposeData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.changeProposalPropose({ ...options, client, throwOnError: true })),
+    changeProposalRead: (
+      options: Omit<types.ChangeProposalReadData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.changeProposalRead({ ...options, client, throwOnError: true })),
+    changeProposalApply: (
+      options: Omit<types.ChangeProposalApplyData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.changeProposalApply({ ...options, client, throwOnError: true })),
+    changeProposalReview: (
+      options: Omit<types.ChangeProposalReviewData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.changeProposalReview({ ...options, client, throwOnError: true })),
+    changeProposalWithdraw: (
+      options: Omit<types.ChangeProposalWithdrawData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.changeProposalWithdraw({ ...options, client, throwOnError: true })),
     contentContentList: (
       options: Omit<types.ContentContentListData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.contentContentList({ ...options, client, throwOnError: true })),
@@ -78,6 +167,8 @@ export function bindOperations(
       invoke((client) => sdk.fileFileList({ ...options, client, throwOnError: true })),
     fileFileUpload: (options: Omit<types.FileFileUploadData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.fileFileUpload({ ...options, client, throwOnError: true })),
+    fileFileErase: (options: Omit<types.FileFileEraseData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.fileFileErase({ ...options, client, throwOnError: true })),
     fileFileDelete: (options: Omit<types.FileFileDeleteData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.fileFileDelete({ ...options, client, throwOnError: true })),
     fileFileRead: (options: Omit<types.FileFileReadData, "url"> & { signal?: AbortSignal }) =>
@@ -87,6 +178,14 @@ export function bindOperations(
     fileFileContentHead: (
       options: Omit<types.FileFileContentHeadData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.fileFileContentHead({ ...options, client, throwOnError: true })),
+    fileFileGrant: (options: Omit<types.FileFileGrantData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.fileFileGrant({ ...options, client, throwOnError: true })),
+    fileFileRelease: (options: Omit<types.FileFileReleaseData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.fileFileRelease({ ...options, client, throwOnError: true })),
+    fileFileRetain: (options: Omit<types.FileFileRetainData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.fileFileRetain({ ...options, client, throwOnError: true })),
+    fileFileUses: (options: Omit<types.FileFileUsesData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.fileFileUses({ ...options, client, throwOnError: true })),
     notificationNotificationList: (
       options: Omit<types.NotificationNotificationListData, "url"> & { signal?: AbortSignal },
     ) =>
@@ -117,15 +216,39 @@ export function bindOperations(
     tenantTenantRead: (
       options: Omit<types.TenantTenantReadData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.tenantTenantRead({ ...options, client, throwOnError: true })),
+    tenantTenantDelete: (
+      options: Omit<types.TenantTenantDeleteData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantDelete({ ...options, client, throwOnError: true })),
     tenantTenantAddHost: (
       options: Omit<types.TenantTenantAddHostData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.tenantTenantAddHost({ ...options, client, throwOnError: true })),
+    tenantTenantRemoveHost: (
+      options: Omit<types.TenantTenantRemoveHostData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantRemoveHost({ ...options, client, throwOnError: true })),
     tenantTenantInvite: (
       options: Omit<types.TenantTenantInviteData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.tenantTenantInvite({ ...options, client, throwOnError: true })),
     tenantTenantSetLocale: (
       options: Omit<types.TenantTenantSetLocaleData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.tenantTenantSetLocale({ ...options, client, throwOnError: true })),
+    tenantTenantSetOidc: (
+      options: Omit<types.TenantTenantSetOidcData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantSetOidc({ ...options, client, throwOnError: true })),
+    tenantTenantClearOidc: (
+      options: Omit<types.TenantTenantClearOidcData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantClearOidc({ ...options, client, throwOnError: true })),
+    tenantTenantReactivate: (
+      options: Omit<types.TenantTenantReactivateData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantReactivate({ ...options, client, throwOnError: true })),
+    tenantTenantRename: (
+      options: Omit<types.TenantTenantRenameData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantRename({ ...options, client, throwOnError: true })),
+    tenantTenantSetSaml: (
+      options: Omit<types.TenantTenantSetSamlData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantSetSaml({ ...options, client, throwOnError: true })),
+    tenantTenantClearSaml: (
+      options: Omit<types.TenantTenantClearSamlData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.tenantTenantClearSaml({ ...options, client, throwOnError: true })),
     tenantTenantSuspend: (
       options: Omit<types.TenantTenantSuspendData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.tenantTenantSuspend({ ...options, client, throwOnError: true })),

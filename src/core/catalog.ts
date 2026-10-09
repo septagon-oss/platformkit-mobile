@@ -7,7 +7,7 @@ import type {
   Field as WireField,
   Command as WireCommand,
 } from "../generated/types.gen";
-import { zCatalog, zEntry } from "../generated/zod.gen";
+import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
 import { issuePath } from "./responses";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
@@ -32,14 +32,16 @@ export const FIELD_TYPES = [
 ] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
 
-export type Field = View<Omit<WireField, "type" | "elem" | "enum">> & {
+export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentation">> & {
   readonly type: FieldType;
   readonly elem?: FieldType;
   readonly enum?: readonly string[];
+  readonly hints?: FieldHints;
 };
 
-export type Command = View<Omit<WireCommand, "fields">> & {
+export type Command = View<Omit<WireCommand, "fields" | "presentation">> & {
   readonly fields: readonly Field[];
+  readonly hints?: CommandHints;
 };
 
 /**
@@ -66,19 +68,80 @@ export interface RendererRef {
   readonly minShell: number;
 }
 
-export type Entry = View<Omit<WireEntry, "fields" | "commands" | "immutable" | "singleton">> & {
+export type Entry = View<
+  Omit<WireEntry, "fields" | "commands" | "immutable" | "singleton" | "operations" | "presentation">
+> & {
   readonly fields: readonly Field[];
   readonly commands: readonly Command[];
   readonly immutable: readonly string[];
   readonly singleton: boolean;
   readonly writePath?: string;
-  // Catalog v2's operations postdates this document pin. This compatibility
-  // extension stays with the existing core owner, not a fabricated operation.
+  // Catalog v2's operations postdates the pin this document was cut from, and the
+  // core re-spells the list as the five verbs the kernel counts, so the wire shape
+  // is omitted from the view rather than passed through: the value in the model is
+  // this build's reading, not the document's bytes.
   readonly operations?: readonly CrudVerb[];
-  // The kernel owns whether an entry names a renderer; no document pin prints
-  // the key yet, so it is read as optional on the same terms as `operations`.
+  // The kernel owns whether an entry names a renderer; it is read as `unknown`
+  // so that a malformed name costs a pack and not a screen.
   readonly renderer?: RendererRef;
+  readonly hints?: EntryHints;
 };
+
+/**
+ * HintTone is the kernel's tone vocabulary (`kit/entity.Tones`). It is spelled
+ * here because a shared model may not import a drawing: `ui/atoms/Badge.tsx`
+ * calls the same colour `ok`, and the mapping is written once, where it is read.
+ */
+export type HintTone = "neutral" | "info" | "success" | "warning" | "danger";
+
+/** FieldVisibility is `kit/entity.Visibilities`. Absent means `shown` and is not stored. */
+export type FieldVisibility = "shown" | "detail" | "hidden";
+
+/**
+ * EntryHints, FieldHints and CommandHints are the phone's reading of the
+ * catalogue's `presentation` objects. The wire key stays `presentation`; the
+ * core field is `hints`, named after the kernel's own `kit/entity/hints.go`,
+ * because `src/core/presentation.ts` already owns the word *Presentation* for
+ * the reader's locale bundle. Only the members this build reads are stored, and
+ * each is absent rather than `undefined`, so `Object.keys` lists what the
+ * document declared.
+ */
+export interface EntryHints {
+  readonly singular?: string;
+  readonly plural?: string;
+  readonly icon?: string;
+  readonly primaryField?: string;
+  readonly previewField?: string;
+  readonly summaryFields?: readonly string[];
+  readonly statusField?: string;
+  readonly sections?: readonly { readonly key: string; readonly label: string }[];
+}
+
+export interface FieldHints {
+  readonly label?: string;
+  readonly help?: string;
+  /** section names a key of the owning entry's declared sections. */
+  readonly section?: string;
+  readonly visibility?: FieldVisibility;
+  readonly enumLabels?: Readonly<Record<string, string>>;
+  readonly enumTones?: Readonly<Record<string, HintTone>>;
+}
+
+export interface CommandHints {
+  readonly label?: string;
+  /** system is stored only when declared true: the kernel prints no key for a
+   * false one, so silence and false are one reading and need no member. */
+  readonly system?: true;
+}
+
+/**
+ * HintNotice is how a hint defect reaches a developer. `at` is the document path
+ * of the hint and `why` names the default now in use. Core calls what it is
+ * handed and keeps no state: the core has no console (AGENTS.md), and a person
+ * is never told about an author's typo. "Logged once" means once per distinct
+ * (path, reason) per parse — the caller owns the set.
+ */
+export type HintNotice = (at: string, why: string) => void;
 
 /**
  * SUPPORTED_CATALOG_VERSION is the newest document shape this build can render.
@@ -147,16 +210,264 @@ function fieldType(v: unknown, at: string): FieldType {
 // inside a well-formed object are ignored: a key this build has never read is
 // no reason to lose a screen. It enters the parser as `unknown` for that
 // reason — the shape is decided below, not by a schema nothing consulted.
+// A presentation hint is the one optional this build must not let a strict
+// schema decide: `additionalProperties: false` would make a mistyped noun the
+// reason the whole catalogue is refused — every screen in the workspace lost to
+// one typo in one label. The brief forbids that, so the hint enters as
+// `unknown` and hintEntry/hintField/hintCommand below decide its shape, exactly
+// as `renderer` does above. The generated `appResources` operation keeps its
+// strict validator: that refusal belongs to the public contract, not to a pocket.
+const looseField = zField.extend({ presentation: z.unknown().optional() });
+const looseCommand = zCommand.extend({
+  fields: z.array(looseField).nullable().optional(),
+  presentation: z.unknown().optional(),
+});
+
 const catalogSchema = zCatalog.extend({
   resources: z
     .array(
       zEntry.extend({
         operations: z.array(z.string()).optional(),
         renderer: z.unknown().optional(),
+        presentation: z.unknown().optional(),
+        fields: z.array(looseField).nullable(),
+        commands: z.array(looseCommand).nullable(),
       }),
     )
     .nullable(),
 });
+
+const HINT_TONES: readonly string[] = ["neutral", "info", "success", "warning", "danger"];
+const FIELD_VISIBILITIES: readonly string[] = ["shown", "detail", "hidden"];
+
+/**
+ * hintWord reads one declared word, or says nothing.
+ *
+ * A hint of the wrong kind is correctable, not fatal: the value falls back to
+ * the default the reader would have used had the key never been printed, and the
+ * defect names itself once. The rest of the same hint object survives it — half a
+ * bag of reading decisions is still a bag, and losing a good `singular` because a
+ * sibling `icon` was a number is the worse screen. An empty string is silence, not
+ * a defect: the reference server prints no key for a zero value, so `""` cannot
+ * arrive from a kernel and is not worth a log line.
+ */
+function hintWord(
+  hint: Record<string, unknown>,
+  member: string,
+  at: string,
+  what: string,
+  notice: HintNotice,
+): string | undefined {
+  const value = hint[member];
+  if (value === undefined) return undefined;
+  if (typeof value !== "string") {
+    notice(`${at}.${member}`, `is not ${what}: the default is used`);
+    return undefined;
+  }
+  return value === "" ? undefined : value;
+}
+
+/** hintNames reads one declared list of names. An empty list is silence. */
+function hintNames(
+  hint: Record<string, unknown>,
+  member: string,
+  at: string,
+  notice: HintNotice,
+): readonly string[] | undefined {
+  const value = hint[member];
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) {
+    notice(`${at}.${member}`, "is not a list of field names: the default is used");
+    return undefined;
+  }
+  const named = value.filter((n): n is string => typeof n === "string" && n !== "");
+  if (named.length < value.length)
+    notice(`${at}.${member}`, "names something the schema does not hold: the rest is used");
+  return named.length === 0 ? undefined : named;
+}
+
+/**
+ * hintEntry reads what an entry says about how it should read.
+ *
+ * `named` is this entry's own field names: a pointer into the schema is resolved
+ * here, where the schema is in hand, so a hint that names no field of this entry
+ * is a fallback rather than a blank screen. `sections` is taken whole or not at
+ * all, because a block with no key or no label is no block.
+ */
+function hintEntry(
+  raw: unknown,
+  at: string,
+  named: readonly string[],
+  notice: HintNotice,
+): EntryHints | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (!isRecord(raw)) {
+    notice(at, "is not a hint object: no hints are read");
+    return undefined;
+  }
+  const pointer = (member: string): string | undefined => {
+    const word = hintWord(raw, member, at, "a field name", notice);
+    if (word === undefined) return undefined;
+    if (!named.includes(word)) {
+      notice(`${at}.${member}`, `names no field of this entry: the default is used`);
+      return undefined;
+    }
+    return word;
+  };
+  const sections = ((): EntryHints["sections"] => {
+    const value = raw.sections;
+    if (value === undefined) return undefined;
+    if (!Array.isArray(value)) {
+      notice(`${at}.sections`, "is not a list of blocks: the record stays flat");
+      return undefined;
+    }
+    const blocks: { key: string; label: string }[] = [];
+    for (const [i, section] of value.entries()) {
+      if (
+        !isRecord(section) ||
+        typeof section.key !== "string" ||
+        section.key === "" ||
+        typeof section.label !== "string" ||
+        section.label === ""
+      ) {
+        notice(`${at}.sections`, "holds a block with no key and label: the record stays flat");
+        return undefined;
+      }
+      if (blocks.some((b) => b.key === (section.key as string))) {
+        notice(`${at}.sections[${i}]`, "repeats a block: the first declaration is used");
+        continue;
+      }
+      blocks.push({ key: section.key, label: section.label });
+    }
+    return blocks.length === 0 ? undefined : blocks;
+  })();
+  const summary = hintNames(raw, "summaryFields", at, notice);
+  const singular = hintWord(raw, "singular", at, "a word", notice);
+  const plural = hintWord(raw, "plural", at, "a word", notice);
+  const icon = hintWord(raw, "icon", at, "a word", notice);
+  const primaryField = pointer("primaryField");
+  const previewField = pointer("previewField");
+  const statusField = pointer("statusField");
+  const hints: EntryHints = {
+    ...(singular === undefined ? {} : { singular }),
+    ...(plural === undefined ? {} : { plural }),
+    ...(icon === undefined ? {} : { icon }),
+    ...(primaryField === undefined ? {} : { primaryField }),
+    ...(previewField === undefined ? {} : { previewField }),
+    ...(statusField === undefined ? {} : { statusField }),
+    ...(summary === undefined
+      ? {}
+      : { summaryFields: summary.filter((field) => named.includes(field)) }),
+    ...(sections === undefined ? {} : { sections }),
+  };
+  return Object.keys(hints).length === 0 ? undefined : hints;
+}
+
+/**
+ * hintField reads what one field says about how it is drawn.
+ *
+ * `values` is the field's own enum: a label or tone keyed on a value the enum
+ * does not hold is dropped on its own, the sibling keys surviving. `sections` are
+ * the owning entry's declared blocks — a field cannot invent a block no author
+ * declared, because the record would then hold a heading nobody named.
+ */
+function hintField(
+  raw: unknown,
+  at: string,
+  values: readonly string[],
+  sections: readonly string[],
+  notice: HintNotice,
+): FieldHints | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (!isRecord(raw)) {
+    notice(at, "is not a hint object: no hints are read");
+    return undefined;
+  }
+  const label = hintWord(raw, "label", at, "a word", notice);
+  const help = hintWord(raw, "help", at, "a sentence", notice);
+  const vocabulary = (
+    member: string,
+    allowed: readonly string[],
+    fallback: string,
+  ): string | undefined => {
+    const word = hintWord(raw, member, at, `one of ${allowed.join(", ")}`, notice);
+    if (word === undefined) return undefined;
+    if (!allowed.includes(word)) {
+      notice(`${at}.${member}`, `is not a name this build draws: ${fallback}`);
+      return undefined;
+    }
+    return word;
+  };
+  const visibility = vocabulary("visibility", FIELD_VISIBILITIES, "the field is shown");
+  const declaredSection = hintWord(raw, "section", at, "a block name", notice);
+  if (declaredSection !== undefined && !sections.includes(declaredSection))
+    notice(`${at}.section`, "names no declared block: the field stays in the overview");
+  const keyed = <T>(
+    member: string,
+    read: (value: unknown) => T | undefined,
+    missing: string,
+  ): Record<string, T> | undefined => {
+    const value = raw[member];
+    if (value === undefined) return undefined;
+    if (!isRecord(value)) {
+      notice(`${at}.${member}`, `is not a list of ${missing}: the default is used`);
+      return undefined;
+    }
+    const kept: Record<string, T> = {};
+    for (const [value_, held] of Object.entries(value)) {
+      if (!values.includes(value_)) {
+        notice(`${at}.${member}.${value_}`, "names no value of this field: it is not drawn");
+        continue;
+      }
+      const read_ = read(held);
+      if (read_ === undefined)
+        notice(`${at}.${member}.${value_}`, `is not ${missing}: the default is used`);
+      else kept[value_] = read_;
+    }
+    return Object.keys(kept).length === 0 ? undefined : kept;
+  };
+  const enumLabels = keyed(
+    "enumLabels",
+    (v) => (typeof v === "string" && v !== "" ? v : undefined),
+    "words",
+  );
+  const enumTones = keyed(
+    "enumTones",
+    (v) => (typeof v === "string" && HINT_TONES.includes(v) ? (v as HintTone) : undefined),
+    "tones",
+  );
+  const hints: FieldHints = {
+    ...(label === undefined ? {} : { label }),
+    ...(help === undefined ? {} : { help }),
+    ...(declaredSection === undefined || !sections.includes(declaredSection)
+      ? {}
+      : { section: declaredSection }),
+    ...(visibility === undefined || visibility === "shown"
+      ? {}
+      : { visibility: visibility as FieldVisibility }),
+    ...(enumLabels === undefined ? {} : { enumLabels }),
+    ...(enumTones === undefined ? {} : { enumTones }),
+  };
+  return Object.keys(hints).length === 0 ? undefined : hints;
+}
+
+/** hintCommand reads what one command says about the button it asks for. */
+function hintCommand(raw: unknown, at: string, notice: HintNotice): CommandHints | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (!isRecord(raw)) {
+    notice(at, "is not a hint object: no hints are read");
+    return undefined;
+  }
+  const label = hintWord(raw, "label", at, "a phrase", notice);
+  const system = raw.system;
+  if (system !== undefined && typeof system !== "boolean")
+    notice(`${at}.system`, "is not yes or no: the command is offered");
+  const hints: CommandHints = {
+    ...(label === undefined ? {} : { label }),
+    ...(system === true ? { system: true as const } : {}),
+  };
+  return Object.keys(hints).length === 0 ? undefined : hints;
+}
 
 /** rendererRef reads which pack an entry asks for, or says that it asks for none. */
 function rendererRef(v: unknown): RendererRef | undefined {
@@ -169,19 +480,45 @@ function rendererRef(v: unknown): RendererRef | undefined {
 }
 
 type ParsedEntry = NonNullable<z.output<typeof catalogSchema>["resources"]>[number];
-function field(v: View<WireField>, at: string): Field {
-  const { type, elem, enum: values, ...rest } = v;
+type ParsedField = z.output<typeof looseField>;
+
+function field(v: ParsedField, at: string, sections: readonly string[], notice: HintNotice): Field {
+  const { type, elem, enum: values, presentation, ...rest } = v;
+  const hints = hintField(presentation, `${at}.presentation`, values ?? [], sections, notice);
   return {
     ...rest,
     type: fieldType(type, `${at}.type`),
     ...(elem === undefined ? {} : { elem: fieldType(elem, `${at}.elem`) }),
     ...(values == null ? {} : { enum: values }),
+    ...(hints === undefined ? {} : { hints }),
   };
 }
 
-function entry(v: ParsedEntry, at: string): Entry {
-  const { fields, commands, immutable, operations, renderer, singleton, ...rest } = v;
+/**
+ * declaredSections lists the blocks an entry declares, without judging them.
+ *
+ * A field names its block, so the blocks have to be known before the fields are
+ * read; `hintEntry` then reads them as a whole and refuses a malformed one, which
+ * is the same answer both readers give when the list is empty.
+ */
+function declaredSections(presentation: unknown): readonly string[] {
+  if (!isRecord(presentation) || !Array.isArray(presentation.sections)) return [];
+  return presentation.sections.flatMap((section) =>
+    isRecord(section) && typeof section.key === "string" && section.key !== "" ? [section.key] : [],
+  );
+}
+
+function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
+  const { fields, commands, immutable, operations, renderer, singleton, presentation, ...rest } = v;
   const pack = rendererRef(renderer);
+  const blocks = declaredSections(presentation);
+  const fieldsRead = (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`, blocks, notice));
+  const hints = hintEntry(
+    presentation,
+    `${at}.presentation`,
+    fieldsRead.map((f) => f.name),
+    notice,
+  );
   return {
     ...rest,
     path: absolute(v.path, `${at}.path`),
@@ -189,20 +526,27 @@ function entry(v: ParsedEntry, at: string): Entry {
     ...(v.write_path === undefined
       ? {}
       : { writePath: absolute(v.write_path, `${at}.write_path`) }),
-    fields: (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`)),
+    fields: fieldsRead,
+    ...(hints === undefined ? {} : { hints }),
     immutable: immutable ?? [],
-    ...(operations === undefined ? {} : { operations: verbs(operations, `${at}.operations`) }),
-    commands: (commands ?? []).map(({ fields, path, ...command }, i) => ({
-      ...command,
-      ...(path === undefined ? {} : { path: absolute(path, `${at}.commands[${i}].path`) }),
-      fields: (fields ?? []).map((f, n) => field(f, `${at}.commands[${i}].fields[${n}]`)),
-    })),
+    ...(operations == null ? {} : { operations: verbs(operations, `${at}.operations`) }),
+    commands: (commands ?? []).map(({ fields, path, presentation: commandHint, ...command }, i) => {
+      const hint = hintCommand(commandHint, `${at}.commands[${i}].presentation`, notice);
+      return {
+        ...command,
+        ...(hint === undefined ? {} : { hints: hint }),
+        ...(path === undefined ? {} : { path: absolute(path, `${at}.commands[${i}].path`) }),
+        fields: (fields ?? []).map((f, n) =>
+          field(f, `${at}.commands[${i}].fields[${n}]`, [], notice),
+        ),
+      };
+    }),
     singleton: singleton ?? false,
   };
 }
 
 /** parseCatalog is the only way a Catalog is made from bytes. */
-export function parseCatalog(input: unknown): Catalog {
+export function parseCatalog(input: unknown, notice: HintNotice = () => {}): Catalog {
   if (!isRecord(input)) throw new CatalogError("document", "is not an object");
   const version = catalogVersion(input.catalogVersion);
   const result = catalogSchema.safeParse({ ...input, catalogVersion: version });
@@ -221,7 +565,7 @@ export function parseCatalog(input: unknown): Catalog {
   return {
     ...metadata,
     version,
-    resources: (resources ?? []).map((r, i) => entry(r, `resources[${i}]`)),
+    resources: (resources ?? []).map((r, i) => entry(r, `resources[${i}]`, notice)),
   };
 }
 
