@@ -3,7 +3,7 @@
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
 import type { Command, CrudVerb, Entry, Field } from "./catalog";
-import { presentedTime, type Formatting } from "./presentation";
+import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
 export { deriveCopy, type Copy, type Language } from "./copy";
 export { stateExamples, type StateExample } from "./stateGallery";
@@ -11,6 +11,8 @@ export {
   deriveFeedback,
   instantValue,
   presentedTime,
+  presentedInstant,
+  civilDay,
   type Clock,
   type Feedback,
   type Formatting,
@@ -48,9 +50,44 @@ export function humanize(name: string): string {
   return out;
 }
 
+/**
+ * massNouns are the words that are already a plural: a catalogue noun is an
+ * entity name the server chose, and "content" is never made "contents" by this
+ * function. The set is this kit's English share; a noun a customer invents
+ * ("sla policy") is answered by the rule below, not by more English grammar here.
+ */
+const massNouns = new Set([
+  "content",
+  "settings",
+  "news",
+  "media",
+  "data",
+  "staff",
+  "feedback",
+  "information",
+]);
+
 /** plural is a screen's name for many of an entity: "task" is "tasks", "settings" is "settings". */
 export function plural(noun: string): string {
-  return noun.endsWith("s") ? noun : noun + "s";
+  return massNouns.has(noun) || noun.endsWith("s") ? noun : noun + "s";
+}
+
+/**
+ * hostLabel is an address reduced to what a person typed and recognises: the host,
+ * with the port when it is not the scheme's own. Never the scheme, path, query,
+ * fragment or credentials — a screen's title is read over a shoulder, and an
+ * address bar is not the place to repeat a token. An address this cannot read is
+ * no address at all, and the caller is left to name the screen another way.
+ */
+export function hostLabel(raw: string): string {
+  let url: URL;
+  try {
+    url = new URL(raw.trim());
+  } catch {
+    return "";
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+  return url.port === "" ? url.hostname : `${url.hostname}:${url.port}`;
 }
 
 /** text is a value as a control reads it: the raw spelling. */
@@ -94,10 +131,15 @@ export const splitList = (raw: string): string[] =>
 
 /** display is a value as a person reads it; nothing at all is a dash. */
 export function display(f: Field, v: unknown, format: Formatting): string {
-  if (f.type === "bool") return v === true ? format.copy.value.yes : format.copy.value.no;
+  if (f.type === "bool")
+    return v === true
+      ? format.copy.value.yes
+      : v === false
+        ? format.copy.value.no
+        : format.copy.value.notSet;
   if (f.type === "time") {
     const at = timeValue(v);
-    return at ? timeText(at, format) : text(v) || "—";
+    return at ? presentedInstant(at, format).shown : text(v) || "—";
   }
   if ((f.type === "int" || f.type === "float") && typeof v === "number" && Number.isFinite(v))
     return new Intl.NumberFormat(format.locale, { maximumSignificantDigits: 21 }).format(v);
@@ -177,14 +219,25 @@ export interface DetailItem {
   readonly field: Field;
   readonly label: string;
   readonly value: string;
+  /**
+   * spoken is the whole fact as it is said aloud, for the one value the eye is
+   * shown in shorthand: a cell reads "5 minutes ago" and a screen reader says
+   * "1 Jul 2026, 13:00". Undefined wherever the shown words are the whole fact.
+   */
+  readonly spoken?: string;
 }
 
 export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  return e.fields.map((f) => ({
-    field: f,
-    label: humanize(f.name),
-    value: display(f, row[f.name], format),
-  }));
+  return e.fields.map((f) => {
+    const at = f.type === "time" ? timeValue(row[f.name]) : undefined;
+    const instant = at ? presentedInstant(at, format) : undefined;
+    return {
+      field: f,
+      label: humanize(f.name),
+      value: display(f, row[f.name], format),
+      ...(instant ? { spoken: instant.exact } : {}),
+    };
+  });
 }
 
 export type ControlKind =

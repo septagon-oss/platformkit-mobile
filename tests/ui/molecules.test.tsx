@@ -2,6 +2,8 @@ import { feedback } from "../fakes/presentation";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
+import { StyleSheet } from "react-native";
+import { display, presentedInstant, timeValue } from "../../src/core/derive";
 import { DetailRow } from "../../src/ui/molecules/DetailRow";
 import { FormField } from "../../src/ui/molecules/FormField";
 import { LoadMore } from "../../src/ui/molecules/LoadMore";
@@ -11,6 +13,7 @@ import { ServerField } from "../../src/ui/molecules/ServerField";
 import { TagsField } from "../../src/ui/molecules/TagsField";
 import { Value } from "../../src/ui/molecules/Value";
 import { ThemeProvider } from "../../src/ui/theme";
+import { palette } from "../../src/ui/tokens";
 
 const inTheme = (el: React.ReactElement, mode: "light" | "dark" = "light") =>
   render(<ThemeProvider mode={mode}>{el}</ThemeProvider>);
@@ -40,6 +43,104 @@ describe("Row", () => {
     expect(open).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("header", { name: "Notes" })).toBeOnTheScreen();
   });
+
+  /** every style drawn under here, so a test can count the lines a group draws. */
+  const drawn = (node: ReturnType<typeof screen.getByTestId>): readonly object[] => [
+    ...(node.props.style === undefined ? [] : [StyleSheet.flatten(node.props.style)]),
+    ...node.children
+      .filter((child): child is ReturnType<typeof screen.getByTestId> => typeof child !== "string")
+      .flatMap(drawn),
+  ];
+
+  test("a row draws no separator; the section it sits in separates its rows once", async () => {
+    await inTheme(
+      <Section testID="group">
+        <Row title="First" testID="row-one" />
+        <Row title="Second" testID="row-two" />
+      </Section>,
+    );
+    // The line between two rows belongs to the group: two rows, one line, and the
+    // row itself carries none — otherwise a row outside a group is a fragment of a
+    // table and every card of rows is drawn twice.
+    for (const id of ["row-one", "row-two"]) {
+      const style = StyleSheet.flatten(screen.getByTestId(id).props.style) as {
+        borderBottomWidth?: number;
+      };
+      expect(style.borderBottomWidth).toBeUndefined();
+    }
+    // The group wraps each row in its own line: two rows, one line between them, and
+    // no line the row itself drew.
+    expect(
+      drawn(screen.getByTestId("group")).filter(
+        (style) => (style as { borderBottomWidth?: number }).borderBottomWidth !== undefined,
+      ).length,
+    ).toBe(1);
+  });
+});
+
+describe("Value", () => {
+  const status = { name: "status", type: "string" as const, enum: ["open", "done"] };
+  const pinned = { name: "pinned", type: "bool" as const };
+
+  test("a value of a closed set is a neutral pill: position in the list picks no colour", async () => {
+    await inTheme(
+      <>
+        <Value presentation={feedback} field={status} value="open" testID="status-open" />
+        <Value presentation={feedback} field={status} value="done" testID="status-done" />
+      </>,
+      "light",
+    );
+    // The first value and the second both: the catalogue names no tone for any of
+    // them, so neither may borrow one from where it sits in the list.
+    for (const id of ["status-open", "status-done"])
+      expect(StyleSheet.flatten(screen.getByTestId(id).props.style)).toMatchObject({
+        backgroundColor: palette.light.surfaceMuted,
+      });
+  });
+
+  test("a switch with no answer says there is none; one answered off says No", async () => {
+    await inTheme(
+      <>
+        <DetailRow
+          term="Pinned"
+          value="Not set"
+          shown={<Value presentation={feedback} field={pinned} value={undefined} />}
+          testID="unset"
+        />
+        <DetailRow
+          term="Pinned"
+          value="No"
+          shown={<Value presentation={feedback} field={pinned} value={false} />}
+          testID="answered-off"
+        />
+      </>,
+    );
+    expect(screen.getByText("Not set")).toBeOnTheScreen();
+    // A pill would claim a state, and "off" is one: it keeps its badge.
+    expect(screen.getByText("No")).toBeOnTheScreen();
+  });
+
+  test("an instant is shown as a distance and announced as the whole date-time", async () => {
+    const createdAt = { name: "createdAt", type: "time" as const };
+    // One call, both spellings: what the eye reads comes from the same instant the
+    // row announces, and the row is the accessible element.
+    const said = presentedInstant(timeValue("2026-01-31T09:00:00Z")!, feedback);
+    expect(said.shown).toBe("Jan 31, 09:00 AM");
+    expect(said.exact).toBe("Jan 31, 2026, 09:00 AM");
+    await inTheme(
+      <DetailRow
+        term="Created"
+        value={display(createdAt, "2026-01-31T09:00:00Z", feedback)}
+        spoken={said.exact}
+        shown={<Value presentation={feedback} field={createdAt} value="2026-01-31T09:00:00Z" />}
+        testID="field-createdAt"
+      />,
+    );
+    expect(screen.getByText(said.shown)).toBeOnTheScreen();
+    expect(screen.getByTestId("field-createdAt").props.accessibilityLabel).toBe(
+      `Created, ${said.exact}`,
+    );
+  });
 });
 
 describe("TagsField", () => {
@@ -68,7 +169,12 @@ describe("testID", () => {
       <>
         <DetailRow term="Title" value="A note" testID="t-detail" />
         <LoadMore feedback={feedback} remaining={3} busy={false} onPress={none} testID="t-more" />
-        <ServerField value="https://acme.test" onChange={none} testID="t-server" />
+        <ServerField
+          caption="Workspace address"
+          value="https://acme.test"
+          onChange={none}
+          testID="t-server"
+        />
         <Section testID="t-section">
           <Row title="A row" testID="t-row" />
         </Section>

@@ -9,7 +9,7 @@ env:
 - runFlow: sign-in.yaml
 - assertVisible:
     id: "open-${MODULE}-${ENTITY}"
-- assertVisible: "In ${MODULE}"
+- assertVisible: "${EMAIL}"
 - tapOn:
     id: "account"
 - assertVisible: "Refresh"

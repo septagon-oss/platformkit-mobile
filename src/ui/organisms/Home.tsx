@@ -1,23 +1,26 @@
-// Home is what there is: one row per resource the caller may reach, which is
-// the web dashboard's cards without the counts. Refresh is pulling the list;
-// the account menu is in the native header, set by the screen composition.
+// Home is what there is: one row per resource the caller may reach, in the one
+// group of choices the app offers. The address and the account say whose workspace
+// these rows belong to; Refresh is pulling the list, and the account menu is in the
+// native header, set by the screen composition.
 import React from "react";
 import type { Entry } from "../../core/catalog";
 import { type Feedback, humanize, plural } from "../../core/derive";
 import { EmptyState } from "../atoms/EmptyState";
+import { Text } from "../atoms/Text";
 import { Row } from "../molecules/Row";
-import { Section } from "../molecules/Section";
 import { ListScreen } from "../templates/ListScreen";
 
 export interface Props {
   readonly feedback: Feedback;
   readonly entries: readonly Entry[];
   readonly refreshing: boolean;
+  /** account is the address the person signs in as, read under the workspace's name. */
+  readonly account?: string | undefined;
   readonly onOpen: (entry: Entry) => void;
   readonly onRefresh: () => void;
 }
 
-export function Home({ feedback, entries, refreshing, onOpen, onRefresh }: Props) {
+export function Home({ feedback, entries, refreshing, account, onOpen, onRefresh }: Props) {
   return (
     <ListScreen
       feedback={feedback}
@@ -26,16 +29,16 @@ export function Home({ feedback, entries, refreshing, onOpen, onRefresh }: Props
       loading={false}
       refreshing={refreshing}
       onRefresh={onRefresh}
+      grouped
+      header={account ? <Text tone="muted">{account}</Text> : undefined}
       testID="home"
       render={(e) => (
-        <Section>
-          <Row
-            title={humanize(plural(e.entity))}
-            cells={[`In ${e.module}${e.writable ? "" : ", read only"}`]}
-            onPress={() => onOpen(e)}
-            testID={`open-${e.module}-${e.entity}`}
-          />
-        </Section>
+        <Row
+          title={humanize(plural(e.entity))}
+          cells={e.writable ? [] : [feedback.copy.kit.readOnly]}
+          onPress={() => onOpen(e)}
+          testID={`open-${e.module}-${e.entity}`}
+        />
       )}
       empty={
         <EmptyState

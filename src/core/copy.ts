@@ -14,7 +14,7 @@ interface Words {
     readonly notSet: string;
     readonly openHint: string;
   };
-  readonly value: { readonly yes: string; readonly no: string };
+  readonly value: { readonly yes: string; readonly no: string; readonly notSet: string };
   readonly state: {
     readonly loading: string;
     readonly empty: { readonly title: string; readonly body: string };
@@ -66,16 +66,22 @@ export interface Copy extends Words {
   readonly language: Language;
 }
 
+// One answer for "nothing is stored here", written once and named by each group
+// that needs it: a date field with no instant and a switch with no answer are the
+// same fact about the record, and a person should read the same two words.
+const notSetEn = "Not set";
+const notSetPt = "Não definido";
+
 const en: Words = {
   kit: kitEnglish,
   choice: { placeholder: "Choose", cancel: "Cancel", hint: "Opens the choices" },
   dateTime: {
     set: "Set",
     clear: "Clear",
-    notSet: "Not set",
+    notSet: notSetEn,
     openHint: "Opens the date and time dialogs",
   },
-  value: { yes: "Yes", no: "No" },
+  value: { yes: "Yes", no: "No", notSet: notSetEn },
   state: {
     loading: "Loading",
     empty: { title: "Nothing here yet", body: "What arrives will be listed here." },
@@ -128,10 +134,10 @@ const pt: Words = {
   dateTime: {
     set: "Definir",
     clear: "Limpar",
-    notSet: "Não definido",
+    notSet: notSetPt,
     openHint: "Abre os seletores de data e hora",
   },
-  value: { yes: "Sim", no: "Não" },
+  value: { yes: "Sim", no: "Não", notSet: notSetPt },
   state: {
     loading: "A carregar",
     empty: { title: "Ainda não há nada aqui", body: "O que chegar será apresentado aqui." },

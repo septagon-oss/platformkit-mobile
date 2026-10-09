@@ -594,7 +594,11 @@ function Samples({
         <FormField label="Tags" help="Comma separated.">
           <TagsField label="Tags" value={tags} onChange={setTags} />
         </FormField>
-        <ServerField value={server} onChange={setServer} />
+        <ServerField
+          caption={feedback.copy.kit.workspaceAddress}
+          value={server}
+          onChange={setServer}
+        />
       </Section>
 
       <Section title="Rows" footer="A footer says something about the group.">

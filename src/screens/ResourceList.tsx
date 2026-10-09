@@ -10,7 +10,6 @@ import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
 import { useCommandAsk } from "./useCommand";
-import { systemClock } from "./clock";
 import { useResourceList } from "./useResourceList";
 
 export function ResourceList({ entry }: ScreenProps) {
@@ -58,7 +57,7 @@ export function ResourceList({ entry }: ScreenProps) {
     <>
       <Stack.Screen options={options} />
       <ResourceListView
-        presentation={{ ...feedback, now: systemClock.now(), weekStartsOn: 1 }}
+        presentation={{ ...feedback, weekStartsOn: 1 }}
         entry={entry}
         rows={list.rows}
         total={list.total}

@@ -2,6 +2,7 @@ import { deriveCopy } from "../../src/core/derive";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
+import { StyleSheet } from "react-native";
 import { Badge } from "../../src/ui/atoms/Badge";
 import { Button } from "../../src/ui/atoms/Button";
 import { ChoiceRow } from "../../src/ui/atoms/ChoiceRow";
@@ -13,7 +14,7 @@ import { Spinner } from "../../src/ui/atoms/Spinner";
 import { SwitchRow } from "../../src/ui/atoms/SwitchRow";
 import { Text } from "../../src/ui/atoms/Text";
 import { radius } from "../../src/ui/scale";
-import { ThemeProvider } from "../../src/ui/theme";
+import { ThemeProvider, themeFor } from "../../src/ui/theme";
 import { palette } from "../../src/ui/tokens";
 
 const inTheme = (el: React.ReactElement, mode: "light" | "dark" = "light") =>
@@ -33,6 +34,32 @@ describe("Button", () => {
   test("a primary button reads in the on-accent colour in both modes", async () => {
     await inTheme(<Button label="Go" onPress={() => undefined} />, "dark");
     expect(screen.getByText("Go")).toHaveStyle({ color: palette.dark.accentOn });
+  });
+
+  test("a control in the native header rests in the header's own band and rings for the keyboard", async () => {
+    const edge = (id: string) =>
+      StyleSheet.flatten(screen.getByTestId(id).props.style) as {
+        borderColor?: string;
+        borderWidth?: number;
+      };
+    const header = (mode: "light" | "dark") =>
+      inTheme(
+        <Button label="Account" placement="header" onPress={() => undefined} testID="account" />,
+        mode,
+      );
+    await header("light");
+    // The word sits in the header's own band, so its edge is painted in that band and
+    // no frame is drawn around it. The border itself stays, because it is the
+    // mechanism the focus ring recolours: a control with no edge at all would have
+    // nothing to ring, and the label would shift as the keyboard reached it.
+    expect(edge("account").borderColor).toBe(palette.light.surfaceCanvas);
+    expect(edge("account").borderColor).not.toBe(palette.light.surfacePrimary);
+    expect(edge("account").borderWidth).toBe(themeFor("light").extent.focus);
+    await fireEvent(screen.getByTestId("account"), "focus");
+    expect(edge("account").borderColor).toBe(themeFor("light").color.focus);
+    await header("dark");
+    expect(edge("account").borderColor).toBe(palette.dark.surfaceCanvas);
+    expect(edge("account").borderColor).not.toBe(palette.dark.surfacePrimary);
   });
 });
 

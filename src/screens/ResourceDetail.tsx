@@ -9,7 +9,6 @@ import { deriveEventActivity, label, rowCommands, screenPath } from "../core/der
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
-import { systemClock } from "./clock";
 import { useActivity } from "./useActivity";
 import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
@@ -20,7 +19,6 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   const activity = useActivity(entry, id);
   const activityModel = deriveEventActivity(activity, {
     ...feedback,
-    now: systemClock.now(),
     weekStartsOn: 1,
   });
   const { run, busy } = useCommandRun(entry, id);

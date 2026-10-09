@@ -9,10 +9,12 @@ import {
   commandOf,
   commandScope,
   commandTitle,
+  deriveCopy,
   detailItems,
   display,
   formControls,
   humanize,
+  hostLabel,
   known,
   label,
   listCells,
@@ -23,6 +25,7 @@ import {
   noOrder,
   numberValue,
   plural,
+  presentedInstant,
   problems,
   queryFilters,
   sortOptions,
@@ -32,6 +35,7 @@ import {
   timeWire,
   screenPath,
   values,
+  type Formatting,
 } from "../src/core/derive";
 
 // An instant reads in the device's zone; the test's device is in UTC.
@@ -74,9 +78,14 @@ test("the list leads with the known field and hides what the schema hides", () =
 test("display is the same answer as rest.Display", () => {
   const f = (name: string) => note.fields.find((x) => x.name === name)!;
   assert.equal(display(f("pinned"), true, feedback), "Yes");
-  assert.equal(display(f("pinned"), undefined, feedback), "No");
+  // A switch with no answer says there is none; only a switch answered "off" says No.
+  assert.equal(display(f("pinned"), undefined, feedback), "Not set");
+  assert.equal(display(f("pinned"), null, feedback), "Not set");
+  assert.equal(display(f("pinned"), false, feedback), "No");
   assert.equal(display(f("status"), "open", feedback), "Open");
-  assert.equal(display(f("createdAt"), row.createdAt, feedback), "Sep 5, 2026, 10:20 AM UTC");
+  // A record the phone has not reached yet is a date, never "ago", and its own
+  // zone needs no label on the clock it prints.
+  assert.equal(display(f("createdAt"), row.createdAt, feedback), "Sep 5, 10:20 AM");
   assert.equal(display(f("tags"), ["a", "b"], feedback), "a, b");
   assert.equal(display(f("rank"), 2, feedback), "2");
   assert.equal(display(f("body"), "", feedback), "—");
@@ -134,10 +143,161 @@ test("a screen path is module/entity", () => {
 test("an instant is parsed, rendered where the phone is, and sent as the API takes it", () => {
   const at = timeValue("2026-01-31T09:00:00Z")!;
   assert.equal(timeWire(at), "2026-01-31T09:00:00.000Z");
-  assert.equal(timeText(at, feedback), "Jan 31, 2026, 09:00 AM UTC");
+  // A form edits the whole instant, so the exact spelling keeps the year and — the
+  // fake's zone is the fake reader's own — says no zone.
+  assert.equal(timeText(at, feedback), "Jan 31, 2026, 09:00 AM");
+  assert.equal(
+    timeText(at, { ...feedback, ownZone: "America/New_York" }),
+    "Jan 31, 2026, 09:00 AM UTC",
+  );
   assert.equal(timeValue(""), undefined);
   assert.equal(timeValue("yesterday"), undefined);
   assert.equal(timeValue(undefined), undefined);
+});
+
+test("an address is read as the host its owner typed, and nothing else", () => {
+  assert.equal(hostLabel("https://acme.example.com"), "acme.example.com");
+  assert.equal(hostLabel("https://acme.example.com/"), "acme.example.com");
+  assert.equal(hostLabel("http://10.0.2.2:8888"), "10.0.2.2:8888");
+  // The scheme's own port is not part of an address, and a host is not spelled in capitals.
+  assert.equal(hostLabel("https://ACME.example.com:443/x?a=1#h"), "acme.example.com");
+  // A credential in an address is never repeated on a screen.
+  assert.equal(hostLabel("http://user:pw@acme.test:8080/p"), "acme.test:8080");
+  assert.equal(hostLabel("http://[::1]:8080/x"), "[::1]:8080");
+  assert.equal(hostLabel("https://acme.test/privacy"), "acme.test");
+  for (const unreadable of ["", "   ", "not a url", "file:///etc/passwd"])
+    assert.equal(hostLabel(unreadable), "", unreadable);
+});
+
+test("many of an entity is its name with an s, unless the word is already many", () => {
+  assert.equal(plural("task"), "tasks");
+  assert.equal(plural("settings"), "settings");
+  assert.equal(plural("plan"), "plans");
+  // A mass noun and a word that already ends in s keep their spelling: "contents",
+  // "staffs" and "medias" are not what an entity named "content" or "staff" is called.
+  for (const mass of [
+    "content",
+    "settings",
+    "news",
+    "media",
+    "data",
+    "staff",
+    "feedback",
+    "information",
+  ])
+    assert.equal(plural(mass), mass, mass);
+  assert.equal(plural("contents"), "contents");
+});
+
+/** One instant, read under one set of formatting: the rule's own words. */
+const read = (at: string, under: Partial<Formatting>) =>
+  presentedInstant(timeValue(at)!, { ...feedback, ...under });
+
+const lisbon = { locale: "en-GB", timeZone: "Europe/Lisbon", ownZone: "Europe/Lisbon" };
+const york = { locale: "en-US", timeZone: "America/New_York", ownZone: "America/New_York" };
+const utc = { locale: "en-US", timeZone: "UTC", ownZone: "UTC" };
+
+// Every row is one line of the rule: what the eye reads, and what a reader says
+// aloud. The instants are fixed, so a row decides the same sentence next year.
+test("a past instant is a distance while a distance is the answer", () => {
+  const cases: readonly [string, string, string, string][] = [
+    // 5 minutes ago, and the minute before that, which is only "just now".
+    ["2026-07-01T11:59:30Z", "2026-07-01T12:00:00Z", "Just now", "1 Jul 2026, 12:59"],
+    ["2026-07-01T12:00:00Z", "2026-07-01T12:05:00Z", "5 minutes ago", "1 Jul 2026, 13:00"],
+    // An hour of recency is told as a duration across midnight; the day word takes
+    // over only once the clock itself has left today.
+    ["2026-06-30T23:30:00Z", "2026-07-01T00:20:00Z", "50 minutes ago", "1 Jul 2026, 00:30"],
+    ["2026-06-30T23:00:00Z", "2026-07-01T01:00:00Z", "2 hours ago", "1 Jul 2026, 00:00"],
+    ["2026-07-05T12:00:00Z", "2026-07-08T12:00:00Z", "3 days ago", "5 Jul 2026, 13:00"],
+    // A week off is a date: nobody counts days that far back.
+    ["2026-07-01T12:00:00Z", "2026-07-08T12:00:00Z", "1 Jul, 13:00", "1 Jul 2026, 13:00"],
+    ["2026-02-01T09:00:00Z", "2026-07-08T12:00:00Z", "1 Feb, 09:00", "1 Feb 2026, 09:00"],
+  ];
+  for (const [at, now, shown, exact] of cases) {
+    const said = read(at, { ...lisbon, now });
+    assert.equal(said.shown, shown, `${at} at ${now}`);
+    assert.equal(said.exact, exact, `${at} at ${now}`);
+  }
+  // Yesterday keeps its clock, because which day it was is half the fact.
+  const yesterday = read("2026-06-30T14:12:00Z", { ...utc, now: "2026-07-01T15:00:00Z" });
+  assert.equal(yesterday.shown, "Yesterday, 02:12 PM");
+  assert.equal(yesterday.exact, "Jun 30, 2026, 02:12 PM");
+  // A record a year old is said with its year, in either direction.
+  assert.equal(
+    read("2025-09-05T09:20:00Z", { ...utc, now: "2026-07-18T09:00:00Z" }).shown,
+    "Sep 5, 2025, 09:20 AM",
+  );
+});
+
+test("a future instant is a date, because it has not happened", () => {
+  // A deadline tomorrow is tomorrow and the hour it is due at.
+  const tomorrow = read("2026-07-02T16:00:00Z", { ...lisbon, now: "2026-07-01T09:00:00Z" });
+  assert.equal(tomorrow.shown, "Tomorrow, 17:00");
+  assert.equal(tomorrow.exact, "2 Jul 2026, 17:00");
+  // Later today is only ever the hour; further off is the day, and the year only
+  // when it is not the year the reader is in.
+  assert.equal(
+    read("2026-07-01T22:00:00Z", { ...lisbon, now: "2026-07-01T09:00:00Z" }).shown,
+    "23:00",
+  );
+  assert.equal(
+    read("2026-10-14T14:00:00Z", { ...utc, now: "2026-07-01T09:00:00Z" }).shown,
+    "Oct 14, 02:00 PM",
+  );
+  assert.equal(
+    read("2027-01-31T15:00:00Z", { ...utc, now: "2026-07-01T09:00:00Z" }).shown,
+    "Jan 31, 2027, 03:00 PM",
+  );
+});
+
+test("a clock is read in the phone's zone and named only when it is not its own", () => {
+  // The acceptance: the same two instants on a Lisbon phone and a New York one.
+  const summer = "2026-07-01T12:00:00Z",
+    winter = "2026-01-15T12:00:00Z",
+    now = "2026-10-09T09:00:00Z";
+  assert.match(read(summer, { ...lisbon, now }).shown, /^1 Jul, 13:00$/);
+  assert.match(read(winter, { ...lisbon, now }).shown, /^15 Jan, 12:00$/);
+  assert.match(read(summer, { ...york, now }).shown, /^Jul 1, 08:00 AM$/);
+  assert.match(read(winter, { ...york, now }).shown, /^Jan 15, 07:00 AM$/);
+  // Hours kept in another zone are a quotation, and say which zone quoted them —
+  // every spelling that prints a clock, and none that prints a duration.
+  const foreign = { locale: "en-GB", timeZone: "Europe/Lisbon", ownZone: "UTC", now };
+  assert.equal(read(summer, foreign).shown, "1 Jul, 13:00 WEST");
+  assert.equal(
+    read("2026-07-01T12:00:00Z", { ...foreign, now: "2026-07-01T12:05:00Z" }).shown,
+    "5 minutes ago",
+  );
+  assert.equal(
+    read("2026-06-30T14:12:00Z", { ...foreign, now: "2026-07-01T15:00:00Z" }).shown,
+    "Yesterday, 15:12 WEST",
+  );
+});
+
+test("a relative instant is said in the copy's own language, and begins as a sentence", () => {
+  // The words are ICU's in the copy's language, capitalised as a sentence: a value
+  // cell is the whole sentence, so "há" would begin it in lower case.
+  const pt = {
+    locale: "pt-PT",
+    timeZone: "Europe/Lisbon",
+    ownZone: "Europe/Lisbon",
+    copy: deriveCopy("pt"),
+  };
+  assert.equal(
+    read("2026-07-01T12:00:00Z", { ...pt, now: "2026-07-01T12:05:00Z" }).shown,
+    "Há 5 minutos",
+  );
+  assert.equal(
+    read("2026-06-30T14:12:00Z", { ...pt, now: "2026-07-01T15:00:00Z" }).shown,
+    "Ontem, 15:12",
+  );
+  assert.equal(
+    read("2026-07-01T14:12:00Z", { ...pt, now: "2026-07-03T15:00:00Z" }).shown,
+    "Anteontem",
+  );
+  assert.equal(
+    read("2026-07-01T12:00:00Z", { ...pt, now: "2026-07-01T12:00:20Z" }).shown,
+    "Agora mesmo",
+  );
 });
 
 test("a typed number may carry a decimal comma and a sign; anything else is not a number", () => {

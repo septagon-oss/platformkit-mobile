@@ -283,9 +283,12 @@ describe("Activity", () => {
 
   test("the trail says what happened, who did it and how long ago", async () => {
     await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={adapt(trail)} />);
-    expect(screen.getByLabelText("Updated by Joao, 2 minutes ago")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Updated by Joao, Sep 7, 2026, 11:58 AM")).toBeOnTheScreen();
+    // A glance reads the distance; a reader is told which instant it is the distance to.
+    expect(screen.getByText("2 minutes ago")).toBeOnTheScreen();
     // An event nobody signed is the system's, not a blank line.
-    expect(screen.getByLabelText("Created by the system, yesterday")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Created by the system, Sep 6, 2026, 09:00 AM")).toBeOnTheScreen();
+    expect(screen.getByText("Yesterday, 09:00 AM")).toBeOnTheScreen();
   });
 
   test("a trail with older lines offers to read them, once", async () => {
@@ -344,7 +347,7 @@ describe("Activity", () => {
 });
 
 describe("Home", () => {
-  test("one row per resource, read-only ones say so", async () => {
+  test("the resources are one group of rows, and a read-only one says so", async () => {
     const onOpen = jest.fn();
     const entries = [note, { ...note, entity: "tag", writable: false }];
     await inTheme(
@@ -352,12 +355,33 @@ describe("Home", () => {
         feedback={feedback}
         entries={entries}
         refreshing={false}
+        account="joao@acme.test"
         onOpen={onOpen}
         onRefresh={none}
       />,
     );
-    await fireEvent.press(screen.getByRole("button", { name: /Tags, In note, read only/ }));
+    // One list, one group: the resources are rows of one card, not a card apiece, and
+    // a row says what it is rather than which module it came in on.
+    expect(screen.getAllByTestId("home")).toHaveLength(1);
+    expect(screen.getByText("joao@acme.test")).toBeOnTheScreen();
+    expect(screen.getByTestId("open-note-note")).toBeOnTheScreen();
+    expect(screen.queryByText(/In note/)).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: /Tags, Read only/ }));
     expect(onOpen).toHaveBeenCalledWith(entries[1]);
+  });
+
+  test("a signed-in screen with no account to name shows the rows alone", async () => {
+    const entries = [note];
+    await inTheme(
+      <Home
+        feedback={feedback}
+        entries={entries}
+        refreshing={false}
+        onOpen={() => undefined}
+        onRefresh={none}
+      />,
+    );
+    expect(screen.getByTestId("open-note-note")).toBeOnTheScreen();
   });
 });
 
@@ -379,6 +403,27 @@ describe("SignInForm", () => {
     await fireEvent.changeText(screen.getByTestId("password"), " pw ");
     await fireEvent.press(screen.getByRole("button", { name: "Sign in" }));
     expect(onSubmit).toHaveBeenCalledWith("https://acme.test", "a@acme.test", " pw ");
+  });
+
+  test("the form asks for the workspace address in the person's words, not in tenancy jargon", async () => {
+    await inTheme(
+      <SignInForm
+        feedback={feedback}
+        baseURL="https://acme.test"
+        notice=""
+        busy={false}
+        error=""
+        onSubmit={none}
+        onClear={none}
+      />,
+    );
+    expect(
+      screen.getByText("Enter your workspace address and the email you use there."),
+    ).toBeOnTheScreen();
+    expect(screen.getByText("Workspace address")).toBeOnTheScreen();
+    // The input itself says what it holds, and keeps the id the sign-in flow types into.
+    expect(screen.getByTestId("server").props.accessibilityLabel).toBe("Workspace address");
+    expect(screen.queryByText(/tenant/i)).toBeNull();
   });
 
   test('the product\'s name stands over the form, and "Sign in" when it has none to say', async () => {

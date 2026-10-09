@@ -13,6 +13,14 @@ export const kitEnglish = {
   // screens still draw the record, so this is the app saying it is behind, not a
   // refusal — quiet, one line, and the only thing said about it.
   shellUpdate: "Update the app for this record's full screen.",
+  // What the first screen says about the session: the address the person signed in
+  // at is the workspace's name until a name exists, the account under it is the
+  // person's own words, and a row that opens nothing is said to be read alone.
+  workspace: "Workspace",
+  readOnly: "Read only",
+  justNow: "Just now",
+  signInIntro: "Enter your workspace address and the email you use there.",
+  workspaceAddress: "Workspace address",
   allLoaded: "Select loaded items",
   of: "of",
   selection: "Selection",
@@ -188,6 +196,11 @@ export const kitPortuguese: KitWords = {
   selected: "Selecionado",
   unavailable: "Já não está disponível. Escolha novamente ou atualize.",
   shellUpdate: "Atualize a aplicação para o ecrã completo deste registo.",
+  workspace: "Espaço de trabalho",
+  readOnly: "Apenas leitura",
+  justNow: "Agora mesmo",
+  signInIntro: "Indique o endereço do espaço de trabalho e o email que usa nele.",
+  workspaceAddress: "Endereço do espaço de trabalho",
   allLoaded: "Selecionar itens carregados",
   of: "de",
   selection: "Seleção",

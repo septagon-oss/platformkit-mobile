@@ -10,14 +10,28 @@ export interface Clock {
 export interface Presentation {
   readonly locale: string;
   readonly timeZone: string;
+  /**
+   * ownZone is the zone the person's own clock runs on, resolved once at the
+   * boundary. It equals timeZone wherever the app reads times as the phone reads
+   * them, and differs in a screen that shows a value kept in another zone. A
+   * formatter decides whether to name a zone by comparing the two: a clock in the
+   * reader's own zone needs no label, the way a phone never prints "local". It is
+   * supplied rather than read from `resolvedOptions()` inside a formatter so that
+   * every zone test decides the same sentence on any machine.
+   */
+  readonly ownZone: string;
   readonly weekStartsOn: 1 | 7;
   readonly now: Instant;
   readonly motion: Motion;
   readonly copy: Copy;
 }
 
-/** The small part needed by existing loading/retry compatibility surfaces. */
-export type Formatting = Pick<Presentation, "copy" | "locale" | "timeZone">;
+/**
+ * The small part needed by existing loading/retry compatibility surfaces, and by
+ * every value the person reads: `now` is what makes "5 minutes ago" computable,
+ * and a formatter cannot say whether to name a zone without both spellings of it.
+ */
+export type Formatting = Pick<Presentation, "copy" | "locale" | "timeZone" | "ownZone" | "now">;
 
 export interface Feedback extends Formatting {
   readonly loadingLabel: string;
@@ -28,7 +42,7 @@ export interface Feedback extends Formatting {
 export function deriveFeedback(
   copy: Copy,
   motion: Motion,
-  format: Pick<Formatting, "locale" | "timeZone">,
+  format: Pick<Formatting, "locale" | "timeZone" | "ownZone" | "now">,
 ): Feedback {
   return {
     ...format,
@@ -167,8 +181,20 @@ export function presentedRange(
   return `${when} · ${hours}`;
 }
 
+/**
+ * zoneNamed says whether a spelling that prints a clock has to say which zone it
+ * printed it in. A clock in the reader's own zone is the clock they live by, and a
+ * label on it is a second fact rather than a useful one; a clock kept somewhere
+ * else is a quotation and says so.
+ */
+const zoneNamed = (p: Pick<Presentation, "timeZone" | "ownZone">): boolean =>
+  p.timeZone !== p.ownZone;
+
 /** A formatter belongs to this explicit invocation, never to a mutable device default. */
-export function presentedTime(at: Date, p: Pick<Presentation, "locale" | "timeZone">): string {
+export function presentedTime(
+  at: Date,
+  p: Pick<Presentation, "locale" | "timeZone" | "ownZone">,
+): string {
   return new Intl.DateTimeFormat(p.locale, {
     timeZone: p.timeZone,
     year: "numeric",
@@ -176,6 +202,106 @@ export function presentedTime(at: Date, p: Pick<Presentation, "locale" | "timeZo
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZoneName: "short",
+    ...(zoneNamed(p) ? { timeZoneName: "short" as const } : {}),
   }).format(at);
+}
+
+/** The calendar parts of an instant in a zone. The parts are read, never the
+ * formatted string: no locale's order for a date is one worth parsing back. */
+function civilParts(
+  at: Date,
+  zone: string,
+): {
+  readonly year: number;
+  readonly month: number;
+  readonly day: number;
+} {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: zone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(at);
+  const part = (type: Intl.DateTimeFormatPartTypes): number =>
+    Number(parts.find((candidate) => candidate.type === type)?.value ?? "0");
+  return { year: part("year"), month: part("month"), day: part("day") };
+}
+
+/**
+ * civilDay is the whole day an instant falls on in a zone, as days since
+ * 1970-01-01 — the number two instants are compared on when a sentence needs
+ * "yesterday" rather than a date.
+ */
+export function civilDay(at: Date, zone: string): number {
+  const { year, month, day } = civilParts(at, zone);
+  return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
+}
+
+const MINUTE = 60_000,
+  HOUR = 3_600_000,
+  DAY = 86_400_000;
+
+/** A value cell is the whole sentence it prints, so a day-word from ICU begins as a sentence does. */
+const sentence = (words: string): string =>
+  words === "" ? words : words.charAt(0).toUpperCase() + words.slice(1);
+
+/**
+ * presentedInstant is one instant said two ways: `shown` is what the eye reads,
+ * `exact` the whole local date-time a screen reader says. Two facts about one
+ * instant may not disagree, so both come from this call.
+ *
+ * A value is read as a distance while the distance is still the answer — "5 minutes
+ * ago" for a minute, "Yesterday, 15:12" once the clock has moved into yesterday,
+ * a plain date from a week off, when nobody counts days. An instant that has not
+ * happened is never called ago: the kit cannot know which field a deadline is, but
+ * it knows which way an instant points, so a future one reads as the day it falls
+ * on — "Tomorrow, 17:00" at the nearest. A spelling that prints no clock never
+ * names a zone, because a duration is the same instant for every reader.
+ */
+export function presentedInstant(
+  at: Date,
+  p: Formatting,
+): { readonly shown: string; readonly exact: string } {
+  const exact = presentedTime(at, p);
+  const now = instantValue(p.now);
+  if (!now) return { shown: exact, exact };
+  const face = (options: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(p.locale, {
+      timeZone: p.timeZone,
+      ...options,
+      ...(zoneNamed(p) ? { timeZoneName: "short" as const } : {}),
+    });
+  const clock = () => face({ hour: "2-digit", minute: "2-digit" }).format(at);
+  const relative = new Intl.RelativeTimeFormat(p.copy.language, { numeric: "auto" });
+  const elapsed = now.getTime() - at.getTime();
+  const today = civilDay(now, p.timeZone);
+  const days = today - civilDay(at, p.timeZone);
+  // The year is a fact about which year the reader is in, not about the calendar:
+  // it is said only when the instant's civil year is not the reader's own.
+  const dated = () =>
+    face({
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      ...(civilParts(now, p.timeZone).year === civilParts(at, p.timeZone).year
+        ? {}
+        : { year: "numeric" }),
+    }).format(at);
+  if (elapsed < 0) {
+    if (days === 0) return { shown: sentence(clock()), exact };
+    if (days === -1) return { shown: sentence(`${relative.format(1, "day")}, ${clock()}`), exact };
+    return { shown: sentence(dated()), exact };
+  }
+  if (elapsed < MINUTE) return { shown: sentence(p.copy.kit.justNow), exact };
+  if (elapsed < HOUR)
+    return { shown: sentence(relative.format(-Math.floor(elapsed / MINUTE), "minute")), exact };
+  // Recency under a day is told as a duration whatever the calendar says; the day
+  // word takes over only once the clock itself has moved off today.
+  if (days === 0)
+    return { shown: sentence(relative.format(-Math.floor(elapsed / HOUR), "hour")), exact };
+  if (days === 1) return { shown: sentence(`${relative.format(-1, "day")}, ${clock()}`), exact };
+  if (elapsed < 7 * DAY)
+    return { shown: sentence(relative.format(-Math.floor(elapsed / DAY), "day")), exact };
+  return { shown: sentence(dated()), exact };
 }

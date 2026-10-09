@@ -94,7 +94,7 @@ export function SignInForm({
     );
   return (
     <Screen form testID="sign-in">
-      {head("Use the address this tenant knows you by.")}
+      {head(feedback.copy.kit.signInIntro)}
       {error ? (
         <Notice
           announcement="urgent"
@@ -113,7 +113,12 @@ export function SignInForm({
         />
       ) : null}
       <Section>
-        <ServerField value={url} onChange={setURL} disabled={busy} />
+        <ServerField
+          caption={feedback.copy.kit.workspaceAddress}
+          value={url}
+          onChange={setURL}
+          disabled={busy}
+        />
         <FormField label="Email">
           <TextField
             kind="email"

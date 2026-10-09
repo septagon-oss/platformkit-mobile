@@ -1,5 +1,7 @@
 // Row is how a list shows one thing: its name, up to a few cells beneath, a
-// chevron that says it opens. It is a phone's table.
+// chevron that says it opens. It is a phone's table. A row draws no separator of
+// its own: the group it sits in separates its rows, so a row outside a group is
+// one thing on a page and not a fragment of a table.
 import React, { useState, type ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "../atoms/Icon";
@@ -114,8 +116,6 @@ const styles = (t: Theme) =>
       alignItems: "center",
       gap: t.space.sm,
       paddingVertical: t.space.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: t.state.divider,
     },
     text: { flex: 1, gap: t.space.xs / 2 },
     cells: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: t.space.sm },
