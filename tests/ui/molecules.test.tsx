@@ -36,12 +36,37 @@ describe("Row", () => {
     const open = jest.fn();
     await inTheme(
       <Section title="Notes">
-        <Row title="Buy milk" cells={["Status: Open", "Rank: 2"]} onPress={open} />
+        <Row
+          title="Buy milk"
+          cells={[
+            { label: "Status", value: "Open" },
+            { label: "Rank", value: "2" },
+          ]}
+          onPress={open}
+        />
       </Section>,
     );
     await fireEvent.press(screen.getByRole("button", { name: "Buy milk, Status: Open, Rank: 2" }));
     expect(open).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("header", { name: "Notes" })).toBeOnTheScreen();
+  });
+
+  test("a row's time cell is announced as the instant it stands for", async () => {
+    // The pair a detail row already carries: the eye reads the distance, the reader
+    // says the whole date-time, so a row never claims a record is newer than its
+    // own accessibility label proves it is not.
+    const said = presentedInstant(timeValue("2026-07-18T08:55:00Z")!, feedback);
+    expect(said.shown).toBe("5 minutes ago");
+    await inTheme(
+      <Row
+        title="Buy milk"
+        cells={[{ label: "Created", value: said.shown, spoken: said.exact }]}
+      />,
+    );
+    expect(screen.getByText("Created: 5 minutes ago")).toBeOnTheScreen();
+    expect(screen.getByRole("button").props.accessibilityLabel).toBe(
+      `Buy milk, Created: ${said.exact}`,
+    );
   });
 
   /** every style drawn under here, so a test can count the lines a group draws. */

@@ -214,6 +214,23 @@ export function listPreview(e: Entry): Field | undefined {
   );
 }
 
+/**
+ * saidValue is a field's value as the eye reads it and as a reader says it aloud.
+ * The two are the same words except for an instant: a cell shows the distance
+ * ("5 minutes ago") and a screen reader says the whole local date-time. No
+ * `spoken` means the shown words are the whole fact, which is true of every other
+ * field type.
+ */
+export function saidValue(
+  f: Field,
+  v: unknown,
+  format: Formatting,
+): { readonly value: string; readonly spoken?: string } {
+  const at = f.type === "time" ? timeValue(v) : undefined;
+  const instant = at ? presentedInstant(at, format) : undefined;
+  return { value: display(f, v, format), ...(instant ? { spoken: instant.exact } : {}) };
+}
+
 export interface DetailItem {
   /** field is the schema entry this fact is about, as `Control.field` is. */
   readonly field: Field;
@@ -228,16 +245,11 @@ export interface DetailItem {
 }
 
 export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  return e.fields.map((f) => {
-    const at = f.type === "time" ? timeValue(row[f.name]) : undefined;
-    const instant = at ? presentedInstant(at, format) : undefined;
-    return {
-      field: f,
-      label: humanize(f.name),
-      value: display(f, row[f.name], format),
-      ...(instant ? { spoken: instant.exact } : {}),
-    };
-  });
+  return e.fields.map((f) => ({
+    field: f,
+    label: humanize(f.name),
+    ...saidValue(f, row[f.name], format),
+  }));
 }
 
 export type ControlKind =

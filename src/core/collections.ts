@@ -93,16 +93,24 @@ export interface DataRow {
   readonly id: string;
   readonly title: string;
   readonly summary?: string;
-  readonly cells: readonly {
-    readonly id: string;
-    readonly label: string;
-    readonly value: string;
-  }[];
+  readonly cells: readonly DataCell[];
   readonly status?: Status;
   readonly selectable: boolean;
   readonly selectionReason?: string;
   readonly open?: Action;
   readonly actions: readonly Action[];
+}
+/**
+ * DataCell is one value under a row's name: what the column is called, what is
+ * shown for it, and — for the one value the eye reads in shorthand — the whole
+ * fact a screen reader says. A time shows "5 minutes ago" and is spoken as
+ * "1 Jul 2026, 13:00", the same pair `DetailItem` carries under a detail row.
+ */
+export interface DataCell {
+  readonly id: string;
+  readonly label: string;
+  readonly value: string;
+  readonly spoken?: string;
 }
 export interface DataSection {
   readonly id: string;
@@ -205,14 +213,17 @@ export function deriveDataList(input: DataListInput, p: Presentation) {
           const path = `sections.${i}.rows.${j}`;
           v.text(r.title, `${path}.title`);
           v.ids(r.cells, `${path}.cells`);
-          r.cells.forEach((c) => v.text(c.label, `${path}.cells.label`));
+          r.cells.forEach((c) => {
+            v.text(c.label, `${path}.cells.label`);
+            // A shorthand is only worth saying if the whole fact came with it.
+            if (c.spoken !== undefined) v.text(c.spoken, `${path}.cells.spoken`);
+          });
           status(r.status, v, `${path}.status`);
           const target = eligible.filter((id) =>
             id === r.id ? !selectedIds.includes(id) : selectedIds.includes(id),
           );
           return {
             ...r,
-            cellLabels: r.cells.map((cell) => `${cell.label}: ${cell.value}`),
             open: r.open ? action(r.open, v, `${path}.open`) : undefined,
             actions: actions(
               r.actions,

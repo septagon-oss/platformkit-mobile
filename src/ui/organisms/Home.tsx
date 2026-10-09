@@ -35,7 +35,7 @@ export function Home({ feedback, entries, refreshing, account, onOpen, onRefresh
       render={(e) => (
         <Row
           title={humanize(plural(e.entity))}
-          cells={e.writable ? [] : [feedback.copy.kit.readOnly]}
+          cells={e.writable ? [] : [{ value: feedback.copy.kit.readOnly }]}
           onPress={() => onOpen(e)}
           testID={`open-${e.module}-${e.entity}`}
         />

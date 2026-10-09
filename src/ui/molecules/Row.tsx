@@ -15,7 +15,7 @@ interface Props {
   /** eyebrow is the category the row sits in, above its name. */
   readonly eyebrow?: string;
   /** cells are what a screen reader hears, and what is shown when nothing else is given. */
-  readonly cells?: readonly string[];
+  readonly cells?: readonly RowCell[];
   /** summary is a line of the record's own words, under its name. */
   readonly summary?: string;
   /** shown replaces those cells with the values in the shapes their types deserve. */
@@ -33,6 +33,24 @@ interface Props {
   readonly opens?: boolean;
   readonly testID?: string;
 }
+
+/**
+ * RowCell is one value under a row's name. The eye reads `value` and a reader
+ * hears `spoken` when there is one: a time is shown as a distance and said as the
+ * whole local date-time, so a row that reads "Created: 5 minutes ago" says
+ * "Created: 1 Jul 2026, 13:00". A cell with no label is the value alone.
+ */
+export interface RowCell {
+  readonly label?: string;
+  readonly value: string;
+  readonly spoken?: string;
+}
+
+/** said is one cell as words — the shorthand the eye reads, or the fact a reader hears. */
+const said = (cell: RowCell, aloud: boolean): string =>
+  [cell.label, aloud ? (cell.spoken ?? cell.value) : cell.value]
+    .filter((part): part is string => !!part)
+    .join(": ");
 
 export function Row({
   title,
@@ -68,7 +86,9 @@ export function Row({
       aria-busy={busy}
       aria-disabled={!onPress || busy}
       {...chosenState("button", selected)}
-      accessibilityLabel={[eyebrow, title, ...cells].filter(Boolean).join(", ")}
+      accessibilityLabel={[eyebrow, title, ...cells.map((cell) => said(cell, true))]
+        .filter(Boolean)
+        .join(", ")}
       android_ripple={{ color: t.color.borderDefault }}
       {...testable(testID)}
     >
@@ -97,7 +117,7 @@ export function Row({
           <View style={s.cells}>{shown}</View>
         ) : cells.length > 0 ? (
           <Text role="caption" tone="muted" numberOfLines={2}>
-            {cells.join("  ·  ")}
+            {cells.map((cell) => said(cell, false)).join("  ·  ")}
           </Text>
         ) : null}
       </View>

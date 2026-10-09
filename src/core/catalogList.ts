@@ -1,6 +1,5 @@
 import type { Entry } from "./catalog";
 import {
-  display,
   filterFields,
   humanize,
   label,
@@ -9,6 +8,7 @@ import {
   narrowed,
   plural,
   readPhase,
+  saidValue,
   sortOptions,
   text,
   type Order,
@@ -73,7 +73,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
           cells: fields.map((field) => ({
             id: field.name,
             label: humanize(field.name),
-            value: display(field, row[field.name], p),
+            ...saidValue(field, row[field.name], p),
           })),
           selectable: false,
           actions: [],
