@@ -123,7 +123,7 @@ read, how an entry asks for it, and which screens the schema already does well.
 The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
 with its public commit and SHA-256 in
 [testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
-55 paths and 71 operations. `npm run api` generates the TypeScript types, Zod
+95 paths and 112 operations. `npm run api` generates the TypeScript types, Zod
 validators, SDK and documented route table in `src/generated/`; `npm run
 check:api` regenerates into a temporary directory and refuses changed, missing
 or extra files. It runs offline as part of `npm run check`. Refresh the public
@@ -187,6 +187,36 @@ status 0. Neither transport nor cancellation proves that a write was rolled back
 does not retry requests automatically. Recover uncertain writes through the
 module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
+
+### What the catalogue says about how it reads
+
+An entry, a field and a command may each carry a `presentation` object: the
+resource's own words for how it should read ("Tarefa", "Em aberto", which field
+titles a row, which value is good, which command is the system's). The phone
+parses them into `hints` on the entry, field and command — never raw wire bytes,
+so `presentation` reaches no component — and every one of them is read in
+`src/core/derive.ts`, where the resource's words are read today. For a resource
+that declares nothing the default *is* the previous rule, so honouring the whole
+contract changes no screen until a server declares a hint.
+
+A hint is never the reason a workspace is refused. The generated schema prints
+`additionalProperties: false`, so one mistyped noun would cost every screen in
+the app; the hint therefore enters the phone's own parser as `unknown`, and
+`hintEntry`/`hintField`/`hintCommand` decide its shape, member by member. A
+member of the wrong kind, a name outside a vocabulary this build can draw, or a
+pointer at a field the entry does not have falls back to the documented default,
+the rest of the same hint survives, and the defect names itself once through the
+`HintNotice` the caller supplies — `Api.catalog(notice?)` passes one that logs
+each distinct (path, reason) per connection. `parseCatalog` without a notice says
+nothing, which is what keeps the nightly's use of it unchanged. The two
+exceptions to per-member reading: an entry's `sections` is taken whole or not at
+all, because a block with no key or label is no block; and a field both `hidden`
+and `required` stays in the form, because the person's only path to a submittable
+create is never taken away for an author's slip.
+
+A declared word is the author's and is used as written — never humanised,
+re-cased or re-pluralised — so `copy.ts` holds one new string, `kit.untitled`, for
+the record whose schema names nothing to read from.
 
 ## Design
 
