@@ -113,7 +113,7 @@ export function useSingleton(entry: Entry) {
       const said = refusalOf(e, "update", failureSubject(entry), copy);
       if (said.verdict.outcome === "silent") return;
       setErrors(refusalFields(said.verdict));
-      setDetail(said.text || copy.kit.validation);
+      setDetail(said.text);
     }
   }, [api, entry, controls, held, wrote, copy]);
 

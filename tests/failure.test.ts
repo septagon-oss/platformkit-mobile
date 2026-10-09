@@ -20,7 +20,7 @@ import {
   type FailureKind,
   type FailureSubject,
 } from "../src/core/failure";
-import { deriveFeedback, type IssueCode } from "../src/core/derive";
+import { type IssueCode } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
 
 const subject: FailureSubject = {
@@ -590,7 +590,7 @@ const banned = /HTTP \d{3}|Invalid response at|ECONN|Network request failed|crud
 
 for (const kind of Object.keys(producers) as FailureKind[]) {
   for (const context of contexts) {
-    const expect = table[kind][context];
+    const expect = table[kind][context]!;
     for (const shape of producers[kind]) {
       test(`a ${kind} during a ${context} is drawn from ${shape}`, () => {
         const facts = shapes[shape]!;
@@ -612,7 +612,7 @@ for (const kind of Object.keys(producers) as FailureKind[]) {
           assert.deepEqual(verdict.fields, shapes[shape]!.fields);
           return;
         }
-        assert.ok(verdict.text.length > 0, "a notice always says something");
+        assert.ok(("text" in verdict ? verdict.text : "").length > 0, "a notice says something");
         if (verdict.outcome !== "notice") return;
         assert.equal(verdict.code, expect.code);
         assert.equal(verdict.action, expect.action);
@@ -649,7 +649,7 @@ test("every sentence the table can name is held in both languages and quotes no 
 });
 
 test("deriveState draws every pair the table can emit", () => {
-  const p = deriveFeedback(deriveCopy("en"), "reduced", presentation);
+  const p = presentation;
   for (const kind of Object.keys(producers) as FailureKind[]) {
     for (const context of contexts) {
       const verdict = classifyFailure(
@@ -704,7 +704,7 @@ test("deriveState draws every pair the table can emit", () => {
 });
 
 test("an immutable refusal and an unanswered write refuse the actions they must", () => {
-  const p = deriveFeedback(deriveCopy("en"), "reduced", presentation);
+  const p = presentation;
   const refused: readonly [IssueCode, "retry-read"][] = [
     ["write-unknown", "retry-read"],
     ["forbidden", "retry-read"],

@@ -78,7 +78,7 @@ describe("ResourceRoute", () => {
     await screen.unmount();
     shell.value = shellValue(fakeApi(), { state: { phase: "failed", generation: 1 } });
     await render(<ResourceRoute kind="list" />);
-    expect(screen.getByRole("alert")).toHaveTextContent(/The catalog could not be read\./);
+    expect(screen.getByRole("alert")).toHaveTextContent(/We couldn't open this workspace\./);
   });
 
   test("a path without a resource goes home; one the catalog lacks says so", async () => {

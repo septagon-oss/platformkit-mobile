@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AccessibilityInfo } from "react-native";
 import {
   deriveFeedback,
+  screenCopy,
   type Clock,
   type Copy,
   type Feedback,
@@ -10,7 +11,6 @@ import {
   type Motion,
 } from "../core/derive";
 import { systemClock } from "./clock";
-import { screenCopy } from "./failure";
 
 export function useFeedback(
   // The words follow the phone: a Portuguese device reads Portuguese sentences,

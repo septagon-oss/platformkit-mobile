@@ -38,8 +38,7 @@ const measure = () => {
       mark,
       count,
       cell: box(element),
-      markToCount:
-        count && mark ? Math.abs(centreX(count) - centreX(mark)) : undefined,
+      markToCount: count && mark ? Math.abs(centreX(count) - centreX(mark)) : undefined,
     });
   }
   return cells;

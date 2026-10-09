@@ -23,7 +23,10 @@ test("selection controls visibly distinguish unchecked and checked states", asyn
     const chooser = page.getByTestId("gallery-case").locator("select");
     await chooser.waitFor({ state: "visible" });
     const captures = [];
-    for (const [state, checked] of [["off", "false"], ["on", "true"]]) {
+    for (const [state, checked] of [
+      ["off", "false"],
+      ["on", "true"],
+    ]) {
       await chooser.selectOption(`selection-control/${state}`);
       const checkbox = page.getByRole("checkbox");
       await checkbox.waitFor({ state: "visible" });

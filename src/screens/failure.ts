@@ -2,7 +2,10 @@
 // a request rejected with into the four facts a `catch` arm can honestly state,
 // and asks the pure rule. Every hook calls this rather than reading `e.message`,
 // because a second chain of instanceof tests is a second classification.
-import { copyLanguage, deriveCopy, type Copy } from "../core/copy";
+import { screenCopy, type Copy } from "../core/copy";
+
+// Re-exported so a hook takes its words and its classifier from one module.
+export { screenCopy } from "../core/copy";
 import {
   classifyFailure,
   noFields,
@@ -91,15 +94,6 @@ export function notice(verdict: FailureVerdict): string {
  * control. Any other refusal names none. */
 export function refusalFields(verdict: FailureVerdict): Readonly<Record<string, string>> {
   return verdict.outcome === "fields" ? verdict.fields : noFields;
-}
-
-/**
- * The phone's own copy bundle: the words follow the language the device reports,
- * with English behind every other tag. The screens read it through `useFeedback`;
- * the shell needs it for the one refusal it holds — the catalogue it could not open.
- */
-export function screenCopy(locale = Intl.DateTimeFormat().resolvedOptions().locale): Copy {
-  return deriveCopy(copyLanguage(locale));
 }
 
 /** The catalogue load has no resource to name, so its refusal names the workspace. */

@@ -270,6 +270,18 @@ export function deriveCopy(language: Language): Copy {
 }
 
 /**
+ * The phone's own bundle: the words follow the language the device reports, with
+ * English behind every other tag. The device is asked at this boundary and the
+ * answer is passed in by any caller that already has one, so a test decides the
+ * language rather than the machine.
+ */
+export function screenCopy(
+  locale: string | undefined = Intl.DateTimeFormat().resolvedOptions().locale,
+): Copy {
+  return deriveCopy(copyLanguage(locale));
+}
+
+/**
  * The phone's own language, from the locale the device reports: the primary
  * subtag decides, so "pt-BR", "pt_PT" and "PT" are Portuguese and anything else
  * reads in English. A locale tag is not a language, so it cannot be handed to

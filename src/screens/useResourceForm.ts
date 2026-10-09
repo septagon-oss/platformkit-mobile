@@ -162,7 +162,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       // A 422 that named fields colours those fields and adds no sentence; an
       // unanswered save says what is honest — that nothing is known.
       setErrors(refusalFields(said.verdict));
-      setDetail(said.text || copy.kit.validation);
+      setDetail(said.text);
       setPhase("editing");
     }
   }, [phase, controls, held, id, api, entry, wrote, copy, create]);

@@ -55,7 +55,7 @@ describe("useResourceForm", () => {
     });
     expect(api.create).not.toHaveBeenCalled();
     expect(Object.keys(result.current.errors)).toEqual(["rank"]);
-    expect(result.current.detail).toBe("Some fields need attention.");
+    expect(result.current.detail).toBe("Review the highlighted fields.");
     expect(result.current.phase).toBe("editing");
     await act(async () => result.current.change("rank", "3"));
     expect(result.current.errors).toEqual({});
@@ -99,7 +99,8 @@ describe("useResourceForm", () => {
     });
     expect(result.current.phase).toBe("editing");
     expect(result.current.errors).toEqual({ title: "is required" });
-    expect(result.current.detail).toBe("a note needs a title");
+    // A 422 that named its field colours that field and adds no sentence above it.
+    expect(result.current.detail).toBe("");
     expect(router.back).not.toHaveBeenCalled();
     await act(async () => result.current.change("title", "Buy oat milk"));
     await act(async () => {
