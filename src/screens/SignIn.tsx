@@ -18,7 +18,7 @@ interface Props {
 
 export function SignIn({ title }: Props = {}) {
   const feedback = useFeedback();
-  const { state, baseURL, signIn, signOut, refresh } = useShell();
+  const { state, baseURL, signIn, signOut, refresh, returning } = useShell();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const submit = async (url: string, email: string, password: string) => {
@@ -46,6 +46,8 @@ export function SignIn({ title }: Props = {}) {
         notice={failed ? "" : (state.error ?? "")}
         booting={state.phase === "booting" || state.phase === "loading"}
         failed={failed ? (state.error ?? feedback.copy.failure.loadCatalog) : ""}
+        expired={state.reason === "expired" ? feedback.copy.failure.signedOut : ""}
+        {...(returning ? { initialEmail: returning.email } : {})}
         onRetry={() => void refresh()}
         busy={busy}
         error={error}

@@ -33,7 +33,13 @@ export const setParams = (next: Record<string, string | undefined>): void => {
   params = next;
 };
 
+/** navigations is every href a Redirect was given, oldest first. "Did the app take the
+ * person back to where they were" is only answerable if the fake remembers being asked;
+ * Redirect still draws what it was given, so what a test reads is what it read before. */
+export const navigations: string[] = [];
+
 export function reset(): void {
+  navigations.length = 0;
   for (const fn of [router.push, router.replace, router.back, navigation.dispatch]) fn.mockClear();
   router.canGoBack.mockReset();
   router.canGoBack.mockReturnValue(true);
@@ -79,8 +85,10 @@ const Screen = ({ options }: { readonly options?: ScreenOptions }): React.ReactE
 
 export const expoRouter = {
   Stack: Object.assign(Nothing, { Screen }),
-  Redirect: ({ href }: { readonly href: string }) =>
-    React.createElement(Text, { testID: "redirect" }, href),
+  Redirect: ({ href }: { readonly href: string }) => {
+    navigations.push(href);
+    return React.createElement(Text, { testID: "redirect" }, href);
+  },
   useRouter: () => router,
   useNavigation: () => navigation,
   useLocalSearchParams: () => params,

@@ -42,7 +42,10 @@ the screens in the theme that follows the device's appearance, and configures
 the native stack whose headers every screen uses.
 `src/shell.tsx` owns session restoration, sign-in, sign-out, catalog loading
 and a count of what this app wrote to each resource, so a list or a detail
-knows when what it shows is stale.
+knows when what it shows is stale. It also owns the expired-session boundary: the
+transport reports that a server answered 401, and the shell alone decides that
+this session is over, what the person was doing when it ended, and who that
+belongs to (`src/core/reentry.ts` holds the rule; no screen is asked to notice).
 The resource route files delegate to `src/route.tsx`, which finds the catalog
 entry and chooses a custom or generated screen.
 
@@ -1148,3 +1151,51 @@ same table the classifier is written against and is run through the real
 or as a caution;
 `screenCopy`, the one place the phone's language becomes words; and
 `FailureSubject`, so a screen that has a noun to name has one way to hand it over.
+
+## Asked to sign in again
+
+A server that refuses a session this app was in the middle of using asks once.
+The transport reports the refusal at the one line where a status becomes a
+throw, `src/shell.tsx` alone decides whether it ends a session, and the person
+lands on sign-in with the sentence that says "again", their email prefilled,
+and — held for them — the address they were standing at and what they had typed
+into an open sheet. An attempt the server refuses leaves them exactly there with
+the same address and the same draft: a mistyped password is part of coming back
+in, not the end of it. Whoever completes the sign-in is compared with who the
+refused session belonged to before the new catalogue is drawn, so a different
+person starts at Home with none of it, and signing out leaves it behind at that
+moment rather than waiting for whoever signs in next.
+
+**Reused** — `src/core/state.ts`'s phases, generation drop and reducer, the
+generation discipline in `src/shell.tsx`, `ShellValue` and `useShell`,
+`createApi`'s single line where a status becomes a throw, `copy.failure.signedOut`
+through `sentence()` (the sentence already existed in `en` and `pt`; none was
+added), `src/effects/session.ts`'s versioned `clear(baseURL)`, `src/core/derive.ts`'s
+`screenPath`, `useFocusEffect` as the screens already use it, `Notice` (its
+`action` is already optional), and `tests/fakes/router.ts`'s `Redirect`.
+**Added** — one `expired` event and one `reason: "expired"` field, because a
+session the server refused is not the ordinary sign-in screen and every existing
+phase already meant something; the `refused` notice on `createApi`, because a
+per-hook 401 branch is a rule repeated in every hook and the brief forbids it;
+and `src/core/reentry.ts`, because nothing in the tree compared who a session
+belonged to with who is signing in now, or spelt a screen's address beyond
+`screenPath`. **Made reusable** — `saw`/`typed`/`keep` on `ShellValue`, so a
+screen reports where it is and a sheet's typed values have one holder that any
+other sheet can be filed the same way (the next one is a command's arguments,
+named under **Limits** below);
+`navigations` in the router fake, which makes "did the app take the person
+where they meant" an assertion instead of an inference; and the
+`tests/shell-expired-session-*.test.tsx` files as the shape of a session test:
+the real `<Shell>` over a recorded fetch, with the routes that walk the return
+leg mounted inside it.
+
+**Limits** — only a record form files what a person types into it: a command's
+arguments are not carried through the sign-in, so returning to a command sheet
+starts with empty fields. What is held lives in memory for the one sheet that was open, so a
+relaunch starts at Home. Identity on this wire is the server that made the
+session and the user id it named — the kernel answers no tenant here, and none
+is inferred from a catalogue or a resource id. A session the server never
+identified leaves no address, no email and no text behind, and a boot-restored
+cookie that is already dead keeps today's path: the sign-in's own notice about
+the saved sign-in, not this one. A cookie expiring on a handset is not proven
+here; the cases run against the real `<Shell>` over a recorded fetch.

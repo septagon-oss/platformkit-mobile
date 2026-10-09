@@ -11,6 +11,7 @@ import { useNavigation, useRouter } from "expo-router";
 import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
+import { address } from "../core/reentry";
 import {
   failureSubject,
   formControls,
@@ -28,15 +29,19 @@ import { useTheme } from "../ui/theme";
 import { refusalFields, refusalOf, screenCopy } from "./failure";
 
 export function useResourceForm(entry: Entry, id: string | undefined) {
-  const { api, wrote } = useShell();
+  const { api, wrote, typed, keep } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   const create = !id;
   const copy = screenCopy();
+  // This sheet's own address, which is what the shell files what is typed under.
+  const here = address("form", entry, id);
   const [row, setRow] = useState<Row | undefined>();
   const [phase, setPhase] = useState<Phase>(create ? "editing" : "loading");
-  const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
+  // A sheet that mounts while the server is refusing the session that would have
+  // saved it starts from what was typed there, rather than from nothing.
+  const [held, setHeld] = useState<Readonly<Record<string, string>>>(() => typed(here) ?? {});
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [detail, setDetail] = useState("");
   const [saved, setSaved] = useState<Row | undefined>();
@@ -90,6 +95,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
 
   const controls = useMemo(() => formControls(entry, row, create), [entry, row, create]);
   const dirty = Object.keys(held).length > 0;
+  // The same contents, held for the callbacks that must not change identity: the
+  // sheet puts Save and Cancel in the navigator's options, and an option rebuilt
+  // on every render is an instruction the navigator repeats forever.
+  const contents = useRef<Readonly<Record<string, string>>>(held);
 
   // usePreventRemove is what a native stack honours: it covers the swipe and
   // the system back as well as the header's Cancel. It guards the editing
@@ -100,7 +109,15 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   usePreventRemove(phase === "editing" && dirty, ({ data }) => {
     confirm(
       "Discard changes?",
-      { label: "Discard", destructive: true, onPress: () => navigation.dispatch(data.action) },
+      {
+        label: "Discard",
+        destructive: true,
+        onPress: () => {
+          // Discarded means the shell keeps none of it either.
+          keep(here, {});
+          navigation.dispatch(data.action);
+        },
+      },
       mode,
       { message: "What you typed here will be lost.", cancel: "Keep editing" },
     );
@@ -110,6 +127,8 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   useEffect(() => {
     if (phase !== "saved" || left.current) return;
     left.current = true;
+    // The row is on the server now: this sheet holds nothing anybody still needs.
+    keep(here, {});
     const at = screenPath(entry);
     // A sheet opened from a link has nothing to go back to; the record it just
     // wrote is where it belongs.
@@ -117,15 +136,20 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     else if (router.canGoBack()) router.back();
     else if (id) router.replace(`${at}/${encodeURIComponent(id)}`);
     else router.replace(at);
-  }, [phase, saved, create, entry, id, router]);
+  }, [phase, saved, create, entry, id, router, here, keep]);
 
   // Every callback this hook hands out is stable, because the screen puts them
   // in the options it gives the navigator, and options rebuilt on each render
   // are an instruction repeated forever.
-  const change = useCallback((name: string, value: string) => {
-    setHeld((h) => ({ ...h, [name]: value }));
-    setErrors(({ [name]: _, ...rest }) => rest);
-  }, []);
+  const change = useCallback(
+    (name: string, value: string) => {
+      contents.current = { ...contents.current, [name]: value };
+      setHeld(contents.current);
+      setErrors(({ [name]: _, ...rest }) => rest);
+      keep(here, contents.current);
+    },
+    [here, keep],
+  );
 
   const save = useCallback(async () => {
     if (phase !== "editing") return;
@@ -168,9 +192,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   }, [phase, controls, held, id, api, entry, wrote, copy, create]);
 
   const cancel = useCallback(() => {
+    keep(here, {});
     if (router.canGoBack()) router.back();
     else router.replace(screenPath(entry));
-  }, [router, entry]);
+  }, [router, entry, here, keep]);
 
   // Retrying is something a person did, so it may say so at once.
   const reload = useCallback(() => {

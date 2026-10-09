@@ -35,6 +35,12 @@ export interface Props {
   readonly booting?: boolean;
   /** failed is why a saved sign-in could not be opened; it is offered a retry and a way to another server. */
   readonly failed?: string;
+  /** expired is the line for a session the server refused while it was in use: this person is
+   * not signing in here, they are signing back in, and nothing about the form asks them to
+   * start over. It carries no action, because signing in is what the form below does. */
+  readonly expired?: string;
+  /** initialEmail is who that session belonged to, so the address is not asked for twice. */
+  readonly initialEmail?: string;
   readonly onRetry?: () => void;
 }
 
@@ -49,6 +55,8 @@ export function SignInForm({
   title = "Sign in",
   booting = false,
   failed = "",
+  expired = "",
+  initialEmail = "",
   onRetry,
 }: Props) {
   const t = useTheme();
@@ -56,7 +64,7 @@ export function SignInForm({
   const insets = useSafeAreaInsets();
   const [enteredURL, setURL] = useState<string>();
   const url = enteredURL ?? baseURL;
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const submit = () => {
     if (!busy) onSubmit(url.trim(), email.trim(), password);
@@ -102,6 +110,9 @@ export function SignInForm({
           action={retry(feedback, submit)}
           testID="sign-in-error"
         />
+      ) : null}
+      {expired ? (
+        <Notice announcement="polite" tone="warning" text={expired} testID="sign-in-expired" />
       ) : null}
       {notice ? (
         <Notice
