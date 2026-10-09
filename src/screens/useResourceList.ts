@@ -7,7 +7,8 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { key, type Entry } from "../core/catalog";
-import { noOrder, queryFilters, type Order, type Row } from "../core/derive";
+import { failureSubject, noOrder, queryFilters, type Order, type Row } from "../core/derive";
+import { refusalOf, screenCopy } from "./failure";
 import { PER_PAGE } from "../effects/api";
 import { useShell } from "../shell";
 
@@ -31,6 +32,7 @@ export function useResourceList(entry: Entry) {
   const shown = useRef(0);
   const seen = useRef(writes[k] ?? 0);
 
+  const copy = screenCopy();
   const load = useCallback(
     async (why: Why) => {
       const started = ++generation.current;
@@ -57,7 +59,21 @@ export function useResourceList(entry: Entry) {
         setError("");
       } catch (e) {
         if (generation.current !== started) return;
-        setError(e instanceof Error ? e.message : "The list could not be read.");
+        // Rows already shown stay under a failure to get more of them; a read
+        // that named no rows, or one the server took away, leaves none.
+        const said = refusalOf(
+          e,
+          why === "first" ? "read" : "refresh",
+          failureSubject(entry),
+          copy,
+        );
+        if (said.verdict.outcome === "silent") return;
+        if (said.withdraws) {
+          setRows([]);
+          shown.current = 0;
+          setTotal(0);
+        }
+        setError(said.text);
       } finally {
         if (generation.current === started) {
           setLoading(false);
@@ -65,7 +81,7 @@ export function useResourceList(entry: Entry) {
         }
       }
     },
-    [api, entry, order],
+    [api, entry, order, copy],
   );
 
   // The first window, and again whenever the order changes.

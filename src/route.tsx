@@ -40,6 +40,9 @@ interface Props {
 
 export function ResourceRoute({ kind, withID = false, withVerb = false }: Props) {
   const { state, renderers, entry } = useShell();
+  // Asked once at the top, as every screen asks it: a hook below an early return
+  // is a different number of hooks per render.
+  const feedback = useFeedback();
   const params = useLocalSearchParams<{
     module: string;
     entity: string;
@@ -51,7 +54,7 @@ export function ResourceRoute({ kind, withID = false, withVerb = false }: Props)
     return <Redirect href="/sign-in" />;
   if (state.phase === "booting" || state.phase === "loading") return <Waiting />;
   if (state.phase === "failed")
-    return <Notice text={state.error ?? "The catalog could not be read."} />;
+    return <Notice text={state.error ?? feedback.copy.failure.loadCatalog} />;
 
   // A resource route without a resource in its path is not a screen. It
   // happens when the app is relaunched into a remembered route, and saying

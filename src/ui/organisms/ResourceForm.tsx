@@ -54,7 +54,6 @@ export function ResourceForm({
       {detail ? (
         <Notice
           announcement="urgent"
-          title="That could not be saved"
           text={detail}
           {...(phase === "failed" ? { action: retry(feedback, onRetry) } : {})}
           testID="form-detail"

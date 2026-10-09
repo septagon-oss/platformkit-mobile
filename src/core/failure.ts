@@ -69,6 +69,13 @@ export type FailureKeeps = "content" | "gone";
  * person was trying to open. It is a subject and not a sentence: the words stay
  * in the copy table, the noun here is the one thing a catalogue-less app knows.
  */
+/** A named operation carries no entry either: a read of one is a read of a row. */
+export const recordSubject: FailureSubject = Object.freeze({
+  singular: "this record",
+  plural: "this record",
+  command: "",
+});
+
 export const workspaceSubject: FailureSubject = Object.freeze({
   singular: "this workspace",
   plural: "this workspace",

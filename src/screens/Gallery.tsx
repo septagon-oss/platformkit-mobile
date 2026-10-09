@@ -2,6 +2,7 @@
 import React from "react";
 import { deriveCopy, type Clock, type Presentation } from "../core/derive";
 import { Gallery as GalleryView } from "../ui/gallery";
+import { screenCopy } from "./failure";
 import { useFeedback } from "./useFeedback";
 import { StateFeedback } from "./StateFeedback";
 import type { Props as StateViewProps } from "../ui/molecules/StateView";
@@ -29,7 +30,9 @@ export function Gallery({
     ownZone: timeZone,
     now: clock.now(),
     weekStartsOn: 1,
-    copy: deriveCopy("en"),
+    // The gallery starts in the phone's language; the person's own choice in the
+    // appearance row still overrides it.
+    copy: screenCopy(),
     motion: feedback.motion,
   };
   return (
