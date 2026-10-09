@@ -127,7 +127,7 @@ const en: Words = {
     loadFailed: (plural) => `We couldn't load ${plural}.`,
     refreshFailed: (instant) => `Couldn't refresh. Showing the last update from ${instant}.`,
     saveFailed: "We couldn't save your changes.",
-    deleteFailed: (singular) => `We couldn't delete this ${singular}`,
+    deleteFailed: (singular) => `We couldn't delete this ${singular}.`,
     commandFailed: (title) => `${title} did not run.`,
     uncertain: "We couldn't confirm whether your changes were saved.",
     signedOut: "Sign in again to continue.",
