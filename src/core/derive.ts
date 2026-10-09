@@ -4,7 +4,7 @@
 // is "Open" in a cell there and in a cell here.
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
 import type { Copy } from "./copy";
-import type { FailureSubject } from "./failure";
+import type { EntrySubject } from "./failure";
 import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
 export { copyForLocale, copyLanguage, deriveCopy, type Copy, type Language } from "./copy";
@@ -118,7 +118,7 @@ export function nounPhrase(e: Entry): Noun {
  * word written into a failure rule — and `lastSeen` is the reader-formatted
  * instant of the last good read, which a refresh quotes and a first read cannot.
  */
-export function failureSubject(entry: Entry, command = "", lastSeen = ""): FailureSubject {
+export function failureSubject(entry: Entry, command = "", lastSeen = ""): EntrySubject {
   const named = nounPhrase(entry);
   return {
     singular: named.singular,
@@ -227,9 +227,7 @@ export function primary(e: Entry): Field | undefined {
     e.fields.find((f) => nameLike.includes(f.name)) ??
     e.fields.find(
       (f) =>
-        f.type === "string" &&
-        !(f.enum && f.enum.length > 0) &&
-        f.hints?.visibility !== "hidden",
+        f.type === "string" && !(f.enum && f.enum.length > 0) && f.hints?.visibility !== "hidden",
     )
   );
 }
@@ -353,8 +351,7 @@ export function listPreview(e: Entry): Field | undefined {
   if (declared !== undefined) return e.fields.find((f) => f.name === declared);
   const named = primary(e);
   return e.fields.find(
-    (f) =>
-      f.name !== named?.name && !f.readOnly && (f.type === "text" || f.widget === "textarea"),
+    (f) => f.name !== named?.name && !f.readOnly && (f.type === "text" || f.widget === "textarea"),
   );
 }
 
@@ -487,8 +484,7 @@ export function commandControls(c: Command): readonly Control[] {
  * commandTitle is what a person taps: the summary the API document gives, or
  * the verb spelled as words when it gives none.
  */
-export const commandTitle = (c: Command): string =>
-  c.hints?.label || c.summary || humanize(c.verb);
+export const commandTitle = (c: Command): string => c.hints?.label || c.summary || humanize(c.verb);
 
 /** rowCommands are the commands about one record; collectionCommands are about the list. */
 /**
@@ -498,7 +494,7 @@ export const commandTitle = (c: Command): string =>
  * still reaches it, and the kernel guards the door. Hiding the address too needs
  * a sentence in both languages, which is copy work, not a filter.
  */
-const offered = (c: Command): boolean => c.hints?.system !== true;
+export const offered = (c: Command): boolean => c.hints?.system !== true;
 
 /** rowCommands are the commands about one record; collectionCommands are about the list. */
 export const rowCommands = (e: Entry): readonly Command[] =>

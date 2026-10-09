@@ -346,7 +346,20 @@ function hintEntry(
     }
     return blocks.length === 0 ? undefined : blocks;
   })();
-  const summary = hintNames(raw, "summaryFields", at, notice);
+  // Each name is checked against this entry's own fields where the list was read,
+  // so a pointer at a field that does not exist costs one cell and says so, rather
+  // than blanking the row or drawing a column the schema has never heard of. A
+  // list left with nothing in it is the default answer, not an empty row.
+  const summary = ((): readonly string[] | undefined => {
+    const declared = hintNames(raw, "summaryFields", at, notice);
+    if (declared === undefined) return undefined;
+    const kept: string[] = [];
+    for (const [i, field] of declared.entries()) {
+      if (named.includes(field)) kept.push(field);
+      else notice(`${at}.summaryFields[${i}]`, "names no field of this entry: it is not drawn");
+    }
+    return kept.length === 0 ? undefined : kept;
+  })();
   const singular = hintWord(raw, "singular", at, "a word", notice);
   const plural = hintWord(raw, "plural", at, "a word", notice);
   const icon = hintWord(raw, "icon", at, "a word", notice);
@@ -360,9 +373,7 @@ function hintEntry(
     ...(primaryField === undefined ? {} : { primaryField }),
     ...(previewField === undefined ? {} : { previewField }),
     ...(statusField === undefined ? {} : { statusField }),
-    ...(summary === undefined
-      ? {}
-      : { summaryFields: summary.filter((field) => named.includes(field)) }),
+    ...(summary === undefined ? {} : { summaryFields: summary }),
     ...(sections === undefined ? {} : { sections }),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;
@@ -447,9 +458,10 @@ function hintField(
     ...(declaredSection === undefined || !sections.includes(declaredSection)
       ? {}
       : { section: declaredSection }),
-    ...(visibility === undefined || visibility === "shown"
-      ? {}
-      : { visibility: visibility as FieldVisibility }),
+    // A declared `shown` is stored: unlike the other zero values it is not the
+    // same reading as silence, because it overrules a `hideList` the author also
+    // wrote (`derive.onList`). Absent means "the schema's own tag decides".
+    ...(visibility === undefined ? {} : { visibility: visibility as FieldVisibility }),
     ...(enumLabels === undefined ? {} : { enumLabels }),
     ...(enumTones === undefined ? {} : { enumTones }),
   };
@@ -490,6 +502,15 @@ type ParsedField = z.output<typeof looseField>;
 function field(v: ParsedField, at: string, sections: readonly string[], notice: HintNotice): Field {
   const { type, elem, enum: values, presentation, ...rest } = v;
   const hints = hintField(presentation, `${at}.presentation`, values ?? [], sections, notice);
+  // The one place the reading axis and the writing axis genuinely collide. A
+  // hidden field is plumbing and leaves the form; a *required* one is the
+  // person's only path to a create the server will accept, and that path is
+  // never taken away — so the field stays visible, the kernel is consulted rather
+  // than contradicted (it refuses a pointer at a hidden field, never a required
+  // field being hidden), and the author hears it once. The copy that could warn
+  // the person is the product's.
+  if (hints?.visibility === "hidden" && v.required === true)
+    notice(`${at}.presentation.visibility`, "names a required field: it stays in the form");
   return {
     ...rest,
     type: fieldType(type, `${at}.type`),

@@ -9,7 +9,13 @@
 // the kernel's CSRF rule accepts a request that carries neither Sec-Fetch-Site
 // nor Origin, because a caller that is not a browser presents what it presents
 // deliberately (kit/httpx.SameSite).
-import { type Catalog, type Entry, parseCatalog, CatalogError } from "../core/catalog";
+import {
+  type Catalog,
+  type Entry,
+  type HintNotice,
+  parseCatalog,
+  CatalogError,
+} from "../core/catalog";
 import { row, page, identity, trail, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
 
@@ -119,7 +125,7 @@ export interface Api {
   events(q?: Since): Promise<Trail>;
   login(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
-  catalog(): Promise<Catalog>;
+  catalog(notice?: HintNotice): Promise<Catalog>;
   /** list is a window of rows, in an order, through equality filters spelled field:value. */
   list(e: Entry, q?: Window): Promise<Page>;
   get(e: Entry, id: string): Promise<Record<string, unknown>>;
@@ -171,6 +177,21 @@ export function createApi(
 ): Api {
   let cookie = initialCookie;
   let generation = 0;
+  /**
+   * warnOnce is where a malformed presentation hint goes: a fallback the person
+   * never sees and never reads, and an author's one line. "Once" means once per
+   * distinct (document path, reason) for this connection — the parse runs once per
+   * served body, so a workspace that declares the same typo in ten hints says it
+   * ten ways once each, and a refresh repeats nothing. The core keeps no console
+   * (AGENTS.md) and no state; this transport is the reader that owns both.
+   */
+  const noticed = new Set<string>();
+  const warnOnce: HintNotice = (at, why) => {
+    const key = `${at}\u0000${why}`;
+    if (noticed.has(key)) return;
+    noticed.add(key);
+    console.warn(`catalog hint: ${at} ${why}`);
+  };
   const base = baseURL.replace(/\/+$/, "");
 
   function apiPath(path: string): void {
@@ -489,7 +510,7 @@ export function createApi(
         throw e;
       }
     },
-    async catalog() {
+    async catalog(notice: HintNotice = warnOnce) {
       // Legacy compatibility belongs to the normalized core view. The public
       // generated operation must keep its stricter wire response validator.
       const result = await documented((client) =>
@@ -497,11 +518,11 @@ export function createApi(
           url: "/api/v1/app/resources",
           throwOnError: true,
           responseValidator: async (value) => {
-            parseCatalog(value);
+            parseCatalog(value, notice);
           },
         }),
       );
-      return parseCatalog(result.data);
+      return parseCatalog(result.data, notice);
     },
     async list(e, { offset = 0, limit = PER_PAGE, sort = "", filters = [] } = {}) {
       const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
