@@ -6,7 +6,7 @@ import { Redirect, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { View } from "react-native";
 import { packKey, shellReady } from "./core/catalog";
-import { humanize, screenCopy } from "./core/derive";
+import { humanize } from "./core/derive";
 import type { Renderer } from "./renderers";
 import { ResourceCommand } from "./screens/ResourceCommand";
 import { ResourceDetail } from "./screens/ResourceDetail";
@@ -51,9 +51,9 @@ export function ResourceRoute({ kind, withID = false, withVerb = false }: Props)
     return <Redirect href="/sign-in" />;
   if (state.phase === "booting" || state.phase === "loading") return <Waiting />;
   if (state.phase === "failed")
-    // The one sentence this build owns about a catalogue it could not open: the
-    // shell's own message when it has one, the workspace sentence when it has not.
-    return <Notice text={state.error ?? screenCopy().failure.loadCatalog} />;
+    // The one sentence this build owns about a catalogue it could not open lives in
+    // `Notice` below: the shell's own words when it has them, nothing restated here.
+    return <Notice text={state.error} />;
 
   // A resource route without a resource in its path is not a screen. It
   // happens when the app is relaunched into a remembered route, and saying
@@ -153,17 +153,22 @@ export function Notice({
   onRetry,
   onSignIn,
 }: {
-  readonly text: string;
+  /** A catalogue this build could not open is the one refusal every screen above the
+   * shell can show, so its sentence is owned here: the shell's own words when it has
+   * them, the workspace sentence from the phone's own bundle when it has not. No
+   * route, screen or app entry restates it — a second spelling is a second rule. */
+  readonly text?: string | undefined;
   readonly onRetry?: () => void;
   /** onSignIn is the way out when the saved server is the thing that is wrong. */
   readonly onSignIn?: () => void;
 }) {
   const feedback = useFeedback();
+  const said = text ?? feedback.copy.failure.loadCatalog;
   return (
     <Screen>
       <NoticeView
         announcement="urgent"
-        text={text}
+        text={said}
         {...(onRetry ? { action: retry(feedback, onRetry) } : {})}
       />
       {onSignIn ? (
