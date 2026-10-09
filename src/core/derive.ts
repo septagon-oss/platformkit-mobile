@@ -285,6 +285,9 @@ export interface Control {
 export function kind(f: Field): ControlKind {
   if ((f.enum && f.enum.length > 0) || f.widget === "select") return "select";
   if (f.widget === "textarea") return "textarea";
+  // Until T-0192 brings 0069 §7's editor, a rich text body is at least written as prose: the owner met a one-line
+  // box writing content (2026-10-09). The server still validates the Markdown either way.
+  if (f.widget === "richtext") return "textarea";
   if (f.widget === "entity-picker") return "reference";
   switch (f.type) {
     case "bool":
