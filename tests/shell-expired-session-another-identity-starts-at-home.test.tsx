@@ -2,7 +2,9 @@
 // what that person left behind does not cross: a different identity lands on Home
 // with no remembered route, no held sheet and no write counts — and the drop
 // happens before the catalogue is ready, so no render shows what they never wrote.
-// A session that cannot say who it is inherits nothing either.
+// A session that cannot say who it is inherits nothing either. Signing out is the
+// same line said earlier: the person ending the session themselves leaves the
+// address and the sheet behind then, so nothing waits on the next sign-in.
 import { loginIdentity, loginResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
@@ -145,6 +147,30 @@ describe("a re-authentication by someone else", () => {
     expect(latest?.typed("/note/note/1/edit")).toBeUndefined();
     // Counted on the first ready render, not corrected afterwards.
     expect(latest?.writes).toEqual({});
+  });
+
+  test("signing out leaves the remembered route and the held sheet behind", async () => {
+    await loseTheSession(former);
+    answering(former);
+
+    await act(async () => {
+      await latest!.signOut();
+    });
+
+    // Nothing waits for a person who has just said they are not coming back: the
+    // address, the draft and the prefilled address all go at the sign-out, not at
+    // whatever sign-in happens to come next.
+    expect(latest?.returning).toBeUndefined();
+    expect(latest?.typed("/note/note/1/edit")).toBeUndefined();
+
+    // The same person, the same server: still a sign-in, not a way back.
+    await act(async () => {
+      await latest!.signIn("https://acme.test", former.email, "pw");
+    });
+    await phase("ready");
+    expect(last()).toBe("/");
+    expect(latest?.returning).toBeUndefined();
+    expect(latest?.typed("/note/note/1/edit")).toBeUndefined();
   });
 
   test("the same user id at another server is another person, and inherits nothing", async () => {

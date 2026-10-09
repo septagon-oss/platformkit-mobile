@@ -113,6 +113,17 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
     remembered.current = next;
     setReturning(next);
   }, []);
+  // forget is the one way what a refused session left behind goes away: who it
+  // belonged to, the sheet that was never saved, and the address to go back to.
+  // Three things call it — a refusal of a session the server never identified, a
+  // sign-in that turns out to be somebody else, and a sign-out, which is the
+  // person saying nobody is coming back to that address. Nothing else may drop
+  // what a person was in the middle of doing.
+  const forget = useCallback(() => {
+    expected.current = undefined;
+    sheet.current = undefined;
+    remember(undefined);
+  }, [remember]);
   const saw = useCallback((href: string) => {
     where.current = href;
   }, []);
@@ -149,9 +160,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         // A session the server never identified — and a shell that never learned
         // where the person was — may not hand its text or its landing page to
         // whoever signs in next.
-        expected.current = undefined;
-        sheet.current = undefined;
-        remember(undefined);
+        forget();
       } else {
         expected.current = dead.who;
         remember({ href: at, who: dead.who, email: dead.email });
@@ -163,7 +172,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       // again and call what it answers a sign-in that could not be opened.
       void sessions.clear(dead.baseURL).catch(() => undefined);
     },
-    [begin, remember],
+    [begin, forget, remember],
   );
   /** transport is a server's transport, with the one thing this shell asks of it: a refusal
    * comes back here. Every call site that holds a session builds it through this. */
@@ -212,9 +221,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
           // session ever shows the old one's counts, landing page or draft.
           const waiting = expected.current;
           if (waiting !== undefined && !samePerson(waiting, next)) {
-            expected.current = undefined;
-            sheet.current = undefined;
-            remember(undefined);
+            forget();
             setWrites({});
           } else {
             expected.current = undefined;
@@ -226,13 +233,15 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         if (generation.current === started) {
           // A session this app could not open is not a live one: a refusal it
           // answers afterwards describes nothing, and the sentence the person is
-          // offered stays the one about the saved sign-in.
+          // offered stays the one about the saved sign-in. What the last person
+          // was doing stays held — a load that failed on a bad network answer
+          // neither identifies whoever it was nor ends their attempt.
           live.current = undefined;
           dispatch({ type: "failed", generation: started, error: catalogFailure(e) || message(e) });
         }
       }
     },
-    [remember],
+    [forget],
   );
 
   useEffect(() => {
@@ -281,14 +290,18 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         // Identity belongs to the previous session until this sign-in starts.
         // The new catalog may be ready before its own identity request settles.
         setIdentity(undefined);
-        // A sign-in is a new session: whoever held one before this is not live,
-        // and a sign-in that is not a re-authentication has nothing to go back to.
+        // A sign-in is a new session: whoever held one before this is not live.
         live.current = undefined;
-        if (state.reason !== "expired") {
-          expected.current = undefined;
-          sheet.current = undefined;
-          remember(undefined);
-        }
+        // A sign-in the shell holds nothing for has no route to return to and
+        // starts fresh. What it holds — and therefore whether this is a
+        // re-authentication — is answered by the holder, not by the phase: an
+        // attempt the server refused ends as plain `anonymous` with no `reason`,
+        // and a person who mistypes a password is still in the middle of coming
+        // back in, not at the start of it. The comparison in `load` is what
+        // decides whether whoever completes this sign-in is the person the held
+        // sheet belongs to; until then it is kept, and it is kept for nobody
+        // else, because `expected` is set only by a refusal of a named session.
+        if (expected.current === undefined) forget();
         dispatch({ type: "sign-in", generation: started });
         const a = transport(url);
         try {
@@ -317,6 +330,10 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         const started = begin();
         const previous = active.current;
         live.current = undefined;
+        // Signing out is the person ending the session themselves, so nobody is
+        // coming back to the address a refusal left behind: it goes now, rather
+        // than waiting to be handed to whoever signs in next.
+        forget();
         connect(previous.baseURL, transport(previous.baseURL));
         setIdentity(undefined);
         dispatch({ type: "signed-out", generation: started });
@@ -355,7 +372,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       begin,
       connect,
       load,
-      remember,
+      forget,
       transport,
     ],
   );
