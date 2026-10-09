@@ -217,9 +217,14 @@ function fieldType(v: unknown, at: string): FieldType {
 // `unknown` and hintEntry/hintField/hintCommand below decide its shape, exactly
 // as `renderer` does above. The generated `appResources` operation keeps its
 // strict validator: that refusal belongs to the public contract, not to a pocket.
+// Only `presentation` is re-declared, and where a hint sits inside a nested
+// list the list is re-declared to hold the loose element — with the optionality
+// the generated schema gives it (`nullish` where the document says a server may
+// print no key, `nullable` where it must print one), so loosening a hint cannot
+// quietly make a wire member required or optional.
 const looseField = zField.extend({ presentation: z.unknown().optional() });
 const looseCommand = zCommand.extend({
-  fields: z.array(looseField).nullable().optional(),
+  fields: z.array(looseField).nullish(),
   presentation: z.unknown().optional(),
 });
 
@@ -231,7 +236,7 @@ const catalogSchema = zCatalog.extend({
         renderer: z.unknown().optional(),
         presentation: z.unknown().optional(),
         fields: z.array(looseField).nullable(),
-        commands: z.array(looseCommand).nullable(),
+        commands: z.array(looseCommand).nullish(),
       }),
     )
     .nullable(),
