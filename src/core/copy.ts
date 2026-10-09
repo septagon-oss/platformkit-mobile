@@ -46,6 +46,11 @@ interface Words {
     readonly backTo: (plural: string) => string;
     readonly update: string;
     readonly loadCatalog: string;
+    /** The noun a refusal names when the call addressed no catalogue entry: a named
+     * operation reads a record, the catalogue load opens a workspace. A person reads
+     * these words, so the table holds them; a Portuguese phone reads Portuguese. */
+    readonly thisRecord: string;
+    readonly thisWorkspace: string;
   };
   /** A disclosure control names what it holds, not how it behaves: "Expand" describes
    * the control, "Show loading, empty and unavailable examples" describes the screen. */
@@ -133,6 +138,8 @@ const en: Words = {
     backTo: (plural) => `Back to ${plural}`,
     update: "Update the app to open this workspace.",
     loadCatalog: "We couldn't open this workspace.",
+    thisRecord: "this record",
+    thisWorkspace: "this workspace",
   },
   disclosure: {
     reveal: (what) => `Show ${what}`,
@@ -208,6 +215,8 @@ const pt: Words = {
     backTo: (plural) => `Voltar a ${plural}`,
     update: "Atualize a aplicação para abrir esta área de trabalho.",
     loadCatalog: "Não foi possível abrir esta área de trabalho.",
+    thisRecord: "este registo",
+    thisWorkspace: "esta área de trabalho",
   },
   disclosure: {
     reveal: (what) => `Mostrar ${what}`,

@@ -31,15 +31,30 @@ export interface FailureFacts {
 export const noFields: Readonly<Record<string, string>> = Object.freeze({});
 
 /**
- * The nouns the sentence names, and the one instant it quotes. `lastSeen` is the
- * reader-formatted instant of the last good read; without it a `refresh` is not a
- * refresh — nothing is known to quote — and is classified as a plain read.
+ * What a refusal's sentence names, and the one instant it quotes. Either the
+ * nouns come from a catalogue entry — the server's own words — or the call
+ * addressed no entry and the noun is a key into the phone's own bundle.
  */
-export interface FailureSubject {
+export type FailureSubject = EntrySubject | NamedSubject;
+
+/** A catalogue entry: `lastSeen` is the reader-formatted instant of the last good
+ * read, which a refresh quotes. Without it a `refresh` is not a refresh — nothing
+ * is known to quote — and is classified as a plain read.
+ */
+export interface EntrySubject {
   readonly singular: string;
   readonly plural: string;
   readonly command: string;
   readonly lastSeen?: string;
+}
+
+/**
+ * No entry to name: a named operation reads a record, the catalogue load opens a
+ * workspace. Which one is a key; the words are `Words.failure`'s, in the phone's
+ * own language, because a person reads them as part of the sentence.
+ */
+export interface NamedSubject {
+  readonly noun: "thisRecord" | "thisWorkspace";
 }
 
 export type FailureKind =
@@ -64,23 +79,11 @@ export type FailureAction = "none" | "retry" | "back" | "dismiss" | "reconcile";
 /** Whether what the screen already shows stays under this refusal. */
 export type FailureKeeps = "content" | "gone";
 
-/**
- * The catalogue load names no resource, so its refusal names the workspace the
- * person was trying to open. It is a subject and not a sentence: the words stay
- * in the copy table, the noun here is the one thing a catalogue-less app knows.
- */
-/** A named operation carries no entry either: a read of one is a read of a row. */
-export const recordSubject: FailureSubject = Object.freeze({
-  singular: "this record",
-  plural: "this record",
-  command: "",
-});
+/** A named operation carries no entry: a read of one is a read of a record. */
+export const recordSubject: FailureSubject = Object.freeze({ noun: "thisRecord" });
 
-export const workspaceSubject: FailureSubject = Object.freeze({
-  singular: "this workspace",
-  plural: "this workspace",
-  command: "",
-});
+/** The catalogue load names no resource, so its refusal names the workspace. */
+export const workspaceSubject: FailureSubject = Object.freeze({ noun: "thisWorkspace" });
 
 /** The copy key the sentence comes from; `backTo` is the label of the `back` action. */
 export type FailureKey =
@@ -296,8 +299,10 @@ export function classifyFailure(
   const kind = failureKind(facts);
   if (kind === "cancelled") return { outcome: "silent", kind, fields: facts.fields };
   // A refresh that has no good read to quote is a read: there is no "last update"
-  // to show, so the sentence that promises one is not available to it.
-  const at: FailureContext = context === "refresh" && !subject.lastSeen ? "read" : context;
+  // to show, so the sentence that promises one is not available to it. A refusal
+  // that names no entry never has one — no screen refreshes a named operation.
+  const quotable = "noun" in subject ? undefined : subject.lastSeen;
+  const at: FailureContext = context === "refresh" && !quotable ? "read" : context;
   const found = grid[kind][at];
   if (found.outcome === "fields")
     return {
@@ -325,21 +330,29 @@ export function classifyFailure(
 /** The sentence, from the phone's own bundle, with the subject's own nouns. */
 function sentence(key: FailureKey, subject: FailureSubject, copy: Copy): string {
   const failure = copy.failure;
+  // A subject named by the bundle fills both noun slots with the one phrase the
+  // table holds for it; the entry's own nouns arrive as they were read.
+  const nouns =
+    "noun" in subject
+      ? { singular: failure[subject.noun], plural: failure[subject.noun] }
+      : { singular: subject.singular, plural: subject.plural };
+  const command = "noun" in subject ? "" : subject.command;
+  const quotableInstant = "noun" in subject ? "" : (subject.lastSeen ?? "");
   switch (key) {
     case "loadFailed":
-      return failure.loadFailed(subject.plural);
+      return failure.loadFailed(nouns.plural);
     case "refreshFailed":
-      return failure.refreshFailed(subject.lastSeen ?? "");
+      return failure.refreshFailed(quotableInstant);
     case "deleteFailed":
-      return failure.deleteFailed(subject.singular);
+      return failure.deleteFailed(nouns.singular);
     case "commandFailed":
-      return failure.commandFailed(subject.command);
+      return failure.commandFailed(command);
     case "revision":
-      return failure.revision(subject.singular);
+      return failure.revision(nouns.singular);
     case "excluded":
-      return failure.excluded(subject.command || subject.plural);
+      return failure.excluded(command || nouns.plural);
     case "backTo":
-      return failure.backTo(subject.plural);
+      return failure.backTo(nouns.plural);
     default:
       return failure[key];
   }
