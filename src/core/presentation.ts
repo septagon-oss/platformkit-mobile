@@ -261,6 +261,35 @@ const sentence = (words: string): string =>
  * at the nearest. A spelling that prints no clock never names a zone, because a
  * duration is the same instant for every reader.
  */
+/**
+ * The distance words for presentedInstant. Hermes on Android has no Intl.RelativeTimeFormat: `new` on it throws
+ * "undefined cannot be used as a constructor", which crashed every record screen that read a recent time (measured
+ * 2026-10-09 on the API 36 emulator, phone 47ab484). Node and iOS have it, so the kit's own words stand in only where
+ * it is missing, and they are the words Intl uses in each language.
+ */
+type DistanceUnit = "minute" | "hour" | "day";
+function relativeWords(p: Formatting): (value: number, unit: DistanceUnit) => string {
+  const Relative = (Intl as { RelativeTimeFormat?: typeof Intl.RelativeTimeFormat })
+    .RelativeTimeFormat;
+  if (typeof Relative === "function") {
+    const f = new Relative(p.copy.language, { numeric: "auto" });
+    return (value, unit) => f.format(value, unit);
+  }
+  const k = p.copy.kit;
+  const n = (words: string, count: number) => words.replace("{n}", String(count));
+  return (value, unit) => {
+    const count = Math.abs(value);
+    if (unit === "day") {
+      if (value === 1) return k.tomorrow;
+      if (value === -1) return k.yesterday;
+      if (value === -2) return k.twoDaysAgo;
+      return n(k.daysAgo, count);
+    }
+    if (unit === "hour") return count === 1 ? k.hourAgo : n(k.hoursAgo, count);
+    return count === 1 ? k.minuteAgo : n(k.minutesAgo, count);
+  };
+}
+
 export function presentedInstant(
   at: Date,
   p: Formatting,
@@ -275,7 +304,7 @@ export function presentedInstant(
       ...(zoneNamed(p) ? { timeZoneName: "short" as const } : {}),
     });
   const clock = () => face({ hour: "2-digit", minute: "2-digit" }).format(at);
-  const relative = new Intl.RelativeTimeFormat(p.copy.language, { numeric: "auto" });
+  const relative = { format: relativeWords(p) };
   const elapsed = now.getTime() - at.getTime();
   const today = civilDay(now, p.timeZone);
   const days = today - civilDay(at, p.timeZone);
