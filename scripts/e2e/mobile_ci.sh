@@ -289,12 +289,21 @@ fi
 # administrator's own identity and handed on unchanged, so no role name is written
 # into this repository, and the new person is offered the home screen the journeys
 # already assert.
+#
+# Two requests, because the kernel refuses one: POST /user/users answers with a
+# User and refuses a body that names roles — "roles belongs to a route of its
+# own, not to this one" (kit/crud, at the commit testdata/openapi.json came from)
+# — and user-user-roles, POST /user/users/{id}/roles, is the route that owns them
+# ("Replaces the roles this person holds"). A person created without roles holds
+# none, so the roles step is not one the harness may skip to reach set-password.
 echo "mobile_ci: one more person on the same tenant"
 api GET /api/v1/auth/me '' "$work/admin.jar" >/dev/null
 roles="$(python3 -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1]))["roles"] or []))' "$work/body")"
-[ "$(api POST /api/v1/user/users "{\"email\":\"$factor_email\",\"displayName\":\"Factor E2E\",\"roles\":$roles}" "$work/admin.jar")" = "201" ] ||
+[ "$(api POST /api/v1/user/users "{\"email\":\"$factor_email\",\"displayName\":\"Factor E2E\"}" "$work/admin.jar")" = "201" ] ||
   refuse "$factor_email could not be created"
 user_id="$(api_field id)"
+[ "$(api POST "/api/v1/user/users/$user_id/roles" "{\"roles\":$roles}" "$work/admin.jar")" = "200" ] ||
+  refuse "$factor_email could not be given the roles the journeys sign in with"
 [ "$(api POST "/api/v1/user/users/$user_id/set-password" "{\"password\":\"$factor_password\"}" "$work/admin.jar")" = "200" ] ||
   refuse "$factor_email could not be given a password"
 
