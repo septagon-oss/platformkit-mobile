@@ -8,6 +8,7 @@ import { useSingleton } from "../../src/screens/useSingleton";
 import { confirm } from "../../src/ui/chooser";
 import { reset } from "../fakes/router";
 import { fakeApi, note, setting, shell, shellValue } from "../fakes/shell";
+import { feedback } from "../fakes/presentation";
 
 jest.mock("expo-router", () => require("../fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("../fakes/router").reactNavigation);
@@ -47,7 +48,7 @@ test("a sheet reached for a verb the resource does not mount sends nothing", asy
 
 test("a remove asked for on a resource with no delete asks no question", async () => {
   const noDelete: Entry = { ...note, operations: ["list", "read", "create", "update"] };
-  const { result } = await renderHook(() => useResourceDetail(noDelete, "1"));
+  const { result } = await renderHook(() => useResourceDetail(noDelete, "1", feedback));
   await act(async () => {
     result.current.remove();
   });

@@ -15,7 +15,7 @@ import { useResourceDetail } from "./useResourceDetail";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
   const feedback = useFeedback();
-  const detail = useResourceDetail(entry, id);
+  const detail = useResourceDetail(entry, id, feedback);
   const activity = useActivity(entry, id);
   const activityModel = deriveEventActivity(activity, {
     ...feedback,
@@ -64,7 +64,10 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         entry={entry}
         row={detail.row}
         error={detail.error}
+        {...(detail.refusal ? { refusal: detail.refusal } : {})}
         onRetry={detail.reload}
+        onDismiss={detail.dismiss}
+        onBack={detail.leave}
         {...(activityModel.ok
           ? {
               activity: {
