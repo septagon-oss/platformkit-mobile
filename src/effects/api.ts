@@ -163,6 +163,11 @@ export function createApi(
   fetchImpl: typeof fetch = fetch,
   initialCookie?: string,
   timeout: number = TIMEOUT,
+  /** refused is called with nothing but the fact that this server answered 401 for this
+   * transport. Every request — generated operation, `me`, the catalogue, the event trail,
+   * a write — is answered at one line, so this is the one place a session's refusal can
+   * be heard: the transport reports it, and the shell is what decides what it means. */
+  refused?: () => void,
 ): Api {
   let cookie = initialCookie;
   let generation = 0;
@@ -262,7 +267,13 @@ export function createApi(
       clearTimeout(bell);
       signal?.removeEventListener("abort", cancel);
     }
-    if (status >= 400) throw problem(status, text);
+    if (status >= 400) {
+      // 401 is a fact about the session rather than about this request, and the
+      // request's caller is not the unit that owns a session. The notice goes out
+      // before the throw, so the shell hears it whoever was waiting on this call.
+      if (status === 401) refused?.();
+      throw problem(status, text);
+    }
     return { text, status, headers: responseHeaders, ...(bytes === undefined ? {} : { bytes }) };
   }
 

@@ -103,6 +103,10 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     identity: undefined,
     writes: {},
     wrote: jest.fn<ShellValue["wrote"]>(),
+    saw: jest.fn<ShellValue["saw"]>(),
+    typed: jest.fn<ShellValue["typed"]>(),
+    keep: jest.fn<ShellValue["keep"]>(),
+    returning: undefined,
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),
     signIn: jest.fn<ShellValue["signIn"]>(async () => undefined),

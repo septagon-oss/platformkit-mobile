@@ -2,11 +2,12 @@
 // path, find the entry in the catalog, pick the renderer pack's screen or the
 // generated one, and send an anonymous visitor to sign in. It is the whole of
 // the composition a route file would otherwise repeat four times.
-import { Redirect, useLocalSearchParams } from "expo-router";
-import React from "react";
+import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
+import React, { useCallback } from "react";
 import { View } from "react-native";
 import { packKey, shellReady } from "./core/catalog";
 import { humanize } from "./core/derive";
+import { address } from "./core/reentry";
 import type { Renderer } from "./renderers";
 import { ResourceCommand } from "./screens/ResourceCommand";
 import { ResourceDetail } from "./screens/ResourceDetail";
@@ -39,13 +40,29 @@ interface Props {
 }
 
 export function ResourceRoute({ kind, withID = false, withVerb = false }: Props) {
-  const { state, renderers, entry } = useShell();
+  const { state, renderers, entry, saw } = useShell();
   const params = useLocalSearchParams<{
     module: string;
     entity: string;
     id?: string;
     verb?: string;
   }>();
+  const module = params.module ?? "";
+  const entity = params.entity ?? "";
+  const id = withID ? params.id : undefined;
+  const verb = withVerb ? params.verb : undefined;
+  // Where the person is, said as this screen draws. The shell keeps it so a
+  // session the server refuses can bring them back here, and says so on focus
+  // rather than on mount: returning to a sheet that never unmounted is exactly
+  // the case a mount effect misses. The entry is looked up inside the effect
+  // because it lives in a catalogue this route may not have yet — an address
+  // with no entry in it is not a place anybody is.
+  useFocusEffect(
+    useCallback(() => {
+      const here = entry(module, entity);
+      if (here) saw(address(kind, here, id, verb));
+    }, [entry, kind, module, entity, id, verb, saw]),
+  );
 
   if (state.phase === "anonymous" || state.phase === "signing-in")
     return <Redirect href="/sign-in" />;
@@ -59,8 +76,6 @@ export function ResourceRoute({ kind, withID = false, withVerb = false }: Props)
   // happens when the app is relaunched into a remembered route, and saying
   // "undefined/undefined is not in this installation" would be neither true
   // nor useful.
-  const module = params.module ?? "";
-  const entity = params.entity ?? "";
   if (!module || !entity) return <Redirect href="/" />;
 
   const found = entry(module, entity);
@@ -85,8 +100,6 @@ export function ResourceRoute({ kind, withID = false, withVerb = false }: Props)
         ? Singleton
         : generated[kind]
       : asked;
-  const id = withID ? params.id : undefined;
-  const verb = withVerb ? params.verb : undefined;
   return (
     <>
       <Screen
