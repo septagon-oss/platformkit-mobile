@@ -17,6 +17,7 @@ import {
   hostLabel,
   known,
   label,
+  civilDay,
   listCells,
   listColumns,
   listPreview,
@@ -234,6 +235,16 @@ test("a past instant is a distance while a distance is the answer", () => {
     read("2025-09-05T09:20:00Z", { ...utc, now: "2026-07-18T09:00:00Z" }).shown,
     "Sep 5, 2025, 09:20 AM",
   );
+});
+
+test("the civil day an instant falls on is the day in the zone the reader is in", () => {
+  // Half past eleven on the 30th in UTC is already the 1st in Lisbon: which day a
+  // sentence calls an instant depends on where the reader is standing, which is why
+  // the day count and the clock are read in one zone and never in two.
+  const at = timeValue("2026-06-30T23:30:00Z")!;
+  assert.equal(civilDay(at, "Europe/Lisbon"), civilDay(at, "UTC") + 1);
+  assert.equal(civilDay(at, "Pacific/Kiritimati"), civilDay(at, "UTC") + 1);
+  assert.equal(civilDay(at, "Pacific/Honolulu"), civilDay(at, "UTC"));
 });
 
 test("a future instant is a date, because it has not happened", () => {
