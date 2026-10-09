@@ -6,7 +6,7 @@ import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
 import { doors } from "../core/catalog";
-import { humanize, type Clock } from "../core/derive";
+import { noun, type Clock } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail } from "../ui/organisms/ResourceDetail";
@@ -30,7 +30,7 @@ export function Singleton({
   // Memoised because the navigator is told its options on every render.
   const options = useMemo(
     () => ({
-      title: humanize(entry.entity),
+      title: noun(entry).singular,
       headerLargeTitleEnabled: !editing,
       // Both sides of every option are spelled out, including the empty ones.
       // A native stack keeps what it was last given, so options that merely

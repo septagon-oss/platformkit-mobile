@@ -18,6 +18,10 @@ export const kitEnglish = {
   // person's own words, and a row that opens nothing is said to be read alone.
   workspace: "Workspace",
   readOnly: "Read only",
+  // A record whose schema names nothing to read as its title. The noun arrives
+  // from the catalogue, the way `failure.loadFailed` takes one: this is the only
+  // sentence the kit writes for a record it cannot name, and it is written once.
+  untitled: (singular: string) => `Untitled ${singular}`,
   justNow: "Just now",
   signInIntro: "Enter your workspace address and the email you use there.",
   workspaceAddress: "Workspace address",
@@ -184,7 +188,12 @@ export const kitEnglish = {
   sourceFloorPlan: "Gallery floor plan",
   audioTour: "Audio tour",
 } as const;
-export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
+// Each word keeps its own shape, widened from the literal it is written as: most
+// are strings, and the few that take a noun as data (`untitled`) are functions
+// here exactly as they are in the table. A flat `string` for every key would
+// force the noun-taking ones back into English.
+type KitWord<T> = T extends string ? string : T;
+export type KitWords = { readonly [K in keyof typeof kitEnglish]: KitWord<(typeof kitEnglish)[K]> };
 export const kitPortuguese: KitWords = {
   by: "por",
   activityEmpty: "Ainda nada aconteceu a este registo.",
@@ -198,6 +207,7 @@ export const kitPortuguese: KitWords = {
   shellUpdate: "Atualize a aplicação para o ecrã completo deste registo.",
   workspace: "Espaço de trabalho",
   readOnly: "Apenas leitura",
+  untitled: (singular: string) => `${singular} sem título`,
   justNow: "Agora mesmo",
   signInIntro: "Indique o endereço do espaço de trabalho e o email que usa nele.",
   workspaceAddress: "Endereço do espaço de trabalho",

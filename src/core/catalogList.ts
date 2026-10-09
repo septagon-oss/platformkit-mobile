@@ -1,12 +1,14 @@
 import type { Entry } from "./catalog";
 import {
+  enumLabel,
+  fieldLabel,
   filterFields,
-  humanize,
   label,
   listCells,
   listPreview,
   narrowed,
-  plural,
+  noun,
+  nounPhrase,
   readPhase,
   saidValue,
   sortOptions,
@@ -35,7 +37,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
     const { entry } = input,
       fields = listCells(entry),
       preview = listPreview(entry),
-      noun = humanize(entry.entity).toLowerCase(),
+      named = nounPhrase(entry),
       phase = readPhase(input.loading, input.rows.length, input.error);
     const state = input.error
       ? v.take(
@@ -65,14 +67,14 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
     const sections: readonly DataSection[] = [
       {
         id: "records",
-        title: humanize(plural(entry.entity)),
+        title: noun(entry).plural,
         rows: input.rows.map((row) => ({
           id: text(row.id),
-          title: label(entry, row),
+          title: label(entry, row, p.copy.kit.untitled),
           ...(preview && text(row[preview.name]) ? { summary: text(row[preview.name]) } : {}),
           cells: fields.map((field) => ({
             id: field.name,
-            label: humanize(field.name),
+            label: fieldLabel(field),
             ...saidValue(field, row[field.name], p),
           })),
           selectable: false,
@@ -104,8 +106,8 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
                       ...(p.copy.language === "en"
                         ? {
                             title: narrowed(input.order)
-                              ? `No ${noun} matches`
-                              : `No ${plural(noun)} yet`,
+                              ? `No ${named.singular} matches`
+                              : `No ${named.plural} yet`,
                           }
                         : {}),
                       ...(input.canCreate && !narrowed(input.order)
@@ -116,7 +118,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
                                 id: "new",
                                 label:
                                   p.copy.language === "en"
-                                    ? `New ${noun}`
+                                    ? `New ${named.singular}`
                                     : `${p.copy.gallery.add}: ${entry.entity}`,
                                 tone: "primary",
                                 state: "ready",
@@ -135,7 +137,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
             { id: "any", label: p.copy.kit.clear, value: "", enabled: true },
             ...(field.enum ?? []).map((value) => ({
               id: `value:${value}`,
-              label: humanize(value),
+              label: enumLabel(field, value),
               value,
               enabled: true,
             })),
@@ -143,7 +145,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
           return {
             id: field.name,
             field: field.name,
-            label: humanize(field.name),
+            label: fieldLabel(field),
             choices,
             selectedId:
               choices.find((c) => c.value === (input.order.filters[field.name] ?? ""))?.id ??
