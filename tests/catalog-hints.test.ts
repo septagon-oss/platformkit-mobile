@@ -5,10 +5,11 @@
 // mount (`kit/rest/hints.go`), so these bytes decide the phone's robustness, not
 // a server's behaviour. `testdata/catalog.json` itself declares nothing.
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { createApi } from "../src/effects/api";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { parseCatalog, type Entry } from "../src/core/catalog";
+import { parseCatalog, type Entry, type Field } from "../src/core/catalog";
 import {
   badgeTone,
   collectionCommands,
@@ -326,6 +327,68 @@ test("no hint changes a request", () => {
     "declared summary cells are the author's order, not the ranking",
   );
   assert.equal(listPreview(entry)!.name, "body");
+});
+
+const readBytes = (name: string): Buffer =>
+  readFileSync(new URL(`../testdata/${name}`, import.meta.url).pathname);
+const sha256 = (bytes: Buffer): string => createHash("sha256").update(bytes).digest("hex");
+const hintsGolden = () => JSON.parse(readBytes("catalog.hints.json").toString("utf8"));
+interface HintsRecord {
+  readonly schema: string;
+  readonly fixture: string;
+  readonly sha256: string;
+  readonly origin: { readonly kind: string; readonly base: string; readonly baseSha256: string };
+}
+interface HintsRecord {
+  readonly schema: string;
+  readonly fixture: string;
+  readonly sha256: string;
+  readonly origin: { readonly kind: string; readonly base: string; readonly baseSha256: string };
+}
+const hintsRecord = () =>
+  JSON.parse(readBytes("catalog.hints.source.json").toString("utf8")) as HintsRecord;
+
+/** A field with its reading decisions taken away: the shape the pinned document gives it. */
+const unread = (f: Field): Omit<Field, "hints"> => {
+  const { hints: _reading, ...rest } = f;
+  return rest;
+};
+
+test("the hinted golden is the pinned copy plus what that copy does not yet declare", () => {
+  // No kernel resource declares a hint yet, so this shape is this repository's
+  // own declaration, written on top of the pinned bytes and recorded as such:
+  // the record names the copy it extends and hashes both, so the relation is a
+  // fact a test can refuse rather than a comment somebody remembered.
+  const record = hintsRecord();
+  assert.equal(record.schema, "platformkit.catalog-declared.v1");
+  assert.equal(record.fixture, "testdata/catalog.hints.json");
+  assert.equal(record.origin.kind, "this repository");
+  assert.equal(record.origin.base, "testdata/catalog.json");
+  assert.equal(record.sha256, sha256(readBytes("catalog.hints.json")));
+  assert.equal(record.origin.baseSha256, sha256(readBytes("catalog.json")));
+
+  const declared = parseCatalog(hintsGolden(), (at, why) => {
+    throw new Error(`the declared fixture noticed ${at} ${why}`);
+  });
+  const pinned = parseCatalog(golden());
+  assert.equal(declared.version, 2);
+  assert.equal(declared.resources.length, pinned.resources.length);
+  assert.equal("hints" in declared.resources[0]!, true);
+  // Everything but the presentation objects is the pinned document, field for
+  // field and command for command: the extension adds words, not facts.
+  for (const [i, entry] of declared.resources.entries()) {
+    assert.equal(entry.module, pinned.resources[i]!.module);
+    assert.equal(entry.entity, pinned.resources[i]!.entity);
+    assert.equal(entry.path, pinned.resources[i]!.path);
+    assert.deepEqual(
+      entry.fields.map(unread),
+      pinned.resources[i]!.fields.map(unread),
+      "a declared hint reached a field's own shape",
+    );
+    if (i > 0) assert.equal("hints" in entry, false, `resources[${i}] declares nothing`);
+  }
+  assert.equal(declared.resources[0]!.hints?.singular, "Note");
+  assert.equal(statusField(declared.resources[0]!), declared.resources[0]!.fields[5]);
 });
 
 /** One served body, once, for the transport that owns the parse. */

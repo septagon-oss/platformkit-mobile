@@ -1,0 +1,13 @@
+{
+  "schema": "platformkit.catalog-declared.v1",
+  "fixture": "testdata/catalog.hints.json",
+  "sha256": "8a441a53f403183121bfbe9b3957fa35eb81ee14fea30631b2405c1a24a37e0d",
+  "origin": {
+    "kind": "this repository",
+    "base": "testdata/catalog.json",
+    "baseSha256": "abc1bd424f5a12cfd65b181d95c96868ed8a05bb1b30249fdc5c3d99ce52d832",
+    "baseCommand": "node --import tsx scripts/catalog.ts refresh",
+    "command": "the pinned copy with this repository's declarations added by hand",
+    "note": "Not a kernel capture. No kernel resource declares a hint yet (kit/entity Hints are unset in every module at the pin), so no served catalogue carries one. This file is the pinned copy plus the hints this repository declares for itself, which is what makes a hint parse testable at all; tests/catalog-hints.test.ts asserts the two files still agree on every entry the pinned copy has, and that the declared entry agrees on everything but its presentation objects. Malformed hints are not here: kit/rest/hints.go refuses them at mount, so no kernel could serve them, and they live as mutations inside that file instead."
+  }
+}
