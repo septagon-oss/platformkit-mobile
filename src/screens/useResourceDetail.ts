@@ -112,7 +112,10 @@ export function useResourceDetail(
       // Whoever wrote here said what the write did; this is the screen that lands on
       // it, and the focus that reconciles the write counter is the moment to hear it.
       const said = heard(address("detail", entry, id));
-      if (said !== "") setSaved(said);
+      // A focus that heard nothing has nothing to say. The sentence belongs to the
+      // visit it was heard in: a person who comes back to this record by way of a
+      // sheet that wrote nothing is not told again what an earlier write did.
+      setSaved(said);
       const now = writes[k] ?? 0;
       if (now !== seen.current) {
         seen.current = now;

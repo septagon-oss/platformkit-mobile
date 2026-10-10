@@ -485,7 +485,8 @@ hidden ones the author keeps as plumbing and the immutable echo of what the read
 so a whole-row replace clears nothing by omission, while `id`, `createdAt` and `updatedAt`
 never travel back. **A landed write says so**: one success haptic and one sentence that
 outlives the screen that wrote it — the shell holds one slot, filed by the destination address
-the writer names (`say`) and read once by the record that lands there (`heard`) — "Note
+the writer names (`say`) and read once by the record that lands there (`heard`), for the visit
+it was heard in: a focus that hears nothing draws nothing — "Note
 created" after a create, "Changes saved" after an edit and after a singleton's PUT, drawn as
 an `ok` `Notice` with a polite live region beside the row it is about.
 

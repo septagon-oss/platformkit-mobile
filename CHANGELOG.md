@@ -48,7 +48,8 @@ for the version being released.
   address, said by the screen that wrote and heard once by the screen that lands there,
   because a confirmation cannot live in a sheet that is on its way out. `ResourceDetail`
   takes the matching `saved?: string` prop and draws it as an `ok` `Notice` with a polite
-  live region.
+  live region. The sentence belongs to the visit it was heard in: a focus that hears
+  nothing draws nothing, so a record is never still saying what some earlier write did.
 - `ResourceForm` (organisms) takes `awaiting?: string` and performs it — the ref of that
   field's box, focused, and asked of React Native to be brought above the keyboard — and
   `refusals?: number` beside it, the count of refusals the sheet has announced, which is

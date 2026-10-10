@@ -40,6 +40,30 @@ describe("useResourceDetail", () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2));
   });
 
+  test("what a write said is said for the visit it landed in, and a visit that heard nothing says nothing", async () => {
+    const api = fakeApi();
+    api.get.mockResolvedValue({ id: "1", title: "Buy milk" });
+    // One sentence filed under this record's address and consumed on read: the
+    // shell's own rule, held here so the case can say what the second focus hears.
+    let filed = "Changes saved";
+    const heard = jest.fn((at: string) => {
+      if (at !== "/note/note/1" || filed === "") return "";
+      const said = filed;
+      filed = "";
+      return said;
+    });
+    shell.value = shellValue(api, { heard });
+    const { result, rerender } = await renderHook(() => useResourceDetail(note, "1", feedback));
+    await waitFor(() => expect(result.current.saved).toBe("Changes saved"));
+    // A sheet opened from this record and dismissed without writing: the focus that
+    // comes back hears nothing, so the sentence about an earlier write goes with the
+    // visit it was heard in instead of staying under the row for the session.
+    shell.value = shellValue(api, { heard });
+    await rerender(undefined);
+    await waitFor(() => expect(result.current.saved).toBe(""));
+    expect(api.get).toHaveBeenCalledTimes(1);
+  });
+
   test("a late read cannot overwrite a newer one", async () => {
     const api = fakeApi();
     const first = Promise.withResolvers<Record<string, unknown>>();
