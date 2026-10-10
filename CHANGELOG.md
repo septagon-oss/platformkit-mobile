@@ -30,6 +30,31 @@ for the version being released.
   a row with), `informationFields` (the identifier and the two stamps, named once) and
   the section model itself; `record-menu` and `record-information` are the two ids a
   journey finds a record's header menu and its collapsed block by.
+- A form now keeps what the person typed and says exactly what to fix, and the rules
+  behind it are exported. `problems` refuses a required field left empty (a switch, which
+  always answers, and a value nobody may fill aside) and answers every refusal in a
+  sentence, so `FormWords` gains `fieldRequired`, `fieldChoiceRequired`, `fieldNumber`
+  and `fieldTime` — a breaking change to that interface in name only for anyone who
+  implemented it, which nothing outside this repository does, and the two wire fragments
+  it used to return ("is not a number", "is not a time") are gone. New in the same
+  subpath, additive: `changedFields` (the controls whose effective value differs from the
+  row's — what a discard guard asks), `firstProblem` (the first control in the sheet's own
+  asked order that carries a sentence) and `writeControls` (the body of a whole-row
+  replace: the drawn fields plus the writable ones the sheet was never shown, and never
+  the server's own `id`, `createdAt` or `updatedAt`). Ten sentences joined the copy table
+  in both languages: the four above, plus `discardChanges`, `discardUnsaved`,
+  `keepEditing`, `discard`, `created` and `changesSaved`.
+- `ShellValue` gains `say(href, sentence)` and `heard(href)`: one sentence for one
+  address, said by the screen that wrote and heard once by the screen that lands there,
+  because a confirmation cannot live in a sheet that is on its way out. `ResourceDetail`
+  takes the matching `saved?: string` prop and draws it as an `ok` `Notice` with a polite
+  live region.
+- `ResourceForm` (organisms) takes `awaiting?: string` and performs it — the ref of that
+  field's box, focused, and asked of React Native to be brought above the keyboard;
+  `Screen` (templates) takes the optional `scrollViewRef` that makes the scroll view
+  reachable, which is a handle and no rule. A singleton's Edit is drawn only once its row
+  has been read, and its Save rechecks the same thing from inside.
+
 - A list row now says which record it is, what state that record is in, and what sets it
   apart: `listRow` assembles the title, the record's own line, the declared pill and at
   most two values, and `DataList` draws those values through `Value` and `Labelled` in the

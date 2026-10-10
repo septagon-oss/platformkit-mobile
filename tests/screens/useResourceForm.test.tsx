@@ -248,7 +248,10 @@ describe("useResourceForm", () => {
       await result.current.save();
     });
     expect(result.current.phase).toBe("editing");
-    expect(result.current.held).toMatchObject({ title: "Buy milk", body: "from the shop on the corner" });
+    expect(result.current.held).toMatchObject({
+      title: "Buy milk",
+      body: "from the shop on the corner",
+    });
     expect(result.current.detail).toBe("We couldn't save your changes.");
     // A save that failed is not replayed by itself; the person asks again.
     expect(api.update).toHaveBeenCalledTimes(1);

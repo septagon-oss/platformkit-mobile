@@ -446,6 +446,70 @@ its required-or-optional word and its refusal are drawn, so a control that grows
 line cannot disagree with the label above it; and the two comma predicates are the
 storage rule itself, which any other writer of a comma-joined field can ask.
 
+A sheet keeps what a person typed and says exactly what to mend. **Validation runs on
+Save**: `problems` answers a sentence per field — "Enter a title." for a box one types
+into, "Choose a due date." for a value one picks, "Enter a valid number.", "Enter a
+valid date and time." — and every one of them exists in `kitCopy` in English and
+Portuguese before a screen may hold it, because a fragment off the wire ("is not a
+number") is a second implementation of the copy table in a language nobody reads. The
+phone refuses only what the catalogue makes it certain of: required-and-empty, not-a-number,
+not-an-instant, and the two list rules above. A range, a unit, a uniqueness, a permission or
+a tenant policy stays the server's, arrives as a 422 whose `body.` prefix the transport strips,
+and is drawn under that field in the same shape. **The sheet then asks for one field**:
+`firstProblem` names the first control *in the sheet's own asked order* that carries a
+sentence — never the first key of the refusal, which arrives in wire order — the hook
+holds it as `awaiting`, the organism focuses that box's ref and asks React Native's
+`scrollResponderScrollNativeHandleToKeyboard` to lift it above the keyboard, and typing into it is
+what clears it. A refusal about a control with no box to focus (a choice, a date row, a
+switch, a tag box) focuses nothing: `FormField` announces `label: error`, its error line is a
+polite live region and the notice above the fields is `urgent`. **Dirty means changed, not
+touched**: `changedFields` compares each control's effective value with the one the row
+arrived with, so typing a word and putting it back asks nobody's permission; the one
+predicate is used by the sheet, by a command's argument and by the singleton, and the
+guard covers Cancel as well as system back and the swipe gesture. **Values survive every
+failure** — a refused save, a 422 under its field, a 500 (`failure.saveFailed`), a
+transport that never answered (`failure.uncertain`, and a save is never replayed), a 409
+(`failure.revision`, no silent overwrite), a 401 (the draft stays filed under this address
+for this person) — because no failure path writes `held`. **Save exists only while the
+row is on screen**: the button is disabled outside `editing` and the transition rechecks
+`phase` and `offers` from inside, so a sheet reached by a link cannot write what it never read.
+A **singleton** gets the same protection: the same question before a dirty draft is thrown
+away, the same Save guard, an Edit drawn only once its row has been read, and a PUT built by
+`writeControls`, which carries every field this client may write — the ones the form drew, the
+hidden ones the author keeps as plumbing and the immutable echo of what the read returned —
+so a whole-row replace clears nothing by omission, while `id`, `createdAt` and `updatedAt`
+never travel back. **A landed write says so**: one success haptic and one sentence that
+outlives the screen that wrote it — the shell holds one slot, filed by the destination address
+the writer names (`say`) and read once by the record that lands there (`heard`) — "Note
+created" after a create, "Changes saved" after an edit and after a singleton's PUT, drawn as
+an `ok` `Notice` with a polite live region beside the row it is about.
+
+**Reused** — `problems`, `values`, `formControls`, `formSections`, `orderControls`,
+`control`, `text`, `numberValue`, `timeValue`, `noun`, `fieldLabel` and `refusalFields`
+for what a refusal is made of and what a body is made of; the copy table's own
+function-shaped entries (`untitled`, `deleteQuestion`, `deleteAction`) as the model for
+the sentences that name a field or a resource; `TextField`'s existing `forwardRef`,
+`Screen form`'s keyboard handling, `FormField`'s announcement and `Notice`'s `ok` tone
+and live region for the drawing; `usePreventRemove` and `src/ui/chooser.ts`'s `confirm`,
+already used by three screens, for the question; the shell's existing holders (one draft
+keyed by its address, one write counter per resource) for the two things that must survive
+a screen. **Added** — `changedFields`, `firstProblem` and `writeControls` in the core,
+`awaiting` in both hooks, and ten sentences in `kitCopy` in both languages, because the
+trace's inventory held the set of controls and the body builder but no answer to "which
+field changed", "which field is being asked for" or "what does a whole-row replace
+carry", and no sentence anywhere in either language for a required field, a discarded
+draft or a write that landed; `ShellValue.say`/`heard` because nothing in the tree carried
+a sentence across a screen — the shell already owns exactly that kind of transient twice
+over (a draft, a write count) and nothing else does. `Screen` gained one optional
+`scrollViewRef`, which is the handle the page needs and no rule of its own. **Made
+reusable** — `writeControls` is the whole-row body, so any future PUT of one row (a
+settings resource, a masked form) keeps the fields it was not shown without learning what
+hidden means; `changedFields` and `firstProblem` are two hooks' worth of decisions in the
+core, exported, so a custom renderer pack gets the same dirty rule and the same field to
+focus; `FormWords` is now the whole seam between a refusal and its sentence, so the core
+writes no English at all; and `say`/`heard` is one sentence for one address, which is the
+carrier the next "the write landed" moment will need instead of a toast.
+
 ## Design
 
 Every PlatformKit phone app is composed from this directory, so the kit is why

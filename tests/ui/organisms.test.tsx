@@ -137,6 +137,41 @@ describe("ResourceList", () => {
   });
 });
 
+describe("ResourceDetail's one sentence", () => {
+  const row = { id: "note-7", title: "Kickoff", status: "open" };
+
+  test("the record says once what the write said, beside the row it is about", async () => {
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        saved="Note created"
+        onRetry={none}
+      />,
+    );
+    // A confirmation, not an alarm: the ok tone, and a polite live region, because a
+    // person who just wrote the record should hear it without being interrupted by it.
+    const said = screen.getAllByTestId("record-saved").at(-1)!;
+    expect(said).toHaveTextContent(/Note created/);
+    const spoken = screen.getByText(/Note created/).parent!;
+    expect(spoken).toHaveProp("accessibilityLiveRegion", "polite");
+    expect(spoken).toHaveProp("accessibilityRole", "text");
+    expect(screen.queryByTestId("refusal")).toBeNull();
+    // The record is still the record: the sentence sits above its facts, in place of
+    // nothing.
+    expect(screen.getByTestId("resource-detail")).toBeOnTheScreen();
+  });
+
+  test("a record nobody just wrote says nothing about a write", async () => {
+    await inTheme(
+      <ResourceDetail feedback={feedback} entry={note} row={row} error="" onRetry={none} />,
+    );
+    expect(screen.queryByTestId("record-saved")).toBeNull();
+  });
+});
+
 describe("ResourceForm", () => {
   const blocks = formSections(note, undefined, true, feedback.copy.kit.overview);
   const base = {
