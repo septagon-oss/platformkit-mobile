@@ -388,8 +388,9 @@ handle preference changes while mounted and default to still until resolved.
 { id: ID; label: string; value: string }[]; status?: Status; selectable: boolean;
 selectionReason?: string; open?: Action; actions: readonly Action[] }`.
 The catalog adapter obtains a row from `listRow`, which is `rowPrimary`, `statusPill`,
-`listPreview(entry, "row")` and `listCells` (at most two, and never the identifier, either
-stamp, or the state the row already wears as its pill) read through `label`, `enumLabel`, `enumTone`, `badgeTone` and `display`; a cell
+`listPreview(entry, "row")` and `listCells` (at most two whoever named them — a declared
+`summaryFields` keeps its first two — and never the identifier, either stamp, or the state
+the row already wears as its pill) read through `label`, `enumLabel`, `enumTone`, `badgeTone` and `display`; a cell
 carries the `Field` behind it, which is how `Value` draws it in the shape its type
 deserves and `Labelled` keeps a short label only for a value that cannot speak for
 itself. Custom screens supply equivalent generic inputs to derive.

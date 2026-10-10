@@ -34,9 +34,10 @@ for the version being released.
   apart: `listRow` assembles the title, the record's own line, the declared pill and at
   most two values, and `DataList` draws those values through `Value` and `Labelled` in the
   shapes their types deserve and the pill in the right-hand column `Row` reserves for it.
-  `listCells` budgets two values, not three, and never answers the identifier, either
-  stamp, or the state the row already wears as its pill: one value is drawn once, at the
-  place that owes it.
+  `listCells` budgets two values, not three, whoever named them — a declared
+  `summaryFields` longer than the line keeps its first two — and never answers the
+  identifier, either stamp, or the state the row already wears as its pill: one value is
+  drawn once, at the place that owes it.
 - `narrowed` is gone from `./core/derive`, which is a breaking change to a published
   subpath: below 1.0.0 the minor carries that. It answered "is anything filtered" and
   "is anything reordered" with one boolean, which is why a list ordered by title and

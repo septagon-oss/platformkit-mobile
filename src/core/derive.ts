@@ -383,9 +383,10 @@ export function listColumns(e: Entry): readonly Field[] {
  * yes or no, then a number, then words, and only then the times and
  * identifiers every record has and few people scan for.
  *
- * The budget is two: one line of a phone holds two values beside the line the
- * record wrote about itself, and a third is scanned by nobody. Plumbing — the id
- * and the two stamps — is never a cell whoever pointed at it: the row answers
+ * The budget is two, whoever named the fields: one line of a phone holds two
+ * values beside the line the record wrote about itself, and a third is scanned by
+ * nobody, so a declared list longer than two keeps its first two. Plumbing — the
+ * id and the two stamps — is never a cell whoever pointed at it: the row answers
  * those questions the same way the record does, in its `recordInformation` block.
  *
  * Neither is the declared state. `statusField`'s value is the row's *pill*, drawn
@@ -406,9 +407,11 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
   if (declared !== undefined)
     // Declared means those, in the order the author gave them, minus any field a
     // row may not speak of and minus what the row draws above or beside the cells.
-    return declared.flatMap((name) =>
-      e.fields.filter((f) => f.name === name && rowContent(f) && !shownTwice(f)),
-    );
+    // `limit` binds here too: a declaration says which values and in which order,
+    // not that a phone has room for a third.
+    return declared
+      .flatMap((name) => e.fields.filter((f) => f.name === name && rowContent(f) && !shownTwice(f)))
+      .slice(0, limit);
   const rank = (f: Field): number => {
     if (f.enum && f.enum.length > 0) return 0;
     if (f.type === "bool") return 1;

@@ -3,8 +3,9 @@
 // entry leads with, the state it declares, the line it writes about itself, the couple
 // of values beside the line), the pill is coloured only by what the document declared
 // for that value, the declared state is the pill and never one of those two values,
-// plumbing is never drawn whoever pointed at it, and a value nobody answered prints no
-// cell and no dash. An entry that declares no state shows no pill: the kit never guesses
+// the budget of two binds a declared list as it binds the derived one, plumbing is
+// never drawn whoever pointed at it, and a value nobody answered prints no cell and no
+// dash. An entry that declares no state shows no pill: the kit never guesses
 // one from "the first enum field".
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -12,6 +13,7 @@ import test from "node:test";
 import { parseCatalog, type Entry } from "../src/core/catalog";
 import {
   deriveCopy,
+  listCells,
   listRow,
   recordHeader,
   recordInformation,
@@ -170,6 +172,29 @@ test("plumbing is never a cell whoever pointed at it", () => {
     [],
   );
   assert.equal(lines.length, 1, lines.join("\n"));
+});
+
+test("a declared summary longer than the row's line keeps the author's first two", () => {
+  // The budget is the row's, not the ranking's. `limit` bounded only the derived
+  // ranking, so a fixture that named three values drew three cells on a line with
+  // room for two, while this build's own README said the cells were "budgeted at
+  // two". One of the two had to move, and it was the code: the row owns its slots.
+  const three = plainEntry({ summaryFields: ["rank", "pinned", "body"] });
+  assert.deepEqual(
+    listRow(three, task, presentation, untitled).cells.map((c) => c.id),
+    ["rank", "pinned"],
+    "the author's first two, in the author's order, never the kit's ranking",
+  );
+  // The budget is what a screen has room for, which is why it is asked for and not
+  // hard-coded in the document: a wider reader is asked wider.
+  assert.deepEqual(
+    listCells(three, 3).map((f) => f.name),
+    ["rank", "pinned", "body"],
+  );
+  // Nothing is lost by the row's arithmetic. The paragraph a row had no room for is
+  // still the record's own line, which is where a value goes when a bigger screen
+  // holds it.
+  assert.equal(recordHeader(three, task, presentation, untitled).summary, task.body);
 });
 
 test("a value nobody answered prints no cell, and no dash stands in for it", () => {
