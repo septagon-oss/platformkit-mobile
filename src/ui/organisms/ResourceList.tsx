@@ -146,10 +146,13 @@ export function ResourceList(props: Props) {
           : {})}
       >
         {model.filters.map((filter) => (
+          // A test id names which group a choice belongs to: two enum fields would
+          // otherwise both emit `filters/all`, and a journey that taps one would be
+          // told it found two.
           <ChoiceRows
             key={filter.model.id}
             model={filter.model}
-            testID="filters"
+            testID={`filters-${filter.model.id}`}
             onChange={(id) => chooseFilter(filter.model.id, id)}
           />
         ))}

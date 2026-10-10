@@ -4,12 +4,14 @@
 // closes the sheet, because choosing is the whole answer. The filters sheet leads each
 // group with "All", never offers a reset inside a group, stays open while a value is
 // picked, and offers the one action that empties them only when something is filtered. A
-// sheet that is closed puts no choice on screen; the toolbar's word stays either way.
+// sheet that is closed puts no choice on screen; the toolbar's word stays either way. Each
+// group's choices name the group they belong to, and the bar that holds both doors is read
+// by its own name, not by the name of one door.
 import React from "react";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
-import { parseCatalog, type Entry } from "../../src/core/catalog";
+import { parseCatalog, type Entry, type Field } from "../../src/core/catalog";
 import type { Order } from "../../src/core/derive";
 import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { ThemeProvider } from "../../src/ui/theme";
@@ -106,6 +108,29 @@ describe("the filters sheet", () => {
     expect(onSheet).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByRole("button", { name: "Clear filters" }));
     expect(onOrder).toHaveBeenLastCalledWith({ sort: "title", filters: {} });
+  });
+
+  test("each field to narrow by gets a group whose choices name it", async () => {
+    // A test id that names no group puts `filters/all` on the screen twice the moment
+    // an entry holds two closed sets, and a journey that taps one would be told it
+    // matched two. Nothing this repository serves has two enums yet, so the second
+    // one is written here rather than left to a fixture nobody reads.
+    const room: Field = { name: "room", type: "string", enum: ["kitchen", "cellar"] };
+    const two: Entry = { ...note, fields: [...note.fields, room] };
+    await list(two, { sort: "", filters: {} }, "filters");
+    expect(screen.getByTestId("filters-status/value%3Aopen")).toBeOnTheScreen();
+    expect(screen.getByTestId("filters-room/value%3Akitchen")).toBeOnTheScreen();
+  });
+});
+
+describe("the toolbar under the header", () => {
+  test("the bar is named for itself and its two doors keep their own words", async () => {
+    // `ActionBar` names the group a reader hears. Named "Sort", the bar would say it
+    // *is* its Sort button, and the Filters door would sit under the wrong name.
+    await list(note, { sort: "", filters: {} }, "none");
+    expect(screen.getByTestId("list-toolbar").props.accessibilityLabel).toBe("List controls");
+    expect(screen.getByRole("button", { name: "Sort" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Filters" })).toBeOnTheScreen();
   });
 
   test("the toolbar counts what its sheet can clear", async () => {

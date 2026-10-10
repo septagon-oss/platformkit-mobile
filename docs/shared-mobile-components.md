@@ -433,12 +433,13 @@ its busy/disabled state and emits the current Order/groupId without persisting i
 | --- | --- | --- |
 | `ChoiceChips` / molecule | `model: ChoiceGroupModel`, `onChange(ID \| undefined)`; single selection, wrapping chips with radio/selected semantics. An optional clear control emits `undefined` only when not required. Derivation shares the choice decision with ChoiceRow. | `choice-chips/default`, `selected`, `disabled-option`, `required`, `long-labels`, plus pressed/focus; R10, R23. |
 | `SelectionControl` / atom | `model: { label; selected: boolean \| 'mixed'; enabled; reason? }`, `onChange(boolean)`. Mixed activation selects all eligible loaded rows; selected activation clears them. | `selection-control/off`, `on`, `mixed`, `disabled`, plus pressed/focus; R02's selection affordance adapted to a native checkbox. |
-| `ActionBar` / molecule | `model: { label; actions: readonly Action[] }`, `onAction(id)`. Preserve supplied order; wrap full labels; no nested pressable parent. | `action-bar/one`, `multiple`, `destructive`, `busy`, `disabled`, `long-copy`; R03, R09. |
+| `ActionBar` / molecule | `model: { label; actions: readonly Action[] }`, `onAction(id)`. Preserve supplied order; wrap full labels; no nested pressable parent. `label` names the *bar* a reader hears (`listControls` for a list's toolbar, never one of the doors inside it), and a supplied `testID` is the bar's own id as well as the prefix of every control inside it. | `action-bar/one`, `multiple`, `destructive`, `busy`, `disabled`, `long-copy`; R03, R09. |
 | `DataList` / organism | `model: DataListModel`; `onOpen(rowId)`, `onRowAction(rowId,actionId)`, `onView(id)`, `onViewAction(id,actionId)`, `onSaveView({order,groupId?})`, `onSelection(ids)`, `onCollapse(ids)`, `onBulkAction(actionId,ids)`, `onRefresh()`, `onMore()`. Only supplied controls are rendered. The order it was read with stays in the model
 (`filters`, `sort` and their `targets`); the controls that change it are the toolbar row and
 the two sheets the list screen draws over it (`deriveListToolbar`, `deriveSortSheet`,
 `deriveFilterSheet`, `ChoiceRows`), not the list's own header, so an organism that composes
-`DataList` directly supplies them from those targets. | `data-list/grouped`, `ungrouped`, `counts-unknown`, `collapsed`, `filtered-empty`, `inline-actions`, `saved-view`, `view-dirty`, `selection-none`, `selection-some`, `selection-all-loaded`, `selection-unavailable`, `paging`, `page-error`, `refresh-error`, plus common states; R02, R23. |
+`DataList` directly supplies them from those targets, keying each group's choices with the
+group's own name (`filters-<field>/<value>`) so two closed sets never share one id. | `data-list/grouped`, `ungrouped`, `counts-unknown`, `collapsed`, `filtered-empty`, `inline-actions`, `saved-view`, `view-dirty`, `selection-none`, `selection-some`, `selection-all-loaded`, `selection-unavailable`, `paging`, `page-error`, `refresh-error`, plus common states; R02, R23. |
 
 Selection is **loaded-row scope**, never “all results on the server.” The helper
 intersects requested IDs with eligible loaded rows and emits them in section/row

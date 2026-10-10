@@ -277,8 +277,10 @@ empties them all, present only where it has something to empty. Clearing filters
 sort, because ordering is not narrowing — which is the same fact that makes
 `sorted-but-unfiltered` answer "No notes yet" and never "No matching notes", and why the
 count on the toolbar says "Filters · 2" for two filters and no order. The two controls sit
-in a toolbar row under the header, where the list is, and neither is offered on a list that
-holds nothing and has nothing filtered.
+in a toolbar row under the header, where the list is; that row is named for itself ("List
+controls") and not for one of the two doors it holds, so a reader hears a group and then its
+two doors, and a choice in the filters sheet carries the name of the group it narrows.
+Neither control is offered on a list that holds nothing and has nothing filtered.
 
 **Reused** — `rowPrimary`, `label(…, "row")`, `statusField`, `enumLabel`, `enumTone`,
 `badgeTone`, `listColumns`, `listCells`, `listPreview`, `saidValue`, `display`, `hasValue`,

@@ -64,6 +64,16 @@ for the version being released.
   two sheets; `ChoiceRows` is the new molecule they are made of, and `Row` gained the role a
   row asks a reader for. Nothing reads `ordering` any more, so nothing writes it.
 
+- Two words the kit was missing, and an id. `kit.listControls` names the toolbar row a
+  list's two doors sit in: the bar's accessible name was `kit.sort`, which told a reader the
+  bar *is* its Sort button and left the filters door beside it under the wrong name. A
+  supplied `testID` now names the `ActionBar` itself as well as every control inside it, so
+  the bar a reader hears the name of is a bar a journey can look up. Additive.
+- Each group of a filters sheet keys its choices with the group's own name
+  (`filters-status/value%3Aopen`), where every group drew `filters/value%3A…`: an entry with
+  two closed sets would have put one id on two rows and a journey that taps one would be
+  told it found two.
+
 ## 0.2.0
 
 - catalogVersion: 2

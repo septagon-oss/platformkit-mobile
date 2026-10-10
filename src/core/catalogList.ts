@@ -328,7 +328,10 @@ export interface ToolbarInput {
  *
  * The count names only filters. A sort is not counted because a sort is not
  * narrowing, and "Filters · 2" that counted an order would tell a person two
- * things were left out when one was only put in another sequence.
+ * things were left out when one was only put in another sequence. The bar itself is
+ * named for the bar (`listControls`), not for one of the two doors it holds: the
+ * accessible name of a group that repeated a button inside it would say the bar is
+ * that button.
  */
 export function deriveListToolbar(input: ToolbarInput, p: Presentation) {
   return build(p, (v: Validation) => {
@@ -339,7 +342,7 @@ export function deriveListToolbar(input: ToolbarInput, p: Presentation) {
       bar: v.take(
         deriveActions(
           {
-            label: p.copy.kit.sort,
+            label: p.copy.kit.listControls,
             actions: !offered
               ? []
               : [

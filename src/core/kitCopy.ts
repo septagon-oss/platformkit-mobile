@@ -60,6 +60,10 @@ export const kitEnglish = {
   filters: "Filters",
   moreFilters: "More filters",
   sort: "Sort",
+  // The bar under the header that holds both doors. It is named for itself: the
+  // accessible name of a group of controls that repeated one of its own buttons
+  // would tell a reader the bar *is* that button.
+  listControls: "List controls",
   // A filter group always answers, so the choice that narrows nothing is "All", the
   // reading of the group, and never "Clear", which is what a reset at the group's edge
   // is called (`clear` above stays that word's owner).
@@ -294,6 +298,7 @@ export const kitPortuguese: KitWords = {
   filters: "Filtros",
   moreFilters: "Mais filtros",
   sort: "Ordenação",
+  listControls: "Controles da lista",
   all: "Todos",
   clearFilters: "Limpar filtros",
   filtersActive: (count: string) => `Filtros · ${count}`,

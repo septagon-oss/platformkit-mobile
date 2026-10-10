@@ -5,8 +5,8 @@
 // answers its own "All", never "Clear" standing where "All" is meant, and the one action
 // that empties the groups appears only when something is filtered; clearing keeps the
 // sort, because ordering is not narrowing. Under the header, the filters control counts
-// what it can clear, and neither control is offered on a list that holds nothing and has
-// nothing filtered.
+// what it can clear, the bar that holds both doors is named for itself, and neither
+// control is offered on a list that holds nothing and has nothing filtered.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -239,6 +239,18 @@ test("the filters control counts what it can clear, and an order is never counte
   const only: Order = { sort: "", filters: { status: "done" } };
   assert.equal(toolbar(entry, only, 3).bar.actions[1]!.label, "Filters · 1");
   assert.equal(activeFilters(only, entry), 1);
+});
+
+test("the bar that holds both doors is named for the bar and not for one door", () => {
+  // `ActionBar` reads the accessible name of its group from this label. A bar named
+  // "Sort" would tell a reader that the group *is* its Sort button, and leave the
+  // Filters door beside it standing under the wrong name — in both bundles.
+  assert.equal(toolbar(plainEntry(), noOrder, 3).bar.label, "List controls");
+  const pt = { ...presentation, copy: deriveCopy("pt") };
+  const said = deriveListToolbar({ entry: plainEntry(), order: noOrder, rows: 3 }, pt);
+  assert.equal(said.ok, true, JSON.stringify(said));
+  if (!said.ok) throw new Error("unreachable");
+  assert.equal(said.value.bar.label, "Controles da lista");
 });
 
 test("an entry with nothing to narrow by is offered no filters control at all", () => {
