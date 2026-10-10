@@ -1164,13 +1164,36 @@ export function problems(
 }
 
 /**
+ * sameAnswer is whether a control holds what it arrived with. For most controls one
+ * answer has one spelling, so the strings settle it. Two do not:
+ *  - an instant, because the date row writes `timeWire`, which always carries
+ *    milliseconds, while the server spells the same instant without them
+ *    ("2026-07-18T09:00:00Z" beside "2026-07-18T09:00:00.000Z"), and because a value
+ *    neither side can read is not an answer at all - `problems` refuses it, and a
+ *    refusal is worth asking about;
+ *  - a switch, because `values` reads anything but "true" as off, so an absent value
+ *    and an explicit "false" are the same answer.
+ * Both are the sheet's own question - is there anything here a person would miss?
+ */
+function sameAnswer(c: Control, typed: string): boolean {
+  if (typed === c.value) return true;
+  if (c.kind === "switch") return (typed === "true") === (c.value === "true");
+  if (c.kind !== "datetime") return false;
+  const now = timeValue(typed);
+  const then = timeValue(c.value);
+  return now !== undefined && then !== undefined && now.getTime() === then.getTime();
+}
+
+/**
  * changedFields names the controls, in asked order, whose effective value differs
  * from the one the row arrived with: changed, not merely touched. `held` is what a
  * person typed and `Control.value` what the read returned (or the declared default on a
  * create), so retyping the same text, re-picking the same instant or toggling a switch
  * back is no change - and a person who changed nothing is never asked whether they
- * meant to throw it away. Comparison is on the string a control holds, which is why a
- * switch's "true", a number's "3" and an instant's `timeWire` match their own row.
+ * meant to throw it away. Comparison is on what a control means, which is why a
+ * switch's "true", a number's "3", a row's own instant and `timeWire`'s spelling of it
+ * all match their own row. See `sameAnswer` for the two that do not spell one answer
+ * one way.
  */
 export function changedFields(
   controls: readonly Control[],
@@ -1178,7 +1201,7 @@ export function changedFields(
 ): readonly string[] {
   const out: string[] = [];
   for (const c of controls)
-    if (c.field.name in held && held[c.field.name] !== c.value) out.push(c.field.name);
+    if (c.field.name in held && !sameAnswer(c, held[c.field.name]!)) out.push(c.field.name);
   return out;
 }
 

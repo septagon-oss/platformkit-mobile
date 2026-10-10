@@ -23,6 +23,7 @@ import {
   formControls,
   formSections,
   problems,
+  timeWire,
   values,
   writeControls,
   type Control,
@@ -195,6 +196,36 @@ test("a value that came back the same was not changed", () => {
   assert.deepEqual(changedFields(sheet, { pinned: "false" }), ["pinned"]);
   // A field the person never touched is not named because its row is missing.
   assert.deepEqual(changedFields(sheet, { body: "" }), []);
+});
+
+test("an instant confirmed in the picker as it already stands is no change", () => {
+  const entry = noteEntry(
+    declares({ name: "due", type: "time", required: false, presentation: { label: "Due date" } }),
+  );
+  const sheet = controls(entry, { id: "1", title: "Buy milk", due: "2026-07-18T09:00:00Z" });
+  // The date row writes `timeWire`, which always carries milliseconds, while the
+  // server and this fixture spell the same instant without them. One answer, two
+  // spellings: a person who opens the picker, changes nothing and confirms it did not
+  // change the row, and must not be asked whether to throw away what they did not do.
+  assert.equal(timeWire(new Date("2026-07-18T09:00:00Z")), "2026-07-18T09:00:00.000Z");
+  assert.deepEqual(changedFields(sheet, { due: timeWire(new Date("2026-07-18T09:00:00Z")) }), []);
+  assert.deepEqual(changedFields(sheet, { due: "2026-07-18T09:00:00.000Z" }), []);
+  assert.deepEqual(changedFields(sheet, { due: "2026-07-18T09:00:00Z" }), []);
+  // Five minutes later is a change, and a value no clock reads is a change worth
+  // asking about: `problems` refuses it, so the draft is not silently clean.
+  assert.deepEqual(changedFields(sheet, { due: "2026-07-18T09:05:00.000Z" }), ["due"]);
+  assert.deepEqual(changedFields(sheet, { due: "yesterday" }), ["due"]);
+  // An optional instant cleared from a row that stored none is still empty.
+  assert.deepEqual(changedFields(controls(entry, { id: "1", title: "Buy milk" }), { due: "" }), []);
+});
+
+test("a switch the row never answered for is off, whether it is left blank or put back off", () => {
+  // On a create, or a row that stores no boolean at all, `Control.value` is the empty
+  // string - and `values` writes that as off, exactly as it writes "false". So a
+  // switch flicked on and back off leaves nothing behind worth a question.
+  const sheet = controls(noteEntry(), {} as Row);
+  assert.deepEqual(changedFields(sheet, { pinned: "false" }), []);
+  assert.deepEqual(changedFields(sheet, { pinned: "true" }), ["pinned"]);
 });
 
 test("the first field the sheet asks for is the one with a sentence", () => {

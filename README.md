@@ -466,7 +466,11 @@ refusal about a control with no box to focus (a choice, a date row, a
 switch, a tag box) focuses nothing: `FormField` announces `label: error`, its error line is a
 polite live region and the notice above the fields is `urgent`. **Dirty means changed, not
 touched**: `changedFields` compares each control's effective value with the one the row
-arrived with, so typing a word and putting it back asks nobody's permission; the one
+arrived with as what the value means — an instant by the instant it is, because the date row
+writes `timeWire` with milliseconds while the server spells the same instant without them,
+and a switch by on or off, because a row that stored nothing is off — so typing a word and
+putting it back, confirming the date the record already carried, or flicking a switch on and
+back asks nobody's permission; the one
 predicate is used by the sheet, by a command's argument and by the singleton, and the
 guard covers Cancel as well as system back and the swipe gesture. **One dismissal, one
 question**: Cancel asks its own answer and then leaves with the guard lifted by a render,
