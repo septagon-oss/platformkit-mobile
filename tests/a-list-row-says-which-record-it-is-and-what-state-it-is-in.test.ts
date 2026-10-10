@@ -195,6 +195,18 @@ test("a declared summary longer than the row's line keeps the author's first two
   // still the record's own line, which is where a value goes when a bigger screen
   // holds it.
   assert.equal(recordHeader(three, task, presentation, untitled).summary, task.body);
+  // The budget counts the cells that are left, not the names a document wrote: a
+  // declared state gives its place to the next value its author named, so the row
+  // never loses a value because its pill already said one.
+  const pillFirst = plainEntry({
+    statusField: "status",
+    summaryFields: ["status", "rank", "pinned"],
+  });
+  assert.deepEqual(
+    listRow(pillFirst, task, presentation, untitled).cells.map((c) => c.id),
+    ["rank", "pinned"],
+    "the pill answers first, then the author's remaining two",
+  );
 });
 
 test("a value nobody answered prints no cell, and no dash stands in for it", () => {
