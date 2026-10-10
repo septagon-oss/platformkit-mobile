@@ -466,7 +466,10 @@ polite live region and the notice above the fields is `urgent`. **Dirty means ch
 touched**: `changedFields` compares each control's effective value with the one the row
 arrived with, so typing a word and putting it back asks nobody's permission; the one
 predicate is used by the sheet, by a command's argument and by the singleton, and the
-guard covers Cancel as well as system back and the swipe gesture. **Values survive every
+guard covers Cancel as well as system back and the swipe gesture. **One dismissal, one
+question**: Cancel asks its own answer and then leaves with the guard lifted by a render,
+because a `router.back()` taken while `usePreventRemove` is armed is handed back to it, and
+a person who was asked twice for the same draft was not asked once. **Values survive every
 failure** — a refused save, a 422 under its field, a 500 (`failure.saveFailed`), a
 transport that never answered (`failure.uncertain`, and a save is never replayed), a 409
 (`failure.revision`, no silent overwrite), a 401 (the draft stays filed under this address

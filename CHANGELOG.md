@@ -53,7 +53,10 @@ for the version being released.
   field's box, focused, and asked of React Native to be brought above the keyboard;
   `Screen` (templates) takes the optional `scrollViewRef` that makes the scroll view
   reachable, which is a handle and no rule. A singleton's Edit is drawn only once its row
-  has been read, and its Save rechecks the same thing from inside.
+  has been read, and its Save rechecks the same thing from inside. One dismissal asks one
+  question: a sheet's Cancel answers its own "Discard changes?" by lifting the
+  `usePreventRemove` guard in a render before it departs, so the stack does not hand the
+  same departure back to the guard and ask the person twice.
 
 - A list row now says which record it is, what state that record is in, and what sets it
   apart: `listRow` assembles the title, the record's own line, the declared pill and at

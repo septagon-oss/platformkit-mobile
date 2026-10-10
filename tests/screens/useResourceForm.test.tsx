@@ -217,6 +217,33 @@ describe("useResourceForm", () => {
     expect(prevent.enabled).toBe(false);
   });
 
+  test("a Cancel over a sheet nobody changed leaves at once and asks nothing", async () => {
+    const api = fakeApi();
+    shell.value = shellValue(api);
+    const { result } = await renderHook(() => useResourceForm(note, undefined));
+    await act(async () => result.current.cancel());
+    expect(asked).not.toHaveBeenCalled();
+    expect(router.back).toHaveBeenCalledTimes(1);
+    expect(shell.value!.keep).toHaveBeenLastCalledWith("/note/note/new", {});
+  });
+
+  test("a Cancel that was asked and not answered leaves nothing behind", async () => {
+    const api = fakeApi();
+    shell.value = shellValue(api);
+    const { result } = await renderHook(() => useResourceForm(note, undefined));
+    await act(async () => result.current.change("title", "Buy milk"));
+    await act(async () => result.current.cancel());
+    // The question was asked once and nothing was answered: "Keep editing" is the
+    // dialog's own dismissal, which dismisses nothing here. The draft, the guard and
+    // the person all stay where they were.
+    expect(asked).toHaveBeenCalledTimes(1);
+    expect(router.back).not.toHaveBeenCalled();
+    expect(navigation.dispatch).not.toHaveBeenCalled();
+    expect(prevent.enabled).toBe(true);
+    expect(result.current.held.title).toBe("Buy milk");
+    expect(result.current.phase).toBe("editing");
+  });
+
   test("an empty required title is refused, named, and asked for; everything else stays typed", async () => {
     const api = fakeApi();
     shell.value = shellValue(api);

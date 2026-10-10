@@ -57,6 +57,11 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // screen that is already gone: on Android that unwinds the stack until the
   // app itself exits.
   const left = useRef(false);
+  // A person's own answer of "Discard" - or a Cancel over a sheet with nothing to
+  // discard. Leaving is an instruction to the effect below rather than a call to the
+  // router: the guard has to lift in a render before the screen departs, or the stack
+  // hands this departure back to the guard and asks the same question twice.
+  const [leaving, setLeaving] = useState(false);
   // A save outlives its screen when somebody dismisses the sheet while the
   // request is in flight. The write still lands and the list still hears about
   // it; what must not happen is this screen deciding where to go afterwards.
@@ -142,7 +147,12 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // dismissed by this app rather than by a person, and a guard that is still
   // registered then leaves the native screen refusing the dismissal it was
   // just asked for.
-  usePreventRemove(phase === "editing" && dirty, ({ data }) =>
+  // `leaving` lifts the guard one render before the sheet departs by Cancel: a
+  // departure taken while this is armed is handed back to it by the stack, and the
+  // person answers the same question twice. The gesture and the system back need no
+  // such flag - the action this callback re-dispatches already carries the route as
+  // visited, which is why that door asks once.
+  usePreventRemove(phase === "editing" && dirty && !leaving, ({ data }) =>
     askDiscard(() => {
       // Discarded means the shell keeps none of it either.
       keep(here, {});
@@ -164,6 +174,20 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     else if (id) router.replace(`${at}/${encodeURIComponent(id)}`);
     else router.replace(at);
   }, [phase, saved, create, entry, id, router, here, keep]);
+
+  // Cancel's "Discard" leaves here, one render after the flag above lifted the guard,
+  // and not from the dialog's own button. One screen leaves once, which is why this
+  // shares `left` with the departure above instead of keeping a flag of its own.
+  useEffect(() => {
+    if (!leaving || left.current) return;
+    left.current = true;
+    // Discarded means the shell keeps none of it either.
+    keep(here, {});
+    // Back to whatever opened the sheet; a sheet opened by a link has nothing to go
+    // back to, so it lands on the list of what it did not write.
+    if (router.canGoBack()) router.back();
+    else router.replace(screenPath(entry));
+  }, [leaving, entry, here, keep, router]);
 
   // Every callback this hook hands out is stable, because the screen puts them
   // in the options it gives the navigator, and options rebuilt on each render
@@ -253,14 +277,14 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // gesture and the system back are asked: an answer of "Keep editing" leaves the
   // person where they were with the draft and the guard both intact.
   const cancel = useCallback(() => {
-    const leave = () => {
-      keep(here, {});
-      if (router.canGoBack()) router.back();
-      else router.replace(screenPath(entry));
-    };
+    // Both answers leave through the flag rather than the router, so the guard lifts in
+    // a render before anything is dismissed. Leaving from here would put a `back()` in
+    // front of a guard that is still armed, and the stack would ask it - so the person
+    // would answer "Discard changes?" a second time for the same Cancel.
+    const leave = () => setLeaving(true);
     if (phase !== "editing" || !dirty) leave();
     else askDiscard(leave);
-  }, [router, entry, here, keep, phase, dirty, askDiscard]);
+  }, [phase, dirty, askDiscard]);
 
   // Retrying is something a person did, so it may say so at once.
   const reload = useCallback(() => {
