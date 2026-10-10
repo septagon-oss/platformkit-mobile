@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Command, type Entry } from "../core/catalog";
 import {
-  commandControls,
+  commandSections,
   commandTitle,
   failureSubject,
   humanize,
@@ -32,10 +32,12 @@ import { useTheme } from "../ui/theme";
 export type Phase = "editing" | "running" | "ran";
 
 export interface Running {
-  readonly controls: ReturnType<typeof commandControls>;
+  readonly blocks: ReturnType<typeof commandSections>;
   readonly held: Readonly<Record<string, string>>;
   readonly errors: Readonly<Record<string, string>>;
   readonly detail: string;
+  /** A control that will not store what it holds says so here; see `useResourceForm`. */
+  readonly fieldRefused: (name: string, refused: boolean) => void;
   readonly phase: Phase;
   readonly change: (name: string, value: string) => void;
   readonly run: () => Promise<void>;
@@ -49,10 +51,11 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
   const router = useRouter();
   const navigation = useNavigation();
   // Memoised for the same reason useResourceForm memoises its own: run closes
-  // over the controls, ResourceCommand memoises the header options over run,
+  // over the argument's controls, ResourceCommand memoises the header options over run,
   // and a fresh array on every render makes both of those memos a lie — which
   // is the shape of the navigator loop this app has already been bitten by.
-  const controls = useMemo(() => commandControls(c), [c]);
+  const blocks = useMemo(() => commandSections(c), [c]);
+  const controls = useMemo(() => blocks.flatMap((b) => b.controls), [blocks]);
   const copy = screenCopy();
   const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
@@ -105,9 +108,20 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     );
   });
 
+  // A box that will not store what it holds says so here, and the run below meets
+  // the same answer as a `problems` refusal. See `useResourceForm` for the rule.
+  const refusing = useRef<Readonly<Record<string, boolean>>>({});
+  const fieldRefused = useCallback((name: string, refused: boolean) => {
+    if ((refusing.current[name] ?? false) === refused) return;
+    const next = { ...refusing.current };
+    if (refused) next[name] = true;
+    else delete next[name];
+    refusing.current = next;
+  }, []);
+
   const run = useCallback(async () => {
-    const wrong = problems(controls, held);
-    if (Object.keys(wrong).length > 0) {
+    const wrong = problems(controls, held, copy.kit);
+    if (Object.keys(wrong).length > 0 || Object.keys(refusing.current).length > 0) {
       setErrors(wrong);
       return;
     }
@@ -129,7 +143,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     }
   }, [api, entry, id, c, controls, held, wrote, leave, copy]);
 
-  return { controls, held, errors, detail, phase, change, run, cancel: leave };
+  return { blocks, held, errors, detail, phase, change, fieldRefused, run, cancel: leave };
 }
 
 /**

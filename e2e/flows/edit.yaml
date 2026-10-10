@@ -24,7 +24,10 @@ env:
       id: "resource-detail"
     timeout: 15000
 - tapOn: "Edit"
-- assertVisible: "Edit ${ENTITY}"
+# The same title, spelled the other way round: the sheet a record's Edit button opens
+# is named by the catalogue's word for the kind, and the journey names it as create
+# does — case-insensitively, because the case is the app's reading and not the wire's.
+- assertVisible: (?i)^Edit ${ENTITY}$
 - assertVisible:
     id: "resource-form"
 - assertVisible: ${TITLE} edit

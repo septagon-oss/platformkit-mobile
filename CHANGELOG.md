@@ -73,6 +73,37 @@ for the version being released.
   (`filters-status/value%3Aopen`), where every group drew `filters/value%3A…`: an entry with
   two closed sets would have put one id on two rows and a journey that taps one would be
   told it found two.
+- A form asks only what a person can answer, and says so in words. `./core/derive` gains
+  `formSections` (the fields a form keeps, grouped by the entry's declared `sections` and
+  ordered within each block by the field the record is called by, then required, then
+  optional), `commandSections` (the same for a command's argument, which has no identity
+  field to lead on), `orderControls` (that order over any control list), `joinList` (the
+  one spelling a comma-joined field knows), `entryHoldsSeparator` (an entry the box
+  cannot honour) and `valueHoldsSeparator` (a held value that does not spell its own
+  items); `FormBlock` and `FormWords` are their shapes. Additive. `formControls`, `values`
+  and what a body carries are untouched: a reordered sheet writes the same request, which
+  the cases assert both ways.
+- `problems` now takes the reader's own kit bundle as a third argument, which is a change
+  to that function's signature on a published subpath: the sentence it refuses a list with
+  is a word, and a core that spelled it in English would be a second implementation of the
+  copy table. Its values are unchanged for every field but a list holding a comma inside
+  one item, which is refused as itself (`commaInValue`) rather than as an item-type error.
+- The `ResourceForm` organism takes `blocks` where it took `controls`, and `FormField`
+  marks a field with the reader's own `Required`/`optional` word where it drew an asterisk
+  — both changes to published subpaths, which the minor carries. `SwitchRow`, `ChoiceRow`
+  and `DateTimeRow` no longer print a label of their own (the name above the control is
+  that label, and one control now says it once, in the announcement as on the screen);
+  `SwitchRow` drops the `help` line it duplicated, and the three take the announced `name`
+  the sheet composes. `TagsField` requires `copy`, commits a word on Return or Add, ignores
+  a word already on the sheet, and refuses an entry holding the separator with the text
+  left where the person typed it.
+- `sheet` in `./route` is titled from the catalogue's declared name for the kind rather
+  than from the wire word in the address, and takes the words over that name from the copy
+  table; it now asks for the shell's `entry` lookup instead of a prefix string. A sheet
+  whose entry has not been read yet still answers the address's word.
+- Five words joined the kit table in English and Portuguese — `editNamed`, `addTag`,
+  `addTagTo`, `removeTag`, `commaInValue` — and `tags-<label>`, `add-<label>`,
+  `tags-fault-<label>` and `field-<name>` are the ids a device journey works through.
 
 ## 0.2.0
 

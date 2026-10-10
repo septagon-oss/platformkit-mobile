@@ -134,12 +134,13 @@ function Sheet({
       <ResourceFormView
         feedback={feedback}
         initialDate={initialDate}
-        controls={form.controls}
+        blocks={form.blocks}
         held={form.held}
         errors={form.errors}
         detail={form.detail}
         phase={running ? "saving" : "editing"}
         onChange={form.change}
+        onFieldRefused={form.fieldRefused}
         onRetry={cancel}
       />
     </>

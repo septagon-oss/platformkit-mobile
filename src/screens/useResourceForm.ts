@@ -14,7 +14,7 @@ import { key, offers, type Entry } from "../core/catalog";
 import { address } from "../core/reentry";
 import {
   failureSubject,
-  formControls,
+  formSections,
   problems,
   screenPath,
   text,
@@ -93,7 +93,15 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     })();
   }, [load]);
 
-  const controls = useMemo(() => formControls(entry, row, create), [entry, row, create]);
+  // The sheet's blocks are the entry's sections; the controls are those blocks
+  // read back flat, which is what a body and a refusal are built from. One order,
+  // computed once, so the order a person is asked in cannot drift from the order
+  // the sheet writes.
+  const blocks = useMemo(
+    () => formSections(entry, row, create, copy.kit.overview),
+    [entry, row, create, copy.kit.overview],
+  );
+  const controls = useMemo(() => blocks.flatMap((b) => b.controls), [blocks]);
   const dirty = Object.keys(held).length > 0;
   // The same contents, held for the callbacks that must not change identity: the
   // sheet puts Save and Cancel in the navigator's options, and an option rebuilt
@@ -151,6 +159,20 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     [here, keep],
   );
 
+  /* One field can refuse what it holds without the core being able to see it: a
+   * comma-joined box keeps a word it cannot store out of the value, and the text
+   * stays on screen. `refusing` is the set of those fields, and a save meets the
+   * same answer as a `problems` refusal — nothing leaves the phone while a field the
+   * person is being asked to fix still stands. */
+  const refusing = useRef<Readonly<Record<string, boolean>>>({});
+  const fieldRefused = useCallback((name: string, refused: boolean) => {
+    if ((refusing.current[name] ?? false) === refused) return;
+    const next = { ...refusing.current };
+    if (refused) next[name] = true;
+    else delete next[name];
+    refusing.current = next;
+  }, []);
+
   const save = useCallback(async () => {
     if (phase !== "editing") return;
     // The header's New/Edit button is the door for this write, and it is drawn
@@ -162,8 +184,8 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setDetail(verbRefusal(create ? "create" : "update"));
       return;
     }
-    const refused = problems(controls, held);
-    if (Object.keys(refused).length > 0) {
+    const refused = problems(controls, held, copy.kit);
+    if (Object.keys(refused).length > 0 || Object.keys(refusing.current).length > 0) {
       setErrors(refused);
       // The kit's own word for it: the sentence is the one the copy table holds.
       setDetail(copy.kit.validation);
@@ -204,5 +226,17 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     void load();
   }, [load]);
 
-  return { create, controls, held, errors, detail, phase, change, save, cancel, reload };
+  return {
+    create,
+    blocks,
+    held,
+    errors,
+    detail,
+    phase,
+    change,
+    fieldRefused,
+    save,
+    cancel,
+    reload,
+  };
 }

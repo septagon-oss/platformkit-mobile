@@ -7,7 +7,7 @@ import { parseCatalog } from "../../src/core/catalog";
 import {
   deriveDisclosure,
   deriveEventActivity,
-  formControls,
+  formSections,
   noOrder,
   sortOptions,
 } from "../../src/core/derive";
@@ -135,10 +135,10 @@ describe("ResourceList", () => {
 });
 
 describe("ResourceForm", () => {
-  const controls = formControls(note, undefined, true);
+  const blocks = formSections(note, undefined, true, feedback.copy.kit.overview);
   const base = {
     initialDate: new Date("2026-08-11T08:20:00Z"),
-    controls,
+    blocks,
     held: {},
     errors: {},
     detail: "",
@@ -169,7 +169,45 @@ describe("ResourceForm", () => {
   test("while saving, every control is off", async () => {
     await inTheme(<ResourceForm feedback={feedback} {...base} phase="saving" />);
     expect(screen.getByTestId("input-title")).toBeDisabled();
-    expect(screen.getByRole("switch", { name: "Pinned" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeDisabled();
+  });
+
+  test("each control announces whether a person may leave it, in the sheet's own words", async () => {
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="editing" />);
+    // The words are the copy table's, and they ride the control the eye is on —
+    // `* ` is not a word, and a switch that says only "Pinned" says nothing about
+    // whether leaving it is allowed.
+    expect(screen.getByTestId("input-title").props.accessibilityLabel).toBe("Title, Required");
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeOnTheScreen();
+    expect(screen.getAllByText(/\(Optional\)/).length).toBeGreaterThan(3);
+  });
+
+  test("every control is named once, above the control, whatever the control is", async () => {
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="editing" />);
+    // A sheet that named a switch on its own row and a text box above its box would
+    // say the same fact in two places and line nothing up. One name, drawn once by
+    // FormField, for the atom that announces it and the control underneath it.
+    for (const name of ["Title", "Body", "Rank", "Pinned", "Tags"])
+      expect(screen.getAllByText(new RegExp(`^${name}( \\(Optional\\))?$`))).toHaveLength(1);
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeOnTheScreen();
+    expect(screen.getByTestId("field-pinned")).toBeOnTheScreen();
+  });
+
+  test("a field that refuses what it holds says so to the sheet, by name", async () => {
+    const refused = jest.fn();
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, undefined, true, feedback.copy.kit.overview)}
+        onFieldRefused={refused}
+      />,
+    );
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work, home");
+    expect(refused).toHaveBeenCalledWith("tags", true);
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work home");
+    expect(refused).toHaveBeenLastCalledWith("tags", false);
   });
 
   test("a failed load offers a retry and no controls", async () => {

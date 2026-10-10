@@ -64,12 +64,13 @@ export function Singleton({
         <ResourceForm
           feedback={feedback}
           initialDate={initialDate}
-          controls={one.controls}
+          blocks={one.blocks}
           held={one.held}
           errors={one.errors}
           detail={one.detail}
           phase={saving ? "saving" : "editing"}
           onChange={one.change}
+          onFieldRefused={one.fieldRefused}
           onRetry={one.reload}
         />
       ) : (

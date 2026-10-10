@@ -1,7 +1,8 @@
 // ChoiceRow is one of a few: a row that shows what is chosen and asks the
 // platform's own chooser for another. On iOS that is the action sheet; on
 // Android and elsewhere it is the picker's dialog. Nothing here imitates
-// either.
+// either, and nothing here prints the field's name: FormField draws it above
+// the control, the way it draws a text field's.
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import { ActionSheetIOS, Platform, Pressable, StyleSheet, View } from "react-native";
@@ -18,7 +19,10 @@ export interface Option {
 
 interface Props {
   readonly copy: Copy["choice"];
+  /** label is what the field is called: the chooser's own title, so a person knows which fact the dialog is about. FormField prints the word a person reads, so this prints none. */
   readonly label: string;
+  /** name is what the row announces when the field's own word is not the whole name — a form says whether it is required in the same breath. */
+  readonly name?: string;
   readonly value: string;
   readonly options: readonly Option[];
   readonly onChange: (value: string) => void;
@@ -30,6 +34,7 @@ interface Props {
 export function ChoiceRow({
   copy,
   label,
+  name,
   value,
   options,
   onChange,
@@ -41,6 +46,7 @@ export function ChoiceRow({
   const s = useStyles(styles);
   const chosen = options.find((o) => o.value === value);
   const shown = chosen?.label ?? (value || placeholder);
+  const spoken = name ?? label;
 
   if (Platform.OS === "ios") {
     const ask = () =>
@@ -62,17 +68,14 @@ export function ChoiceRow({
         onPress={ask}
         disabled={disabled}
         accessibilityRole="button"
-        accessibilityLabel={label}
+        accessibilityLabel={spoken}
         aria-valuetext={shown}
         aria-disabled={disabled}
         accessibilityHint={copy.hint}
         {...testable(testID)}
       >
-        <Text style={s.label} maxFontSizeMultiplier={0}>
-          {label}
-        </Text>
         <View style={s.value}>
-          <Text tone={chosen ? "primary" : "muted"} style={s.label} maxFontSizeMultiplier={0}>
+          <Text tone={chosen ? "primary" : "muted"} maxFontSizeMultiplier={0}>
             {shown}
           </Text>
           <Icon name="chevron" size="sm" tone="muted" />
@@ -82,10 +85,7 @@ export function ChoiceRow({
   }
 
   return (
-    <View style={s.row} accessibilityLabel={label} {...testable(testID)}>
-      <Text style={s.label} maxFontSizeMultiplier={0}>
-        {label}
-      </Text>
+    <View style={s.row} accessibilityLabel={spoken} {...testable(testID)}>
       <View style={s.picker}>
         <Picker
           selectedValue={value}
@@ -95,7 +95,7 @@ export function ChoiceRow({
           prompt={label}
           dropdownIconColor={t.color.textMuted}
           style={s.pickerInner}
-          accessibilityLabel={label}
+          accessibilityLabel={spoken}
         >
           {chosen ? null : <Picker.Item label={placeholder} value="" color={t.color.textMuted} />}
           {options.map((o) => (
@@ -114,15 +114,16 @@ export function ChoiceRow({
 
 const styles = (t: Theme) =>
   StyleSheet.create({
+    // The row holds one thing now that the name sits above it, so the control takes
+    // the field's whole width the way a text box does: the same measure down the
+    // sheet, and the largest tap target the row can give a chooser.
     row: {
       minHeight: t.hit,
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
       gap: t.space.md,
     },
     value: { flexDirection: "row", alignItems: "center", gap: t.space.xs, flexShrink: 1 },
-    label: { flexShrink: 1 },
-    picker: { flex: 1, minWidth: t.extent.choiceMin, maxWidth: "60%" },
+    picker: { flex: 1, minWidth: t.extent.choiceMin },
     pickerInner: { color: t.color.textPrimary, backgroundColor: "transparent", minHeight: t.hit },
   });

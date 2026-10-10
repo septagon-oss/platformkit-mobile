@@ -75,8 +75,12 @@ and keeps that small indicator still.
 `copy.choice`; `DateTimeRow` receives `copy.dateTime`, `initialValue` and `timeZone`.
 Its native picker callbacks ignore a newly disabled or unmounted control, and
 Clear is unavailable for required or disabled values. `ResourceForm` also
-requires `initialDate`; form, command and singleton screen compositions sample
-their injected `Clock` once at mount. `timeText`, `display` and the record's section
+requires `initialDate` and the `blocks` that `formSections` answers (ordered groups,
+where it took a flat list of controls); form, command and singleton screen compositions sample
+their injected `Clock` once at mount. `SwitchRow`, `ChoiceRow` and `DateTimeRow` draw
+no label of their own and take the announced `name`; `FormField` takes `copy` to mark a
+field required or optional in the reader's words, and `TagsField` takes `copy` and owns
+the comma rule that keeps one list item free of the separator. `timeText`, `display` and the record's section
 functions require explicit formatting,
 and Value/Labelled receive it as `presentation`. These remove the shared mutable
 formatter and component-owned choice words. `StateFeedback` is the optional

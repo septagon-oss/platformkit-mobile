@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
 import {
   failureSubject,
-  formControls,
+  formSections,
   problems,
   values,
   verbRefusal,
@@ -67,9 +67,24 @@ export function useSingleton(entry: Entry) {
     })();
   }, [load]);
 
-  const controls = useMemo(() => formControls(entry, row, false), [entry, row]);
+  const blocks = useMemo(
+    () => formSections(entry, row, false, copy.kit.overview),
+    [entry, row, copy.kit.overview],
+  );
+  const controls = useMemo(() => blocks.flatMap((b) => b.controls), [blocks]);
   const change = useCallback((name: string, value: string) => {
     setHeld((was) => ({ ...was, [name]: value }));
+  }, []);
+  // A box that will not store what it holds says so here, and the save below meets
+  // the same answer as a `problems` refusal: nothing leaves while a field the person
+  // is being asked to fix still stands. See `useResourceForm` for the full rule.
+  const refusing = useRef<Readonly<Record<string, boolean>>>({});
+  const fieldRefused = useCallback((name: string, refused: boolean) => {
+    if ((refusing.current[name] ?? false) === refused) return;
+    const next = { ...refusing.current };
+    if (refused) next[name] = true;
+    else delete next[name];
+    refusing.current = next;
   }, []);
 
   const edit = useCallback(() => {
@@ -90,8 +105,8 @@ export function useSingleton(entry: Entry) {
       setDetail(verbRefusal("update"));
       return;
     }
-    const wrong = problems(controls, held);
-    if (Object.keys(wrong).length > 0) {
+    const wrong = problems(controls, held, copy.kit);
+    if (Object.keys(wrong).length > 0 || Object.keys(refusing.current).length > 0) {
       setErrors(wrong);
       return;
     }
@@ -119,10 +134,11 @@ export function useSingleton(entry: Entry) {
 
   return {
     row,
-    controls,
+    blocks,
     held,
     errors,
     detail,
+    fieldRefused,
     phase,
     editing,
     change,

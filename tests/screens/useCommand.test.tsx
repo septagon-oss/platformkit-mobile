@@ -71,7 +71,9 @@ describe("useCommandForm", () => {
     const api = fakeApi();
     shell.value = shellValue(api);
     const { result } = await renderHook(() => useCommandForm(note, "1", publish));
-    expect(result.current.controls.map((c) => c.field.name)).toEqual(["at"]);
+    expect(result.current.blocks.flatMap((b) => b.controls.map((c) => c.field.name))).toEqual([
+      "at",
+    ]);
     expect(result.current.phase).toBe("editing");
     await act(async () => result.current.change("at", "2026-02-01T09:00:00Z"));
     await act(async () => {

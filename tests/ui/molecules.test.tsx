@@ -3,7 +3,7 @@ import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 import { StyleSheet } from "react-native";
-import { display, presentedInstant, timeValue } from "../../src/core/derive";
+import { deriveCopy, display, presentedInstant, timeValue } from "../../src/core/derive";
 import { DetailRow } from "../../src/ui/molecules/DetailRow";
 import { FormField } from "../../src/ui/molecules/FormField";
 import { LoadMore } from "../../src/ui/molecules/LoadMore";
@@ -20,14 +20,43 @@ const inTheme = (el: React.ReactElement, mode: "light" | "dark" = "light") =>
 const none = () => undefined;
 
 describe("FormField", () => {
-  test("the refusal sits under the field it is about", async () => {
+  test("the refusal sits under the field it is about, and no asterisk stands in for a word", async () => {
     await inTheme(
-      <FormField label="Title" required error="is required">
+      <FormField label="Title" required copy={feedback.copy.kit} error="is required">
         <></>
       </FormField>,
     );
-    expect(screen.getByText("Title *")).toBeOnTheScreen();
+    expect(screen.getByText("Title")).toBeOnTheScreen();
+    expect(screen.queryByText(/Optional/)).toBeNull();
+    expect(screen.queryByText(/\*/)).toBeNull();
     expect(screen.getByText("is required")).toBeOnTheScreen();
+  });
+
+  test("an optional field is marked with the reader's own word", async () => {
+    await inTheme(
+      <FormField label="Notes" required={false} copy={feedback.copy.kit}>
+        <></>
+      </FormField>,
+    );
+    expect(screen.getByText("Notes (Optional)")).toBeOnTheScreen();
+  });
+
+  test("a control that is nobody's form field marks nothing", async () => {
+    await inTheme(
+      <FormField label="Appearance">
+        <></>
+      </FormField>,
+    );
+    expect(screen.queryByText(/Optional/)).toBeNull();
+  });
+
+  test("the word is the bundle's, so a Portuguese phone reads Portuguese", async () => {
+    await inTheme(
+      <FormField label="Notes" required={false} copy={deriveCopy("pt").kit}>
+        <></>
+      </FormField>,
+    );
+    expect(screen.getByText("Notes (Opcional)")).toBeOnTheScreen();
   });
 });
 
@@ -169,22 +198,139 @@ describe("Value", () => {
 });
 
 describe("TagsField", () => {
+  const kit = feedback.copy.kit;
+  /** One render of the box, whose value is what the form holds and whose draft is empty. */
+  const box = (value: string, onChange: (raw: string) => void = none, disabled = false) => (
+    <TagsField label="Tags" value={value} onChange={onChange} copy={kit} disabled={disabled} />
+  );
+  const typed = (text: string, value = "", onChange: (raw: string) => void = none) => {
+    const wrote = onChange;
+    return {
+      render: async () => {
+        await inTheme(box(value, wrote));
+        await fireEvent.changeText(screen.getByTestId("tags-tags"), text);
+      },
+    };
+  };
+
+  test("a return key commits the word, and so does the Add control", async () => {
+    const onChange = jest.fn();
+    await inTheme(box("", onChange));
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work");
+    await fireEvent(screen.getByTestId("tags-tags"), "submitEditing");
+    expect(onChange).toHaveBeenLastCalledWith("work, ");
+    expect(screen.getByTestId("tags-tags")).toHaveDisplayValue("");
+
+    const other = jest.fn();
+    await inTheme(box("", other));
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "home");
+    await fireEvent.press(screen.getByRole("button", { name: "Add to Tags" }));
+    expect(other).toHaveBeenLastCalledWith("home, ");
+  });
+
+  test("a box with nothing in it commits nothing at all", async () => {
+    const onChange = jest.fn();
+    await inTheme(box("alpha, ", onChange));
+    await fireEvent.press(screen.getByRole("button", { name: "Add to Tags" }));
+    await fireEvent(screen.getByTestId("tags-tags"), "submitEditing");
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  test("a word already on the sheet is ignored, however it is spelt", async () => {
+    const onChange = jest.fn();
+    await inTheme(box("work, ", onChange));
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "Work");
+    await fireEvent.press(screen.getByRole("button", { name: "Add to Tags" }));
+    // The box is emptied and no second chip appears; the value the form holds is
+    // the one it held, minus nothing and plus nothing.
+    expect(onChange).toHaveBeenLastCalledWith("work, ");
+    expect(screen.getAllByText("work")).toHaveLength(1);
+  });
+
+  test("a word holding the comma is refused as it is typed, and the text stays put", async () => {
+    const onChange = jest.fn();
+    await inTheme(box("", onChange));
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work, home");
+    // Nothing was written: the value the form holds is the one it held, because a
+    // held value cannot tell a comma it stored from a comma somebody typed, and the
+    // meaning of one word is not the sheet's to guess.
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByTestId("tags-fault-tags")).toHaveTextContent(
+      "Remove the comma from this value.",
+    );
+    expect(screen.getByTestId("tags-tags")).toHaveDisplayValue("work, home");
+    // Committing it changes nothing beyond the sentence already on screen.
+    await fireEvent.press(screen.getByRole("button", { name: "Add to Tags" }));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /^work/ })).toBeNull();
+  });
+
+  test("the box tells the sheet what it will not write, and tells it again when it can", async () => {
+    const onRefused = jest.fn();
+    await inTheme(
+      <TagsField
+        label="Tags"
+        value=""
+        onChange={jest.fn()}
+        onRefused={onRefused}
+        copy={feedback.copy.kit}
+      />,
+    );
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "a,b");
+    expect(onRefused).toHaveBeenLastCalledWith(true);
+    // One report, not one per keystroke: the sheet keeps a set, not a history.
+    expect(onRefused).toHaveBeenCalledTimes(1);
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "ab");
+    expect(onRefused).toHaveBeenLastCalledWith(false);
+    expect(onRefused).toHaveBeenCalledTimes(2);
+  });
+
+  test("a keystroke after the refusal clears it, because the person is fixing it", async () => {
+    await inTheme(box(""));
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "a,b");
+    await fireEvent.press(screen.getByRole("button", { name: "Add to Tags" }));
+    expect(screen.getByTestId("tags-fault-tags")).toBeOnTheScreen();
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "ab");
+    expect(screen.queryByTestId("tags-fault-tags")).toBeNull();
+  });
+
+  test("a record's own list is all chips, none of it half-typed", async () => {
+    const onChange = jest.fn();
+    await inTheme(box("alpha, beta", onChange));
+    expect(screen.getByRole("button", { name: "Remove beta" })).toBeOnTheScreen();
+    expect(screen.getByTestId("tags-tags")).toHaveDisplayValue("");
+    expect(screen.queryByTestId("tags-fault-tags")).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Remove alpha" }));
+    expect(onChange).toHaveBeenCalledWith("beta, ");
+  });
+
   test("what is typed is part of the value, so a save that never blurred it carries it", async () => {
     const onChange = jest.fn();
-    await inTheme(<TagsField label="Tags" value="alpha, beta, " onChange={onChange} />);
-    // A value this control wrote reads back as its chips and what is being typed.
+    await inTheme(box("alpha, beta, ", onChange));
     expect(screen.getByRole("button", { name: "Remove alpha" })).toBeOnTheScreen();
     await fireEvent.changeText(screen.getByTestId("tags-tags"), "gam");
     expect(onChange).toHaveBeenCalledWith("alpha, beta, gam");
   });
 
-  test("a record's own list is all chips, none of it half-typed", async () => {
-    const onChange = jest.fn();
-    await inTheme(<TagsField label="Tags" value="alpha, beta" onChange={onChange} />);
-    expect(screen.getByRole("button", { name: "Remove beta" })).toBeOnTheScreen();
-    expect(screen.getByTestId("tags-tags")).toHaveDisplayValue("");
-    await fireEvent.press(screen.getByRole("button", { name: "Remove alpha" }));
-    expect(onChange).toHaveBeenCalledWith("beta, ");
+  test("a list that cannot act shows its chips, and no control that would change them", async () => {
+    await inTheme(box("alpha, beta", none, true));
+    expect(screen.getByText("alpha")).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: /^Remove / })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Add to/ })).toBeNull();
+    expect(screen.getByTestId("tags-tags")).toBeDisabled();
+  });
+
+  test("every word the box says is the table's, in both languages", async () => {
+    await inTheme(
+      <TagsField label="Tags" value="alpha" onChange={none} copy={deriveCopy("pt").kit} />,
+    );
+    expect(screen.getByRole("button", { name: "Remover alpha" })).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Adicionar a Tags" })).toBeOnTheScreen();
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "a,b");
+    await fireEvent.press(screen.getByRole("button", { name: "Adicionar a Tags" }));
+    expect(screen.getByTestId("tags-fault-tags")).toHaveTextContent(
+      "Remova a vírgula deste valor.",
+    );
   });
 });
 
@@ -204,7 +350,13 @@ describe("testID", () => {
           <Row title="A row" testID="t-row" />
         </Section>
         <FormField label="Words" testID="t-field">
-          <TagsField label="Tags" value="" onChange={none} testID="t-tags" />
+          <TagsField
+            label="Tags"
+            value=""
+            onChange={none}
+            copy={feedback.copy.kit}
+            testID="t-tags"
+          />
         </FormField>
       </>,
     );

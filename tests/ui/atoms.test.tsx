@@ -11,6 +11,7 @@ import { Icon } from "../../src/ui/atoms/Icon";
 import { Notice } from "../../src/ui/atoms/Notice";
 import { Skeleton } from "../../src/ui/atoms/Skeleton";
 import { Spinner } from "../../src/ui/atoms/Spinner";
+import { DateTimeRow } from "../../src/ui/atoms/DateTimeRow";
 import { SwitchRow } from "../../src/ui/atoms/SwitchRow";
 import { Text } from "../../src/ui/atoms/Text";
 import { radius } from "../../src/ui/scale";
@@ -96,6 +97,34 @@ describe("Rows", () => {
     await inTheme(<SwitchRow label="Pinned" value={false} onValueChange={onChange} />);
     await fireEvent.press(screen.getByRole("switch", { name: "Pinned" }));
     expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  test("a row prints no name of its own: the sheet above it says what the field is", async () => {
+    // FormField draws one name above every control, so an atom that printed its own
+    // would say the same fact twice and leave the sheet unlined. What the row still
+    // holds is the name it announces, and the form's is that name plus whether the
+    // field is required.
+    await inTheme(
+      <SwitchRow label="Pinned" name="Pinned, Required" value onValueChange={jest.fn()} />,
+    );
+    expect(screen.queryByText("Pinned")).toBeNull();
+    expect(screen.getByRole("switch", { name: "Pinned, Required" })).toBeOnTheScreen();
+  });
+
+  test("a date row prints no name of its own either", async () => {
+    await inTheme(
+      <DateTimeRow
+        copy={deriveCopy("en").dateTime}
+        initialValue={new Date("2026-08-11T08:20:00Z")}
+        timeZone="UTC"
+        label="Due"
+        name="Due, Optional"
+        value={undefined}
+        onChange={jest.fn()}
+        text={() => "Aug 11, 08:20 AM"}
+      />,
+    );
+    expect(screen.queryByText("Due")).toBeNull();
   });
 
   test("a choice row announces what is chosen", async () => {

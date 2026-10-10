@@ -53,12 +53,13 @@ export function ResourceForm({
       <ResourceFormView
         feedback={feedback}
         initialDate={initialDate}
-        controls={form.controls}
+        blocks={form.blocks}
         held={form.held}
         errors={form.errors}
         detail={form.detail}
         phase={form.phase}
         onChange={form.change}
+        onFieldRefused={form.fieldRefused}
         onRetry={form.reload}
       />
     </>

@@ -74,6 +74,11 @@ export const kitEnglish = {
   // no known kind; `newNamed` names the kind the catalogue gave it.
   new: "New",
   newNamed: (singular: string) => `New ${singular}`,
+  // The other sheet's title. `new` names a record of no known kind, this names the
+  // record a person opened their own sheet to change, in the words the catalogue
+  // gave its resource: a header that said `Edit note` while the toolbar under it
+  // said `New Note` was spelling one kind of thing two ways.
+  editNamed: (singular: string) => `Edit ${singular}`,
   // The three answers an empty list gives, which are three different facts: nothing
   // has arrived yet, nothing arrived that matches, and nothing can arrive yet.
   emptyNone: (plural: string) => `No ${plural} yet`,
@@ -124,6 +129,15 @@ export const kitEnglish = {
   skipped: "Skipped",
   required: "Required",
   optional: "Optional",
+  // The tag box: one word for the act, one sentence to name whose list it is, one
+  // to name which chip goes. A list stores its items comma-joined, so the box that
+  // writes one item says so when a person types the separator. The field's own word
+  // keeps the case its author gave it — one sentence, spelled one way, whether it is
+  // the placeholder in the box or the name the box announces.
+  addTag: "Add",
+  addTagTo: (label: string) => `Add to ${label}`,
+  removeTag: (tag: string) => `Remove ${tag}`,
+  commaInValue: "Remove the comma from this value.",
   saveExit: "Save and exit",
   steps: "Steps",
   validation: "Review the highlighted fields.",
@@ -304,6 +318,7 @@ export const kitPortuguese: KitWords = {
   filtersActive: (count: string) => `Filtros · ${count}`,
   new: "Novo",
   newNamed: (singular: string) => `Novo ${singular}`,
+  editNamed: (singular: string) => `Editar ${singular}`,
   emptyNone: (plural: string) => `Ainda não há ${plural}`,
   emptyCreate: (singular: string) => `Crie um ${singular} para começar.`,
   emptyArrive: (plural: string) => `Os ${plural} aparecem aqui quando estão disponíveis.`,
@@ -342,6 +357,10 @@ export const kitPortuguese: KitWords = {
   skipped: "Saltado",
   required: "Obrigatório",
   optional: "Opcional",
+  addTag: "Adicionar",
+  addTagTo: (label: string) => `Adicionar a ${label}`,
+  removeTag: (tag: string) => `Remover ${tag}`,
+  commaInValue: "Remova a vírgula deste valor.",
   saveExit: "Guardar e sair",
   steps: "Etapas",
   validation: "Reveja os campos assinalados.",
