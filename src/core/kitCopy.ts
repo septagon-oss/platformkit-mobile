@@ -1,4 +1,23 @@
 // System words shared by the composed kit. Product nouns remain supplied content.
+
+/**
+ * englishArticle is the indefinite article a field's own word takes: none before an
+ * `s` (a joined list or a plural reads "Enter tags."), `an` before a vowel letter,
+ * `a` otherwise. This is English *spelling*, not English morphology — "Status" loses
+ * its article and "Data" keeps one — and the limit is written down rather than
+ * guessed at by a translator. Portuguese puts its label after a colon, where no
+ * article, no agreement and no case rule exists, which is the construction `untitled`
+ * already uses.
+ */
+const englishArticle = (field: string): string => {
+  const word = field.trim();
+  if (word === "" || /s$/i.test(word)) return "";
+  return /^[aeiou]/i.test(word) ? "an " : "a ";
+};
+
+/** lowerFirst keeps a word's own letters but not its own capital: an English sentence names the field mid-sentence. */
+const lowerFirst = (field: string): string => field.charAt(0).toLowerCase() + field.slice(1);
+
 export const kitEnglish = {
   by: "by",
   activityEmpty: "Nothing has happened to this record yet.",
@@ -149,6 +168,25 @@ export const kitEnglish = {
   saveExit: "Save and exit",
   steps: "Steps",
   validation: "Review the highlighted fields.",
+  // What a sheet says when it refuses on submit, in sentences a person can mend by
+  // typing. A field is named either here or by the announcement that wraps it
+  // (`FormField` reads `label: error` on iOS), which is why the number and the
+  // instant name the box rather than repeat its label. The English article rule is
+  // spelled once, below.
+  fieldRequired: (field: string) => `Enter ${englishArticle(field)}${lowerFirst(field)}.`,
+  fieldChoiceRequired: (field: string) => `Choose ${englishArticle(field)}${lowerFirst(field)}.`,
+  fieldNumber: "Enter a valid number.",
+  fieldTime: "Enter a valid date and time.",
+  // What a sheet asks before it throws away what a person wrote, and what a write
+  // that landed says. Both outlive their own screen — the question is asked of a
+  // dismissal and the sentence is read by the record the write moved to — so both
+  // are the kit's words, not a screen's.
+  discardChanges: "Discard changes?",
+  discardUnsaved: "Your changes haven’t been saved.",
+  keepEditing: "Keep editing",
+  discard: "Discard",
+  created: (singular: string) => `${singular} created`,
+  changesSaved: "Changes saved",
   available: "Available",
   soldOut: "Sold out",
   full: "Not enough places",
@@ -374,6 +412,16 @@ export const kitPortuguese: KitWords = {
   saveExit: "Guardar e sair",
   steps: "Etapas",
   validation: "Reveja os campos assinalados.",
+  fieldRequired: (field: string) => `Campo obrigatório: ${field}.`,
+  fieldChoiceRequired: (field: string) => `Campo obrigatório: ${field}.`,
+  fieldNumber: "Introduza um número válido.",
+  fieldTime: "Introduza uma data e hora válidas.",
+  discardChanges: "Descartar alterações?",
+  discardUnsaved: "As suas alterações não foram guardadas.",
+  keepEditing: "Continuar a editar",
+  discard: "Descartar",
+  created: (singular: string) => `Registo criado: ${singular}`,
+  changesSaved: "Alterações guardadas",
   available: "Disponível",
   soldOut: "Esgotado",
   full: "Lugares insuficientes",

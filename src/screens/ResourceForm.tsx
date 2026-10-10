@@ -57,6 +57,7 @@ export function ResourceForm({
         held={form.held}
         errors={form.errors}
         detail={form.detail}
+        awaiting={form.awaiting}
         phase={form.phase}
         onChange={form.change}
         onFieldRefused={form.fieldRefused}

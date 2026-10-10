@@ -858,6 +858,37 @@ export function formControls(e: Entry, row: Row | undefined, create: boolean): r
 }
 
 /**
+ * writeControls is the body of a whole-row replace: every field this client may write,
+ * which is the sheet's own controls plus the writable ones the sheet was not shown - a
+ * hidden one the author keeps as plumbing, an immutable one the row returned - each
+ * carrying the value the read gave back. A PUT replaces the whole row, so a field left
+ * out of the body is a field cleared by omission. Fields the catalogue itself marks
+ * read-only (`id`, `createdAt`, `updatedAt`) are the server's own and never join, and a
+ * field neither the read returned nor the sheet asks is not invented.
+ */
+export function writeControls(
+  e: Entry,
+  row: Row | undefined,
+  drawn: readonly Control[],
+): readonly Control[] {
+  // An immutable field is drawn greyed, so nothing the person types can name it; the
+  // echo is the value the read returned, coerced the same way `values` coerces it.
+  const out = drawn.map((c) =>
+    c.readOnly && row !== undefined && c.field.name in row
+      ? control(c.field, text(row[c.field.name]), false)
+      : c,
+  );
+  const named = new Set(out.map((c) => c.field.name));
+  for (const f of e.fields) {
+    if (f.readOnly || named.has(f.name)) continue;
+    if (row === undefined || !(f.name in row)) continue;
+    out.push(control(f, text(row[f.name]), false));
+    named.add(f.name);
+  }
+  return out;
+}
+
+/**
  * commandControls is a command's argument as a form: the same controls a field
  * of the entity gets, because a command's argument is described the same way.
  * A command that takes no argument has none, which is what makes it a
@@ -1081,13 +1112,23 @@ export function values(
 export interface FormWords {
   /** A value whose storage is comma-joined cannot hold the separator in one item. */
   readonly commaInValue: string;
+  /** A field the person owes a value for, left empty: for the boxes one types into. */
+  readonly fieldRequired: (field: string) => string;
+  /** The same refusal for a field whose value is chosen rather than typed. */
+  readonly fieldChoiceRequired: (field: string) => string;
+  /** A box that takes a number, holding something that is not one. */
+  readonly fieldNumber: string;
+  /** A box that takes an instant, holding something that is not one. */
+  readonly fieldTime: string;
 }
 
 /**
- * problems is what a form can refuse before the server does: a number that is
- * not one, an instant that is not one, a comma-joined value that does not spell
- * its own items. Required and everything else are the
- * server's, answered in the same shape, so a form shows both the same way.
+ * problems is what a form can refuse before the server does: a required field left
+ * empty, a number that is not one, an instant that is not one, a comma-joined value
+ * that does not spell its own items. Everything else - ranges, units, uniqueness,
+ * permission - is the server's, answered in the same shape, so a form shows both the
+ * same way. Each answer is a sentence naming what to mend, and the sheet runs this on
+ * submit, which is what lets it ask for the first field that needs mending.
  */
 export function problems(
   controls: readonly Control[],
@@ -1098,10 +1139,20 @@ export function problems(
   for (const c of controls) {
     if (c.readOnly) continue;
     const raw = held[c.field.name] ?? c.value;
-    if (raw === "") continue;
+    if (raw === "") {
+      // An empty field is a refusal only where the person owes one - and never for a
+      // switch, which answers for itself (values reads "" as off), nor for an
+      // immutable value nobody may fill, which the line above already passed by.
+      if (c.required && c.kind !== "switch")
+        out[c.field.name] =
+          c.kind === "select" || c.kind === "datetime"
+            ? words.fieldChoiceRequired(c.label)
+            : words.fieldRequired(c.label);
+      continue;
+    }
     if (c.kind === "number" && numberValue(raw) === undefined)
-      out[c.field.name] = "is not a number";
-    if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = "is not a time";
+      out[c.field.name] = words.fieldNumber;
+    if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = words.fieldTime;
     // The comma is refused on its own, ahead of the item type: a value spelled
     // `1,2` is two integers read out of one item, and the sentence a person can
     // act on is about the comma, not about a type nobody wrote wrong.
@@ -1110,6 +1161,38 @@ export function problems(
       out[c.field.name] = "contains a value that does not match its item type";
   }
   return out;
+}
+
+/**
+ * changedFields names the controls, in asked order, whose effective value differs
+ * from the one the row arrived with: changed, not merely touched. `held` is what a
+ * person typed and `Control.value` what the read returned (or the declared default on a
+ * create), so retyping the same text, re-picking the same instant or toggling a switch
+ * back is no change - and a person who changed nothing is never asked whether they
+ * meant to throw it away. Comparison is on the string a control holds, which is why a
+ * switch's "true", a number's "3" and an instant's `timeWire` match their own row.
+ */
+export function changedFields(
+  controls: readonly Control[],
+  held: Readonly<Record<string, string>>,
+): readonly string[] {
+  const out: string[] = [];
+  for (const c of controls)
+    if (c.field.name in held && held[c.field.name] !== c.value) out.push(c.field.name);
+  return out;
+}
+
+/**
+ * firstProblem is the field a sheet asks for first: the earliest control in the sheet's
+ * own asked order that carries a sentence. The order comes from the controls, never
+ * from the key order of `errors`, so a server refusal that names its fields in wire
+ * order still focuses the field this person meets first.
+ */
+export function firstProblem(
+  controls: readonly Control[],
+  errors: Readonly<Record<string, string>>,
+): string | undefined {
+  return controls.find((c) => errors[c.field.name] !== undefined)?.field.name;
 }
 
 /** Order is how a list is asked for: a sort the API understands, and equality filters by field. */

@@ -37,6 +37,12 @@ export interface ShellValue {
   readonly typed: (href: string) => Readonly<Record<string, string>> | undefined;
   /** what a sheet holds right now; an empty record means this sheet is finished with. */
   readonly keep: (href: string, values: Readonly<Record<string, string>>) => void;
+  /** say files the sentence a write said for the address the person lands on: the sheet
+   * that wrote is leaving, so it cannot draw the sentence itself. */
+  readonly say: (href: string, sentence: string) => void;
+  /** heard reads that sentence once, and it is gone: a record says what its write did
+   * once, not on every visit afterwards. */
+  readonly heard: (href: string) => string;
   /** where a re-authentication returns to and what to prefill: set when the server refuses a
    * session this app was using, cleared when the app learns that whoever signs in now is not
    * that person, or when a sign-in starts that is not a re-authentication at all. */
@@ -93,6 +99,9 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
   const where = useRef<string | undefined>(undefined);
   const live = useRef<Session | undefined>(undefined);
   const sheet = useRef<Sheet | undefined>(undefined);
+  // The one sentence a write said, filed by the address it was said for. One slot,
+  // because one write lands on one record, and the writer names where the person goes.
+  const sentence = useRef<{ href: string; text: string } | undefined>(undefined);
   // The person a remembered route and a held sheet belong to, waiting to be
   // compared with whoever the next completed sign-in turns out to be.
   const expected = useRef<Who | undefined>(undefined);
@@ -122,10 +131,20 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
   const forget = useCallback(() => {
     expected.current = undefined;
     sheet.current = undefined;
+    sentence.current = undefined;
     remember(undefined);
   }, [remember]);
   const saw = useCallback((href: string) => {
     where.current = href;
+  }, []);
+  const say = useCallback((href: string, text: string) => {
+    sentence.current = { href, text };
+  }, []);
+  const heard = useCallback((href: string) => {
+    if (sentence.current?.href !== href) return "";
+    const said = sentence.current.text;
+    sentence.current = undefined;
+    return said;
   }, []);
   const typed = useCallback(
     (href: string) => (sheet.current?.href === href ? sheet.current.values : undefined),
@@ -282,6 +301,8 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       saw,
       typed,
       keep,
+      say,
+      heard,
       returning,
       entry: (module, entity) =>
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
@@ -368,6 +389,8 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       saw,
       typed,
       keep,
+      say,
+      heard,
       returning,
       begin,
       connect,
