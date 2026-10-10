@@ -381,11 +381,18 @@ test("a typed number may carry a decimal comma and a sign; anything else is not 
   assert.equal(numberValue("two"), undefined);
 });
 
-test("a form refuses a number or an instant that is not one before the server sees it", () => {
+test("a form refuses a required field left empty and a value that is not of its kind, in sentences", () => {
   const controls = formControls(note, undefined, true);
-  assert.deepEqual(problems(controls, { rank: "abc" }, kit), { rank: "is not a number" });
-  assert.deepEqual(problems(controls, { rank: "3" }, kit), {});
-  assert.deepEqual(problems(controls, {}, kit), {});
+  // Validation on submit: every answer is a sentence naming what to mend, and the
+  // number's own sentence replaces the wire fragment this build used to print.
+  assert.deepEqual(problems(controls, { title: "Buy milk", rank: "abc" }, kit), {
+    rank: "Enter a valid number.",
+  });
+  assert.deepEqual(problems(controls, { title: "Buy milk", rank: "3" }, kit), {});
+  assert.deepEqual(problems(controls, { title: "Buy milk", body: "tomorrow" }, kit), {});
+  // An empty required field is a refusal now, and it names the field: this is the
+  // check the sheet runs before it sends, the one whose field it then focuses.
+  assert.deepEqual(problems(controls, {}, kit), { title: "Enter a title." });
 });
 
 test("the orders a list offers are newest, oldest, and the fields it orders by worded for their type", () => {

@@ -30,6 +30,43 @@ for the version being released.
   a row with), `informationFields` (the identifier and the two stamps, named once) and
   the section model itself; `record-menu` and `record-information` are the two ids a
   journey finds a record's header menu and its collapsed block by.
+- A form now keeps what the person typed and says exactly what to fix, and the rules
+  behind it are exported. `problems` refuses a required field left empty (a switch, which
+  always answers, and a value nobody may fill aside) and answers every refusal in a
+  sentence, so `FormWords` gains `fieldRequired`, `fieldChoiceRequired`, `fieldNumber`
+  and `fieldTime` — a breaking change to that interface in name only for anyone who
+  implemented it, which nothing outside this repository does, and the two wire fragments
+  it used to return ("is not a number", "is not a time") are gone. New in the same
+  subpath, additive: `changedFields` (the controls whose effective value differs from the
+  row's — what a discard guard asks, compared as what a value means rather than as how it
+  is spelled, so confirming the instant the row already held or flicking a switch back off
+  is no change), `firstProblem` (the first control in the sheet's own
+  asked order that carries a sentence) and `writeControls` (the body of a whole-row
+  replace: the drawn fields plus the writable ones the sheet was never shown, and never
+  the server's own `id`, `createdAt` or `updatedAt`). `Control` gained the optional `echo`,
+  which is the row's own value for a field nobody is asked to type — a hidden one, a frozen
+  one — and which `values` sends back unparsed, because an editor's one-string spelling has
+  no way to hold a list item carrying a comma, an item of padding or an empty one, and a
+  whole-row replace that re-spells what it was never shown rewrites the row. Ten sentences
+  joined the copy table in both languages: the four above, plus `discardChanges`, `discardUnsaved`,
+  `keepEditing`, `discard`, `created` and `changesSaved`.
+- `ShellValue` gains `say(href, sentence)` and `heard(href)`: one sentence for one
+  address, said by the screen that wrote and heard once by the screen that lands there,
+  because a confirmation cannot live in a sheet that is on its way out. `ResourceDetail`
+  takes the matching `saved?: string` prop and draws it as an `ok` `Notice` with a polite
+  live region. The sentence belongs to the visit it was heard in: a focus that hears
+  nothing draws nothing, so a record is never still saying what some earlier write did.
+- `ResourceForm` (organisms) takes `awaiting?: string` and performs it — the ref of that
+  field's box, focused, and asked of React Native to be brought above the keyboard — and
+  `refusals?: number` beside it, the count of refusals the sheet has announced, which is
+  what makes a second refusal of the same field a new request for the box; `Screen`
+  (templates) takes the optional `scrollViewRef` that makes the scroll view
+  reachable, which is a handle and no rule. A singleton's Edit is drawn only once its row
+  has been read, and its Save rechecks the same thing from inside. One dismissal asks one
+  question: a sheet's Cancel answers its own "Discard changes?" by lifting the
+  `usePreventRemove` guard in a render before it departs, so the stack does not hand the
+  same departure back to the guard and ask the person twice.
+
 - A list row now says which record it is, what state that record is in, and what sets it
   apart: `listRow` assembles the title, the record's own line, the declared pill and at
   most two values, and `DataList` draws those values through `Value` and `Labelled` in the

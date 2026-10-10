@@ -52,9 +52,15 @@ export function Singleton({
                 testID="save"
               />
             )
-          : () => <Button placement="header" label="Edit" icon="edit" onPress={edit} />,
+          : // A row this app never read is a row it cannot replace: a failed read
+            // leaves no Edit, so nobody stands one tap from a PUT of an empty form
+            // over a record the phone has not seen. `useSingleton`'s own `save`
+            // refuses the same call from inside.
+            phase === "editing"
+            ? () => <Button placement="header" label="Edit" icon="edit" onPress={edit} />
+            : () => null,
     }),
-    [entry.entity, may, editing, saving, edit, cancel, save],
+    [entry.entity, may, editing, saving, phase, edit, cancel, save],
   );
 
   return (
@@ -68,6 +74,8 @@ export function Singleton({
           held={one.held}
           errors={one.errors}
           detail={one.detail}
+          awaiting={one.awaiting}
+          refusals={one.refusals}
           phase={saving ? "saving" : "editing"}
           onChange={one.change}
           onFieldRefused={one.fieldRefused}
@@ -79,6 +87,7 @@ export function Singleton({
           entry={entry}
           row={one.row}
           error={phase === "failed" ? one.detail : ""}
+          saved={one.saved}
           onRetry={() => void one.reload()}
         />
       )}

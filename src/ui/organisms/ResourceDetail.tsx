@@ -44,6 +44,12 @@ export interface Props {
   readonly entry: Entry;
   readonly row: Item | undefined;
   readonly error: string;
+  /**
+   * saved is the sentence a write said — "Note created", "Changes saved". The screen
+   * that wrote is on its way out when it says it, so it arrives here, where the record
+   * it is about is drawn, and it is read once by whoever holds it.
+   */
+  readonly saved?: string;
   /** refusal names which sentence this is and what the person may do next; without
    * it the notice is the plain retry it always was. */
   readonly refusal?: FailureVerdict;
@@ -83,6 +89,7 @@ export function ResourceDetail({
   entry,
   row,
   error,
+  saved = "",
   refusal,
   onRetry,
   onDismiss,
@@ -117,6 +124,7 @@ export function ResourceDetail({
   const details = row ? recordInformation(entry, row, feedback) : [];
   return (
     <Screen testID="resource-detail">
+      {saved ? <Notice testID="record-saved" tone="ok" announcement="polite" text={saved} /> : null}
       {error ? (
         <Notice
           testID="refusal"

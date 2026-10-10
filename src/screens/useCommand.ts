@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Command, type Entry } from "../core/catalog";
 import {
+  changedFields,
   commandSections,
   commandTitle,
   failureSubject,
@@ -78,7 +79,9 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
       alive.current = false;
     };
   }, []);
-  const dirty = Object.keys(held).length > 0;
+  // Changed, not touched — the one predicate every protected form in this app asks,
+  // so an argument typed and put back is never worth a question.
+  const dirty = changedFields(controls, held).length > 0;
 
   const change = useCallback((name: string, value: string) => {
     setHeld((was) => ({ ...was, [name]: value }));
@@ -96,7 +99,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     confirm(
       "Discard this?",
       {
-        label: "Discard",
+        label: copy.kit.discard,
         destructive: true,
         onPress: () => {
           left.current = true;
@@ -104,7 +107,10 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
         },
       },
       mode,
-      { message: `The ${commandTitle(c).toLowerCase()} has not run.`, cancel: "Keep editing" },
+      {
+        message: `The ${commandTitle(c).toLowerCase()} has not run.`,
+        cancel: copy.kit.keepEditing,
+      },
     );
   });
 

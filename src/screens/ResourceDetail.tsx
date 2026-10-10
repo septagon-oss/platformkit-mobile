@@ -118,6 +118,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         entry={entry}
         row={detail.row}
         error={detail.error}
+        saved={detail.saved}
         {...(detail.refusal ? { refusal: detail.refusal } : {})}
         onRetry={detail.reload}
         onDismiss={detail.dismiss}

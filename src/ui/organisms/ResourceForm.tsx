@@ -5,7 +5,8 @@
 // switch and a date row sit in the same column as a text box. Save and Cancel
 // live in the native header, which the screen composition sets from the same
 // phase this renders.
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { findNodeHandle, type ScrollView, type TextInput } from "react-native";
 import {
   type Feedback,
   timeText,
@@ -35,6 +36,19 @@ export interface Props {
   readonly held: Readonly<Record<string, string>>;
   readonly errors: Readonly<Record<string, string>>;
   readonly detail: string;
+  /**
+   * awaiting is the field the sheet is waiting on: the first one it asks for that
+   * carries a sentence. The hook decides which field that is; bringing it forward is
+   * this component's, because it is the one that holds the boxes.
+   */
+  readonly awaiting?: string;
+  /**
+   * refusals counts the refusals this sheet has announced. A second Save on a sheet
+   * nobody mended asks for the same field, so `awaiting` carries the same name twice
+   * and an effect keyed on it alone would not run: the count is what makes the second
+   * refusal a new request for the box.
+   */
+  readonly refusals?: number;
   readonly phase: Phase;
   readonly onChange: (name: string, value: string) => void;
   readonly onRetry: () => void;
@@ -59,6 +73,8 @@ export function ResourceForm({
   held,
   errors,
   detail,
+  awaiting = "",
+  refusals = 0,
   phase,
   onChange,
   onRetry,
@@ -66,6 +82,29 @@ export function ResourceForm({
 }: Props) {
   const busy = phase === "saving" || phase === "saved";
   const kit = feedback.copy.kit;
+  // The boxes a refusal can be answered in, by field name. Only a text-like control
+  // has one: a choice, a date, a switch and a tag box are pressed, not focused, and a
+  // refused one of those is announced where it stands — FormField says `label: error`
+  // on iOS and its error line is a polite live region, so nothing about the refusal is
+  // unheard while the keyboard goes to the field that can be typed into.
+  const boxes = useRef(new Map<string, TextInput>());
+  const scroller = useRef<ScrollView>(null);
+  const box = (name: string) => (node: TextInput | null) => {
+    if (node) boxes.current.set(name, node);
+    else boxes.current.delete(name);
+  };
+  useEffect(() => {
+    if (awaiting === "") return;
+    const field = boxes.current.get(awaiting);
+    if (!field) return;
+    field.focus?.();
+    // React Native's own call for the one thing a keyboard makes necessary: it measures
+    // this box against the keyboard's top, which no distance written here could know.
+    const handle = findNodeHandle(field);
+    if (handle !== null)
+      scroller.current?.scrollResponderScrollNativeHandleToKeyboard?.(handle, 0, true);
+  }, [awaiting, refusals]);
+
   // The word a field's requiredness is said in. It rides the control's own name,
   // so a screen reader hears `Subject, Required` where a sighted person reads the
   // label above the box and, for an optional one, the word Optional.
@@ -153,6 +192,7 @@ export function ResourceForm({
         return (
           <FormField key={name} {...common}>
             <TextField
+              ref={box(name)}
               kind={kinds[c.kind] ?? "text"}
               value={value}
               onChangeText={(v) => onChange(name, v)}
@@ -166,7 +206,7 @@ export function ResourceForm({
     }
   };
   return (
-    <Screen form testID="resource-form">
+    <Screen form testID="resource-form" scrollViewRef={scroller}>
       {detail ? (
         <Notice
           announcement="urgent"

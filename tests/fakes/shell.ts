@@ -106,6 +106,8 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     saw: jest.fn<ShellValue["saw"]>(),
     typed: jest.fn<ShellValue["typed"]>(),
     keep: jest.fn<ShellValue["keep"]>(),
+    say: jest.fn<ShellValue["say"]>(),
+    heard: jest.fn<ShellValue["heard"]>(() => ""),
     returning: undefined,
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),

@@ -1,6 +1,6 @@
 # A new record: the sheet a New button opens, what it refuses, and where a
-# saved one lands. An empty record is refused by the server, and the sheet keeps
-# its place and says so — the write that found nothing is the one that must.
+# saved one lands. An empty record is refused before anything is sent, and the sheet
+# keeps its place and says so — the write that found nothing is the one that must.
 # screen: app/[module]/[entity]/new.tsx
 appId: ${APP_ID}
 env:

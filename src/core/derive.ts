@@ -790,6 +790,15 @@ export interface Control {
   readonly readOnly: boolean;
   readonly help: string;
   readonly options: readonly { value: string; label: string }[];
+  /**
+   * echo is the row's own value for a field this form lets nobody type: a field
+   * the author hid, or one the catalogue freezes. `writeControls` is the only
+   * writer, and `values` is the only reader — it sends this back byte for byte
+   * instead of coercing `value`, because a value that never entered an editor
+   * should not be reshaped by one. Absent means the person can answer the field,
+   * so its text is what they typed or what the row handed the box.
+   */
+  readonly echo?: unknown;
 }
 
 /** kind is the control a field gets: the tag when the entity named one, the type otherwise. */
@@ -853,6 +862,44 @@ export function formControls(e: Entry, row: Row | undefined, create: boolean): r
     if (create && immutable) continue;
     const value = row && f.name in row ? text(row[f.name]) : create ? (f.default ?? "") : "";
     out.push(control(f, value, immutable));
+  }
+  return out;
+}
+
+/**
+ * writeControls is the body of a whole-row replace: every field this client may write,
+ * which is the sheet's own controls plus the writable ones the sheet was not shown - a
+ * hidden one the author keeps as plumbing, an immutable one the row returned - each
+ * carrying the value the read gave back. A PUT replaces the whole row, so a field left
+ * out of the body is a field cleared by omission. Fields the catalogue itself marks
+ * read-only (`id`, `createdAt`, `updatedAt`) are the server's own and never join, and a
+ * field neither the read returned nor the sheet asks is not invented.
+ *
+ * What the person cannot type goes back as an `echo`: the row's own value, unparsed.
+ * The string a control holds is an editor's spelling — a list is its items joined by
+ * `", "`, a blank is an empty box — and reading a row through it and back out loses
+ * whatever the spelling cannot carry: `"North, West"` as one item becomes two, `" North "`
+ * and `""` lose their padding and themselves. Only what somebody typed has earned the
+ * right to be re-spelled.
+ */
+export function writeControls(
+  e: Entry,
+  row: Row | undefined,
+  drawn: readonly Control[],
+): readonly Control[] {
+  // An immutable field is drawn greyed: no keystroke can name it, so the read's own
+  // value is what travels, and the control stays greyed for whoever draws it.
+  const out = drawn.map((c) =>
+    c.readOnly && row !== undefined && c.field.name in row ? { ...c, echo: row[c.field.name] } : c,
+  );
+  const named = new Set(out.map((c) => c.field.name));
+  for (const f of e.fields) {
+    if (f.readOnly || named.has(f.name)) continue;
+    if (row === undefined || !(f.name in row)) continue;
+    // `value` stays the editor's spelling for the one answer the row cannot give —
+    // a JSON `null` echoes nothing, and the box's own blank is what is left to send.
+    out.push({ ...control(f, text(row[f.name]), false), echo: row[f.name] });
+    named.add(f.name);
   }
   return out;
 }
@@ -1036,6 +1083,13 @@ export function values(
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const c of controls) {
+    // What nobody was asked to type goes back exactly as the read returned it. This
+    // runs ahead of the read-only skip below because an echoed field is read-only by
+    // definition: greyed on the sheet, and still a field a PUT must carry.
+    if (c.echo !== undefined) {
+      out[c.field.name] = c.echo;
+      continue;
+    }
     if (c.readOnly) continue;
     const raw = held[c.field.name] ?? c.value;
     switch (c.kind) {
@@ -1081,13 +1135,23 @@ export function values(
 export interface FormWords {
   /** A value whose storage is comma-joined cannot hold the separator in one item. */
   readonly commaInValue: string;
+  /** A field the person owes a value for, left empty: for the boxes one types into. */
+  readonly fieldRequired: (field: string) => string;
+  /** The same refusal for a field whose value is chosen rather than typed. */
+  readonly fieldChoiceRequired: (field: string) => string;
+  /** A box that takes a number, holding something that is not one. */
+  readonly fieldNumber: string;
+  /** A box that takes an instant, holding something that is not one. */
+  readonly fieldTime: string;
 }
 
 /**
- * problems is what a form can refuse before the server does: a number that is
- * not one, an instant that is not one, a comma-joined value that does not spell
- * its own items. Required and everything else are the
- * server's, answered in the same shape, so a form shows both the same way.
+ * problems is what a form can refuse before the server does: a required field left
+ * empty, a number that is not one, an instant that is not one, a comma-joined value
+ * that does not spell its own items. Everything else - ranges, units, uniqueness,
+ * permission - is the server's, answered in the same shape, so a form shows both the
+ * same way. Each answer is a sentence naming what to mend, and the sheet runs this on
+ * submit, which is what lets it ask for the first field that needs mending.
  */
 export function problems(
   controls: readonly Control[],
@@ -1098,10 +1162,20 @@ export function problems(
   for (const c of controls) {
     if (c.readOnly) continue;
     const raw = held[c.field.name] ?? c.value;
-    if (raw === "") continue;
+    if (raw === "") {
+      // An empty field is a refusal only where the person owes one - and never for a
+      // switch, which answers for itself (values reads "" as off), nor for an
+      // immutable value nobody may fill, which the line above already passed by.
+      if (c.required && c.kind !== "switch")
+        out[c.field.name] =
+          c.kind === "select" || c.kind === "datetime"
+            ? words.fieldChoiceRequired(c.label)
+            : words.fieldRequired(c.label);
+      continue;
+    }
     if (c.kind === "number" && numberValue(raw) === undefined)
-      out[c.field.name] = "is not a number";
-    if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = "is not a time";
+      out[c.field.name] = words.fieldNumber;
+    if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = words.fieldTime;
     // The comma is refused on its own, ahead of the item type: a value spelled
     // `1,2` is two integers read out of one item, and the sentence a person can
     // act on is about the comma, not about a type nobody wrote wrong.
@@ -1110,6 +1184,61 @@ export function problems(
       out[c.field.name] = "contains a value that does not match its item type";
   }
   return out;
+}
+
+/**
+ * sameAnswer is whether a control holds what it arrived with. For most controls one
+ * answer has one spelling, so the strings settle it. Two do not:
+ *  - an instant, because the date row writes `timeWire`, which always carries
+ *    milliseconds, while the server spells the same instant without them
+ *    ("2026-07-18T09:00:00Z" beside "2026-07-18T09:00:00.000Z"), and because a value
+ *    neither side can read is not an answer at all - `problems` refuses it, and a
+ *    refusal is worth asking about;
+ *  - a switch, because `values` reads anything but "true" as off, so an absent value
+ *    and an explicit "false" are the same answer.
+ * Both are the sheet's own question - is there anything here a person would miss?
+ */
+function sameAnswer(c: Control, typed: string): boolean {
+  if (typed === c.value) return true;
+  if (c.kind === "switch") return (typed === "true") === (c.value === "true");
+  if (c.kind !== "datetime") return false;
+  const now = timeValue(typed);
+  const then = timeValue(c.value);
+  return now !== undefined && then !== undefined && now.getTime() === then.getTime();
+}
+
+/**
+ * changedFields names the controls, in asked order, whose effective value differs
+ * from the one the row arrived with: changed, not merely touched. `held` is what a
+ * person typed and `Control.value` what the read returned (or the declared default on a
+ * create), so retyping the same text, re-picking the same instant or toggling a switch
+ * back is no change - and a person who changed nothing is never asked whether they
+ * meant to throw it away. Comparison is on what a control means, which is why a
+ * switch's "true", a number's "3", a row's own instant and `timeWire`'s spelling of it
+ * all match their own row. See `sameAnswer` for the two that do not spell one answer
+ * one way.
+ */
+export function changedFields(
+  controls: readonly Control[],
+  held: Readonly<Record<string, string>>,
+): readonly string[] {
+  const out: string[] = [];
+  for (const c of controls)
+    if (c.field.name in held && !sameAnswer(c, held[c.field.name]!)) out.push(c.field.name);
+  return out;
+}
+
+/**
+ * firstProblem is the field a sheet asks for first: the earliest control in the sheet's
+ * own asked order that carries a sentence. The order comes from the controls, never
+ * from the key order of `errors`, so a server refusal that names its fields in wire
+ * order still focuses the field this person meets first.
+ */
+export function firstProblem(
+  controls: readonly Control[],
+  errors: Readonly<Record<string, string>>,
+): string | undefined {
+  return controls.find((c) => errors[c.field.name] !== undefined)?.field.name;
 }
 
 /** Order is how a list is asked for: a sort the API understands, and equality filters by field. */

@@ -1,9 +1,17 @@
-import { expect, jest, test } from "@jest/globals";
+import { beforeEach, expect, jest, test } from "@jest/globals";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { useSingleton } from "../../src/screens/useSingleton";
+import { reset } from "../fakes/router";
 import { fakeApi, note, shell, shellValue } from "../fakes/shell";
 
+// A protected form participates in navigation: its guard is what a native stack
+// honours. The hook is rendered bare here, so the navigation both halves need is
+// the same fake every other screen test installs.
+jest.mock("expo-router", () => require("../fakes/router").expoRouter);
+jest.mock("expo-router/react-navigation", () => require("../fakes/router").reactNavigation);
 jest.mock("../../src/shell", () => ({ useShell: () => require("../fakes/shell").shell.value }));
+
+beforeEach(reset);
 
 test("cancelling a refused singleton draft allows the next valid edit to save", async () => {
   const entry = { ...note, singleton: true };
