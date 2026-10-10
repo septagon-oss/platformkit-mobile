@@ -50,6 +50,16 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // The field the sheet is waiting on: the first one it asks for that carries a
   // sentence. The organism brings it forward; typing into it is what clears it.
   const [awaiting, setAwaiting] = useState("");
+  // How many times this sheet has refused. A second Save on a sheet nobody mended asks
+  // for the same field, so `awaiting` alone says nothing new and the organism's effect
+  // would not run again; the count is what makes the second refusal a new request for
+  // the box. Every refusal counts itself, named or not.
+  const [refusals, setRefusals] = useState(0);
+  // A person's own answer of "Discard" - or a Cancel over a sheet with nothing to
+  // discard. Leaving is an instruction to the effect below rather than a call to the
+  // router: the guard has to lift in a render before the screen departs, or the stack
+  // hands this departure back to the guard and asks the same question twice.
+  const [leaving, setLeaving] = useState(false);
   const [saved, setSaved] = useState<Row | undefined>();
   const generation = useRef(0);
   // Leaving happens once. The effect below depends on the router, whose
@@ -57,11 +67,6 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // screen that is already gone: on Android that unwinds the stack until the
   // app itself exits.
   const left = useRef(false);
-  // A person's own answer of "Discard" - or a Cancel over a sheet with nothing to
-  // discard. Leaving is an instruction to the effect below rather than a call to the
-  // router: the guard has to lift in a render before the screen departs, or the stack
-  // hands this departure back to the guard and asks the same question twice.
-  const [leaving, setLeaving] = useState(false);
   // A save outlives its screen when somebody dismisses the sheet while the
   // request is in flight. The write still lands and the list still hears about
   // it; what must not happen is this screen deciding where to go afterwards.
@@ -235,6 +240,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       // The kit's own word for it: the sentence is the one the copy table holds.
       setDetail(copy.kit.validation);
       setAwaiting(firstProblem(controls, refused) ?? "");
+      setRefusals((n) => n + 1);
       return;
     }
     setPhase("saving");
@@ -269,6 +275,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setErrors(fields);
       setDetail(said.text);
       setAwaiting(firstProblem(controls, fields) ?? "");
+      setRefusals((n) => n + 1);
       setPhase("editing");
     }
   }, [phase, controls, held, id, api, entry, wrote, copy, create, say]);
@@ -300,6 +307,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     errors,
     detail,
     awaiting,
+    refusals,
     phase,
     change,
     fieldRefused,

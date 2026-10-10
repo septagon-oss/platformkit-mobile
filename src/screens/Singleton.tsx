@@ -75,6 +75,7 @@ export function Singleton({
           errors={one.errors}
           detail={one.detail}
           awaiting={one.awaiting}
+          refusals={one.refusals}
           phase={saving ? "saving" : "editing"}
           onChange={one.change}
           onFieldRefused={one.fieldRefused}

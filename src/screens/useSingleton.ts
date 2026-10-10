@@ -47,6 +47,11 @@ export function useSingleton(entry: Entry) {
   // sentence. See `useResourceForm` for the rule; this is the same rule at the
   // other address a protected form is drawn at.
   const [awaiting, setAwaiting] = useState("");
+  // How many times this form has refused: the second refusal of the same field names
+  // the same field, and it takes the count to make it a new request for the box. See
+  // `useResourceForm`, which holds the rule; this is the same rule at the other
+  // address a protected form is drawn at.
+  const [refusals, setRefusals] = useState(0);
   // The sentence the write said. This screen does not navigate when it saves — the
   // record is the same screen as its own form — so the sentence has somewhere to be
   // drawn without the shell carrying it anywhere.
@@ -188,6 +193,7 @@ export function useSingleton(entry: Entry) {
       setErrors(wrong);
       setDetail(copy.kit.validation);
       setAwaiting(firstProblem(controls, wrong) ?? "");
+      setRefusals((n) => n + 1);
       return;
     }
     setPhase("saving");
@@ -220,6 +226,7 @@ export function useSingleton(entry: Entry) {
       setErrors(fields);
       setDetail(said.text);
       setAwaiting(firstProblem(controls, fields) ?? "");
+      setRefusals((n) => n + 1);
     }
   }, [api, entry, row, controls, held, wrote, copy, phase]);
 
@@ -230,6 +237,7 @@ export function useSingleton(entry: Entry) {
     errors,
     detail,
     awaiting,
+    refusals,
     saved,
     fieldRefused,
     phase,

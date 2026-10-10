@@ -50,8 +50,10 @@ for the version being released.
   takes the matching `saved?: string` prop and draws it as an `ok` `Notice` with a polite
   live region.
 - `ResourceForm` (organisms) takes `awaiting?: string` and performs it — the ref of that
-  field's box, focused, and asked of React Native to be brought above the keyboard;
-  `Screen` (templates) takes the optional `scrollViewRef` that makes the scroll view
+  field's box, focused, and asked of React Native to be brought above the keyboard — and
+  `refusals?: number` beside it, the count of refusals the sheet has announced, which is
+  what makes a second refusal of the same field a new request for the box; `Screen`
+  (templates) takes the optional `scrollViewRef` that makes the scroll view
   reachable, which is a handle and no rule. A singleton's Edit is drawn only once its row
   has been read, and its Save rechecks the same thing from inside. One dismissal asks one
   question: a sheet's Cancel answers its own "Discard changes?" by lifting the

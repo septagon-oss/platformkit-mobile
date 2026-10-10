@@ -69,23 +69,25 @@ beforeEach(() => {
 });
 
 describe("the sheet's refusal asks for its box", () => {
-  const drawn = (awaiting: string, errors: Readonly<Record<string, string>>) =>
-    render(
-      <ThemeProvider mode="light">
-        <ResourceForm
-          feedback={feedback}
-          initialDate={new Date("2026-08-11T08:20:00Z")}
-          blocks={blocks}
-          held={{}}
-          errors={errors}
-          detail="Review the highlighted fields."
-          awaiting={awaiting}
-          phase="editing"
-          onChange={none}
-          onRetry={none}
-        />
-      </ThemeProvider>,
-    );
+  const sheet = (awaiting: string, errors: Readonly<Record<string, string>>, refusals: number) => (
+    <ThemeProvider mode="light">
+      <ResourceForm
+        feedback={feedback}
+        initialDate={new Date("2026-08-11T08:20:00Z")}
+        blocks={blocks}
+        held={{}}
+        errors={errors}
+        detail="Review the highlighted fields."
+        awaiting={awaiting}
+        refusals={refusals}
+        phase="editing"
+        onChange={none}
+        onRetry={none}
+      />
+    </ThemeProvider>
+  );
+  const drawn = (awaiting: string, errors: Readonly<Record<string, string>>, refusals = 1) =>
+    render(sheet(awaiting, errors, refusals));
 
   test("the box the sheet is waiting on is the one it brings forward", async () => {
     await drawn("title", { title: "Enter a title.", rank: "Enter a valid number." });
@@ -106,5 +108,16 @@ describe("the sheet's refusal asks for its box", () => {
     await drawn("", {});
     expect(focused).toEqual([]);
     expect(screen.getByTestId("input-title")).toBeOnTheScreen();
+  });
+
+  test("a second refusal of the same field asks for its box again", async () => {
+    const first = await drawn("title", { title: "Enter a title." });
+    expect(focused).toEqual(["input-title"]);
+    // Save pressed again over a sheet nobody mended: the field the sheet waits on is
+    // the same field, so its name says nothing new. The count of refusals is what
+    // makes the second refusal a new request; without it the box stays unfocused and
+    // the person is left hunting for the one thing they were just asked for.
+    await first.rerender(sheet("title", { title: "Enter a title." }, 2));
+    expect(focused).toEqual(["input-title", "input-title"]);
   });
 });

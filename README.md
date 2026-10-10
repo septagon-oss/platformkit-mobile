@@ -458,9 +458,11 @@ a tenant policy stays the server's, arrives as a 422 whose `body.` prefix the tr
 and is drawn under that field in the same shape. **The sheet then asks for one field**:
 `firstProblem` names the first control *in the sheet's own asked order* that carries a
 sentence — never the first key of the refusal, which arrives in wire order — the hook
-holds it as `awaiting`, the organism focuses that box's ref and asks React Native's
-`scrollResponderScrollNativeHandleToKeyboard` to lift it above the keyboard, and typing into it is
-what clears it. A refusal about a control with no box to focus (a choice, a date row, a
+holds it as `awaiting` and counts its refusals as `refusals`, the organism focuses that box's
+ref and asks React Native's `scrollResponderScrollNativeHandleToKeyboard` to lift it above
+the keyboard; typing into the field awaited is what clears it, and a second Save over a
+sheet nobody mended asks for the same field again, which is what the count is for. A
+refusal about a control with no box to focus (a choice, a date row, a
 switch, a tag box) focuses nothing: `FormField` announces `label: error`, its error line is a
 polite live region and the notice above the fields is `urgent`. **Dirty means changed, not
 touched**: `changedFields` compares each control's effective value with the one the row

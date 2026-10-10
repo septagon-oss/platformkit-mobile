@@ -263,6 +263,31 @@ describe("useResourceForm", () => {
     expect(result.current.phase).toBe("editing");
   });
 
+  test("a Save refused twice asks for the same field twice", async () => {
+    const api = fakeApi();
+    shell.value = shellValue(api);
+    const { result } = await renderHook(() => useResourceForm(note, undefined));
+    await act(async () => result.current.change("body", "Two lines about the same errand"));
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(result.current.awaiting).toBe("title");
+    expect(result.current.refusals).toBe(1);
+    // Mending some other field changes nothing about which one is owed: the sheet goes
+    // on waiting for the title. A second Save asks for that same field again, and the
+    // name alone cannot say so — it is the count of refusals that the sheet's box is
+    // brought forward by. (Typing into the awaited field itself is what clears it; see
+    // the case above.)
+    await act(async () => result.current.change("body", "Two more lines about the errand"));
+    expect(result.current.awaiting).toBe("title");
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(api.create).not.toHaveBeenCalled();
+    expect(result.current.awaiting).toBe("title");
+    expect(result.current.refusals).toBe(2);
+  });
+
   test("a server that failed keeps every word, and says what it knows", async () => {
     const api = fakeApi();
     api.update.mockRejectedValueOnce(new ApiError(500, "HTTP 500 crud: upstream"));

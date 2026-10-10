@@ -42,6 +42,13 @@ export interface Props {
    * this component's, because it is the one that holds the boxes.
    */
   readonly awaiting?: string;
+  /**
+   * refusals counts the refusals this sheet has announced. A second Save on a sheet
+   * nobody mended asks for the same field, so `awaiting` carries the same name twice
+   * and an effect keyed on it alone would not run: the count is what makes the second
+   * refusal a new request for the box.
+   */
+  readonly refusals?: number;
   readonly phase: Phase;
   readonly onChange: (name: string, value: string) => void;
   readonly onRetry: () => void;
@@ -67,6 +74,7 @@ export function ResourceForm({
   errors,
   detail,
   awaiting = "",
+  refusals = 0,
   phase,
   onChange,
   onRetry,
@@ -95,7 +103,7 @@ export function ResourceForm({
     const handle = findNodeHandle(field);
     if (handle !== null)
       scroller.current?.scrollResponderScrollNativeHandleToKeyboard?.(handle, 0, true);
-  }, [awaiting]);
+  }, [awaiting, refusals]);
 
   // The word a field's requiredness is said in. It rides the control's own name,
   // so a screen reader hears `Subject, Required` where a sighted person reads the

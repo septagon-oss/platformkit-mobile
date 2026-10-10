@@ -150,6 +150,13 @@ describe("useSingleton", () => {
     expect(result.current.detail).toBe("Review the highlighted fields.");
     expect(result.current.awaiting).toBe("title");
     expect(result.current.phase).toBe("editing");
+    // A second Save over the same unamended draft asks for the same field again: the
+    // name is unchanged, so the sheet counts its refusals to have something to ask by.
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(result.current.awaiting).toBe("title");
+    expect(result.current.refusals).toBe(2);
   });
 
   test("a failed read draws no Edit, and a save with no row sends nothing", async () => {
