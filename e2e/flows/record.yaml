@@ -49,7 +49,7 @@ env:
       id: "delete"
 - tapOn:
     id: "delete"
-- tapOn: "Delete"
+- tapOn: "/(?i)^Delete [^‘’?]+$/"
 - extendedWaitUntil:
     visible:
       id: "resource-list"
