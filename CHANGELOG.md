@@ -104,6 +104,20 @@ for the version being released.
 - Five words joined the kit table in English and Portuguese — `editNamed`, `addTag`,
   `addTagTo`, `removeTag`, `commaInValue` — and `tags-<label>`, `add-<label>`,
   `tags-fault-<label>` and `field-<name>` are the ids a device journey works through.
+- The refusal a person can correct now survives the correction. `TagsField` draws its
+  chips from the value beyond the word the box last *wrote*, not beyond whatever stands
+  in the box, so a word typed, refused and mended lands alone instead of beside its own
+  accepted prefix, and a chip's remove button keeps that word out of the value. In
+  `./core/derive`, `entryHoldsSeparator` asks the text for a comma rather than asking
+  splitting how many words it would leave, so `alpha,`, `,alpha`, `,` and `alpha,,` are
+  refused as `alpha,beta` is — the answer changes for any text holding a comma that
+  splitting would leave as one word or none, and for no other input. Additive to the molecule's props: `TagsField` takes the optional
+  `announce`, the accessible name the sheet derived (`Tags, Required`), which a box
+  standing outside a form has none of and so falls back to its own. Two sentences left
+  the derivation for the table — `control` now returns the author's `hints.help` and
+  nothing else, and `changedByCommand` and `identifierOnly` (English and Portuguese) are
+  drawn by `ResourceForm` — so what an English phone reads beside a greyed-out value is
+  the same sentence as before, and a Portuguese phone reads one for the first time.
 
 ## 0.2.0
 

@@ -71,15 +71,26 @@ export function ResourceForm({
   // label above the box and, for an optional one, the word Optional.
   const current = (c: Control) => held[c.field.name] ?? c.value;
   const named = (c: Control) => `${c.label}, ${c.required ? kit.required : kit.optional}`;
+  // The author's line, then the one sentence the kit owes a person about the control
+  // itself: a value greyed out says what changes it, a bare identifier box says that
+  // nothing picks the related record out yet. The words are the copy table's, which is
+  // why they are drawn here rather than written into the derivation of a control — a
+  // sentence in `control` could only ever be English. A field the author left without
+  // a hint is left without one; nothing here invents one.
+  const help = (c: Control) =>
+    [c.help, c.readOnly ? kit.changedByCommand : c.kind === "reference" ? kit.identifierOnly : ""]
+      .filter(Boolean)
+      .join(" ");
   const field = (c: Control) => {
     const name = c.field.name;
     const value = current(c);
     const off = c.readOnly || busy;
+    const drawn = help(c);
     const common = {
       label: c.label,
       required: c.required,
       copy: kit,
-      ...(c.help ? { help: c.help } : {}),
+      ...(drawn ? { help: drawn } : {}),
       ...(errors[name] ? { error: errors[name] } : {}),
       testID: `field-${name}`,
     };
@@ -129,6 +140,7 @@ export function ResourceForm({
           <FormField key={name} {...common}>
             <TagsField
               label={c.label}
+              announce={named(c)}
               value={value}
               onChange={(v) => onChange(name, v)}
               onRefused={(r) => onFieldRefused?.(name, r)}

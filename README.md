@@ -385,11 +385,17 @@ even when it is optional, and never leaves the block its entry filed it in.
 command's argument the same way with no identity to lead on. Neither moves a byte
 `values` sends: reordering what is drawn does not reorder what is written.
 
-Help is the author's line and nothing else. A field's `hints.help` is drawn under the
-field and announced with it; the developer's `doc`, which describes a wire member, is
+Help is the author's line. A field's `hints.help` is drawn under the field and
+announced with it; the developer's `doc`, which describes a wire member, is
 never drawn or announced on any form, sheet title or command screen — the same text
 that used to put "Lifecycle state" in front of a person is now a note only a developer
-sees, and no list carries a help sentence anybody did not write.
+sees, and no list carries a help sentence anybody did not write. Two sentences are the
+kit's own rather than an author's, and they are the sheet's to draw, not the
+derivation's: `changedByCommand` under a value only a command of its own changes, and
+`identifierOnly` under a reference box that takes an identifier because no picker
+exists yet. `control` hands back `hints.help` and nothing else, because a sentence
+written there could only ever be in one language; these two sit in `src/core/kitCopy.ts`
+with every other word a screen says.
 
 One name is drawn above every control, by `FormField`, whatever the control is: a
 switch, a chooser, a date row and a tag box print no name of their own and announce the
@@ -397,7 +403,9 @@ one the sheet gave them, so a control is named once and the columns line up. Tha
 announced name carries whether a person may leave the field empty, in the reader's own
 words ("Title, Required", "Pinned, Optional"), because `*` is not a word and a switch
 that says only "Pinned" says nothing about leaving it alone. `field-<name>` is the id a
-journey looks a control up by.
+journey looks a control up by. The tag box announces it too — its input carries the
+name the sheet derived, so a person hearing the sheet hears "Tags, Required" and not
+only "Add to Tags", whose act the Add button names.
 
 A list field stores its items comma-joined, so one item can never hold the separator.
 `joinList` is the one spelling, `entryHoldsSeparator` is the box's rule and
@@ -424,7 +432,10 @@ word over `editNamed`. **Added** — `formSections`, `commandSections`, `orderCo
 inventory held `formControls` (the set) and no answer to "in what order, in what
 blocks, and which of these words is a person's"; `FormBlock` and `FormWords` are its
 two shapes. Five words joined the copy table in both languages (`editNamed`, `addTag`,
-`addTagTo`, `removeTag`, `commaInValue`), and `required`/`optional`, which the table
+`addTagTo`, `removeTag`, `commaInValue`), and two more joined it in this round so a
+Portuguese phone reads Portuguese where the sheet explains a control it did not get
+words for (`changedByCommand`, `identifierOnly`), which the table already held in
+English only as a literal inside the derivation. `required`/`optional`, which the table
 already held and nothing drew, are now drawn and announced by the sheet — a refusal or
 an affordance with no word in the table is one no phone can say. **Made reusable** — `formSections`
 hands a renderer pack the form as data (blocks, labels and ordered controls), so a
@@ -626,9 +637,11 @@ Direct consumers upgrading their source pin must migrate these required props:
   flat list of `controls`: one name is drawn above every control, so the organism
   needs to know which control begins a group. `FormField` takes `copy` (the kit
   bundle) when it is to mark a field required or optional, `TagsField` requires
-  `copy`, and `SwitchRow` no longer takes `help` — the name above the switch is
-  where help belongs. `problems(controls, held, words)` takes the reader's own
-  bundle, because the sentence it refuses with is a word, not a format string.
+  `copy` and takes the optional `announce` (the accessible name the sheet derived,
+  which a box outside a form does not have), and `SwitchRow` no longer takes `help` —
+  the name above the switch is where help belongs. `problems(controls, held, words)`
+  takes the reader's own bundle, because the sentence it refuses with is a word, not a
+  format string.
   `sheet(title, entry)` is titled by the catalogue's declared name for the kind,
   with the wire word from the address when no entry has been read. Generated form,
   command and singleton screens accept an optional `Clock` and sample it once

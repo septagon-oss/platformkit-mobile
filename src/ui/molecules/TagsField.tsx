@@ -21,6 +21,15 @@ import { useStyles, useTheme, type Theme } from "../theme";
 
 interface Props {
   readonly label: string;
+  /**
+   * announce is the field's accessible name as the sheet derived it — the label and
+   * the word for whether it may be left empty ("Tags, Required"). Every other
+   * control on the sheet is announced by that name, and a list field whose box says
+   * only "Add to Tags" tells a person hearing it nothing about leaving the field
+   * alone. Left unset it falls back to the box's own word, which is what a control
+   * standing outside a form — the gallery's — has to say.
+   */
+  readonly announce?: string;
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly copy: Pick<KitWords, "addTag" | "addTagTo" | "removeTag" | "commaInValue">;
@@ -38,6 +47,7 @@ interface Props {
 
 export function TagsField({
   label,
+  announce,
   value,
   onChange,
   copy,
@@ -152,7 +162,7 @@ export function TagsField({
           onSubmitEditing={commit}
           blurOnSubmit={false}
           placeholder={copy.addTagTo(label)}
-          accessibilityLabel={copy.addTagTo(label)}
+          accessibilityLabel={announce ?? copy.addTagTo(label)}
           disabled={disabled}
           returnKeyType="done"
           testID={`tags-${tagKey}`}

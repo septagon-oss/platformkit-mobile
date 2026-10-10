@@ -79,8 +79,11 @@ requires `initialDate` and the `blocks` that `formSections` answers (ordered gro
 where it took a flat list of controls); form, command and singleton screen compositions sample
 their injected `Clock` once at mount. `SwitchRow`, `ChoiceRow` and `DateTimeRow` draw
 no label of their own and take the announced `name`; `FormField` takes `copy` to mark a
-field required or optional in the reader's words, and `TagsField` takes `copy` and owns
-the comma rule that keeps one list item free of the separator. `timeText`, `display` and the record's section
+field required or optional in the reader's words, and `TagsField` takes `copy`, the
+optional `announce` the sheet derived for it, and owns the comma rule that keeps one
+list item free of the separator; the two sentences a sheet owes a person about a
+control it has no author's hint for are table words (`changedByCommand`,
+`identifierOnly`), drawn by `ResourceForm` rather than written into the derivation. `timeText`, `display` and the record's section
 functions require explicit formatting,
 and Value/Labelled receive it as `presentation`. These remove the shared mutable
 formatter and component-owned choice words. `StateFeedback` is the optional

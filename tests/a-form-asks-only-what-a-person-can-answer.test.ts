@@ -3,7 +3,9 @@
 // is `formControls`' — a hidden field is neither offered nor sent — the grouping is
 // the entry's declared `sections`, and the order inside a block is the field the
 // record is called by, then required, then optional. Help is the author's line alone:
-// the developer's `doc` describes a wire member and is never drawn or announced.
+// the developer's `doc` describes a wire member and is never drawn or announced, and
+// the two sentences the kit owes a control come from the copy table in both languages,
+// drawn by the sheet rather than written into the derivation.
 //
 // The comma rules are the same fact seen from the two doors: a list stores its items
 // comma-joined, so one item can never hold the separator. The box refuses an entry
@@ -84,15 +86,6 @@ function unhinted(mutate: (resource: Record<string, unknown>) => void = () => un
 const plain = unhinted();
 
 const names = (controls: readonly Control[]) => controls.map((c) => c.field.name).join(", ");
-const order = (blocks: ReturnType<typeof formSections>) =>
-  blocks
-    .map((b) => `[${b.key || "-"}] ${b.label || "-"}: ${names(b.controls)}${mark(b)}`)
-    .join(" | ");
-/** The required fields of a block, so an order claim says which of them it is about. */
-const mark = (block: ReturnType<typeof formSections>[number]) => {
-  const required = block.controls.filter((c) => c.required).map((c) => c.field.name);
-  return required.length === 0 ? "" : ` (${required.join(",")} are)`;
-};
 
 /** A `pinned` the document makes required, which is what moves it above an optional `body`. */
 const pinRequired = (r: Record<string, unknown>) => {
@@ -291,6 +284,35 @@ test("help is the author's line, and the developer's doc is never drawn or annou
     "",
     "the doc fallback is gone: an undeclared field says nothing until an author writes a hint",
   );
+});
+
+test("the derivation writes no help sentence of its own, in any language", () => {
+  // A control carries its author's line and nothing else. The two sentences the kit
+  // does owe a person — what greys a value out, what a bare identifier box takes —
+  // are drawn by the sheet out of the copy table, because a sentence written in the
+  // derivation could only ever be in one language.
+  const edit = formSections(hinted(), taskRow, false, kit.overview).flatMap((b) => b.controls);
+  const greyed = edit.find((c) => c.field.name === "status")!;
+  assert.equal(greyed.readOnly, true, "a value only a command changes is read on the sheet");
+  assert.equal(greyed.help, "", "and the derivation says nothing beside it");
+  const picked = formSections(
+    hinted((r) => {
+      (r.fields as Record<string, unknown>[]).find((f) => f.name === "body")!.widget =
+        "entity-picker";
+    }),
+    undefined,
+    true,
+    kit.overview,
+  )
+    .flatMap((b) => b.controls)
+    .find((c) => c.field.name === "body")!;
+  assert.equal(picked.kind, "reference", "the document asked for an identifier box");
+  assert.equal(picked.help, "", "which says nothing here either");
+  for (const language of ["en", "pt"] as const) {
+    const words = deriveCopy(language).kit;
+    assert.notEqual(words.changedByCommand, "", `${language} says what changes the value`);
+    assert.notEqual(words.identifierOnly, "", `${language} says what the box takes`);
+  }
 });
 
 test("a hidden field is not offered and not sent; a required one stays and says so", () => {

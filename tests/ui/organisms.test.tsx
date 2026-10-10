@@ -5,11 +5,14 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
 import {
+  deriveCopy,
   deriveDisclosure,
   deriveEventActivity,
+  deriveFeedback,
   formSections,
   noOrder,
   sortOptions,
+  type Presentation,
 } from "../../src/core/derive";
 import { Home } from "../../src/ui/organisms/Home";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
@@ -179,7 +182,56 @@ describe("ResourceForm", () => {
     // whether leaving it is allowed.
     expect(screen.getByTestId("input-title").props.accessibilityLabel).toBe("Title, Required");
     expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeOnTheScreen();
+    // The tag box announces the name the sheet derived, not only the act of its own
+    // Add button: a person hearing the sheet hears whether the list may be left empty.
+    expect(screen.getByTestId("tags-tags").props.accessibilityLabel).toBe("Tags, Optional");
     expect(screen.getAllByText(/\(Optional\)/).length).toBeGreaterThan(3);
+  });
+
+  test("a list field a person owes is announced as owed", async () => {
+    const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+    const fields = doc.resources.find((r: { entity: string }) => r.entity === "note").fields;
+    fields.find((f: { name: string }) => f.name === "tags").required = true;
+    const owed = parseCatalog(doc).resources.find((r) => r.entity === "note")!;
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(owed, undefined, true, feedback.copy.kit.overview)}
+      />,
+    );
+    // "Add to Tags" names the button's act; the box itself answers whether the
+    // person may leave the list empty, which is the same word the label above it gives.
+    expect(screen.getByTestId("tags-tags").props.accessibilityLabel).toBe("Tags, Required");
+    expect(screen.getByRole("button", { name: "Add to Tags" })).toBeOnTheScreen();
+  });
+
+  test("a value only a command changes is explained in the language the phone reads", async () => {
+    const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: false, tags: [] };
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, row, false, feedback.copy.kit.overview)}
+      />,
+    );
+    expect(screen.getByText(feedback.copy.kit.changedByCommand)).toBeOnTheScreen();
+    // The sentence is the table's, so the same sheet on a Portuguese phone says it in
+    // Portuguese: it is drawn by the sheet rather than written into the derivation.
+    const there: Presentation = { ...presentation, copy: deriveCopy("pt") };
+    const pt = deriveFeedback(there.copy, there.motion, there);
+    await inTheme(
+      <ResourceForm
+        feedback={pt}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, row, false, pt.copy.kit.overview)}
+      />,
+    );
+    expect(screen.getByText(pt.copy.kit.changedByCommand)).toBeOnTheScreen();
+    expect(screen.queryByText(feedback.copy.kit.changedByCommand)).toBeNull();
   });
 
   test("every control is named once, above the control, whatever the control is", async () => {

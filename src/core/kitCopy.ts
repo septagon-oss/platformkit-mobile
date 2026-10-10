@@ -138,6 +138,14 @@ export const kitEnglish = {
   addTagTo: (label: string) => `Add to ${label}`,
   removeTag: (tag: string) => `Remove ${tag}`,
   commaInValue: "Remove the comma from this value.",
+  // The two sentences a sheet owes a person whatever the field's author wrote, and
+  // the only two the kit writes into a form: a value that is greyed out has to say
+  // what changes it, and a box that takes an identifier has to say that nothing
+  // picks the record out yet. They live here rather than in the derivation of a
+  // control so a Portuguese phone reads Portuguese (`control` hands back the
+  // author's line and nothing else), and they are drawn by `ResourceForm`.
+  changedByCommand: "Changed by a command of its own, not by this form.",
+  identifierOnly: "The identifier of the related record. There is no picker for it yet.",
   saveExit: "Save and exit",
   steps: "Steps",
   validation: "Review the highlighted fields.",
@@ -361,6 +369,8 @@ export const kitPortuguese: KitWords = {
   addTagTo: (label: string) => `Adicionar a ${label}`,
   removeTag: (tag: string) => `Remover ${tag}`,
   commaInValue: "Remova a vírgula deste valor.",
+  changedByCommand: "Alterado por um comando próprio, não por este formulário.",
+  identifierOnly: "O identificador do registo relacionado. Ainda não há seletor para ele.",
   saveExit: "Guardar e sair",
   steps: "Etapas",
   validation: "Reveja os campos assinalados.",

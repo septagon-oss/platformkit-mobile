@@ -818,15 +818,14 @@ export function kind(f: Field): ControlKind {
 /** control is one field as a form holds it: the same rules wherever the field came from. */
 function control(f: Field, value: string, immutable: boolean): Control {
   const k = kind(f);
-  // Help is the author's line for the person who fills the form. The developer's
-  // `doc` describes a wire member to whoever wrote the server, so it is never
-  // drawn or announced (0085): a field whose author wrote no hint says nothing,
-  // and its label, its required mark and its control still read.
-  const notes = [f.hints?.help ?? ""];
-  if (immutable) notes.push("Changed by a command of its own, not by this form.");
-  if (k === "reference") {
-    notes.push("The identifier of the related record. There is no picker for it yet.");
-  }
+  // Help is the author's line for the person who fills the form, and nothing else.
+  // The developer's `doc` describes a wire member to whoever wrote the server, so it
+  // is never drawn or announced (0085); the two sentences the kit does owe a person —
+  // what greys a value out, and what a bare identifier box takes — are the sheet's to
+  // draw, because its words are the reader's language (`kitCopy`'s `changedByCommand`
+  // and `identifierOnly`), and a sentence written here could only ever be English.
+  // A field whose author wrote no hint therefore says nothing here, and its label,
+  // its required word and its control still read.
   return {
     kind: k,
     field: f,
@@ -834,7 +833,7 @@ function control(f: Field, value: string, immutable: boolean): Control {
     value,
     required: f.required === true,
     readOnly: immutable,
-    help: notes.filter(Boolean).join(" "),
+    help: f.hints?.help ?? "",
     options: (f.enum ?? []).map((v) => ({ value: v, label: enumLabel(f, v) })),
   };
 }

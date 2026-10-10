@@ -203,15 +203,6 @@ describe("TagsField", () => {
   const box = (value: string, onChange: (raw: string) => void = none, disabled = false) => (
     <TagsField label="Tags" value={value} onChange={onChange} copy={kit} disabled={disabled} />
   );
-  const typed = (text: string, value = "", onChange: (raw: string) => void = none) => {
-    const wrote = onChange;
-    return {
-      render: async () => {
-        await inTheme(box(value, wrote));
-        await fireEvent.changeText(screen.getByTestId("tags-tags"), text);
-      },
-    };
-  };
 
   test("a return key commits the word, and so does the Add control", async () => {
     const onChange = jest.fn();
