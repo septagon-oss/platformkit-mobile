@@ -17,6 +17,20 @@ decides whether a server's document can be drawn at all; an entry for a version
 that was never published states none, and `check:publish` reads only the section
 for the version being released.
 
+## 0.3.0 (unreleased)
+
+- catalogVersion: 2
+- `detailItems` is gone from `./core/derive`, which is a breaking change to a published
+  subpath: below 1.0.0 the minor carries that, so the removal is documented here rather
+  than noted under `0.2.0`, and `package.json` moves to `0.3.0` when the cut is made.
+  `recordHeader`, `recordSections` and `recordInformation` answer the question it used to
+  — which facts a record draws — as three levels instead of one flat list of every
+  non-hidden field, which is what let a record open on its own identifier.
+- New in the same subpath, additive: `hasValue` (the one emptiness rule a record reads
+  a row with), `informationFields` (the identifier and the two stamps, named once) and
+  the section model itself; `record-menu` and `record-information` are the two ids a
+  journey finds a record's header menu and its collapsed block by.
+
 ## 0.2.0
 
 - catalogVersion: 2
