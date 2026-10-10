@@ -36,7 +36,9 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   // question the platform asks here. useCommandRun is that rule, shared with
   // every renderer pack that draws a record's actions.
   const commands = rowCommands(entry);
-  const title = detail.row ? label(entry, detail.row) : "";
+  // A row whose schema names nothing to read is titled as what it is, in the
+  // words the reader's bundle holds; the noun comes from the catalogue.
+  const title = detail.row ? label(entry, detail.row, feedback.copy.kit.untitled) : "";
   // The options are memoised because the navigator is told them on every
   // render: a fresh object, with fresh callbacks in it, is a new instruction
   // each time and the renders never settle.

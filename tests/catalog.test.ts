@@ -548,15 +548,23 @@ test("a v2 document retains generated metadata without inventing controls", () =
   doc.resources[0].fields[1].maxLength = 80;
   doc.resources[0].fields[1].present = "badge";
   doc.resources[0].fields[1].display = true;
+  doc.resources[0].fields[1].precision = 2;
   doc.resources[0].fields[2].widget = "richtext";
   const c = parseCatalog(doc);
   const note = c.resources[0]!;
   assert.equal(note.screen, "/app/note/notes");
   assert.equal(note.fields[1]!.present, "badge");
+  // The pin this document is cut from declares both of these, so they are wire
+  // metadata like `present`: retained, and read by whoever has a use for them.
+  assert.equal(note.fields[1]!.maxLength, 80);
+  assert.equal(note.fields[1]!.display, true);
   for (const f of note.fields) {
-    for (const ignored of ["maxLength", "display"]) {
-      assert.equal(ignored in f, false, `${ignored} reached a field`);
-    }
+    // A member no document declares stays outside the view: a screen is handed
+    // what the document named, never whatever a stray JSON object happened to hold.
+    assert.equal("precision" in f, false, "a member outside the document reached a field");
+    // A hint is the one declared member kept out on purpose: the core reads it
+    // into `hints`, so raw hint bytes never reach a component.
+    assert.equal("presentation" in f, false, "raw hint bytes reached a field");
   }
   // A widget the phone has no control for is still the widget the server named.
   assert.equal(note.fields[2]!.widget, "richtext");

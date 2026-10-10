@@ -5,7 +5,7 @@ import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { doors, type Command } from "../core/catalog";
-import { collectionCommands, humanize, plural, screenPath } from "../core/derive";
+import { collectionCommands, noun, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
@@ -43,7 +43,7 @@ export function ResourceList({ entry }: ScreenProps) {
   // each time and the renders never settle.
   const options = useMemo(
     () => ({
-      title: humanize(plural(entry.entity)),
+      title: noun(entry).plural,
       headerRight: () => (
         <View style={styles.actions}>
           <Button placement="header" label="Order" icon="sort" onPress={toggleOrdering} />

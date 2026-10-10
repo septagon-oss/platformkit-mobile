@@ -15,8 +15,8 @@ import {
   formControls,
   humanize,
   hostLabel,
-  known,
   label,
+  primary,
   civilDay,
   listCells,
   listColumns,
@@ -63,10 +63,13 @@ test("humanize reads like the web shell", () => {
   assert.equal(humanize("mark-paid"), "Mark paid");
 });
 
-test("the row is known by its first writable string", () => {
-  assert.equal(known(note.fields).name, "title");
-  assert.equal(label(note, row), "Buy milk");
-  assert.equal(label(note, { id: "9" }), "9");
+test("the row is known by its primary field, and a nameless one says so", () => {
+  assert.equal(primary(note)!.name, "title");
+  assert.equal(label(note, row, deriveCopy("en").kit.untitled), "Buy milk");
+  // An un-hinted entry whose row carries no title reads as the record it is, not
+  // as the identifier nobody came to read: the fabricated `id` fallback is gone.
+  assert.equal(label(note, { id: "9" }, deriveCopy("en").kit.untitled), "Untitled Note");
+  assert.equal(label(note, { id: "9" }, deriveCopy("pt").kit.untitled), "Note sem título");
 });
 
 test("the list leads with the known field and hides what the schema hides", () => {

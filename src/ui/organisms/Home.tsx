@@ -4,7 +4,7 @@
 // native header, set by the screen composition.
 import React from "react";
 import type { Entry } from "../../core/catalog";
-import { type Feedback, humanize, plural } from "../../core/derive";
+import { noun, type Feedback } from "../../core/derive";
 import { EmptyState } from "../atoms/EmptyState";
 import { Text } from "../atoms/Text";
 import { Row } from "../molecules/Row";
@@ -34,7 +34,7 @@ export function Home({ feedback, entries, refreshing, account, onOpen, onRefresh
       testID="home"
       render={(e) => (
         <Row
-          title={humanize(plural(e.entity))}
+          title={noun(e).plural}
           cells={e.writable ? [] : [{ value: feedback.copy.kit.readOnly }]}
           onPress={() => onOpen(e)}
           testID={`open-${e.module}-${e.entity}`}

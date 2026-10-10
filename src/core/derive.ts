@@ -2,8 +2,9 @@
 // only an entry's schema. The rules are the web generator's (ui/screens in the
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
-import type { Command, CrudVerb, Entry, Field } from "./catalog";
-import type { FailureSubject } from "./failure";
+import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
+import type { Copy } from "./copy";
+import type { EntrySubject } from "./failure";
 import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
 export { copyForLocale, copyLanguage, deriveCopy, type Copy, type Language } from "./copy";
@@ -74,14 +75,54 @@ export function plural(noun: string): string {
 }
 
 /**
+ * noun is what a list header, an empty state and a row title call the resource.
+ *
+ * A declared `singular`/`plural` is the author's word and arrives as it was
+ * written: never humanised, never re-pluralised, never re-cased. "Conteúdo" is
+ * shown as "Conteúdo", and a declared plural is never made more plural. The
+ * fallback is today's reading of the entity name, so for every resource that
+ * declares nothing the answer is the one this build has always given.
+ */
+export interface Noun {
+  readonly singular: string;
+  readonly plural: string;
+}
+
+export function noun(e: Entry): Noun {
+  return {
+    singular: e.hints?.singular ?? humanize(e.entity),
+    plural: e.hints?.plural ?? humanize(plural(e.entity)),
+  };
+}
+
+/**
+ * nounPhrase is a resource's name as a sentence uses it: "We couldn't load
+ * notes.", "No notes yet", "New note".
+ *
+ * A declared name keeps the case the author gave it, because case carries meaning
+ * in languages this kit's English rules do not speak — the cost of not editing an
+ * author's words is a capital inside an English sentence, and the sentence
+ * templates are where that is absorbed. The humanised fallback is this build's
+ * own reading of an entity name, which has always been said lower case.
+ */
+export function nounPhrase(e: Entry): Noun {
+  const named = noun(e);
+  return {
+    singular: e.hints?.singular ?? named.singular.toLowerCase(),
+    plural: e.hints?.plural ?? named.plural.toLowerCase(),
+  };
+}
+
+/**
  * What a refusal's sentence names. The nouns are the catalogue's own — never a
  * word written into a failure rule — and `lastSeen` is the reader-formatted
  * instant of the last good read, which a refresh quotes and a first read cannot.
  */
-export function failureSubject(entry: Entry, command = "", lastSeen = ""): FailureSubject {
+export function failureSubject(entry: Entry, command = "", lastSeen = ""): EntrySubject {
+  const named = nounPhrase(entry);
   return {
-    singular: humanize(entry.entity).toLowerCase(),
-    plural: humanize(plural(entry.entity)).toLowerCase(),
+    singular: named.singular,
+    plural: named.plural,
     command,
     lastSeen,
   };
@@ -160,28 +201,177 @@ export function display(f: Field, v: unknown, format: Formatting): string {
     return new Intl.NumberFormat(format.locale, { maximumSignificantDigits: 21 }).format(v);
   const out = text(v);
   if (!out) return "—";
-  return f.enum && f.enum.length > 0 ? humanize(out) : out;
+  return f.enum && f.enum.length > 0 ? enumLabel(f, out) : out;
 }
 
-/** known is the field a row is recognised by: the first writable string. */
-export function known(fields: readonly Field[]): Field {
+/**
+ * nameLike are the wire names a row is recognised by before any other string:
+ * the three an author reaches for when they want a record to have a title.
+ */
+const nameLike: readonly string[] = ["title", "name", "displayName"];
+
+/**
+ * neverShown is the one visibility no screen draws. `hidden` is integration
+ * plumbing: the value stays in the schema, the JSON and the PATCH, where nothing
+ * a person reads is drawn from it — so it is neither drawn nor named by anything
+ * that is. The kernel says the same thing at mount (`kit/rest/hints.go`,
+ * `namedFieldFault`: "a row is not named by its plumbing") and refuses the
+ * document; the phone refuses the pointer and keeps the screens, because one
+ * author's slip is not worth this app.
+ */
+const neverShown = (f: Field): boolean => f.hints?.visibility === "hidden";
+
+/**
+ * namedBy is the chain that decides what a record is called, spelled once and
+ * asked of the fields the asking screen draws: the field the entry names, then a
+ * field *called* title/name/displayName, then the first readable string that is
+ * not a closed set of values, then nothing.
+ *
+ * Asking of one screen's fields is the whole of it: an identity chosen from the
+ * whole schema names a row by a field that screen does not draw, and the value
+ * comes back anyway through the column every row leads on. So the chain never
+ * checks a visibility of its own — the list it was handed already excludes what
+ * that screen keeps off.
+ */
+function namedBy(e: Entry, fields: readonly Field[]): Field | undefined {
+  const declared = e.hints?.primaryField;
   return (
-    fields.find((f) => !f.readOnly && f.type === "string") ??
-    fields[0] ?? { name: "id", type: "uuid" }
+    (declared === undefined ? undefined : fields.find((f) => f.name === declared)) ??
+    fields.find((f) => nameLike.includes(f.name)) ??
+    fields.find((f) => f.type === "string" && !(f.enum && f.enum.length > 0))
   );
 }
 
-export function label(e: Entry, row: Row): string {
-  return text(row[known(e.fields).name]) || text(row.id);
+/**
+ * primary is the field the record is recognised by: the chain over every field a
+ * person is shown, `detail` included, since the record answers a `detail` field
+ * and a row has no room for it. It answers `undefined` rather than fabricating an
+ * `id` the schema does not hold: a record with nothing to read says so (`label`
+ * below) instead of quoting an identifier nobody chose to look at.
+ */
+export function primary(e: Entry): Field | undefined {
+  return namedBy(
+    e,
+    e.fields.filter((f) => !neverShown(f)),
+  );
 }
 
-/** listColumns: the known field first, then every field the schema does not hide; never the id. */
+/**
+ * label is what one record is called, named by the fields of one screen: `record`
+ * is its own page, where a `detail` field answers, and `row` is a line on a list,
+ * which is made of the fields `onList` admits — a field its author kept off every
+ * row cannot title one either. When the screen has nothing to read, `untitled`
+ * spells what the record is called instead — a noun the catalogue named and a
+ * phrase the reader's own bundle holds, because a screen's title is said in the
+ * phone's language and derive never asks which language that is.
+ */
+export function label(
+  e: Entry,
+  row: Row,
+  untitled: Copy["kit"]["untitled"],
+  where: "record" | "row" = "record",
+): string {
+  const at = where === "record" ? primary(e) : rowPrimary(e);
+  return (at === undefined ? "" : text(row[at.name])) || untitled(noun(e).singular);
+}
+
+/** fieldLabel is a field's own word for itself: what the author wrote, else its name read as words. */
+export const fieldLabel = (f: Field): string => f.hints?.label ?? humanize(f.name);
+
+/**
+ * enumLabel is one value of a closed set as a person reads it. A declared label
+ * is the author's word; an unlabelled value keeps today's humanising, so a
+ * document that labels two of five values loses nothing.
+ */
+export const enumLabel = (f: Field, value: string): string =>
+  f.hints?.enumLabels?.[value] ?? humanize(value);
+
+/**
+ * enumTone is how one value of a closed set should read: which of its values is
+ * good, which is a warning. Nothing is inferred — an unlabelled value is neutral
+ * the way it is today — and `badgeTone` is the one cast into the colours this
+ * build ships, so no atom maps a word it cannot draw.
+ */
+export const enumTone = (f: Field, value: string): HintTone =>
+  f.hints?.enumTones?.[value] ?? "neutral";
+
+/** badgeTone is the atom's name for a hint tone: the kernel says `success`, the kit says `ok`. */
+export const badgeTone = (tone: HintTone): "ok" | "warning" | "danger" | "info" | "neutral" =>
+  tone === "success" ? "ok" : tone;
+
+/**
+ * statusField is the field whose value the record's pill shows, or nothing.
+ *
+ * No status is ever inferred from "the first enum field": a pill that guesses
+ * says something the document did not say, and a pointer at plumbing names no
+ * pill either. The declaration is read here and drawn by whoever draws the pill
+ * (T-0323).
+ */
+export const statusField = (e: Entry): Field | undefined =>
+  e.hints?.statusField === undefined
+    ? undefined
+    : e.fields.find((f) => f.name === e.hints?.statusField && !neverShown(f));
+
+/**
+ * iconName is the word an entry asks for its glyph. It answers the word and draws
+ * nothing: which glyphs this build ships belongs to `ui/atoms/Icon.tsx`, and a
+ * name it does not hold draws the generic one.
+ */
+export const iconName = (e: Entry): string | undefined => e.hints?.icon;
+
+/**
+ * rowContent is a field's own answer about what a row may *say*: silence about its
+ * visibility, or a declared `shown`, and the field's words may be read on a line
+ * of a list — as its name, as the line under the name, or as a cell beside it.
+ * `detail` and `hidden` answer no: the first is the record's own answer, which
+ * `detailItems` gives and a row has no room for, and the second is nobody's.
+ *
+ * A declared pointer (`previewField`, `summaryFields`) is asked the same question
+ * as the default it overrides, because an entry that points a row's summary line
+ * at a paragraph its own field kept for the record says two opposite things, and
+ * the field's word about itself is the newer fact. `hideList` is deliberately not
+ * consulted here: it declines a *column* — which is why every long text carries
+ * it — and a row's line under its name is not a column. `onList` is where that
+ * legacy tag is asked.
+ */
+const rowContent = (f: Field): boolean =>
+  f.hints?.visibility === undefined || f.hints.visibility === "shown";
+
+/**
+ * onList is a field's own answer about which *columns* a list has: `rowContent`,
+ * and, when the field declares no visibility, the schema's older `hideList` tag.
+ * A declaration beats `hideList` in both directions (`shown` reclaims the column
+ * `hideList` took, `detail` and `hidden` give up one it left), because an author's
+ * word about one field is the newer fact. What else belongs in a list — never the
+ * id, always the row's own name — is `listColumns`'s, not a field's.
+ */
+export const onList = (f: Field): boolean =>
+  rowContent(f) && (f.hints?.visibility !== undefined || f.hideList !== true);
+
+/**
+ * rowFields are the fields a row is made of: what the schema puts on a list, in
+ * schema order, never the id. This is the one place the list asks which fields it
+ * has, so the columns it draws, the field it leads a row with and the cells beside
+ * it cannot disagree about the answer.
+ */
+const rowFields = (e: Entry): readonly Field[] =>
+  e.fields.filter((f) => f.name !== "id" && onList(f));
+
+/**
+ * rowPrimary is the field a list leads with and calls a row by: the same chain as
+ * `primary`, asked of `rowFields` — a `detail` field is the record's answer and a
+ * `hidden` one nobody's, so neither names a row. The web shell selects the same
+ * way for the same reason (`ui/resource/resource.go`: `known(onList(…))`).
+ */
+export function rowPrimary(e: Entry): Field | undefined {
+  return namedBy(e, rowFields(e));
+}
+
+/** listColumns: the field the list names rows by first, then every other field it draws; never the id. */
 export function listColumns(e: Entry): readonly Field[] {
-  const primary = known(e.fields);
-  return [
-    primary,
-    ...e.fields.filter((f) => !f.hideList && f.name !== primary.name && f.name !== "id"),
-  ];
+  const drawn = rowFields(e);
+  const named = rowPrimary(e);
+  return named === undefined ? drawn : [named, ...drawn.filter((f) => f.name !== named.name)];
 }
 
 /**
@@ -192,6 +382,13 @@ export function listColumns(e: Entry): readonly Field[] {
  * identifiers every record has and few people scan for.
  */
 export function listCells(e: Entry, limit = 3): readonly Field[] {
+  const declared = e.hints?.summaryFields;
+  if (declared !== undefined)
+    // Declared means exactly those, in the order the author gave them, minus any
+    // field a row may not speak of: `limit` is this build's budget for a ranking
+    // nobody asked for, and neither plumbing nor the record's own paragraph is a
+    // cell whoever pointed at it.
+    return declared.flatMap((name) => e.fields.filter((f) => f.name === name && rowContent(f)));
   const rank = (f: Field): number => {
     if (f.enum && f.enum.length > 0) return 0;
     if (f.type === "bool") return 1;
@@ -201,10 +398,10 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
     if (f.type === "time") return 5;
     return 6;
   };
-  const primary = known(e.fields);
+  const named = rowPrimary(e);
   const preview = listPreview(e);
   return listColumns(e)
-    .filter((f) => f.name !== primary.name && f.name !== preview?.name)
+    .filter((f) => f.name !== named?.name && f.name !== preview?.name)
     .map((f, i) => ({ f, i }))
     .sort((a, b) => rank(a.f) - rank(b.f) || a.i - b.i)
     .slice(0, limit)
@@ -220,12 +417,20 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
  * in a table column, which is true of every long text and is why a schema
  * marks them: a paragraph ruins a column. A line under the name is not a
  * column, and the paragraph is exactly what is worth reading there. It stays
- * out of the cells beside it, which are columns.
+ * out of the cells beside it, which are columns. A declared visibility does
+ * disqualify it, in both readings: `detail` is the paragraph a person reads on
+ * the record and nowhere else, and a pointer at it cannot make the row quote it.
  */
 export function listPreview(e: Entry): Field | undefined {
-  const primary = known(e.fields);
+  const declared = e.hints?.previewField;
+  if (declared !== undefined) return e.fields.find((f) => f.name === declared && rowContent(f));
+  const named = rowPrimary(e);
   return e.fields.find(
-    (f) => f.name !== primary.name && !f.readOnly && (f.type === "text" || f.widget === "textarea"),
+    (f) =>
+      f.name !== named?.name &&
+      rowContent(f) &&
+      !f.readOnly &&
+      (f.type === "text" || f.widget === "textarea"),
   );
 }
 
@@ -259,12 +464,20 @@ export interface DetailItem {
   readonly spoken?: string;
 }
 
+/**
+ * detailItems is a record's own screen: every field a person is shown there, in
+ * schema order. `hideList` hides nothing here — that tag is about a table being
+ * readable, not about a field being secret — and `hidden` is the one declaration
+ * that is off this screen too, its value left in the JSON and the PATCH.
+ */
 export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  return e.fields.map((f) => ({
-    field: f,
-    label: humanize(f.name),
-    ...saidValue(f, row[f.name], format),
-  }));
+  return e.fields
+    .filter((f) => !neverShown(f))
+    .map((f) => ({
+      field: f,
+      label: fieldLabel(f),
+      ...saidValue(f, row[f.name], format),
+    }));
 }
 
 export type ControlKind =
@@ -304,7 +517,10 @@ export function kind(f: Field): ControlKind {
 /** control is one field as a form holds it: the same rules wherever the field came from. */
 function control(f: Field, value: string, immutable: boolean): Control {
   const k = kind(f);
-  const notes = [f.doc ?? ""];
+  // The author's help line reads the form; the developer's `doc` is the fallback
+  // it has always had. Deleting that fallback is a visible change to every
+  // un-hinted form, so it belongs to whoever redraws the form (T-0324).
+  const notes = [f.hints?.help ?? f.doc ?? ""];
   if (immutable) notes.push("Changed by a command of its own, not by this form.");
   if (k === "reference") {
     notes.push("The identifier of the related record. There is no picker for it yet.");
@@ -313,12 +529,12 @@ function control(f: Field, value: string, immutable: boolean): Control {
   return {
     kind: k,
     field: f,
-    label: humanize(f.name),
+    label: fieldLabel(f),
     value,
     required: f.required === true,
     readOnly: immutable,
     help: notes.filter(Boolean).join(" "),
-    options: (f.enum ?? []).map((v) => ({ value: v, label: humanize(v) })),
+    options: (f.enum ?? []).map((v) => ({ value: v, label: enumLabel(f, v) })),
   };
 }
 
@@ -327,6 +543,12 @@ export function formControls(e: Entry, row: Row | undefined, create: boolean): r
   const out: Control[] = [];
   for (const f of e.fields) {
     if (f.readOnly) continue;
+    // A field the author hid is plumbing: it stays in the schema, the JSON and
+    // the PATCH, but not in the sheet. A *required* field is the exception —
+    // taking the person's only path to a submittable create away is the write
+    // this build never makes, and one ugly row is the lesser screen. The parser
+    // already named the pair once.
+    if (f.hints?.visibility === "hidden" && f.required !== true) continue;
     const immutable = e.immutable.includes(f.name);
     if (create && immutable) continue;
     const value = row && f.name in row ? text(row[f.name]) : create ? (f.default ?? "") : "";
@@ -349,13 +571,23 @@ export function commandControls(c: Command): readonly Control[] {
  * commandTitle is what a person taps: the summary the API document gives, or
  * the verb spelled as words when it gives none.
  */
-export const commandTitle = (c: Command): string => c.summary || humanize(c.verb);
+export const commandTitle = (c: Command): string => c.hints?.label || c.summary || humanize(c.verb);
+
+/** rowCommands are the commands about one record; collectionCommands are about the list. */
+/**
+ * offered excludes what the catalogue marks `system`: a command the kernel runs
+ * for its own reasons is never a choice a person is given. `commandOf` and
+ * `commandAt` keep resolving it, deliberately: an address someone already holds
+ * still reaches it, and the kernel guards the door. Hiding the address too needs
+ * a sentence in both languages, which is copy work, not a filter.
+ */
+export const offered = (c: Command): boolean => c.hints?.system !== true;
 
 /** rowCommands are the commands about one record; collectionCommands are about the list. */
 export const rowCommands = (e: Entry): readonly Command[] =>
-  e.commands.filter((c) => !c.collection);
+  e.commands.filter((c) => !c.collection && offered(c));
 export const collectionCommands = (e: Entry): readonly Command[] =>
-  e.commands.filter((c) => c.collection === true);
+  e.commands.filter((c) => c.collection === true && offered(c));
 
 /**
  * CommandScope is the address a command was opened at, which is the whole of
@@ -496,8 +728,9 @@ export function sortOptions(e: Entry): readonly { value: string; label: string }
   for (const f of listColumns(e)) {
     if (f.type === "bool" || f.type === "list" || f.type === "uuid") continue;
     if (f.name === "createdAt") continue;
-    out.push({ value: f.name, label: `${humanize(f.name)}, ascending` });
-    out.push({ value: "-" + f.name, label: `${humanize(f.name)}, descending` });
+    const word = fieldLabel(f);
+    out.push({ value: f.name, label: `${word}, ascending` });
+    out.push({ value: "-" + f.name, label: `${word}, descending` });
   }
   return out;
 }
