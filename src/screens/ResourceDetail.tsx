@@ -73,7 +73,10 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   );
   // The options are memoised because the navigator is told them on every
   // render: a fresh object, with fresh callbacks in it, is a new instruction
-  // each time and the renders never settle.
+  // each time and the renders never settle. That is why the dependency is the
+  // word the button carries and not the `feedback` object around it, which
+  // `useFeedback` rebuilds — with a new reading of the clock — on every render.
+  const moreOptions = feedback.copy.kit.moreOptions;
   const options = useMemo(
     () => ({
       title,
@@ -94,7 +97,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
                 {canDelete ? (
                   <Button
                     placement="header"
-                    label={feedback.copy.kit.moreOptions}
+                    label={moreOptions}
                     icon="more"
                     expanded={detail.menu}
                     onPress={detail.toggleMenu}
@@ -105,7 +108,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
             )
           : () => null,
     }),
-    [title, canEdit, canDelete, edit, feedback, detail.menu, detail.toggleMenu],
+    [title, canEdit, canDelete, edit, moreOptions, detail.menu, detail.toggleMenu],
   );
   return (
     <>
