@@ -324,7 +324,7 @@ export const iconName = (e: Entry): string | undefined => e.hints?.icon;
  * visibility, or a declared `shown`, and the field's words may be read on a line
  * of a list — as its name, as the line under the name, or as a cell beside it.
  * `detail` and `hidden` answer no: the first is the record's own answer, which
- * `detailItems` gives and a row has no room for, and the second is nobody's.
+ * `recordInformation` gives and a row has no room for, and the second is nobody's.
  *
  * A declared pointer (`previewField`, `summaryFields`) is asked the same question
  * as the default it overrides, because an entry that points a row's summary line
@@ -561,6 +561,19 @@ export interface RecordBlock {
 export const informationFields: readonly string[] = ["id", "createdAt", "updatedAt"];
 
 /**
+ * headerDrawn names the fields the record's header draws: the one that calls the
+ * record, the one that fills its pill, the one that gives its summary line.
+ *
+ * Asking the header is the only way to get this right, because a field's own
+ * visibility does not decide who draws it: `primary` reads a `detail` field (the
+ * record answers a detail field and a row has no room for it) and `statusField`
+ * takes any visibility but `hidden`. So the header's facts are settled here, from
+ * the three declarations, and every place below asks this one answer.
+ */
+const headerDrawn = (e: Entry): ReadonlySet<string> =>
+  new Set([primary(e), statusField(e), listPreview(e)].flatMap((f) => (f ? [f.name] : [])));
+
+/**
  * shownFields are the fields a record may draw at all: no `hidden` anywhere, and no
  * field the record's header already drew as its title, its pill or its summary line.
  *
@@ -571,8 +584,7 @@ export const informationFields: readonly string[] = ["id", "createdAt", "updated
  * twice.
  */
 function shownFields(e: Entry, row: Row, keep: (f: Field) => boolean): readonly Field[] {
-  const drawn = new Set<string>();
-  for (const f of [primary(e), statusField(e), listPreview(e)]) if (f) drawn.add(f.name);
+  const drawn = headerDrawn(e);
   return e.fields.filter(
     (f) =>
       !neverShown(f) &&
@@ -615,15 +627,22 @@ export function recordSections(e: Entry, row: Row, format: Formatting): readonly
 
 /**
  * recordInformation is the record's plumbing a person may need: the identifier, the
- * two stamps, and every field the document keeps for this screen (`detail`). The
- * three stamps come first, in that order, and only when the entry declares the field
- * *and* the row answers it — a resource that mounts no PATCH shows no "Updated at"
- * row, which is truthful about the answer the person got.
+ * two stamps, and every field the document keeps for this screen (`detail`) that a
+ * higher place has not already drawn. The three stamps come first, in that order,
+ * and only when the entry declares the field *and* the row answers it — a resource
+ * that mounts no PATCH shows no "Updated at" row, which is truthful about the answer
+ * the person got.
  *
- * `hidden` beats everything here too: plumbing is not content on this screen either.
- * Whoever draws it collapses it and puts it last; this decides only what is in it.
+ * The header's exclusion is what keeps this block the last resort it is: a record
+ * named and stated by fields it keeps for itself (`visibility: detail` on the
+ * primary field, a `statusField` declared `detail`) draws them in the header, and
+ * `detail` is the reason a field lands *here*, not a licence to draw it a second
+ * time. `hidden` beats everything here too: plumbing is not content on this screen
+ * either. Whoever draws it collapses it and puts it last; this decides only what is
+ * in it.
  */
 export function recordInformation(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
+  const drawn = headerDrawn(e);
   const stamps = informationFields.flatMap((name) =>
     e.fields.filter((f) => f.name === name && !neverShown(f) && hasValue(f, row[f.name])),
   );
@@ -631,6 +650,7 @@ export function recordInformation(e: Entry, row: Row, format: Formatting): reado
     (f) =>
       f.hints?.visibility === "detail" &&
       !neverShown(f) &&
+      !drawn.has(f.name) &&
       !informationFields.includes(f.name) &&
       hasValue(f, row[f.name]),
   );
