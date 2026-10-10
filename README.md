@@ -526,7 +526,9 @@ about a list item of the wrong type is still English written in the core ("conta
 that does not match its item type"), because no phone's table holds it in either language
 yet; a singleton PUT echoes what the read returned for an immutable field, and this kit has
 no live server to prove the kernel accepts its own echo rather than refusing it as a write
-of a field nobody may write; and the English article rule chooses its article from a label's
+of a field nobody may write — and that echo is re-spelled through the editor's one-string form,
+so a stored list item that carries a comma comes back as two items, which only this kit's own
+tag box is unable to write; and the English article rule chooses its article from a label's
 first letter rather than its meaning, so a field labelled `URL` is asked for as "Enter an
 uRL." and one labelled `Hour` as "Enter a hour.".
 
