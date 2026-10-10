@@ -1,6 +1,6 @@
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
-import { render, screen, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { type CrudVerb, type Entry } from "../../src/core/catalog";
 import { ResourceDetail } from "../../src/screens/ResourceDetail";
 import { ResourceList } from "../../src/screens/ResourceList";
@@ -109,28 +109,34 @@ test("a record whose resource mounts no delete loses Delete and keeps Edit", asy
   api.get.mockResolvedValueOnce(row);
   await render(view(<ResourceDetail entry={{ ...note, operations: NO_DELETE }} id={row.id} />));
   await waitFor(() => expect(screen.getByRole("button", { name: "Edit" })).toBeOnTheScreen());
+  // Nothing destructive, and no `…` standing in for a door that is not there.
   expect(screen.queryByTestId("delete")).toBeNull();
+  expect(screen.queryByTestId("record-menu")).toBeNull();
 });
 
 test("a record whose resource mounts no update loses Edit and keeps Delete", async () => {
   api.get.mockResolvedValueOnce(row);
   await render(view(<ResourceDetail entry={{ ...note, operations: NO_UPDATE }} id={row.id} />));
+  // Delete is the header's `…` now, so the row it opens is drawn only once the
+  // person has asked for the menu: the door is mounted, the door is opened.
+  await waitFor(() => expect(screen.getByTestId("record-menu")).toBeOnTheScreen());
+  await fireEvent.press(screen.getByTestId("record-menu"));
   await waitFor(() => expect(screen.getByTestId("delete")).toBeOnTheScreen());
   expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
-  // The other half of the same door: the option is handed over *empty*, not
-  // omitted. A native stack keeps the option it was last given, so an omitted
-  // headerRight leaves the Edit of the row before this one sitting in the
-  // header, greyed and doing nothing — a door drawn closed is not a door the
-  // navigator was never told about. `Singleton` spells both sides out for the
-  // reason; this is the same rule on the screen that gained a second door.
+  // The other half of the same door: the option is handed over, not omitted. A
+  // native stack keeps the option it was last given, so an omitted headerRight
+  // leaves the Edit of the row before this one sitting in the header, greyed and
+  // doing nothing — a door drawn closed is not a door the navigator was never
+  // told about. `Singleton` spells both sides out for the reason; the slot that
+  // holds the `…` and no Edit is this screen's same rule with a second door.
   expect(header.options?.headerRight).toBeInstanceOf(Function);
-  expect(header.options?.headerRight?.()).toBeNull();
 });
 
 test("a record whose resource says nothing about operations draws both doors", async () => {
   api.get.mockResolvedValueOnce(row);
   await render(view(<ResourceDetail entry={note} id={row.id} />));
   await waitFor(() => expect(screen.getByRole("button", { name: "Edit" })).toBeOnTheScreen());
+  await fireEvent.press(screen.getByTestId("record-menu"));
   await waitFor(() => expect(screen.getByTestId("delete")).toBeOnTheScreen());
 });
 

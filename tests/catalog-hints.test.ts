@@ -16,7 +16,6 @@ import {
   commandOf,
   commandTitle,
   deriveCopy,
-  detailItems,
   display,
   enumLabel,
   enumTone,
@@ -33,6 +32,7 @@ import {
   offered,
   onList,
   primary,
+  recordHeader,
   rowCommands,
   statusField,
   values,
@@ -199,9 +199,10 @@ test("a hidden field leaves the form, unless the form needs it", () => {
 });
 
 test("a declared enum label and tone read where the value reads", () => {
-  const { entry } = withFieldHint("status", {
-    enumLabels: { open: "Em aberto" },
-    enumTones: { open: "success" },
+  const { entry } = served((e) => {
+    e.presentation = { statusField: "status" };
+    const field = (e.fields as Record<string, unknown>[]).find((f) => f.name === "status")!;
+    field.presentation = { enumLabels: { open: "Em aberto" }, enumTones: { open: "success" } };
   });
   const status = entry.fields.find((f) => f.name === "status")!;
   assert.equal(enumLabel(status, "open"), "Em aberto");
@@ -214,7 +215,9 @@ test("a declared enum label and tone read where the value reads", () => {
     { value: "open", label: "Em aberto" },
     { value: "done", label: "Done" },
   ]);
-  assert.deepEqual(detailItems(entry, { status: "open" }, feedback)[5]!.value, "Em aberto");
+  const header = recordHeader(entry, { status: "open" }, feedback, feedback.copy.kit.untitled);
+  assert.equal(header.status?.label, "Em aberto", "the pill reads the author's word for the value");
+  assert.equal(header.status?.tone, "ok", "and is coloured with the tone the author declared");
   assert.equal(badgeTone(enumTone(status, "open")), "ok");
   assert.equal(badgeTone(enumTone(status, "done")), "neutral", "nothing is inferred");
 });

@@ -240,6 +240,63 @@ state, which is what `primaryField` and `statusField` answer there): the referen
 kernel refuses that document at mount (`kit/rest/hints.go`, `namedFieldFault`), and
 one author's slip is not worth this app's screens.
 
+### How a record opens
+
+One rule decides the whole of a record's hierarchy: **a fact is drawn once, at the
+highest place that draws it.** The places, in order, are the title, the status pill,
+the one summary line, the overview blocks and the collapsed "Record information". A
+field that a higher place drew is not a row anywhere below it — which is why the
+record is not called by its own name twice and why the field the entry points at with
+`statusField` is not repeated under the pill it just filled.
+
+Three total functions in `src/core/derive.ts` answer that, each a pure function of the
+entry, the row and the reader: `recordHeader` (the primary field's value, the declared
+`statusField`'s pill with the declared `enumTones` colour, `listPreview`'s one line —
+never a pill inferred from "the first enum", never a dash for a line nobody filled
+in), `recordSections` (the fields with values, grouped by the entry's declared
+`sections` in declared order, each block in schema order, fields naming no block in a
+final "Overview", an empty block left out) and `recordInformation` (the identifier,
+the two stamps, then every field the document keeps for this screen that no higher
+place drew — in that order, collapsed and last, its identifier selectable and
+monospaced). `hasValue` is the one emptiness test, and it is the reading side of the
+line `values` draws when it builds a PATCH: `false` and `0` are facts and keep their
+row, while nothing, an untouched blank, an empty list and a switch nobody answered do
+not. `hidden` beats every declaration here: its value and its label reach no sentence
+on any screen. A record with nothing to say answers no blocks at all — no placeholder
+sentence, because 0085 defers an "Add {field}" affordance until it has an interaction
+contract.
+
+Delete lives in the header's `…` — drawn only where the resource mounts DELETE and the
+caller may use it, opened inline as the first row under that header and above every
+row of the record, and asked in 0085's words ("Delete '{title}'?" / "You can't undo
+this in the app." / "Cancel", "Delete {singular}"). A command the catalogue marks
+`system` is never offered at all, and a command's row carries its own title with no
+developer prose under it. The trail names people — "You", a name, the system, or "Name
+unavailable" — and never a user id; where the plan excludes it the section is not
+drawn.
+
+**Reused** — the hint surface T-0328 landed (`EntryHints.sections`,
+`FieldHints.section`/`visibility`/`enumLabels`/`enumTones`, `CommandHints.system`) read
+through `label`, `primary`, `statusField`, `enumLabel`, `enumTone`, `badgeTone`,
+`listPreview`, `fieldLabel`, `saidValue`, `display`, `neverShown`, `commandTitle` and
+`offered`; `DetailItem`, `DetailRow` and `Value` for every row; `Section`, `Row`,
+`Badge`, `Screen`, `Notice` and `Skeleton` for the drawing; `SummaryDetail` →
+`DisclosureSection` → `deriveDisclosure` for the collapsed section; `doors`/`offers`
+for the delete door and `confirm` in `src/ui/chooser.ts` for the question; `nounPhrase`
+for the noun in a sentence and `kitCopy` for every word. **Added** —
+`recordHeader`, `recordSections`, `recordInformation` and `hasValue` in the core, plus
+`informationFields`, because the inventory held no function answering "this record's
+fields that have values, grouped": `detailItems` was the only reading of one record and
+it returned one flat list, which is what made a screen open on its own identifier; the
+two hint half-pairs (`statusField`, `enumTone`/`badgeTone`) were parsed and read
+nowhere until this delivery drew them. **Made reusable** — the three functions are the
+record's hierarchy as data, so a client's renderer pack can take the header block, the
+blocks or the plumbing apart without redrawing the screen; `hasValue` is the emptiness
+rule for any screen that reads a row; `Value` now paints a closed set with the tone the
+document declared for that value, which is the pill a list row wants next; and
+`record-menu`/`record-information` are the two ids a journey finds a record's header
+menu and its collapsed block by.
+
 ## Design
 
 Every PlatformKit phone app is composed from this directory, so the kit is why
@@ -429,9 +486,10 @@ Direct consumers upgrading their source pin must migrate these required props:
 - The `ResourceForm` organism also requires `initialDate`. Generated form,
   command and singleton screens accept an optional `Clock` and sample it once
   per mounted screen; the default device clock lives in screen composition.
-- `timeText(date, formatting)`, `display(field, value, formatting)` and
-  `detailItems(entry, row, formatting)` require explicit formatting. The latter
-  two also use its copy bundle. `Value` and `Labelled` receive that value as
+- `timeText(date, formatting)`, `display(field, value, formatting)` and the
+  record's three answers (`recordHeader`, `recordSections`,
+  `recordInformation(entry, row, formatting)`) require explicit formatting. The
+  latter four also use its copy bundle. `Value` and `Labelled` receive that value as
   `presentation`. There is no mutable device-default date formatter.
 
 The public `@septagon-oss/platformkit-mobile/ui/gallery` export accepts `presentation`, optional
@@ -789,8 +847,10 @@ with an item left empty, unclosed or tab-indented, a filter pointing at no file
 beside it, a `tags:` read out of each flow's own header, an `excludeFlows:` no
 Maestro run applies at all — is refused by name rather than read as agreement;
 every id one of them names is a testID a component sets, every route screen under
-`app/` is named by some flow's `# screen:` header, and every flow names the
-screen it proves) and
+`app/` is named by some flow's `# screen:` header, every flow names the screen it
+proves, and every text selector is spelled as the regex source Maestro compiles it —
+between slashes the delimiters are two characters the element's own text would have to
+carry, so such a journey taps nothing and is refused where the words are written) and
 `check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the

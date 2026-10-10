@@ -64,7 +64,8 @@ test.each(["light", "dark"] as const)(
         <ResourceDetail entry={note} id="note-73" />
       </ThemeProvider>,
     );
-    await waitFor(() => expect(screen.getByText(actor)).toBeOnTheScreen());
+    // An actor with no directory entry is named as unavailable, not by their id.
+    await waitFor(() => expect(screen.getByText("Name unavailable")).toBeOnTheScreen());
     await fireEvent.press(screen.getByTestId("activity-more"));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     const denied = await fetch.mock.results[1]!.value;

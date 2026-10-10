@@ -22,6 +22,25 @@ export const kitEnglish = {
   // from the catalogue, the way `failure.loadFailed` takes one: this is the only
   // sentence the kit writes for a record it cannot name, and it is written once.
   untitled: (singular: string) => `Untitled ${singular}`,
+  // A record's own words: the block that holds what the entry filed nowhere, the
+  // collapsed section that holds what a record keeps about itself rather than about
+  // its subject, and the three parts of the disclosure that opens it. `reveals` is a
+  // noun phrase because `disclosure.reveal` builds the sentence around it.
+  overview: "Overview",
+  recordInformation: "Record information",
+  recordInformationHolds: "The record’s identifier and the moments it changed.",
+  recordInformationContent: "the identifier and the timestamps",
+  // What a trail calls a person whose name the directory does not hold. Never the id:
+  // a user id on a screen is a fact about the store, quoted to a person who cannot
+  // look anything up with it.
+  nameUnavailable: "Name unavailable",
+  // A delete, asked in the words 0085 sets down: the record by its own name, the
+  // warning plain, and an answer that names what it does. "Permanently" is not
+  // claimed: a soft-deleting resource is recoverable by an administrator.
+  deleteQuestion: (title: string) => `Delete ‘${title}’?`,
+  deleteWarning: "You can’t undo this in the app.",
+  deleteAction: (singular: string) => `Delete ${singular}`,
+  moreOptions: "More options",
   justNow: "Just now",
   signInIntro: "Enter your workspace address and the email you use there.",
   workspaceAddress: "Workspace address",
@@ -50,7 +69,6 @@ export const kitEnglish = {
   after: "After",
   missing: "Not supplied",
   redacted: "Redacted",
-  excluded: "This account’s plan does not include the activity trail.",
   older: "Show older",
   back: "Back",
   next: "Next",
@@ -208,6 +226,15 @@ export const kitPortuguese: KitWords = {
   workspace: "Espaço de trabalho",
   readOnly: "Apenas leitura",
   untitled: (singular: string) => `${singular} sem título`,
+  overview: "Visão geral",
+  recordInformation: "Informações do registo",
+  recordInformationHolds: "O identificador do registo e os momentos em que mudou.",
+  recordInformationContent: "o identificador e as datas",
+  nameUnavailable: "Nome indisponível",
+  deleteQuestion: (title: string) => `Eliminar ‘${title}’?`,
+  deleteWarning: "Não é possível anular esta ação na aplicação.",
+  deleteAction: (singular: string) => `Eliminar ${singular}`,
+  moreOptions: "Mais opções",
   justNow: "Agora mesmo",
   signInIntro: "Indique o endereço do espaço de trabalho e o email que usa nele.",
   workspaceAddress: "Endereço do espaço de trabalho",
@@ -233,7 +260,6 @@ export const kitPortuguese: KitWords = {
   after: "Depois",
   missing: "Não fornecido",
   redacted: "Ocultado",
-  excluded: "Esta conta não inclui o histórico de atividade.",
   older: "Mostrar anteriores",
   back: "Voltar",
   next: "Seguinte",

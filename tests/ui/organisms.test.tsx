@@ -4,7 +4,13 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
-import { deriveEventActivity, formControls, noOrder, sortOptions } from "../../src/core/derive";
+import {
+  deriveDisclosure,
+  deriveEventActivity,
+  formControls,
+  noOrder,
+  sortOptions,
+} from "../../src/core/derive";
 import { Home } from "../../src/ui/organisms/Home";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
@@ -152,9 +158,92 @@ describe("ResourceForm", () => {
 });
 
 describe("ResourceDetail", () => {
-  test("every field in schema order, and delete only for a caller who may", async () => {
-    const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: ["a"] };
+  const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: ["a"] };
+
+  /**
+   * informationModel is the Record information disclosure as the screen hands it
+   * over, open or closed: the open state is the screen's, the organism draws it.
+   */
+  const informationModel = (expanded: boolean) => {
+    const model = deriveDisclosure(
+      {
+        id: "record-information",
+        title: feedback.copy.kit.recordInformation,
+        summary: feedback.copy.kit.recordInformationHolds,
+        reveals: feedback.copy.kit.recordInformationContent,
+        expanded,
+        depth: 1,
+        enabled: true,
+      },
+      presentation,
+    );
+    if (!model.ok) throw new Error(JSON.stringify(model.issues));
+    return model.value;
+  };
+
+  test("the record opens on what it holds, and keeps its own history to itself", async () => {
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        information={{ model: informationModel(false), onExpanded: none }}
+      />,
+    );
+    // The fields with values are drawn, named after the field they came from, so a
+    // journey finds a row by the name the API document gives it.
+    expect(screen.getByLabelText("Status, Open")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
+    // The record is *called* Buy milk; that is the header's fact, and repeating it as
+    // a field would say there are two. An un-hinted entry declares no status, so the
+    // record draws no pill rather than guessing one from the first enum.
+    expect(screen.queryByLabelText(/Buy milk/)).toBeNull();
+    // And the identifier, the stamps and the rest of the plumbing wait collapsed at
+    // the foot of the screen: the person who wants them asks for them.
+    expect(screen.queryByTestId("field-id")).toBeNull();
+    expect(screen.getByRole("button", { name: "Show the identifier and the timestamps" }));
+    await screen.unmount();
+
+    const onExpanded = jest.fn();
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        information={{ model: informationModel(false), onExpanded }}
+      />,
+    );
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Show the identifier and the timestamps" }),
+    );
+    expect(onExpanded).toHaveBeenCalledWith(true);
+    await screen.unmount();
+
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        information={{ model: informationModel(true), onExpanded: none }}
+      />,
+    );
+    expect(screen.getByTestId("field-id")).toBeOnTheScreen();
+    // And only what the row answers: this one carries no `updatedAt`, so no "Updated
+    // at" row is drawn to be a dash.
+    expect(screen.queryByTestId("field-updatedAt")).toBeNull();
+    await screen.unmount();
+  });
+
+  test("the destructive row lives in the menu, and the menu only for a caller who may", async () => {
     const onDelete = jest.fn();
+    // The door is there, but the `…` has not been pressed: nothing destructive sits
+    // on the screen waiting to be missed.
     await inTheme(
       <ResourceDetail
         feedback={feedback}
@@ -165,16 +254,32 @@ describe("ResourceDetail", () => {
         onDelete={onDelete}
       />,
     );
-    expect(screen.getByLabelText("Title, Buy milk")).toBeOnTheScreen();
-    // A field's row is named after the field, so a journey finds it by the name
-    // the API document gives it and never by the label's spelling.
-    expect(screen.getByTestId("field-title")).toBeOnTheScreen();
-    expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Delete note" })).toBeNull();
+    await screen.unmount();
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        onDelete={onDelete}
+        menuOpen
+      />,
+    );
     await fireEvent.press(screen.getByRole("button", { name: "Delete note" }));
     expect(onDelete).toHaveBeenCalledTimes(1);
     await screen.unmount();
+    // No DELETE on the resource, no row whatever the menu does.
     await inTheme(
-      <ResourceDetail feedback={feedback} entry={note} row={row} error="" onRetry={none} />,
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        menuOpen
+      />,
     );
     expect(screen.queryByRole("button", { name: "Delete note" })).toBeNull();
   });
@@ -192,7 +297,9 @@ describe("Actions", () => {
     );
     await fireEvent.press(screen.getByRole("button", { name: "Publish a note" }));
     expect(onRun).toHaveBeenCalledWith(commands[0]);
-    expect(screen.getByText(/Makes the note visible/)).toBeOnTheScreen();
+    // The row is titled and tapped; the developer's sentence about idempotence is
+    // nothing a person choosing an action needs (0085).
+    expect(screen.queryByText(/Makes the note visible/)).toBeNull();
   });
 
   test("a command about the collection is under the list, not on a row", async () => {
@@ -317,7 +424,7 @@ describe("Activity", () => {
     expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
   });
 
-  test("a plan that does not include the trail says so, and is not an error", async () => {
+  test("a plan that does not include the trail draws no section at all", async () => {
     await inTheme(
       <ResourceDetail
         feedback={feedback}
@@ -325,7 +432,10 @@ describe("Activity", () => {
         activity={adapt({ ...trail, events: [], excluded: true })}
       />,
     );
-    expect(screen.getByText(/plan does not include the activity trail/)).toBeOnTheScreen();
+    // Not the plan's notice as the record's content, and not the empty state's lie
+    // either: the section is simply not there.
+    expect(screen.queryByText(/plan does not include the activity trail/)).toBeNull();
+    expect(screen.queryByText("Activity")).toBeNull();
     expect(screen.queryByText("Nothing has happened to this record yet.")).toBeNull();
   });
 

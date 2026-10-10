@@ -1,8 +1,9 @@
 // Actions is what a record can be told to do beyond being edited: the
 // lifecycle commands the catalog says this caller may run. Every one of them
-// is a row with the API document's own words on it — the summary as the row,
-// the description under it — because a screen that renamed them would be a
-// second vocabulary to keep true.
+// is a row titled in the API document's own words — its `presentation.label`, or
+// its summary, or the verb spelled as words — because a screen that renamed them
+// would be a second vocabulary to keep true, and because the sentence under the
+// row is developer prose where a person is choosing an action (0085).
 //
 // A command that takes an argument opens a sheet; one that takes none asks and
 // runs. That difference belongs to the screen, which is why both arrive here as
@@ -29,7 +30,6 @@ export function Actions({ commands, running, onRun }: Props) {
         <Row
           key={c.verb}
           title={commandTitle(c)}
-          {...(c.description ? { summary: c.description } : {})}
           busy={running === c.verb}
           opens={c.fields.length > 0}
           onPress={() => onRun(c)}

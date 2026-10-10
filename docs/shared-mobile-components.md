@@ -76,7 +76,8 @@ and keeps that small indicator still.
 Its native picker callbacks ignore a newly disabled or unmounted control, and
 Clear is unavailable for required or disabled values. `ResourceForm` also
 requires `initialDate`; form, command and singleton screen compositions sample
-their injected `Clock` once at mount. `timeText`, `display` and `detailItems` require explicit formatting,
+their injected `Clock` once at mount. `timeText`, `display` and the record's section
+functions require explicit formatting,
 and Value/Labelled receive it as `presentation`. These remove the shared mutable
 formatter and component-owned choice words. `StateFeedback` is the optional
 screen adapter for iOS announcements; Gallery accepts its `renderState` slot.
@@ -455,8 +456,9 @@ not last-wins data replacement.
 close: Action; dismissal: 'allowed' | 'confirm' | 'blocked'; reason?: string;
 actions: readonly Action[]; contentState?: StateInput }`.
 Confirm/blocked require a localized reason. Content is a React child slot; core
-does not accept React nodes. `DetailRowsModel` uses the existing `detailItems`
-rule; an optional Activity child is composed by the organism/screen.
+does not accept React nodes. `DetailRowsModel` uses the existing
+`recordSections` and `recordInformation` rules; an optional Activity child is
+composed by the organism/screen.
 
 | Component / layer | Props and events | Gallery cases; reference |
 | --- | --- | --- |

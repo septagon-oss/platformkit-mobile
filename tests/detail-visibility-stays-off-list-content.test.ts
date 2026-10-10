@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog, type FieldVisibility } from "../src/core/catalog";
 import { deriveCatalogList } from "../src/core/catalogList";
-import { detailItems, noOrder } from "../src/core/derive";
+import { noOrder, recordHeader, recordInformation } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
 
 const paragraph = "Read the inspection instructions on the record page.";
@@ -39,10 +39,11 @@ function listAndRecord(visibility: FieldVisibility, hints: Record<string, unknow
   if (!list.ok) throw new Error("list derivation failed");
   assert.equal(list.value.sections[0]!.rows[0]!.id, row.id);
   assert.ok(
-    detailItems(entry, row, presentation).some(
+    recordInformation(entry, row, presentation).some(
       (item) => item.field.name === "body" && item.value === paragraph,
-    ),
-    "a detail field remains readable on the record page",
+    ) ||
+      recordHeader(entry, row, presentation, presentation.copy.kit.untitled).summary === paragraph,
+    "a record still answers the paragraph: as its own row, or as the line under its name",
   );
   return list.value.sections[0]!.rows[0]!;
 }

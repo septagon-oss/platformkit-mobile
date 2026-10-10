@@ -72,9 +72,14 @@ describe("useResourceDetail", () => {
     expect(api.remove).not.toHaveBeenCalled();
     expect(asked).toHaveBeenCalledTimes(1);
     const [title, choice, , wording] = asked.mock.calls[0]!;
-    expect(title).toBe("Are you sure?");
-    expect(choice).toMatchObject({ label: "Delete", destructive: true });
-    expect(wording).toEqual({ message: "This deletes the note. It cannot be undone." });
+    // 0085's question: the record by the name it is called everywhere, the warning
+    // that says what this app cannot do, and an answer that names the act.
+    expect(title).toBe("Delete ‘Buy milk’?");
+    expect(choice).toMatchObject({ label: "Delete note", destructive: true });
+    expect(wording).toEqual({
+      message: "You can’t undo this in the app.",
+      cancel: feedback.copy.kit.cancel,
+    });
     await act(async () => {
       choice.onPress();
     });

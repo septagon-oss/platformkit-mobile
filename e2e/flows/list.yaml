@@ -37,12 +37,14 @@ env:
 - tapOn: ${TITLE} list
 - assertVisible:
     id: "resource-detail"
+- tapOn:
+    id: "record-menu"
 - scrollUntilVisible:
     element:
       id: "delete"
 - tapOn:
     id: "delete"
-- tapOn: "Delete"
+- tapOn: (?i)^Delete [^‘’?]+$
 - extendedWaitUntil:
     visible:
       id: "resource-list"

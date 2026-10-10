@@ -78,14 +78,14 @@ for (const mode of ["light", "dark"] as const) {
     shell.value = { ...ready, state: current };
     await rerender(detail());
     await waitFor(() => expect(api.events).toHaveBeenCalledTimes(2));
-    expect(screen.getByText(actor)).toBeOnTheScreen();
+    expect(screen.getByText("Name unavailable")).toBeOnTheScreen();
 
     await act(async () => {
       directory.resolve({ items: [{ id: actor, displayName: secret }], total: 1 });
       await api.list.mock.results[0]!.value;
     });
     expect(api.list).toHaveBeenCalledTimes(1);
-    expect(screen.getByText(actor)).toBeOnTheScreen();
+    expect(screen.getByText("Name unavailable")).toBeOnTheScreen();
     expect(screen.getByText("Updated")).toBeOnTheScreen();
     expect(screen.queryAllByText(secret, { includeHiddenElements: true })).toHaveLength(0);
     expect(

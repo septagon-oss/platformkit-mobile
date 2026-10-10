@@ -9,7 +9,15 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import type { Field } from "../../core/catalog";
-import { type Formatting, display, humanize, splitList, text } from "../../core/derive";
+import {
+  type Formatting,
+  badgeTone,
+  display,
+  enumTone,
+  humanize,
+  splitList,
+  text,
+} from "../../core/derive";
 import { Badge } from "../atoms/Badge";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
@@ -42,10 +50,12 @@ export function Value({ presentation, field, value, compact = false, testID }: P
       </Text>
     );
 
-  // A closed set is a word, and a word of its own colour is a claim about it: the
-  // catalogue's `Field` carries no tone, so the pill stays neutral until the
-  // document says which value is good. Position in a list is no such fact.
-  if (field.enum && field.enum.length > 0) return <Badge label={shown} {...id} />;
+  // A closed set is a word, and a word of its own colour is a claim about it, so the
+  // colour comes from what the document declared for that value (`enumTones`) and
+  // from nothing else. An unlabelled value — including one a closed set does not
+  // contain — stays neutral: position in a list is no such fact.
+  if (field.enum && field.enum.length > 0)
+    return <Badge label={shown} tone={badgeTone(enumTone(field, raw))} {...id} />;
 
   if (field.type === "bool")
     return <Badge label={shown} tone={value === true ? "ok" : "neutral"} {...id} />;

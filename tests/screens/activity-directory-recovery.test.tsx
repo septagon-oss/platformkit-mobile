@@ -30,6 +30,9 @@ const self = "e8a8560c-1311-551c-acc4-2bc92d9110f9";
 const emailed = "5cf6c551-621b-54e0-b58f-5d4c6b9dc04e";
 const priorName = "Previously readable person 217";
 const priorEmail = "prior-219@example.test";
+// What the trail says for a person its directory cannot name. Never the id they are
+// stored under, which is what these cases used to read as "enrichment is gone".
+const unavailable = "Name unavailable";
 const users = { ...note, module: "user", entity: "user", path: "/api/v1/user/users" };
 
 const events = [named, self, emailed].map((actor, index) => ({
@@ -108,13 +111,13 @@ for (const mode of ["light", "dark"] as const) {
       // forbidden data or the particular words used to report the refusal.
       expect(await fetch.mock.results[3]!.value).toHaveProperty("status", status);
       await waitFor(expectWithdrawn);
-      expect(screen.getByText(named)).toBeOnTheScreen();
+      expect(screen.getAllByText(unavailable)).toHaveLength(1);
       expect(screen.getByText("You")).toBeOnTheScreen();
 
       // A previously cached email was not on the first page. Reading its event
       // later must not reintroduce that directory enrichment.
       await fireEvent.press(screen.getByTestId("activity-more"));
-      await waitFor(() => expect(screen.getByText(emailed)).toBeOnTheScreen());
+      await waitFor(() => expect(screen.getAllByText(unavailable)).toHaveLength(2));
       expect(api.events).toHaveBeenLastCalledWith({ record, offset: 2, limit: 20 });
       expect(api.list).toHaveBeenCalledTimes(2);
       expectWithdrawn();
@@ -126,8 +129,7 @@ for (const mode of ["light", "dark"] as const) {
         await expect(api.list.mock.results[2]!.value).rejects.toHaveProperty("status", 503);
       });
       expectWithdrawn();
-      expect(screen.getByText(named)).toBeOnTheScreen();
-      expect(screen.getByText(emailed)).toBeOnTheScreen();
+      expect(screen.getAllByText(unavailable)).toHaveLength(2);
 
       shell.value = { ...ready, writes: { "note/note": 3 } };
       await rerender(detail());
@@ -140,7 +142,7 @@ for (const mode of ["light", "dark"] as const) {
         await api.list.mock.results[3]!.value;
       });
       await waitFor(() => expect(screen.getByText("Freshly readable 217")).toBeOnTheScreen());
-      expect(screen.getByText(emailed)).toBeOnTheScreen();
+      expect(screen.getAllByText(unavailable)).toHaveLength(1);
       expect(screen.getByText("You")).toBeOnTheScreen();
       expectWithdrawn();
       for (const write of [
