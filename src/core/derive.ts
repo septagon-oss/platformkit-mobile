@@ -790,6 +790,15 @@ export interface Control {
   readonly readOnly: boolean;
   readonly help: string;
   readonly options: readonly { value: string; label: string }[];
+  /**
+   * echo is the row's own value for a field this form lets nobody type: a field
+   * the author hid, or one the catalogue freezes. `writeControls` is the only
+   * writer, and `values` is the only reader — it sends this back byte for byte
+   * instead of coercing `value`, because a value that never entered an editor
+   * should not be reshaped by one. Absent means the person can answer the field,
+   * so its text is what they typed or what the row handed the box.
+   */
+  readonly echo?: unknown;
 }
 
 /** kind is the control a field gets: the tag when the entity named one, the type otherwise. */
@@ -865,24 +874,31 @@ export function formControls(e: Entry, row: Row | undefined, create: boolean): r
  * out of the body is a field cleared by omission. Fields the catalogue itself marks
  * read-only (`id`, `createdAt`, `updatedAt`) are the server's own and never join, and a
  * field neither the read returned nor the sheet asks is not invented.
+ *
+ * What the person cannot type goes back as an `echo`: the row's own value, unparsed.
+ * The string a control holds is an editor's spelling — a list is its items joined by
+ * `", "`, a blank is an empty box — and reading a row through it and back out loses
+ * whatever the spelling cannot carry: `"North, West"` as one item becomes two, `" North "`
+ * and `""` lose their padding and themselves. Only what somebody typed has earned the
+ * right to be re-spelled.
  */
 export function writeControls(
   e: Entry,
   row: Row | undefined,
   drawn: readonly Control[],
 ): readonly Control[] {
-  // An immutable field is drawn greyed, so nothing the person types can name it; the
-  // echo is the value the read returned, coerced the same way `values` coerces it.
+  // An immutable field is drawn greyed: no keystroke can name it, so the read's own
+  // value is what travels, and the control stays greyed for whoever draws it.
   const out = drawn.map((c) =>
-    c.readOnly && row !== undefined && c.field.name in row
-      ? control(c.field, text(row[c.field.name]), false)
-      : c,
+    c.readOnly && row !== undefined && c.field.name in row ? { ...c, echo: row[c.field.name] } : c,
   );
   const named = new Set(out.map((c) => c.field.name));
   for (const f of e.fields) {
     if (f.readOnly || named.has(f.name)) continue;
     if (row === undefined || !(f.name in row)) continue;
-    out.push(control(f, text(row[f.name]), false));
+    // `value` stays the editor's spelling for the one answer the row cannot give —
+    // a JSON `null` echoes nothing, and the box's own blank is what is left to send.
+    out.push({ ...control(f, text(row[f.name]), false), echo: row[f.name] });
     named.add(f.name);
   }
   return out;
@@ -1067,6 +1083,13 @@ export function values(
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const c of controls) {
+    // What nobody was asked to type goes back exactly as the read returned it. This
+    // runs ahead of the read-only skip below because an echoed field is read-only by
+    // definition: greyed on the sheet, and still a field a PUT must carry.
+    if (c.echo !== undefined) {
+      out[c.field.name] = c.echo;
+      continue;
+    }
     if (c.readOnly) continue;
     const raw = held[c.field.name] ?? c.value;
     switch (c.kind) {

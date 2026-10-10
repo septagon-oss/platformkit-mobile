@@ -202,8 +202,9 @@ export function useSingleton(entry: Entry) {
     try {
       // A PUT replaces the whole of it, so the body is every field this client may
       // write — the ones the form drew and the ones it was never shown — and not
-      // only the ones somebody touched. `writeControls` is that rule; `values` is
-      // the same coercion it has always used.
+      // only the ones somebody touched. `writeControls` is that rule: what nobody was
+      // asked to type rides back as the row gave it, and `values` coerces only what
+      // an editor drew, so a stored item survives the round trip.
       const written = await api.replace(entry, values(writeControls(entry, row, controls), held));
       if (!alive.current) return;
       setRow(written);

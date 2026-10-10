@@ -6,7 +6,9 @@
 // order a refusal arrived in; whether anything is worth discarding at all is
 // `changedFields`, which asks what differs rather than what was touched; and what a
 // whole-row replace carries is `writeControls`, which keeps the writable fields the
-// sheet was never shown so a PUT cannot clear them by omission.
+// sheet was never shown so a PUT cannot clear them by omission, and keeps them
+// *unparsed*, because the one-string spelling a control holds carries no comma inside
+// one list item, no item of padding and no empty item.
 //
 // The sentences themselves are the copy table's, in both languages, before a screen
 // may hold one: the core writes no sentence and `FormWords` is the seam. Every case
@@ -282,4 +284,36 @@ test("a whole-row write keeps what the sheet was not shown", () => {
     body: "one errand",
   });
   assert.deepEqual(sparse, { title: "Buy milk", body: "one errand", pinned: false, tags: [] });
+});
+
+test("a hidden list the row answered for goes back item for item, not as its joined spelling reads", () => {
+  const entry = hintedEntry(hidden("tags"));
+  // Three items a control's one-string spelling cannot hold: one carrying the
+  // separator, one that is padding alone, one that is nothing. Read through an editor
+  // and back out, they spell themselves as two items, none and none.
+  const row = { id: "1", title: "Buy milk", status: "open", tags: ["North, West", " ", ""] };
+  const sheet = controls(entry, row);
+  assert.ok(!sheet.map((c) => c.field.name).includes("tags"), "a hidden field is not drawn");
+  const body = values(writeControls(entry, row, sheet), { title: "New title" });
+  assert.deepEqual(body.tags, ["North, West", " ", ""]);
+  // What the person typed still takes the editor's route: their own answer is what is
+  // sent, and the plumbing beside it is nothing they did.
+  assert.equal(body.title, "New title");
+});
+
+test("a frozen value the row answered for goes back item for item though the sheet shows it greyed", () => {
+  const entry = hintedEntry((resource) => {
+    declares({ name: "lanes", type: "list", elem: "string" })(resource);
+    (resource.immutable as string[]).push("lanes");
+  });
+  const row = { id: "1", title: "Buy milk", status: "open", lanes: ["North, West", "East "] };
+  const sheet = controls(entry, row);
+  assert.ok(
+    sheet.find((c) => c.field.name === "lanes")!.readOnly,
+    "a frozen field is drawn greyed and asks for nothing",
+  );
+  assert.deepEqual(values(writeControls(entry, row, sheet), { title: "New title" }).lanes, [
+    "North, West",
+    "East ",
+  ]);
 });

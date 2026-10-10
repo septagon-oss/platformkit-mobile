@@ -43,8 +43,12 @@ for the version being released.
   is no change), `firstProblem` (the first control in the sheet's own
   asked order that carries a sentence) and `writeControls` (the body of a whole-row
   replace: the drawn fields plus the writable ones the sheet was never shown, and never
-  the server's own `id`, `createdAt` or `updatedAt`). Ten sentences joined the copy table
-  in both languages: the four above, plus `discardChanges`, `discardUnsaved`,
+  the server's own `id`, `createdAt` or `updatedAt`). `Control` gained the optional `echo`,
+  which is the row's own value for a field nobody is asked to type — a hidden one, a frozen
+  one — and which `values` sends back unparsed, because an editor's one-string spelling has
+  no way to hold a list item carrying a comma, an item of padding or an empty one, and a
+  whole-row replace that re-spells what it was never shown rewrites the row. Ten sentences
+  joined the copy table in both languages: the four above, plus `discardChanges`, `discardUnsaved`,
   `keepEditing`, `discard`, `created` and `changesSaved`.
 - `ShellValue` gains `say(href, sentence)` and `heard(href)`: one sentence for one
   address, said by the screen that wrote and heard once by the screen that lands there,

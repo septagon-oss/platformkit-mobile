@@ -486,7 +486,11 @@ away, the same Save guard, an Edit drawn only once its row has been read, and a 
 `writeControls`, which carries every field this client may write — the ones the form drew, the
 hidden ones the author keeps as plumbing and the immutable echo of what the read returned —
 so a whole-row replace clears nothing by omission, while `id`, `createdAt` and `updatedAt`
-never travel back. **A landed write says so**: one success haptic and one sentence that
+never travel back. What nobody is asked to type travels **unparsed**: a hidden or frozen field
+carries the row's own value (`Control.echo`), not that value re-spelled through an editor's
+one-string form, which is a spelling with no comma inside one list item and no empty item —
+`["North, West", "", " "]` stays three items rather than becoming `"North, West, "` split back
+into `"North"` and `"West"`. **A landed write says so**: one success haptic and one sentence that
 outlives the screen that wrote it — the shell holds one slot, filed by the destination address
 the writer names (`say`) and read once by the record that lands there (`heard`), for the
 visit it was heard in: a focus that hears nothing draws nothing — "Note
@@ -502,8 +506,9 @@ the sentences that name a field or a resource; `TextField`'s existing `forwardRe
 and live region for the drawing; `usePreventRemove` and `src/ui/chooser.ts`'s `confirm`,
 already used by three screens, for the question; the shell's existing holders (one draft
 keyed by its address, one write counter per resource) for the two things that must survive
-a screen. **Added** — `changedFields`, `firstProblem` and `writeControls` in the core,
-`awaiting` in both hooks, and ten sentences in `kitCopy` in both languages, because the
+a screen. **Added** — `changedFields`, `firstProblem` and `writeControls` in the core, `Control.echo` — the row's
+own value for a field nobody is asked to type, which `values` sends unparsed — `awaiting` in
+both hooks, and ten sentences in `kitCopy` in both languages, because the
 trace's inventory held the set of controls and the body builder but no answer to "which
 field changed", "which field is being asked for" or "what does a whole-row replace
 carry", and no sentence anywhere in either language for a required field, a discarded
@@ -526,11 +531,13 @@ about a list item of the wrong type is still English written in the core ("conta
 that does not match its item type"), because no phone's table holds it in either language
 yet; a singleton PUT echoes what the read returned for an immutable field, and this kit has
 no live server to prove the kernel accepts its own echo rather than refusing it as a write
-of a field nobody may write — and that echo is re-spelled through the editor's one-string form,
-so a stored list item that carries a comma comes back as two items, which only this kit's own
-tag box is unable to write; and the English article rule chooses its article from a label's
-first letter rather than its meaning, so a field labelled `URL` is asked for as "Enter an
-uRL." and one labelled `Hour` as "Enter a hour.".
+of a field nobody may write; the *tag box* has no spelling for one item that carries a
+comma, so a stored item written some other way is drawn as two chips and saved back as two —
+what a person sees there is what the write holds, and nothing is rewritten behind their back,
+but nobody can type such an item back in, because the box refuses the separator on entry;
+and the English article rule chooses its article from a label's first letter rather than its
+meaning, so a field labelled `URL` is asked for as "Enter an uRL." and one labelled `Hour`
+as "Enter a hour.".
 
 ## Design
 
