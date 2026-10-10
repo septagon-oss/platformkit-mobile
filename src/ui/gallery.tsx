@@ -60,6 +60,7 @@ import { SelectionControl } from "./atoms/SelectionControl";
 import { Price } from "./atoms/Price";
 import { ActionBar } from "./molecules/ActionBar";
 import { ChoiceChips } from "./molecules/ChoiceChips";
+import { ChoiceRows } from "./molecules/ChoiceRows";
 import { DisclosureSection } from "./molecules/DisclosureSection";
 import { DayStrip } from "./molecules/DayStrip";
 import { QuantityControl } from "./molecules/QuantityControl";
@@ -870,6 +871,8 @@ function KitSamples({
       return <SelectionControl model={k.selection} onChange={send} />;
     case "choice-chips":
       return <ChoiceChips model={k.choices} onChange={choice} />;
+    case "choice-rows":
+      return <ChoiceRows model={k.choices} onChange={choice} />;
     case "action-bar":
       return <ActionBar model={k.actions} onAction={action} />;
     case "model-state":
