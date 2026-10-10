@@ -248,10 +248,14 @@ neighbours**. `listRow` in `src/core/derive.ts` assembles the answers from the f
 that already owned them — the field a row is called by (`rowPrimary`), the state the entry
 declares (`statusField` with its `enumLabels` and `enumTones`, read through the one
 `statusPill` a record reads too), the line under the name (`listPreview(entry, "row")`) and
-the couple of values beside it (`listCells`, budgeted at two) — and nothing else. A row is
-never titled by an identifier and never filled with one: the stamps and the id are
-plumbing, are not cells whoever pointed at them, and the record spells them out in its own
-"Record information" block for the person who needs them. `hideList` is asked the question
+the couple of values beside it (`listCells`, budgeted at two) — and nothing else. The state
+is one of those four answers and not two: the value `statusField` names is the row's pill,
+in the column `Row` reserves for it, and is never one of the two cells beside the title,
+even where an author points `summaryFields` at it — a fact is drawn once, at the place that
+owes it, which is the rule that keeps a record's header out of its own rows. A row is never
+titled by an identifier and never filled with one: the stamps and the id are plumbing, are
+not cells whoever pointed at them, and the record spells them out in its own "Record
+information" block for the person who needs them. `hideList` is asked the question
 it answers — which columns a list has — so the paragraph every schema marks
 `hideList` lines a record, which has room for it, and not a row, which does not; a row
 with nothing worth reading under its name shows nothing there, never a dash. A value that

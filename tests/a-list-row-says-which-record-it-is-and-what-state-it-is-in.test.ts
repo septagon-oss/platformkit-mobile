@@ -2,13 +2,14 @@
 // apart — and nothing else. The four answers come from four declarations (the field the
 // entry leads with, the state it declares, the line it writes about itself, the couple
 // of values beside the line), the pill is coloured only by what the document declared
-// for that value, plumbing is never drawn whoever pointed at it, and a value nobody
-// answered prints no cell and no dash. An entry that declares no state shows no pill:
-// the kit never guesses one from "the first enum field".
+// for that value, the declared state is the pill and never one of those two values,
+// plumbing is never drawn whoever pointed at it, and a value nobody answered prints no
+// cell and no dash. An entry that declares no state shows no pill: the kit never guesses
+// one from "the first enum field".
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { parseCatalog, type Entry, type Field } from "../src/core/catalog";
+import { parseCatalog, type Entry } from "../src/core/catalog";
 import {
   deriveCopy,
   listRow,
@@ -263,13 +264,30 @@ test("a row a person reads in Portuguese says its state in Portuguese", () => {
 // The row's two summary values are drawn by `Value`, which needs the field and nothing
 // else: a `shape` tag in the model would be a second `Value` nobody maintains.
 test("every cell names the field behind it, in the words that field's author wrote", () => {
-  const row = listRow(hintEntry(), task, presentation, untitled);
-  for (const cell of row.cells) {
-    const field = (hintEntry().fields as readonly Field[]).find((f) => f.name === cell.id)!;
-    assert.equal(cell.field?.name, field.name);
-    assert.equal(cell.label, field.hints?.label ?? cell.label);
-  }
-  // "State" is what the author called `status`; the kit's own reading of the name
-  // would be the second word for one field.
-  assert.equal(row.cells.find((c) => c.id === "status")?.label, "State");
+  // An entry that declares a state and names two more values in its summary: what a
+  // cell is, and what it is called, are decided here and nowhere else — the author's
+  // word where the author wrote one, the field's own name read as words where nobody
+  // did, and the state the row already wears as its pill nowhere among them.
+  const entry = hintEntry((e) => {
+    e.presentation = { ...(e.presentation as object), summaryFields: ["pinned", "tags"] };
+    const f = (e.fields as Record<string, unknown>[]).find((x) => x.name === "pinned")!;
+    f.presentation = { label: "Stuck on" };
+  });
+  const row = listRow(entry, { ...task, tags: ["locksmith", "front"] }, presentation, untitled);
+  assert.deepEqual(
+    row.cells.map((c) => c.id),
+    ["pinned", "tags"],
+  );
+  for (const cell of row.cells)
+    assert.equal(
+      cell.field?.name,
+      cell.id,
+      "the molecule that draws a value gets the schema behind it, not a description of it",
+    );
+  assert.equal(
+    row.cells[0]?.label,
+    "Stuck on",
+    "the word the author wrote for the field, not the kit's own reading of its name",
+  );
+  assert.equal(row.cells[1]?.label, "Tags", "a field nobody labelled reads as its own name");
 });

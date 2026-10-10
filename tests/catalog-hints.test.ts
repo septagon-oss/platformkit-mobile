@@ -378,7 +378,7 @@ test("no hint changes a request", () => {
     plural: "Tarefas",
     primaryField: "title",
     previewField: "body",
-    summaryFields: ["status", "rank"],
+    summaryFields: ["rank", "pinned", "status"],
     statusField: "status",
     sections: [{ key: "main", label: "Main" }],
   });
@@ -391,8 +391,9 @@ test("no hint changes a request", () => {
   assert.equal(commandOf(entry, "archive", "collection")?.verb, "archive");
   assert.deepEqual(
     listCells(entry).map((f) => f.name),
-    ["status", "rank"],
-    "declared summary cells are the author's order, not the ranking",
+    ["rank", "pinned"],
+    "declared summary cells are the author's order, not the ranking, and the state their " +
+      "pill already says is never one of them",
   );
   assert.equal(listPreview(entry)!.name, "body");
 });

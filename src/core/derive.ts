@@ -387,17 +387,28 @@ export function listColumns(e: Entry): readonly Field[] {
  * record wrote about itself, and a third is scanned by nobody. Plumbing — the id
  * and the two stamps — is never a cell whoever pointed at it: the row answers
  * those questions the same way the record does, in its `recordInformation` block.
+ *
+ * Neither is the declared state. `statusField`'s value is the row's *pill*, drawn
+ * in the column `Row` reserves for it, and the same value is not also one of the
+ * two cells beside the title: "Em aberto" as a pill and "Em aberto" as a cell
+ * answers one question twice and pushes out the value that would have set this row
+ * apart. This is `headerDrawn`'s rule asked of a row — a fact is drawn once, at the
+ * highest place that draws it — and an entry that declares no state loses nothing:
+ * with no pill to defer to, the closed set stays the plain cell it has always been.
  */
 export function listCells(e: Entry, limit = 2): readonly Field[] {
+  // Asked once, so the pill and the cell cannot disagree about which field the row
+  // states its condition in.
+  const pill = statusField(e);
+  const shownTwice = (f: Field): boolean =>
+    informationFields.includes(f.name) || f.name === pill?.name;
   const declared = e.hints?.summaryFields;
   if (declared !== undefined)
-    // Declared means exactly those, in the order the author gave them, minus any
-    // field a row may not speak of: `limit` is this build's budget for a ranking
-    // nobody asked for, and neither plumbing nor the record's own paragraph is a
-    // cell whoever pointed at it.
-    return declared
-      .flatMap((name) => e.fields.filter((f) => f.name === name && rowContent(f)))
-      .filter((f) => !informationFields.includes(f.name));
+    // Declared means those, in the order the author gave them, minus any field a
+    // row may not speak of and minus what the row draws above or beside the cells.
+    return declared.flatMap((name) =>
+      e.fields.filter((f) => f.name === name && rowContent(f) && !shownTwice(f)),
+    );
   const rank = (f: Field): number => {
     if (f.enum && f.enum.length > 0) return 0;
     if (f.type === "bool") return 1;
@@ -410,10 +421,7 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
   const named = rowPrimary(e);
   const preview = listPreview(e);
   return listColumns(e)
-    .filter(
-      (f) =>
-        f.name !== named?.name && f.name !== preview?.name && !informationFields.includes(f.name),
-    )
+    .filter((f) => f.name !== named?.name && f.name !== preview?.name && !shownTwice(f))
     .map((f, i) => ({ f, i }))
     .sort((a, b) => rank(a.f) - rank(b.f) || a.i - b.i)
     .slice(0, limit)
