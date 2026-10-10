@@ -137,7 +137,6 @@ const list = (p: ReturnType<typeof phone>, said: Refusal, rows: readonly Row[]) 
     more={false}
     error={said.text}
     order={noOrder}
-    ordering={false}
     onOrder={none}
     onOpen={none}
     onMore={none}

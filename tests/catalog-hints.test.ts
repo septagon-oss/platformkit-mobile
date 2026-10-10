@@ -91,8 +91,8 @@ test("for the served golden every reading answer is the one this build gave befo
       listCells(e).map((f) => f.name),
       listCells(e, 99)
         .map((f) => f.name)
-        .slice(0, 3),
-      "the limit still bounds the ranking",
+        .slice(0, 2),
+      "the row's budget of two values still bounds the ranking",
     );
     for (const f of e.fields) assert.equal(fieldLabel(f), human(f.name));
     for (const c of e.commands) assert.equal(commandTitle(c), c.summary || human(c.verb));

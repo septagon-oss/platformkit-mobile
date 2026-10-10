@@ -30,7 +30,6 @@ function listAndRecord(visibility: FieldVisibility, hints: Record<string, unknow
       more: false,
       error: "",
       order: noOrder,
-      ordering: false,
       canCreate: false,
     },
     presentation,

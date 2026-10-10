@@ -47,7 +47,10 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [order, setOrder] = useState<Order>(noOrder);
-  const [ordering, setOrdering] = useState(false);
+  // Which of the two order sheets is open. One state answers both controls, so the
+  // two doors cannot both hold the screen, and it is deliberately not remembered:
+  // an open sheet is one screen's scroll position, not a fact about the records.
+  const [sheet, setSheetState] = useState<"none" | "sort" | "filters">("none");
   const generation = useRef(0);
   const shown = useRef(0);
   const seen = useRef(writes[k] ?? 0);
@@ -134,7 +137,7 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
 
   const busy = loading || refreshing;
   // Stable, because the screen puts them in the navigator's options.
-  const toggleOrdering = useCallback(() => setOrdering((on) => !on), []);
+  const setSheet = useCallback((next: "none" | "sort" | "filters") => setSheetState(next), []);
   const refresh = useCallback(() => {
     if (!busy) void load("refresh");
   }, [busy, load]);
@@ -152,9 +155,9 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
     // cannot be the one that is dropped.
     more: rows.length < total && !busy,
     order,
-    ordering,
+    sheet,
+    setSheet,
     setOrder,
-    toggleOrdering,
     refresh,
     loadMore,
   };

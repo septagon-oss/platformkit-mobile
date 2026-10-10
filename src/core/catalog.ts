@@ -114,6 +114,14 @@ export interface EntryHints {
   readonly previewField?: string;
   readonly summaryFields?: readonly string[];
   readonly statusField?: string;
+  /**
+   * sortable names the fields a list may be ordered by, in the order its sheet
+   * lists them. It is the kernel's own member (`kit/entity`), read here so no
+   * component reaches past the parser into the generated wire type; absent means
+   * the sheet answers with the field the entry leads rows with plus the date
+   * fields it declares (`sortFields`).
+   */
+  readonly sortable?: readonly string[];
   readonly sections?: readonly { readonly key: string; readonly label: string }[];
 }
 
@@ -348,6 +356,23 @@ function hintEntry(
   const primaryField = pointer("primaryField");
   const previewField = pointer("previewField");
   const statusField = pointer("statusField");
+  // The same question `summaryFields` asks: a name that matches no field of this
+  // entry costs one sort row and says so, and a list left with nothing in it is
+  // the default answer rather than "this list orders by nothing".
+  const sortable = ((): readonly string[] | undefined => {
+    const declared = hintNames(raw, "sortable", at, notice);
+    if (declared === undefined) return undefined;
+    const kept: string[] = [];
+    for (const { name, served } of declared) {
+      if (named.includes(name)) kept.push(name);
+      else
+        notice(
+          `${at}.sortable[${served}]`,
+          "names no field of this entry: it is not offered as a sort",
+        );
+    }
+    return kept.length === 0 ? undefined : kept;
+  })();
   const hints: EntryHints = {
     ...(singular === undefined ? {} : { singular }),
     ...(plural === undefined ? {} : { plural }),
@@ -355,6 +380,7 @@ function hintEntry(
     ...(primaryField === undefined ? {} : { primaryField }),
     ...(previewField === undefined ? {} : { previewField }),
     ...(statusField === undefined ? {} : { statusField }),
+    ...(sortable === undefined ? {} : { sortable }),
     ...(summary === undefined ? {} : { summaryFields: summary }),
     ...(sections.length === 0 ? {} : { sections }),
   };

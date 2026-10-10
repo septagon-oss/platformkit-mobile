@@ -20,7 +20,9 @@ import {
   listCells,
   listColumns,
   listPreview,
-  narrowed,
+  filtered,
+  reordered,
+  activeFilters,
   recordHeader,
   recordInformation,
   recordSections,
@@ -375,20 +377,38 @@ test("a form refuses a number or an instant that is not one before the server se
   assert.deepEqual(problems(controls, {}), {});
 });
 
-test("the orders a list offers are newest, oldest and each visible column both ways", () => {
-  const labels = sortOptions(note).map((o) => o.label);
+test("the orders a list offers are newest, oldest, and the fields it orders by worded for their type", () => {
+  const labels = sortOptions(note, feedback).map((o) => o.label);
   assert.deepEqual(labels.slice(0, 2), ["Newest first", "Oldest first"]);
-  assert.ok(labels.includes("Title, ascending"));
-  assert.ok(labels.includes("Rank, descending"));
-  assert.ok(!labels.includes("Pinned, ascending"));
+  // The field the list leads rows with, both ways, and nothing else: this entry
+  // declares no `sortable`, so the sheet answers the primary field and the date
+  // fields it holds — and `note` holds no date field but the two stamps.
+  assert.deepEqual(labels, ["Newest first", "Oldest first", "Title, A–Z", "Title, Z–A"]);
+  // A chip wall named every column, incl. the plumbing and every long paragraph;
+  // the words "ascending"/"descending" were what it said instead of an order.
+  assert.ok(!labels.some((l) => /ascending|descending/.test(l)));
+  assert.ok(!labels.some((l) => /Pinned|Status|Body|Created|Updated/.test(l)));
 });
 
 test("filters are spelled the way the API takes them, and narrowing is visible", () => {
   assert.deepEqual(queryFilters(noOrder), []);
   assert.deepEqual(queryFilters({ sort: "", filters: { status: "open" } }), ["status:open"]);
-  assert.equal(narrowed(noOrder), false);
-  assert.equal(narrowed({ sort: "title", filters: {} }), true);
-  assert.equal(narrowed({ sort: "", filters: { status: "open" } }), true);
+  // Ordering and narrowing are two questions. "Newest first" and "soonest first"
+  // both show every record there is, so a sort never answers "no matching notes".
+  assert.equal(reordered(noOrder), false);
+  assert.equal(reordered({ sort: "title", filters: {} }), true);
+  assert.equal(filtered(noOrder), false);
+  assert.equal(filtered({ sort: "title", filters: {} }), false);
+  assert.equal(filtered({ sort: "", filters: { status: "open" } }), true);
+  // What the filters button counts is what clearing it would take away.
+  assert.equal(activeFilters({ sort: "title", filters: { status: "open" } }, note), 1);
+  assert.equal(activeFilters({ sort: "", filters: { whoKnows: "x" } }, note), 0);
+  for (const order of [
+    noOrder,
+    { sort: "title", filters: {} },
+    { sort: "", filters: { status: "open" } },
+  ])
+    assert.ok(activeFilters(order, note) > 0 ? filtered(order) : true);
 });
 
 test("a comma-separated field is split once, for the control and for the API", () => {
@@ -412,22 +432,29 @@ test("many of an entity is its name with an s, unless it already ends in one", (
   assert.equal(plural("plan"), "plans");
 });
 
-test("a row shows what tells two records apart, not the times every record has", () => {
+test("a row shows the two values that tell it apart, and none of the times every record has", () => {
   const names = listCells(note).map((f) => f.name);
-  assert.deepEqual(names, ["status", "pinned", "rank"]);
+  assert.deepEqual(names, ["status", "pinned"]);
   // The name of the row is not repeated beneath it, and the id is never a cell.
   assert.ok(!names.includes("title"));
   assert.ok(!names.includes("id"));
+  // One line of a phone holds two values beside the record's own line; the third
+  // cell was scanned by nobody and pushed the line out of the row.
+  assert.ok(!names.includes("rank"));
+  assert.ok(!names.includes("createdAt"));
 });
 
-test("a row previews the record's own words, and does not repeat them as a cell", () => {
-  // body is a long text hidden from the table's columns, which is exactly the
-  // field worth reading under the row's name.
-  assert.equal(listPreview(note)?.name, "body");
+test("a row's own line is what a row has room for, which is not what a record has room for", () => {
+  // body carries `hideList`, the schema's own "no table can hold this". A record
+  // has room for the paragraph and lines itself with it; a row has one line and
+  // shows its title and two values instead — never a dash where a line went.
+  assert.equal(listPreview(note, "row"), undefined);
+  assert.equal(listPreview(note, "record")?.name, "body");
   assert.ok(!listCells(note).some((f) => f.name === "body"));
-  // An entity with no long text has no line to preview.
+  // An entity with no long text has no line to preview at all.
   const terse = { ...note, fields: note.fields.filter((f) => f.name !== "body") };
-  assert.equal(listPreview(terse), undefined);
+  assert.equal(listPreview(terse, "row"), undefined);
+  assert.equal(listPreview(terse, "record"), undefined);
 });
 
 test("a command's argument is a form built by the rules a field is built by", () => {

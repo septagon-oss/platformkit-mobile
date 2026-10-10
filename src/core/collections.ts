@@ -1,4 +1,5 @@
 import type { Order } from "./derive";
+import type { Field } from "./catalog";
 import type { Action } from "./feedback";
 import type { Presentation } from "./presentation";
 import {
@@ -111,6 +112,20 @@ export interface DataCell {
   readonly label: string;
   readonly value: string;
   readonly spoken?: string;
+  /**
+   * field is the schema field behind this value, supplied by whoever builds the row.
+   * The molecule that draws a value in the shape its type deserves reads the schema
+   * (a closed set is a pill, an instant carries a clock, digits are monospaced);
+   * a cell with no field draws as the joined line it did before.
+   */
+  readonly field?: Field;
+  /**
+   * raw is the value as the row held it, beside `field`. The shapes are read from
+   * the schema — a pill's colour comes from the tone declared for the *value*, not
+   * for the word it was shown as — so the word the eye reads is not enough to draw
+   * it. `value` and `spoken` stay what the derivation said; nothing recomputes them.
+   */
+  readonly raw?: unknown;
 }
 export interface DataSection {
   readonly id: string;

@@ -18,6 +18,7 @@ const entry: Entry = {
   fields: [
     { name: "id", type: "uuid", readOnly: true },
     { name: "title", type: "string" },
+    { name: "heldAt", type: "time" },
     { name: "createdAt", type: "time", readOnly: true },
   ],
 };
@@ -41,15 +42,15 @@ test.each([
             now: "2026-03-29T08:00:00Z",
           }}
           entry={entry}
-          rows={[{ id: "note-a", title: "Arrival", createdAt: "2026-03-27T18:15:00Z" }]}
+          rows={[{ id: "note-a", title: "Arrival", heldAt: "2026-03-27T18:15:00Z" }]}
           total={1}
           loading={false}
           refreshing={false}
           more={false}
           error=""
           order={noOrder}
-          ordering={false}
           onOrder={jest.fn()}
+          onSheet={jest.fn()}
           onOpen={open}
           onMore={jest.fn()}
           onRefresh={jest.fn()}
@@ -58,8 +59,11 @@ test.each([
     );
     // Reach the record by its stable identity, independently of either time spelling.
     const row = screen.getByTestId("row-note-a");
-    expect(screen.getByText(`Created at: ${shown}`)).toBeOnTheScreen();
-    expect(row.props.accessibilityLabel).toBe(`Arrival, Created at: ${exact}`);
+    // The cell is drawn in the shape its type deserves — the field's word, a clock,
+    // the distance — so the two words are two elements and one label says both.
+    expect(screen.getByText("Held at")).toBeOnTheScreen();
+    expect(screen.getByText(shown)).toBeOnTheScreen();
+    expect(row.props.accessibilityLabel).toBe(`Arrival, Held at: ${exact}`);
     await fireEvent.press(row);
     expect(open).toHaveBeenCalledWith("note-a");
   },
