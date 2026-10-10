@@ -1,0 +1,25 @@
+# The session this phone was given outlives the app: signed in, killed, launched again
+# with its state kept, the person is where they left off — the home screen, never the
+# sign-in form. The cookie and the server it belongs to are one record in the system's
+# secure storage (src/effects/session.ts), and this journey is the device's evidence
+# that a launch reads that record back rather than asking who you are all over again.
+# A session the server has since refused is the other half of the rule: no step on a
+# device can make the kernel this harness serves answer 401, so the journey for it
+# waits on the harness, and tests/INVENTORY.md names that as the missing job.
+# screen: app/index.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- killApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "home"
+    timeout: 20000
+- assertNotVisible:
+    id: "sign-in"
+- tapOn:
+    id: "account"
+- assertVisible: "Sign out"
