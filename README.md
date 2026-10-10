@@ -256,22 +256,24 @@ never a pill inferred from "the first enum", never a dash for a line nobody fill
 in), `recordSections` (the fields with values, grouped by the entry's declared
 `sections` in declared order, each block in schema order, fields naming no block in a
 final "Overview", an empty block left out) and `recordInformation` (the identifier,
-the two stamps, then every field the document keeps for this screen — in that order,
-collapsed and last, its identifier selectable and monospaced). `hasValue` is the one
-emptiness test, and it is the reading side of the line `values` draws when it builds a
-PATCH: `false` and `0` are facts and keep their row, while nothing, an untouched blank,
-an empty list and a switch nobody answered do not. `hidden` beats every declaration
-here: its value and its label reach no sentence on any screen. A record with nothing
-to say answers no blocks at all — no placeholder sentence, because 0085 defers an
-"Add {field}" affordance until it has an interaction contract.
+the two stamps, then every field the document keeps for this screen that no higher
+place drew — in that order, collapsed and last, its identifier selectable and
+monospaced). `hasValue` is the one emptiness test, and it is the reading side of the
+line `values` draws when it builds a PATCH: `false` and `0` are facts and keep their
+row, while nothing, an untouched blank, an empty list and a switch nobody answered do
+not. `hidden` beats every declaration here: its value and its label reach no sentence
+on any screen. A record with nothing to say answers no blocks at all — no placeholder
+sentence, because 0085 defers an "Add {field}" affordance until it has an interaction
+contract.
 
 Delete lives in the header's `…` — drawn only where the resource mounts DELETE and the
-caller may use it, opened inline under the header, and asked in 0085's words
-("Delete '{title}'?" / "You can't undo this in the app." / "Cancel", "Delete
-{singular}"). A command the catalogue marks `system` is never offered at all, and a
-command's row carries its own title with no developer prose under it. The trail names
-people — "You", a name, the system, or "Name unavailable" — and never a user id; where
-the plan excludes it the section is not drawn.
+caller may use it, opened inline as the first row under that header and above every
+row of the record, and asked in 0085's words ("Delete '{title}'?" / "You can't undo
+this in the app." / "Cancel", "Delete {singular}"). A command the catalogue marks
+`system` is never offered at all, and a command's row carries its own title with no
+developer prose under it. The trail names people — "You", a name, the system, or "Name
+unavailable" — and never a user id; where the plan excludes it the section is not
+drawn.
 
 **Reused** — the hint surface T-0328 landed (`EntryHints.sections`,
 `FieldHints.section`/`visibility`/`enumLabels`/`enumTones`, `CommandHints.system`) read

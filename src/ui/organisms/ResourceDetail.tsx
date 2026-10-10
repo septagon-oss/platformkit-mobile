@@ -136,6 +136,20 @@ export function ResourceDetail({
               {header.summary ? <Text>{header.summary}</Text> : null}
             </View>
           ) : null}
+          {/* What the `…` in the native header opened, drawn directly under the header
+              it belongs to and above every row of the record: a person pressed a button
+              at the top of the screen, so the answer appears where they were looking —
+              not at the foot of a scroll view they have to hunt down. */}
+          {onDelete && menuOpen ? (
+            <Section>
+              <Row
+                title={feedback.copy.kit.deleteAction(nounPhrase(entry).singular)}
+                tone="destructive"
+                onPress={onDelete}
+                testID="delete"
+              />
+            </Section>
+          ) : null}
           {blocks.map((block) => (
             <Section key={block.key || "overview"} title={block.label}>
               {block.items.map((item) => (
@@ -161,16 +175,6 @@ export function ResourceDetail({
             <RecordFact key={item.field.name} feedback={feedback} item={item} row={row} />
           ))}
         </SummaryDetail>
-      ) : null}
-      {row && onDelete && menuOpen ? (
-        <Section>
-          <Row
-            title={feedback.copy.kit.deleteAction(nounPhrase(entry).singular)}
-            tone="destructive"
-            onPress={onDelete}
-            testID="delete"
-          />
-        </Section>
       ) : null}
     </Screen>
   );
