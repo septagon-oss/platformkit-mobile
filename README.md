@@ -847,8 +847,10 @@ with an item left empty, unclosed or tab-indented, a filter pointing at no file
 beside it, a `tags:` read out of each flow's own header, an `excludeFlows:` no
 Maestro run applies at all — is refused by name rather than read as agreement;
 every id one of them names is a testID a component sets, every route screen under
-`app/` is named by some flow's `# screen:` header, and every flow names the
-screen it proves) and
+`app/` is named by some flow's `# screen:` header, every flow names the screen it
+proves, and every text selector is spelled as the regex source Maestro compiles it —
+between slashes the delimiters are two characters the element's own text would have to
+carry, so such a journey taps nothing and is refused where the words are written) and
 `check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the
