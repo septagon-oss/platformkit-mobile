@@ -1,9 +1,11 @@
 // One rule, read at the screens it reaches: a field its author kept off a screen
 // is neither drawn nor named on that screen. `visibility` decides which columns a
 // list has, so it decides the field the list leads with, the words a row is called
-// by, the line under those words and the cells beside them; `hidden` is off the
-// record's own screen too, where `hideList` asks nothing; and a declared pointer at
-// plumbing (`primaryField`, `previewField`, `summaryFields`, `statusField`) names
+// by, the line under those words and the cells beside them — declared pointers
+// included, which is why `previewField` and `summaryFields` are asked here too;
+// `hidden` is off the record's own screen too, where `hideList` asks nothing, while
+// `detail` stays on it as the record's name and its state; and a declared pointer
+// at plumbing (`primaryField`, `previewField`, `summaryFields`, `statusField`) names
 // nothing and lets the documented default read on. The reference kernel refuses
 // such a pointer at mount (`kit/rest/hints.go`, `namedFieldFault`: "a row is not
 // named by its plumbing"); the phone keeps every screen and refuses the pointer.
@@ -17,6 +19,7 @@ import {
   detailItems,
   listCells,
   listPreview,
+  label,
   noOrder,
   primary,
   rowPrimary,
@@ -118,6 +121,14 @@ test("a declared pointer at plumbing names nothing and lets the default read on"
 
   const pill = noteWith("rank", { visibility: "hidden" }, { statusField: "rank" });
   assert.equal(statusField(pill), undefined, "plumbing is no record's state");
+});
+
+test("a detail field stays the record's own name and the record's own state", () => {
+  const named = noteWith("title", { visibility: "detail" });
+  assert.equal(primary(named)?.name, "title", "the record answers what a row has no room for");
+  assert.equal(label(named, rowOf({}), untitled), secret, "and calls itself by it");
+  const pill = noteWith("status", { visibility: "detail" }, { statusField: "status" });
+  assert.equal(statusField(pill)?.name, "status", "a detail set of values is still a state");
 });
 
 test("a hidden field is off the record's own screen, where hideList asks nothing", () => {

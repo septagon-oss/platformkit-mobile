@@ -222,14 +222,21 @@ A declared visibility is read on every screen it speaks about. `hidden` is the o
 visibility no screen draws — off the list, off the record's own page and off the
 form, its value left in the schema, the JSON and the PATCH where nothing a person
 reads is built from it — and `detail` is a record's own answer, which a row has no
-room for. A row's columns and the field that leads them are chosen from one list
-(`rowFields` in `derive.ts`), so a field its author kept off a row can neither be a
-column nor title one: an identity picked from the whole schema would put the value
+room for. A row asks one question of every field it could draw (`rowContent` in
+`derive.ts`) and asks it of the field it leads with, the line under that name and
+the cells beside it alike, so a field its author kept for the record neither titles
+a row, is quoted under its name, nor reaches it as a column — however the entry's
+hints point at it. Its columns and the field that leads them are chosen from one
+list (`rowFields`), so they cannot disagree about the answer: an identity picked
+from the whole schema would put the value
 back through the column every row leads on, which is the web shell's rule for the
-same reason (`known(onList(…))` in `ui/resource/resource.go`). And a hint that
-points at plumbing — `primaryField`, `previewField`, `summaryFields` or
-`statusField` naming a `hidden` field — names nothing and lets the default read on:
-the reference kernel refuses that document at mount (`kit/rest/hints.go`,
+same reason (`known(onList(…))` in `ui/resource/resource.go`). A hint that points
+where its screen may not read — `primaryField`, `previewField`, `summaryFields` or
+`statusField` naming a `hidden` field, or one of the row's three naming a `detail`
+one — names nothing and lets the default read on (a `detail` field stays the
+record's own name and the record's own state, which is what `primaryField` and
+`statusField` answer there): the reference kernel refuses that document at mount
+(`kit/rest/hints.go`,
 `namedFieldFault`), and one author's slip is not worth this app's screens.
 
 ## Design

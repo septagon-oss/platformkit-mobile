@@ -320,14 +320,33 @@ export const statusField = (e: Entry): Field | undefined =>
 export const iconName = (e: Entry): string | undefined => e.hints?.icon;
 
 /**
- * onList is a field's own answer about the list: the declared visibility when
- * there is one, which beats `hideList` in both directions (`shown` reclaims the
- * column `hideList` took, `detail` and `hidden` give up one it left), because an
- * author's word about one field is the newer fact. What else belongs in a list —
- * never the id, always the row's own name — is `listColumns`'s, not a field's.
+ * rowContent is a field's own answer about what a row may *say*: silence about its
+ * visibility, or a declared `shown`, and the field's words may be read on a line
+ * of a list — as its name, as the line under the name, or as a cell beside it.
+ * `detail` and `hidden` answer no: the first is the record's own answer, which
+ * `detailItems` gives and a row has no room for, and the second is nobody's.
+ *
+ * A declared pointer (`previewField`, `summaryFields`) is asked the same question
+ * as the default it overrides, because an entry that points a row's summary line
+ * at a paragraph its own field kept for the record says two opposite things, and
+ * the field's word about itself is the newer fact. `hideList` is deliberately not
+ * consulted here: it declines a *column* — which is why every long text carries
+ * it — and a row's line under its name is not a column. `onList` is where that
+ * legacy tag is asked.
+ */
+const rowContent = (f: Field): boolean =>
+  f.hints?.visibility === undefined || f.hints.visibility === "shown";
+
+/**
+ * onList is a field's own answer about which *columns* a list has: `rowContent`,
+ * and, when the field declares no visibility, the schema's older `hideList` tag.
+ * A declaration beats `hideList` in both directions (`shown` reclaims the column
+ * `hideList` took, `detail` and `hidden` give up one it left), because an author's
+ * word about one field is the newer fact. What else belongs in a list — never the
+ * id, always the row's own name — is `listColumns`'s, not a field's.
  */
 export const onList = (f: Field): boolean =>
-  f.hints?.visibility === undefined ? f.hideList !== true : f.hints.visibility === "shown";
+  rowContent(f) && (f.hints?.visibility !== undefined || f.hideList !== true);
 
 /**
  * rowFields are the fields a row is made of: what the schema puts on a list, in
@@ -366,9 +385,10 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
   const declared = e.hints?.summaryFields;
   if (declared !== undefined)
     // Declared means exactly those, in the order the author gave them, minus any
-    // field no screen draws: `limit` is this build's budget for a ranking nobody
-    // asked for, and plumbing is not a cell whoever pointed at it.
-    return declared.flatMap((name) => e.fields.filter((f) => f.name === name && !neverShown(f)));
+    // field a row may not speak of: `limit` is this build's budget for a ranking
+    // nobody asked for, and neither plumbing nor the record's own paragraph is a
+    // cell whoever pointed at it.
+    return declared.flatMap((name) => e.fields.filter((f) => f.name === name && rowContent(f)));
   const rank = (f: Field): number => {
     if (f.enum && f.enum.length > 0) return 0;
     if (f.type === "bool") return 1;
@@ -397,16 +417,18 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
  * in a table column, which is true of every long text and is why a schema
  * marks them: a paragraph ruins a column. A line under the name is not a
  * column, and the paragraph is exactly what is worth reading there. It stays
- * out of the cells beside it, which are columns.
+ * out of the cells beside it, which are columns. A declared visibility does
+ * disqualify it, in both readings: `detail` is the paragraph a person reads on
+ * the record and nowhere else, and a pointer at it cannot make the row quote it.
  */
 export function listPreview(e: Entry): Field | undefined {
   const declared = e.hints?.previewField;
-  if (declared !== undefined) return e.fields.find((f) => f.name === declared && !neverShown(f));
+  if (declared !== undefined) return e.fields.find((f) => f.name === declared && rowContent(f));
   const named = rowPrimary(e);
   return e.fields.find(
     (f) =>
       f.name !== named?.name &&
-      !neverShown(f) &&
+      rowContent(f) &&
       !f.readOnly &&
       (f.type === "text" || f.widget === "textarea"),
   );
