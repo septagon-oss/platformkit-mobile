@@ -37,7 +37,8 @@ test("a mounted list withdraws both create controls when its catalogue changes",
   await waitFor(() => expect(screen.getByRole("button", { name: /^New / })).toBeOnTheScreen());
   expect(screen.getByRole("button", { name: "New" })).toBeOnTheScreen();
   await rendered.rerender(view(<ResourceList entry={readOnly} />));
-  expect(screen.getByRole("button", { name: "Order" })).toBeOnTheScreen();
+  // The list itself stayed: what went is the doors, not the screen behind them.
+  expect(screen.getByText("No notes yet")).toBeOnTheScreen();
   expect(screen.queryByRole("button", { name: "New" })).toBeNull();
   expect(screen.queryByRole("button", { name: /^New / })).toBeNull();
   await rendered.rerender(view(<ResourceList entry={note} />));

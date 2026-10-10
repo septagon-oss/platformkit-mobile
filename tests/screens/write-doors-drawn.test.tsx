@@ -50,13 +50,16 @@ const view = (children: React.ReactElement) => (
 
 /**
  * An empty list is the fastest thing to render, and it asks both halves of the
- * question at once: the header drew at all (the `Order` button is always in it),
- * and the create door agrees between the header and the empty state's own
- * primary action.
+ * question at once: the screen drew at all (its own empty state is on it), and the
+ * create door agrees between the header and the empty state's primary action.
+ *
+ * The screen's own words are the signal, not a button: a list that holds nothing
+ * and has nothing filtered offers neither of its two controls, so "the header drew
+ * a button" proves nothing about whether the screen is on screen.
  */
 async function renderList(entry: Entry) {
   await render(view(<ResourceList entry={entry} />));
-  await waitFor(() => expect(screen.getByRole("button", { name: "Order" })).toBeOnTheScreen());
+  await waitFor(() => expect(screen.getByText("No notes yet")).toBeOnTheScreen());
 }
 
 const expectNoCreate = () => {
@@ -89,8 +92,9 @@ test("a list whose resource lists an empty set of verbs keeps the New it always 
 test("a list whose resource mounts no create draws no New", async () => {
   await renderList({ ...note, operations: NO_CREATE });
   expectNoCreate();
-  // Not an empty header: the doors that are mounted are still drawn.
-  expect(screen.getByRole("button", { name: "Order" })).toBeOnTheScreen();
+  // Nothing to open and nothing blank about the screen: the list a caller cannot
+  // write is still the list, read and titled by what it holds.
+  expect(screen.getByText("No notes yet")).toBeOnTheScreen();
 });
 
 test("a list a caller may not write draws no New whatever its operations say", async () => {

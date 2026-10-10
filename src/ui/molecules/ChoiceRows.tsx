@@ -32,6 +32,7 @@ export function ChoiceRows({ model, onChange, named = true, testID }: Props) {
           <Row
             key={choice.id}
             title={choice.label}
+            role="radio"
             selected={choice.selected}
             opens={false}
             {...(choice.enabled && choice.change ? { onPress: () => onChange(choice.id) } : {})}
