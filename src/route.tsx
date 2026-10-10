@@ -5,8 +5,8 @@
 import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback } from "react";
 import { View } from "react-native";
-import { packKey, shellReady } from "./core/catalog";
-import { humanize } from "./core/derive";
+import { packKey, shellReady, type Entry } from "./core/catalog";
+import { humanize, noun } from "./core/derive";
 import { address } from "./core/reentry";
 import type { Renderer } from "./renderers";
 import { ResourceCommand } from "./screens/ResourceCommand";
@@ -137,15 +137,33 @@ function ShellUpdate() {
  * route's own name on screen. Both read the path, which is where the words
  * are; they live here rather than in the layout because spelling a name is a
  * rule, and the composition root holds none.
+ *
+ * The kind of record a sheet is about is named by `entry`, which is how the shell
+ * answers what a module and an entity are: the word the catalogue gave the entry,
+ * which is the same word the list's toolbar puts on its New button. An entry that
+ * is not there yet — the sheet is titled a moment before the catalogue arrives, and
+ * for any address the shell has not read — leaves the wire word from the address,
+ * which is what a sheet title has always read. The words *over* that name come from
+ * the copy table, so a Portuguese phone reads Portuguese in a header it used to
+ * read English in.
  */
-export const sheet = (verb: string) => (prop: { route: { params?: unknown } }) => {
-  const entity = (prop.route.params as { entity?: string } | undefined)?.entity ?? "";
-  return {
-    presentation: "modal" as const,
-    headerLargeTitleEnabled: false,
-    title: verb + entity,
+export const sheet =
+  (
+    title: (name: string) => string,
+    entry?: (module: string, entity: string) => Entry | undefined,
+  ) =>
+  (prop: { route: { params?: unknown } }) => {
+    const at = (prop.route.params ?? {}) as { entity?: string; module?: string };
+    const found = at.module === undefined ? undefined : entry?.(at.module, at.entity ?? "");
+    // `noun` is what the list's toolbar puts on its New button, so the sheet a
+    // press opens is titled with the word the person just read.
+    const name = found === undefined ? (at.entity ?? "") : noun(found).singular;
+    return {
+      presentation: "modal" as const,
+      headerLargeTitleEnabled: false,
+      title: title(name),
+    };
   };
-};
 
 export const commandSheet = (prop: { route: { params?: unknown } }) => {
   const verb = (prop.route.params as { verb?: string } | undefined)?.verb ?? "";

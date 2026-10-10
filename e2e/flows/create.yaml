@@ -14,7 +14,13 @@ env:
       id: "resource-list"
     timeout: 15000
 - tapOn: "New"
-- assertVisible: "New ${ENTITY}"
+# The sheet is titled with the word the catalogue gave the resource under the copy
+# table's own, and the word for a resource that declares no name is this build's
+# reading of the address's own — capitalised, the way every header says a noun. The
+# journey therefore matches the wire name it passed case-insensitively rather than
+# spelling a case it did not choose; Maestro reads a text selector as regex source
+# matched against the whole of an element's text, so the exact form would tap nothing.
+- assertVisible: (?i)^New ${ENTITY}$
 - assertVisible:
     id: "resource-form"
 - tapOn: "Cancel"

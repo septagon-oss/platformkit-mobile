@@ -43,6 +43,17 @@ import {
   type Formatting,
 } from "../src/core/derive";
 
+// ---------------------------------------------------------------------------
+// Where a write goes, and which doors are drawn. One implementation of each,
+// which is why these cases are here and not in the screens that use them.
+// ---------------------------------------------------------------------------
+
+import { doors, offers, type Entry } from "../src/core/catalog";
+import { commandPath, verbRefusal, writePath } from "../src/core/derive";
+
+/** The words a sheet hands `problems`: a refusal is a line of the copy table, not a string written here. */
+const kit = deriveCopy("en").kit;
+
 // An instant reads in the device's zone; the test's device is in UTC.
 process.env.TZ = "UTC";
 
@@ -372,9 +383,9 @@ test("a typed number may carry a decimal comma and a sign; anything else is not 
 
 test("a form refuses a number or an instant that is not one before the server sees it", () => {
   const controls = formControls(note, undefined, true);
-  assert.deepEqual(problems(controls, { rank: "abc" }), { rank: "is not a number" });
-  assert.deepEqual(problems(controls, { rank: "3" }), {});
-  assert.deepEqual(problems(controls, {}), {});
+  assert.deepEqual(problems(controls, { rank: "abc" }, kit), { rank: "is not a number" });
+  assert.deepEqual(problems(controls, { rank: "3" }, kit), {});
+  assert.deepEqual(problems(controls, {}, kit), {});
 });
 
 test("the orders a list offers are newest, oldest, and the fields it orders by worded for their type", () => {
@@ -465,7 +476,11 @@ test("a command's argument is a form built by the rules a field is built by", ()
   assert.equal(at.kind, "text");
   assert.equal(at.label, "At");
   assert.equal(at.readOnly, false);
-  assert.equal(at.help, "When it goes out; now if left empty");
+  assert.equal(
+    at.help,
+    "",
+    "the member's doc is a note about the wire; a command sheet says nothing until an author hints it",
+  );
   // A command that takes nothing has no controls, which is what makes it a
   // question rather than a sheet.
   assert.deepEqual(commandControls(note.commands.find((c) => c.verb === "archive")!), []);
@@ -543,7 +558,7 @@ test("list values retain declared integer, float, boolean and string elements", 
     labels: "2, false",
     legacy: "7, 8",
   };
-  assert.deepEqual(problems(controls, held), {});
+  assert.deepEqual(problems(controls, held, kit), {});
   assert.deepEqual(values(controls, held), {
     counts: [-4, 0, 12],
     ratios: [1.25, -0.5, 100],
@@ -579,20 +594,12 @@ test("invalid typed list items refuse the whole input without filtering or round
       undefined,
       true,
     );
-    assert.deepEqual(problems(controls, { items: raw }), {
+    assert.deepEqual(problems(controls, { items: raw }, kit), {
       items: "contains a value that does not match its item type",
     });
     assert.deepEqual(values(controls, { items: raw }), {});
   }
 });
-
-// ---------------------------------------------------------------------------
-// Where a write goes, and which doors are drawn. One implementation of each,
-// which is why these cases are here and not in the screens that use them.
-// ---------------------------------------------------------------------------
-
-import { doors, offers, type Entry } from "../src/core/catalog";
-import { commandPath, verbRefusal, writePath } from "../src/core/derive";
 
 const control = parseCatalog(
   JSON.parse(

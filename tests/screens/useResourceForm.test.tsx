@@ -41,7 +41,9 @@ describe("useResourceForm", () => {
     expect(api.update).not.toHaveBeenCalled();
     row.resolve({ id: "1", title: "Buy milk", rank: 2 });
     await waitFor(() => expect(edit.result.current.phase).toBe("editing"));
-    const title = edit.result.current.controls.find((c) => c.field.name === "title");
+    const title = edit.result.current.blocks
+      .flatMap((b) => b.controls)
+      .find((c) => c.field.name === "title");
     expect(title?.value).toBe("Buy milk");
   });
 
@@ -112,6 +114,61 @@ describe("useResourceForm", () => {
       expect.objectContaining({ title: "Buy oat milk" }),
     );
     await waitFor(() => expect(router.back).toHaveBeenCalledTimes(1));
+  });
+
+  test("a held value whose list holds a comma never reaches the server", async () => {
+    const api = fakeApi();
+    shell.value = shellValue(api);
+    const { result } = await renderHook(() => useResourceForm(note, "1"));
+    await waitFor(() => expect(result.current.phase).toBe("editing"));
+    // The box refuses a word with a comma as it is committed, and the form holds
+    // only what the box committed. A value that got here another way — a row read
+    // from a server that stored one the box would never write — is refused at the
+    // save: the sheet sends what the core makes of the held text, and the core
+    // refuses a list whose items are spelled with a loose comma.
+    await act(async () => result.current.change("tags", "work,home"));
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(api.update).not.toHaveBeenCalled();
+    expect(result.current.errors).toEqual({ tags: "Remove the comma from this value." });
+    // The sheet's own notice, in the kit's words, beside the field it is about.
+    expect(result.current.detail).toBe("Review the highlighted fields.");
+    expect(router.back).not.toHaveBeenCalled();
+    expect(result.current.held.tags).toBe("work,home");
+    // A word the person fixes with the keyboard is a value the save accepts again.
+    await act(async () => result.current.change("tags", "work home"));
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(api.update).toHaveBeenLastCalledWith(
+      note,
+      "1",
+      expect.objectContaining({ tags: ["work home"] }),
+    );
+  });
+
+  test("a save a field's own box refuses sends nothing and leaves the sheet where it is", async () => {
+    const api = fakeApi();
+    shell.value = shellValue(api);
+    const { result } = await renderHook(() => useResourceForm(note, "1"));
+    await waitFor(() => expect(result.current.phase).toBe("editing"));
+    // The core cannot see this one: the box holds a word it will not write, and the
+    // value the sheet would send is the last one that could be stored. The person's
+    // text is on screen and the sheet says nothing went.
+    await act(async () => result.current.fieldRefused("tags", true));
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(api.update).not.toHaveBeenCalled();
+    expect(result.current.phase).toBe("editing");
+    expect(result.current.detail).toBe("Review the highlighted fields.");
+    expect(router.back).not.toHaveBeenCalled();
+    await act(async () => result.current.fieldRefused("tags", false));
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(api.update).toHaveBeenCalledTimes(1);
   });
 
   test("a dirty sheet asks before it is dismissed; a clean one and a saving one do not", async () => {

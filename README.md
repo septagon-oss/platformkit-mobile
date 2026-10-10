@@ -364,6 +364,88 @@ document declared for that value, which is the pill a list row wants next; and
 `record-menu`/`record-information` are the two ids a journey finds a record's header
 menu and its collapsed block by.
 
+### How a form asks
+
+Three questions decide what a sheet holds, and all three are answered in
+`src/core/derive.ts` rather than by the screen that draws them. **The set** is
+`formControls`' answer: every field the entry keeps for the form, minus the ones it
+hides — a `hidden` field is neither offered nor sent, so `source` and `source_ref`
+never reach a label, a control or a request body. The one exception is a field that is
+hidden *and* required: the person's only path to a submittable create is never taken
+away, so it stays in the sheet marked required, and the parser names that pair once in
+the developer's channel. **The grouping** is the entry's own `sections`, in declared
+order, with the fields that named no block landing in a last block carrying the word the
+caller was handed (`copy.kit.overview`, "Visão geral" on a Portuguese phone); an entry
+that declares no blocks gets one block with no heading, because the sheet is the group.
+**The order inside a block** is `orderControls`: the field the record is called by
+first, then required, then optional, and schema order within each of those. Schema
+order alone put a required `pinned` below an optional `body`; the identity field leads
+even when it is optional, and never leaves the block its entry filed it in.
+`formSections` answers all three at once as blocks, and `commandSections` answers a
+command's argument the same way with no identity to lead on. Neither moves a byte
+`values` sends: reordering what is drawn does not reorder what is written.
+
+Help is the author's line. A field's `hints.help` is drawn under the field and
+announced with it; the developer's `doc`, which describes a wire member, is
+never drawn or announced on any form, sheet title or command screen — the same text
+that used to put "Lifecycle state" in front of a person is now a note only a developer
+sees, and no list carries a help sentence anybody did not write. Two sentences are the
+kit's own rather than an author's, and they are the sheet's to draw, not the
+derivation's: `changedByCommand` under a value only a command of its own changes, and
+`identifierOnly` under a reference box that takes an identifier because no picker
+exists yet. `control` hands back `hints.help` and nothing else, because a sentence
+written there could only ever be in one language; these two sit in `src/core/kitCopy.ts`
+with every other word a screen says.
+
+One name is drawn above every control, by `FormField`, whatever the control is: a
+switch, a chooser, a date row and a tag box print no name of their own and announce the
+one the sheet gave them, so a control is named once and the columns line up. That
+announced name carries whether a person may leave the field empty, in the reader's own
+words ("Title, Required", "Pinned, Optional"), because `*` is not a word and a switch
+that says only "Pinned" says nothing about leaving it alone. `field-<name>` is the id a
+journey looks a control up by. The tag box announces it too — its input carries the
+name the sheet derived, so a person hearing the sheet hears "Tags, Required" and not
+only "Add to Tags", whose act the Add button names.
+
+A list field stores its items comma-joined, so one item can never hold the separator.
+`joinList` is the one spelling, `entryHoldsSeparator` is the box's rule and
+`valueHoldsSeparator` the save's: `TagsField` commits a word on Return or on Add,
+ignores a word already on the sheet, and refuses an entry holding a comma without
+writing it, keeping what the person typed and saying which word it refused; the core
+refuses a held value that does not spell its own items, so a list that arrived with a
+loose comma is refused before anything is sent and never reaches the server half-spelled.
+`tags-<label>`, `add-<label>` and `tags-fault-<label>` are the ids those three acts
+work through. Every word the box says, in English and Portuguese, comes from
+`src/core/kitCopy.ts`.
+
+**Reused** — `neverShown` and the hint surface T-0328 landed (`visibility`, `help`,
+`section`, `sections`, `singular`, `primaryField`) for what a sheet may offer and what
+it may say; `primary` and the `namedBy` chain behind it for the identity field that
+leads; `control`, `label`, `splitList`, `text`, `timeWire`, `numberValue` and
+`listValues` for each field's own shape; `values` and `problems` unchanged in what they
+write, so a reordered sheet sends the same body; `Section`, `FormField`, `TextField`,
+`Button`, `Icon`, `Text`, `SwitchRow`, `ChoiceRow`, `DateTimeRow` and `Notice` for the
+drawing, with the chip drawn by the `View` and `Icon` `TagsField` already used; `noun`
+for the kind a sheet is titled with and `kitCopy`'s existing `newNamed` pattern for the
+word over `editNamed`. **Added** — `formSections`, `commandSections`, `orderControls`,
+`joinList`, `entryHoldsSeparator` and `valueHoldsSeparator` in the core, because the
+inventory held `formControls` (the set) and no answer to "in what order, in what
+blocks, and which of these words is a person's"; `FormBlock` and `FormWords` are its
+two shapes. Five words joined the copy table in both languages (`editNamed`, `addTag`,
+`addTagTo`, `removeTag`, `commaInValue`), and two more joined it in this round so a
+Portuguese phone reads Portuguese where the sheet explains a control it did not get
+words for (`changedByCommand`, `identifierOnly`), which the table already held in
+English only as a literal inside the derivation. `required`/`optional`, which the table
+already held and nothing drew, are now drawn and announced by the sheet — a refusal or
+an affordance with no word in the table is one no phone can say. **Made reusable** — `formSections`
+hands a renderer pack the form as data (blocks, labels and ordered controls), so a
+custom sheet takes the kit's order without redrawing it; `orderControls` orders any
+control list against any identity field, which is what a command argument needed and
+what a filter sheet will want next; `FormField` is now the only place a field's name,
+its required-or-optional word and its refusal are drawn, so a control that grows a help
+line cannot disagree with the label above it; and the two comma predicates are the
+storage rule itself, which any other writer of a comma-joined field can ask.
+
 ## Design
 
 Every PlatformKit phone app is composed from this directory, so the kit is why
@@ -550,7 +632,18 @@ Direct consumers upgrading their source pin must migrate these required props:
   `deriveFeedback(copy, motion, { locale, timeZone })`. The in-repository screens
   adapt native preferences in `useFeedback`. `retry(feedback, callback)` now
   gets its label from core; the old Notice export re-exports that same helper.
-- The `ResourceForm` organism also requires `initialDate`. Generated form,
+- The `ResourceForm` organism also requires `initialDate`, and takes `blocks`
+  (the ordered groups `formSections` and `commandSections` answer) where it took a
+  flat list of `controls`: one name is drawn above every control, so the organism
+  needs to know which control begins a group. `FormField` takes `copy` (the kit
+  bundle) when it is to mark a field required or optional, `TagsField` requires
+  `copy` and takes the optional `announce` (the accessible name the sheet derived,
+  which a box outside a form does not have), and `SwitchRow` no longer takes `help` —
+  the name above the switch is where help belongs. `problems(controls, held, words)`
+  takes the reader's own bundle, because the sentence it refuses with is a word, not a
+  format string.
+  `sheet(title, entry)` is titled by the catalogue's declared name for the kind,
+  with the wire word from the address when no entry has been read. Generated form,
   command and singleton screens accept an optional `Clock` and sample it once
   per mounted screen; the default device clock lives in screen composition.
 - `timeText(date, formatting)`, `display(field, value, formatting)` and the

@@ -20,7 +20,7 @@ import {
   deriveCopy,
   deriveFeedback,
   failureSubject,
-  formControls,
+  formSections,
   noOrder,
   presentedTime,
   type Copy,
@@ -178,7 +178,7 @@ const surfaces: readonly Surface[] = [
       <ResourceForm
         feedback={p.feedback}
         initialDate={new Date("2026-08-11T08:20:00Z")}
-        controls={formControls(note, undefined, true)}
+        blocks={formSections(note, undefined, true, p.feedback.copy.kit.overview)}
         held={{}}
         errors={refusalFields(said.verdict)}
         detail={said.text}

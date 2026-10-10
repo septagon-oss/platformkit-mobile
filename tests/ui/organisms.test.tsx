@@ -5,11 +5,14 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
 import {
+  deriveCopy,
   deriveDisclosure,
   deriveEventActivity,
-  formControls,
+  deriveFeedback,
+  formSections,
   noOrder,
   sortOptions,
+  type Presentation,
 } from "../../src/core/derive";
 import { Home } from "../../src/ui/organisms/Home";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
@@ -135,10 +138,10 @@ describe("ResourceList", () => {
 });
 
 describe("ResourceForm", () => {
-  const controls = formControls(note, undefined, true);
+  const blocks = formSections(note, undefined, true, feedback.copy.kit.overview);
   const base = {
     initialDate: new Date("2026-08-11T08:20:00Z"),
-    controls,
+    blocks,
     held: {},
     errors: {},
     detail: "",
@@ -169,7 +172,94 @@ describe("ResourceForm", () => {
   test("while saving, every control is off", async () => {
     await inTheme(<ResourceForm feedback={feedback} {...base} phase="saving" />);
     expect(screen.getByTestId("input-title")).toBeDisabled();
-    expect(screen.getByRole("switch", { name: "Pinned" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeDisabled();
+  });
+
+  test("each control announces whether a person may leave it, in the sheet's own words", async () => {
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="editing" />);
+    // The words are the copy table's, and they ride the control the eye is on —
+    // `* ` is not a word, and a switch that says only "Pinned" says nothing about
+    // whether leaving it is allowed.
+    expect(screen.getByTestId("input-title").props.accessibilityLabel).toBe("Title, Required");
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeOnTheScreen();
+    // The tag box announces the name the sheet derived, not only the act of its own
+    // Add button: a person hearing the sheet hears whether the list may be left empty.
+    expect(screen.getByTestId("tags-tags").props.accessibilityLabel).toBe("Tags, Optional");
+    expect(screen.getAllByText(/\(Optional\)/).length).toBeGreaterThan(3);
+  });
+
+  test("a list field a person owes is announced as owed", async () => {
+    const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+    const fields = doc.resources.find((r: { entity: string }) => r.entity === "note").fields;
+    fields.find((f: { name: string }) => f.name === "tags").required = true;
+    const owed = parseCatalog(doc).resources.find((r) => r.entity === "note")!;
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(owed, undefined, true, feedback.copy.kit.overview)}
+      />,
+    );
+    // "Add to Tags" names the button's act; the box itself answers whether the
+    // person may leave the list empty, which is the same word the label above it gives.
+    expect(screen.getByTestId("tags-tags").props.accessibilityLabel).toBe("Tags, Required");
+    expect(screen.getByRole("button", { name: "Add to Tags" })).toBeOnTheScreen();
+  });
+
+  test("a value only a command changes is explained in the language the phone reads", async () => {
+    const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: false, tags: [] };
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, row, false, feedback.copy.kit.overview)}
+      />,
+    );
+    expect(screen.getByText(feedback.copy.kit.changedByCommand)).toBeOnTheScreen();
+    // The sentence is the table's, so the same sheet on a Portuguese phone says it in
+    // Portuguese: it is drawn by the sheet rather than written into the derivation.
+    const there: Presentation = { ...presentation, copy: deriveCopy("pt") };
+    const pt = deriveFeedback(there.copy, there.motion, there);
+    await inTheme(
+      <ResourceForm
+        feedback={pt}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, row, false, pt.copy.kit.overview)}
+      />,
+    );
+    expect(screen.getByText(pt.copy.kit.changedByCommand)).toBeOnTheScreen();
+    expect(screen.queryByText(feedback.copy.kit.changedByCommand)).toBeNull();
+  });
+
+  test("every control is named once, above the control, whatever the control is", async () => {
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="editing" />);
+    // A sheet that named a switch on its own row and a text box above its box would
+    // say the same fact in two places and line nothing up. One name, drawn once by
+    // FormField, for the atom that announces it and the control underneath it.
+    for (const name of ["Title", "Body", "Rank", "Pinned", "Tags"])
+      expect(screen.getAllByText(new RegExp(`^${name}( \\(Optional\\))?$`))).toHaveLength(1);
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeOnTheScreen();
+    expect(screen.getByTestId("field-pinned")).toBeOnTheScreen();
+  });
+
+  test("a field that refuses what it holds says so to the sheet, by name", async () => {
+    const refused = jest.fn();
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, undefined, true, feedback.copy.kit.overview)}
+        onFieldRefused={refused}
+      />,
+    );
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work, home");
+    expect(refused).toHaveBeenCalledWith("tags", true);
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work home");
+    expect(refused).toHaveBeenLastCalledWith("tags", false);
   });
 
   test("a failed load offers a retry and no controls", async () => {

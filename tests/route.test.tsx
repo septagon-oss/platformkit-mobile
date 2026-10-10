@@ -188,17 +188,39 @@ describe("ResourceRoute", () => {
 });
 
 describe("sheets", () => {
+  /** What the layout hands the factory: the copy table's word over a name, and how to
+   * look an entry up. Only an entry whose author declared a name has one to give. */
+  const called = (singular: string) => (_module: string, entity: string) =>
+    entity === "note" ? { ...catalog.resources[0]!, hints: { singular } } : undefined;
+  const newSheet = sheet((name) => `New ${name}`, called("Task"));
+
   test("a sheet is titled from the path before it mounts; a command sheet by its verb as words", () => {
-    expect(sheet("New ")({ route: { params: { entity: "note" } } })).toEqual({
+    expect(newSheet({ route: { params: { module: "note", entity: "note" } } })).toEqual({
       presentation: "modal",
       headerLargeTitleEnabled: false,
-      title: "New note",
+      title: "New Task",
     });
-    expect(sheet("Edit ")({ route: {} }).title).toBe("Edit ");
+    expect(sheet((name) => `Edit ${name}`)({ route: {} }).title).toBe("Edit ");
     expect(commandSheet({ route: { params: { verb: "mark-paid" } } })).toEqual({
       presentation: "modal",
       headerLargeTitleEnabled: false,
       title: "Mark paid",
     });
+  });
+
+  test("a declared name goes into the title; an entry not read yet leaves the word from the address", () => {
+    // The title is built from the params before the screen mounts — the one moment a
+    // native stack can name a modal — so the entry is looked up, never awaited. The
+    // address carries the resource's own word, which is what a title has always read
+    // a moment before the catalogue arrives; it is never a wire member's name, which
+    // is only ever a field.
+    expect(newSheet({ route: { params: { module: "billing", entity: "invoice" } } }).title).toBe(
+      "New invoice",
+    );
+    expect(sheet((name) => `Edit ${name}`, called("Task"))({ route: {} }).title).toBe("Edit ");
+    // A sheet composed with no way to look an entry up still says what the address says.
+    expect(sheet((name) => `Edit ${name}`)({ route: { params: { entity: "note" } } }).title).toBe(
+      "Edit note",
+    );
   });
 });

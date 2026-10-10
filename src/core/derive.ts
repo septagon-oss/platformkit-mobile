@@ -187,6 +187,35 @@ export const splitList = (raw: string): string[] =>
     .map((s) => s.trim())
     .filter(Boolean);
 
+/** joinList is the one spelling a comma-joined field knows: trimmed items, one `", "` between each. */
+export const joinList = (items: readonly string[]): string =>
+  items
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(", ");
+
+/**
+ * entryHoldsSeparator asks whether text a person means as ONE value holds the
+ * separator. Storage is comma-joined, so one item can never carry a comma: the
+ * tag box refuses the entry rather than writing one chip as two.
+ *
+ * The question is asked of the text, not of what splitting would leave. "alpha,"
+ * splits to one word and stores none of what it spells — it asks for a second,
+ * empty item and loses the comma that asked for it — so a comma *anywhere* in the
+ * entry is the refusal, at either end or on its own.
+ */
+export const entryHoldsSeparator = (entry: string): boolean => entry.includes(",");
+
+/**
+ * valueHoldsSeparator asks whether a whole held value spells its own items.
+ * A comma inside an item cannot be told from a separator by splitting — splitting
+ * is what destroys it — so the question is whether the text reads back as its
+ * items joined the one way storage joins them. The trailing `", "` the tag box
+ * writes while a chip is pending is its own spelling and never a fault.
+ */
+export const valueHoldsSeparator = (raw: string): boolean =>
+  raw.trim().replace(/,\s*$/, "") !== joinList(splitList(raw));
+
 /** display is a value as a person reads it; nothing at all is a dash. */
 export function display(f: Field, v: unknown, format: Formatting): string {
   if (f.type === "bool")
@@ -789,15 +818,14 @@ export function kind(f: Field): ControlKind {
 /** control is one field as a form holds it: the same rules wherever the field came from. */
 function control(f: Field, value: string, immutable: boolean): Control {
   const k = kind(f);
-  // The author's help line reads the form; the developer's `doc` is the fallback
-  // it has always had. Deleting that fallback is a visible change to every
-  // un-hinted form, so it belongs to whoever redraws the form (T-0324).
-  const notes = [f.hints?.help ?? f.doc ?? ""];
-  if (immutable) notes.push("Changed by a command of its own, not by this form.");
-  if (k === "reference") {
-    notes.push("The identifier of the related record. There is no picker for it yet.");
-  }
-  if (k === "list") notes.push("Comma separated.");
+  // Help is the author's line for the person who fills the form, and nothing else.
+  // The developer's `doc` describes a wire member to whoever wrote the server, so it
+  // is never drawn or announced (0085); the two sentences the kit does owe a person —
+  // what greys a value out, and what a bare identifier box takes — are the sheet's to
+  // draw, because its words are the reader's language (`kitCopy`'s `changedByCommand`
+  // and `identifierOnly`), and a sentence written here could only ever be English.
+  // A field whose author wrote no hint therefore says nothing here, and its label,
+  // its required word and its control still read.
   return {
     kind: k,
     field: f,
@@ -805,7 +833,7 @@ function control(f: Field, value: string, immutable: boolean): Control {
     value,
     required: f.required === true,
     readOnly: immutable,
-    help: notes.filter(Boolean).join(" "),
+    help: f.hints?.help ?? "",
     options: (f.enum ?? []).map((v) => ({ value: v, label: enumLabel(f, v) })),
   };
 }
@@ -837,6 +865,90 @@ export function formControls(e: Entry, row: Row | undefined, create: boolean): r
  */
 export function commandControls(c: Command): readonly Control[] {
   return c.fields.map((f) => control(f, f.default ?? "", false));
+}
+
+/**
+ * FormBlock is one group of a form: the declared key (or "" for the group that
+ * names none), the label drawn above it ("" draws no heading), and the controls
+ * in the order a person meets them.
+ */
+export interface FormBlock {
+  readonly key: string;
+  readonly label: string;
+  readonly controls: readonly Control[];
+}
+
+/**
+ * orderControls is the order inside a block: the field the record is called by,
+ * then the required fields, then the optional ones, schema order within each.
+ *
+ * `identity` is the entry's own `primary` field name, and it is passed only for
+ * the block that holds that field: a declaration says where a fact goes, so the
+ * sheet leads a block with the name of the record but never lifts a field out of
+ * the block its entry filed it in. Where an author filed the name of the record
+ * in a later block, that block leads with it — and the answer to "ask for the
+ * name first" is the catalogue's `sections`, not an override written here.
+ */
+export function orderControls(controls: readonly Control[], identity?: string): readonly Control[] {
+  const rank = (c: Control) => (c.field.name === identity ? 0 : c.required ? 1 : 2);
+  return controls
+    .map((control, at) => ({ control, at }))
+    .sort((a, b) => rank(a.control) - rank(b.control) || a.at - b.at)
+    .map(({ control }) => control);
+}
+
+/**
+ * formSections is the sheet as data — `recordSections`' shape for a form: the
+ * fields `formControls` offers, grouped as the entry declares its sections, in
+ * the order the entry declared them, each block holding its fields in the order
+ * `orderControls` gives them.
+ *
+ * A declared block that holds no control draws nothing: an empty heading over an
+ * empty card is the fault 0085 photographs. A field the entry filed nowhere lands
+ * in the final block, which is named with the `overview` word the caller passes —
+ * the same word the record calls that block — and an entry that declares no
+ * sections at all gets exactly one block that names none, because the sheet *is*
+ * the form and 0085 asks no heading on it. Which fields exist, what they hold and
+ * whether they are editable stays entirely `formControls`' answer: this groups and
+ * orders, and adds or removes nothing.
+ */
+export function formSections(
+  e: Entry,
+  row: Row | undefined,
+  create: boolean,
+  overview: string,
+): readonly FormBlock[] {
+  const controls = formControls(e, row, create);
+  const identity = primary(e)?.name;
+  const filed = (c: Control) => c.field.hints?.section;
+  const declared = e.hints?.sections ?? [];
+  const blocks: FormBlock[] = declared.flatMap((section) => {
+    const own = controls.filter((c) => filed(c) === section.key);
+    return own.length === 0
+      ? []
+      : [{ key: section.key, label: section.label, controls: orderControls(own, identity) }];
+  });
+  const rest = controls.filter((c) => !declared.some((s) => s.key === filed(c)));
+  return rest.length === 0
+    ? blocks
+    : [
+        ...blocks,
+        {
+          key: "",
+          label: declared.length === 0 ? "" : overview,
+          controls: orderControls(rest, identity),
+        },
+      ];
+}
+
+/**
+ * commandSections is a command's argument as the one block it is: no identity to
+ * lead with, because an argument is not a record's field, and no heading, because
+ * a sheet with one group is that group alone. Required first is still worth
+ * saying, so the order is the same `orderControls` the entity's own sheet uses.
+ */
+export function commandSections(c: Command): readonly FormBlock[] {
+  return [{ key: "", label: "", controls: orderControls(commandControls(c)) }];
 }
 
 /**
@@ -961,13 +1073,26 @@ export function values(
 }
 
 /**
+ * FormWords is the copy a form needs to refuse what it can refuse: the sentences
+ * arrive from the phone's own bundle, because `derive` never asks which language
+ * a person reads and a sentence written here would be a second implementation of
+ * the copy table.
+ */
+export interface FormWords {
+  /** A value whose storage is comma-joined cannot hold the separator in one item. */
+  readonly commaInValue: string;
+}
+
+/**
  * problems is what a form can refuse before the server does: a number that is
- * not one, an instant that is not one. Required and everything else are the
+ * not one, an instant that is not one, a comma-joined value that does not spell
+ * its own items. Required and everything else are the
  * server's, answered in the same shape, so a form shows both the same way.
  */
 export function problems(
   controls: readonly Control[],
   held: Readonly<Record<string, string>>,
+  words: FormWords,
 ): Readonly<Record<string, string>> {
   const out: Record<string, string> = {};
   for (const c of controls) {
@@ -977,7 +1102,11 @@ export function problems(
     if (c.kind === "number" && numberValue(raw) === undefined)
       out[c.field.name] = "is not a number";
     if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = "is not a time";
-    if (c.kind === "list" && listValues(c.field, raw) === undefined)
+    // The comma is refused on its own, ahead of the item type: a value spelled
+    // `1,2` is two integers read out of one item, and the sentence a person can
+    // act on is about the comma, not about a type nobody wrote wrong.
+    if (c.kind === "list" && valueHoldsSeparator(raw)) out[c.field.name] = words.commaInValue;
+    else if (c.kind === "list" && listValues(c.field, raw) === undefined)
       out[c.field.name] = "contains a value that does not match its item type";
   }
   return out;
