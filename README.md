@@ -212,9 +212,9 @@ nothing, which is what keeps the nightly's use of it unchanged. The two
 exceptions to per-member reading: an entry's `sections` is taken whole or not at
 all, because a block with no key or label is no block — and a field that named one
 of the blocks the entry lost is left in the overview, since a record cannot be
-grouped under a heading nobody declared; and a field both `hidden`
-and `required` stays in the form, because the person's only path to a submittable
-create is never taken away for an author's slip.
+grouped under a heading nobody declared; and a field both `hidden` and `required`
+stays in the form, because the person's only path to a submittable create is never
+taken away for an author's slip.
 
 A declared word is the author's and is used as written — never humanised,
 re-cased or re-pluralised — so `copy.ts` holds one new string, `kit.untitled`, for
@@ -230,16 +230,15 @@ the cells beside it alike, so a field its author kept for the record neither tit
 a row, is quoted under its name, nor reaches it as a column — however the entry's
 hints point at it. Its columns and the field that leads them are chosen from one
 list (`rowFields`), so they cannot disagree about the answer: an identity picked
-from the whole schema would put the value
-back through the column every row leads on, which is the web shell's rule for the
-same reason (`known(onList(…))` in `ui/resource/resource.go`). A hint that points
-where its screen may not read — `primaryField`, `previewField`, `summaryFields` or
-`statusField` naming a `hidden` field, or one of the row's three naming a `detail`
-one — names nothing and lets the default read on (a `detail` field stays the
-record's own name and the record's own state, which is what `primaryField` and
-`statusField` answer there): the reference kernel refuses that document at mount
-(`kit/rest/hints.go`,
-`namedFieldFault`), and one author's slip is not worth this app's screens.
+from the whole schema would put the value back through the column every row leads
+on, which is the web shell's rule for the same reason (`known(onList(…))` in
+`ui/resource/resource.go`). A hint that points where its screen may not read —
+`primaryField`, `previewField`, `summaryFields` or `statusField` naming a `hidden`
+field, or one of the row's three naming a `detail` one — names nothing and lets the
+default read on (a `detail` field stays the record's own name and the record's own
+state, which is what `primaryField` and `statusField` answer there): the reference
+kernel refuses that document at mount (`kit/rest/hints.go`, `namedFieldFault`), and
+one author's slip is not worth this app's screens.
 
 ## Design
 
