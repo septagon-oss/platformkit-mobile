@@ -331,8 +331,19 @@ test("joinList is the one spelling, and read back through splitList it is itself
 
 test("a value that holds the separator in one item is refused, and one that spells its items is not", () => {
   // The box's own door: text a person means as one word.
-  for (const typed of ["work, home", "work,home", "work , home", "work,,home"])
-    assert.equal(entryHoldsSeparator(typed), true, `${typed} is two items`);
+  // The comma is asked of the text, not of what splitting would leave: "alpha,"
+  // splits to one word and stores neither the empty item it asked for nor the comma.
+  for (const typed of [
+    "work, home",
+    "work,home",
+    "work , home",
+    "work,,home",
+    "alpha,",
+    ",alpha",
+    ",",
+    "alpha,,",
+  ])
+    assert.equal(entryHoldsSeparator(typed), true, `${typed} holds the separator`);
   for (const typed of ["work", " work ", "work home", ""])
     assert.equal(entryHoldsSeparator(typed), false, `${typed} is one`);
 

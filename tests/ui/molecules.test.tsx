@@ -265,6 +265,18 @@ describe("TagsField", () => {
     expect(screen.queryByRole("button", { name: /^work/ })).toBeNull();
   });
 
+  test("removing a chip while a refused word stands in the box writes no part of that word", async () => {
+    const onChange = jest.fn();
+    await inTheme(box("alpha, beta, ", onChange));
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "ga,me");
+    expect(onChange).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByRole("button", { name: "Remove beta" }));
+    // The chip goes and the refused word stays in the box: neither that word nor the
+    // prefix the box wrote before the refusal was refused is written into the value.
+    expect(onChange).toHaveBeenLastCalledWith("alpha, ");
+    expect(screen.getByTestId("tags-tags")).toHaveDisplayValue("ga,me");
+  });
+
   test("the box tells the sheet what it will not write, and tells it again when it can", async () => {
     const onRefused = jest.fn();
     await inTheme(

@@ -47,27 +47,42 @@ export function TagsField({
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
-  // What is being typed is held here and written into the value on every
-  // keystroke, so a save that never blurred the input still carries it. The
-  // chips are whatever the value holds beyond that draft, which means a record
-  // as the server has it arrives as chips and nothing half-typed.
+  // What is being typed is held here and shown as it is typed; the value carries
+  // it whenever it could be stored, so a save that never blurred the input still
+  // has it. `pending` remembers the word the box last *wrote* into the value, and
+  // the chips are the value beyond that word — not beyond what stands in the box,
+  // because a refused keystroke changes the box and writes nothing: strip the draft
+  // instead and the last accepted prefix ("be" of the half-typed "be,ta") counts as
+  // a chip nobody added, with the corrected word landing beside it. Stripping what
+  // was written means a record as the server has it still arrives as chips and
+  // nothing half-typed, and a refusal still writes nothing at all.
   const [draft, setDraft] = useState("");
+  const [pending, setPending] = useState("");
   // The one refusal this control can answer for itself: it names the text in the
   // box, it is corrected by the person who typed it, and a keystroke clears it.
   const [refused, setRefused] = useState(false);
   const fault = refused ? copy.commaInValue : "";
-  const base = value.endsWith(draft) ? value.slice(0, value.length - draft.length) : value;
+  const base = value.endsWith(pending) ? value.slice(0, value.length - pending.length) : value;
   const tags = splitList(base);
   const tagKey = label.toLowerCase();
 
-  const write = (next: readonly string[], pending: string) => {
-    setDraft(pending);
-    onChange(next.length > 0 ? `${next.join(", ")}, ${pending}` : pending);
+  /** store writes the chips the sheet is to hold, with `tail` as the word still being typed. */
+  const store = (next: readonly string[], tail: string) => {
+    setPending(tail);
+    onChange(next.length > 0 ? `${next.join(", ")}, ${tail}` : tail);
   };
 
-  // The draft is shown whatever it holds; only a word that could be stored is
-  // written. Refusing is one decision, told to the sheet once when it starts and
-  // once when the person's next keystroke ends it.
+  /** A committed word leaves the box empty: its chip carries it from here on. */
+  const committed = (next: readonly string[]) => {
+    setDraft("");
+    store(next, "");
+  };
+
+  // The box shows whatever was typed; only a word that could be stored is written.
+  // Refusing is one decision, told to the sheet once when it starts and once when
+  // the person's next keystroke ends it, and it writes nothing: the tail the box
+  // left in the value stands until the next accepted keystroke overwrites it, and
+  // the sheet refuses the save for as long as the refused word is on screen.
   const typing = (typed: string) => {
     const holds = entryHoldsSeparator(typed);
     setDraft(typed);
@@ -75,7 +90,7 @@ export function TagsField({
       setRefused(holds);
       onRefused?.(holds);
     }
-    if (!holds) write(tags, typed);
+    if (!holds) store(tags, typed);
   };
 
   const commit = () => {
@@ -94,10 +109,10 @@ export function TagsField({
     // case, because "Work" and "work" are one tag spelled twice; the chip keeps
     // the spelling it was first given.
     if (tags.some((tag) => tag.toLowerCase() === entry.toLowerCase())) {
-      write(tags, "");
+      committed(tags);
       return;
     }
-    write([...tags, entry], "");
+    committed([...tags, entry]);
   };
 
   return (
@@ -109,10 +124,13 @@ export function TagsField({
               <Text role="label">{tag}</Text>
               {disabled ? null : (
                 <Pressable
+                  // The word being typed keeps its place in the value — the tail it
+                  // was written as, which is the box's own text whenever the box will
+                  // write it, and the last word it accepted whenever it will not.
                   onPress={() =>
-                    write(
+                    store(
                       tags.filter((x) => x !== tag),
-                      draft,
+                      pending,
                     )
                   }
                   accessibilityRole="button"

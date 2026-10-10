@@ -87,14 +87,28 @@ export function useSingleton(entry: Entry) {
     refusing.current = next;
   }, []);
 
-  const edit = useCallback(() => {
+  // A draft that is thrown away holds no refusal either. The box that refused clears
+  // its own report when the person corrects the word, but this screen *unmounts* the
+  // form on cancel, so that correction can never arrive: a report left standing here
+  // would outlive the draft it was about and silently block the next valid save.
+  // The sheet's own callbacks are stable (the navigator's options are rebuilt on every
+  // render), hence the discard written once and called by both transitions.
+  const discardDraft = () => {
     setHeld({});
     setErrors({});
     setDetail("");
+    refusing.current = {};
+  };
+
+  const edit = useCallback(() => {
+    discardDraft();
     setEditing(true);
   }, []);
 
-  const cancel = useCallback(() => setEditing(false), []);
+  const cancel = useCallback(() => {
+    discardDraft();
+    setEditing(false);
+  }, []);
 
   const save = useCallback(async () => {
     // Edit is drawn from doors(entry); what this rechecks for a sheet reached

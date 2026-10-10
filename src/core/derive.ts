@@ -198,8 +198,13 @@ export const joinList = (items: readonly string[]): string =>
  * entryHoldsSeparator asks whether text a person means as ONE value holds the
  * separator. Storage is comma-joined, so one item can never carry a comma: the
  * tag box refuses the entry rather than writing one chip as two.
+ *
+ * The question is asked of the text, not of what splitting would leave. "alpha,"
+ * splits to one word and stores none of what it spells — it asks for a second,
+ * empty item and loses the comma that asked for it — so a comma *anywhere* in the
+ * entry is the refusal, at either end or on its own.
  */
-export const entryHoldsSeparator = (entry: string): boolean => splitList(entry).length > 1;
+export const entryHoldsSeparator = (entry: string): boolean => entry.includes(",");
 
 /**
  * valueHoldsSeparator asks whether a whole held value spells its own items.
