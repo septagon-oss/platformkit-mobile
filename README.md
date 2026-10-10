@@ -210,7 +210,9 @@ the rest of the same hint survives, and the defect names itself once through the
 each distinct (path, reason) per connection. `parseCatalog` without a notice says
 nothing, which is what keeps the nightly's use of it unchanged. The two
 exceptions to per-member reading: an entry's `sections` is taken whole or not at
-all, because a block with no key or label is no block; and a field both `hidden`
+all, because a block with no key or label is no block — and a field that named one
+of the blocks the entry lost is left in the overview, since a record cannot be
+grouped under a heading nobody declared; and a field both `hidden`
 and `required` stays in the form, because the person's only path to a submittable
 create is never taken away for an author's slip.
 

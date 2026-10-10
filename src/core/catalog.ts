@@ -303,13 +303,14 @@ function hintNames(
  *
  * `named` is this entry's own field names: a pointer into the schema is resolved
  * here, where the schema is in hand, so a hint that names no field of this entry
- * is a fallback rather than a blank screen. `sections` is taken whole or not at
- * all, because a block with no key or no label is no block.
+ * is a fallback rather than a blank screen. `sections` is what `readSections`
+ * kept of the blocks the entry declares, judged before the fields that name them.
  */
 function hintEntry(
   raw: unknown,
   at: string,
   named: readonly string[],
+  sections: readonly Section[],
   notice: HintNotice,
 ): EntryHints | undefined {
   if (raw === undefined || raw === null) return undefined;
@@ -326,33 +327,6 @@ function hintEntry(
     }
     return word;
   };
-  const sections = ((): EntryHints["sections"] => {
-    const value = raw.sections;
-    if (value === undefined) return undefined;
-    if (!Array.isArray(value)) {
-      notice(`${at}.sections`, "is not a list of blocks: the record stays flat");
-      return undefined;
-    }
-    const blocks: { key: string; label: string }[] = [];
-    for (const [i, section] of value.entries()) {
-      if (
-        !isRecord(section) ||
-        typeof section.key !== "string" ||
-        section.key === "" ||
-        typeof section.label !== "string" ||
-        section.label === ""
-      ) {
-        notice(`${at}.sections`, "holds a block with no key and label: the record stays flat");
-        return undefined;
-      }
-      if (blocks.some((b) => b.key === (section.key as string))) {
-        notice(`${at}.sections[${i}]`, "repeats a block: the first declaration is used");
-        continue;
-      }
-      blocks.push({ key: section.key, label: section.label });
-    }
-    return blocks.length === 0 ? undefined : blocks;
-  })();
   // Each name is checked against this entry's own fields where the list was read,
   // so a pointer at a field that does not exist costs one cell and says so, rather
   // than blanking the row or drawing a column the schema has never heard of. A
@@ -382,7 +356,7 @@ function hintEntry(
     ...(previewField === undefined ? {} : { previewField }),
     ...(statusField === undefined ? {} : { statusField }),
     ...(summary === undefined ? {} : { summaryFields: summary }),
-    ...(sections === undefined ? {} : { sections }),
+    ...(sections.length === 0 ? {} : { sections }),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;
 }
@@ -391,15 +365,16 @@ function hintEntry(
  * hintField reads what one field says about how it is drawn.
  *
  * `values` is the field's own enum: a label or tone keyed on a value the enum
- * does not hold is dropped on its own, the sibling keys surviving. `sections` are
- * the owning entry's declared blocks — a field cannot invent a block no author
- * declared, because the record would then hold a heading nobody named.
+ * does not hold is dropped on its own, the sibling keys surviving. `blocks` are the
+ * keys of the blocks the owning entry itself kept — a field cannot invent a block no
+ * author declared, and cannot name one the entry lost on the way, because the record
+ * would then hold a heading nobody named.
  */
 function hintField(
   raw: unknown,
   at: string,
   values: readonly string[],
-  sections: readonly string[],
+  blocks: readonly string[],
   notice: HintNotice,
 ): FieldHints | undefined {
   if (raw === undefined || raw === null) return undefined;
@@ -424,7 +399,7 @@ function hintField(
   };
   const visibility = vocabulary("visibility", FIELD_VISIBILITIES, "the field is shown");
   const declaredSection = hintWord(raw, "section", at, "a block name", notice);
-  if (declaredSection !== undefined && !sections.includes(declaredSection))
+  if (declaredSection !== undefined && !blocks.includes(declaredSection))
     notice(`${at}.section`, "names no declared block: the field stays in the overview");
   const keyed = <T>(
     member: string,
@@ -463,7 +438,7 @@ function hintField(
   const hints: FieldHints = {
     ...(label === undefined ? {} : { label }),
     ...(help === undefined ? {} : { help }),
-    ...(declaredSection === undefined || !sections.includes(declaredSection)
+    ...(declaredSection === undefined || !blocks.includes(declaredSection)
       ? {}
       : { section: declaredSection }),
     // A declared `shown` is stored: unlike the other zero values it is not the
@@ -507,9 +482,9 @@ function rendererRef(v: unknown): RendererRef | undefined {
 type ParsedEntry = NonNullable<z.output<typeof catalogSchema>["resources"]>[number];
 type ParsedField = z.output<typeof looseField>;
 
-function field(v: ParsedField, at: string, sections: readonly string[], notice: HintNotice): Field {
+function field(v: ParsedField, at: string, blocks: readonly string[], notice: HintNotice): Field {
   const { type, elem, enum: values, presentation, ...rest } = v;
-  const hints = hintField(presentation, `${at}.presentation`, values ?? [], sections, notice);
+  const hints = hintField(presentation, `${at}.presentation`, values ?? [], blocks, notice);
   // The one place the reading axis and the writing axis genuinely collide. A
   // hidden field is plumbing and leaves the form; a *required* one is the
   // person's only path to a create the server will accept, and that path is
@@ -528,29 +503,65 @@ function field(v: ParsedField, at: string, sections: readonly string[], notice: 
   };
 }
 
+/** One block of a record, as its entry declares it. */
+type Section = NonNullable<EntryHints["sections"]>[number];
+
 /**
- * declaredSections lists the blocks an entry declares, without judging them.
+ * readSections is the entry's declared blocks, judged once for both readers.
  *
- * A field names its block, so the blocks have to be known before the fields are
- * read; `hintEntry` then reads them as a whole and refuses a malformed one, which
- * is the same answer both readers give when the list is empty.
+ * A field names its block, so the blocks have to be read — and judged — before the
+ * fields are: `sections` is taken whole or not at all, because a block with no key
+ * or no label is no block, and a field left pointing at a block the entry lost
+ * would group a fact under a heading no author ever declared. Reading them here is
+ * what makes "is this block declared?" one answer, given by `hintField` and by the
+ * record's own heading list alike. Silence about a bag that is not a bag at all is
+ * `hintEntry`'s: it says once that no hint was read.
  */
-function declaredSections(presentation: unknown): readonly string[] {
-  if (!isRecord(presentation) || !Array.isArray(presentation.sections)) return [];
-  return presentation.sections.flatMap((section) =>
-    isRecord(section) && typeof section.key === "string" && section.key !== "" ? [section.key] : [],
-  );
+function readSections(presentation: unknown, at: string, notice: HintNotice): readonly Section[] {
+  if (!isRecord(presentation) || presentation.sections === undefined) return [];
+  const value = presentation.sections;
+  if (!Array.isArray(value)) {
+    notice(`${at}.sections`, "is not a list of blocks: the record stays flat");
+    return [];
+  }
+  const blocks: Section[] = [];
+  for (const [i, section] of value.entries()) {
+    if (
+      !isRecord(section) ||
+      typeof section.key !== "string" ||
+      section.key === "" ||
+      typeof section.label !== "string" ||
+      section.label === ""
+    ) {
+      notice(`${at}.sections`, "holds a block with no key and label: the record stays flat");
+      return [];
+    }
+    if (blocks.some((b) => b.key === (section.key as string))) {
+      notice(`${at}.sections[${i}]`, "repeats a block: the first declaration is used");
+      continue;
+    }
+    blocks.push({ key: section.key, label: section.label });
+  }
+  return blocks;
 }
 
 function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
   const { fields, commands, immutable, operations, renderer, singleton, presentation, ...rest } = v;
   const pack = rendererRef(renderer);
-  const blocks = declaredSections(presentation);
-  const fieldsRead = (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`, blocks, notice));
+  const blocks = readSections(presentation, `${at}.presentation`, notice);
+  const fieldsRead = (fields ?? []).map((f, i) =>
+    field(
+      f,
+      `${at}.fields[${i}]`,
+      blocks.map((b) => b.key),
+      notice,
+    ),
+  );
   const hints = hintEntry(
     presentation,
     `${at}.presentation`,
     fieldsRead.map((f) => f.name),
+    blocks,
     notice,
   );
   return {

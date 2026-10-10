@@ -310,6 +310,64 @@ test("every malformed hint falls back and names itself once", () => {
 const record = (v: unknown): Record<string, unknown> =>
   typeof v === "object" && v !== null ? (v as Record<string, unknown>) : {};
 
+test("a field names a block the entry kept, not one it lost", () => {
+  const titled = (e: Record<string, unknown>) => {
+    (e.fields as Record<string, unknown>[]).find((f) => f.name === "title")!.presentation = {
+      section: "main",
+    };
+  };
+  const kept = served((e) => {
+    e.presentation = { sections: [{ key: "main", label: "Main" }] };
+    titled(e);
+  });
+  assert.equal(kept.entry.hints?.sections?.[0]?.key, "main");
+  assert.equal(
+    kept.entry.fields[3]?.hints?.section,
+    "main",
+    "the block the entry has is the block the field is in",
+  );
+  assert.deepEqual(kept.lines, [], "a declared pair says nothing");
+
+  // `sections` is taken whole or not at all, so one block with no label leaves the
+  // record flat — and a field left naming a block that no longer exists would group
+  // a fact under a heading nobody declared. Both readers now ask the same question.
+  const flat = served((e) => {
+    e.presentation = { sections: [{ key: "main", label: "Main" }, { key: "extra" }] };
+    titled(e);
+  });
+  assert.equal("sections" in (flat.entry.hints ?? {}), false, "one bad block costs the whole list");
+  assert.equal(flat.entry.fields[3]?.hints?.section, undefined, "so no field keeps a pointer");
+  assert.ok(
+    flat.lines.includes(
+      "resources[0].presentation.sections holds a block with no key and label: the record stays flat",
+    ),
+    `refused by block: ${JSON.stringify(flat.lines)}`,
+  );
+  assert.ok(
+    flat.lines.includes(
+      "resources[0].fields[3].presentation.section names no declared block: the field stays in the overview",
+    ),
+    `and by field: ${JSON.stringify(flat.lines)}`,
+  );
+
+  // A block kept once and repeated twice is one block, and the field is in it.
+  const repeated = served((e) => {
+    e.presentation = {
+      sections: [
+        { key: "main", label: "Main" },
+        { key: "main", label: "Again" },
+      ],
+    };
+    titled(e);
+  });
+  assert.deepEqual(
+    repeated.entry.hints?.sections,
+    [{ key: "main", label: "Main" }],
+    "the first declaration is used",
+  );
+  assert.equal(repeated.entry.fields[3]?.hints?.section, "main");
+});
+
 test("no hint changes a request", () => {
   const plain = parseCatalog(golden()).resources[0]!;
   const { entry } = withEntryHints({
