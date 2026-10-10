@@ -5,13 +5,26 @@
 // identical line coverage is not identical assertions; and the count of files no runner reaches may not rise,
 // so a test added to this repository cannot be filed where nothing runs it. The fourth rule is where each
 // layer then runs: the push tier's scope is the transitive import closure of the diff, the merge tier is
-// `npm run check` whole, and the nightly tier publishes what the suite cost.
+// `npm run check` whole, and the nightly tier publishes what the suite cost. The fifth rule is that every
+// measured number came from a run: a measurement reads the columns its runner prints, refuses a report it
+// read no counts from and a run in which a case failed, and keeps the per-test record one run cannot take.
+// The sixth is that the table is written in one order, so regenerating over an unchanged checkout is the
+// identity.
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test, { type TestContext } from "node:test";
-import { checkInventory, TIERS, totalsOf, sortRows, type Row } from "../scripts/inventory";
+import {
+  checkInventory,
+  coverageOf,
+  jestRow,
+  measureNodeRow,
+  TIERS,
+  totalsOf,
+  sortRows,
+  type Row,
+} from "../scripts/inventory";
 import { reachedBy, suiteFiles } from "../scripts/tiers";
 
 const RULE = "one rule of one unit, named before it imports";
@@ -98,8 +111,8 @@ test("a test file the table does not answer for is refused", (t) => {
 
 test("a row whose file is gone is refused, not quietly dropped", (t) => {
   const root = tree(t, { "tests/keeps.test.ts": SUITE }, [
-    row("tests/keeps.test.ts"),
     row("tests/deleted.test.ts"),
+    row("tests/keeps.test.ts"),
   ]);
   assert.deepEqual(checkInventory(root), [
     "tests/deleted.test.ts: the row names a file this checkout does not hold",
@@ -308,4 +321,147 @@ test("the tiers are wired where they run and the merge tier is the required chec
   );
   const nightly = readFileSync(".gitea/workflows/nightly.yml", "utf8");
   assert.match(nightly, /npm run report:tests/, "the nightly publishes what the suite costs");
+});
+
+/**
+ * measureRoot is a checkout a measurement can run in: the loader `npm test` uses, reached by symlink rather
+ * than by a second install, and one derivation with a test over it, so the run has a production file to load.
+ */
+const measureRoot = (t: TestContext): string => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "pk-measure-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const write = (at: string, text: string) => {
+    const file = path.join(root, at);
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, text);
+  };
+  symlinkSync(path.resolve("node_modules"), path.join(root, "node_modules"), "dir");
+  write("src/core/state.ts", "export const reduce = 0;\nexport const step = 1;\n");
+  write(
+    "tests/derive.test.ts",
+    `// ${RULE}\nimport test from "node:test";\nimport { reduce, step } from "../src/core/state";\n` +
+      `test("the unit answers the case", () => { if (reduce + step !== 1) throw new Error("sum"); });\n` +
+      `test("the derivation is read twice", () => { if (step * 2 !== 2) throw new Error("twice"); });\n`,
+  );
+  return root;
+};
+
+test("a measurement reads the coverage columns the runner right-aligns, and refuses a report it read nothing from", (t) => {
+  const root = measureRoot(t);
+  const measured = measureNodeRow(root, "tests/derive.test.ts", row("tests/derive.test.ts"));
+  assert.equal(measured.cases, 2);
+  // The report prints ` inventory.ts |  62.34 |    79.00 |` — a number padded to its column. A parse that
+  // asked for one space after the pipe matched none of them and wrote `loaded: 0` for a file that loaded one.
+  assert.equal(measured.loaded, 1, "the one production file the run loaded is counted");
+  assert.ok((measured.coveredProdLines as number) > 0, "a loaded file covers lines");
+  const block = (rows: string[]) =>
+    [
+      "ℹ start of coverage report",
+      "ℹ file      | line % | branch % | funcs % | uncovered lines",
+      ...rows,
+      "ℹ all files | 100.00 |   100.00 |  100.00 | ",
+      "ℹ end of coverage report",
+    ].join("\n");
+  // A run that loaded nothing prints no file row at all: that answer is `loaded: 0`, not a refusal.
+  assert.equal(coverageOf(root, block([])).size, 0);
+  // A run that printed a row this unit read no counts from is a broken parse, not an empty measurement.
+  assert.throws(
+    () =>
+      coverageOf(
+        root,
+        block([
+          "ℹ  gone.ts     |  62.34 |    79.00 |   63.79 | 1-2",
+          "ℹ src          |        |          |         | ",
+        ]),
+      ),
+    /read no counts from/,
+  );
+});
+
+test("a component suite is measured by its own runner, and an exclusive run survives the measurement", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "pk-jest-row-"));
+  const at = (f: string) => path.join(root, f);
+  const held = row("tests/ui/chosen.test.tsx", {
+    runner: "jest",
+    tests: [
+      { title: "the chip stands chosen", ms: 9, measured: true, isolatedMs: 40, onlyProdLines: 3 },
+      { title: "the chip leaves chosen", ms: 9, measured: true, isolatedMs: 41, onlyProdLines: 0 },
+    ],
+  });
+  const suite = jestRow(
+    root,
+    "tests/ui/chosen.test.tsx",
+    held,
+    {
+      success: true,
+      testResults: [
+        {
+          assertionResults: [
+            { title: "  the chip stands chosen  ", status: "passed", duration: 12 },
+            { title: "the chip leaves chosen", status: "passed", duration: 0.5 },
+          ],
+        },
+      ],
+    },
+    {
+      [at("src/ui/atoms/Chip.tsx")]: { path: at("src/ui/atoms/Chip.tsx"), s: { 0: 1, 1: 0, 2: 4 } },
+      [at("tests/fakes/wire.ts")]: { path: at("tests/fakes/wire.ts"), s: { 0: 7 } },
+    },
+    1234,
+  );
+  assert.equal(suite.cases, 2);
+  assert.deepEqual(suite.titles, ["the chip stands chosen", "the chip leaves chosen"]);
+  assert.equal(suite.ms, 1234);
+  assert.equal(suite.testsMs, 12.5);
+  assert.equal(suite.loaded, 2, "both files the run instrumented are counted");
+  assert.equal(suite.coveredProdLines, 2, "only the src/ file's statements reached at least once");
+  const carried = (suite.tests as Record<string, unknown>[])[0]!;
+  assert.equal(carried.isolatedMs, 40, "a per-test exclusive run is the record of its own pass");
+  assert.equal(carried.measured, false, "and this run says plainly it was not that pass");
+  // A red run measures nothing, and a run that named no case is not a measurement either.
+  assert.throws(
+    () => jestRow(root, "tests/ui/chosen.test.tsx", held, { success: false }, {}, 1),
+    /measure a red run/,
+  );
+  assert.throws(
+    () =>
+      jestRow(root, "tests/ui/chosen.test.tsx", held, { success: true, testResults: [] }, {}, 1),
+    /reported no case/,
+  );
+});
+
+test("a file named like a test where no runner looks is discovered, and a row for it is refused", (t) => {
+  // node's glob is one folder deep and jest takes .test.tsx: a `.test.ts` under tests/ui/ runs nowhere, and
+  // 0088 keeps that as a count the table may not let rise rather than a file nobody looks at.
+  const files = { "tests/keeps.test.ts": SUITE, "tests/ui/misplaced.test.ts": SUITE };
+  const unfiled = tree(t, files, [row("tests/keeps.test.ts")]);
+  assert.deepEqual(checkInventory(unfiled), [
+    "tests/ui/misplaced.test.ts: no row — a test file the table does not answer for is a test nobody inventoried",
+  ]);
+  const filed = tree(t, files, [
+    row("tests/ui/misplaced.test.ts", {
+      runner: "browser",
+      needsEnv: [],
+      reach:
+        "no runner: node's glob is tests/*.test.ts and jest's testMatch is tests/**/*.test.tsx, so a file named like a test in a subfolder of tests/ is reached by neither",
+      runsNowhere: true,
+    }),
+    row("tests/keeps.test.ts"),
+  ]);
+  assert.deepEqual(checkInventory(filed), [
+    "1 files match no runner, the baseline is 0: a file added to the suite has to be reached by a tier, not filed (0088 rule 5)",
+  ]);
+});
+
+test("the table is written in one order, so regenerating over an unchanged checkout moves nothing", (t) => {
+  const rows = [row("tests/b.test.ts"), row("tests/a.test.ts")];
+  const root = tree(t, { "tests/a.test.ts": SUITE, "tests/b.test.ts": SUITE }, rows);
+  assert.deepEqual(
+    sortRows(rows).map((r) => r.file),
+    ["tests/a.test.ts", "tests/b.test.ts"],
+    "one order: layer, then runner, then file",
+  );
+  assert.deepEqual(checkInventory(root), [
+    "tests/inventory.json: rows are not in the order --sync writes them — tests/b.test.ts belongs at tests/a.test.ts",
+  ]);
 });

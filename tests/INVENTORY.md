@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `b931dca75` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `d069a96b1` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -10,6 +10,7 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | column | command | what the number is |
 |---|---|---|
 | runner | `node --import tsx --test tests/*.test.ts` / `jest` (the two halves of `npm test`) / `scripts/e2e/run.sh` | which runner executes the file today, read from its own glob |
+| files the run loaded (`loaded`) | `npm run inventory -- --measure <file>`, which is the node or jest command above with coverage on | files that run's coverage pass instrumented: node lists the `src/`+`app/`+`scripts/` files it loaded, jest the files istanbul transformed for that one suite. Two sets, never added |
 | wall ms | the same command run for that one file | process wall time, startup included; it decides what a tier costs |
 | tests ms | sum of the runner's own per-test durations | the work the file's tests do; this is the column a slowest-tests report reads |
 | only-it-covers | `--experimental-test-coverage` per file (node, whose percentage is over the whole source file) / `jest --coverage --coverageReporters=json` per suite (istanbul statement lines) | production lines this file's run covers that no other run of the same runner covers |
@@ -22,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 26 | 168 | 46.0 s | 63 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 166 | 818 | 41.4 s | 1351 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 26 | 172 | 46.3 s | 63 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 167 | 819 | 41.6 s | 1352 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 41 | 167 | 19.2 s | 854 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 55 | 47 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 288
+* keep: 289
 * merge: 0
 * delete: 0
 
@@ -45,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 288 — 128 `tests/*.test.ts` (node), 105 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 12 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1153; cases in files no runner reaches: 35
-* isolated wall time: contract 63 s, behaviour 1351 s, composition 854 s, journey 0 s
+* files inventoried: 289 — 129 `tests/*.test.ts` (node), 105 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 12 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1158; cases in files no runner reaches: 35
+* isolated wall time: contract 63 s, behaviour 1352 s, composition 854 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -70,12 +71,17 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## Which tests the push tier runs
 
-`npm run check` stays the required check and the merge tier: it runs both suites undiscovered-scoped, and
+`npm run check` stays the required check and the merge tier: it runs both suites whole, and
 `tests/component-suite-gate.test.ts` refuses a `check`/`test` script that stops running either. The push
-tier runs the contract steps, then the behaviour and composition files whose `loaded` column names a file
-the diff touches — `npm run test:push --diff <base>`, which reads this table and prints the files it chose.
-It can only ever add work relative to `check`, never replace it: a selection that named no file is a
-refusal, and the merge tier runs the whole suite whatever the push tier ran.
+tier runs the contract steps, then the suites the change reaches — `npm run test:scope <base> [--run]`,
+which `npm run test:push` wraps with `${BASE_REF:-origin/main}` as the base. The scope is the transitive
+**import** closure of the changed files, walked out of the suites' own `from`/`require` statements by
+`scripts/tiers.ts`; this table's `loaded` column is a count of what one run loaded, not a list of paths,
+so it is never the scope. The step adds work and never replaces it: a changed file no suite imports is
+named on stderr and changes no exit status, because every `app/` route is in that set (a suite mounts a
+screen through `tests/fakes/router`, and a flow claims the route) and a change the merge tier accepts is
+not refused by the tier whose whole job is to run less of the suite first. The merge tier runs the whole
+suite whatever the push tier selected, and a selection that named no file says so and exits zero.
 
 ## Rows
 
@@ -92,7 +98,7 @@ refusal, and the merge tier runs the whole suite whatever the push tier ran.
 | tests/catalog-golden-contract.test.ts | node | contract | 3 | 1288 | 65.8 | 0 | 0 of 3 | — | 0 | keep | The catalogue goldens copied from the kernel are answers the pinned HTTP document must accept: the shell's own catalog read and the strict generated appResourc… |
 | tests/catalog-operation-contract.test.ts | node | contract | 2 | 1255 | 52.1 | 0 | 0 of 2 | — | 0 | keep | The bound catalog operation must honor its generated return type even when the shell's compatibility adapter accepts an unstamped legacy catalog. |
 | tests/catalog.test.ts | node | contract | 26 | 1102 | 354.4 | 9 | 5 of 26 | — | 0 | keep | (no first comment; first test title) the golden catalog parses |
-| tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts | node | contract | 11 | 502 | 73.6 |  | not measured | — | 0 | keep | The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches h… |
+| tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts | node | contract | 15 | 620 | 303.6 |  | not measured | — | 0 | keep | The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches h… |
 | tests/fingerprint.test.ts | node | contract | 3 | 573 | 2.1 | 0 | 0 of 3 | scripts/fingerprint.ts | 0 | keep | The hook resets after EOF, even when a caller reads the same source twice. |
 | tests/kernel-main-bound.test.ts | node | contract | 3 | 1969 | 1289.7 | 0 | 0 of 3 | — | 0 | keep | These cases hold the nightly's bound to what `startBound` says it is: a timer the process keeps. A process whose only pending work is the bound must stay alive… |
 | tests/kernel-main-budget.test.ts | node | contract | 2 | 1142 | 485.7 | 0 | 1 of 2 | — | 0 | keep | The command refuses an unrepresentable timer budget before reading the forge, while both ends of the supported interval remain usable configuration. |
@@ -277,6 +283,7 @@ refusal, and the merge tier runs the whole suite whatever the push tier ran.
 | tests/test-title-grammar.test.ts | node | behaviour | 1 | 269 | 11.8 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) test titles are named for behavior instead of the task that wrote them |
 | tests/the-delete-warning-a-journey-reads-takes-the-drawn-sentence-whole.test.ts | node | behaviour | 1 | 303 | 3.7 | 0 | 0 of 1 | — | 0 | keep | Maestro reads an assertVisible text as regex source and matches it against the whole of an element's text, the same reading that takes the delete answer's tapO… |
 | tests/the-delete-warning-is-read-where-the-question-shows-it.test.ts | node | behaviour | 1 | 263 | 2.8 | 0 | 0 of 1 | — | 0 | keep | The delete warning is the question's words: `kit.deleteWarning` is what `useResourceDetail.remove()` passes to `confirm` as the dialog's message, and no screen… |
+| tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts | node | behaviour | 1 | 521 | 232 |  | not measured | — | 0 | keep | The push tier is a faster first answer, never a second gate: `npm run check` is the required check, and the scope step only chooses which of its files to run f… |
 | tests/viewer-lost-selection.test.ts | node | behaviour | 1 | 765 | 9.5 | 0 | 0 of 1 | — | 0 | keep | The viewer shows the image a person opened, or none. An item removed from the list or newly marked decorative clears the selection with its own refusal instead… |
 | tests/viewer-snapshot-isolation.test.ts | node | behaviour | 1 | 742 | 5.3 | 0 | 0 of 1 | — | 0 | keep | Each viewer model belongs to the input it came from: a later caller edit or a later withdrawal cannot reach into a model already derived, so a screen holding a… |
 | tests/visibility-reaches-the-default-primary-field.test.ts | node | behaviour | 2 | 966 | 10 | 0 | 0 of 2 | — | 0 | keep | A declared visibility reaches the default primary chain. The kernel pins this for the web shell (`ui/resource/primary_visibility_test.go`, TestListVisibilityAl… |

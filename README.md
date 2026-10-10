@@ -1010,7 +1010,13 @@ every id one of them names is a testID a component sets, every route screen unde
 `app/` is named by some flow's `# screen:` header, every flow names the screen it
 proves, and every text selector is spelled as the regex source Maestro compiles it —
 between slashes the delimiters are two characters the element's own text would have to
-carry, so such a journey taps nothing and is refused where the words are written) and
+carry, so such a journey taps nothing and is refused where the words are written),
+`check:inventory` (the suite's own record in `tests/inventory.json` answers for this
+checkout: a reached test file with no row, a row whose file is gone, a row whose
+layer, tier, reach or rule the file no longer answers to, or a rise in the count of
+review-named files or of files no runner reaches — see *Which tests run where*
+below), `check:publish` (the manifest names a package the registry can hold and the
+changelog carries the entry this version's release is documented by) and
 `check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the
@@ -1114,14 +1120,21 @@ row whose layer, tier, reach or rule the file no longer answers to, a `merge` or
 the count of review-named files or of files no runner reaches. It never decides
 whether a file runs — that is its runner's glob alone — so a wrong row cannot silence
 a test. The verdicts are a proposal: root ratifies the table before any prune commit,
-and no prune lands in this change.
+and no prune lands in this change. The layer is read from what a file **imports**, so
+a test that drives a tool by spawning it (`scripts/tiers.ts` under `tsx`, say) is
+filed by its own imports — behaviour — whatever its subject is; a row that means
+otherwise carries a `layerReason` and the gate takes the override.
 
 The tiers build on that table and add work rather than replacing it.
 `npm run test:contracts` is the contract tier — one process each for the pinned
 documents, the generated client, the published surface, the flows and the inventory.
 `npm run test:scope -- <base> --run` is the push tier's scope: the test files whose
 transitive imports reach a file the diff touches, computed from the suites' own import
-statements, and it names any changed `src/` or `app/` file no suite imports at all.
+statements. It names any changed `src/` or `app/` file no suite imports at all and
+exits zero for it: every route under `app/` is in that set, because a suite mounts a
+screen through `tests/fakes/router` and a flow claims the route itself, so a scope
+that refused would turn away an ordinary change to the home screen before the required
+check had read it. A name belongs to the scope; a refusal belongs to `npm run check`.
 `npm run test:merge` is `npm run check` under the other tier's name, and it is what
 every push and every pull request still runs whole. `.gitea/workflows/nightly.yml`
 runs `npm run report:tests`, which publishes the slowest files, the slowest tests and
@@ -1146,10 +1159,13 @@ everything today; and `tests/INVENTORY.md`, `tests/inventory.json` and
 `tests/duplicate-candidates.md`, which are the table root ratifies.
 **Made reusable** — the inventory's row shape and its `--sync`/`--measure` commands,
 so the next task that adds a test adds a row in the same commit and CI refuses the
-one that does not; `reachedBy` as a diff-to-tests lookup any later gate can call
+one that does not; `--measure` runs the file's own runner — node or jest — so a
+component suite costs one command rather than a hand-typed case list; `reachedBy` as a diff-to-tests lookup any later gate can call
 instead of re-deriving one; `baseline.unreachable`, which turns "this file runs
 nowhere" from a sentence in a report into a refusal; and `e2e/flows/session-restored.yaml`
-as the pattern for a journey whose assertions are only testIDs and copy-table words.
+as the pattern for a journey whose assertions are only testIDs and words the screen it
+names actually draws (the sign-out journeys assert the `Sign out` label, which is
+`src/screens/Home.tsx`'s own literal rather than a word of `src/core/copy.ts`).
 
 ### Run the device journeys
 

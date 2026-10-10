@@ -2,7 +2,9 @@
 // which test files does a diff reach (the push tier's scope), and which tests cost the most (the nightly
 // tier's slowest-tests and flake reports). It reads the suite's own imports and tests/inventory.json, and
 // decides nothing about whether a file runs: `npm run check` remains the required check and the merge tier,
-// and it always runs both suites whatever this prints.
+// and it always runs both suites whatever this prints. So the scope's exit status carries only what it
+// could not do (no base revision, a selected suite that failed) — never its opinion about coverage. See
+// `--diff` below for why a file no suite imports is named on stderr and refused by nothing.
 //
 // Entered as `npm run test:scope --diff <base> [--run]` and `npm run report:tests`.
 import { existsSync, readFileSync, readdirSync, mkdirSync, statSync, writeFileSync } from "node:fs";
@@ -107,7 +109,12 @@ export interface Scope {
   untested: string[];
 }
 
-/** reachedBy names the test files a set of changed files reaches, and the production files none of them does. */
+/**
+ * reachedBy names the test files a set of changed files reaches, and the production files none of them does.
+ * `untested` is a hole in the suite's *imports*, not a hole in what runs: every `app/` route sits in it,
+ * because a suite mounts a screen through `tests/fakes/router` rather than through the route file, and a
+ * journey claims each of those routes. Nothing may decide a change on this list.
+ */
 export function reachedBy(root: string, changed: string[]): Scope {
   const map = importers(root);
   const node = new Set<string>();
@@ -203,9 +210,15 @@ if (process.argv[1]?.endsWith("tiers.ts")) {
       `push tier: ${changed.length} changed files reach ${scope.node.length} node files and ${scope.jest.length} component suites`,
     );
     for (const f of [...scope.node, ...scope.jest]) console.log(`  ${f}`);
+    // The hole is named and the step exits zero. Sixteen production files are reached by no import — every
+    // route under app/ among them, since a suite mounts a screen through tests/fakes/router and a journey
+    // claims the route itself — so refusing here would reject an ordinary change to the home screen at a step
+    // whose whole job is to run *less* of the suite first, and the merge tier would pass that same change.
+    // A name a person acts on belongs here; a refusal belongs to `npm run check`, which is the required check.
     for (const f of scope.untested)
-      console.error(`${f}: changed and no test file in the repository imports it`);
-    if (scope.untested.length > 0) process.exit(1);
+      console.error(
+        `${f}: changed and no test file imports it — a route file is claimed by a flow, a screens file by the shell; nothing decides on this line`,
+      );
     if (args.includes("--run")) runScope(root, scope);
   } else if (args[0] === "--report") {
     const json = report(readTable(root).rows);

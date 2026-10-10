@@ -276,22 +276,22 @@
  "totals": {
   "contract": {
    "files": 26,
-   "cases": 168,
-   "ms": 62804,
-   "testsMs": 46024.3,
+   "cases": 172,
+   "ms": 62922,
+   "testsMs": 46254.3,
    "runners": {
     "node": 26
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 166,
-   "cases": 818,
-   "ms": 1351324,
-   "testsMs": 41366.900000000016,
+   "files": 167,
+   "cases": 819,
+   "ms": 1351845,
+   "testsMs": 41598.900000000016,
    "runners": {
     "jest": 64,
-    "node": 102
+    "node": 103
    },
    "unreachable": 0
   },
@@ -1152,6 +1152,120 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 15,
+   "rule": "The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches has exactly one row, and the row's layer, tier, reach and rule are read back out of the file rather than remembered; a `merge` or `delete` verdict names the sibling that keeps its rule and maps every one of its assertions to the test that keeps it, because identical line coverage is not identical assertions; and the count of files no runner reaches may not rise, so a test added to this repository cannot be filed where nothing runs it. The fourth rule is where each layer then runs: the push tier's scope is the transitive import closure of the diff, the merge tier is `npm run check` whole, and the nightly tier publishes what the suite cost. The fifth rule is that every measured number came from a run: a measurement reads the columns its runner prints, refuses a report it read no counts from and a run in which a case failed, and keeps the per-test record one run cannot take. The sixth is that the table is written in one order, so regenerating over an unchanged checkout is the identity.",
+   "ruleSource": "first comment",
+   "verdict": "keep",
+   "verdictReason": "the only row whose subject is scripts/inventory.ts and scripts/tiers.ts: no other test file imports either, so nothing is refused when the table stops answering the checkout or the push tier scope drifts",
+   "ms": 620,
+   "titles": [
+    "a checkout answers its own inventory table",
+    "a test file the table does not answer for is refused",
+    "a row whose file is gone is refused, not quietly dropped",
+    "a layer a file does not answer to is refused unless its row says why",
+    "a verdict that removes a test names its successor and maps every assertion",
+    "a file added where nothing runs it is refused by name",
+    "a flow's row answers the journey in the file, at either spelling",
+    "a row that no longer quotes the file's own rule is refused",
+    "the totals a person reads are the rows they were drawn from",
+    "the push tier reaches the suites that import a changed file, whoever they import it through",
+    "the tiers are wired where they run and the merge tier is the required check",
+    "a measurement reads the coverage columns the runner right-aligns, and refuses a report it read nothing from",
+    "a component suite is measured by its own runner, and an exclusive run survives the measurement",
+    "a file named like a test where no runner looks is discovered, and a row for it is refused",
+    "the table is written in one order, so regenerating over an unchanged checkout moves nothing"
+   ],
+   "tests": [
+    {
+     "title": "a checkout answers its own inventory table",
+     "ms": 35.211853,
+     "measured": false
+    },
+    {
+     "title": "a test file the table does not answer for is refused",
+     "ms": 2.102509,
+     "measured": false
+    },
+    {
+     "title": "a row whose file is gone is refused, not quietly dropped",
+     "ms": 0.931824,
+     "measured": false
+    },
+    {
+     "title": "a layer a file does not answer to is refused unless its row says why",
+     "ms": 1.069518,
+     "measured": false
+    },
+    {
+     "title": "a verdict that removes a test names its successor and maps every assertion",
+     "ms": 1.587797,
+     "measured": false
+    },
+    {
+     "title": "a file added where nothing runs it is refused by name",
+     "ms": 0.770365,
+     "measured": false
+    },
+    {
+     "title": "a flow's row answers the journey in the file, at either spelling",
+     "ms": 0.712728,
+     "measured": false
+    },
+    {
+     "title": "a row that no longer quotes the file's own rule is refused",
+     "ms": 0.657146,
+     "measured": false
+    },
+    {
+     "title": "the totals a person reads are the rows they were drawn from",
+     "ms": 1.046255,
+     "measured": false
+    },
+    {
+     "title": "the push tier reaches the suites that import a changed file, whoever they import it through",
+     "ms": 2.589439,
+     "measured": false
+    },
+    {
+     "title": "the tiers are wired where they run and the merge tier is the required check",
+     "ms": 0.541311,
+     "measured": false
+    },
+    {
+     "title": "a measurement reads the coverage columns the runner right-aligns, and refuses a report it read nothing from",
+     "ms": 253.197091,
+     "measured": false
+    },
+    {
+     "title": "a component suite is measured by its own runner, and an exclusive run survives the measurement",
+     "ms": 0.788819,
+     "measured": false
+    },
+    {
+     "title": "a file named like a test where no runner looks is discovered, and a row for it is refused",
+     "ms": 1.511216,
+     "measured": false
+    },
+    {
+     "title": "the table is written in one order, so regenerating over an unchanged checkout moves nothing",
+     "ms": 0.868416,
+     "measured": false
+    }
+   ],
+   "loaded": 2,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "testsMs": 303.6,
+   "layerReason": "its subject is two tool scripts under scripts/ \u2014 the inventory re-check and the tier selection \u2014 which is the contract layer of a suite; the src/shell import the derivation reads is text inside one of its own fixtures, not an import of the shell",
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/fingerprint.test.ts",
@@ -15429,6 +15543,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The push tier is a faster first answer, never a second gate: `npm run check` is the required check, and the scope step only chooses which of its files to run first (0088 rule 5: contract plus the behaviour of the packages the diff reaches). A production file the diff touches that no suite imports \u2014 a route file under app/, which the router mounts and a flow claims \u2014 is named so a reader sees the hole, and the step exits zero, because a change the merge tier accepts is not refused by the tier that exists to run less of it. Sixteen files of this repository are reached by no import today, every `app/` route among them, so a scope that exited non-zero on one would refuse every change to the home screen before `npm run check` ran.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 521,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a diff that touches a route file no suite imports is scoped, not refused"
+   ],
+   "tests": [
+    {
+     "title": "a diff that touches a route file no suite imports is scoped, not refused",
+     "ms": 232.049022,
+     "measured": false
+    }
+   ],
+   "loaded": 2,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 232
+  },
+  {
    "file": "tests/viewer-lost-selection.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -18366,96 +18509,6 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts",
-   "runner": "node",
-   "layer": "contract",
-   "cases": 11,
-   "rule": "The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches has exactly one row, and the row's layer, tier, reach and rule are read back out of the file rather than remembered; a `merge` or `delete` verdict names the sibling that keeps its rule and maps every one of its assertions to the test that keeps it, because identical line coverage is not identical assertions; and the count of files no runner reaches may not rise, so a test added to this repository cannot be filed where nothing runs it. The fourth rule is where each layer then runs: the push tier's scope is the transitive import closure of the diff, the merge tier is `npm run check` whole, and the nightly tier publishes what the suite cost.",
-   "ruleSource": "first comment",
-   "verdict": "keep",
-   "verdictReason": "the only row whose subject is scripts/inventory.ts and scripts/tiers.ts: no other test file imports either, so nothing is refused when the table stops answering the checkout or the push tier scope drifts",
-   "ms": 502,
-   "titles": [
-    "a checkout answers its own inventory table",
-    "a test file the table does not answer for is refused",
-    "a row whose file is gone is refused, not quietly dropped",
-    "a layer a file does not answer to is refused unless its row says why",
-    "a verdict that removes a test names its successor and maps every assertion",
-    "a file added where nothing runs it is refused by name",
-    "a flow's row answers the journey in the file, at either spelling",
-    "a row that no longer quotes the file's own rule is refused",
-    "the totals a person reads are the rows they were drawn from",
-    "the push tier reaches the suites that import a changed file, whoever they import it through",
-    "the tiers are wired where they run and the merge tier is the required check"
-   ],
-   "tests": [
-    {
-     "title": "a checkout answers its own inventory table",
-     "ms": 45.331594,
-     "measured": false
-    },
-    {
-     "title": "a test file the table does not answer for is refused",
-     "ms": 3.455103,
-     "measured": false
-    },
-    {
-     "title": "a row whose file is gone is refused, not quietly dropped",
-     "ms": 1.060402,
-     "measured": false
-    },
-    {
-     "title": "a layer a file does not answer to is refused unless its row says why",
-     "ms": 1.880419,
-     "measured": false
-    },
-    {
-     "title": "a verdict that removes a test names its successor and maps every assertion",
-     "ms": 2.692071,
-     "measured": false
-    },
-    {
-     "title": "a file added where nothing runs it is refused by name",
-     "ms": 1.049532,
-     "measured": false
-    },
-    {
-     "title": "a flow's row answers the journey in the file, at either spelling",
-     "ms": 2.157151,
-     "measured": false
-    },
-    {
-     "title": "a row that no longer quotes the file's own rule is refused",
-     "ms": 1.013785,
-     "measured": false
-    },
-    {
-     "title": "the totals a person reads are the rows they were drawn from",
-     "ms": 8.847969,
-     "measured": false
-    },
-    {
-     "title": "the push tier reaches the suites that import a changed file, whoever they import it through",
-     "ms": 5.630988,
-     "measured": false
-    },
-    {
-     "title": "the tiers are wired where they run and the merge tier is the required check",
-     "ms": 0.506477,
-     "measured": false
-    }
-   ],
-   "loaded": 0,
-   "coveredProdLines": 0,
-   "onlyProdLines": null,
-   "tier": "push",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "testsMs": 73.6,
-   "layerReason": "its subject is two tool scripts under scripts/ \u2014 the inventory re-check and the tier selection \u2014 which is the contract layer of a suite; the src/shell import the derivation reads is text inside one of its own fixtures, not an import of the shell",
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/chart-axis-position.case.mjs",

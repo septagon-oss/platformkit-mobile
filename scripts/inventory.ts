@@ -9,8 +9,17 @@
 // Entered as `npm run check:inventory` (the refusal) and `npm run inventory` (the rewrite). Its CLI shape is
 // scripts/check_flows.ts's: exported functions that answer with refusals as strings, a command line that
 // prints them and exits 1, and nothing else.
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { execFileSync } from "node:child_process";
+import os from "node:os";
 import path from "node:path";
 
 export const LAYERS = ["contract", "behaviour", "composition", "journey"] as const;
@@ -147,13 +156,19 @@ function everyFile(root: string): string[] {
   return out.sort();
 }
 
+/** UNREACHED_TEST is a file named like a test that none of the globs above matches — see `runnerOf`. */
+const UNREACHED_TEST = /\.(?:test|spec|case)\.[cm]?[jt]sx?$/;
+
 /** runnerOf names who executes a file today; `browser` is the honest word for nobody in this repository does. */
 export function runnerOf(file: string): Runner | null {
   if (NODE_GLOB.test(file)) return "node";
   if (JEST_GLOB.test(file)) return "jest";
   if (BROWSER_GLOBS.some((g) => g.test(file))) return "browser";
   if (/^e2e\/flows\/[^/]+\.ya?ml$/.test(file)) return "maestro";
-  return null;
+  // A file named like a test that no glob above reached — a `.test.ts` under `tests/ui/`, a `.spec.ts` in a
+  // subfolder — is reached by nobody too: node's glob is one folder deep and jest takes `.test.tsx` only. It
+  // still owes a row, so it lands in the count `check:inventory` refuses to let rise instead of going unseen.
+  return UNREACHED_TEST.test(file) ? "browser" : null;
 }
 
 /** discovered is every file the table owes a row to, in path order. */
@@ -174,7 +189,10 @@ function text(root: string, file: string): string {
  * the pinned document, the generated client or the published manifest **is** the thing under test.
  */
 export function layerOf(root: string, file: string, runner: Runner): Layer {
-  if (runner === "maestro" || runner === "browser") return "journey";
+  if (runner === "maestro") return "journey";
+  // A browser *specimen* — a Playwright `.case.mjs`/`.spec.ts`, a `.case.tsx` — proves what a person sees. A
+  // file merely named like a test and reached by no glob is not one: it is a unit test in the wrong place.
+  if (runner === "browser" && BROWSER_GLOBS.some((g) => g.test(file))) return "journey";
   const src = text(root, file);
   const imports = [...src.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]!);
   const joined = imports.join(" ").replace(/\.\.\//g, "");
@@ -226,6 +244,8 @@ function reachOf(file: string, runner: Runner): string {
   if (runner === "jest") return "npm test (jest half)";
   if (runner === "maestro")
     return "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there";
+  if (!BROWSER_GLOBS.some((g) => g.test(file)))
+    return "no runner: node's glob is tests/*.test.ts and jest's testMatch is tests/**/*.test.tsx, so a file named like a test in a subfolder of tests/ is reached by neither";
   return file.endsWith(".case.tsx")
     ? "no runner: matches neither jest's testMatch (.test.tsx only) nor the node glob; its own header names the failing assertion it waits on"
     : "no runner: needs REVIEW_GALLERY_URL + PLAYWRIGHT_MODULE (Playwright is not a dependency)";
@@ -421,7 +441,9 @@ export function checkInventory(root: string): string[] {
           );
       const unique =
         (row.tests as { measured?: boolean }[] | undefined)?.filter((t) => t.measured).length ?? 0;
-      if (unique === row.cases && row.cases !== null) {
+      // The pair is only quotable once every case has been run alone; a row that holds no measurement at all
+      // — a file added since the last per-test pass, which quotes `not measured` — has nothing to name.
+      if (row.cases !== null && row.cases > 0 && unique === row.cases) {
         if (typeof row.testsUnique !== "number" || typeof row.testsTotal !== "number")
           problems.push(`${row.file}: every test measured but no testsUnique/testsTotal to quote`);
         else if (row.testsTotal !== row.cases)
@@ -475,6 +497,14 @@ export function checkInventory(root: string): string[] {
       if (JSON.stringify(row[key]) !== JSON.stringify(want))
         problems.push(`${file}: ${key} in the row no longer answers what is in the file`);
   }
+
+  // The order the table is written in is the order its totals are summed in and the order a reader diffs in.
+  const ordered = sortRows(table.rows);
+  const misplaced = ordered.findIndex((r, i) => r.file !== table.rows[i]!.file);
+  if (misplaced >= 0)
+    problems.push(
+      `${JSON_PATH}: rows are not in the order --sync writes them — ${table.rows[misplaced]!.file} belongs at ${ordered[misplaced]!.file}`,
+    );
 
   // The two counts 0088 keeps as ratchets, each against the number the table records.
   const named = everyFile(root).filter((f) => REVIEW_NAMED.test(f));
@@ -551,8 +581,10 @@ export function sync(root: string): string[] {
   const table = readTable(root);
   const have = new Set(table.rows.map((r) => r.file));
   const added = discovered(root).filter((f) => !have.has(f));
-  if (added.length > 0)
-    table.rows = sortRows([...table.rows, ...added.map((f) => newRow(root, f))]);
+  // The whole table is written in one order every time, so regenerating over an unchanged checkout is the
+  // identity: a table that only sometimes came back sorted made the first `--sync` after a merge a 200-line
+  // move of rows nobody touched.
+  table.rows = sortRows([...table.rows, ...added.map((f) => newRow(root, f))]);
   table.totals = totalsOf(table.rows);
   writeFileSync(path.join(root, JSON_PATH), emit(table) + "\n");
   writeFileSync(path.join(root, MD_PATH), renderMarkdown(root, table));
@@ -587,11 +619,21 @@ const NODE_TITLE = /^(?:✔|✖) (.+?)(?: \((\d+(?:\.\d+)?)ms\))?$/;
 
 /**
  * COVERAGE_ROW is one line of the folder tree the runner prints under `start of coverage report`: every row
- * shows a basename and its depth by leading spaces, so the path is rebuilt from the nesting. A reconstructed
- * path that is no file on disk is dropped, because a parse may not invent a covered file.
+ * shows a basename and its depth by leading spaces, so the path is rebuilt from the nesting. The numbers are
+ * right-aligned in their column, which is why every pipe is surrounded by `\s*` and not by one space: read
+ * with `cat -A`, a loaded file prints `|  62.34 |    79.00 |`, and a parse that demanded one space matched
+ * none of them and left `loaded` at zero. A reconstructed path that is no file on disk is dropped, because a
+ * parse may not invent a covered file.
  */
 const COVERAGE_ROW =
-  /^ℹ (?<name>[^|]*?) \|(?<line>[\d.]*) \|(?<branch>[\d.]*) \|(?<func>[\d.]*) \|(?<uncov>.*)$/;
+  /^ℹ (?<name>[^|]*?)\s*\|\s*(?<line>[\d.]*)\s*\|\s*(?<branch>[\d.]*)\s*\|\s*(?<func>[\d.]*)\s*\|\s*(?<uncov>.*)$/;
+
+/**
+ * COVERAGE_LEAF is the same line seen without any field read: one whose first column carries a percentage.
+ * A folder row and the `file` header hold nothing there, so the count of leaves is the runner's own answer
+ * to "did this run load any file", and a run whose leaves no COVERAGE_ROW matched is a parse failure.
+ */
+const COVERAGE_LEAF = /^ℹ (?<name>[^|]*)\|\s*[\d.]/;
 
 /** lineRanges reads `85-87, 120` into the line numbers it names. */
 function lineRanges(text: string): Set<number> {
@@ -608,28 +650,80 @@ function lineRanges(text: string): Set<number> {
 /**
  * coverageOf rebuilds the covered files out of one run's report: each path, the lines its run did not reach,
  * and its own line count, so `loaded` and `coveredProdLines` answer the same question they do for every other
- * node row. The percentage is never read as a count — node's denominator is the source file's own lines.
+ * node row. The percentage is never read as a count — node's denominator is the source file's own lines. It is
+ * exported because the two refusals it makes (no report at all, a report no count was read from) are the
+ * difference between an honest `loaded: 0` and a column that has quietly stopped being read.
  */
-function coverageOf(root: string, report: string): Map<string, number> {
+export function coverageOf(root: string, report: string): Map<string, number> {
   const lines = report.split("\n");
   const lo = lines.findIndex((l) => l.includes("start of coverage report"));
   const hi = lines.findIndex((l) => l.includes("end of coverage report"));
   if (lo < 0 || hi < 0) throw new Error("the run printed no coverage report");
   const out = new Map<string, number>();
+  let leaves = 0;
   const stack: string[] = [];
   for (const raw of lines.slice(lo + 1, hi)) {
+    const leaf = COVERAGE_LEAF.exec(raw)?.groups?.name;
+    // `all files` is the run's own summary row, not a file the run loaded.
+    if (leaf !== undefined && leaf.trim() !== "all files") leaves += 1;
     const row = COVERAGE_ROW.exec(raw);
     if (!row || /^[ -]*$/.test(row.groups!.name!)) continue;
     const name = row.groups!.name!;
     if (name.trim() === "file" || name.trim() === "all files") continue;
-    const depth = name.length - name.replace(/^ /, "").length;
+    const depth = /^ */.exec(name)![0]!.length;
     stack.splice(depth, stack.length, name.trim());
+    // A folder row names no counts of its own — it is the nesting the rows beneath it rebuild their path
+    // from. Its percentage is empty where a file's is a number, which is also how the leaf count above
+    // tells the two apart.
+    if (row.groups!.line === "") continue;
     const full = stack.join("/");
-    if (!existsSync(path.join(root, full))) continue;
+    if (!statSync(path.join(root, full), { throwIfNoEntry: false })?.isFile()) continue;
     const total = readFileSync(path.join(root, full), "utf8").split("\n").length;
     out.set(full, total - lineRanges(row.groups!.uncov!).size);
   }
+  // An empty map is honest only when the run loaded nothing: a run that printed rows this unit could not
+  // read would otherwise be recorded as a file that covers no production line at all.
+  if (out.size === 0 && leaves > 0)
+    throw new Error(
+      `the coverage report holds ${leaves} ${leaves === 1 ? "file row" : "file rows"} this unit read no counts from`,
+    );
   return out;
+}
+
+/**
+ * mergedTests carries the per-test columns one run of a file cannot answer (`ranAsOne`, `isolatedMs`,
+ * `onlyProdLines`, `onlyToolLines`, `onlyFiles`) onto the fresh list by title, so measuring a row again does
+ * not erase the exclusive runs that cost a pass per test to take. A title that has gone loses its record with
+ * it, and the `testsUnique`/`testsTotal` pair stays the record of the pass that took it.
+ */
+function mergedTests(
+  previous: unknown[] | undefined,
+  fresh: { title: string; ms: number; measured: boolean }[],
+): Record<string, unknown>[] {
+  const before = new Map(
+    (previous ?? [])
+      .filter((t) => typeof (t as { title?: unknown }).title === "string")
+      .map((t) => [(t as { title: string }).title, t as Record<string, unknown>]),
+  );
+  return fresh.map((f) => {
+    const held = before.get(f.title);
+    if (!held) return { ...f };
+    const { ms: _ms, measured: _measured, ...heldOutsideThisRun } = held;
+    return { ...heldOutsideThisRun, ...f };
+  });
+}
+
+/**
+ * measureEnv is the parent's environment without the marks Node's own test runner leaves in it:
+ * `NODE_TEST_CONTEXT=child-v8` inherited by a measurement run makes Node answer "run() is being called
+ * recursively within a test file" and report no case at all, so a measurement taken from inside the suite
+ * would measure nothing. The command is the same command either way.
+ */
+function measureEnv(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  delete env.NODE_TEST_CONTEXT;
+  delete env.NODE_TEST_WORKER_ID;
+  return env;
 }
 
 /**
@@ -645,6 +739,7 @@ export function measureNodeRow(root: string, file: string, row: Row): Row {
     out = execFileSync("node", [...NODE_MEASURE, file], {
       cwd: root,
       encoding: "utf8",
+      env: measureEnv(),
       maxBuffer: 1 << 28,
     });
   } catch (e) {
@@ -673,7 +768,10 @@ export function measureNodeRow(root: string, file: string, row: Row): Row {
     ...row,
     cases: cases.length,
     titles: cases.map((c) => c.title),
-    tests: cases.map((c) => ({ title: c.title, ms: c.ms, measured: false })),
+    tests: mergedTests(
+      row.tests as unknown[] | undefined,
+      cases.map((c) => ({ title: c.title, ms: c.ms, measured: false })),
+    ),
     ms,
     testsMs: Math.round(cases.reduce((sum, c) => sum + c.ms, 0) * 10) / 10,
     loaded: covered.size,
@@ -683,13 +781,138 @@ export function measureNodeRow(root: string, file: string, row: Row): Row {
   };
 }
 
-/** measure runs `--measure` for one file and re-renders both artifacts. */
-export function measure(root: string, file: string): Row | null {
+/**
+ * JEST_RUN is one component suite run alone, with istanbul's statement map written beside the run's own JSON
+ * report. The command is the one `measured.commands.jest` names; everything about the run that a row records —
+ * its cases, each case's own duration, the wall time, which files it loaded and how many production statements
+ * its run reached — is read out of these two documents rather than parsed off a console.
+ */
+const JEST_RUN = (dir: string): string[] => [
+  "jest",
+  "--coverage",
+  "--coverageReporters=json",
+  `--coverageDirectory=${dir}`,
+  "--ci",
+  "--json",
+  `--outputFile=${path.join(dir, "run.json")}`,
+];
+
+/** JestRun and IstanbulFile are the two reports one `npx jest` measurement writes. */
+export interface JestRun {
+  success?: boolean;
+  testResults?: { assertionResults?: { title?: string; status?: string; duration?: number }[] }[];
+}
+export interface IstanbulFile {
+  path?: string;
+  s?: Record<string, number>;
+}
+
+/**
+ * jestRow turns the two reports of one measurement run into the row's measured columns. A red run is refused,
+ * not recorded: durations taken while a case fails measure a run nobody would ship. `loaded` counts the files
+ * istanbul instrumented for this run and `coveredProdLines` the statements of `src/`/`app/` it reached at
+ * least once — istanbul's statement lines, which are not node's source-file lines, exactly as `measured` says.
+ */
+export function jestRow(
+  root: string,
+  file: string,
+  row: Row,
+  run: JestRun,
+  istanbul: Record<string, IstanbulFile>,
+  ms: number,
+): Row {
+  if (run.success === false)
+    throw new Error(`${file}: a case of this suite failed, so its durations measure a red run`);
+  const cases = (run.testResults ?? [])
+    .flatMap((s) => s.assertionResults ?? [])
+    .map((a) => ({ title: (a.title ?? "").trim(), ms: a.duration ?? 0 }));
+  if (cases.length === 0)
+    throw new Error(`${file}: the run reported no case, so its cases are not counted here`);
+  const covered = new Map<string, number>();
+  for (const [at, entry] of Object.entries(istanbul)) {
+    const rel = path.relative(root, entry.path ?? at);
+    if (rel === "" || rel.startsWith("..") || path.isAbsolute(rel)) continue;
+    covered.set(rel, Object.values(entry.s ?? {}).filter((n) => n > 0).length);
+  }
+  const prodLines = [...covered]
+    .filter(([p]) => /^(src|app)\//.test(p))
+    .reduce((sum, [, n]) => sum + n, 0);
+  return {
+    ...row,
+    cases: cases.length,
+    titles: cases.map((c) => c.title),
+    tests: mergedTests(
+      row.tests as unknown[] | undefined,
+      cases.map((c) => ({ title: c.title, ms: c.ms, measured: false })),
+    ),
+    ms,
+    testsMs: Math.round(cases.reduce((sum, c) => sum + c.ms, 0) * 10) / 10,
+    loaded: covered.size,
+    coveredProdLines: prodLines,
+    exclusiveNotMeasured:
+      "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+  };
+}
+
+/**
+ * measureJestRow runs one `.test.tsx` suite alone — the command `measured.commands.jest` names, both reports
+ * into a directory no commit reads — and hands them to `jestRow`.
+ */
+export function measureJestRow(root: string, file: string, row: Row): Row {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "pk-inventory-jest-"));
+  const started = Date.now();
+  try {
+    let refused = false;
+    try {
+      execFileSync("npx", [...JEST_RUN(dir), file], {
+        cwd: root,
+        encoding: "utf8",
+        env: measureEnv(),
+        stdio: ["ignore", "pipe", "pipe"],
+        maxBuffer: 1 << 28,
+      });
+    } catch {
+      // The report still holds each case it ran; jestRow below says why a red run is not a measurement.
+      refused = true;
+    }
+    const ms = Date.now() - started;
+    if (!existsSync(path.join(dir, "run.json")))
+      throw new Error(`${file}: the run wrote no report, so its cases are not counted here`);
+    const run = JSON.parse(readFileSync(path.join(dir, "run.json"), "utf8")) as JestRun;
+    const mapAt = path.join(dir, "coverage-final.json");
+    if (!existsSync(mapAt))
+      throw new Error(`${file}: the run wrote no coverage map, so nothing is recorded as loaded`);
+    return jestRow(
+      root,
+      file,
+      row,
+      refused ? { ...run, success: false } : run,
+      JSON.parse(readFileSync(mapAt, "utf8")) as Record<string, IstanbulFile>,
+      ms,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * measure runs `--measure` for one file and re-renders both artifacts. A file no command in this repository
+ * runs (a browser specimen, a flow) is a refusal with a reason, never a zero: there is nothing here that
+ * could run it, so its cost stays `null` rather than becoming a measurement.
+ */
+export function measure(root: string, file: string): Row {
   const table = readTable(root);
   const row = table.rows.find((r) => r.file === file);
-  if (!row) return null;
-  if (row.runner !== "node") return null;
-  Object.assign(row, measureNodeRow(root, file, row));
+  if (!row)
+    throw new Error(
+      `${file}: no row to measure — npm run inventory -- --sync writes one from the file's shape first`,
+    );
+  if (row.runner === "node") Object.assign(row, measureNodeRow(root, file, row));
+  else if (row.runner === "jest") Object.assign(row, measureJestRow(root, file, row));
+  else
+    throw new Error(
+      `${file}: a ${row.runner} file is run by no command in this repository (${row.reach}), so nothing here can measure it`,
+    );
   table.totals = totalsOf(table.rows);
   writeFileSync(path.join(root, JSON_PATH), emit(table) + "\n");
   writeFileSync(path.join(root, MD_PATH), renderMarkdown(root, table));
@@ -761,6 +984,7 @@ export function renderMarkdown(root: string, table: Table): string {
     "| column | command | what the number is |",
     "|---|---|---|",
     "| runner | `node --import tsx --test tests/*.test.ts` / `jest` (the two halves of `npm test`) / `scripts/e2e/run.sh` | which runner executes the file today, read from its own glob |",
+    "| files the run loaded (`loaded`) | `npm run inventory -- --measure <file>`, which is the node or jest command above with coverage on | files that run's coverage pass instrumented: node lists the `src/`+`app/`+`scripts/` files it loaded, jest the files istanbul transformed for that one suite. Two sets, never added |",
     "| wall ms | the same command run for that one file | process wall time, startup included; it decides what a tier costs |",
     "| tests ms | sum of the runner's own per-test durations | the work the file's tests do; this is the column a slowest-tests report reads |",
     "| only-it-covers | `--experimental-test-coverage` per file (node, whose percentage is over the whole source file) / `jest --coverage --coverageReporters=json` per suite (istanbul statement lines) | production lines this file's run covers that no other run of the same runner covers |",
@@ -833,12 +1057,17 @@ export function renderMarkdown(root: string, table: Table): string {
     "",
     "## Which tests the push tier runs",
     "",
-    "`npm run check` stays the required check and the merge tier: it runs both suites undiscovered-scoped, and",
+    "`npm run check` stays the required check and the merge tier: it runs both suites whole, and",
     "`tests/component-suite-gate.test.ts` refuses a `check`/`test` script that stops running either. The push",
-    "tier runs the contract steps, then the behaviour and composition files whose `loaded` column names a file",
-    "the diff touches — `npm run test:push --diff <base>`, which reads this table and prints the files it chose.",
-    "It can only ever add work relative to `check`, never replace it: a selection that named no file is a",
-    "refusal, and the merge tier runs the whole suite whatever the push tier ran.",
+    "tier runs the contract steps, then the suites the change reaches — `npm run test:scope <base> [--run]`,",
+    "which `npm run test:push` wraps with `${BASE_REF:-origin/main}` as the base. The scope is the transitive",
+    "**import** closure of the changed files, walked out of the suites' own `from`/`require` statements by",
+    "`scripts/tiers.ts`; this table's `loaded` column is a count of what one run loaded, not a list of paths,",
+    "so it is never the scope. The step adds work and never replaces it: a changed file no suite imports is",
+    "named on stderr and changes no exit status, because every `app/` route is in that set (a suite mounts a",
+    "screen through `tests/fakes/router`, and a flow claims the route) and a change the merge tier accepts is",
+    "not refused by the tier whose whole job is to run less of the suite first. The merge tier runs the whole",
+    "suite whatever the push tier selected, and a selection that named no file says so and exits zero.",
     "",
     "## Rows",
     "",
@@ -894,11 +1123,11 @@ if (process.argv[1]?.endsWith("inventory.ts")) {
       `${JSON_PATH}: ${added.length === 0 ? "every reached file already has a row" : `rows added for ${added.join(", ")}`}`,
     );
   } else if (args[0] === "--measure" && args[1]) {
-    const row = measure(root, args[1]);
-    if (!row) {
-      console.error(
-        `${args[1]}: no row to measure (a node row only, and the file has to have a row)`,
-      );
+    let row: Row;
+    try {
+      row = measure(root, args[1]);
+    } catch (e) {
+      console.error((e as Error).message);
       process.exit(1);
     }
     console.log(`${row.file}: ${row.cases} cases, ${row.ms} ms wall, ${row.testsMs} ms of tests`);
