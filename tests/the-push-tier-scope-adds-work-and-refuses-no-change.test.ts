@@ -7,7 +7,7 @@
 // scope that exited non-zero on one would refuse every change to the home screen before `npm run check` ran.
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
@@ -76,4 +76,53 @@ test("a diff that touches a route file no suite imports is scoped, not refused",
     0,
     `the push tier's scope refused a change the merge tier would run:\n${run.stdout}${run.stderr}`,
   );
+});
+
+test("running a route-only scope succeeds, but a selected failing test still refuses the change", (t) => {
+  const root = checkout((fn) => t.after(fn));
+  symlinkSync(path.resolve("node_modules"), path.join(root, "node_modules"), "dir");
+  const env = { ...process.env };
+  delete env.NODE_TEST_CONTEXT;
+  delete env.NODE_TEST_WORKER_ID;
+  const run = () =>
+    spawnSync(process.execPath, ["--import", TSX, TIERS, "--diff", "HEAD~1", "--run"], {
+      cwd: root,
+      encoding: "utf8",
+      env,
+      timeout: 30_000,
+    });
+  const empty = run();
+  assert.match(empty.stdout, /push tier: 1 changed files reach 0 node files/);
+  assert.equal(empty.status, 0, empty.stdout + empty.stderr);
+
+  // A selected suite's refusal still belongs to the runner. Its test title proves the
+  // child reached the assertion rather than failing to load the temporary checkout.
+  writeFileSync(
+    path.join(root, "tests/derive.test.ts"),
+    'import test from "node:test";\nimport assert from "node:assert/strict";\n' +
+      'import { reduce } from "../src/core/state";\n' +
+      'test("the derivation preserves its starting value", () => assert.equal(reduce, 0));\n',
+  );
+  writeFileSync(path.join(root, "src/core/state.ts"), "export const reduce = 1;\n");
+  execFileSync(
+    "git",
+    [
+      "-c",
+      "user.name=suite",
+      "-c",
+      "user.email=suite@example.invalid",
+      "-c",
+      "commit.gpgsign=false",
+      "commit",
+      "-q",
+      "-am",
+      "the derivation changes",
+    ],
+    { cwd: root, stdio: "pipe" },
+  );
+  const failed = run();
+  assert.match(failed.stdout, /push tier: 2 changed files reach 1 node files/);
+  assert.match(failed.stdout, /the derivation preserves its starting value/);
+  assert.match(failed.stdout, /ERR_ASSERTION|AssertionError/);
+  assert.equal(failed.status, 1, failed.stdout + failed.stderr);
 });

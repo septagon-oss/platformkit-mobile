@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 167,
-   "cases": 819,
-   "ms": 1351845,
-   "testsMs": 41598.900000000016,
+   "cases": 820,
+   "ms": 1352509,
+   "testsMs": 42214.500000000015,
    "runners": {
     "jest": 64,
     "node": 103
@@ -15546,7 +15546,7 @@
    "file": "tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 1,
+   "cases": 2,
    "rule": "The push tier is a faster first answer, never a second gate: `npm run check` is the required check, and the scope step only chooses which of its files to run first (0088 rule 5: contract plus the behaviour of the packages the diff reaches). A production file the diff touches that no suite imports \u2014 a route file under app/, which the router mounts and a flow claims \u2014 is named so a reader sees the hole, and the step exits zero, because a change the merge tier accepts is not refused by the tier that exists to run less of it. Sixteen files of this repository are reached by no import today, every `app/` route among them, so a scope that exited non-zero on one would refuse every change to the home screen before `npm run check` ran.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -15554,22 +15554,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 521,
+   "ms": 1185,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
-    "a diff that touches a route file no suite imports is scoped, not refused"
+    "a diff that touches a route file no suite imports is scoped, not refused",
+    "running a route-only scope succeeds, but a selected failing test still refuses the change"
    ],
    "tests": [
     {
      "title": "a diff that touches a route file no suite imports is scoped, not refused",
-     "ms": 232.049022,
+     "ms": 263.851516,
+     "measured": false
+    },
+    {
+     "title": "running a route-only scope succeeds, but a selected failing test still refuses the change",
+     "ms": 583.794771,
      "measured": false
     }
    ],
    "loaded": 2,
    "coveredProdLines": 0,
    "onlyProdLines": null,
-   "testsMs": 232
+   "testsMs": 847.6
   },
   {
    "file": "tests/viewer-lost-selection.test.ts",
