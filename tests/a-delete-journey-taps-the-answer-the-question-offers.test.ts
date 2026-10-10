@@ -1,12 +1,18 @@
-// The delete question answers in the kit's words: `kit.deleteAction(singular)` labels
-// the button — "Delete note", "Delete task" — so the word the journey used to tap, a
-// bare "Delete", is no longer the whole answer, and the noun belongs to whichever
-// resource the CI job names through ${MODULE}/${ENTITY}. A journey therefore taps the
-// *shape* of the answer: Maestro's pattern spelling, read here against the sentence the
-// copy table actually draws. One implementation of the rule — the test reads the words
-// from `kitCopy`, never restates them — and it refuses a flow that taps the old word,
-// one that spells one resource's noun, and one that cannot tell the answer from the
-// question above it, which is the same two words and a quoted name.
+// Tapping the menu's Delete row opens a question the journey must answer: the delete is the
+// run's own tidying, and a flow that leaves the question standing fails at its next step for a
+// reason that says nothing about the screen it was proving. So every journey the workspace
+// plans — the plan, not a list of names — that taps `delete` goes on to answer it, and answers
+// it by the answer's *words*: the button carries the record's own noun ("Delete note",
+// "Delete task"), which a journey that names the served resource through ${MODULE}/${ENTITY}
+// cannot spell, and which no node id promises. Pointing at a node instead is refused here.
+//
+// Two rules live here, and neither is the words' meaning. `delete-selectors-match-the-dialog-answer.test.ts`
+// reads each enumerated journey's selector as the regex source Maestro takes it for and matches
+// it against what `kitCopy` draws; what is checked below is that a journey reaches and answers
+// its question, and that every journey that does is enumerated *there*, so a seventh delete
+// journey cannot slip through with words nobody matched. And at least one journey deletes,
+// because deleting is how these journeys leave the server as they found it, which is the
+// behavioural coverage AGENTS.md keeps for copy a change replaced.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -15,10 +21,12 @@ import { kitEnglish } from "../src/core/kitCopy";
 import { flowFiles } from "../scripts/check_flows";
 
 const FLOWS = "e2e/flows";
-/** PATTERN is Maestro's spelling of a pattern in a text selector: the expression between two slashes. */
-const PATTERN = /^\/(.*)\/$/s;
+/** SELECTED is the file that matches a delete answer's words against the copy table. */
+const SELECTED = "tests/delete-selectors-match-the-dialog-answer.test.ts";
 /** DELETED is the tap on the menu's row: the `id: delete` line the `tapOn:` above it owns. */
 const DELETED = /^\s*id:\s*"?delete"?\s*$/;
+/** TAPPED is a step that taps something: a scalar after the colon, or a block under it. */
+const TAPPED = /^[ ]*-[ ]+tapOn:(?:[ ](.*\S))?$/;
 
 /** steps are a flow's journey lines, in order, after Maestro's `---` divider. */
 function steps(file: string): readonly string[] {
@@ -27,55 +35,73 @@ function steps(file: string): readonly string[] {
 }
 
 /**
- * toRegExp builds an expression from Maestro's spelling. Java reads a leading `(?i)`
- * as "ignore case", which is the flag JavaScript spells after the literal, and
- * Maestro's own text match ignores case — so a pattern written to answer either way a
- * dialog renders its button's letters is read either way here too.
+ * answers lists, for each planned journey, the file and the step that answers a delete
+ * question — every journey that taps the menu's row, whether or not it then answers it.
  */
-function toRegExp(pattern: string): RegExp {
-  const ignoresCase = pattern.startsWith("(?i)");
-  return new RegExp(ignoresCase ? pattern.slice(4) : pattern, ignoresCase ? "i" : "");
-}
-
-test("a journey that deletes taps the answer by its shape, not by a noun it spells", () => {
-  const drawn = kitEnglish.deleteAction("note");
-  let asked = 0;
+function deleteJourneys(): {
+  file: string;
+  answer: string | undefined;
+  block: readonly string[];
+}[] {
+  const journeys: { file: string; answer: string | undefined; block: readonly string[] }[] = [];
   for (const file of flowFiles(process.cwd())) {
     const lines = steps(file);
-    const tapped = lines.findIndex((l, i) => DELETED.test(l) && /tapOn/.test(lines[i - 1] ?? ""));
-    if (tapped === -1) continue;
-    asked += 1;
-    const line = lines.slice(tapped + 1).find((l) => /^\s*-\s*tapOn:/.test(l));
-    assert.ok(line, `${file}: taps the delete row and never answers the question it opens`);
-    const selector = (/^\s*-\s*tapOn:\s*(.*)$/.exec(line)![1] ?? "").trim();
-    const quoted = PATTERN.exec(selector.replace(/^["'](.*)["']$/, "$1"));
-    assert.ok(
-      quoted,
-      `${file}: taps ${selector} — the answer is labelled "${drawn}", whose noun is the served ` +
-        "resource's, so the journey matches its shape between slashes",
-    );
-    const re = toRegExp(quoted[1]!);
-    assert.ok(re.test(drawn), `${file}: ${selector} misses the answer the kit draws ("${drawn}")`);
-    // The match is the whole answer: Maestro may read a text pattern as a whole-string
-    // match or as a search, and an anchored pattern answers both the same way.
-    assert.equal(
-      drawn.match(re)?.[0] ?? "",
-      drawn,
-      `${file}: ${selector} matches part of "${drawn}"`,
-    );
-    assert.ok(
-      re.test(kitEnglish.deleteAction("task item")),
-      `${file}: ${selector} misses an answer whose noun is two words`,
-    );
-    assert.ok(
-      !re.test(kitEnglish.deleteQuestion("Renew the shared drive licence")),
-      `${file}: ${selector} also matches the question ("${kitEnglish.deleteQuestion("x")}") ` +
-        "drawn above the answer, so the tap could land on the sentence instead",
-    );
-    assert.ok(
-      !re.test(kitEnglish.deleteWarning),
-      `${file}: ${selector} also matches the warning it is reading`,
-    );
+    const opened = lines.findIndex((l, i) => DELETED.test(l) && /tapOn/.test(lines[i - 1] ?? ""));
+    if (opened === -1) continue;
+    const at = lines.findIndex((l, i) => i > opened && TAPPED.test(l));
+    if (at === -1) {
+      journeys.push({ file, answer: undefined, block: [] });
+      continue;
+    }
+    // `tapOn:` with nothing after it puts its selector on the indented lines below it.
+    const below = lines.slice(at + 1);
+    const ends = below.findIndex((l) => l.trim() !== "" && !/^[ ]{4,}\S/.test(l));
+    journeys.push({
+      file,
+      answer: TAPPED.exec(lines[at]!)![1]?.trim(),
+      block: ends === -1 ? below : below.slice(0, ends),
+    });
   }
-  assert.ok(asked > 0, "no journey answers the delete question: deleting is covered nowhere");
+  return journeys;
+}
+
+test("a journey that opens the delete question answers it by its words, not by a node", () => {
+  const drawn = kitEnglish.deleteAction("note");
+  for (const { file, answer, block } of deleteJourneys()) {
+    assert.notEqual(
+      answer,
+      undefined,
+      `${file}: taps the menu's delete row and never answers the question that opens — the run ` +
+        "leaves its own question standing and fails at its next step for a reason that names nothing",
+    );
+    if (answer === "")
+      assert.ok(
+        block.some((l) => /^[ ]+text:/.test(l)) && !block.some((l) => /^[ ]+id:/.test(l)),
+        `${file}: answers the delete question by pointing at a node. The button carries the ` +
+          `record's own noun ("${drawn}"), which the journey cannot spell from what the job names, ` +
+          "so it is found by the shape of its words",
+      );
+  }
+});
+
+test("every journey that answers a delete question is one whose words were matched", () => {
+  const deleting = deleteJourneys().map((j) => j.file);
+  assert.ok(
+    deleting.length > 0,
+    "no journey answers the delete question: deleting is covered nowhere",
+  );
+  // The selector test enumerates the journeys it matches; the list is read from that
+  // file rather than copied, so the two cannot drift apart by a name.
+  const listed = /\[[ \t]*(?:"[a-z0-9-]+"[ \t*,]+)*"[a-z0-9-]+"[ \t]*\]/.exec(
+    readFileSync(SELECTED, "utf8"),
+  );
+  assert.ok(listed, `${SELECTED}: enumerates no journeys, so nothing matches a delete answer`);
+  const matched = new Set([...listed[0]!.matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]!));
+  const unwatched = deleting.filter((f) => !matched.has(f.replace(/\.ya?ml$/, "")));
+  assert.deepEqual(
+    unwatched,
+    [],
+    `${unwatched.join(", ")} answer a delete question no check matches against ${path.basename(SELECTED)} — ` +
+      "name the journey there, beside the journeys whose words that file reads",
+  );
 });

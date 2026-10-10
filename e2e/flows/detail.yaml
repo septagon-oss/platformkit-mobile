@@ -40,7 +40,10 @@ env:
 # the record's own noun ("Delete note", "Delete task"), which a journey that names the
 # served resource through ${ENTITY} cannot spell, so the journey matches the word and a
 # noun — case-insensitively, because a dialog may set its buttons in capitals — and
-# never the question above it, which is the same word and a quoted name.
+# never the question above it, which is the same word and a quoted name. Maestro reads
+# what a text selector says as regex source, matched against the whole of an element's
+# text, so the expression is written as one: between slashes the two characters would be
+# part of the label the button would have to carry, and the journey would tap nothing.
 - tapOn:
     id: "record-menu"
 - scrollUntilVisible:
@@ -49,7 +52,7 @@ env:
 - tapOn:
     id: "delete"
 - assertVisible: "You can’t undo this in the app."
-- tapOn: "/(?i)^Delete [^‘’?]+$/"
+- tapOn: (?i)^Delete [^‘’?]+$
 - extendedWaitUntil:
     visible:
       id: "resource-list"
