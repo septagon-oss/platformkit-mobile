@@ -240,6 +240,63 @@ state, which is what `primaryField` and `statusField` answer there): the referen
 kernel refuses that document at mount (`kit/rest/hints.go`, `namedFieldFault`), and
 one author's slip is not worth this app's screens.
 
+### How a list row reads
+
+A row answers four questions and no fifth: **which record is this**, **what state is it
+in**, **what does the record say about itself**, and **what sets it apart from its
+neighbours**. `listRow` in `src/core/derive.ts` assembles the answers from the four rules
+that already owned them — the field a row is called by (`rowPrimary`), the state the entry
+declares (`statusField` with its `enumLabels` and `enumTones`, read through the one
+`statusPill` a record reads too), the line under the name (`listPreview(entry, "row")`) and
+the couple of values beside it (`listCells`, budgeted at two) — and nothing else. A row is
+never titled by an identifier and never filled with one: the stamps and the id are
+plumbing, are not cells whoever pointed at them, and the record spells them out in its own
+"Record information" block for the person who needs them. `hideList` is asked the question
+it answers — which columns a list has — so the paragraph every schema marks
+`hideList` lines a record, which has room for it, and not a row, which does not; a row
+with nothing worth reading under its name shows nothing there, never a dash. A value that
+was never answered prints no cell, and a pill is never drawn for a state the document did
+not declare, so an un-hinted resource shows a title, its line, and its values.
+
+How the list is being read is two questions, and the kit asks them separately. **In what
+order** is the sort sheet: newest, oldest, then one row per direction for each field the
+entry may be ordered by (`sortable`, else the field a row is called by and the date fields
+it declares), worded for that field's type — "Due at, soonest first", "Rank, low to high",
+"Title, A–Z" — in the reader's language. Nothing without an honest direction word, and
+nothing that is plumbing, is offered. **Narrowed how** is the filters sheet: one group per
+filterable field, each leading with "All" so the group always answers, and one action that
+empties them all, present only where it has something to empty. Clearing filters keeps the
+sort, because ordering is not narrowing — which is the same fact that makes
+`sorted-but-unfiltered` answer "No notes yet" and never "No matching notes", and why the
+count on the toolbar says "Filters · 2" for two filters and no order. The two controls sit
+in a toolbar row under the header, where the list is, and neither is offered on a list that
+holds nothing and has nothing filtered.
+
+**Reused** — `rowPrimary`, `label(…, "row")`, `statusField`, `enumLabel`, `enumTone`,
+`badgeTone`, `listColumns`, `listCells`, `listPreview`, `saidValue`, `display`, `hasValue`,
+`filterFields`, `queryFilters`, `noOrder` and `nounPhrase` in the core; `DataRow.status`,
+`DataCell`, `Filter`, `Sort`, `deriveChoices`, `deriveActions` and `deriveDataList` in the
+list family, whose `targets` are the orders both sheets offer; `deriveSurface` and
+`DetailSheet` for the sheets, `ActionBar` for the toolbar, and `Value`, `Labelled`,
+`Badge`, `Notice`, `Row` — with `Row`'s `shown`, `trailing` and `selected` props, all three
+of which were declared, documented and passed by nobody until this delivery. **Added** —
+`listRow`, because the row was an object literal inside the list adapter and no function
+answered "this record as a line"; `statusPill`, which is `recordHeader`'s pill extracted,
+since a record and a row colouring one value differently is one rule written twice;
+`sortFields`, `deriveSortSheet`, `deriveFilterSheet` and `deriveListToolbar`, because the
+brief's toolbar is a control with a count and a visibility rule that belongs to neither
+sheet; and `ChoiceRows`, because the inventory held `ChoiceChips` (a wrapping wall — the
+thing being replaced) and `SlotOption` (the same idea welded to a capacity model), and no
+sheet-sized group of rows: it is `Row` in a radiogroup and nothing else. **Made
+reusable** — `statusPill` is now the only reading of a declared state, so any surface that
+wants a pill asks it rather than restating it; `listPreview(entry, where)` is the medium-
+aware rule every future screen reads; `filtered`/`reordered`/`activeFilters` are three
+questions any screen can ask without the old word conflating them; the sortable hint, the
+two ids `sort-sheet`/`filter-sheet` and the `list-toolbar` id are what a journey and a
+renderer pack reach for; and `kitCopy` gained the direction words, the three empty answers
+and "All"/"Clear filters" in `en` and `pt`, so the next screen that orders or narrows a
+list writes no sentence of its own.
+
 ### How a record opens
 
 One rule decides the whole of a record's hierarchy: **a fact is drawn once, at the

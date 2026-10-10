@@ -559,22 +559,13 @@ const recordField = (f: Field, v: unknown, format: Formatting): DetailItem => ({
 });
 
 /**
- * RecordPill is the status as the record shows it: the author's word for the value
- * (`enumLabels`, or the value humanised) and the colour the author declared for it
- * (`enumTones`, or neutral). Both come from one field's value, so a pill cannot say
- * "Open" in green because it came first.
+ * RecordPill is a status as a screen shows it: the author's word for the value and the
+ * colour the author declared for it. Both come from one field's value through
+ * `statusPill`, so a pill cannot say "Open" in green because it came first.
  */
 export interface RecordPill {
   readonly label: string;
   readonly tone: "ok" | "warning" | "danger" | "info" | "neutral";
-}
-
-export interface RecordHeader {
-  readonly title: string;
-  /** absent when the entry declares no `statusField`, or its row holds no value: no status is ever inferred. */
-  readonly status?: RecordPill;
-  /** absent when the preview field has no value: a blank never prints a dash under a title. */
-  readonly summary?: string;
 }
 
 /**

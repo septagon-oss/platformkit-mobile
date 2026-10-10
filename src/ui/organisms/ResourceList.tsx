@@ -77,6 +77,9 @@ export function ResourceList(props: Props) {
       />
     );
   const model = result.value;
+  // Nothing opens a sheet without a screen that asked for one, so the way out of a
+  // sheet that is not there is the same no-op as the control that was never drawn.
+  const close = () => onSheet?.("none");
   // A choice answers with the order the model already computed for it, so the sheet
   // and the list ask the same endpoint the same way. Choosing a sort is the whole
   // answer — the sheet goes with it. A filter stays open: a person narrowing a list
@@ -84,7 +87,7 @@ export function ResourceList(props: Props) {
   const chooseSort = (id: string) => {
     const target = model.sort?.targets.find((c) => c.id === id)?.order;
     if (target) onOrder(target);
-    onSheet("none");
+    close();
   };
   const chooseFilter = (groupId: string, id: string) => {
     const target = model.filters
@@ -126,18 +129,14 @@ export function ResourceList(props: Props) {
         }
       />
       {model.sort ? (
-        <DetailSheet
-          model={sorts.value.surface}
-          testID="sort-sheet"
-          onRequestClose={() => onSheet("none")}
-        >
+        <DetailSheet model={sorts.value.surface} testID="sort-sheet" onRequestClose={close}>
           <ChoiceRows model={model.sort.model} named={false} testID="sort" onChange={chooseSort} />
         </DetailSheet>
       ) : null}
       <DetailSheet
         model={narrowing.value.surface}
         testID="filter-sheet"
-        onRequestClose={() => onSheet("none")}
+        onRequestClose={close}
         {...(narrowing.value.clearTarget
           ? {
               onAction: (id: string) => {

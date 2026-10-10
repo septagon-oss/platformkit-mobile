@@ -119,7 +119,9 @@ test("no value answers, no pill — except a switch, whose no is a fact", () => 
   const entry = hintEntry();
   assert.equal(statusPill(entry, { title: "x" }, presentation), undefined);
   assert.equal(statusPill(entry, { status: "" }, presentation), undefined);
-  const pinned = hintEntry((e) => (e.presentation = { ...e.presentation, statusField: "pinned" }));
+  const pinned = hintEntry(
+    (e) => (e.presentation = { ...(e.presentation as object), statusField: "pinned" }),
+  );
   assert.deepEqual(statusPill(pinned, { pinned: false }, presentation), {
     label: "No",
     tone: "neutral",

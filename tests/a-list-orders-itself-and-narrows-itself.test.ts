@@ -179,15 +179,11 @@ test("the sort sheet is the list's own sort group, and pressing a row is the who
   assert.equal(sheet.surface.close.id, "close");
   assert.equal(sheet.surface.bar.actions.length, 0, "choosing a row is not a draft");
   assert.equal(sheet.surface.gestureDismissal, true);
-  const wire = values(entry);
+  assert.deepEqual(values(entry), ["", "createdAt", "title", "-title"]);
   assert.deepEqual(
     list.sort?.targets.map((t) => t.order.sort),
-    wire,
-  );
-  assert.deepEqual(
-    list.sort?.model.choices.map((c) => (c as { value: string }).value),
-    ["", "createdAt", "title", "-title"],
-    "the bytes the kernel is sent, unchanged by the new words over them",
+    values(entry),
+    "the sheet offers the bytes the kernel is sent, unchanged by the new words over them",
   );
 });
 

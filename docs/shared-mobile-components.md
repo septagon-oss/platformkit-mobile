@@ -387,8 +387,12 @@ handle preference changes while mounted and default to still until resolved.
 `DataRow = { id: ID; title: string; summary?: string; cells: readonly
 { id: ID; label: string; value: string }[]; status?: Status; selectable: boolean;
 selectionReason?: string; open?: Action; actions: readonly Action[] }`.
-The catalog adapter obtains title/cells from `label`, `listCells`, `listPreview`
-and `display`; custom screens supply equivalent generic inputs to derive.
+The catalog adapter obtains a row from `listRow`, which is `rowPrimary`, `statusPill`,
+`listPreview(entry, "row")` and `listCells` (at most two, never the identifier or either
+stamp) read through `label`, `enumLabel`, `enumTone`, `badgeTone` and `display`; a cell
+carries the `Field` behind it, which is how `Value` draws it in the shape its type
+deserves and `Labelled` keeps a short label only for a value that cannot speak for
+itself. Custom screens supply equivalent generic inputs to derive.
 
 `DataSection = { id: ID; title: string; rows: readonly DataRow[];
 total?: number; collapsible: boolean }`. Totals are nonnegative safe integers
@@ -429,7 +433,11 @@ its busy/disabled state and emits the current Order/groupId without persisting i
 | `ChoiceChips` / molecule | `model: ChoiceGroupModel`, `onChange(ID \| undefined)`; single selection, wrapping chips with radio/selected semantics. An optional clear control emits `undefined` only when not required. Derivation shares the choice decision with ChoiceRow. | `choice-chips/default`, `selected`, `disabled-option`, `required`, `long-labels`, plus pressed/focus; R10, R23. |
 | `SelectionControl` / atom | `model: { label; selected: boolean \| 'mixed'; enabled; reason? }`, `onChange(boolean)`. Mixed activation selects all eligible loaded rows; selected activation clears them. | `selection-control/off`, `on`, `mixed`, `disabled`, plus pressed/focus; R02's selection affordance adapted to a native checkbox. |
 | `ActionBar` / molecule | `model: { label; actions: readonly Action[] }`, `onAction(id)`. Preserve supplied order; wrap full labels; no nested pressable parent. | `action-bar/one`, `multiple`, `destructive`, `busy`, `disabled`, `long-copy`; R03, R09. |
-| `DataList` / organism | `model: DataListModel`; `onOpen(rowId)`, `onRowAction(rowId,actionId)`, `onOrder(Order)`, `onView(id)`, `onViewAction(id,actionId)`, `onSaveView({order,groupId?})`, `onSelection(ids)`, `onCollapse(ids)`, `onBulkAction(actionId,ids)`, `onRefresh()`, `onMore()`. Only supplied controls are rendered. | `data-list/grouped`, `ungrouped`, `counts-unknown`, `collapsed`, `filtered-empty`, `inline-actions`, `saved-view`, `view-dirty`, `selection-none`, `selection-some`, `selection-all-loaded`, `selection-unavailable`, `paging`, `page-error`, `refresh-error`, plus common states; R02, R23. |
+| `DataList` / organism | `model: DataListModel`; `onOpen(rowId)`, `onRowAction(rowId,actionId)`, `onView(id)`, `onViewAction(id,actionId)`, `onSaveView({order,groupId?})`, `onSelection(ids)`, `onCollapse(ids)`, `onBulkAction(actionId,ids)`, `onRefresh()`, `onMore()`. Only supplied controls are rendered. The order it was read with stays in the model
+(`filters`, `sort` and their `targets`); the controls that change it are the toolbar row and
+the two sheets the list screen draws over it (`deriveListToolbar`, `deriveSortSheet`,
+`deriveFilterSheet`, `ChoiceRows`), not the list's own header, so an organism that composes
+`DataList` directly supplies them from those targets. | `data-list/grouped`, `ungrouped`, `counts-unknown`, `collapsed`, `filtered-empty`, `inline-actions`, `saved-view`, `view-dirty`, `selection-none`, `selection-some`, `selection-all-loaded`, `selection-unavailable`, `paging`, `page-error`, `refresh-error`, plus common states; R02, R23. |
 
 Selection is **loaded-row scope**, never “all results on the server.” The helper
 intersects requested IDs with eligible loaded rows and emits them in section/row

@@ -18,7 +18,6 @@ export interface Props {
   readonly model: DataListModel;
   readonly onOpen?: (id: string) => void;
   readonly onRowAction?: (rowId: string, actionId: string) => void;
-  readonly onOrder?: (order: Order) => void;
   readonly onView?: (id: string) => void;
   readonly onViewAction?: (viewId: string, actionId: string) => void;
   readonly onSaveView?: (value: { readonly order: Order; readonly groupId?: string }) => void;
@@ -36,7 +35,6 @@ export function DataList({
   model,
   onOpen,
   onRowAction,
-  onOrder,
   onView,
   onViewAction,
   onSaveView,
@@ -51,10 +49,6 @@ export function DataList({
   rowTestID,
 }: Props) {
   const s = useStyles(kitStyles);
-  const orderChoice = (group: NonNullable<DataListModel["sort"]>, id: string | undefined) => {
-    const target = id === undefined ? group.clear : group.targets.find((c) => c.id === id)?.order;
-    if (target) onOrder?.(target);
-  };
   return (
     <GroupedListScreen
       sections={model.sections.map((section) => ({

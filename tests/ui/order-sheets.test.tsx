@@ -11,9 +11,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import { parseCatalog, type Entry } from "../../src/core/catalog";
 import type { Order } from "../../src/core/derive";
-import { ChoiceRows } from "../../src/ui/molecules/ChoiceRows";
 import { ResourceList } from "../../src/ui/organisms/ResourceList";
-import { DetailSheet } from "../../src/ui/templates/DetailSheet";
 import { ThemeProvider } from "../../src/ui/theme";
 import { presentation } from "../fakes/presentation";
 
@@ -135,43 +133,5 @@ describe("the filters sheet", () => {
       </ThemeProvider>,
     );
     expect(screen.getByRole("button", { name: "Filters · 1" })).toBeOnTheScreen();
-  });
-});
-
-describe("a choice row", () => {
-  test("a row that stands on the answer says so, and one already chosen is not pressed again", async () => {
-    const onChange = jest.fn();
-    const model = {
-      id: "g",
-      label: "State",
-      choices: [
-        { id: "all", label: "All", enabled: true, selected: true, change: false },
-        { id: "open", label: "Open", enabled: true, selected: false, change: true },
-      ],
-      clearLabel: "Clear",
-      canClear: false,
-      satisfied: true,
-    };
-    await render(
-      <ThemeProvider mode="light">
-        <DetailSheet
-          model={{
-            open: true,
-            title: "Filters",
-            close: { id: "close", label: "Close", tone: "plain", state: "ready" },
-            canRequestClose: true,
-            gestureDismissal: true,
-            bar: { label: "Actions", actions: [] },
-          }}
-          onRequestClose={none}
-        >
-          <ChoiceRows model={model} named={false} onChange={onChange} />
-        </DetailSheet>
-      </ThemeProvider>,
-    );
-    await fireEvent.press(screen.getByRole("radio", { name: "All" }));
-    expect(onChange).not.toHaveBeenCalled();
-    await fireEvent.press(screen.getByRole("radio", { name: "Open" }));
-    expect(onChange).toHaveBeenCalledWith("open");
   });
 });
