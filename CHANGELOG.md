@@ -38,9 +38,9 @@ for the version being released.
   implemented it, which nothing outside this repository does, and the two wire fragments
   it used to return ("is not a number", "is not a time") are gone. New in the same
   subpath, additive: `changedFields` (the controls whose effective value differs from the
-  row's — what a discard guard asks, compared as what a value means rather than as how it is
-  spelled, so confirming the instant the row already held or flicking a switch back off is no
-  change), `firstProblem` (the first control in the sheet's own
+  row's — what a discard guard asks, compared as what a value means rather than as how it
+  is spelled, so confirming the instant the row already held or flicking a switch back off
+  is no change), `firstProblem` (the first control in the sheet's own
   asked order that carries a sentence) and `writeControls` (the body of a whole-row
   replace: the drawn fields plus the writable ones the sheet was never shown, and never
   the server's own `id`, `createdAt` or `updatedAt`). Ten sentences joined the copy table

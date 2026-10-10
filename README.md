@@ -462,20 +462,19 @@ holds it as `awaiting` and counts its refusals as `refusals`, the organism focus
 ref and asks React Native's `scrollResponderScrollNativeHandleToKeyboard` to lift it above
 the keyboard; typing into the field awaited is what clears it, and a second Save over a
 sheet nobody mended asks for the same field again, which is what the count is for. A
-refusal about a control with no box to focus (a choice, a date row, a
-switch, a tag box) focuses nothing: `FormField` announces `label: error`, its error line is a
+refusal about a control with no box to focus (a choice, a date row, a switch, a tag box)
+focuses nothing: `FormField` announces `label: error`, its error line is a
 polite live region and the notice above the fields is `urgent`. **Dirty means changed, not
 touched**: `changedFields` compares each control's effective value with the one the row
-arrived with as what the value means — an instant by the instant it is, because the date row
-writes `timeWire` with milliseconds while the server spells the same instant without them,
-and a switch by on or off, because a row that stored nothing is off — so typing a word and
-putting it back, confirming the date the record already carried, or flicking a switch on and
-back asks nobody's permission; the one
-predicate is used by the sheet, by a command's argument and by the singleton, and the
-guard covers Cancel as well as system back and the swipe gesture. **One dismissal, one
-question**: Cancel asks its own answer and then leaves with the guard lifted by a render,
-because a `router.back()` taken while `usePreventRemove` is armed is handed back to it, and
-a person who was asked twice for the same draft was not asked once. **Values survive every
+arrived with, as what the value means — an instant by the instant it is, because the date row
+writes `timeWire` with milliseconds and the server spells the same instant without them, and
+a switch by on or off, because a row that stored nothing is off — so typing a word and putting
+it back, confirming the date the record already carried, or flicking a switch on and back asks
+nobody's permission; the one predicate is used by the sheet, by a command's argument and by the
+singleton, and the guard covers Cancel as well as system back and the swipe gesture. **One
+dismissal, one question**: Cancel asks its own answer and then leaves with the guard lifted by a
+render, because a `router.back()` taken while `usePreventRemove` is armed is handed back to it,
+and a person who was asked twice for the same draft was not asked once. **Values survive every
 failure** — a refused save, a 422 under its field, a 500 (`failure.saveFailed`), a
 transport that never answered (`failure.uncertain`, and a save is never replayed), a 409
 (`failure.revision`, no silent overwrite), a 401 (the draft stays filed under this address
@@ -489,8 +488,8 @@ hidden ones the author keeps as plumbing and the immutable echo of what the read
 so a whole-row replace clears nothing by omission, while `id`, `createdAt` and `updatedAt`
 never travel back. **A landed write says so**: one success haptic and one sentence that
 outlives the screen that wrote it — the shell holds one slot, filed by the destination address
-the writer names (`say`) and read once by the record that lands there (`heard`), for the visit
-it was heard in: a focus that hears nothing draws nothing — "Note
+the writer names (`say`) and read once by the record that lands there (`heard`), for the
+visit it was heard in: a focus that hears nothing draws nothing — "Note
 created" after a create, "Changes saved" after an edit and after a singleton's PUT, drawn as
 an `ok` `Notice` with a polite live region beside the row it is about.
 
@@ -519,6 +518,17 @@ core, exported, so a custom renderer pack gets the same dirty rule and the same 
 focus; `FormWords` is now the whole seam between a refusal and its sentence, so the core
 writes no English at all; and `say`/`heard` is one sentence for one address, which is the
 carrier the next "the write landed" moment will need instead of a toast.
+
+What this does not reach, stated where a reader would look for it: four controls carry no
+box to focus — a choice, a date row, a switch and the tag box — so their refusal is announced
+where it stands and the keyboard goes to the first box that can be typed into; the sentence
+about a list item of the wrong type is still English written in the core ("contains a value
+that does not match its item type"), because no phone's table holds it in either language
+yet; a singleton PUT echoes what the read returned for an immutable field, and this kit has
+no live server to prove the kernel accepts its own echo rather than refusing it as a write
+of a field nobody may write; and the English article rule chooses its article from a label's
+first letter rather than its meaning, so a field labelled `URL` is asked for as "Enter an
+uRL." and one labelled `Hour` as "Enter a hour.".
 
 ## Design
 
