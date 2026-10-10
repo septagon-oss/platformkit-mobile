@@ -14,7 +14,7 @@ import {
   badgeTone,
   display,
   enumTone,
-  humanize,
+  fieldLabel,
   splitList,
   text,
 } from "../../core/derive";
@@ -136,7 +136,7 @@ export function Labelled({
     <View style={s.cell}>
       {speaks ? null : (
         <Text role="caption" tone="muted">
-          {humanize(field.name)}
+          {fieldLabel(field)}
         </Text>
       )}
       <Value presentation={presentation} field={field} value={value} compact />

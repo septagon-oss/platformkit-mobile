@@ -39,7 +39,6 @@ const listed = () => {
       more: false,
       error: "",
       order: noOrder,
-      ordering: false,
       canCreate: true,
     },
     presentation,

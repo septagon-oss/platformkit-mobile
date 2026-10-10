@@ -5,6 +5,8 @@
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
 import type { Copy } from "./copy";
 import type { EntrySubject } from "./failure";
+import type { DataCell } from "./collections";
+import type { Status } from "./shared";
 import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
 export { copyForLocale, copyLanguage, deriveCopy, type Copy, type Language } from "./copy";
@@ -380,15 +382,36 @@ export function listColumns(e: Entry): readonly Field[] {
  * shows what tells two records apart first: a closed set of values, then a
  * yes or no, then a number, then words, and only then the times and
  * identifiers every record has and few people scan for.
+ *
+ * The budget is two, whoever named the fields: one line of a phone holds two
+ * values beside the line the record wrote about itself, and a third is scanned by
+ * nobody, so a declared list longer than two keeps its first two. Plumbing — the
+ * id and the two stamps — is never a cell whoever pointed at it: the row answers
+ * those questions the same way the record does, in its `recordInformation` block.
+ *
+ * Neither is the declared state. `statusField`'s value is the row's *pill*, drawn
+ * in the column `Row` reserves for it, and the same value is not also one of the
+ * two cells beside the title: "Em aberto" as a pill and "Em aberto" as a cell
+ * answers one question twice and pushes out the value that would have set this row
+ * apart. This is `headerDrawn`'s rule asked of a row — a fact is drawn once, at the
+ * highest place that draws it — and an entry that declares no state loses nothing:
+ * with no pill to defer to, the closed set stays the plain cell it has always been.
  */
-export function listCells(e: Entry, limit = 3): readonly Field[] {
+export function listCells(e: Entry, limit = 2): readonly Field[] {
+  // Asked once, so the pill and the cell cannot disagree about which field the row
+  // states its condition in.
+  const pill = statusField(e);
+  const shownTwice = (f: Field): boolean =>
+    informationFields.includes(f.name) || f.name === pill?.name;
   const declared = e.hints?.summaryFields;
   if (declared !== undefined)
-    // Declared means exactly those, in the order the author gave them, minus any
-    // field a row may not speak of: `limit` is this build's budget for a ranking
-    // nobody asked for, and neither plumbing nor the record's own paragraph is a
-    // cell whoever pointed at it.
-    return declared.flatMap((name) => e.fields.filter((f) => f.name === name && rowContent(f)));
+    // Declared means those, in the order the author gave them, minus any field a
+    // row may not speak of and minus what the row draws above or beside the cells.
+    // `limit` binds here too: a declaration says which values and in which order,
+    // not that a phone has room for a third.
+    return declared
+      .flatMap((name) => e.fields.filter((f) => f.name === name && rowContent(f) && !shownTwice(f)))
+      .slice(0, limit);
   const rank = (f: Field): number => {
     if (f.enum && f.enum.length > 0) return 0;
     if (f.type === "bool") return 1;
@@ -401,7 +424,7 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
   const named = rowPrimary(e);
   const preview = listPreview(e);
   return listColumns(e)
-    .filter((f) => f.name !== named?.name && f.name !== preview?.name)
+    .filter((f) => f.name !== named?.name && f.name !== preview?.name && !shownTwice(f))
     .map((f, i) => ({ f, i }))
     .sort((a, b) => rank(a.f) - rank(b.f) || a.i - b.i)
     .slice(0, limit)
@@ -409,26 +432,27 @@ export function listCells(e: Entry, limit = 3): readonly Field[] {
 }
 
 /**
- * listPreview is the field a row shows a line of under its name: the first
- * long text the entity has, which is what a person reads to recognise the
- * record.
+ * listPreview is the field whose line sits under a record's name, asked of one
+ * medium: `row` is a line on a list, `record` is the record's own page.
  *
- * `hide:list` does not disqualify it. That tag says a value does not belong
- * in a table column, which is true of every long text and is why a schema
- * marks them: a paragraph ruins a column. A line under the name is not a
- * column, and the paragraph is exactly what is worth reading there. It stays
- * out of the cells beside it, which are columns. A declared visibility does
- * disqualify it, in both readings: `detail` is the paragraph a person reads on
- * the record and nowhere else, and a pointer at it cannot make the row quote it.
+ * The declared pointer (`previewField`) is asked `rowContent` in both readings:
+ * an author who pointed a summary line at a paragraph said what lines this record,
+ * and `hideList` answers the different question of what belongs in a table column.
+ * The *default* chain asks each medium its own question — `onList` for a row, the
+ * one place the legacy `hideList` tag is answered, and `rowContent` for a record,
+ * which has room for the paragraph a row has no room for. So an un-hinted entity's
+ * long text, which every schema marks `hideList`, lines a record and not a row, and
+ * a row with nothing worth reading under its name shows nothing rather than a dash.
  */
-export function listPreview(e: Entry): Field | undefined {
+export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | undefined {
   const declared = e.hints?.previewField;
   if (declared !== undefined) return e.fields.find((f) => f.name === declared && rowContent(f));
   const named = rowPrimary(e);
+  const speaks = where === "row" ? onList : rowContent;
   return e.fields.find(
     (f) =>
       f.name !== named?.name &&
-      rowContent(f) &&
+      speaks(f) &&
       !f.readOnly &&
       (f.type === "text" || f.widget === "textarea"),
   );
@@ -449,6 +473,59 @@ export function saidValue(
   const at = f.type === "time" ? timeValue(v) : undefined;
   const instant = at ? presentedInstant(at, format) : undefined;
   return { value: display(f, v, format), ...(instant ? { spoken: instant.exact } : {}) };
+}
+
+/**
+ * ListRow is one record as a line: what it is called, what state it is in, the
+ * record's own line under its name, and the couple of values that set it apart from
+ * its neighbours. It is the row a list draws and nothing else — which fields answer
+ * which of the four is `rowPrimary`, `statusPill`, `listPreview(…, "row")` and
+ * `listCells`'s, each asked here and nowhere else.
+ *
+ * An identifier is never in it. `collections.ts` names a row by `row.id` for the
+ * press and the test id; a person reading "3f2a…" learns nothing, and 0085
+ * photographs exactly that line.
+ */
+export interface ListRow {
+  readonly title: string;
+  /** absent, never a dash, when the preview field holds nothing. */
+  readonly summary?: string;
+  /** absent when the entry declares no state: a row never guesses one. */
+  readonly status?: Status;
+  readonly cells: readonly DataCell[];
+}
+
+/**
+ * listRow is one record read as a line. A cell exists only where the row holds a
+ * value, so two chosen fields with one blank answer one cell and no placeholder;
+ * each cell carries the `Field` behind it, because the molecule that draws a value
+ * in the shape its type deserves (`Value`) needs the schema and not a description
+ * of it — a `shape: "badge"` tag in the model would be a second `Value`.
+ */
+export function listRow(
+  e: Entry,
+  row: Row,
+  format: Formatting,
+  untitled: Copy["kit"]["untitled"],
+): ListRow {
+  const preview = listPreview(e, "row");
+  const pill = statusPill(e, row, format);
+  return {
+    title: label(e, row, untitled, "row"),
+    ...(preview && hasValue(preview, row[preview.name])
+      ? { summary: display(preview, row[preview.name], format) }
+      : {}),
+    ...(pill ? { status: { ...pill, symbol: "none" as const } } : {}),
+    cells: listCells(e)
+      .filter((field) => hasValue(field, row[field.name]))
+      .map((field) => ({
+        id: field.name,
+        label: fieldLabel(field),
+        ...saidValue(field, row[field.name], format),
+        field,
+        raw: row[field.name],
+      })),
+  };
 }
 
 export interface DetailItem {
@@ -493,14 +570,34 @@ const recordField = (f: Field, v: unknown, format: Formatting): DetailItem => ({
 });
 
 /**
- * RecordPill is the status as the record shows it: the author's word for the value
- * (`enumLabels`, or the value humanised) and the colour the author declared for it
- * (`enumTones`, or neutral). Both come from one field's value, so a pill cannot say
- * "Open" in green because it came first.
+ * RecordPill is a status as a screen shows it: the author's word for the value and the
+ * colour the author declared for it. Both come from one field's value through
+ * `statusPill`, so a pill cannot say "Open" in green because it came first.
  */
 export interface RecordPill {
   readonly label: string;
   readonly tone: "ok" | "warning" | "danger" | "info" | "neutral";
+}
+
+/**
+ * statusPill is the state a record declares, as this kit draws it: the author's word
+ * for the value (`enumLabels`, or the value humanised) and the colour the author
+ * declared for it (`enumTones`, or neutral). It is the one reading of `statusField`
+ * with its two label tables, asked by the record's header and by a list row, so a
+ * record and a row cannot colour one value two ways.
+ *
+ * Nothing is inferred: it answers `undefined` when the entry declares no
+ * `statusField`, when that field is plumbing, or when this row holds no value — a
+ * pill that guessed from "the first enum field" would say something the document
+ * never said (`statusField`'s own rule).
+ */
+export function statusPill(e: Entry, row: Row, format: Formatting): RecordPill | undefined {
+  const status = statusField(e);
+  if (!status || !hasValue(status, row[status.name])) return undefined;
+  return {
+    label: display(status, row[status.name], format),
+    tone: badgeTone(enumTone(status, text(row[status.name]))),
+  };
 }
 
 export interface RecordHeader {
@@ -523,18 +620,11 @@ export function recordHeader(
   format: Formatting,
   untitled: Copy["kit"]["untitled"],
 ): RecordHeader {
-  const status = statusField(e);
-  const preview = listPreview(e);
+  const preview = listPreview(e, "record");
+  const pill = statusPill(e, row, format);
   return {
     title: label(e, row, untitled, "record"),
-    ...(status && hasValue(status, row[status.name])
-      ? {
-          status: {
-            label: display(status, row[status.name], format),
-            tone: badgeTone(enumTone(status, text(row[status.name]))),
-          },
-        }
-      : {}),
+    ...(pill ? { status: pill } : {}),
     ...(preview && hasValue(preview, row[preview.name])
       ? { summary: display(preview, row[preview.name], format) }
       : {}),
@@ -571,7 +661,9 @@ export const informationFields: readonly string[] = ["id", "createdAt", "updated
  * the three declarations, and every place below asks this one answer.
  */
 const headerDrawn = (e: Entry): ReadonlySet<string> =>
-  new Set([primary(e), statusField(e), listPreview(e)].flatMap((f) => (f ? [f.name] : [])));
+  new Set(
+    [primary(e), statusField(e), listPreview(e, "record")].flatMap((f) => (f ? [f.name] : [])),
+  );
 
 /**
  * shownFields are the fields a record may draw at all: no `hidden` anywhere, and no
@@ -899,33 +991,102 @@ export interface Order {
 
 export const noOrder: Order = { sort: "", filters: {} };
 
-/** sortOptions are the orders a list offers: newest, oldest, then each visible column both ways. */
-export function sortOptions(e: Entry): readonly { value: string; label: string }[] {
+/**
+ * sortFields are the fields a list can be ordered by, in the order its sheet lists
+ * them: the entry's declared `sortable`, else the field it leads rows with plus the
+ * date fields it declares.
+ *
+ * Three kinds are never offered, declared or not. `bool`, `list` and `uuid` have no
+ * honest direction word — "false, then true" is nobody's order — and the two stamps
+ * are said by "Newest first" and "Oldest first" already, which are the first two
+ * rows of every sheet. A field the document calls plumbing is never offered either:
+ * a sort row *names* the field, and naming plumbing in a sheet is naming it on screen.
+ */
+export function sortFields(e: Entry): readonly Field[] {
+  const offerable = (f: Field): boolean =>
+    !neverShown(f) &&
+    !informationFields.includes(f.name) &&
+    f.type !== "bool" &&
+    f.type !== "list" &&
+    f.type !== "uuid";
+  const declared = e.hints?.sortable;
+  if (declared !== undefined)
+    return declared.flatMap((name) => e.fields.filter((f) => f.name === name && offerable(f)));
+  const named = rowPrimary(e);
+  const dates = e.fields.filter((f) => f.type === "time" && f.name !== named?.name && offerable(f));
+  return [...(named !== undefined && offerable(named) ? [named] : []), ...dates];
+}
+
+/**
+ * sortOptions are the orders a list offers: newest, oldest, then each field the
+ * sheet offers, once per direction. The values are the wire's and do not move — ""
+ * is newest, `createdAt` oldest, a field name ascending and `-name` descending,
+ * which is what `effects/api.ts` sends as `sort`. The *words* come from the copy
+ * table and from the field's type: a deadline is "soonest first", a rank is "low to
+ * high", a title is "A–Z", and none of them is said in English on a Portuguese phone.
+ *
+ * A closed set sorts A–Z because the kernel sorts the stored value, not the label the
+ * author gave it; ordering a set by its declared words needs a sort contract the
+ * kernel does not print yet, so the sheet says the order it actually performs.
+ */
+export function sortOptions(
+  e: Entry,
+  format: Formatting,
+): readonly { readonly value: string; readonly label: string }[] {
+  const kit = format.copy.kit;
   const out = [
-    { value: "", label: "Newest first" },
-    { value: "createdAt", label: "Oldest first" },
+    { value: "", label: kit.sortNewest },
+    { value: "createdAt", label: kit.sortOldest },
   ];
-  for (const f of listColumns(e)) {
-    if (f.type === "bool" || f.type === "list" || f.type === "uuid") continue;
-    if (f.name === "createdAt") continue;
+  for (const f of sortFields(e)) {
     const word = fieldLabel(f);
-    out.push({ value: f.name, label: `${word}, ascending` });
-    out.push({ value: "-" + f.name, label: `${word}, descending` });
+    const pair =
+      f.type === "time"
+        ? [kit.sortSoon, kit.sortLate]
+        : f.type === "int" || f.type === "float"
+          ? [kit.sortLow, kit.sortHigh]
+          : [kit.sortAZ, kit.sortZA];
+    out.push({ value: f.name, label: pair[0]!(word) });
+    out.push({ value: "-" + f.name, label: pair[1]!(word) });
   }
   return out;
 }
 
-/** filterFields are the fields a list can be narrowed by: the ones with a closed set of values. */
+/**
+ * filterFields are the fields a list can be narrowed by: the ones with a closed set
+ * of values. A group *names* its field above the choices, so plumbing the document
+ * keeps off every screen is never a group either — naming is not drawing, which is
+ * why `detail` still answers yes and `hidden` answers no.
+ */
 export const filterFields = (e: Entry): readonly Field[] =>
-  e.fields.filter((f) => f.enum && f.enum.length > 0);
+  e.fields.filter((f) => f.enum && f.enum.length > 0 && !neverShown(f));
 
 /** queryFilters spells an Order's filters the way the API takes them. */
 export const queryFilters = (order: Order): readonly string[] =>
   Object.entries(order.filters).map(([k, v]) => `${k}:${v}`);
 
-/** narrowed says whether a list is showing less than everything, which changes what "empty" means. */
-export const narrowed = (order: Order): boolean =>
-  order.sort !== "" || Object.keys(order.filters).length > 0;
+/**
+ * reordered says the list reads in an order somebody chose. It is not narrowing:
+ * newest and soonest-first both show every record there is, so a sort never answers
+ * "no matching notes" for a resource that holds none.
+ */
+export const reordered = (order: Order): boolean => order.sort !== "";
+
+/**
+ * filtered says a value is in force that leaves some records out — any filter the
+ * person set, whether or not the entry still offers a control that can clear it.
+ */
+export const filtered = (order: Order): boolean =>
+  Object.values(order.filters).some((value) => value !== "");
+
+/**
+ * activeFilters counts the groups the entry offers *and* holds a value for, which is
+ * what the toolbar's "Filters · 2" says and what "Clear filters" would take away. A
+ * value on a field the document stopped offering is filtered but not counted: the
+ * control would promise to clear what it cannot reach.
+ */
+export const activeFilters = (order: Order, e: Entry): number =>
+  filterFields(e).filter((f) => (order.filters[f.name] ?? "") !== "").length;
 
 /** screenPath is where the router serves an entry's screens. */
 export const screenPath = (e: Entry): `/${string}/${string}` =>

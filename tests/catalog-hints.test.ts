@@ -91,8 +91,8 @@ test("for the served golden every reading answer is the one this build gave befo
       listCells(e).map((f) => f.name),
       listCells(e, 99)
         .map((f) => f.name)
-        .slice(0, 3),
-      "the limit still bounds the ranking",
+        .slice(0, 2),
+      "the row's budget of two values still bounds the ranking",
     );
     for (const f of e.fields) assert.equal(fieldLabel(f), human(f.name));
     for (const c of e.commands) assert.equal(commandTitle(c), c.summary || human(c.verb));
@@ -378,7 +378,7 @@ test("no hint changes a request", () => {
     plural: "Tarefas",
     primaryField: "title",
     previewField: "body",
-    summaryFields: ["status", "rank"],
+    summaryFields: ["rank", "pinned", "status"],
     statusField: "status",
     sections: [{ key: "main", label: "Main" }],
   });
@@ -391,8 +391,9 @@ test("no hint changes a request", () => {
   assert.equal(commandOf(entry, "archive", "collection")?.verb, "archive");
   assert.deepEqual(
     listCells(entry).map((f) => f.name),
-    ["status", "rank"],
-    "declared summary cells are the author's order, not the ranking",
+    ["rank", "pinned"],
+    "declared summary cells are the author's order, not the ranking, and the state their " +
+      "pill already says is never one of them",
   );
   assert.equal(listPreview(entry)!.name, "body");
 });

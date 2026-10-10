@@ -8,7 +8,7 @@ import { Notice } from "../atoms/Notice";
 import { SelectionControl } from "../atoms/SelectionControl";
 import { Text } from "../atoms/Text";
 import { ActionBar } from "../molecules/ActionBar";
-import { ChoiceChips } from "../molecules/ChoiceChips";
+import { Labelled } from "../molecules/Value";
 import { ModelState } from "../molecules/ModelState";
 import { Row } from "../molecules/Row";
 import { GroupedListScreen } from "../templates/ListScreen";
@@ -18,7 +18,6 @@ export interface Props {
   readonly model: DataListModel;
   readonly onOpen?: (id: string) => void;
   readonly onRowAction?: (rowId: string, actionId: string) => void;
-  readonly onOrder?: (order: Order) => void;
   readonly onView?: (id: string) => void;
   readonly onViewAction?: (viewId: string, actionId: string) => void;
   readonly onSaveView?: (value: { readonly order: Order; readonly groupId?: string }) => void;
@@ -36,7 +35,6 @@ export function DataList({
   model,
   onOpen,
   onRowAction,
-  onOrder,
   onView,
   onViewAction,
   onSaveView,
@@ -51,10 +49,6 @@ export function DataList({
   rowTestID,
 }: Props) {
   const s = useStyles(kitStyles);
-  const orderChoice = (group: NonNullable<DataListModel["sort"]>, id: string | undefined) => {
-    const target = id === undefined ? group.clear : group.targets.find((c) => c.id === id)?.order;
-    if (target) onOrder?.(target);
-  };
   return (
     <GroupedListScreen
       sections={model.sections.map((section) => ({
@@ -73,18 +67,6 @@ export function DataList({
             {...(onRefresh ? { onRetry: onRefresh } : {})}
             {...(onStateAction ? { onAction: onStateAction } : {})}
           />
-          {onOrder
-            ? model.filters.map((filter) => (
-                <ChoiceChips
-                  key={filter.model.id}
-                  model={filter.model}
-                  onChange={(id) => orderChoice(filter, id)}
-                />
-              ))
-            : null}
-          {onOrder && model.sort ? (
-            <ChoiceChips model={model.sort.model} onChange={(id) => orderChoice(model.sort!, id)} />
-          ) : null}
           {model.views.map((view) => (
             <View key={view.id}>
               {onView ? (
@@ -154,6 +136,40 @@ export function DataList({
             title={row.title}
             cells={row.cells}
             {...(row.summary ? { summary: row.summary } : {})}
+            {...(row.cells.some((cell) => cell.field)
+              ? {
+                  // The same cells, in the shapes their types deserve: a closed set is
+                  // a pill, an instant carries a clock, and only a value that cannot
+                  // speak for itself ("No", "2") keeps the field's short name. `cells`
+                  // stays beside them because a row is one focusable element whose label
+                  // is every field it drew, shorthand read aloud in full.
+                  shown: (
+                    <>
+                      {row.cells
+                        .filter((cell) => cell.field)
+                        .map((cell) => (
+                          <Labelled
+                            key={cell.id}
+                            presentation={model.feedback}
+                            field={cell.field!}
+                            value={cell.raw}
+                          />
+                        ))}
+                    </>
+                  ),
+                }
+              : {})}
+            {...(row.status
+              ? {
+                  trailing: (
+                    <Badge
+                      label={row.status.label}
+                      tone={row.status.tone}
+                      symbol={row.status.symbol}
+                    />
+                  ),
+                }
+              : {})}
             {...(row.open?.enabled && onOpen ? { onPress: () => onOpen(row.id) } : {})}
             {...(testID
               ? {
@@ -163,9 +179,6 @@ export function DataList({
                 }
               : {})}
           />
-          {row.status ? (
-            <Badge label={row.status.label} tone={row.status.tone} symbol={row.status.symbol} />
-          ) : null}
           {row.selection && onSelection ? (
             <SelectionControl
               model={row.selection}

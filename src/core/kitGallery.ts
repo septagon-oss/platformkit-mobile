@@ -36,6 +36,10 @@ export const kitCaseIds = [
   "choice-chips/selected",
   "choice-chips/disabled-option",
   "choice-chips/required",
+  // The same choice group as a sheet's rows, which is what a sort or a filters sheet
+  // is made of; the chips above it wrap, and a sheet is read down a column.
+  "choice-rows/default",
+  "choice-rows/selected",
   "action-bar/multiple",
   "action-bar/busy",
   "action-bar/disabled",

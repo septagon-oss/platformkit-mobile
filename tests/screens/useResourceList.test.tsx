@@ -60,6 +60,56 @@ describe("useResourceList", () => {
     expect(result.current.total).toBe(0);
   });
 
+  test("the order a list was narrowed to is the order its next page is asked for", async () => {
+    api.list.mockResolvedValue({ items: rows, total: 4 });
+    const { result } = await renderHook(() => useResourceList(note, feedback));
+    await waitFor(() => expect(result.current.rows).toHaveLength(2));
+    await act(async () =>
+      result.current.setOrder({ sort: "dueAt", filters: { status: "resolved" } }),
+    );
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(2));
+    expect(api.list.mock.calls[1]![1]).toEqual({
+      offset: 0,
+      limit: 20,
+      sort: "dueAt",
+      filters: ["status:resolved"],
+    });
+    await act(async () => result.current.loadMore());
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(3));
+    // The window grew under the same question: paging is not a fresh one.
+    expect(api.list.mock.calls[2]![1]).toEqual({
+      offset: 2,
+      limit: 20,
+      sort: "dueAt",
+      filters: ["status:resolved"],
+    });
+  });
+
+  test("a changed order re-reads from the first page instead of stitching a new one on", async () => {
+    api.list.mockResolvedValue({ items: rows, total: 60 });
+    const { result } = await renderHook(() => useResourceList(note, feedback));
+    await waitFor(() => expect(result.current.rows).toHaveLength(2));
+    await act(async () => result.current.loadMore());
+    await waitFor(() => expect(result.current.rows).toHaveLength(4));
+    await act(async () => result.current.setOrder({ sort: "title", filters: {} }));
+    await waitFor(() => expect(result.current.rows).toHaveLength(2));
+    const last = api.list.mock.calls[api.list.mock.calls.length - 1]![1];
+    expect(last).toMatchObject({ offset: 0, sort: "title", filters: [] });
+  });
+
+  test("one sheet holds the screen at a time, and closing it is the same answer", async () => {
+    api.list.mockResolvedValue({ items: rows, total: 2 });
+    const { result } = await renderHook(() => useResourceList(note, feedback));
+    await waitFor(() => expect(result.current.rows).toHaveLength(2));
+    expect(result.current.sheet).toBe("none");
+    await act(async () => result.current.setSheet("sort"));
+    expect(result.current.sheet).toBe("sort");
+    await act(async () => result.current.setSheet("filters"));
+    expect(result.current.sheet).toBe("filters");
+    await act(async () => result.current.setSheet("none"));
+    expect(result.current.sheet).toBe("none");
+  });
+
   test("a read the screen abandoned changes nothing about the rows it left", async () => {
     api.list.mockResolvedValueOnce({ items: rows, total: 2 });
     const { result } = await renderHook(() => useResourceList(note, feedback));

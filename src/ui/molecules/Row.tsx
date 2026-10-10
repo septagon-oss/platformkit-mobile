@@ -29,6 +29,12 @@ interface Props {
   readonly busy?: boolean;
   /** selected is the row a filter or a single choice stands on, not a row being pressed. */
   readonly selected?: boolean;
+  /**
+   * role is which control this row is to a reader. A row on a list is a button that
+   * opens something; a row that *is* the choice — one line of a sheet of orders — is a
+   * radio, and a group of them is read down as one question.
+   */
+  readonly role?: "button" | "radio";
   /** opens says pressing leads somewhere, which is what the chevron promises. */
   readonly opens?: boolean;
   readonly testID?: string;
@@ -63,6 +69,7 @@ export function Row({
   tone = "primary",
   busy = false,
   selected,
+  role = "button",
   opens: leads,
   testID,
 }: Props) {
@@ -82,10 +89,10 @@ export function Row({
       disabled={!onPress || busy}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
-      accessibilityRole="button"
+      accessibilityRole={role}
       aria-busy={busy}
       aria-disabled={!onPress || busy}
-      {...chosenState("button", selected)}
+      {...chosenState(role, selected)}
       accessibilityLabel={[eyebrow, title, ...cells.map((cell) => said(cell, true))]
         .filter(Boolean)
         .join(", ")}

@@ -60,6 +60,42 @@ export const kitEnglish = {
   filters: "Filters",
   moreFilters: "More filters",
   sort: "Sort",
+  // The bar under the header that holds both doors. It is named for itself: the
+  // accessible name of a group of controls that repeated one of its own buttons
+  // would tell a reader the bar *is* that button.
+  listControls: "List controls",
+  // A filter group always answers, so the choice that narrows nothing is "All", the
+  // reading of the group, and never "Clear", which is what a reset at the group's edge
+  // is called (`clear` above stays that word's owner).
+  all: "All",
+  clearFilters: "Clear filters",
+  filtersActive: (count: string) => `Filters · ${count}`,
+  // The two doors a list's toolbar holds. `new` is the header's word for a record of
+  // no known kind; `newNamed` names the kind the catalogue gave it.
+  new: "New",
+  newNamed: (singular: string) => `New ${singular}`,
+  // The three answers an empty list gives, which are three different facts: nothing
+  // has arrived yet, nothing arrived that matches, and nothing can arrive yet.
+  emptyNone: (plural: string) => `No ${plural} yet`,
+  emptyCreate: (singular: string) => `Create a ${singular} to get started.`,
+  // The sentence opens with the noun, so it is capitalised here: this kit wrote the
+  // fallback plural lower-case and a sentence may not begin with it. A declared name
+  // arrives as its author wrote it, and capitalising what is already capitalised does
+  // nothing.
+  emptyArrive: (plural: string) =>
+    `${plural.charAt(0).toUpperCase()}${plural.slice(1)} will appear here when they're available.`,
+  noMatching: (plural: string) => `No matching ${plural}`,
+  filteredBody: "Try another search or clear your filters.",
+  // The direction words a sort sheet says. Which words a field takes is its type's,
+  // so a phone never reads "ascending" for a deadline and never reads English at all.
+  sortNewest: "Newest first",
+  sortOldest: "Oldest first",
+  sortAZ: (word: string) => `${word}, A–Z`,
+  sortZA: (word: string) => `${word}, Z–A`,
+  sortSoon: (word: string) => `${word}, soonest first`,
+  sortLate: (word: string) => `${word}, latest first`,
+  sortLow: (word: string) => `${word}, low to high`,
+  sortHigh: (word: string) => `${word}, high to low`,
   views: "Saved views",
   unsaved: "Unsaved changes",
   expand: "Expand",
@@ -262,6 +298,25 @@ export const kitPortuguese: KitWords = {
   filters: "Filtros",
   moreFilters: "Mais filtros",
   sort: "Ordenação",
+  listControls: "Controles da lista",
+  all: "Todos",
+  clearFilters: "Limpar filtros",
+  filtersActive: (count: string) => `Filtros · ${count}`,
+  new: "Novo",
+  newNamed: (singular: string) => `Novo ${singular}`,
+  emptyNone: (plural: string) => `Ainda não há ${plural}`,
+  emptyCreate: (singular: string) => `Crie um ${singular} para começar.`,
+  emptyArrive: (plural: string) => `Os ${plural} aparecem aqui quando estão disponíveis.`,
+  noMatching: (plural: string) => `Nenhum ${plural} corresponde`,
+  filteredBody: "Experimente outra pesquisa ou limpe os filtros.",
+  sortNewest: "Mais recentes primeiro",
+  sortOldest: "Mais antigos primeiro",
+  sortAZ: (word: string) => `${word}, A–Z`,
+  sortZA: (word: string) => `${word}, Z–A`,
+  sortSoon: (word: string) => `${word}, mais próximo primeiro`,
+  sortLate: (word: string) => `${word}, mais distante primeiro`,
+  sortLow: (word: string) => `${word}, crescente`,
+  sortHigh: (word: string) => `${word}, decrescente`,
   views: "Vistas guardadas",
   unsaved: "Alterações por guardar",
   expand: "Expandir",

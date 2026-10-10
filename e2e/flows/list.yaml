@@ -1,6 +1,8 @@
-# The list a generated entry opens: its two header doors, a row of its own, and
-# that the row opens the record it names. The row is created here, named after
-# this journey, and deleted by the end of it.
+# The list a generated entry opens: the door that makes a record of its own, a row
+# of its own, that the row opens the record it names, and that the two controls under
+# the header change how the list is read. The row is created here, named after this
+# journey, and deleted by the end of it. The controls are asserted only once a row
+# exists: a list with nothing on it and nothing filtered offers neither of them.
 # screen: app/[module]/[entity]/index.tsx
 appId: ${APP_ID}
 env:
@@ -13,7 +15,6 @@ env:
     visible:
       id: "resource-list"
     timeout: 15000
-- assertVisible: "Order"
 - assertVisible: "New"
 - tapOn: "New"
 - assertVisible:
@@ -34,6 +35,19 @@ env:
       id: "resource-list"
     timeout: 15000
 - assertVisible: ${TITLE} list
+# The two doors under the header: the order the list reads in, and what it is narrowed
+# by. Choosing an order is the whole answer, so the sheet goes with the choice; the
+# filters sheet stays open until the person leaves it.
+- assertVisible: "Sort"
+- tapOn: "Sort"
+- assertVisible: "Newest first"
+- tapOn: "Oldest first"
+- assertNotVisible: "Newest first"
+- assertVisible: "Filters"
+- tapOn: "Filters"
+- assertVisible: "All"
+- back
+- assertNotVisible: "All"
 - tapOn: ${TITLE} list
 - assertVisible:
     id: "resource-detail"

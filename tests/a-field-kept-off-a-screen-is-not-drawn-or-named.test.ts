@@ -75,7 +75,6 @@ function firstRow(entry: Entry, row: Row) {
       more: false,
       error: "",
       order: noOrder,
-      ordering: false,
       canCreate: true,
     },
     presentation,

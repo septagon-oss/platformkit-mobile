@@ -38,7 +38,6 @@ describe("ResourceList", () => {
         more={false}
         error="Connection lost."
         order={{ sort: "", filters: {} }}
-        ordering={false}
         onOrder={none}
         onOpen={none}
         onMore={none}
@@ -63,7 +62,6 @@ describe("ResourceList", () => {
     more: false,
     error: "",
     order: noOrder,
-    ordering: false,
     onOrder: none,
     onMore: none,
     onRefresh: none,
@@ -72,11 +70,13 @@ describe("ResourceList", () => {
   test("a row is its name and what tells it apart, and opens by id", async () => {
     const onOpen = jest.fn();
     await inTheme(<ResourceList presentation={presentation} {...props} onOpen={onOpen} />);
-    // The cells are the closed set, the yes-or-no and the number, in that
-    // order: not the times every record has.
+    // The cells are the closed set and the yes-or-no: two values, in that order,
+    // which is what one line of a phone holds. The number ranks behind them and
+    // the times every record has are never cells at all.
     await fireEvent.press(
-      screen.getByRole("button", { name: "Buy milk, Status: Open, Pinned: No, Rank: 2" }),
+      screen.getByRole("button", { name: "Buy milk, Status: Open, Pinned: No" }),
     );
+    expect(screen.queryByText(/Rank/)).toBeNull();
     expect(onOpen).toHaveBeenCalledWith("1");
   });
 
@@ -101,10 +101,36 @@ describe("ResourceList", () => {
     expect(screen.queryByRole("button", { name: "New note" })).toBeNull();
   });
 
-  test("the orders offered are newest, oldest and each visible column both ways", () => {
-    const labels = sortOptions(note).map((o) => o.label);
-    expect(labels.slice(0, 2)).toEqual(["Newest first", "Oldest first"]);
-    expect(labels).toContain("Title, ascending");
+  test("the state a row wears as its pill is not said again beside its name", async () => {
+    // The hinted note declares `status` as its state and points its summary at that
+    // same field. One value, one drawing: the pill in the column `Row` reserves for it,
+    // and no cell repeating it under the field's own word. Two identical badges on one
+    // row is what this refuses, so it counts what is drawn rather than the model.
+    const hinted = parseCatalog(JSON.parse(readFileSync("testdata/catalog.hints.json", "utf8")))
+      .resources[0]!;
+    await inTheme(
+      <ResourceList
+        presentation={presentation}
+        {...props}
+        entry={hinted}
+        rows={[{ id: "1", title: "Buy milk", status: "open", pinned: false }]}
+        onOpen={none}
+      />,
+    );
+    expect(screen.getAllByText("Em aberto")).toHaveLength(1);
+    expect(screen.queryByText("State")).toBeNull();
+    await screen.unmount();
+    // An entry that declares no state has no pill to defer to, and the same value is
+    // then the row's own cell — the rule holds from both sides of the declaration.
+    await inTheme(<ResourceList presentation={presentation} {...props} onOpen={none} />);
+    expect(
+      screen.getByRole("button", { name: "Buy milk, Status: Open, Pinned: No" }),
+    ).toBeOnTheScreen();
+  });
+
+  test("the orders offered are newest, oldest and the field the list leads with, both ways", () => {
+    const labels = sortOptions(note, presentation).map((o) => o.label);
+    expect(labels).toEqual(["Newest first", "Oldest first", "Title, A–Z", "Title, Z–A"]);
   });
 });
 
@@ -317,7 +343,6 @@ describe("Actions", () => {
           more: false,
           error: "",
           order: noOrder,
-          ordering: false,
           onOrder: none,
           onMore: none,
           onRefresh: none,

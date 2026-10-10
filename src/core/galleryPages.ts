@@ -75,6 +75,9 @@ export const galleryPages = {
       "detail-sheet/dirty",
       "side-panel/docked",
       "more-filters/open",
+      // The rows a sort or a filters sheet is made of: the same choice group the chips
+      // draw as wrapped chips, drawn down a column with one verb at the foot.
+      "choice-rows/selected",
       "confirm-dialog/delete",
     ],
   },
