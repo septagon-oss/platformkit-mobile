@@ -13,6 +13,8 @@ import { key, offers, type Entry } from "../core/catalog";
 import {
   failureSubject,
   instantValue,
+  label,
+  nounPhrase,
   presentedTime,
   screenPath,
   verbRefusal,
@@ -45,6 +47,11 @@ export function useResourceDetail(
   const [row, setRow] = useState<Row | undefined>();
   const [error, setError] = useState("");
   const [refusal, setRefusal] = useState<FailureVerdict | undefined>();
+  // The record's `…` is open. The button sits in the native header and the rows it
+  // opens in the body, so the state lives where both can reach it, and Delete closes
+  // it as it asks its question — a platform dialog drawn over a menu that is still
+  // open would leave the person answering two things at once.
+  const [menu, setMenu] = useState(false);
   const generation = useRef(0);
   const seen = useRef(writes[k] ?? 0);
   // The instant of the last read that answered. A refresh names it, and while it
@@ -76,6 +83,9 @@ export function useResourceDetail(
         if (verdict.withdraws) {
           setRow(undefined);
           read.current = "";
+          // The menu opens over a row. A row that is gone takes the menu with it,
+          // and the sentence about the access says the rest.
+          setMenu(false);
         }
         setError(verdict.text);
         setRefusal(verdict.verdict);
@@ -112,11 +122,15 @@ export function useResourceDetail(
       setError(verbRefusal("delete"));
       return;
     }
+    setMenu(false);
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    // The record is named by the field that names it everywhere else, and the
+    // warning says what this app cannot do, which is less than "permanently":
+    // a soft-deleting resource stays recoverable to the person who holds it.
     confirm(
-      "Are you sure?",
+      copy.kit.deleteQuestion(label(entry, row ?? {}, copy.kit.untitled)),
       {
-        label: "Delete",
+        label: copy.kit.deleteAction(nounPhrase(entry).singular),
         destructive: true,
         onPress: async () => {
           try {
@@ -134,9 +148,9 @@ export function useResourceDetail(
         },
       },
       mode,
-      { message: `This deletes the ${entry.entity}. It cannot be undone.` },
+      { message: copy.kit.deleteWarning, cancel: copy.kit.cancel },
     );
-  }, [id, entry, api, wrote, k, leave, mode, copy]);
+  }, [id, entry, row, api, wrote, k, leave, mode, copy]);
 
   // Retry reads the row again; reconcile reads it too, and is what an unanswered
   // write offers instead of sending the same write a second time. Dismiss puts the
@@ -147,5 +161,17 @@ export function useResourceDetail(
     setRefusal(undefined);
   }, []);
 
-  return { row, error, refusal, reload, dismiss, remove, leave };
+  const toggleMenu = useCallback(() => setMenu((open) => !open), []);
+
+  return {
+    row,
+    error,
+    refusal,
+    reload,
+    dismiss,
+    remove,
+    leave,
+    menu,
+    toggleMenu,
+  };
 }

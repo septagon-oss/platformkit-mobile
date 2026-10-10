@@ -16,12 +16,13 @@ import type { Entry } from "../src/core/catalog";
 import { parseCatalog } from "../src/core/catalog";
 import { deriveCatalogList } from "../src/core/catalogList";
 import {
-  detailItems,
   listCells,
   listPreview,
   label,
   noOrder,
   primary,
+  recordInformation,
+  recordSections,
   rowPrimary,
   statusField,
   type Row,
@@ -134,20 +135,33 @@ test("a detail field stays the record's own name and the record's own state", ()
 test("a hidden field is off the record's own screen, where hideList asks nothing", () => {
   const shown = noteWith("body", { visibility: "detail" });
   assert.ok(
-    detailItems(shown, { id: "1", body: "Two paragraphs" }, presentation).some(
+    recordInformation(shown, { id: "1", body: "Two paragraphs" }, presentation).some(
       (i) => i.field.name === "body",
     ),
     "detail is the record's answer, so the record answers it",
   );
   const hidden = noteWith("rank", { visibility: "hidden" });
   assert.ok(
-    !detailItems(hidden, { id: "1", rank: 3 }, presentation).some((i) => i.field.name === "rank"),
+    !recordRows(hidden, { id: "1", rank: 3 }).some((i) => i.field.name === "rank"),
     "hidden is plumbing, and the record is not built from plumbing",
   );
   assert.ok(
-    detailItems(noteWith("rank", { visibility: "shown" }), { id: "1", rank: 3 }, presentation).some(
+    recordRows(noteWith("rank", { visibility: "shown" }), { id: "1", rank: 3 }).some(
       (i) => i.field.name === "rank",
     ),
     "shown is the author taking the field back, on every screen",
   );
 });
+
+/**
+ * recordRows are every row the record draws, in either of its two places: a field
+ * that is drawn is in one of them, and a field that is not is in neither. Split the
+ * other way — one flat list of everything — and the record would open on its own
+ * identifier, which is what the section model exists to stop.
+ */
+function recordRows(e: Entry, row: Row) {
+  return [
+    ...recordSections(e, row, presentation).flatMap((block) => block.items),
+    ...recordInformation(e, row, presentation),
+  ];
+}

@@ -49,6 +49,8 @@ env:
       id: "resource-detail"
     timeout: 15000
 - assertVisible: ${TITLE} create
+- tapOn:
+    id: "record-menu"
 - scrollUntilVisible:
     element:
       id: "delete"

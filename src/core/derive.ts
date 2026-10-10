@@ -465,19 +465,176 @@ export interface DetailItem {
 }
 
 /**
- * detailItems is a record's own screen: every field a person is shown there, in
- * schema order. `hideList` hides nothing here — that tag is about a table being
- * readable, not about a field being secret — and `hidden` is the one declaration
- * that is off this screen too, its value left in the JSON and the PATCH.
+ * hasValue says whether a field's value is a fact about this record, which is the
+ * question a record asks of every field before it draws a row for it. `false` and
+ * `0` are facts and get their row; nothing, an untouched blank and an empty list
+ * are not. A switch nobody answered is not either, because the words it would draw
+ * ("Not set") say there is no fact — which is why the bool line is its own test
+ * rather than `text(v) !== ""`, which would call the string "false" an answer.
+ *
+ * This is the reading side of the line `values` draws for the writing side: a
+ * number, a boolean and a cleared date go in the body, an untouched blank does not.
+ * The two agree because both read the same `text` and the same bool spelling.
  */
-export function detailItems(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  return e.fields
-    .filter((f) => !neverShown(f))
-    .map((f) => ({
-      field: f,
-      label: fieldLabel(f),
-      ...saidValue(f, row[f.name], format),
-    }));
+export const hasValue = (f: Field, v: unknown): boolean =>
+  f.type === "bool" ? v === true || v === false : text(v) !== "";
+
+/**
+ * recordFields are a record's own rows: one item per field, the label the author
+ * gave the field and the value read aloud the way `saidValue` reads it. It is the
+ * whole of what a row on a record is made of; which rows a person is shown, and
+ * above or below which line, is `recordHeader`, `recordSections` and
+ * `recordInformation`.
+ */
+const recordField = (f: Field, v: unknown, format: Formatting): DetailItem => ({
+  field: f,
+  label: fieldLabel(f),
+  ...saidValue(f, v, format),
+});
+
+/**
+ * RecordPill is the status as the record shows it: the author's word for the value
+ * (`enumLabels`, or the value humanised) and the colour the author declared for it
+ * (`enumTones`, or neutral). Both come from one field's value, so a pill cannot say
+ * "Open" in green because it came first.
+ */
+export interface RecordPill {
+  readonly label: string;
+  readonly tone: "ok" | "warning" | "danger" | "info" | "neutral";
+}
+
+export interface RecordHeader {
+  readonly title: string;
+  /** absent when the entry declares no `statusField`, or its row holds no value: no status is ever inferred. */
+  readonly status?: RecordPill;
+  /** absent when the preview field has no value: a blank never prints a dash under a title. */
+  readonly summary?: string;
+}
+
+/**
+ * recordHeader is the top of a record: what it is called, what state it is in, and
+ * the one line that tells two records apart. The three are read from the three
+ * declarations the entry may carry, and from the answers its row holds, and nothing
+ * else — which is why an un-hinted entry gets a title and nothing beside it.
+ */
+export function recordHeader(
+  e: Entry,
+  row: Row,
+  format: Formatting,
+  untitled: Copy["kit"]["untitled"],
+): RecordHeader {
+  const status = statusField(e);
+  const preview = listPreview(e);
+  return {
+    title: label(e, row, untitled, "record"),
+    ...(status && hasValue(status, row[status.name])
+      ? {
+          status: {
+            label: display(status, row[status.name], format),
+            tone: badgeTone(enumTone(status, text(row[status.name]))),
+          },
+        }
+      : {}),
+    ...(preview && hasValue(preview, row[preview.name])
+      ? { summary: display(preview, row[preview.name], format) }
+      : {}),
+  };
+}
+
+/**
+ * RecordBlock is one group of a record's fields: the declared key (or "" for the
+ * group that names none) and the label drawn above it.
+ */
+export interface RecordBlock {
+  readonly key: string;
+  readonly label: string;
+  readonly items: readonly DetailItem[];
+}
+
+/**
+ * informationFields are the record's own three: the identifier and the two stamps.
+ * Not a declaration — no document carries "this field is plumbing" — but the three
+ * names every resource the kernel mounts has, and the three a person reaches for
+ * when a support conversation needs them. Declaring them here, once, is what keeps
+ * the id out of every other sentence about the record.
+ */
+export const informationFields: readonly string[] = ["id", "createdAt", "updatedAt"];
+
+/**
+ * shownFields are the fields a record may draw at all: no `hidden` anywhere, and no
+ * field the record's header already drew as its title, its pill or its summary line.
+ *
+ * That last half is the whole of "a fact is drawn once, at the highest place that
+ * draws it": the field the record is named by would otherwise be the first row
+ * under its own name, which is the fault 0085 photographs. It holds even when such a
+ * field declares a section — a declaration says where a fact goes, not that it goes
+ * twice.
+ */
+function shownFields(e: Entry, row: Row, keep: (f: Field) => boolean): readonly Field[] {
+  const drawn = new Set<string>();
+  for (const f of [primary(e), statusField(e), listPreview(e)]) if (f) drawn.add(f.name);
+  return e.fields.filter(
+    (f) =>
+      !neverShown(f) &&
+      !drawn.has(f.name) &&
+      !informationFields.includes(f.name) &&
+      keep(f) &&
+      hasValue(f, row[f.name]),
+  );
+}
+
+/**
+ * recordSections is a record's overview as data: the fields with values that are not
+ * the record's plumbing, grouped as the entry declares its sections, in the order the
+ * entry declared them, each block holding its fields in schema order.
+ *
+ * `hideList` hides nothing here — that tag is about a table being readable, not about
+ * a field being secret. A field the entry filed nowhere lands in the final block,
+ * which is what the catalogue's own parser calls the overview ("the field stays in
+ * the overview"), and an entry that declares no sections gets exactly that one.
+ * A record with nothing to say answers no blocks at all: no dash, no placeholder
+ * sentence, because an empty field is not information (0085's principle 3) and the
+ * "Add {field}" affordance is deferred until it has an interaction contract.
+ */
+export function recordSections(e: Entry, row: Row, format: Formatting): readonly RecordBlock[] {
+  const shown = shownFields(e, row, (f) => f.hints?.visibility !== "detail");
+  const declared = e.hints?.sections ?? [];
+  const blocks: RecordBlock[] = declared.flatMap((section) => {
+    const items = shown
+      .filter((f) => f.hints?.section === section.key)
+      .map((f) => recordField(f, row[f.name], format));
+    return items.length === 0 ? [] : [{ key: section.key, label: section.label, items }];
+  });
+  const rest = shown
+    .filter((f) => !declared.some((section) => section.key === f.hints?.section))
+    .map((f) => recordField(f, row[f.name], format));
+  return rest.length === 0
+    ? blocks
+    : [...blocks, { key: "", label: format.copy.kit.overview, items: rest }];
+}
+
+/**
+ * recordInformation is the record's plumbing a person may need: the identifier, the
+ * two stamps, and every field the document keeps for this screen (`detail`). The
+ * three stamps come first, in that order, and only when the entry declares the field
+ * *and* the row answers it — a resource that mounts no PATCH shows no "Updated at"
+ * row, which is truthful about the answer the person got.
+ *
+ * `hidden` beats everything here too: plumbing is not content on this screen either.
+ * Whoever draws it collapses it and puts it last; this decides only what is in it.
+ */
+export function recordInformation(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
+  const stamps = informationFields.flatMap((name) =>
+    e.fields.filter((f) => f.name === name && !neverShown(f) && hasValue(f, row[f.name])),
+  );
+  const kept = e.fields.filter(
+    (f) =>
+      f.hints?.visibility === "detail" &&
+      !neverShown(f) &&
+      !informationFields.includes(f.name) &&
+      hasValue(f, row[f.name]),
+  );
+  return [...stamps, ...kept].map((f) => recordField(f, row[f.name], format));
 }
 
 export type ControlKind =

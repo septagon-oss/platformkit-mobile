@@ -79,7 +79,7 @@ for (const mode of ["light", "dark"] as const) {
     await rerender(detail());
     await waitFor(() => expect(api.events).toHaveBeenCalledTimes(2));
     expect(api.list).toHaveBeenCalledTimes(1);
-    expect(screen.getByText(actor)).toBeOnTheScreen();
+    expect(screen.getByText("Name unavailable")).toBeOnTheScreen();
     expect(screen.getByText("Updated")).toBeOnTheScreen();
     expect(screen.queryAllByText(previousName, { includeHiddenElements: true })).toHaveLength(0);
     expect(

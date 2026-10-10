@@ -1,6 +1,7 @@
-# One record as a screen: every field the schema names, in its order, with the
-# record's own name in the header and the destructive row at its foot. The
-# record is made here and deleted by the end of the journey.
+# One record as a screen: what it is and what distinguishes it first, its fields
+# that have values, and its own identifier kept in the collapsed Record information
+# until it is asked for. The record is made here and deleted by the end of the
+# journey, through the header's `…`.
 # screen: app/[module]/[entity]/[id]/index.tsx
 appId: ${APP_ID}
 env:
@@ -25,13 +26,22 @@ env:
       id: "resource-detail"
     timeout: 15000
 - assertVisible: ${TITLE} record
-- assertVisible:
-    id: "field-${KNOWN}"
 - assertVisible: "Edit"
+# The record's own plumbing waits in one collapsed block: when it was made is there
+# to be read, and nowhere on the screen before the person asks for it.
+- assertVisible:
+    id: "record-information"
+- assertNotVisible: "Created at"
+- tapOn:
+    id: "record-information"
+- assertVisible: "Created at"
+# Delete is the header's `…`, and the question says what this app cannot undo.
+- tapOn:
+    id: "record-menu"
 - scrollUntilVisible:
     element:
       id: "delete"
-- assertVisible: "Deleting cannot be undone."
+- assertVisible: "You can’t undo this in the app."
 - tapOn:
     id: "delete"
 - tapOn: "Delete"

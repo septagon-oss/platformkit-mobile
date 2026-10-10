@@ -48,6 +48,8 @@ env:
 - assertVisible:
     id: "resource-detail"
 - assertNotVisible: ${TITLE} edit
+- tapOn:
+    id: "record-menu"
 - scrollUntilVisible:
     element:
       id: "delete"

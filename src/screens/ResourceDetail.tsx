@@ -3,9 +3,16 @@
 // may, and the organism that draws it.
 import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { doors } from "../core/catalog";
-import { deriveEventActivity, label, rowCommands, screenPath } from "../core/derive";
+import {
+  deriveDisclosure,
+  deriveEventActivity,
+  recordHeader,
+  rowCommands,
+  screenPath,
+} from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
@@ -36,9 +43,34 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   // question the platform asks here. useCommandRun is that rule, shared with
   // every renderer pack that draws a record's actions.
   const commands = rowCommands(entry);
-  // A row whose schema names nothing to read is titled as what it is, in the
-  // words the reader's bundle holds; the noun comes from the catalogue.
-  const title = detail.row ? label(entry, detail.row, feedback.copy.kit.untitled) : "";
+  // The record's own screen opens on what it is, so the header is read from the
+  // same answer the body is drawn from: a row whose schema names nothing to read is
+  // titled as what it is, in the words the reader's bundle holds, and the noun comes
+  // from the catalogue.
+  const header = detail.row
+    ? recordHeader(entry, detail.row, feedback, feedback.copy.kit.untitled)
+    : undefined;
+  const title = header?.title ?? "";
+  // The collapsed Record information block is a disclosure, and a disclosure's open
+  // state is the screen's. Its words come from the reader's bundle; what it holds is
+  // the section model's.
+  const [informationOpen, setInformationOpen] = useState(false);
+  const information = useMemo(
+    () =>
+      deriveDisclosure(
+        {
+          id: "record-information",
+          title: feedback.copy.kit.recordInformation,
+          summary: feedback.copy.kit.recordInformationHolds,
+          reveals: feedback.copy.kit.recordInformationContent,
+          expanded: informationOpen,
+          depth: 1,
+          enabled: true,
+        },
+        { ...feedback, weekStartsOn: 1 },
+      ),
+    [feedback, informationOpen],
+  );
   // The options are memoised because the navigator is told them on every
   // render: a fresh object, with fresh callbacks in it, is a new instruction
   // each time and the renders never settle.
@@ -52,11 +84,28 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
       // catalogue handing this screen an entry with no `update` — sits in the
       // header greyed and doing nothing. An empty block is the refusal that
       // actually shows.
-      headerRight: canEdit
-        ? () => <Button placement="header" label="Edit" icon="edit" onPress={edit} />
-        : () => null,
+      headerRight:
+        canEdit || canDelete
+          ? () => (
+              <View style={styles.actions}>
+                {canEdit ? (
+                  <Button placement="header" label="Edit" icon="edit" onPress={edit} />
+                ) : null}
+                {canDelete ? (
+                  <Button
+                    placement="header"
+                    label={feedback.copy.kit.moreOptions}
+                    icon="more"
+                    expanded={detail.menu}
+                    onPress={detail.toggleMenu}
+                    testID="record-menu"
+                  />
+                ) : null}
+              </View>
+            )
+          : () => null,
     }),
-    [title, canEdit, edit],
+    [title, canEdit, canDelete, edit, feedback, detail.menu, detail.toggleMenu],
   );
   return (
     <>
@@ -70,6 +119,10 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         onRetry={detail.reload}
         onDismiss={detail.dismiss}
         onBack={detail.leave}
+        menuOpen={detail.menu}
+        {...(information.ok
+          ? { information: { model: information.value, onExpanded: setInformationOpen } }
+          : {})}
         {...(activityModel.ok
           ? {
               activity: {
@@ -85,3 +138,5 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     </>
   );
 }
+
+const styles = StyleSheet.create({ actions: { flexDirection: "row" } });

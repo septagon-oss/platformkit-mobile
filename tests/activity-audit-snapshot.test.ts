@@ -96,7 +96,9 @@ for (const language of ["en", "pt"] as const) {
     const excluded = value(deriveActivity({ ...input, excluded: true }, p));
     assert.deepEqual(excluded.rows, []);
     assert.equal(excluded.more, undefined);
-    assert.equal(excluded.excluded, p.copy.kit.excluded);
+    // The exclusion is the fact a composition reads, not the sentence a section
+    // prints: whoever draws the trail leaves it out entirely (0085).
+    assert.equal(excluded.excluded, true);
     assert.equal(JSON.stringify(snapshot), serialized);
     assert.equal(value(deriveActivity(input, p)).rows[0]!.id, item.id);
   });

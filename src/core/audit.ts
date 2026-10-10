@@ -55,7 +55,7 @@ export function deriveActivity(input: ActivityInput, p: Presentation) {
         if (item.actor.kind === "person") v.text(item.actor.id, `events.${i}.actor.id`);
         const actor =
           item.actor.kind === "person"
-            ? (item.actor.name ?? item.actor.id)
+            ? (item.actor.name ?? p.copy.kit.nameUnavailable)
             : item.actor.kind === "system"
               ? p.copy.kit.system
               : p.copy.kit.unknownActor;
@@ -97,7 +97,10 @@ export function deriveActivity(input: ActivityInput, p: Presentation) {
       ...base,
       title: p.copy.kit.activity,
       rows: input.excluded ? [] : rows,
-      excluded: input.excluded ? p.copy.kit.excluded : undefined,
+      // The exclusion is a fact the composition reads, not a sentence the section
+      // prints: a trail this plan does not include is a section that is not drawn
+      // (0085), and a plan notice drawn as a record's content is the fault named.
+      excluded: input.excluded,
       before: p.copy.kit.before,
       after: p.copy.kit.after,
       more: input.excluded

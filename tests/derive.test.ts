@@ -10,7 +10,6 @@ import {
   commandScope,
   commandTitle,
   deriveCopy,
-  detailItems,
   display,
   formControls,
   humanize,
@@ -22,6 +21,9 @@ import {
   listColumns,
   listPreview,
   narrowed,
+  recordHeader,
+  recordInformation,
+  recordSections,
   rowCommands,
   noOrder,
   numberValue,
@@ -95,13 +97,43 @@ test("display is the same answer as rest.Display", () => {
   assert.equal(display(f("body"), "", feedback), "—");
 });
 
-test("detail shows every field in schema order", () => {
-  const items = detailItems(note, row, feedback);
-  assert.equal(items[0]!.label, "Id");
-  assert.equal(items.find((i) => i.label === "Status")!.value, "Open");
+test("an un-hinted record opens on what it is, and keeps its plumbing to itself", () => {
+  const untitled = feedback.copy.kit.untitled;
+  const header = recordHeader(note, row, feedback, untitled);
+  assert.equal(header.title, "Buy milk", "the field called title names the record");
+  assert.equal("status" in header, false, "no pill is inferred from the first enum");
+  assert.equal(header.summary, "Two litres", "one line tells two records apart");
+
+  const blocks = recordSections(note, row, feedback);
+  assert.deepEqual(
+    blocks.map((b) => b.label),
+    ["Overview"],
+    "an entry that declares no sections gets the one block the catalogue's own parser names",
+  );
+  assert.deepEqual(
+    blocks[0]!.items.map((i) => i.field.name),
+    ["status", "rank", "pinned", "tags"],
+    "schema order, with the header's own fields and the stamps left out",
+  );
   // Each item carries the schema entry it came from: the screen names its row
   // after the field, and never re-derives which column a fact belongs to.
-  assert.equal(items.find((i) => i.label === "Status")!.field.name, "status");
+  assert.equal(blocks[0]!.items[0]!.field.name, "status");
+  assert.equal(blocks[0]!.items[0]!.label, "Status");
+  assert.equal(blocks[0]!.items[0]!.value, "Open");
+
+  // The identifier and the stamps are the record's plumbing: drawn, in one place,
+  // and nowhere else. `tags` holds nothing in this row, so it is drawn nowhere.
+  assert.deepEqual(
+    recordInformation(note, row, feedback).map((i) => i.field.name),
+    ["id", "createdAt"],
+  );
+  assert.equal(
+    [...blocks.flatMap((b) => b.items), ...recordInformation(note, row, feedback)].some(
+      (i) => i.field.name === "title" || i.field.name === "body",
+    ),
+    false,
+    "the header drew both, so no block repeats them",
+  );
 });
 
 test("form controls derive from the schema", () => {

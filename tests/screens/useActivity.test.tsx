@@ -204,8 +204,11 @@ test.each([403, 404])(
     const activity = deriveEventActivity(result.current, presentation);
     expect(activity.ok).toBe(true);
     if (activity.ok) {
+      // The read lost its directory, so the row says a name is unavailable. It is
+      // never the user id: that is a fact about the store, quoted to a person who
+      // cannot look anything up with it.
       expect(activity.value.rows.map((row) => row.actor)).toEqual([
-        "63b9a861-2c2d-58fd-a66e-c323e3f186cb",
+        presentation.copy.kit.nameUnavailable,
       ]);
       expect(activity.value.more).toBeDefined();
     }

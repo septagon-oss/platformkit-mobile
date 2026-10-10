@@ -42,6 +42,8 @@ env:
 - extendedWaitUntil:
     visible: ${TITLE} edited
     timeout: 15000
+- tapOn:
+    id: "record-menu"
 - scrollUntilVisible:
     element:
       id: "delete"
