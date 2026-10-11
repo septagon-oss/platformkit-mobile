@@ -189,9 +189,12 @@ export const kitEnglish = {
   // code to whichever server the field names now.
   noChallenge: "No code step is open on this phone. Sign in with the password again.",
   // A sign-out always forgets the key here. This is the other half saying it did
-  // not happen there: the key still answers for its holder until they stop it.
+  // not happen there: the key still answers for its holder, and the only way out
+  // left to a phone that cannot spend it is to stop it where the account lists
+  // what holds its keys. It says "device" and not "phone" because the key this
+  // sentence is about was read back out of storage, by whichever device did.
   keyNotStopped:
-    "This phone forgot its key. The server did not stop it: sign in again, or from a browser, and stop it there.",
+    "This device's key could not be revoked from here; remove it from your account's devices.",
 } as const;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
 export const kitPortuguese: KitWords = {
@@ -360,5 +363,5 @@ export const kitPortuguese: KitWords = {
   noChallenge:
     "Nenhuma etapa de código está aberta neste telemóvel. Inicie sessão novamente com a palavra-passe.",
   keyNotStopped:
-    "Este telemóvel esqueceu a sua chave. O servidor não a bloqueou: inicie sessão novamente, ou num navegador, e bloqueie-a aí.",
+    "A chave deste dispositivo não pôde ser revogada a partir daqui; remova-a nos dispositivos da sua conta.",
 };

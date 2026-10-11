@@ -1003,11 +1003,16 @@ app name its own key; and the sign-out answers `SignOut`, so a product's screen
 can say whether the server stopped the key or only the phone forgot it.
 
 Two limits belong with that. A key this phone _restored_ from secure storage
-carries no sign-in session with it — nothing here stores a session, and the brief
-stores only the key — and `auth-token-revoke` answers only to its holder, so
-signing out with a restored key forgets it here and cannot stop it there: the
-screen says that in so many words rather than letting the person believe the
-credential dead, and stopping such a key is a sign-in's or a browser's act. The
+carries no sign-in session with it — nothing here stores a session, and only the
+key is stored — and `auth-token-revoke` answers only to its holder, so signing out
+with a restored key forgets it here and cannot stop it there. That is the contract
+this phone builds to, and it is a refusal the screen says out loud — "This device's
+key could not be revoked from here; remove it from your account's devices." —
+rather than a signed-out screen letting the person believe the credential dead: the
+account's list of its devices is the door that remains to a phone holding a key it
+cannot spend. Whether the kernel ever gives a scoped credential a door to retire
+its own key is the kernel's to decide; if it does, a restored key stops itself at
+sign-out, and this paragraph and the words above change with it. The
 device journey for the code step is a state behind a password, so
 `design gate` measures `/sign-in` and not the step, and no emulator ran on this
 delivery: SecureStore and native cookie behaviour remain unproven here.

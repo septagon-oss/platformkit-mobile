@@ -110,8 +110,9 @@ export type SignInStep =
  * and `revoked` says whether the server said it stopped that key too. The two
  * differ for a key this phone restored from storage: it holds the secret but not
  * the session its mint used, and the revoke answers only to the holder, so the
- * forgotten key stays live until somebody stops it as themselves. A screen that
- * said "signed out" over a revoked=false would be saying the credential is dead.
+ * forgotten key stays live until the person stops it where their account lists
+ * its devices. A screen that said "signed out" over a revoked=false would be
+ * saying the credential is dead.
  */
 export interface SignOut {
   readonly revoked: boolean;
