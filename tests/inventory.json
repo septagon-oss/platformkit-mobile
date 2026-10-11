@@ -281,13 +281,13 @@
       "unreachable": 0
     },
     "behaviour": {
-      "files": 170,
-      "cases": 838,
-      "ms": 1371399,
-      "testsMs": 42652.400000000016,
+      "files": 171,
+      "cases": 840,
+      "ms": 1371703,
+      "testsMs": 42656.10000000001,
       "runners": {
         "jest": 65,
-        "node": 105
+        "node": 106
       },
       "unreachable": 0
     },
@@ -8185,6 +8185,41 @@
       "coveredProdLines": 8706,
       "onlyProdLines": null,
       "testsMs": 22.2
+    },
+    {
+      "file": "tests/a-keep-reason-names-siblings-the-table-holds.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 2,
+      "rule": "A keep reason is what root reads before a prune (0088), so what it points at has to be there to read: every tests/ or e2e/ test path a verdictReason names is a row of the table it sits in, and a row measured after the table was first written says which run its numbers came from \u2014 the one-file command the table holds under `measured.commands.<runner>` \u2014 rather than that it is new. `checkInventory` re-reads a row's own file on every push and refuses an empty reason; the paths and pointers inside a reason it never reads, so a renamed sibling or the placeholder `--sync` leaves behind would go stale without a refusal. These cases read the same table and refuse both.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "the only row whose cases read what a keep reason points at against the table itself: the sibling paths a reason names are rows, and a row measured after the table was first written names the one-file command under `measured.commands.<runner>` instead of the placeholder `--sync` leaves; `tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts` reads a row's own file, layer and rule and never the inside of its reason. Its cases, titles and cost come from the one-file run named under measured.commands.node; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
+      "ms": 304,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a sibling a keep reason names is a row of this table",
+        "a row measured after the table was written says which run its numbers came from, not that it is new"
+      ],
+      "tests": [
+        {
+          "title": "a sibling a keep reason names is a row of this table",
+          "ms": 3.201923,
+          "measured": false
+        },
+        {
+          "title": "a row measured after the table was written says which run its numbers came from, not that it is new",
+          "ms": 0.487873,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 3.7
     },
     {
       "file": "tests/a-list-orders-itself-and-narrows-itself.test.ts",

@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `1669815bc` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `d7428ab6a` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer       | job                                                                                                        | tier in this repository (0088 rule 5)                         | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 | ----------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----- | ----- | ------------------------------------------------- | ---------------------------- | ----------------------- |
 | contract    | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first                                                   | 26    | 172   | 46.3 s                                            | 63 s                         | 0                       |
-| behaviour   | one rule of `src/core` or one component, named for the rule                                                | push (scoped to the packages the diff reaches), full at merge | 170   | 838   | 42.7 s                                            | 1371 s                       | 0                       |
+| behaviour   | one rule of `src/core` or one component, named for the rule                                                | push (scoped to the packages the diff reaches), full at merge | 171   | 840   | 42.7 s                                            | 1372 s                       | 0                       |
 | composition | the mounted app: shell + router + screen together                                                          | merge                                                         | 45    | 180   | 19.3 s                                            | 922 s                        | 0                       |
 | journey     | what a person does on a device or in a browser                                                             | nightly / before a release                                    | 55    | 47    | 0.0 s                                             | 0 s                          | 43                      |
 
 ## The verdicts
 
-- keep: 296
+- keep: 297
 - merge: 0
 - delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-- files inventoried: 296 — 131 `tests/*.test.ts` (node), 110 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 12 Maestro flows in `e2e/flows`
-- cases in files a runner reaches: 1190; cases in files no runner reaches: 35
-- isolated wall time: contract 63 s, behaviour 1371 s, composition 922 s, journey 0 s
+- files inventoried: 297 — 132 `tests/*.test.ts` (node), 110 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 12 Maestro flows in `e2e/flows`
+- cases in files a runner reaches: 1192; cases in files no runner reaches: 35
+- isolated wall time: contract 63 s, behaviour 1372 s, composition 922 s, journey 0 s
 - the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 - whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 - the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -192,6 +192,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts     | node   | behaviour | 2     | 309     | 8.5      | 0                           | 1 of 2                                 | —                              | 0             | keep    | Maestro reads a text selector as regex source, not as a JavaScript literal: its YAML reader keeps the scalar whole and StringUtils.toRegexSafe compiles what it… |
 | tests/a-form-asks-only-what-a-person-can-answer.test.ts                         | node   | behaviour | 15    | 1149    | 32.1     | 17                          | 1 of 15                                | —                              | 0             | keep    | A form asks only what a person can answer (0085). Three rules decide what a sheet holds and in what order it holds it, and all three are answers of the core: t… |
 | tests/a-form-keeps-what-the-person-typed.test.ts                                | node   | behaviour | 12    | 1833    | 22.2     |                             | not measured                           | —                              | 0             | keep    | A form keeps what the person typed, and says exactly what to fix (0085). Four rules decide that, and all four are answers of the core: what the sheet may refus… |
+| tests/a-keep-reason-names-siblings-the-table-holds.test.ts                      | node   | behaviour | 2     | 304     | 3.7      |                             | not measured                           | —                              | 0             | keep    | A keep reason is what root reads before a prune (0088), so what it points at has to be there to read: every tests/ or e2e/ test path a verdictReason names is a… |
 | tests/a-list-orders-itself-and-narrows-itself.test.ts                           | node   | behaviour | 13    | 1269    | 69.4     | 61                          | 5 of 13                                | —                              | 0             | keep    | How a list is being read is two questions, and the kit asks them separately: in what order, and narrowed how. A sheet of orders words each one for the type of … |
 | tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts        | node   | behaviour | 13    | 1214    | 43.4     | 0                           | 0 of 13                                | —                              | 0             | keep    | A list row says which record it is, what state that record is in, and what sets it apart — and nothing else. The four answers come from four declarations (the … |
 | tests/a-record-opens-on-what-it-is.test.ts                                      | node   | behaviour | 10    | 1225    | 51.7     | 2                           | 0 of 10                                | —                              | 0             | keep    | A record opens on what it is, not on how it is stored (0085). The whole of the hierarchy is one pure function of the entry and the row — `recordHeader`, `recor… |
