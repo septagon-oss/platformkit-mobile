@@ -6525,7 +6525,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "verdictReason": "the only suite that drives `ResourceForm`'s focusing of a refused field: which box the sheet brings forward when the hook names the field it waits on, that a second refusal of the same field asks for its box again, and that a refusal about a control with no box to focus leaves the notice above the fields to say it; the focus suites beside it draw a ring on one control and never a refusal. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 16050,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": [
@@ -8102,7 +8102,7 @@
       "reach": "npm test (node half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "verdictReason": "all four answers a form keeps (0085) are decided in this one file \u2014 `problems`, `firstProblem`, `changedFields` (no other test file names it) and `writeControls` \u2014 and every refusal sentence is read from the copy table in both languages, so none of the four may move without a case here moving. Its cases, titles and cost come from the one-file run named under measured.commands.node; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 1833,
       "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
       "titles": [
@@ -8704,7 +8704,7 @@
       "reach": "npm test (node half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "verdictReason": "the only row whose cases are `writeControls`'s own two promises rather than the sheet's: the frozen field it hands back stays greyed and carries the row's value, and a hidden field the row answered with an empty string travels as that string, because a PUT that omits it clears it; `tests/a-form-keeps-what-the-person-typed.test.ts` reads the same builder for a hidden list item by item. Its cases, titles and cost come from the one-file run named under measured.commands.node; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 1007,
       "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
       "titles": [
@@ -15824,7 +15824,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "verdictReason": "the only row whose cases ask where a landed write's sentence is heard rather than whether the write landed: the sheet files it under an address it spells itself, the record asks under the id it holds, and a record nobody wrote to hears nothing; `tests/screens/write-doors.test.tsx` asks what the same hooks do at a door the resource does not mount. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 15901,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": [
@@ -16677,7 +16677,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "verdictReason": "the only test file that arms the `usePreventRemove` guard, and it arms it while opening a door: the sheet's Cancel and the guard can each leave the screen, and armed together they would ask the same question twice, so this case is what fails when one is removed. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 17839,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": ["asks once, and the sheet leaves once"],
@@ -17234,7 +17234,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "verdictReason": "the only row whose cases are the two spellings a one-string control cannot carry back \u2014 a comma inside one list item, and padding of spaces and an empty item \u2014 on a hidden list of a singleton's PUT where only the title changes; `tests/screens/useSingleton.test.tsx` keeps the hidden field a singleton read and `tests/screens/singleton-cancelled-refusal.test.tsx` the refusal a cancel clears. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 16760,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": [
@@ -17809,7 +17809,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "verdictReason": "the only row whose cases are the singleton form's protections as a whole: Edit only once the row is read, the discard question by button, by system back and by swipe, the PUT's hidden and immutable fields, one sentence and one haptic for a landed write; `tests/screens/write-doors.test.tsx` and `tests/screens/singleton-cancelled-refusal.test.tsx` each take one door of it. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 17869,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": [
