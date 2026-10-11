@@ -6525,7 +6525,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "the only suite that drives `ResourceForm`'s focusing of a refused field: which box the sheet brings forward when the hook names the field it waits on, that a second refusal of the same field asks for its box again, and that a refusal about a control with no box to focus leaves the notice above the fields to say it; the focus suites beside it draw a ring on one control and never a refusal. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
+      "verdictReason": "the only suite that drives `ResourceForm`'s focusing of a refused field: which box the sheet brings forward when the hook names the field it waits on, that a second refusal of the same field asks for its box again, and that a refusal about a control with no box to focus steals no keyboard and still says itself under the field it means; the focus suites beside it draw a ring on one control and never a refusal. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 16050,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": [
@@ -16677,7 +16677,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "the only test file that arms the `usePreventRemove` guard, and it arms it while opening a door: the sheet's Cancel and the guard can each leave the screen, and armed together they would ask the same question twice, so this case is what fails when one is removed. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
+      "verdictReason": "the only case that hands Cancel's own `router.back()` to the armed `usePreventRemove` guard: the suites beside it arm that guard and fire it themselves, none routes the sheet's own departure through it, and a back the stack returns to a live guard is what asks the discard question twice, so this case is what fails when either door starts asking. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 17839,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": ["asks once, and the sheet leaves once"],
@@ -17809,7 +17809,7 @@
       "reach": "npm test (jest half)",
       "runsNowhere": false,
       "verdict": "keep",
-      "verdictReason": "the only row whose cases are the singleton form's protections as a whole: Edit only once the row is read, the discard question by button, by system back and by swipe, the PUT's hidden and immutable fields, one sentence and one haptic for a landed write; `tests/screens/write-doors.test.tsx` and `tests/screens/singleton-cancelled-refusal.test.tsx` each take one door of it. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
+      "verdictReason": "the only row whose cases are the singleton form's protections as a whole: Edit only once the row is read, the discard question asked by Cancel and by a swipe the stack pops, the PUT's hidden and immutable fields, one sentence and one haptic for a landed write; `tests/screens/write-doors.test.tsx` and `tests/screens/singleton-cancelled-refusal.test.tsx` each take one door of it. Its cases, titles and cost come from the one-file run named under measured.commands.jest; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
       "ms": 17869,
       "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
       "titles": [
