@@ -1258,7 +1258,12 @@ instead of re-deriving one; `baseline.unreachable`, which turns "this file runs
 nowhere" from a sentence in a report into a refusal; and `e2e/flows/session-restored.yaml`
 as the pattern for a journey whose assertions are only testIDs and words the screen it
 names actually draws (the sign-out journeys assert the `Sign out` label, which is
-`src/screens/Home.tsx`'s own literal rather than a word of `src/core/copy.ts`).
+`src/screens/Home.tsx`'s own literal rather than a word of `src/core/copy.ts`), and the
+shape of a `keep` reason — what only that row proves, the sibling that comes closest, which
+run its numbers came from, and no coverage claim a column left null cannot support. The
+reason's emptiness is refused by `checkInventory`; what it points at is read by
+`tests/a-keep-reason-names-siblings-the-table-holds.test.ts`, which refuses a named sibling
+that is no row of the table and a measured row still saying it is new.
 
 ### Run the device journeys
 
