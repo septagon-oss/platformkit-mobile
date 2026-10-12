@@ -1510,9 +1510,11 @@ surface, a command at a printed address of its own, and a singleton whose PUT
 follows it. The copy is not extended in place, because the hash that makes it
 trustworthy is a hash of the kernel's bytes; a test asserts the extension is
 those bytes plus those entries instead. The generated catalog types retain `screen` and `present` as metadata. Neither
-changes a native route or draws a new control. `display` and `maxLength` are not
-in this document pin; the `richtext` widget still has no native control. The
-catalog tests distinguish retained metadata from rendered behavior.
+changes a native route or draws a new control. `display`, `maxLength`, `translatable` and
+`keys` are declared by the document and carried by the field view with no screen of their
+own — a test distinguishes retained metadata from rendered behavior, and only a stray JSON
+member outside the document is refused. The `richtext` widget is read natively (under
+*How a rich text body reads* above); it still has no native editor.
 
 **Reused** — `parseCatalog`'s supported-version and path checks, `CatalogError`, and
 the `writable` gate the screens already consulted; the New, Edit, Delete and Save
