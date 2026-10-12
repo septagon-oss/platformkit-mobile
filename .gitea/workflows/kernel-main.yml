@@ -48,7 +48,11 @@ jobs:
       # dispatch needs no setup beyond the job token this forge already gives.
       PK_KERNEL_SERVER: ${{ github.server_url }}
       PK_KERNEL_REPOSITORY: septagon-oss/platformkit
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # The job token reads this repository and no other: since 2026-10-08 the forge answers it 404 on the kernel
+      # (sign-in is required to read, and a job token is nobody there), so the read uses PK_KERNEL_TOKEN, a
+      # repository secret holding a read-only token for septagon-oss/platformkit, and falls back to the job token
+      # where none is set so the refusal still names the URL.
+      GITHUB_TOKEN: ${{ secrets.PK_KERNEL_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
