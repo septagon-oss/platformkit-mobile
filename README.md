@@ -1778,8 +1778,9 @@ identifier it holds; `Names` and its key, so a resolved name travels to the
 place that draws it instead of being looked up there; `useRecordNames` and
 `useDirectoryNames`, one read per record on a record's screen and one page per
 resource on a window of rows; and `e2e/flows/first-journey.yaml`, the signed-in
-journey that opens a record, reads it, and runs a `kind: other` command to its
-own success line.
+journey that makes a record with a deadline, reads its state pill and its
+deadline with no identifier on the screen until Record information is opened,
+finds it again through a filter, amends it and deletes it.
 
 **Made reusable** — `Names` as the prop every surface that draws a field takes,
 so the next module with a pointer pays nothing; `acts` on `ResourceForm`, the
