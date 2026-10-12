@@ -29,13 +29,16 @@
 # flow names a tenant, a host or a client. MODULE/ENTITY/KNOWN name a writable
 # resource and its first writable string field (the one a row is recognised by);
 # VERB/VERB_FIELD/VERB_TITLE name a lifecycle command, its one argument and the
-# summary the API document gives it — the served kernel's vocabulary, which is
-# why the job names all six and no script defaults them. TITLE is the stem of
+# summary the API document gives it; DUE_FIELD/STATUS_FIELD/STATUS_VALUE name its
+# deadline field, its field of declared states and the state a fresh record is in
+# — all served kernel's vocabulary, which is why the job names them and no script
+# defaults any of them. TITLE is the stem of
 # every record a journey makes; it defaults to a per-run stamp so no two runs
 # share a name.
 #
 #   SERVER=http://localhost:8080 EMAIL=… PASSWORD=… MODULE=… ENTITY=… KNOWN=… \
-#   VERB=… VERB_FIELD=… VERB_TITLE=… scripts/e2e/run.sh <apk>
+#   VERB=… VERB_FIELD=… VERB_TITLE=… DUE_FIELD=… STATUS_FIELD=… STATUS_VALUE=… \
+#   scripts/e2e/run.sh <apk>
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 . "$(dirname "${BASH_SOURCE[0]}")/tools.sh"
@@ -49,6 +52,9 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 : "${VERB:?the verb of a lifecycle command on that server}"
 : "${VERB_FIELD:?the one argument that command takes}"
 : "${VERB_TITLE:?the summary the API document gives that command}"
+: "${DUE_FIELD:?the field of that resource that holds a deadline}"
+: "${STATUS_FIELD:?the field of that resource whose value states its condition}"
+: "${STATUS_VALUE:?the value of that field a fresh record starts in}"
 apk="${1:?the verification APK to install (make apk ABIS=x86_64 PROFILE=ci && make apk-debug-sign)}"
 TITLE="${TITLE:-Journey $(date +%H%M%S)}"
 MAESTRO="${MAESTRO:-maestro}"
@@ -111,5 +117,7 @@ mkdir -p "$(dirname "$report")"
   -e SERVER="$SERVER" -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" \
   -e MODULE="$MODULE" -e ENTITY="$ENTITY" -e KNOWN="$KNOWN" \
   -e VERB="$VERB" -e VERB_FIELD="$VERB_FIELD" -e VERB_TITLE="$VERB_TITLE" \
+  -e DUE_FIELD="$DUE_FIELD" -e STATUS_FIELD="$STATUS_FIELD" \
+  -e STATUS_VALUE="$STATUS_VALUE" \
   -e TITLE="$TITLE" \
   --format junit --output "$report"

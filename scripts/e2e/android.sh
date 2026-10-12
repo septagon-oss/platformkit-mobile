@@ -6,7 +6,9 @@
 # a phone on adb, and the env contract scripts/e2e/run.sh states: SERVER, EMAIL,
 # PASSWORD, a writable resource MODULE/ENTITY with its first writable string
 # field KNOWN, a lifecycle command VERB with its argument VERB_FIELD and the
-# summary the API document gives it VERB_TITLE, and optionally TITLE (default: a
+# summary the API document gives it VERB_TITLE, that resource's deadline field
+# DUE_FIELD, its field of declared states STATUS_FIELD and the value a fresh
+# record starts in STATUS_VALUE, and optionally TITLE (default: a
 # per-run stamp), TENANT_HOST/UPSTREAM (a server that selects its tenant by host
 # name) and MAESTRO. None of those values is committed.
 #

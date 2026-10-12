@@ -10,6 +10,7 @@ import {
   deriveDisclosure,
   deriveEventActivity,
   deriveOffline,
+  pointerTargets,
   recordHeader,
   rowCommands,
   screenPath,
@@ -21,6 +22,7 @@ import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDe
 import { useActivity } from "./useActivity";
 import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
+import { useRecordNames } from "./useReferenceNames";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
   const feedback = useFeedback();
@@ -51,8 +53,16 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   // same answer the body is drawn from: a row whose schema names nothing to read is
   // titled as what it is, in the words the reader's bundle holds, and the noun comes
   // from the catalogue.
+  // The records this one points at are named by the same read that names a
+  // trail's actors, and the answer is threaded through every derivation below so
+  // a pointer reads as a person and never as the identifier stored for it.
+  const asked = useMemo(
+    () => pointerTargets(entry, detail.row === undefined ? [] : [detail.row], "record"),
+    [entry, detail.row],
+  );
+  const names = useRecordNames(asked);
   const header = detail.row
-    ? recordHeader(entry, detail.row, feedback, feedback.copy.kit.untitled)
+    ? recordHeader(entry, detail.row, feedback, feedback.copy.kit.untitled, names)
     : undefined;
   const title = header?.title ?? "";
   // The collapsed Record information block is a disclosure, and a disclosure's open
@@ -121,6 +131,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         feedback={feedback}
         entry={entry}
         row={detail.row}
+        names={names}
         error={detail.error}
         saved={detail.saved}
         {...(detail.refusal ? { refusal: detail.refusal } : {})}

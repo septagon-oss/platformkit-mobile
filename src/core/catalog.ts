@@ -133,6 +133,14 @@ export interface FieldHints {
   readonly visibility?: FieldVisibility;
   readonly enumLabels?: Readonly<Record<string, string>>;
   readonly enumTones?: Readonly<Record<string, HintTone>>;
+  /**
+   * reference names the resource this field's value points at, spelled the way
+   * the document spells it (`"user/user"`). It is what lets a value read as the
+   * record it points at rather than as the identifier stored for it; a pointer
+   * with no declared target — a picker widget alone — keeps the same reading of
+   * its value and only loses which resource a name could come from.
+   */
+  readonly reference?: { readonly resource: string };
 }
 
 export interface CommandHints {
@@ -140,6 +148,15 @@ export interface CommandHints {
   /** system is stored only when declared true: the kernel prints no key for a
    * false one, so silence and false are one reading and need no member. */
   readonly system?: true;
+  /**
+   * confirmation is what running the command does, said above the answer. Only
+   * the body is read: the title of the question is the command's own label
+   * (`derive.commandTitle`) and the answer is the same word, so a sheet never
+   * asks a person to read a second name for the thing they just chose.
+   */
+  readonly confirmation?: { readonly body: string };
+  /** successMessage is the sentence the record says after the command ran. */
+  readonly successMessage?: string;
 }
 
 /**
@@ -461,6 +478,19 @@ function hintField(
     (v) => (typeof v === "string" && HINT_TONES.includes(v) ? (v as HintTone) : undefined),
     "tones",
   );
+  // A pointer is read as an object with one word in it, and a wrong one costs the
+  // reading of the value and nothing else: the field keeps its label, its section
+  // and its visibility, and the value is shown the way a document with no hint
+  // shows it.
+  const reference = ((): { readonly resource: string } | undefined => {
+    const value = raw.reference;
+    if (value === undefined) return undefined;
+    if (!isRecord(value) || typeof value.resource !== "string" || value.resource === "") {
+      notice(`${at}.reference`, "names no resource: the value is read as stored");
+      return undefined;
+    }
+    return { resource: value.resource };
+  })();
   const hints: FieldHints = {
     ...(label === undefined ? {} : { label }),
     ...(help === undefined ? {} : { help }),
@@ -473,6 +503,7 @@ function hintField(
     ...(visibility === undefined ? {} : { visibility: visibility as FieldVisibility }),
     ...(enumLabels === undefined ? {} : { enumLabels }),
     ...(enumTones === undefined ? {} : { enumTones }),
+    ...(reference === undefined ? {} : { reference }),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;
 }
@@ -485,12 +516,31 @@ function hintCommand(raw: unknown, at: string, notice: HintNotice): CommandHints
     return undefined;
   }
   const label = hintWord(raw, "label", at, "a phrase", notice);
+  const successMessage = hintWord(raw, "successMessage", at, "a sentence", notice);
   const system = raw.system;
   if (system !== undefined && typeof system !== "boolean")
     notice(`${at}.system`, "is not yes or no: the command is offered");
+  // The consequence is one word in an object. A confirmation that is not an
+  // object, or holds no readable body, costs the sentence under the question and
+  // says so; the command keeps its label, its `system` tag and its success line.
+  const confirmation = ((): { readonly body: string } | undefined => {
+    const value = raw.confirmation;
+    if (value === undefined) return undefined;
+    if (!isRecord(value)) {
+      notice(`${at}.confirmation`, "is not a hint object: the consequence is not read");
+      return undefined;
+    }
+    if (typeof value.body !== "string" || value.body === "") {
+      notice(`${at}.confirmation.body`, "is not words: the consequence is not read");
+      return undefined;
+    }
+    return { body: value.body };
+  })();
   const hints: CommandHints = {
     ...(label === undefined ? {} : { label }),
     ...(system === true ? { system: true as const } : {}),
+    ...(confirmation === undefined ? {} : { confirmation }),
+    ...(successMessage === undefined ? {} : { successMessage }),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;
 }

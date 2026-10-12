@@ -165,6 +165,20 @@ export const kitEnglish = {
   // author's line and nothing else), and they are drawn by `ResourceForm`.
   changedByCommand: "Changed by a command of its own, not by this form.",
   identifierOnly: "The identifier of the related record. There is no picker for it yet.",
+  // What a value that points at another record says when this phone cannot read
+  // the record it points at. Never the stored identifier: "3f2a…" is a fact about
+  // the store, and a person cannot look anything up with it. Which of the two
+  // words a pointer says is decided by what it points at — a record of the
+  // directory of people is *assigned*, anything else is *linked* — and never by
+  // whether a read happened to answer, so the word says nothing about a request
+  // this person may not have been allowed to make.
+  referenceAssigned: "Assigned",
+  referenceLinked: "Linked",
+  // What a command says it did when the document declared no sentence: the verb
+  // or label the person just tapped, in the frame this bundle holds. The label
+  // arrives from the served document, so on a Portuguese phone the kernel's
+  // Portuguese label enters a Portuguese frame.
+  commandDone: (label: string) => `${label} done`,
   saveExit: "Save and exit",
   steps: "Steps",
   validation: "Review the highlighted fields.",
@@ -409,6 +423,9 @@ export const kitPortuguese: KitWords = {
   commaInValue: "Remova a vírgula deste valor.",
   changedByCommand: "Alterado por um comando próprio, não por este formulário.",
   identifierOnly: "O identificador do registo relacionado. Ainda não há seletor para ele.",
+  referenceAssigned: "Atribuído",
+  referenceLinked: "Vinculado",
+  commandDone: (label: string) => `${label} concluído`,
   saveExit: "Guardar e sair",
   steps: "Etapas",
   validation: "Reveja os campos assinalados.",

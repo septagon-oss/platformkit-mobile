@@ -9,6 +9,7 @@ import {
   deriveFilterSheet,
   deriveListToolbar,
   deriveSortSheet,
+  type Names,
   type Presentation,
   type Order,
   type Row as Item,
@@ -23,6 +24,8 @@ export interface Props {
   readonly presentation: Presentation;
   readonly entry: Entry;
   readonly rows: readonly Item[];
+  /** names resolves the records the rows point at; see `derive.CatalogListInput`. */
+  readonly names?: Names | undefined;
   readonly total: number;
   readonly loading: boolean;
   readonly refreshing: boolean;
@@ -49,6 +52,7 @@ export function ResourceList(props: Props) {
   const {
     presentation,
     entry,
+    names,
     order,
     sheet = "none",
     onSheet,
@@ -60,7 +64,10 @@ export function ResourceList(props: Props) {
     actions,
     ...input
   } = props;
-  const result = deriveCatalogList({ entry, order, ...input, canCreate: !!onNew }, presentation);
+  const result = deriveCatalogList(
+    { entry, order, names, ...input, canCreate: !!onNew },
+    presentation,
+  );
   const toolbar = deriveListToolbar(
     {
       entry,
@@ -101,6 +108,7 @@ export function ResourceList(props: Props) {
     <>
       <DataList
         model={model}
+        names={names}
         onOpen={onOpen}
         onMore={onMore}
         onRefresh={onRefresh}

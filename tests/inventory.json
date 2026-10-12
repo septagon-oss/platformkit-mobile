@@ -281,34 +281,34 @@
       "unreachable": 0
     },
     "behaviour": {
-      "files": 191,
-      "cases": 900,
-      "ms": 1441134,
-      "testsMs": 43316.60000000003,
+      "files": 193,
+      "cases": 912,
+      "ms": 1443382,
+      "testsMs": 43347.100000000035,
       "runners": {
         "jest": 68,
-        "node": 123
+        "node": 125
       },
       "unreachable": 0
     },
     "composition": {
-      "files": 54,
-      "cases": 195,
-      "ms": 1136424,
-      "testsMs": 22483,
+      "files": 56,
+      "cases": 204,
+      "ms": 1170803,
+      "testsMs": 22524,
       "runners": {
-        "jest": 54
+        "jest": 56
       },
       "unreachable": 0
     },
     "journey": {
-      "files": 55,
-      "cases": 47,
+      "files": 56,
+      "cases": 48,
       "ms": 0,
       "testsMs": 0,
       "runners": {
         "browser": 43,
-        "maestro": 12
+        "maestro": 13
       },
       "unreachable": 43
     }
@@ -7771,6 +7771,59 @@
       "runsNowhere": false
     },
     {
+      "file": "tests/a-command-says-what-it-runs-on-and-what-it-does.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 5,
+      "rule": "What a person is told about one command, said once for the dialog, the sheet and the sentence said afterwards. The title is the command's own word and the answer is that same word, so a button never carries a sentence. The sentence under the title is what running it does \u2014 the declared consequence, else the summary where that is not already the title \u2014 and the developer's description of the wire member is never spoken to a person. A command nobody described stays a bare confirm: an explicit question with no invented sentence about what it does. Every case is served bytes through the shipped parser, hinted and unhinted, in both languages the phone says.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1373,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a command that declares nothing is asked in its own words, answered short, and says nothing it does not know",
+        "a declared consequence, answer and success are the words a person is told",
+        "a labelled command whose document says no consequence moves the summary under the title",
+        "the title never repeats as the consequence, and the description never appears, in either language",
+        "a success with no declared sentence is the kit's own frame, in the phone's language"
+      ],
+      "tests": [
+        {
+          "title": "a command that declares nothing is asked in its own words, answered short, and says nothing it does not know",
+          "ms": 10.685295,
+          "measured": false
+        },
+        {
+          "title": "a declared consequence, answer and success are the words a person is told",
+          "ms": 1.907247,
+          "measured": false
+        },
+        {
+          "title": "a labelled command whose document says no consequence moves the summary under the title",
+          "ms": 0.640124,
+          "measured": false
+        },
+        {
+          "title": "the title never repeats as the consequence, and the description never appears, in either language",
+          "ms": 1.429273,
+          "measured": false
+        },
+        {
+          "title": "a success with no declared sentence is the kit's own frame, in the phone's language",
+          "ms": 0.692601,
+          "measured": false
+        }
+      ],
+      "loaded": 30,
+      "coveredProdLines": 8909,
+      "onlyProdLines": null,
+      "testsMs": 15.4
+    },
+    {
       "file": "tests/a-declared-visibility-and-hide-list-agree-on-every-column.test.ts",
       "runner": "node",
       "layer": "behaviour",
@@ -8636,6 +8689,71 @@
       "tier": "push(scoped)+merge(full)",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 7,
+      "rule": "A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one word saying that there is one when it did not \u2014 in the record's overview, in Record information, in a row's cells and in the words a row is called by. Which word depends on what the value points at, never on whether a read answered. A field with no declared target keeps its identifier and its monospaced shape: `id` is still an identifier.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 868,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a pointer reads as the name of the record it points at, in every medium",
+        "a pointer with no name resolved says one word, by what it points at, and never the identifier",
+        "a pointer with nothing in it is no fact at all, and a plain identifier keeps its shape",
+        "a record called by a pointer is called by the name of what it points at",
+        "a greyed reference row reads as a name and sends what the record was given",
+        "a screen asks for the records the medium it draws points at",
+        "a referenced record is named by the chain that names every record"
+      ],
+      "tests": [
+        {
+          "title": "a pointer reads as the name of the record it points at, in every medium",
+          "ms": 10.35306,
+          "measured": false
+        },
+        {
+          "title": "a pointer with no name resolved says one word, by what it points at, and never the identifier",
+          "ms": 0.626218,
+          "measured": false
+        },
+        {
+          "title": "a pointer with nothing in it is no fact at all, and a plain identifier keeps its shape",
+          "ms": 0.609227,
+          "measured": false
+        },
+        {
+          "title": "a record called by a pointer is called by the name of what it points at",
+          "ms": 0.655132,
+          "measured": false
+        },
+        {
+          "title": "a greyed reference row reads as a name and sends what the record was given",
+          "ms": 1.271592,
+          "measured": false
+        },
+        {
+          "title": "a screen asks for the records the medium it draws points at",
+          "ms": 1.859199,
+          "measured": false
+        },
+        {
+          "title": "a referenced record is named by the chain that names every record",
+          "ms": 0.498191,
+          "measured": false
+        }
+      ],
+      "loaded": 30,
+      "coveredProdLines": 9101,
+      "onlyProdLines": null,
+      "testsMs": 15.9
     },
     {
       "file": "tests/a-record-opens-on-what-it-is.test.ts",
@@ -12211,8 +12329,8 @@
       "runner": "node",
       "layer": "behaviour",
       "cases": 1,
-      "ms": 291,
-      "testsMs": 4.3,
+      "ms": 298,
+      "testsMs": 3.5,
       "loaded": 1,
       "coveredProdLines": 0,
       "onlyProdLines": 0,
@@ -12220,7 +12338,7 @@
       "onlyFiles": [],
       "onlyLines": [],
       "flakyRuns": [],
-      "rule": "The served kernel's vocabulary \u2014 which resource, its known field, which command and its argument \u2014 is named once, in the mobile-e2e job's env, and a flow reads it through ${MODULE}, ${KNOWN}, ${VERB}\u2026 A flow that spells one of those words itself fails the day the job names a different resource.",
+      "rule": "The served kernel's vocabulary \u2014 which resource, its known field, which command and its argument \u2014 is named once, in the mobile-e2e job's env, and a flow reads it through ${MODULE}, ${KNOWN}, ${VERB}\u2026 A flow that spells one of those words itself fails the day the job names a different resource. `STATUS_VALUE` is the served vocabulary too, and deliberately not in this list: the journey taps that choice by its id and asserts the *word* the pill and the chip say, which is the phone's reading of the value and the assertion the journey exists to make. Spelling the id in a quoted string is what this test refuses, and the id is never quoted.",
       "titles": ["a journey names the served kernel's vocabulary only through the job's variables"],
       "tests": [
         {
@@ -12230,7 +12348,8 @@
           "onlyProdLines": 0,
           "onlyToolLines": 0,
           "onlyFiles": [],
-          "measured": true
+          "ms": 3.48142,
+          "measured": false
         }
       ],
       "verdict": "keep",
@@ -12240,7 +12359,8 @@
       "testsTotal": 1,
       "tier": "push(scoped)+merge(full)",
       "reach": "npm test (node half)",
-      "runsNowhere": false
+      "runsNowhere": false,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
     },
     {
       "file": "tests/flow-workspace-key-spelling.test.ts",
@@ -16692,6 +16812,41 @@
       "testsMs": 18
     },
     {
+      "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 2,
+      "rule": "A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answers. A value the page does not reach keeps the word the kit says, which is what a page is \u2014 the identifier the row carries is never what a person reads.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 17918,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "a window reads each pointed-at resource once and names every value that page holds",
+        "a value outside the page keeps its word, which is what a page is"
+      ],
+      "tests": [
+        {
+          "title": "a window reads each pointed-at resource once and names every value that page holds",
+          "ms": 9,
+          "measured": false
+        },
+        {
+          "title": "a value outside the page keeps its word, which is what a page is",
+          "ms": 2,
+          "measured": false
+        }
+      ],
+      "loaded": 128,
+      "coveredProdLines": 1322,
+      "onlyProdLines": null,
+      "testsMs": 11
+    },
+    {
       "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",
       "runner": "jest",
       "layer": "composition",
@@ -18120,6 +18275,71 @@
       "tier": "merge",
       "reach": "npm test (jest half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/screens/reference-name-resolves-or-says-linked.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 7,
+      "rule": "A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the identifier in between. A refusal settles that pointer for the visit rather than retrying it, and a session the server withdrew withdraws every name the screen holds.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 16461,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "a record's screen asks once per pointed-at record, and the answer is the name",
+        "a person with nothing to read as a name stays the word, and the identifier is never in the map",
+        "a refused record leaves the word in place, asks once, and reports no failure",
+        "a refused session withdraws every name, and the words stand",
+        "a resource this tenant does not mount is never asked about, and reads as the word",
+        "a pointer moved on is asked for, and a pointer settled is never asked again",
+        "an answer that arrives after the screen went away sets nothing"
+      ],
+      "tests": [
+        {
+          "title": "a record's screen asks once per pointed-at record, and the answer is the name",
+          "ms": 9,
+          "measured": false
+        },
+        {
+          "title": "a person with nothing to read as a name stays the word, and the identifier is never in the map",
+          "ms": 3,
+          "measured": false
+        },
+        {
+          "title": "a refused record leaves the word in place, asks once, and reports no failure",
+          "ms": 3,
+          "measured": false
+        },
+        {
+          "title": "a refused session withdraws every name, and the words stand",
+          "ms": 2,
+          "measured": false
+        },
+        {
+          "title": "a resource this tenant does not mount is never asked about, and reads as the word",
+          "ms": 2,
+          "measured": false
+        },
+        {
+          "title": "a pointer moved on is asked for, and a pointer settled is never asked again",
+          "ms": 9,
+          "measured": false
+        },
+        {
+          "title": "an answer that arrives after the screen went away sets nothing",
+          "ms": 2,
+          "measured": false
+        }
+      ],
+      "loaded": 128,
+      "coveredProdLines": 1324,
+      "onlyProdLines": null,
+      "testsMs": 30
     },
     {
       "file": "tests/screens/sign-in-door-asks-before-held-writes-go.test.tsx",
@@ -20565,6 +20785,28 @@
       "tier": "nightly",
       "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
       "runsNowhere": false
+    },
+    {
+      "file": "e2e/flows/first-journey.yaml",
+      "runner": "maestro",
+      "layer": "journey",
+      "cases": 1,
+      "rule": "The first journey a person takes on the kernel's reference application: sign in, open the served resource, make a record with a deadline, read what the record says about itself, find it again in the list, amend it and delete it.  Each segment is one already proven elsewhere; what this journey owns is the whole being walkable in one sitting, and the two things no sibling asserts: a record and a row state their condition in the same pill, and an identifier is nowhere on a screen until the person asks for Record information.  MODULE/ENTITY/KNOWN name the served resource and the field a row is known by, DUE_FIELD its deadline and STATUS_FIELD the field of declared states \u2014 all facts about the kernel the job names. STATUS_VALUE is the state a fresh record is in, and the choice is tapped by its id; the *word* the pill says is the phone's own reading of that value, asserted below as a word and never as an id.",
+      "ruleSource": "first comment",
+      "tier": "nightly",
+      "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.maestro",
+      "claims": [
+        "app/sign-in.tsx",
+        "app/index.tsx",
+        "app/[module]/[entity]/index.tsx",
+        "app/[module]/[entity]/new.tsx",
+        "app/[module]/[entity]/[id]/index.tsx",
+        "app/[module]/[entity]/[id]/edit.tsx"
+      ],
+      "steps": 1
     },
     {
       "file": "e2e/flows/gallery-page.yaml",

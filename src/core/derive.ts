@@ -217,8 +217,59 @@ export const entryHoldsSeparator = (entry: string): boolean => entry.includes(",
 export const valueHoldsSeparator = (raw: string): boolean =>
   raw.trim().replace(/,\s*$/, "") !== joinList(splitList(raw));
 
+/**
+ * Names is what one screen resolved of the records its values point at: the words
+ * each is called by, keyed by the resource it lives in and the identifier stored
+ * for it. An identifier never appears as a *value* in it, so no screen can reach
+ * a name and find an identifier beside it, and no read that was refused leaves a
+ * trace here — a name that never arrived is simply not in the map.
+ */
+export type Names = Readonly<Record<string, string>>;
+
+/** nameKey is one referenced record as a key: the resource it lives in and the identifier as the wire printed it, so two resources whose identifiers collide cannot name each other. */
+export const nameKey = (resource: string, id: string): string => `${resource}|${id}`;
+
+/** points says the document calls this field's value another record: a declared target, or the picker widget that means the same thing. Nothing else is inferred to be a pointer. */
+export const points = (f: Field): boolean =>
+  f.hints?.reference !== undefined || f.widget === "entity-picker";
+
+/** pointedAt is the resource a field's value points at, or nothing when the document says only that it points somewhere. */
+export const pointedAt = (f: Field): string | undefined => f.hints?.reference?.resource;
+
+/**
+ * directory is the resource whose records are the people of the workspace. It is
+ * the same pair `useActivity` reads its actor names from, and it is the one
+ * pointer a phone can always try to list: whether the read is allowed is the
+ * server's answer, not this constant's.
+ */
+const directory = "user/user";
+
+/**
+ * referenceWordFor is what a pointer to `resource` says when this screen holds no
+ * name for it: a record of the directory of people is *assigned*, anything else
+ * is *linked*. The choice is made of what the value points at and of nothing
+ * else — never of whether a read answered, because a name this person was
+ * refused and a name nobody could resolve are the same fact to whoever is read
+ * the row, and neither is worth an error.
+ */
+export const referenceWordFor = (resource: string, copy: Copy): string =>
+  resource === directory ? copy.kit.referenceAssigned : copy.kit.referenceLinked;
+
+/**
+ * referenceWord is what a pointer says when this screen holds no name for it: a
+ * person is *assigned* and anything else is *linked*. The choice is made of what
+ * the value points at and of nothing else — never of whether a read answered,
+ * because a name this person was refused and a name nobody could resolve are the
+ * same fact to the person reading the row, and neither is worth an error.
+ */
+function referenceWord(f: Field, format: Formatting): string {
+  return pointedAt(f) === directory
+    ? format.copy.kit.referenceAssigned
+    : format.copy.kit.referenceLinked;
+}
+
 /** display is a value as a person reads it; nothing at all is a dash. */
-export function display(f: Field, v: unknown, format: Formatting): string {
+export function display(f: Field, v: unknown, format: Formatting, names?: Names): string {
   if (f.type === "bool")
     return v === true
       ? format.copy.value.yes
@@ -233,6 +284,12 @@ export function display(f: Field, v: unknown, format: Formatting): string {
     return new Intl.NumberFormat(format.locale, { maximumSignificantDigits: 21 }).format(v);
   const out = text(v);
   if (!out) return "—";
+  // A value that points at another record is never read back as the identifier
+  // stored for it: it is the other record's name, or the one word saying there is
+  // one. `names` is what this screen resolved; the word is what it could not, and
+  // which word depends only on what the value points at (`referenceWord`), never
+  // on whether a read answered.
+  if (points(f)) return names?.[nameKey(pointedAt(f) ?? "", out)] ?? referenceWord(f, format);
   return f.enum && f.enum.length > 0 ? enumLabel(f, out) : out;
 }
 
@@ -302,10 +359,25 @@ export function label(
   row: Row,
   untitled: Copy["kit"]["untitled"],
   where: "record" | "row" = "record",
+  names?: Names,
 ): string {
   const at = where === "record" ? primary(e) : rowPrimary(e);
-  return (at === undefined ? "" : text(row[at.name])) || untitled(noun(e).singular);
+  // A record called by a pointer is called by the name of what it points at, not
+  // by the identifier stored for it; with no name resolved it is untitled rather
+  // than "Assigned", because the word that says a pointer exists says nothing to
+  // lead a row with.
+  const held =
+    at === undefined
+      ? ""
+      : points(at)
+        ? (names?.[nameKey(pointedAt(at) ?? "", text(row[at.name]))] ?? "")
+        : text(row[at.name]);
+  return held || untitled(noun(e).singular);
 }
+
+/** referencedName is the words a referenced record answers with, or "" when it answers none: `namedBy`'s chain and no other, so a person named by the document is named the one way, and an invited person with nothing in that field is nameless rather than called by an email address. */
+export const referencedName = (target: Entry, row: Row): string =>
+  label(target, row, () => "", "row");
 
 /** fieldLabel is a field's own word for itself: what the author wrote, else its name read as words. */
 export const fieldLabel = (f: Field): string => f.hints?.label ?? humanize(f.name);
@@ -499,10 +571,11 @@ export function saidValue(
   f: Field,
   v: unknown,
   format: Formatting,
+  names?: Names,
 ): { readonly value: string; readonly spoken?: string } {
   const at = f.type === "time" ? timeValue(v) : undefined;
   const instant = at ? presentedInstant(at, format) : undefined;
-  return { value: display(f, v, format), ...(instant ? { spoken: instant.exact } : {}) };
+  return { value: display(f, v, format, names), ...(instant ? { spoken: instant.exact } : {}) };
 }
 
 /**
@@ -537,13 +610,14 @@ export function listRow(
   row: Row,
   format: Formatting,
   untitled: Copy["kit"]["untitled"],
+  names?: Names,
 ): ListRow {
   const preview = listPreview(e, "row");
   const pill = statusPill(e, row, format);
   return {
-    title: label(e, row, untitled, "row"),
+    title: label(e, row, untitled, "row", names),
     ...(preview && hasValue(preview, row[preview.name])
-      ? { summary: display(preview, row[preview.name], format) }
+      ? { summary: display(preview, row[preview.name], format, names) }
       : {}),
     ...(pill ? { status: { ...pill, symbol: "none" as const } } : {}),
     cells: listCells(e)
@@ -551,7 +625,7 @@ export function listRow(
       .map((field) => ({
         id: field.name,
         label: fieldLabel(field),
-        ...saidValue(field, row[field.name], format),
+        ...saidValue(field, row[field.name], format, names),
         field,
         raw: row[field.name],
       })),
@@ -593,10 +667,10 @@ export const hasValue = (f: Field, v: unknown): boolean =>
  * above or below which line, is `recordHeader`, `recordSections` and
  * `recordInformation`.
  */
-const recordField = (f: Field, v: unknown, format: Formatting): DetailItem => ({
+const recordField = (f: Field, v: unknown, format: Formatting, names?: Names): DetailItem => ({
   field: f,
   label: fieldLabel(f),
-  ...saidValue(f, v, format),
+  ...saidValue(f, v, format, names),
 });
 
 /**
@@ -649,14 +723,15 @@ export function recordHeader(
   row: Row,
   format: Formatting,
   untitled: Copy["kit"]["untitled"],
+  names?: Names,
 ): RecordHeader {
   const preview = listPreview(e, "record");
   const pill = statusPill(e, row, format);
   return {
-    title: label(e, row, untitled, "record"),
+    title: label(e, row, untitled, "record", names),
     ...(pill ? { status: pill } : {}),
     ...(preview && hasValue(preview, row[preview.name])
-      ? { summary: display(preview, row[preview.name], format) }
+      ? { summary: display(preview, row[preview.name], format, names) }
       : {}),
   };
 }
@@ -691,9 +766,14 @@ export const informationFields: readonly string[] = ["id", "createdAt", "updated
  * the three declarations, and every place below asks this one answer.
  */
 const headerDrawn = (e: Entry): ReadonlySet<string> =>
-  new Set(
-    [primary(e), statusField(e), listPreview(e, "record")].flatMap((f) => (f ? [f.name] : [])),
-  );
+  new Set(headerDrawnList(e).map((f) => f.name));
+
+/**
+ * headerDrawnList is the same answer as a list of fields: the three declarations
+ * that fill a record's header, whoever asks them.
+ */
+const headerDrawnList = (e: Entry): readonly Field[] =>
+  [primary(e), statusField(e), listPreview(e, "record")].filter((f): f is Field => f !== undefined);
 
 /**
  * shownFields are the fields a record may draw at all: no `hidden` anywhere, and no
@@ -730,21 +810,121 @@ function shownFields(e: Entry, row: Row, keep: (f: Field) => boolean): readonly 
  * sentence, because an empty field is not information (0085's principle 3) and the
  * "Add {field}" affordance is deferred until it has an interaction contract.
  */
-export function recordSections(e: Entry, row: Row, format: Formatting): readonly RecordBlock[] {
+export function recordSections(
+  e: Entry,
+  row: Row,
+  format: Formatting,
+  names?: Names,
+): readonly RecordBlock[] {
   const shown = shownFields(e, row, (f) => f.hints?.visibility !== "detail");
   const declared = e.hints?.sections ?? [];
   const blocks: RecordBlock[] = declared.flatMap((section) => {
     const items = shown
       .filter((f) => f.hints?.section === section.key)
-      .map((f) => recordField(f, row[f.name], format));
+      .map((f) => recordField(f, row[f.name], format, names));
     return items.length === 0 ? [] : [{ key: section.key, label: section.label, items }];
   });
   const rest = shown
     .filter((f) => !declared.some((section) => section.key === f.hints?.section))
-    .map((f) => recordField(f, row[f.name], format));
+    .map((f) => recordField(f, row[f.name], format, names));
   return rest.length === 0
     ? blocks
     : [...blocks, { key: "", label: format.copy.kit.overview, items: rest }];
+}
+
+/**
+ * informationHeld are the fields the record's own block draws: the three stamps,
+ * in that order, and every field the document keeps for this screen (`detail`) a
+ * higher place has not already drawn. It is asked both by the block below and by
+ * `pointerTargets`, so "which fields does this medium draw" stays one answer.
+ */
+function informationHeld(e: Entry, row: Row): readonly Field[] {
+  const drawn = headerDrawn(e);
+  const stamps = informationFields.flatMap((name) =>
+    e.fields.filter((f) => f.name === name && !neverShown(f) && hasValue(f, row[f.name])),
+  );
+  const kept = e.fields.filter(
+    (f) =>
+      f.hints?.visibility === "detail" &&
+      !neverShown(f) &&
+      !drawn.has(f.name) &&
+      !informationFields.includes(f.name) &&
+      hasValue(f, row[f.name]),
+  );
+  return [...stamps, ...kept];
+}
+
+/**
+ * Pointer is one record a value on this screen points at: the resource it lives
+ * in and the identifier the row holds for it. A name is asked for by this pair
+ * and nothing else, so a name can never be read across two resources whose
+ * identifiers happen to match.
+ */
+export interface Pointer {
+  readonly resource: string;
+  readonly id: string;
+}
+
+/**
+ * pointerTargets are the records a screen will have to name, gathered from the
+ * fields that medium actually draws — so a pointer the screen never reads is
+ * never asked for, and the question "which fields does this medium draw" is
+ * asked of the same helpers that draw it.
+ *
+ * A pointer with no declared resource is not in the list: with no target named,
+ * the phone has nothing to ask, and the value reads as the word rather than as
+ * an identifier all the same (`display`).
+ */
+export function pointerTargets(
+  e: Entry,
+  rows: readonly Row[],
+  where: "record" | "row",
+): readonly Pointer[] {
+  const drawn = (row: Row): readonly Field[] =>
+    where === "record"
+      ? [
+          ...headerDrawnList(e),
+          ...shownFields(e, row, (f) => f.hints?.visibility !== "detail"),
+          ...informationHeld(e, row),
+        ]
+      : [rowPrimary(e), statusField(e), listPreview(e, "row"), ...listCells(e)].filter(
+          (f): f is Field => f !== undefined,
+        );
+  const seen = new Set<string>();
+  const out: Pointer[] = [];
+  for (const row of rows) {
+    for (const f of drawn(row)) {
+      const resource = points(f) ? pointedAt(f) : undefined;
+      const id = resource === undefined ? "" : text(row[f.name]);
+      if (resource === undefined || id === "" || seen.has(nameKey(resource, id))) continue;
+      seen.add(nameKey(resource, id));
+      out.push({ resource, id });
+    }
+  }
+  return out;
+}
+
+/**
+ * controlPointers are the records the greyed boxes of a sheet point at: each is
+ * drawn as a name, so each is asked once. A box a person types into is not here —
+ * it holds the identifier it must send and asks about nothing. The identifier is
+ * read from the row and never from the control, whose own string is what the box
+ * draws and may already be somebody's name.
+ */
+export function controlPointers(
+  controls: readonly Control[],
+  row: Row | undefined,
+): readonly Pointer[] {
+  const seen = new Set<string>();
+  const out: Pointer[] = [];
+  for (const c of controls) {
+    const resource = c.readOnly && points(c.field) ? pointedAt(c.field) : undefined;
+    const id = resource === undefined || row === undefined ? "" : text(row[c.field.name]);
+    if (resource === undefined || id === "" || seen.has(nameKey(resource, id))) continue;
+    seen.add(nameKey(resource, id));
+    out.push({ resource, id });
+  }
+  return out;
 }
 
 /**
@@ -763,20 +943,13 @@ export function recordSections(e: Entry, row: Row, format: Formatting): readonly
  * either. Whoever draws it collapses it and puts it last; this decides only what is
  * in it.
  */
-export function recordInformation(e: Entry, row: Row, format: Formatting): readonly DetailItem[] {
-  const drawn = headerDrawn(e);
-  const stamps = informationFields.flatMap((name) =>
-    e.fields.filter((f) => f.name === name && !neverShown(f) && hasValue(f, row[f.name])),
-  );
-  const kept = e.fields.filter(
-    (f) =>
-      f.hints?.visibility === "detail" &&
-      !neverShown(f) &&
-      !drawn.has(f.name) &&
-      !informationFields.includes(f.name) &&
-      hasValue(f, row[f.name]),
-  );
-  return [...stamps, ...kept].map((f) => recordField(f, row[f.name], format));
+export function recordInformation(
+  e: Entry,
+  row: Row,
+  format: Formatting,
+  names?: Names,
+): readonly DetailItem[] {
+  return informationHeld(e, row).map((f) => recordField(f, row[f.name], format, names));
 }
 
 export type ControlKind =
@@ -848,8 +1021,22 @@ function control(f: Field, value: string, immutable: boolean): Control {
   };
 }
 
-/** formControls: one control per writable field; immutable fields are read-only on edit and absent on create. */
-export function formControls(e: Entry, row: Row | undefined, create: boolean): readonly Control[] {
+/**
+ * formControls: one control per writable field; immutable fields are read-only on edit and absent on create.
+ *
+ * `names` is what this screen resolved of the records its greyed boxes point at.
+ * A box nobody can type into draws that name and keeps the row's own value in
+ * `echo` (added by `writeControls`), so the person reads "Assignee — Ada Lovelace"
+ * and the write sends the identifier it was given. A box a person types into keeps
+ * the identifier: there is no picker yet, and the value in the box is the value
+ * that will be sent.
+ */
+export function formControls(
+  e: Entry,
+  row: Row | undefined,
+  create: boolean,
+  names?: Names,
+): readonly Control[] {
   const out: Control[] = [];
   for (const f of e.fields) {
     if (f.readOnly) continue;
@@ -861,7 +1048,11 @@ export function formControls(e: Entry, row: Row | undefined, create: boolean): r
     if (f.hints?.visibility === "hidden" && f.required !== true) continue;
     const immutable = e.immutable.includes(f.name);
     if (create && immutable) continue;
-    const value = row && f.name in row ? text(row[f.name]) : create ? (f.default ?? "") : "";
+    const stored = row && f.name in row ? text(row[f.name]) : create ? (f.default ?? "") : "";
+    const value =
+      immutable && points(f) && names !== undefined
+        ? (names[nameKey(pointedAt(f) ?? "", stored)] ?? stored)
+        : stored;
     out.push(control(f, value, immutable));
   }
   return out;
@@ -965,8 +1156,9 @@ export function formSections(
   row: Row | undefined,
   create: boolean,
   overview: string,
+  names?: Names,
 ): readonly FormBlock[] {
-  const controls = formControls(e, row, create);
+  const controls = formControls(e, row, create, names);
   const identity = primary(e)?.name;
   const filed = (c: Control) => c.field.hints?.section;
   const declared = e.hints?.sections ?? [];
@@ -1004,6 +1196,43 @@ export function commandSections(c: Command): readonly FormBlock[] {
  * the verb spelled as words when it gives none.
  */
 export const commandTitle = (c: Command): string => c.hints?.label || c.summary || humanize(c.verb);
+
+/**
+ * CommandWording is everything a person is told about one command, in the words
+ * this build is allowed to say, assembled once for the dialog, the sheet and the
+ * sentence said afterwards.
+ *
+ * Two rules hold across the five answers. Nothing a person reads is the
+ * developer's `description`, which describes a wire member to whoever wrote the
+ * server. And a fact already in the title is never repeated under it: where the
+ * summary *is* the title the consequence is empty rather than the same sentence
+ * twice, which leaves a command nobody described as a bare confirm — an explicit
+ * question with an invented sentence about what it does is the worse screen.
+ */
+export interface CommandWording {
+  /** title is the sheet's header and the dialog's question. */
+  readonly title: string;
+  /** button is the short domain word the answer is made of — never a whole sentence on a button. */
+  readonly button: string;
+  /** actsOn is the record the command runs on, "" when it runs on the list or the screen the dialog is drawn over. */
+  readonly actsOn: string;
+  /** consequence is what running it does, "" when the document says nothing. */
+  readonly consequence: string;
+  /** success is what the record says afterwards. */
+  readonly success: string;
+}
+
+export function commandWording(c: Command, actsOn: string, copy: Copy): CommandWording {
+  const title = commandTitle(c);
+  const summary = c.summary ?? "";
+  return {
+    title,
+    button: c.hints?.label ?? humanize(c.verb),
+    actsOn,
+    consequence: c.hints?.confirmation?.body ?? (summary !== title ? summary : ""),
+    success: c.hints?.successMessage ?? copy.kit.commandDone(c.hints?.label ?? humanize(c.verb)),
+  };
+}
 
 /** rowCommands are the commands about one record; collectionCommands are about the list. */
 /**

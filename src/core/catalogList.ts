@@ -11,6 +11,7 @@ import {
   readPhase,
   sortOptions,
   text,
+  type Names,
   type Order,
   type Row,
 } from "./derive";
@@ -42,6 +43,12 @@ export interface CatalogListInput {
    * say so: rows that arrived yesterday are not drawn as today's.
    */
   readonly savedAt?: string;
+  /**
+   * names is what this window resolved of the records its rows point at, so a
+   * cell, a row's name and its line under the name read as a name and never as
+   * the identifier stored for the pointer. Absent means nothing was resolved.
+   */
+  readonly names?: Names | undefined;
 }
 
 /**
@@ -93,7 +100,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
         id: "records",
         title: noun(entry).plural,
         rows: input.rows.map((row) => ({
-          ...listRow(entry, row, p, p.copy.kit.untitled),
+          ...listRow(entry, row, p, p.copy.kit.untitled, input.names),
           id: text(row.id),
           selectable: false,
           actions: [],

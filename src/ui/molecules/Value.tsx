@@ -11,10 +11,12 @@ import { View, StyleSheet } from "react-native";
 import type { Field } from "../../core/catalog";
 import {
   type Formatting,
+  type Names,
   badgeTone,
   display,
   enumTone,
   fieldLabel,
+  points,
   splitList,
   text,
 } from "../../core/derive";
@@ -30,13 +32,19 @@ interface Props {
   readonly value: unknown;
   /** compact is a value on a list row, where there is one line to say it in. */
   readonly compact?: boolean;
+  /**
+   * names is what this screen resolved of the records its values point at, keyed
+   * the way `derive.nameKey` keys them. Absent means nothing was resolved, which
+   * is still not the identifier: a pointer says the word (`derive.referenceWord`).
+   */
+  readonly names?: Names | undefined;
   /** testID names whichever shape the value takes. */
   readonly testID?: string;
 }
 
-export function Value({ presentation, field, value, compact = false, testID }: Props) {
+export function Value({ presentation, field, value, compact = false, names, testID }: Props) {
   const s = useStyles(styles);
-  const shown = display(field, value, presentation);
+  const shown = display(field, value, presentation, names);
   const raw = text(value);
   const id = testable(testID);
 
@@ -82,7 +90,11 @@ export function Value({ presentation, field, value, compact = false, testID }: P
       </View>
     );
 
-  if (field.type === "uuid" || field.widget === "entity-picker")
+  // An identifier is monospaced and selectable because a person reads it out
+  // letter by letter. A value that points at another record is not an identifier
+  // to anyone: it reads as that record's name, or as the word saying there is one,
+  // and both are ordinary words.
+  if ((field.type === "uuid" || field.widget === "entity-picker") && !points(field))
     return (
       <Text
         role="mono"
@@ -125,10 +137,12 @@ export function Labelled({
   presentation,
   field,
   value,
+  names,
 }: {
   readonly presentation: Formatting;
   readonly field: Field;
   readonly value: unknown;
+  readonly names?: Names | undefined;
 }) {
   const s = useStyles(styles);
   const speaks = (field.enum ?? []).length > 0;
@@ -139,7 +153,7 @@ export function Labelled({
           {fieldLabel(field)}
         </Text>
       )}
-      <Value presentation={presentation} field={field} value={value} compact />
+      <Value presentation={presentation} field={field} value={value} names={names} compact />
     </View>
   );
 }

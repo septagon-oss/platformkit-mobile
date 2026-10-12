@@ -501,3 +501,91 @@ test("the strict generated operation still refuses what the phone forgives", asy
   await api.catalog();
   await assert.rejects(api.operations.appResources({}));
 });
+
+// What a command says about itself, and what a field says it points at, are the
+// two readings added to the hint surface: the consequence a sheet says under its
+// title, the sentence said afterwards, and the record a value names. A malformed
+// one costs its own reading and names itself; the rest of the hint survives, and
+// a document that declares none of them parses exactly as it did.
+test("a command's consequence and success reach the hints, and the wire shape does not", () => {
+  const doc = golden();
+  doc.resources[0].commands[0].presentation = {
+    label: "Publish it",
+    system: false,
+    confirmation: { title: "Publish?", body: "Anyone can read it.", confirmLabel: "Yes" },
+    successMessage: "The note is public.",
+  };
+  const lines: string[] = [];
+  const entry = parseCatalog(doc, (at, why) => lines.push(`${at} ${why}`)).resources[0]!;
+  const command = entry.commands[0]!;
+  assert.deepEqual(command.hints, {
+    label: "Publish it",
+    confirmation: { body: "Anyone can read it." },
+    successMessage: "The note is public.",
+  });
+  assert.equal("presentation" in command, false, "the wire key does not survive the parse");
+  assert.deepEqual(lines, []);
+});
+
+test("a malformed consequence, success or target costs its own reading and says so", () => {
+  for (const [hint, why] of [
+    ["Publish it", "confirmation is not a hint object: the consequence is not read"],
+    [{}, "confirmation.body is not words: the consequence is not read"],
+    [{ body: 3 }, "confirmation.body is not words: the consequence is not read"],
+  ] as const) {
+    const doc = golden();
+    doc.resources[0].commands[0].presentation = { label: "Publish it", confirmation: hint };
+    const lines: string[] = [];
+    const entry = parseCatalog(doc, (at, why) => lines.push(`${at} ${why}`)).resources[0]!;
+    assert.deepEqual(entry.commands[0]!.hints, { label: "Publish it" }, JSON.stringify(hint));
+    assert.ok(
+      lines.some((l) => l.includes(why)),
+      `${why} was not said: ${lines.join("; ")}`,
+    );
+  }
+  const doc = golden();
+  doc.resources[0].commands[0].presentation = {
+    label: "Publish it",
+    confirmation: { body: "Anyone can read it." },
+    successMessage: 7,
+  };
+  const lines: string[] = [];
+  const entry = parseCatalog(doc, (at, why) => lines.push(`${at} ${why}`)).resources[0]!;
+  assert.deepEqual(entry.commands[0]!.hints, {
+    label: "Publish it",
+    confirmation: { body: "Anyone can read it." },
+  });
+  assert.ok(
+    lines.some((l) => l.endsWith("successMessage is not a sentence: the default is used")),
+    lines.join("; "),
+  );
+});
+
+test("a field names the record its value points at, or leaves the value read as stored", () => {
+  const pointed = withFieldHint("body", { reference: { resource: "user/user" } });
+  assert.deepEqual(pointed.entry.fields.find((f) => f.name === "body")!.hints?.reference, {
+    resource: "user/user",
+  });
+  assert.deepEqual(pointed.lines, []);
+  for (const broken of ["user/user", 7, {}, { resource: "" }] as const) {
+    const hint = withFieldHint("body", { label: "Text", reference: broken });
+    assert.deepEqual(
+      hint.entry.fields.find((f) => f.name === "body")!.hints,
+      { label: "Text" },
+      JSON.stringify(broken),
+    );
+    assert.ok(
+      hint.lines.some((l) => l.includes("reference names no resource")),
+      `${JSON.stringify(broken)}: ${hint.lines.join("; ")}`,
+    );
+  }
+});
+
+test("a command whose only presentation is a label and a system tag still parses to exactly that", () => {
+  const doc = golden();
+  doc.resources[0].commands[0].presentation = { label: "Publish it", system: true };
+  const lines: string[] = [];
+  const entry = parseCatalog(doc, (at, why) => lines.push(`${at} ${why}`)).resources[0]!;
+  assert.deepEqual(entry.commands[0]!.hints, { label: "Publish it", system: true });
+  assert.deepEqual(lines, []);
+});

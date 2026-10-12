@@ -24,6 +24,7 @@ import { TextField, type FieldKind } from "../atoms/TextField";
 import { FormField } from "../molecules/FormField";
 import { Section } from "../molecules/Section";
 import { TagsField } from "../molecules/TagsField";
+import { Text } from "../atoms/Text";
 import { Screen } from "../templates/Screen";
 
 /** Phase is what the sheet is doing: loading the row to edit, failed to, editing, saving, or done. */
@@ -50,6 +51,13 @@ export interface Props {
    */
   readonly refusals?: number;
   readonly phase: Phase;
+  /**
+   * acts is what a command sheet says above its controls: the record it runs on,
+   * and what running it does. Each line is drawn only where it has words, and a
+   * sheet with nothing to say draws no block at all. A create or edit sheet passes
+   * nothing: a form that writes the record is not a command acting on it.
+   */
+  readonly acts?: { readonly on: string; readonly consequence: string };
   readonly onChange: (name: string, value: string) => void;
   readonly onRetry: () => void;
   /**
@@ -76,6 +84,7 @@ export function ResourceForm({
   awaiting = "",
   refusals = 0,
   phase,
+  acts,
   onChange,
   onRetry,
   onFieldRefused,
@@ -164,6 +173,7 @@ export function ResourceForm({
             <DateTimeRow
               copy={feedback.copy.dateTime}
               initialValue={initialDate}
+              testID={`input-${name}`}
               timeZone={feedback.timeZone}
               label={named(c)}
               value={timeValue(value)}
@@ -207,6 +217,20 @@ export function ResourceForm({
   };
   return (
     <Screen form testID="resource-form" scrollViewRef={scroller}>
+      {acts && (acts.on !== "" || acts.consequence !== "") ? (
+        <Section>
+          {acts.on !== "" ? (
+            <Text role="title" testID="command-subject">
+              {acts.on}
+            </Text>
+          ) : null}
+          {acts.consequence !== "" ? (
+            <Text role="body" tone="muted" testID="command-consequence">
+              {acts.consequence}
+            </Text>
+          ) : null}
+        </Section>
+      ) : null}
       {detail ? (
         <Notice
           announcement="urgent"

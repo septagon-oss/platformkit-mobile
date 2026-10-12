@@ -12,7 +12,6 @@ import {
   commandOf,
   commandScope,
   commandTitle,
-  humanize,
   otherScope,
   screenPath,
   type Clock,
@@ -100,11 +99,11 @@ function Sheet({
   const form = useCommandForm(entry, id, command);
   const running = form.phase === "running";
   const { cancel, run, phase } = form;
-  // The sheet is titled with the command's own summary and confirmed with its
-  // verb: a header button is a word, not a sentence. The layout has already
-  // put the verb up there, so the title only ever grows into itself.
-  const title = commandTitle(command);
-  const verb = humanize(command.verb);
+  // The sheet is titled with the command's own word and confirmed with that same
+  // word: a header button is a word, not a sentence, and the sentence of what
+  // running it does goes under the title, in the body. Both come from the one
+  // reading of the command the sheet's model uses (`commandWording`).
+  const { title, button, actsOn, consequence } = form.wording;
   // Memoised for the reason every screen's options are: a fresh object with
   // fresh callbacks in it is a new instruction on every render.
   const options = useMemo(
@@ -117,7 +116,7 @@ function Sheet({
       headerRight: () => (
         <Button
           placement="header"
-          label={verb}
+          label={button}
           onPress={() => void run()}
           busy={running}
           disabled={phase !== "editing"}
@@ -125,7 +124,7 @@ function Sheet({
         />
       ),
     }),
-    [title, verb, running, phase, cancel, run],
+    [title, button, running, phase, cancel, run],
   );
 
   return (
@@ -139,6 +138,7 @@ function Sheet({
         errors={form.errors}
         detail={form.detail}
         phase={running ? "saving" : "editing"}
+        acts={{ on: actsOn, consequence }}
         onChange={form.change}
         onFieldRefused={form.fieldRefused}
         onRetry={cancel}
