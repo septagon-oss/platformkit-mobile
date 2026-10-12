@@ -81,20 +81,25 @@ function Figure({
 }) {
   const s = useStyles(styles);
   const open = figure.canOpen && onOpenFigure !== undefined;
+  // A decorative figure says nothing to a person listening either: the picture carries
+  // no words and the frame has no affordance, so the whole block leaves the tree rather
+  // than being announced as something to open.
+  const decorative = figure.slot?.decorative ?? false;
   // The box is reserved by the measurements the server took of the file itself, so a
   // paragraph below a figure does not move when its bytes arrive. No frame yet means
   // nothing is reserved: the skeleton says so at its own height.
   const box = figure.slot ? { aspectRatio: figure.slot.aspectRatio } : undefined;
   return (
-    <View style={s.figure} {...testable(`prose-figure-${figure.id}`)}>
+    <View
+      style={s.figure}
+      accessibilityElementsHidden={decorative}
+      importantForAccessibility={decorative ? "no-hide-descendants" : "auto"}
+      {...testable(`prose-figure-${figure.id}`)}
+    >
       <Pressable
         accessible
         accessibilityRole={open ? "imagebutton" : "image"}
-        accessibilityLabel={
-          figure.slot && !figure.slot.decorative
-            ? `${figure.openLabel}, ${figure.slot.description}`
-            : figure.openLabel
-        }
+        accessibilityLabel={spoken(figure)}
         accessibilityHint={open ? figure.openLabel : undefined}
         disabled={!open}
         onPress={() => onOpenFigure?.(figure.id)}
@@ -132,6 +137,22 @@ function Figure({
       ) : null}
     </View>
   );
+}
+
+/**
+ * spoken is what a person hearing the screen is told about one figure: the one thing it
+ * is. The figure that opens is invited by name; a box whose bytes have not arrived is
+ * loading; a box that was refused names the reason the server gave; and a decorative
+ * picture has nothing to say, so nothing is said. An "Open" over any of the last three
+ * is a promise the figure cannot keep, and a screen reader would make three of them.
+ */
+function spoken(figure: ProseBlockModel & { kind: "figure" }): string | undefined {
+  if (figure.slot?.decorative ?? false) return undefined;
+  if (figure.canRetry) return figure.reason;
+  if (figure.state === "loading" || figure.slot === undefined) return figure.loadingLabel;
+  return figure.canOpen
+    ? `${figure.openLabel}, ${figure.slot?.description ?? ""}`
+    : figure.slot?.description;
 }
 
 const styles = (t: Theme) =>

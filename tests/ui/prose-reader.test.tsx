@@ -95,6 +95,23 @@ describe("the reader", () => {
   test("a figure whose frame is not known yet is loading, and reserves nothing", async () => {
     await inTheme(draw(read("![One](pk-file:3f7b1c2e-8d5a-4e6f-9b1c-2a3d4e5f6a7b)")));
     expect(screen.getByTestId("prose-figure-loading-fig-0")).toBeTruthy();
+    expect(screen.getByTestId("prose-figure-open-fig-0").props.accessibilityLabel).toBe("Loading");
+  });
+
+  test("a figure that cannot be opened says what it is instead of offering to open", async () => {
+    const failed = read("![One](pk-file:3f7b1c2e-8d5a-4e6f-9b1c-2a3d4e5f6a7b)", {
+      "fig-0": { ...frame, state: "error", reason: "This file is gone from the shelf" },
+    });
+    await inTheme(draw(failed, jest.fn()));
+    expect(screen.getByTestId("prose-figure-open-fig-0").props.accessibilityLabel).toBe(
+      "This file is gone from the shelf",
+    );
+
+    const decorative = read("![](pk-file:3f7b1c2e-8d5a-4e6f-9b1c-2a3d4e5f6a7b)", {
+      "fig-0": { ...frame, description: "", decorative: true },
+    });
+    await inTheme(draw(decorative, jest.fn()));
+    expect(screen.queryByTestId("prose-figure-open-fig-0")).toBeNull();
   });
 
   test("a missing image says so and loses none of the text around it", async () => {
@@ -114,7 +131,7 @@ describe("the reader", () => {
     expect(onOpen).not.toHaveBeenCalled();
   });
 
-  test("a ready figure opens, and a decorative one is not a thing to open", async () => {
+  test("a ready figure opens, and a decorative one is nothing a person is offered", async () => {
     const onOpen = jest.fn();
     const openable = read("![One](pk-file:3f7b1c2e-8d5a-4e6f-9b1c-2a3d4e5f6a7b)", {
       "fig-0": frame,
@@ -127,7 +144,10 @@ describe("the reader", () => {
       "fig-0": { ...frame, description: "", decorative: true },
     });
     await inTheme(draw(decorative, onOpen));
-    expect(screen.getByTestId("prose-figure-open-fig-0").props.accessibilityRole).toBe("image");
+    // Nothing inside the figure is reachable: the tree answers for none of it, so no
+    // "image" is announced for a picture the format called decoration.
+    expect(screen.queryByTestId("prose-figure-open-fig-0")).toBeNull();
+    expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
   test("a body the phone cannot draw is refused by the reader, not drawn as less", () => {

@@ -852,7 +852,8 @@ therefore calls a fence quoting a table no table. `Prose` draws the runs in the 
 the figures in the slot the media family already owns: the box is reserved from the
 frame the server measured, so no paragraph moves when the bytes arrive; a figure that
 did not arrive says `Image unavailable` in the reader's language and keeps every word
-around it; a decorative figure is nothing to open, and a ready one is.
+around it; a decorative figure is nothing to open and nothing a person listening is told
+about at all, and a ready one is invited by name.
 `MarkdownProse` is the only file that names a Markdown library — `src/ui/` draws what it
 is handed and knows no library, no transport and no file byte. The parser behind that face
 is `markdown-it@14.3.1`, held by one `overrides` entry: the face asks for `^10`, whose
