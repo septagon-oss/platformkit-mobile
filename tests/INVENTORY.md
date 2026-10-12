@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `c70a6c8b7` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `1c798c001` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 30 | 181 | 46.9 s | 65 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 200 | 918 | 43.8 s | 1445 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 201 | 918 | 43.8 s | 1445 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 58 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 344
+* keep: 345
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 344 — 160 `tests/*.test.ts` (node), 128 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* files inventoried: 345 — 160 `tests/*.test.ts` (node), 129 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1305; cases in files no runner reaches: 35
 * isolated wall time: contract 65 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -172,6 +172,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/player-words-not-cut.test.tsx | jest | behaviour | 4 | 19021 | 21 | 0 | 0 of 4 | — | 0 | keep | What is playing has to be readable, not merely present. The strip over a list is one line tall by design; the card a person stops on is not, and drawing it lik… |
 | tests/ui/pricing-withdrawal.test.tsx | jest | behaviour | 4 | 19724 | 131 | 22 | 0 of 4 | — | 0 | keep | Coming back from lost pricing needs a press, not a quiet refill, and no plan may keep a value or an offer the current read no longer allows. |
 | tests/ui/prose-code-reads-in-the-dark.test.tsx | jest | behaviour |  |  |  |  | not measured | — | 0 | keep | The reader is styled only by the kit's tokens, in both modes (0069 §8: prose, figures, tables and code are styled only by tokens; dark mode is checked). A code… |
+| tests/ui/prose-draws-no-face-of-its-own.test.tsx | jest | behaviour |  |  |  |  | not measured | — | 0 | keep | The reader is drawn only from the kit's tokens, in both modes — no colour, face or size of the Markdown library ever reaches a screen. One element cannot answe… |
 | tests/ui/prose-reader.test.tsx | jest | behaviour |  |  |  |  | not measured | — | 0 | keep | A rich text body is read natively: every construct 0069 §1 allows comes back as text a person can read, in both modes, with the figure's box reserved by the fr… |
 | tests/ui/record-menu-opens-under-its-header.test.tsx | jest | behaviour | 1 | 20512 | 22 | 0 | 0 of 1 | — | 0 | keep | The `…` sits in the native header, which stays put while the record scrolls, so what it opens appears where the person was looking: the open menu is the first … |
 | tests/ui/refused-field-asks-for-its-box.test.tsx | jest | behaviour | 4 | 16050 | 405 |  | not measured | — | 0 | keep | The sheet does not merely say which field is wrong, it asks for that field: the organism keeps the ref of every box it drew and, when the hook names the field … |

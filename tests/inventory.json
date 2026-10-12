@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 200,
+   "files": 201,
    "cases": 918,
    "ms": 1445375,
    "testsMs": 43814.00000000003,
    "runners": {
-    "jest": 70,
+    "jest": 71,
     "node": 130
    },
    "unreachable": 0
@@ -6811,6 +6811,26 @@
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
    "ms": null,
    "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-code-reads-in-the-dark.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
+   "file": "tests/ui/prose-draws-no-face-of-its-own.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "The reader is drawn only from the kit's tokens, in both modes \u2014 no colour, face or size of the Markdown library ever reaches a screen. One element cannot answer that: a style written under a key the library never reads is invisible to a case that looks at one block, and the library's own default lands on the screen beside it. So this asks the question of every element of a whole body: each colour must be a role of the palette, each face one of the three the theme names, each size one of the scale's.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-draws-no-face-of-its-own.test.tsx fills wall time, cases and titles from one run of this file",
    "titles": [],
    "tests": [],
    "loaded": null,
