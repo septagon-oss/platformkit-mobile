@@ -10,7 +10,7 @@
 // their sentence until the server names a type of its own. The drift test in
 // tests/sign-in-outcome.test.ts reads the pinned document and refuses this
 // fallback the day it does. A dead key is told apart by the code its refusal
-// names, because "every refusal is a 403, never a 401" (kit/httpx/authorize.go)
+// names, because "every refusal is a 403, never a 401" (kit/httpx/authorize.go).
 import type { RefusalShape } from "./refusal";
 
 /** The discriminator the kernel would use if it grew one, quoted from the
