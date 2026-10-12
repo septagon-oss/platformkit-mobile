@@ -236,6 +236,13 @@ export interface Api {
     values?: Record<string, unknown>,
     options?: RequestOptions,
   ): Promise<Record<string, unknown>>;
+  /**
+   * upload stores one file: a multipart POST at the entry's write address, answered with the
+   * row the server made for the bytes. No JSON call can carry it — the document gives a file's
+   * bytes one door, and it is a streamed form rather than a body — so the generated operation
+   * is walked directly and its answer is read as any other row.
+   */
+  upload(e: Entry, form: FormData, query?: string): Promise<Record<string, unknown>>;
   /** cookie is the session the shell should persist, or undefined when signed out. */
   readonly cookie: () => string | undefined;
 }
@@ -722,6 +729,22 @@ export function createApi(
     },
     async command(e, id, verb, values, options) {
       return json("POST", commandPath(e, verb, id), row.parse, values, options);
+    },
+    async upload(e, form, query = "") {
+      const path = `${writePath(e)}${query}`;
+      apiPath(path);
+      const route = documentedRoute("POST", path);
+      if (route?.multipart !== true)
+        throw new TypeError(`No documented multipart upload at ${writePath(e)}.`);
+      const result = await documented((client) => route.run(client, path, form));
+      try {
+        return row.parse(result.data);
+      } catch (error) {
+        throw new ResponseError(
+          result.response.status,
+          `Invalid response at ${path}: ${error instanceof CatalogError ? error.at : issuePath(error)} failed validation.`,
+        );
+      }
     },
   };
 }

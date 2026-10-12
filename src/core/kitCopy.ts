@@ -272,8 +272,14 @@ export const kitEnglish = {
   heading: "Heading",
   bulletList: "List",
   image: "Image",
-  imageFromFiles: "Choose a file to put in the body",
   noFilesToInsert: "This workspace holds no file to put in the body yet.",
+  // Where a picture in a body comes from: the phone's own camera and photo library, or a
+  // file this workspace already holds. A picture taken here is stored as a file first, so
+  // the body points at a file the server has rather than at a path on this phone.
+  imageSource: "Add a picture to the body",
+  takePhoto: "Take photo",
+  photoLibrary: "Photo library",
+  photoNotStored: "This phone could not store the picture, so nothing was put in the body.",
   // A body written in the reader's own language is a translation of the record, and the
   // two are written at different addresses: a save that changed both at once would be half
   // a translation and half an edit, which is why the sheet asks for one at a time.
@@ -523,8 +529,12 @@ export const kitPortuguese: KitWords = {
   heading: "Título",
   bulletList: "Lista",
   image: "Imagem",
-  imageFromFiles: "Escolha um ficheiro para colocar no texto",
   noFilesToInsert: "Este espaço ainda não tem ficheiro para colocar no texto.",
+  imageSource: "Adicionar uma imagem ao texto",
+  takePhoto: "Tirar foto",
+  photoLibrary: "Biblioteca de fotos",
+  photoNotStored:
+    "Este telefone não conseguiu guardar a imagem, por isso nada foi colocado no texto.",
   mixedLanguageWrite:
     "Alterou um campo traduzido e um que o registo guarda no seu próprio idioma. Guarde um e depois o outro.",
   table: "Tabela de dados",

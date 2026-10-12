@@ -155,6 +155,25 @@ for the version being released.
   nothing else, and `changedByCommand` and `identifierOnly` (English and Portuguese) are
   drawn by `ResourceForm` — so what an English phone reads beside a greyed-out value is
   the same sentence as before, and a Portuguese phone reads one for the first time.
+- A picture in a rich text body may come from the phone itself. `Image` over an editable
+  `widget: richtext` box now asks where the picture comes from — this phone's camera, its
+  photo library, or a file the server already holds — and a picture taken or chosen here is
+  stored first: `./effects/api` gains `upload(e, form, query)`, the one multipart POST the
+  pinned document gives a file's bytes, answered with the row the server made, so the line
+  that enters the body points at that row and never at an address only this phone can read.
+  This needs a native module the kit did not carry: `expo-image-picker` is a new dependency,
+  and a client that pins this release gets a new native project and therefore a new binary.
+  A formatting mark is applied to the body the box shows rather than to whatever the sheet
+  happens to hold, and an answer that arrives after the person typed again is inserted into
+  the draft as it now stands: a mark over a freshly read body no longer writes `****` over
+  the body, and a figure no longer erases the sentence typed while its file was being listed.
+- Additive to `./core/derive`: `servedLanguage` (the language the server says one field's
+  words arrived in, read off `_i18n`) and `writeLanguage` (what a sheet's Save may name, and
+  which of its changed fields that language cannot carry). A save of a translated field now
+  sends `?lang=` with it, because a PATCH that names no language writes the record: without
+  this, editing Portuguese on a Portuguese phone overwrote the English it was translated
+  from. `Api.update` takes the language on its request options, and a held write replays at
+  the same address it was filed under.
 
 ## 0.2.0
 

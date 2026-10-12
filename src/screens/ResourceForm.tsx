@@ -13,6 +13,7 @@ import { label, type Clock } from "../core/derive";
 import { systemClock, useInitialDate } from "./clock";
 import { useShell } from "../shell";
 import { choose } from "../ui/chooser";
+import { capturePicture, uploadForm, type Capture } from "./capture";
 import { useTheme } from "../ui/theme";
 
 export function ResourceForm({
@@ -28,29 +29,56 @@ export function ResourceForm({
   const { api, entry: entryOf } = useShell();
   const { mode } = useTheme();
   const kit = feedback.copy.kit;
-  // A figure goes into a body as a file this server already holds: the person chooses among
-  // the files this session may read, and the body is given that file's own line. Pointing a
-  // camera or uploading a picture from this phone needs a native module this build does not
-  // carry (README Limits), so no control here promises one.
+  // A figure in a body is a file this server holds, so a picture taken on this phone is
+  // stored as one before the body points at it: the person says where the picture comes
+  // from, this screen carries its bytes to the file module, and only the row the server
+  // answers with goes into the text — never an address on this phone. A workspace whose
+  // catalogue carries no file module offers nothing at all, because a picture with nowhere
+  // to live is a figure no reader could open.
   const pickImage = useCallback(
     (field: string, put: (pick: { readonly name: string; readonly file: string }) => void) => {
       const files = entryOf("file", "files");
       if (files === undefined) return;
+      const say = () => choose(kit.imageSource, [], mode, { message: kit.photoNotStored });
+      const add = async (via: Capture) => {
+        const answer = await capturePicture(via);
+        if (answer.picture === undefined) {
+          // Nobody picked anything is the platform's own business; a permission this
+          // installation does not hold is the person's, and both leave the body alone.
+          if (answer.refused) say();
+          return;
+        }
+        try {
+          // `image=true` is the file module's own question — measure the frame, and refuse
+          // what no decoder reads — so a body never points at bytes no picture is in.
+          const stored = await api.upload(files, uploadForm(answer.picture), "?image=true");
+          put({
+            name: label(files, stored, kit.untitled, "row"),
+            file: String(stored.id ?? ""),
+          });
+        } catch {
+          say();
+        }
+      };
       void api
         .list(files, { limit: 6 })
         .then((page) => {
           const rows = page.items.slice(0, 6);
           choose(
-            kit.imageFromFiles,
-            rows.map((row) => {
-              const name = label(files, row, kit.untitled, "row");
-              return {
-                label: name,
-                onPress: () => put({ name, file: String(row.id ?? "") }),
-              };
-            }),
+            kit.imageSource,
+            [
+              { label: kit.takePhoto, onPress: () => void add("camera") },
+              { label: kit.photoLibrary, onPress: () => void add("library") },
+              ...rows.map((row) => {
+                const name = label(files, row, kit.untitled, "row");
+                return {
+                  label: name,
+                  onPress: () => put({ name, file: String(row.id ?? "") }),
+                };
+              }),
+            ],
             mode,
-            { message: kit.noFilesToInsert },
+            rows.length === 0 ? { message: kit.noFilesToInsert } : {},
           );
         })
         .catch(() => undefined);

@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `82bd6831e` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `a76494350` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 30 | 181 | 46.9 s | 65 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 204 | 918 | 43.8 s | 1445 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 65 | 206 | 22.6 s | 1188 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 70 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 355
+* keep: 360
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 355 — 163 `tests/*.test.ts` (node), 136 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* files inventoried: 360 — 163 `tests/*.test.ts` (node), 141 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1305; cases in files no runner reaches: 35
 * isolated wall time: contract 65 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -337,6 +337,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering. |
 | tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
+| tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A picture taken on the phone is stored as a file before the body points at it: the body never learns an address that only this phone could read. |
 | tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at th… |
 | tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload. |
 | tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores … |
@@ -359,6 +360,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/command-refusal-exit.test.tsx | jest | composition | 2 | 18424 | 21 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) closing a command refusal returns to the preceding screen when there is one |
 | tests/screens/custom-renderer-catalog-withdrawal.test.tsx | jest | composition | 2 | 18420 | 59 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom detail renderer is unreachable after its catalog entry is withdrawn |
 | tests/screens/custom-renderer-session-isolation.test.tsx | jest | composition | 2 | 19295 | 438 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom renderer follows only the current session catalog |
+| tests/screens/editing-a-translation-keeps-the-source-language.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A translated read cannot be sent back as the source-language value on Save. |
 | tests/screens/example-task-detail.test.tsx | jest | composition | 6 | 18703 | 189 | 20 | 1 of 6 | — | 0 | keep | The example pack is the pattern a product copies, so what is proved here is the pattern's two halves: a screen whose data arrives as the operation's own respon… |
 | tests/screens/generated-richtext-record-renders-natively.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A generated record reads a richtext declaration without a product renderer. Markdown headings become native text while a plain text field keeps its syntax. |
 | tests/screens/newer-shell-fallback.test.tsx | jest | composition | 6 | 23705 | 570 | 0 | 0 of 6 | — | 0 | keep | A catalogue document, as the server prints it, that names a pack this build carries but cannot draw yet: the record is still read and drawn by the generated de… |
@@ -368,6 +370,9 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/record-command-at-collection-address.test.tsx | jest | composition | 3 | 23933 | 64 | 0 | 0 of 3 | — | 0 | keep | A command is about one record or about the collection (src/core/catalog.ts: "{entry.path}/{id}/{verb}, or {entry.path}/{verb} when collection"). The collection… |
 | tests/screens/reference-name-resolves-or-says-linked.test.tsx | jest | composition | 7 | 16461 | 30 |  | not measured | — | 0 | keep | A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the i… |
 | tests/screens/refused-richtext-file-keeps-the-reader.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A tenant-scoped file read that answers 404 leaves a missing-image figure in the native body. The surrounding Markdown still renders, and no refused byte is ask… |
+| tests/screens/richtext-formatting-preserves-the-loaded-body.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | Formatting a read value is an edit of that value, even before anyone types into it. |
+| tests/screens/richtext-image-insertion-keeps-later-typing.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | Choosing a file is asynchronous; typing while it loads must survive the insertion. |
+| tests/screens/richtext-image-source-offers-camera-and-library.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | Inserting a new phone photo starts by choosing the photo library or camera. |
 | tests/screens/sign-in-door-asks-before-held-writes-go.test.tsx | jest | composition | 1 | 25803 | 196 |  | not measured | — | 0 | keep | The sign-in screen has its own way to another server when a sign-in loaded the person but not the catalog — a network that dropped half-way through, which is t… |
 | tests/screens/sign-out-asks-before-held-writes-go.test.tsx | jest | composition | 1 | 23996 | 304 |  | not measured | — | 0 | keep | Signing out clears what this phone is holding, so every way out asks first while a write is held — including the one a catalog that could not be read offers, w… |
 | tests/screens/singleton-cancelled-refusal.test.tsx | jest | composition | 1 | 21526 | 37 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) cancelling a refused singleton draft allows the next valid edit to save |

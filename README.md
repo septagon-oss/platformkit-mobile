@@ -882,20 +882,31 @@ The row is announced by `proseSpoken` — the same body with none of the charact
 a screen how to draw them — so a person hearing the record is told its sentences, a code block
 as written and a figure by name, and never a `##` where a heading stands.
 
-**Limits** — the reading of a body is here, and so is the first writing of one: an
+**Limits** — the reading of a body is here, and so is the writing of one: an
 editable `widget: richtext` field offers Bold, Italic, Heading, List and Image over the box
 (`RichTextToolbar`, and `src/core/richtext.ts` is the one code that edits the draft, at the
-caret the box last reported). A picture is inserted as the one line a figure is, for a file
-this server already holds and this session may list: capture from the camera or the photo
-library, and upload of a file this phone has never sent, need a native module this build does
-not carry. A table and a task list stay the plain Markdown box's, with the sentence naming
-what the phone cannot hold. The language slice is a read: every request prints the phone's
-own `Accept-Language`, and `_i18n` — the server's own note of which language a translatable
-field's words arrived in — is said beside the field in the language the person is reading in
-(`Mostrado em inglês — ainda não traduzido`). Writing a translation, choosing the language on
-the phone, and the translator's side-by-side view stay on the web: the phone's own words (its
-buttons, its refusals, its "Image unavailable") follow the reader's language, while a body
-arrives in whatever language the server had for it, and now says which one that was.
+caret the box last reported, of the body the box *shows* — marking a word of a freshly read
+note marks that note rather than an empty box, and a figure whose answer arrives a second
+later lands among whatever has been typed since it was asked). `Image` asks where the
+picture comes from: this phone's camera, its photo library, or a file this server already
+holds. A picture taken or chosen here is sent up as the multipart upload the document names
+(`?image=true`, so a frame no decoder reads is refused before anything is kept) and enters
+the body as the one line a figure is, pointing at the row the server answered with and never
+at an address only this phone could read. A table and a task list stay the plain Markdown
+box's, with the sentence naming what the phone cannot hold. The language slice is a read and
+one write: every request prints the phone's own `Accept-Language`; `_i18n` — the server's own
+note of which language a translatable field's words arrived in — is said beside the field in
+the language the person is reading in (`Mostrado em inglês — ainda não traduzido`); and a
+Save of a field the server named in that reader's own language names the language back
+(`?lang=`) and carries only the fields that language owns, saying so when the sheet changed
+the record's own fields beside them. A body's words sent with no language would be filed as
+the record's own copy, over the source they were translated from, which is the write this
+rule exists to refuse. The phone's own words (its buttons, its refusals, its "Image
+unavailable") follow the reader's language, while a body arrives in whatever language the
+server had for it and now says which one that was. Choosing the language on the phone, the
+translator's side-by-side view, and the overwrite of a translation that already stands — the
+kernel answers that one at the record's own translate route, which names the revision it
+cuts across — stay on the web.
 
 **Reused** — `MediaItem`, `ImageSlotProps` and the media family's
 `loading | ready | error | unavailable` life cycle with its `imageUnavailable`,
@@ -1531,8 +1542,8 @@ changes a native route or draws a new control. `display`, `maxLength`, `translat
 `keys` are declared by the document and carried by the field view with no screen of their
 own — a test distinguishes retained metadata from rendered behavior, and only a stray JSON
 member outside the document is refused. The `richtext` widget is read natively and written
-with the marks that reader draws back (under
-_How a rich text body reads_ above); capture and upload are not in this build.
+with the marks that reader draws back, a picture taken here included (under
+_How a rich text body reads_ above).
 
 **Reused** — `parseCatalog`'s supported-version and path checks, `CatalogError`, and
 the `writable` gate the screens already consulted; the New, Edit, Delete and Save

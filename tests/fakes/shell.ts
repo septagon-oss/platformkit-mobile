@@ -49,6 +49,7 @@ export function fakeApi(operations: Partial<Operations> = {}): FakeApi {
     create: jest.fn<Api["create"]>(async (_e, v) => ({ id: "new", ...v })),
     update: jest.fn<Api["update"]>(async (_e, id, v) => ({ id, ...v })),
     remove: jest.fn<Api["remove"]>(async () => undefined),
+    upload: jest.fn<Api["upload"]>(async () => ({ id: "file-new" })),
     command: jest.fn<Api["command"]>(async (_e, id) => ({ id: id ?? "" })),
     cookie: jest.fn<Api["cookie"]>(() => "pk=1"),
   };
