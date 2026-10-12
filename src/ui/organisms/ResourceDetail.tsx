@@ -19,6 +19,7 @@ import {
   recordSections,
   refusalAction,
   richBody,
+  translationNote,
   type DetailItem,
   type DisclosureModel,
   type Names,
@@ -262,6 +263,14 @@ function RecordFact({
   const stored = row[item.field.name];
   const plain = <Value presentation={feedback} field={item.field} value={stored} names={names} />;
   const body = richText === undefined ? undefined : richBody(item.field, stored);
+  const shown =
+    body === undefined || richText === undefined
+      ? plain
+      : richText(body, `field-${item.field.name}-prose`, plain);
+  // Whose words these are, when they are not the reader's: the server names the language
+  // each translatable field arrived in, and a person reading in another is told which one
+  // this is rather than left to assume their own (`translationNote`).
+  const served = translationNote(item.field, row, feedback);
   return (
     <DetailRow
       testID={`field-${item.field.name}`}
@@ -269,9 +278,16 @@ function RecordFact({
       value={item.value}
       {...(item.spoken === undefined ? {} : { spoken: item.spoken })}
       shown={
-        body === undefined || richText === undefined
-          ? plain
-          : richText(body, `field-${item.field.name}-prose`, plain)
+        served === undefined ? (
+          shown
+        ) : (
+          <>
+            {shown}
+            <Text role="caption" tone="muted" testID={`field-${item.field.name}-language`}>
+              {served}
+            </Text>
+          </>
+        )
       }
     />
   );

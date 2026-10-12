@@ -4,7 +4,7 @@
 // is "Open" in a cell there and in a cell here.
 import { proseSpoken } from "./prose";
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
-import type { Copy } from "./copy";
+import { copyLanguage, type Copy } from "./copy";
 import type { EntrySubject } from "./failure";
 import type { DataCell } from "./collections";
 import type { Status } from "./shared";
@@ -549,16 +549,29 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
  */
 export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | undefined {
   const declared = e.hints?.previewField;
-  if (declared !== undefined) return e.fields.find((f) => f.name === declared && rowContent(f));
+  // A rich text body is never the summary line, declared or default: a printed line under
+  // a name can only print the Markdown the server stored, and that syntax is not part of
+  // what a person is told (`richBody`). Such a body is read by the medium that draws it —
+  // the record's own reader, where a heading is a heading — which is what keeps the
+  // reader on the page for an entry that hints nothing at all.
+  if (declared !== undefined)
+    return printed(e.fields.find((f) => f.name === declared && rowContent(f)));
   const named = rowPrimary(e);
   const speaks = where === "row" ? onList : rowContent;
-  return e.fields.find(
-    (f) =>
-      f.name !== named?.name &&
-      speaks(f) &&
-      !f.readOnly &&
-      (f.type === "text" || f.widget === "textarea"),
+  return printed(
+    e.fields.find(
+      (f) =>
+        f.name !== named?.name &&
+        speaks(f) &&
+        !f.readOnly &&
+        (f.type === "text" || f.widget === "textarea"),
+    ),
   );
+}
+
+/** printed is a field only while a line can print its value: a rich text body has no printed form. */
+function printed(f: Field | undefined): Field | undefined {
+  return f !== undefined && f.widget === "richtext" ? undefined : f;
 }
 
 /**
@@ -980,6 +993,12 @@ export interface Control {
    * so its text is what they typed or what the row handed the box.
    */
   readonly echo?: unknown;
+  /**
+   * rich says the author declared this field's value a rich text body, so the sheet offers
+   * the formatting controls over the box — the marks this phone's reader draws back, and
+   * the picture the body may point at. Absent means the box is only a box.
+   */
+  readonly rich?: boolean;
 }
 
 /** kind is the control a field gets: the tag when the entity named one, the type otherwise. */
@@ -1016,6 +1035,29 @@ export function richBody(f: Field, value: unknown): string | undefined {
   return body === "" ? undefined : body;
 }
 
+/**
+ * translationNote is the sentence a record says when a field's words arrived in a language
+ * other than the one its person reads in. `_i18n` is the server's own record of the
+ * translatable fields it served: the language each one's words are in, and whether this
+ * reader's language had a row of its own. Nothing is guessed from the text — a body that
+ * reads like another language is still the body the server says it is — and a field served
+ * in the language the phone asked in says nothing, because a note about the language a
+ * person is reading is not information about the record.
+ */
+export function translationNote(f: Field, row: Row, format: Formatting): string | undefined {
+  const served: unknown = row._i18n;
+  if (typeof served !== "object" || served === null || Array.isArray(served)) return undefined;
+  const said: unknown = (served as Record<string, unknown>)[f.name];
+  if (typeof said !== "object" || said === null || Array.isArray(said)) return undefined;
+  const locale = (said as { locale?: unknown }).locale;
+  if (typeof locale !== "string") return undefined;
+  const mine = copyLanguage(format.locale);
+  const theirs = copyLanguage(locale);
+  if (mine === theirs) return undefined;
+  const kit = format.copy.kit;
+  return kit.shownInLanguage(theirs === "pt" ? kit.languagePortuguese : kit.languageEnglish);
+}
+
 /** control is one field as a form holds it: the same rules wherever the field came from. */
 function control(f: Field, value: string, immutable: boolean): Control {
   const k = kind(f);
@@ -1030,6 +1072,8 @@ function control(f: Field, value: string, immutable: boolean): Control {
   return {
     kind: k,
     field: f,
+    // The declaration is the catalogue's; what it earns on a form is the editor's marks.
+    ...(f.widget === "richtext" ? { rich: true } : {}),
     label: fieldLabel(f),
     value,
     required: f.required === true,

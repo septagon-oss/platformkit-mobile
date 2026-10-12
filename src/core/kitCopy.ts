@@ -257,6 +257,23 @@ export const kitEnglish = {
   images: "Images",
   imageUnavailable: "Image unavailable",
   retryImage: "Reload image",
+  // Which language a record's words actually arrived in: `_i18n` names the language of a
+  // translatable field the reader's own had no words for, and the sentence says so rather
+  // than letting source-language prose pass for translated. The two languages this kit
+  // holds words in are the two it can name.
+  shownInLanguage: (language: string) => `Shown in ${language} — not translated yet`,
+  languageEnglish: "English",
+  languagePortuguese: "Portuguese",
+  // What an editing keyboard offers above a rich text body: the marks this phone's reader
+  // draws back, and the picture it may point at. Each label is the control's own name.
+  formatting: "Formatting",
+  bold: "Bold",
+  italic: "Italic",
+  heading: "Heading",
+  bulletList: "List",
+  image: "Image",
+  imageFromFiles: "Choose a file to put in the body",
+  noFilesToInsert: "This workspace holds no file to put in the body yet.",
   table: "Data table",
   // What a plot says before its numbers: the one observation a person came to
   // read. The axis supplies the rest of the sentence.
@@ -492,6 +509,17 @@ export const kitPortuguese: KitWords = {
   images: "Imagens",
   imageUnavailable: "Imagem indisponível",
   retryImage: "Recarregar imagem",
+  shownInLanguage: (language: string) => `Mostrado em ${language} — ainda não traduzido`,
+  languageEnglish: "inglês",
+  languagePortuguese: "português",
+  formatting: "Formatação",
+  bold: "Negrito",
+  italic: "Itálico",
+  heading: "Título",
+  bulletList: "Lista",
+  image: "Imagem",
+  imageFromFiles: "Escolha um ficheiro para colocar no texto",
+  noFilesToInsert: "Este espaço ainda não tem ficheiro para colocar no texto.",
   table: "Tabela de dados",
   peak: "Pico",
   range: "Intervalo",

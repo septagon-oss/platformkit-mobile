@@ -5,11 +5,13 @@
 // names the files it points at, each file's row names the frame, and the authenticated
 // read of the pin's content address says when a picture is on the screen.
 //
-// A figure whose file this phone cannot read stops the native reading of the whole body:
-// the field draws the caller's value shape instead, so the person reads the whole body as
-// text rather than a native body with a figure missing from it. Reserving a box for a
-// frame nobody measured, or painting a picture over a caption that is not its own, would
-// both be the phone inventing what the server never said.
+// A figure whose file this phone cannot read says so in its own frame — the words every
+// other missing image in the kit says, its caption beneath them and the way back to ask
+// again — and the rest of the body keeps reading: only a body whose shape the reader
+// refuses is drawn as the caller's value shape instead, because there is no native
+// reading of a body the server could not have stored. Reserving a box for a frame nobody
+// measured, or painting a picture over a caption that is not its own, would both be the
+// phone inventing what the server never said.
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useWindowDimensions } from "react-native";
 import { key } from "../core/catalog";
@@ -77,8 +79,8 @@ function frameOf(row: Row): Frame | null {
 
 /**
  * RichTextBody reads one field's body natively, or draws the caller's fallback where the
- * body cannot be read whole (src/core/prose.ts's refusal, a figure whose file this phone
- * cannot read).
+ * body has a shape this phone does not read (src/core/prose.ts's refusal). A figure whose
+ * file cannot be read is said where it sits, not substituted or hidden.
  */
 export function RichTextBody({ presentation, source, testID, fallback }: Props) {
   const { api, entry, reads, baseURL, identity } = useShell();
@@ -147,7 +149,8 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
     for (const figure of figures) {
       // Nothing to ask: this server's catalogue names no file module, so no figure can
       // have its frame measured or its bytes read. Said as an unavailable figure — which
-      // stops the native reading of the whole body — rather than a wait that never ends.
+      // costs this figure its picture and nothing else — rather than a wait that never
+      // ends.
       if (files === undefined) {
         out[figure.id] = {
           id: figure.file,

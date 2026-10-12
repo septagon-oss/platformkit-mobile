@@ -5,7 +5,7 @@
 // switch and a date row sit in the same column as a text box. Save and Cancel
 // live in the native header, which the screen composition sets from the same
 // phase this renders.
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { findNodeHandle, type ScrollView, type TextInput } from "react-native";
 import {
   type Feedback,
@@ -15,6 +15,15 @@ import {
   type Control,
   FormBlock,
 } from "../../core/derive";
+import {
+  figureLine,
+  insertLine,
+  lined,
+  marked,
+  NO_CARET,
+  type Caret,
+  type Draft,
+} from "../../core/richtext";
 import { ChoiceRow } from "../atoms/ChoiceRow";
 import { DateTimeRow } from "../atoms/DateTimeRow";
 import { Notice, retry } from "../atoms/Notice";
@@ -22,6 +31,7 @@ import { Skeleton } from "../atoms/Skeleton";
 import { SwitchRow } from "../atoms/SwitchRow";
 import { TextField, type FieldKind } from "../atoms/TextField";
 import { FormField } from "../molecules/FormField";
+import { RichTextToolbar } from "../molecules/RichTextToolbar";
 import { Section } from "../molecules/Section";
 import { TagsField } from "../molecules/TagsField";
 import { Text } from "../atoms/Text";
@@ -58,6 +68,16 @@ export interface Props {
    * nothing: a form that writes the record is not a command acting on it.
    */
   readonly acts?: { readonly on: string; readonly consequence: string };
+  /**
+   * onImage asks the surface for a file to put in a rich text body. It is given the field,
+   * and the `put` that answers with the file the person chose — the draft stays with this
+   * form, which is the one code that edits it. No surface, no control: a form that cannot
+   * reach the file module offers no picture to insert.
+   */
+  readonly onImage?: (
+    field: string,
+    put: (pick: { readonly name: string; readonly file: string }) => void,
+  ) => void;
   readonly onChange: (name: string, value: string) => void;
   readonly onRetry: () => void;
   /**
@@ -86,6 +106,7 @@ export function ResourceForm({
   phase,
   acts,
   onChange,
+  onImage,
   onRetry,
   onFieldRefused,
 }: Props) {
@@ -118,6 +139,22 @@ export function ResourceForm({
   // so a screen reader hears `Subject, Required` where a sighted person reads the
   // label above the box and, for an optional one, the word Optional.
   const current = (c: Control) => held[c.field.name] ?? c.value;
+  // Where the keyboard's caret last stood in each box, as that box reported it: a formatting
+  // control writes its marks where the person was typing, and a box that never reported one
+  // is edited at its end. Each control was made by the render that holds this draft, so the
+  // value it edits is the one on the screen when the control is pressed.
+  const [carets, setCarets] = useState<Record<string, Caret>>({});
+  const apply = (name: string, edit: (draft: Draft) => Draft) => {
+    const draft: Draft = { text: held[name] ?? "", caret: carets[name] ?? NO_CARET };
+    const next = edit(draft);
+    if (next.text === draft.text) return;
+    onChange(name, next.text);
+    setCarets((at) => ({ ...at, [name]: next.caret }));
+  };
+  // A figure is inserted for a file this server holds: the surface asks which one, and the
+  // line that figure is gets written at the caret by the one code that edits a draft.
+  const placeFigure = (name: string, picked: { readonly name: string; readonly file: string }) =>
+    apply(name, (draft) => insertLine(draft, figureLine(picked.name, picked.file)));
   const named = (c: Control) => `${c.label}, ${c.required ? kit.required : kit.optional}`;
   // The author's line, then the one sentence the kit owes a person about the control
   // itself: a value greyed out says what changes it, a bare identifier box says that
@@ -198,14 +235,43 @@ export function ResourceForm({
             />
           </FormField>
         );
-      default:
+      default: {
+        // A rich text body is written with the marks this phone reads back, so the controls
+        // are offered over the box — and only over an editable one: a frozen value takes no
+        // marks. The Markdown stays visible: this is a text box with instruments above it,
+        // not a face that hides what the body is made of.
+        const rich = c.rich === true && !off;
         return (
           <FormField key={name} {...common}>
+            {rich ? (
+              <RichTextToolbar
+                copy={kit}
+                disabled={off}
+                testID={`toolbar-${name}`}
+                actions={{
+                  onBold: () => apply(name, (draft) => marked(draft, "**", "**")),
+                  onItalic: () => apply(name, (draft) => marked(draft, "_", "_")),
+                  onHeading: () => apply(name, (draft) => lined(draft, "## ")),
+                  onList: () => apply(name, (draft) => lined(draft, "- ")),
+                  ...(onImage === undefined
+                    ? {}
+                    : {
+                        onImage: () => onImage(name, (picked) => placeFigure(name, picked)),
+                      }),
+                }}
+              />
+            ) : null}
             <TextField
               ref={box(name)}
               kind={kinds[c.kind] ?? "text"}
               value={value}
               onChangeText={(v) => onChange(name, v)}
+              {...(rich
+                ? {
+                    onSelectionChange: (event: { nativeEvent: { selection: Caret } }) =>
+                      setCarets((at) => ({ ...at, [name]: event.nativeEvent.selection })),
+                  }
+                : {})}
               disabled={off}
               invalid={!!errors[name]}
               accessibilityLabel={named(c)}
@@ -213,6 +279,7 @@ export function ResourceForm({
             />
           </FormField>
         );
+      }
     }
   };
   return (

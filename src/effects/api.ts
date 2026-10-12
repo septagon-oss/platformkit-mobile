@@ -220,6 +220,31 @@ export interface Api {
  */
 export const TIMEOUT = 15_000;
 
+/** TAG is a language tag a header can carry: characters a header allows, and nothing that could end the line. */
+const TAG = /^[A-Za-z0-9-]{1,35}$/;
+
+/**
+ * acceptLanguage is the phone saying which language its person reads in, in the order it
+ * will read it: the device's own tag, that language on its own behind it, and the kit's
+ * fallback last. Content negotiation is the transport's because every answer this phone
+ * reads — a row, a catalogue, a refusal — arrives in words, and a server can only honour a
+ * preference it is told. The device is asked per request, since a language can change
+ * while the app runs and a saved server must not go on answering in the words of a person
+ * who no longer reads them. A platform that names no tag, or names one no header could
+ * carry, says nothing: an invented preference would ask for words nobody chose.
+ */
+export function acceptLanguage(): string | undefined {
+  const device = Intl.DateTimeFormat().resolvedOptions().locale ?? "";
+  const language = device.split("-")[0]!.toLowerCase();
+  const wanted: string[] = [];
+  if (TAG.test(device)) wanted.push(device);
+  if (TAG.test(language) && language !== device.toLowerCase()) wanted.push(language);
+  if (wanted.length === 0) return undefined;
+  const list = wanted.map((tag, at) => (at === 0 ? tag : `${tag};q=0.9`));
+  if (!wanted.some((tag) => tag.toLowerCase().startsWith("en"))) list.push("en;q=0.5");
+  return list.join(", ");
+}
+
 export function createApi(
   baseURL: string,
   fetchImpl: typeof fetch = fetch,
@@ -290,6 +315,11 @@ export function createApi(
       ? Object.fromEntries(prepared.headers.entries())
       : {};
     headers.Accept = "application/json";
+    // Whose words to answer in. A translatable record the server holds in another
+    // language is served in the tenant's own and says so (`_i18n`); with no preference
+    // printed there is nothing for the server to have honoured.
+    const language = acceptLanguage();
+    if (language !== undefined) headers["Accept-Language"] = language;
     delete headers.cookie;
     delete headers.origin;
     delete headers["sec-fetch-site"];

@@ -108,6 +108,10 @@ interface Group {
  * A fence ends on a marker of its own character at least as wide as the one that opened
  * it, which is what lets a body quote Markdown: a body that describes a fenced block
  * opens with four backticks, and the three inside it are literal code, not an ending.
+ *
+ * The marker says nothing else: a line of the same characters with words after it is
+ * the code the author meant to keep, because the format gives a closing marker no
+ * information to carry. A line that opens a fence may carry the language after it.
  */
 function cut(source: string): readonly Group[] | null {
   const groups: Group[] = [];
@@ -130,7 +134,8 @@ function cut(source: string): readonly Group[] | null {
       fence !== undefined &&
       marker !== null &&
       marker[1]![0] === fence[0] &&
-      marker[1]!.length >= fence.length;
+      marker[1]!.length >= fence.length &&
+      line.slice(marker[0]!.length).trim() === "";
     if (opens) fence = marker![1]!;
     else if (closes) fence = undefined;
     else if (fence === undefined && line.trim() === "") {
@@ -414,7 +419,9 @@ function accepted(v: Validation, split: ReturnType<typeof proseBlocks>): readonl
  * the frame the server measured so the box is reserved before a byte arrives, and the
  * words that say what it is. The caption is drawn as the figure's own line, so the
  * slot is told not to repeat it. A figure with no row read yet reserves nothing and
- * says it is loading.
+ * says it is loading. A figure that can no longer be painted — the file's row was
+ * refused, or this server names no file module at all — has no frame to reserve and gets
+ * no slot: it says what it is, keeps its caption, and the rest of the body keeps reading.
  */
 function figureView(item: MediaItem | undefined, figure: ProseFigure, v: Validation) {
   if (item === undefined)
@@ -430,30 +437,37 @@ function figureView(item: MediaItem | undefined, figure: ProseFigure, v: Validat
       motion: v.p.motion,
     };
   v.text(item.id, "figure.file");
-  v.need(
-    Number.isSafeInteger(item.width) &&
-      item.width > 0 &&
-      Number.isSafeInteger(item.height) &&
-      item.height > 0,
-    "figure.dimensions",
-  );
   v.need(["loading", "ready", "error", "unavailable"].includes(item.state), "figure.state");
   const decorative = item.decorative || figure.alt === "";
   const failed = item.state === "error" || item.state === "unavailable";
+  // Only a figure that can still be painted needs a frame: measurements are what a box is
+  // reserved against, and a file nobody read has none. Asking for them anyway would refuse
+  // the whole body, which is the phone destroying a person's prose because one picture
+  // went away.
+  const measured =
+    Number.isSafeInteger(item.width) &&
+    item.width > 0 &&
+    Number.isSafeInteger(item.height) &&
+    item.height > 0;
+  v.need(measured || failed, "figure.dimensions");
+  // The box a loader fills, or nothing where no frame was ever measured to reserve one.
+  const slot: ImageSlotProps | undefined = measured
+    ? {
+        id: item.id,
+        description: item.description,
+        decorative,
+        fit: "contain",
+        // Aspect ratio is variant-invariant, so the frame the server measured is what
+        // the box reserves at every width: choosing 960 or 1440 never moves a line.
+        aspectRatio: item.width / item.height,
+        // The figure writes its own caption line, so the slot does not repeat it.
+        caption: false,
+        ...(item.scene === undefined ? {} : { scene: item.scene }),
+      }
+    : undefined;
   return {
     state: item.state,
-    slot: {
-      id: item.id,
-      description: item.description,
-      decorative,
-      fit: "contain" as const,
-      // Aspect ratio is variant-invariant, so the frame the server measured is what
-      // the box reserves at every width: choosing 960 or 1440 never moves a line.
-      aspectRatio: item.width / item.height,
-      // The figure writes its own caption line, so the slot does not repeat it.
-      caption: false,
-      ...(item.scene === undefined ? {} : { scene: item.scene }),
-    } satisfies ImageSlotProps,
+    slot,
     caption: figure.caption || (item.caption ?? ""),
     canOpen: !decorative && item.state === "ready",
     canRetry: failed,

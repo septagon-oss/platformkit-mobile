@@ -1,8 +1,9 @@
 // A rich text figure names a file, not a picture: the body points at `file/files`, that
 // row's own measurements reserve the box, and the bytes are asked for at the file's
 // content address — at the width this device can paint, or as stored when the frame
-// already fits — with the session this app holds. A file this phone cannot read takes
-// the native reading of the whole body away — and every word of the body stays on it.
+// already fits — with the session this app holds. A file this phone cannot read is said
+// where it sits: the body keeps reading natively and no byte of the refused file is asked
+// for.
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { render, screen, waitFor, within } from "@testing-library/react-native";
 import { Dimensions } from "react-native";
@@ -126,14 +127,19 @@ test("a frame that already fits its slot is asked for as stored", async () => {
   expect(asked[0]!.uri).toBe(`https://acme.test/api/v1/file/files/${FILE}/content`);
 });
 
-test("a file this phone cannot read takes the native reading away and keeps every word", async () => {
+test("a file this phone cannot read is said in its own frame and the body keeps reading", async () => {
   const { api, files } = await read(() => {
     throw new Error("no read of that file");
   });
   await waitFor(() => expect(api.get).toHaveBeenCalledWith(files, FILE));
-  const row = within(screen.getByTestId("field-body"));
-  // The body is drawn as the text it is, figure syntax and all: the whole record rather
-  // than a native body with a picture quietly missing from it.
-  expect(row.getByText(body)).toBeOnTheScreen();
-  expect(screen.queryByTestId("field-body-prose")).toBeNull();
+  const reader = within(screen.getByTestId("field-body-prose"));
+  // The picture is gone; the sentence around it is not. Nothing is invented in the
+  // figure's place but the words the kit says for a missing image, its own caption under
+  // them, and the prose drawn in the kit's type rather than as the markup it came in.
+  expect(reader.getByText("Image unavailable")).toBeOnTheScreen();
+  expect(reader.getByText("South span")).toBeOnTheScreen();
+  expect(reader.getByText("fresh water")).toBeOnTheScreen();
+  expect(screen.queryByText(body)).toBeNull();
+  // No frame was measured, so no box was reserved and no byte was ever asked for.
+  expect(asked).toEqual([]);
 });
