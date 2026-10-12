@@ -5,7 +5,7 @@
 // server would never have stored them.
 import assert from "node:assert/strict";
 import test from "node:test";
-import { escapeSpoilers, phoneEditorHolds, proseBlocks, variantWidth } from "../src/core/prose";
+import { phoneEditorHolds, proseBlocks, variantWidth } from "../src/core/prose";
 
 type Blocks = Extract<ReturnType<typeof proseBlocks>, { ok: true }>;
 type Block = Blocks["blocks"][number];
@@ -184,11 +184,6 @@ test("a frame nobody measured plans nothing", () => {
   assert.equal(variantWidth(Number.NaN, 2400), 0);
 });
 
-test("a spoiler span is escaped so no sentence hides on the phone alone", () => {
-  assert.equal(escapeSpoilers("a || b || c"), "a \\|\\| b \\|\\| c");
-  assert.equal(escapeSpoilers("no bars here"), "no bars here");
-});
-
 test("a table is what the phone's rich editor cannot hold, and nothing else is", () => {
   assert.deepEqual(phoneEditorHolds("| a | b |\n| --- | --- |\n| 1 | 2 |\n"), ["table"]);
   assert.deepEqual(
@@ -198,4 +193,12 @@ test("a table is what the phone's rich editor cannot hold, and nothing else is",
     [],
   );
   assert.deepEqual(phoneEditorHolds("A body with no table at all."), []);
+});
+
+test("a table quoted into a blockquote is one the editor cannot hold either", () => {
+  assert.deepEqual(phoneEditorHolds("> | a | b |\n> | --- | --- |\n> | 1 | 2 |\n"), ["table"]);
+});
+
+test("a table drawn inside a code fence is not a table the editor would lose", () => {
+  assert.deepEqual(phoneEditorHolds("```md\n| a | b |\n| --- | --- |\n| 1 | 2 |\n```\n"), []);
 });

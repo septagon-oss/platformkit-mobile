@@ -43,17 +43,6 @@ export function variantWidth(slotPx: number, frameWidth: number): ServedWidth | 
   return plan;
 }
 
-/**
- * escapeSpoilers stops the renderer hiding text the format treats as plain: the
- * spoiler span `||x||` is outside 0069 §1, is always parsed by the renderer this kit
- * draws with, and would make one sentence readable on a browser and unreadable on a
- * phone. Backslash-escaping the bars costs a body nothing it can hold, because §1
- * stores no `||` run that carries meaning.
- */
-export function escapeSpoilers(source: string): string {
-  return source.replace(/\|\|/g, "\\|\\|");
-}
-
 /** A figure is 0069 §1's block image: one image, its own paragraph, its title as the caption. */
 export interface ProseFigure {
   readonly kind: "figure";
@@ -83,17 +72,99 @@ const FIGURE = /^!\[([^\]]*)\]\(\s*pk-file:([^\s)"]+)(?:\s+"((?:[^"\\]|\\.)*)"\s
   FENCE = /^\s{0,3}(`{3,}|~{3,})/,
   HEADING = /^(#{1,6})\s/,
   IMAGE_SYNTAX = /!\[[^\]]*\]\([^)]*\)/,
-  FILE_REFERENCE = /pk-file:/;
+  FILE_REFERENCE = /pk-file:/,
+  QUOTE = /^\s*(?:>[\s]*)+/;
 
 /** titleText unquotes a caption the way the format quoted it. */
 function titleText(title: string | undefined): string {
   return title === undefined ? "" : title.replace(/\\(["\\])/g, "$1").trim();
 }
 
+/**
+ * Group is one block of the body: its lines as the server stored them, and which of
+ * them the format reads as code — a fenced block's delimiters and everything between
+ * them. The second half is what the shape checks below read, because a line of code
+ * says nothing about the shapes a body is allowed to hold: 0069 §1 stores a fenced
+ * block and a code span verbatim, so a `# comment`, a quoted `![alt](url)` or the
+ * scheme `pk-file:` inside code is code, not a heading, an image or a file reference.
+ */
+interface Group {
+  readonly lines: readonly string[];
+  readonly code: readonly boolean[];
+}
+
+/**
+ * cut divides a body at its blank lines into blocks.
+ *
+ * A blank line inside a fence belongs to the fence, which may hold as many as it
+ * likes; an unterminated fence answers null, because a body whose fence never closed
+ * has no block boundaries left to trust.
+ */
+function cut(source: string): readonly Group[] | null {
+  const groups: Group[] = [];
+  let lines: string[] = [],
+    code: boolean[] = [],
+    fence: string | undefined;
+  const flush = () => {
+    // A run of blank lines is a separator, never an empty paragraph of its own — a
+    // body's trailing newline is not a block.
+    if (lines.some((line) => line.trim() !== "")) groups.push({ lines, code });
+    lines = [];
+    code = [];
+  };
+  for (const line of source.split("\n")) {
+    const marker = FENCE.exec(line);
+    const opens = fence === undefined && marker !== null;
+    const closes = fence !== undefined && line.trimStart().startsWith(fence);
+    if (opens) fence = marker![1]!.slice(0, 3);
+    else if (closes) fence = undefined;
+    else if (fence === undefined && line.trim() === "") {
+      flush();
+      continue;
+    }
+    lines.push(line);
+    code.push(opens || closes || fence !== undefined);
+  }
+  flush();
+  return fence === undefined ? groups : null;
+}
+
+/**
+ * proseOnly is a block with its code left out: every fenced line, and every inline
+ * code span — a span closes on the next run of the same number of backticks, so one
+ * left open at a line break still holds the lines below it within the paragraph.
+ * What remains is the part of the block the format reads as prose, which is the only
+ * part whose shapes mean anything.
+ */
+function proseOnly(block: Group): readonly string[] {
+  const prose: string[] = [];
+  let open = "";
+  for (const [index, line] of block.lines.entries()) {
+    if (block.code[index]) continue;
+    let rest = line,
+      kept = "";
+    for (;;) {
+      const at = rest.indexOf("`");
+      if (at < 0) break;
+      let width = 0;
+      while (rest[at + width] === "`") width += 1;
+      const run = rest.slice(at, at + width);
+      if (open === "") {
+        kept += rest.slice(0, at); // the prose before a span is the block's own words
+        open = run;
+      } else if (run === open) open = ""; // a closed span drops its content with its bars
+      rest = rest.slice(at + width);
+    }
+    // Whatever follows an unclosed span is still inside it, on this line or the next.
+    prose.push(open === "" ? kept + rest : kept);
+  }
+  return prose;
+}
+
 /** figureBlock is the one paragraph §1's image rule allows: a single image line, its file a uuid. */
-function figureBlock(block: readonly string[]): Omit<ProseFigure, "id"> | undefined {
-  if (block.length !== 1) return undefined;
-  const match = FIGURE.exec(block[0]!);
+function figureBlock(block: Group): Omit<ProseFigure, "id"> | undefined {
+  if (block.lines.length !== 1 || block.code[0]) return undefined;
+  const match = FIGURE.exec(block.lines[0]!);
   if (!match || !UUID.test(match[2]!)) return undefined;
   return { kind: "figure", file: match[2]!, alt: match[1] ?? "", caption: titleText(match[3]) };
 }
@@ -107,34 +178,17 @@ function figureBlock(block: readonly string[]): Omit<ProseFigure, "id"> | undefi
  * server could not have stored under 0069 §1 — an image reference that is not a
  * figure of its own, a `pk-file:` that is not a uuid, a heading outside `##`–`####` —
  * because drawing what the server refuses to store would be this phone inventing a
- * format. A body of plain text is no refusal: plain text is paragraphs.
+ * format. Only the prose of a block is asked those questions: code is stored verbatim
+ * and may look like any construct without being one. A body of plain text is no
+ * refusal: plain text is paragraphs.
  */
 export function proseBlocks(
   source: string,
 ):
   | { readonly ok: true; readonly blocks: readonly ProseBlock[] }
   | { readonly ok: false; readonly constructs: readonly string[] } {
-  const groups: string[][] = [];
-  let current: string[] = [],
-    fence: string | undefined;
-  const flush = () => {
-    // A run of blank lines is a separator, never an empty paragraph of its own — a
-    // body's trailing newline is not a block.
-    if (current.some((line) => line.trim() !== "")) groups.push(current);
-    current = [];
-  };
-  for (const line of source.split("\n")) {
-    const marker = FENCE.exec(line);
-    if (marker && (fence === undefined || line.trimStart().startsWith(fence)))
-      fence = fence === undefined ? marker[1]!.slice(0, 3) : undefined;
-    else if (fence === undefined && line.trim() === "") {
-      flush();
-      continue;
-    }
-    current.push(line);
-  }
-  flush();
-  if (fence !== undefined) return { ok: false, constructs: ["code fence"] };
+  const groups = cut(source);
+  if (groups === null) return { ok: false, constructs: ["code fence"] };
 
   const blocks: ProseBlock[] = [],
     constructs = new Set<string>();
@@ -146,14 +200,19 @@ export function proseBlocks(
       blocks.push({ ...figure, id: `fig-${figures++}` });
       continue;
     }
-    const text = group.join("\n");
-    if (IMAGE_SYNTAX.test(text)) constructs.add("image");
-    if (FILE_REFERENCE.test(text)) constructs.add("pk-file");
-    for (const line of group) {
+    const spoken = proseOnly(group);
+    const words = spoken.join("\n");
+    if (IMAGE_SYNTAX.test(words)) constructs.add("image");
+    if (FILE_REFERENCE.test(words)) constructs.add("pk-file");
+    for (const line of spoken) {
       const heading = HEADING.exec(line);
       if (heading && (heading[1]!.length < 2 || heading[1]!.length > 4)) constructs.add("heading");
     }
-    blocks.push({ kind: "markdown", source: text, id: `run-${runs++}` });
+    blocks.push({
+      kind: "markdown",
+      source: group.lines.join("\n"),
+      id: `run-${runs++}`,
+    });
   }
   if (constructs.size > 0) return { ok: false, constructs: [...constructs] };
   return { ok: true, blocks };
@@ -171,17 +230,21 @@ export function phoneEditorHolds(source: string): readonly string[] {
   const split = proseBlocks(source);
   if (!split.ok) return split.constructs;
   const held = new Set<string>();
-  for (const block of split.blocks)
-    if (block.kind === "markdown" && tableRows(block.source)) held.add("table");
+  for (const group of cut(source) ?? []) if (tableRows(group)) held.add("table");
   return [...held];
 }
 
-/** tableRows says whether a text run holds a GFM table: a delimiter row under a header row. */
-function tableRows(source: string): boolean {
-  const lines = source.split("\n");
-  for (let i = 1; i < lines.length; i += 1) {
-    const row = lines[i]!.trim();
-    if (row.includes("-") && /^\|?[\s:-]*\|[\s:|-]*\|?$/.test(row) && lines[i - 1]!.includes("|"))
+/**
+ * tableRows says whether a block holds a GFM table: a delimiter row under a header
+ * row. It reads the block's prose, so a fence that quotes a table is not one, and
+ * reads past a blockquote marker, so a table quoted into a blockquote still is one —
+ * the editor loses a table in either case only if it holds one.
+ */
+function tableRows(block: Group): boolean {
+  const rows = proseOnly(block).map((line) => line.replace(QUOTE, "").trim());
+  for (let i = 1; i < rows.length; i += 1) {
+    const row = rows[i]!;
+    if (row.includes("-") && /^\|?[\s:-]*\|[\s:|-]*\|?$/.test(row) && rows[i - 1]!.includes("|"))
       return true;
   }
   return false;
@@ -212,7 +275,7 @@ export function deriveProse(input: ProseInput, p: Parameters<typeof build>[0]) {
     const blocks = accepted(v, proseBlocks(input.source)).map((block) =>
       block.kind === "figure"
         ? { ...block, ...figureView(input.figures[block.id], block, v) }
-        : { ...block, source: escapeSpoilers(block.source) },
+        : block,
     );
     const figures = blocks.filter((block) => block.kind === "figure");
     const open = figures.find((figure) => figure.id === input.openId);

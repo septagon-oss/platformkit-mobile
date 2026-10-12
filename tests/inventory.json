@@ -275,33 +275,33 @@
  },
  "totals": {
   "contract": {
-   "files": 29,
+   "files": 30,
    "cases": 181,
    "ms": 64719,
    "testsMs": 46911.60000000001,
    "runners": {
-    "node": 29
+    "node": 30
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 198,
+   "files": 200,
    "cases": 918,
    "ms": 1445375,
    "testsMs": 43814.00000000003,
    "runners": {
-    "jest": 69,
-    "node": 129
+    "jest": 70,
+    "node": 130
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 57,
+   "files": 58,
    "cases": 206,
    "ms": 1188175,
    "testsMs": 22569,
    "runners": {
-    "jest": 57
+    "jest": 58
    },
    "unreachable": 0
   },
@@ -515,6 +515,26 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/advisory-record-covers-the-markdown-face.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": null,
+   "rule": "The Markdown face brings markdown-it and linkify-it into the lockfile, and both carry high advisories the registry has published with no release this face can take (react-native-markdown-display pins markdown-it ^10). The repository's rule (scripts/advisories.ts, run blocking in CI) is that a high filing is either fixed by the version held or reviewed by name and version in advisories.json. This case asks that question of the two packages this face alone adds, from the two files in the checkout and nothing on the network, so a lockfile that holds them unreviewed is refused here as CI refuses it.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/advisory-record-covers-the-markdown-face.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/android.test.ts",
@@ -6776,6 +6796,26 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/prose-code-reads-in-the-dark.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "The reader is styled only by the kit's tokens, in both modes (0069 \u00a78: prose, figures, tables and code are styled only by tokens; dark mode is checked). A code block sits on the palette's muted surface and a heading takes the type scale's size, so in dark mode the code is readable on its own surface and no default of the Markdown face shows through.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-code-reads-in-the-dark.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/ui/prose-reader.test.tsx",
@@ -15111,6 +15151,26 @@
    "onlyProdLines": null
   },
   {
+   "file": "tests/prose-code-keeps-its-content.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "0069 \u00a71 allows fenced code with any content and inline code with any content, and the server stores both as written. The reader's refusals \u2014 an image outside a figure, a `pk-file:` that is not a uuid, a heading outside `##`\u2013`####` \u2014 are about the body's own constructs, so a line of code that merely looks like one of them is still code. A description that carries a shell snippet with a comment line is an ordinary body, and the phone draws it whole.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-code-keeps-its-content.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/range-clock-change.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -20537,6 +20597,26 @@
    "coveredProdLines": 1435,
    "onlyProdLines": null,
    "testsMs": 826
+  },
+  {
+   "file": "tests/ui/prose-code-reads-as-written.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "Code is drawn as the author wrote it: a fenced block and an inline code span are literal in 0069 \u00a71 and in CommonMark, so no character inside them is escaped on the way to the face. A shell line such as `make || echo failed` reads the same on the phone as on the web, and a person who copies it from the screen copies a command that runs.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-code-reads-as-written.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/chart-axis-position.case.mjs",

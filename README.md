@@ -844,14 +844,26 @@ one image, its own paragraph, its title as its caption. `proseBlocks` cuts the b
 into text runs and figures and never repairs one; a body holding a shape §1 could not
 have stored (an image inside a sentence, a `pk-file:` that is not an identifier, a
 heading outside `##`–`####`) is refused as `unsupported-format` so a screen draws the
-whole body as prose rather than less of it. `Prose` draws the runs in the kit's type and
+whole body as prose rather than less of it. Those questions are asked of the body's
+prose only: a fence and a code span hold what §1 stored verbatim, so a `# comment` in a
+shell block, an image quoted in a fence or the `pk-file:` scheme named in a span is code
+and is drawn as it was written — the same reading answers `phoneEditorHolds`, which
+therefore calls a fence quoting a table no table. `Prose` draws the runs in the kit's type and
 the figures in the slot the media family already owns: the box is reserved from the
 frame the server measured, so no paragraph moves when the bytes arrive; a figure that
 did not arrive says `Image unavailable` in the reader's language and keeps every word
 around it; a decorative figure is nothing to open, and a ready one is.
 `MarkdownProse` is the only file that names a Markdown library — `src/ui/` draws what it
-is handed and knows no library, no transport and no file byte. Until the file read
-reaches each figure, generated screens still show a rich text body as prose.
+is handed and knows no library, no transport and no file byte. The parser behind that face
+is `markdown-it@14.3.1`, held by one `overrides` entry: the face asks for `^10`, whose
+`linkify-it` carries two high filings with no release inside its reach, and 14.3.1 is the
+first release that answers every filing the registry names against either package. Until
+the file read reaches each figure, generated screens still show a rich text body as prose.
+
+**Limits** — only the reading of a body is here. There is no native editor, no upload and
+no language slice yet, and the full translator side-by-side view stays on the web: the
+phone reads a body in the reader's own language and offers no second column of another
+language beside it.
 
 **Reused** — `MediaItem`, `ImageSlotProps` and the media family's
 `loading | ready | error | unavailable` life cycle with its `imageUnavailable`,
@@ -860,8 +872,7 @@ reaches each figure, generated screens still show a rich text body as prose.
 `scale` and the generated token palette; `tests/fakes/presentation.ts`. **Added** —
 `src/core/prose.ts`, because the phone had never read a Markdown body and nothing here
 carried the file module's served-width set (which is why `variantWidth` lives beside the
-segmentation and not beside a loader), plus the spoiler escape that keeps a sentence
-readable on both media; `src/ui/organisms/Prose.tsx`, because no Markdown reader
+segmentation and not beside a loader); `src/ui/organisms/Prose.tsx`, because no Markdown reader
 existed; `src/screens/MarkdownProse.tsx`, because a third-party face enters through a
 screen and not through `src/ui/`. **Made reusable** — `deriveProse`'s figure view model
 (`slot`, `canOpen`, `canRetry`, `openLabel`, `retryLabel`), which is what
