@@ -195,6 +195,13 @@ test("a table is what the phone's rich editor cannot hold, and nothing else is",
   assert.deepEqual(phoneEditorHolds("A body with no table at all."), []);
 });
 
+test("a span closed on the line below holds only its own words, and the prose after it is read", () => {
+  // The run never closes, so it is a lonely backtick and not a span: what follows is
+  // still the body's own prose, and an image inside a sentence is still refused.
+  assert.equal(proseBlocks("Cost 5` per unit and ![one](pk-file:no-uuid) here.").ok, false);
+  assert.equal(proseBlocks("Run `a\nb` first.\n\n## Two\n\n- [x] wormed").ok, true);
+});
+
 test("a table quoted into a blockquote is one the editor cannot hold either", () => {
   assert.deepEqual(phoneEditorHolds("> | a | b |\n> | --- | --- |\n> | 1 | 2 |\n"), ["table"]);
 });

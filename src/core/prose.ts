@@ -130,35 +130,49 @@ function cut(source: string): readonly Group[] | null {
 }
 
 /**
- * proseOnly is a block with its code left out: every fenced line, and every inline
- * code span — a span closes on the next run of the same number of backticks, so one
- * left open at a line break still holds the lines below it within the paragraph.
- * What remains is the part of the block the format reads as prose, which is the only
- * part whose shapes mean anything.
+ * proseOnly is a block with its code left out: every fenced line, and every inline code
+ * span. A span opens on a run of backticks and closes on the next run of the same width,
+ * which may sit on a line below; a run that never closes is a literal backtick, which the
+ * format draws and this reader still asks about. Newlines survive either way, so a shape
+ * is still found on the line it was written on.
  */
 function proseOnly(block: Group): readonly string[] {
-  const prose: string[] = [];
-  let open = "";
-  for (const [index, line] of block.lines.entries()) {
-    if (block.code[index]) continue;
-    let rest = line,
-      kept = "";
-    for (;;) {
-      const at = rest.indexOf("`");
-      if (at < 0) break;
-      let width = 0;
-      while (rest[at + width] === "`") width += 1;
-      const run = rest.slice(at, at + width);
-      if (open === "") {
-        kept += rest.slice(0, at); // the prose before a span is the block's own words
-        open = run;
-      } else if (run === open) open = ""; // a closed span drops its content with its bars
-      rest = rest.slice(at + width);
+  const spoken = block.lines.filter((_, index) => !block.code[index]).join("\n");
+  let out = "",
+    at = 0;
+  for (;;) {
+    const open = runAt(spoken, at);
+    if (open === null) {
+      out += spoken.slice(at);
+      break;
     }
-    // Whatever follows an unclosed span is still inside it, on this line or the next.
-    prose.push(open === "" ? kept + rest : kept);
+    const close = runOfWidth(spoken, open.width, open.end);
+    if (close === null) {
+      out += spoken.slice(at, open.end); // one lonely run is a backtick, not a span
+      at = open.end;
+      continue;
+    }
+    out += spoken.slice(at, open.at);
+    out += spoken.slice(open.end, close).replace(/[^\n]/g, ""); // the code, minus its words
+    at = close + open.width;
   }
-  return prose;
+  return out.split("\n");
+}
+
+/** runAt is the next run of backticks at or after `from`: where it starts, how wide it is, where it ends. */
+function runAt(text: string, from: number): { at: number; width: number; end: number } | null {
+  const at = text.indexOf("`", from);
+  if (at < 0) return null;
+  let width = 1;
+  while (text[at + width] === "`") width += 1;
+  return { at, width, end: at + width };
+}
+
+/** runOfWidth is where the next run of exactly that many backticks begins; a longer run does not close a span. */
+function runOfWidth(text: string, width: number, from: number): number | null {
+  for (let found = runAt(text, from); found !== null; found = runAt(text, found.end))
+    if (found.width === width) return found.at;
+  return null;
 }
 
 /** figureBlock is the one paragraph §1's image rule allows: a single image line, its file a uuid. */
