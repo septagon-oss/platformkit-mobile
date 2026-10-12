@@ -5,11 +5,18 @@
 # journey passes. That is this job, and until it ran, the coverage those flows
 # claim was a promise nothing checked.
 #
-# Why this runner and not a hosted farm: the label's host was measured on
-# 2026-10-04 to answer scripts/e2e/mobile_ci.sh --probe with adb, the emulator
-# and Maestro found under the SDK prefixes, /dev/kvm world-readable, an android-36
-# system image, two AVDs and a debug keystore. A hosted farm needs an account, a
-# secret and a queue outside this loop, to prove one flow.
+# Why this runner and not a hosted farm: the journey needs a device. The label is
+# pkit-ci-android — the one platformkit runs its own device job on, whose image
+# (pkit-ci-android:2026-10-05) keeps the Android SDK at /opt/android-sdk, with adb
+# in platform-tools and the emulator beside it, the x86_64 Google APIs AVD this
+# repository names through PK_MOBILE_AVD, and Maestro at /opt/maestro, on a host
+# that passes /dev/kvm into the job container. The plain Linux runner this job used
+# to ask for carries none of that: it answered the probe below with
+# `missing: adb emulator maestro psql keytool` on every run of main, which is the
+# probe refusing correctly rather than a journey failing. A hosted farm needs an
+# account, a secret and a queue outside this loop, to prove one flow. The probe is
+# the check on the claim about this image too: an image that stops carrying these
+# fails this job naming the tool it could not find.
 #
 # Nothing here continues on error. A journey that quietly skipped would leave the
 # coverage number reading like a figure nobody earned — the same objection the
@@ -60,7 +67,7 @@ concurrency:
 
 jobs:
   journey:
-    runs-on: pkit-ci-linux-amd64
+    runs-on: pkit-ci-android
     timeout-minutes: 60
     env:
       # The service names, not localhost, and for the reason platformkit's job
@@ -71,12 +78,12 @@ jobs:
       PLATFORMKIT_TEST_DATABASE_URL: postgres://platformkit_app:platformkit@postgres:5432/platformkit?sslmode=disable
       PLATFORMKIT_TEST_NATS_URL: nats://nats:4222
       PLATFORMKIT_MOBILE_PORT: '8098'
-      # Which kernel build to serve, and which Android Virtual Device to boot:
-      # both are repository variables, and the harness refuses by name when
-      # either is missing rather than serving something it cannot name. No
-      # secret belongs to this job — the tenant, its administrator and that
+      # Which Android Virtual Device to boot: a repository variable, and the
+      # harness refuses by name when it is missing rather than booting something it
+      # cannot name. Which kernel to serve is not a variable: the job builds the
+      # commit this repository's own provenance records name, three steps below.
+      # No secret belongs to this job — the tenant, its administrator and that
       # administrator's password are created by the run and dropped with it.
-      PK_KERNEL_IMAGE: ${{ vars.PK_KERNEL_IMAGE }}
       PK_MOBILE_AVD: ${{ vars.PK_MOBILE_AVD }}
       # Where the harness leaves the report so the step below can print it: the
       # work directory is removed whichever step failed, and the report outlives it.
@@ -84,8 +91,8 @@ jobs:
       # The served kernel's vocabulary, named once, here: a writable resource and
       # its first writable string field (the one a row is recognised by), and a
       # lifecycle command, its one argument and the summary the API document
-      # gives it. These are facts about the build PK_KERNEL_IMAGE names, which is
-      # why no flow and no script defaults them.
+      # gives it. These are facts about the build the provenance records name,
+      # which is why no flow and no script defaults them.
       MODULE: task
       ENTITY: task
       KNOWN: title
@@ -156,6 +163,57 @@ jobs:
           fi
           make apk ABIS=x86_64 PROFILE=ci
           make apk-debug-sign
+
+      - name: Name the kernel this repository's fixtures were cut from
+        id: pin
+        # After the APK step, and not before it: `make apk` sends this workspace as
+        # a Docker build context, and a kernel checkout sitting in it would travel
+        # into the app image for nothing. Not a variable and not a tag:
+        # testdata/catalog.source.json and testdata/openapi.source.json already
+        # carry upstream.commit, the build every screen and every generated client
+        # here was derived from, and serving that object is what makes the server
+        # the flows write through be the server the fixtures describe. The harness
+        # reads both records and refuses by name when either is missing, holds a
+        # commit that is not forty hex characters, or disagrees with the other — a
+        # job that served one and skipped the other would test a server no fixture
+        # describes.
+        run: echo "commit=$(scripts/e2e/mobile_ci.sh --kernel-pin)" >> "$GITHUB_OUTPUT"
+
+      # The forge's own septagon-oss/platformkit, at an object id and never a branch:
+      # the provenance record names the public repository the fixture was fetched
+      # from, and this checkout needs that same object, which the forge mirrors.
+      # fetch-depth 1 because the ref is one commit and the job's whole ceiling is
+      # 60 minutes.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: septagon-oss/platformkit
+          ref: ${{ steps.pin.outputs.commit }}
+          path: kernel-src
+          fetch-depth: 1
+          persist-credentials: false
+
+      # The Go version the kernel's own go.mod asks for, and cache off: platformkit's
+      # mobile job runs this same pair on this same label.
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: kernel-src/go.mod
+          cache: false
+
+      - name: Build the server the journeys write through
+        # This repository has no Go module and no toolchain of its own, which is why
+        # the kernel used to arrive as an image somebody else published. It publishes
+        # no image of itself; its own journey builds it in the job, and this step is
+        # that. CGO_ENABLED=0 and -trimpath are deploy/Dockerfile's own build line, so
+        # the binary is the one the kernel's image recipe makes and needs no C compiler
+        # on this image. The binary lands outside the checkout, and its path is exported
+        # rather than named at job level: a job-level entry cannot carry a step output,
+        # and scripts/e2e/mobile_ci.sh refuses by name when the export never arrived —
+        # which is also why act_runner's ordering of a job env against $GITHUB_ENV
+        # cannot matter here, since nothing else can stand in PK_KERNEL_BIN's place.
+        run: |
+          cd kernel-src
+          CGO_ENABLED=0 go build -trimpath -o "$GITHUB_WORKSPACE/kernel-bin/platformkit" ./apps/platformkit
+          echo "PK_KERNEL_BIN=$GITHUB_WORKSPACE/kernel-bin/platformkit" >> "$GITHUB_ENV"
 
       - name: Prepare the role the served kernel connects as
         env:
@@ -256,11 +314,11 @@ jobs:
           echo "serial=$serial" >> "$GITHUB_OUTPUT"
 
       - name: Run every journey in e2e/flows
-        # The served kernel, its own database, one tenant and one administrator,
-        # then the flows — all ten of them, read from the directory and never
-        # from a list beside it. Maestro runs one invocation serially, so the
-        # journeys share a device; they do not share a record, because each names
-        # its own `${TITLE} <journey>` and deletes it.
+        # The kernel the job built above, its own database, one tenant and one
+        # administrator, then the flows — all ten of them, read from the directory
+        # and never from a list beside it. Maestro runs one invocation serially, so
+        # the journeys share a device; they do not share a record, because each
+        # names its own `${TITLE} <journey>` and deletes it.
         env:
           ANDROID_SERIAL: ${{ steps.emulator.outputs.serial }}
         run: scripts/e2e/mobile_ci.sh "$(ls out/apk/release/*-debug-signed.apk | head -1)"

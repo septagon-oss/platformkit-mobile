@@ -42,11 +42,12 @@ test("a sibling a keep reason names is a row of this table", () => {
 
 /**
  * measuredAfterwards is the rows whose reasons were written by hand once `--measure` had filled them:
- * the seven files the form cases brought in after the table was first measured.
+ * the eight files the table took in after it was first measured.
  */
 const measuredAfterwards = [
   "tests/a-form-keeps-what-the-person-typed.test.ts",
   "tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts",
+  "tests/journey-job-runs-on-the-runner-that-has-a-device.test.ts",
   "tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx",
   "tests/screens/cancel-asks-once.test.tsx",
   "tests/screens/singleton-preserves-hidden-values.test.tsx",

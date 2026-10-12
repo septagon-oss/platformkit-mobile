@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 26 | 172 | 46.3 s | 63 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 27 | 177 | 46.7 s | 64 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 194 | 915 | 43.4 s | 1444 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 57 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 333
+* keep: 334
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 333 — 152 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1293; cases in files no runner reaches: 35
-* isolated wall time: contract 63 s, behaviour 1444 s, composition 1188 s, journey 0 s
+* files inventoried: 334 — 153 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1298; cases in files no runner reaches: 35
+* isolated wall time: contract 64 s, behaviour 1444 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -100,6 +100,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/catalog.test.ts | node | contract | 26 | 1102 | 354.4 | 9 | 5 of 26 | — | 0 | keep | (no first comment; first test title) the golden catalog parses |
 | tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts | node | contract | 15 | 620 | 303.6 |  | not measured | — | 0 | keep | The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches h… |
 | tests/fingerprint.test.ts | node | contract | 3 | 573 | 2.1 | 0 | 0 of 3 | scripts/fingerprint.ts | 0 | keep | The hook resets after EOF, even when a caller reads the same source twice. |
+| tests/journey-job-runs-on-the-runner-that-has-a-device.test.ts | node | contract | 5 | 836 | 425.2 |  | not measured | — | 0 | keep | The device journey runs on `pkit-ci-android`, the runner whose image carries adb, the emulator, Maestro and /dev/kvm, and its probe step refuses by name on a h… |
 | tests/kernel-main-bound.test.ts | node | contract | 3 | 1969 | 1289.7 | 0 | 0 of 3 | — | 0 | keep | These cases hold the nightly's bound to what `startBound` says it is: a timer the process keeps. A process whose only pending work is the bound must stay alive… |
 | tests/kernel-main-budget.test.ts | node | contract | 2 | 1142 | 485.7 | 0 | 1 of 2 | — | 0 | keep | The command refuses an unrepresentable timer budget before reading the forge, while both ends of the supported interval remain usable configuration. |
 | tests/kernel-main-deadline.test.ts | node | contract | 5 | 11235 | 10555.8 | 0 | 3 of 5 | — | 0 | keep | These cases hold one rule about the nightly's own failure modes: a read that never answers is a red that names itself, not a job that sits until something else… |

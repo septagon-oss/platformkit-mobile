@@ -257,7 +257,12 @@ test("the shell version is a whole number the screens may depend on", () => {
   for (const entry of parseCatalog(fixture()).resources) assert.equal(entry.renderer, undefined);
 });
 
-const PINNED = "7fc4b0abd547f4e30ad4e5b8b87ef6cc34138bb0";
+// The commit testdata/catalog.source.json records. It is written here as a literal on
+// purpose: a re-pin should be a diff somebody reads, and a fixture that moved under a
+// test that only ever re-read it would report agreement about bytes nobody fetched.
+const PINNED = "cbaa47b4825a90d95d61b55f39ffdf7051adf1ba";
+
+const PIN_SHORT = PINNED.slice(0, 8);
 
 test("the copy names the commit it was fetched from, and the bytes still match it", async () => {
   // Every screen is derived from this fixture, so "copied by hand" has to stay a
@@ -265,7 +270,7 @@ test("the copy names the commit it was fetched from, and the bytes still match i
   // The revision is main, which is where the version-2 stamp lives; no tag carries it
   // yet, so the record names a commit, which cannot move under the bytes the way a
   // branch would, and provenance() reads it as its own tag.
-  await assert.match(await check(), /matches 7fc4b0ab/);
+  await assert.match(await check(), new RegExp(`matches ${PIN_SHORT}`));
   const source = await readSource();
   assert.equal(source.upstream.commit, PINNED);
   assert.equal(source.upstream.tag, PINNED);
@@ -366,11 +371,11 @@ test("the drift report says the six things it can say, and only the true one", a
   const ours = Buffer.from('{"catalogVersion":1}');
   const lines = (latest?: LatestLookup) => report(source, ours, ours, latest).join("\n");
 
-  assert.match(lines(), /^ok  testdata\/catalog\.json still matches 7fc4b0ab/);
-  assert.match(lines(), /^ok .*\nok  7fc4b0abd547f4e30ad4e5b8b87ef6cc34138bb0 is the version/m);
+  assert.match(lines(), new RegExp(`^ok  testdata\\/catalog\\.json still matches ${PIN_SHORT}`));
+  assert.match(lines(), new RegExp(`^ok .*\nok  ${PINNED} is the version`));
   assert.match(
     report(source, ours, Buffer.from('{"catalogVersion":2}')).join("\n"),
-    /^DRIFT .*differs from 7fc4b0ab/,
+    new RegExp(`^DRIFT .*differs from ${PIN_SHORT}`),
   );
   assert.match(
     lines({ state: "ahead", version: "v1.2.0", bytes: Buffer.from('{"catalogVersion":2}') }),
