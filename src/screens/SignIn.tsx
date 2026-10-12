@@ -8,7 +8,7 @@
 // the session.
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useShell } from "../shell";
 import { ApiError } from "../effects/api";
 import { SignInForm } from "../ui/organisms/SignInForm";
@@ -26,6 +26,16 @@ export function SignIn({ title }: Props = {}) {
   const { state, baseURL, signIn, answerFactor, signOut, refresh } = useShell();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  /**
+   * working is the screen's own answer to "is this screen already asking" held
+   * where a second activation can read it before anything is drawn. busy is that
+   * answer as this render received it, so a keyboard submit and a tap landing in
+   * one frame both find the screen idle and both send — two answers to one
+   * challenge, and the kernel spends the proof of the first factor once. One
+   * request leaves per activation, so the gate is set here synchronously and
+   * busy only carries the same answer to the screen.
+   */
+  const working = useRef(false);
   const [step, setStep] = useState<"credentials" | "code">("credentials");
   // challenged is the address the server refused to finish signing in. The code
   // is offered about that address, not whatever is left in the field after a
@@ -34,7 +44,8 @@ export function SignIn({ title }: Props = {}) {
   const [code, setCode] = useState("");
   const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
   const submit = async (url: string, email: string, password: string) => {
-    if (busy) return;
+    if (working.current) return;
+    working.current = true;
     setBusy(true);
     setError("");
     try {
@@ -47,11 +58,13 @@ export function SignIn({ title }: Props = {}) {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Those credentials are not right.");
     } finally {
+      working.current = false;
       setBusy(false);
     }
   };
   const submitCode = async (typed: string) => {
-    if (busy) return;
+    if (working.current) return;
+    working.current = true;
     setBusy(true);
     setError("");
     try {
@@ -71,6 +84,7 @@ export function SignIn({ title }: Props = {}) {
         e instanceof ApiError && e.status === 401 ? feedback.copy.kit.codeWrong : message(e),
       );
     } finally {
+      working.current = false;
       setBusy(false);
     }
   };

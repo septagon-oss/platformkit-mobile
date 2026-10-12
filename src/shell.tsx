@@ -92,17 +92,18 @@ function message(e: unknown): string {
 }
 
 /**
- * challenge is the connection that accepted a password and answered that it
- * needs a second factor. The window that refusal opened lives on that server's
- * clock and in no table this phone can read, so the code goes back along the same
- * connection: the address field is where the *next* sign-in goes, not where this
- * one is answered. It is held for one sign-in — until a key is minted, a password
- * is refused, this phone signs out, or a newer attempt opens a window of its own.
+ * challenge is the address that accepted a password and answered that it needs a
+ * second factor. The window that refusal opened lives on that server's clock and
+ * in no table this phone can read, so the code goes back to that address and to
+ * no other: the address field is where the *next* sign-in goes, not where this one
+ * is answered. Only the address survives the refusal — the connection that was
+ * refused is not kept, because every answer makes its own connection and is the
+ * only holder of the key that answer mints. An answer that lost the race then has
+ * nothing to give back but its own, and a key a newer answer earned is out of the
+ * reach of anything the older one does. The address is held for one sign-in —
+ * until a key is minted, a password is refused, this phone signs out, or a newer
+ * attempt opens a window of its own.
  */
-interface Challenge {
-  readonly api: Api;
-  readonly baseURL: string;
-}
 
 /**
  * held is the key a saved record carries, or nothing when it names a server
@@ -129,7 +130,7 @@ export function Shell({
   }));
   const active = useRef(connection);
   const generation = useRef(0);
-  const challenge = useRef<Challenge | undefined>(undefined);
+  const challenge = useRef<string | undefined>(undefined);
   const [identity, setIdentity] = useState<Identity | undefined>();
   const [writes, setWrites] = useState<Readonly<Record<string, number>>>({});
   const wrote = useCallback(
@@ -236,7 +237,7 @@ export function Shell({
             // no window here and hands back nothing: a code step drawn over the
             // winner's session could only be refused.
             if (generation.current !== started) return undefined;
-            challenge.current = { api: a, baseURL: url };
+            challenge.current = url;
             dispatch({ type: "no-session", generation: started });
             return answer;
           }
@@ -278,7 +279,12 @@ export function Shell({
         const open = challenge.current;
         if (!open) throw new Error(kitEnglish.noChallenge);
         const started = begin();
-        const a = open.api;
+        // The answer makes its own connection to the server that refused, with
+        // this app's own name and grant catalogue, and is the only holder of what
+        // it mints. Two answers to one refusal are then two attempts that share
+        // nothing but the address: whichever arrives first owns its key, and the
+        // clean-up of the other reaches only its own.
+        const a = createApi(open, undefined, undefined, undefined, tokenName, declaredGrants);
         try {
           const key = await a.answerFactor(email, code);
           if (generation.current !== started) {
@@ -288,13 +294,13 @@ export function Shell({
           // The key is the answer to the refusal; the refusal is spent with it.
           challenge.current = undefined;
           setIdentity(undefined);
-          await sessions.save({ baseURL: open.baseURL, token: key.token, tokenId: key.id });
+          await sessions.save({ baseURL: open, token: key.token, tokenId: key.id });
           if (generation.current !== started) {
             void a.logout().catch(() => undefined);
             return;
           }
-          connect(open.baseURL, a);
-          await load(a, started, open.baseURL);
+          connect(open, a);
+          await load(a, started, open);
         } catch (e) {
           // A refused code mints nothing, and it does not close the window
           // either: the server spends the proof of the first factor with a
@@ -302,7 +308,10 @@ export function Shell({
           // rolls that spend back and a mistyped digit costs only the mistyped
           // digit (modules/auth/internal/factors.go's RequireFirstFactorProof,
           // at the commit this build's document came from). The challenge stays
-          // open on the connection that earned it, and the step stays open too.
+          // open on the address that earned it, and the step stays open too. Only
+          // this answer's own connection is given back: a refusal that lands after
+          // a newer answer was accepted is late by an ordinary amount of time, and
+          // the key standing on the session by then belongs to that newer answer.
           void a.logout().catch(() => undefined);
           if (generation.current === started) dispatch({ type: "no-session", generation: started });
           throw e;
