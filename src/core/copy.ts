@@ -26,6 +26,18 @@ interface Words {
     readonly reconcile: string;
     readonly unknownWrite: string;
     readonly updatedAt: (instant: string) => string;
+    /** held is a write on this phone that has not reached the server. */
+    readonly held: { readonly title: string; readonly body: string };
+    /** holding is what the screen that made a write says when the write stayed: it names the act and where to find the write, in the section's own words. */
+    readonly holding: (where: string) => string;
+    /** refused is a held write the server answered 4xx to; its own words come from the record. */
+    readonly refused: { readonly title: string; readonly body: string };
+    /** discard throws the person's own work away, which is not what `dismiss` says. */
+    readonly discard: string;
+    /** signOutHeld is the question every way out of a sign-in asks while this phone still holds writes; signing out discards them. */
+    readonly signOutHeld: (owed: number) => string;
+    /** keep is the answer that stops at the way out: the person stays signed in and the writes stay here. */
+    readonly keep: string;
   };
   readonly issue: { readonly invalid: string; readonly unsupported: string };
   /** What went wrong, in plain words. Nouns and the quoted instant arrive from the
@@ -117,6 +129,18 @@ const en: Words = {
     reconcile: "Check the result",
     unknownWrite: "The change may have been saved. Check its result before submitting again.",
     updatedAt: (instant) => `Last updated ${instant}`,
+    held: {
+      title: "Held on this phone",
+      body: "It will send when this phone reaches the server.",
+    },
+    holding: (where) => `This phone is holding it. It is listed under ${where} until it sends.`,
+    refused: { title: "Not sent", body: "The server refused it." },
+    discard: "Discard",
+    signOutHeld: (owed) =>
+      owed === 1
+        ? "1 write has not left this phone. Discard it before signing out?"
+        : `${owed} writes have not left this phone. Discard them before signing out?`,
+    keep: "Keep on this phone",
   },
   issue: {
     invalid: "This information is not valid.",
@@ -196,6 +220,18 @@ const pt: Words = {
     unknownWrite:
       "A alteração pode ter sido guardada. Verifique o resultado antes de enviar novamente.",
     updatedAt: (instant) => `Última atualização: ${instant}`,
+    held: {
+      title: "Guardado neste telefone",
+      body: "Será enviado quando este telefone alcançar o servidor.",
+    },
+    holding: (where) => `Este telefone está a guardá-lo. Está listado em ${where} até ser enviado.`,
+    refused: { title: "Não enviado", body: "O servidor recusou-o." },
+    discard: "Descartar",
+    signOutHeld: (owed) =>
+      owed === 1
+        ? "1 gravação ainda não saiu deste telefone. Descartá-la antes de terminar a sessão?"
+        : `${owed} gravações ainda não saíram deste telefone. Descartá-las antes de terminar a sessão?`,
+    keep: "Manter neste telefone",
   },
   issue: { invalid: "Esta informação não é válida.", unsupported: "Este formato não é suportado." },
   failure: {
@@ -261,6 +297,8 @@ function bundle(language: Language, words: Words): Copy {
       empty: Object.freeze(words.state.empty),
       error: Object.freeze(words.state.error),
       offline: Object.freeze(words.state.offline),
+      held: Object.freeze(words.state.held),
+      refused: Object.freeze(words.state.refused),
       success: Object.freeze(words.state.success),
     }),
     issue: Object.freeze(words.issue),

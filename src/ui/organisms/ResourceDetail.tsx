@@ -23,6 +23,7 @@ import {
   type Feedback,
   type FailureVerdict,
   type Row as Item,
+  type StateModel,
 } from "../../core/derive";
 import { Notice } from "../atoms/Notice";
 import { Badge } from "../atoms/Badge";
@@ -31,6 +32,7 @@ import { Actions, type Props as ActionsProps } from "./Actions";
 import { Activity, type Props as ActivityProps } from "./Activity";
 import { Skeleton } from "../atoms/Skeleton";
 import { DetailRow } from "../molecules/DetailRow";
+import { ModelState } from "../molecules/ModelState";
 import { Value } from "../molecules/Value";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
@@ -54,6 +56,12 @@ export interface Props {
    * it the notice is the plain retry it always was. */
   readonly refusal?: FailureVerdict;
   readonly onRetry: () => void;
+  /**
+   * offline is the sentence a record says when it came from this phone rather
+   * than the server, derived once in core (deriveOffline) and drawn by the same
+   * molecule a list draws it through: one line, wherever a stored answer is shown.
+   */
+  readonly offline?: StateModel;
   readonly onDismiss?: () => void;
   readonly onBack?: () => void;
   /**
@@ -92,6 +100,7 @@ export function ResourceDetail({
   saved = "",
   refusal,
   onRetry,
+  offline,
   onDismiss,
   onBack,
   menuOpen,
@@ -132,6 +141,12 @@ export function ResourceDetail({
           announcement="urgent"
           text={error}
           {...(notice ? { action: notice } : {})}
+        />
+      ) : null}
+      {offline ? (
+        <ModelState
+          model={{ notice: offline, refreshing: false, writable: false }}
+          onRetry={onRetry}
         />
       ) : null}
       {row ? (

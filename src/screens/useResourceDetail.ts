@@ -18,6 +18,7 @@ import {
   presentedTime,
   screenPath,
   verbRefusal,
+  writePath,
   type Clock,
   type FailureContext,
   type FailureVerdict,
@@ -25,6 +26,8 @@ import {
   type Row,
 } from "../core/derive";
 import { address } from "../core/reentry";
+import { keyed, rowAddress } from "../effects/api";
+import { answered } from "../effects/read-cache";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import { useTheme } from "../ui/theme";
@@ -37,7 +40,7 @@ export function useResourceDetail(
   format: Formatting,
   clock: Clock = systemClock,
 ) {
-  const { api, writes, wrote, heard } = useShell();
+  const { api, writes, wrote, heard, outbox, reads } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   // The three format fields this hook reads are strings and a frozen bundle, so
@@ -46,6 +49,9 @@ export function useResourceDetail(
   const { copy, locale, timeZone, ownZone } = format;
   const k = key(entry);
   const [row, setRow] = useState<Row | undefined>();
+  // When this phone last received the row on screen, and nothing when the server
+  // sent it: a record read on the train is shown in the tunnel, and says so.
+  const [savedAt, setSavedAt] = useState<string | undefined>(undefined);
   const [error, setError] = useState("");
   const [refusal, setRefusal] = useState<FailureVerdict | undefined>();
   // The sentence a write said, read once from the shell as this record comes into
@@ -73,9 +79,17 @@ export function useResourceDetail(
       if (!id) return;
       const started = ++generation.current;
       try {
-        const got = await api.get(entry, id);
+        // The row comes from the cache when the server cannot be reached, so a
+        // record a person read on the train is still on the screen in the tunnel.
+        const got = await answered(
+          reads,
+          { kind: "row", resourceKey: k, path: rowAddress(entry, id) },
+          "",
+          () => api.get(entry, id),
+        );
         if (generation.current !== started) return;
-        setRow(got);
+        setRow(got.value);
+        setSavedAt(got.source === "device" ? got.savedAt : undefined);
         setError("");
         setRefusal(undefined);
         read.current = clock.now();
@@ -96,7 +110,7 @@ export function useResourceDetail(
         setRefusal(verdict.verdict);
       }
     },
-    [api, entry, id, copy, locale, timeZone, ownZone, clock],
+    [api, reads, entry, id, k, copy, locale, timeZone, ownZone, clock],
   );
 
   useEffect(() => {
@@ -146,8 +160,20 @@ export function useResourceDetail(
         destructive: true,
         onPress: async () => {
           try {
-            await api.remove(entry, id);
-            wrote(k);
+            const live = (idem?: string) => api.remove(entry, id, ...keyed(idem));
+            const answer = outbox
+              ? await outbox.submit(
+                  {
+                    kind: "delete",
+                    resourceKey: k,
+                    path: `${writePath(entry)}/${encodeURIComponent(id)}`,
+                  },
+                  live,
+                )
+              : { sent: true as const, row: await live() };
+            // A delete this phone is holding is still a delete the person asked
+            // for: they leave the record either way, and the row shows what is owed.
+            if (answer.sent) wrote(k);
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             leave();
           } catch (e) {
@@ -162,7 +188,7 @@ export function useResourceDetail(
       mode,
       { message: copy.kit.deleteWarning, cancel: copy.kit.cancel },
     );
-  }, [id, entry, row, api, wrote, k, leave, mode, copy]);
+  }, [id, entry, row, api, wrote, k, leave, mode, copy, outbox]);
 
   // Retry reads the row again; reconcile reads it too, and is what an unanswered
   // write offers instead of sending the same write a second time. Dismiss puts the
@@ -177,6 +203,7 @@ export function useResourceDetail(
 
   return {
     row,
+    savedAt,
     error,
     refusal,
     saved,

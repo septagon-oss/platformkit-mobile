@@ -342,3 +342,21 @@ Nothing else differs.
   `tests/viewer-zoom-reflow.spec.ts` and the behaviour-named
   `tests/viewer-controls.spec.ts` — stay manual: playwright is not a dependency here, and
   installing a browser driver is not this fold's call.
+
+## The next fold: one client's pending store moves onto the kit's outbox
+
+`septagon-clients/modules/routebook/native/src/effects/storage.ts` exists because
+the kit had nothing to keep a write in. The kit now has one (`src/core/outbox.ts`,
+`src/effects/outbox.ts`), and it keeps the sound half of routebook's store — the
+serialising chain whose tail swallows a rejection, parse-on-read through the
+caller's own validator, the same size constant checked on the way in and on the
+way out, and the refusal to move a record that is not the one asked for, now as
+the scope columns in every statement. What routebook's store cannot become is a
+queue: one record per key, no order, no per-item state, no drain.
+
+The follow-up, in the client, is to hold its one immutable vehicle request as one
+item of the kit's outbox (`kind: "create"`, its own idempotency key) and delete
+`createRequestStorage`, `reserve`, `cancel` and `clear` with it; `cancelling: true`
+becomes `discard`, which is the same thing written before the send rather than
+after it. Its `version: 2` record migrates to `version 1` of `pending_write` in
+one written step at the client's own door.

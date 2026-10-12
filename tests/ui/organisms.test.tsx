@@ -616,6 +616,9 @@ describe("Home", () => {
         entries={entries}
         refreshing={false}
         account="joao@acme.test"
+        held={[]}
+        onRetryHeld={none}
+        onDiscardHeld={none}
         onOpen={onOpen}
         onRefresh={none}
       />,
@@ -637,6 +640,9 @@ describe("Home", () => {
         feedback={feedback}
         entries={entries}
         refreshing={false}
+        held={[]}
+        onRetryHeld={none}
+        onDiscardHeld={none}
         onOpen={() => undefined}
         onRefresh={none}
       />,

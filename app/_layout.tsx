@@ -9,12 +9,22 @@ import React, { useEffect, useMemo } from "react";
 import { defaultRenderers } from "../src/renderers";
 import { commandSheet, sheet } from "../src/route";
 import { screenCopy } from "../src/screens/failure";
+import { device } from "../src/screens/device";
 import { Shell, useShell } from "../src/shell";
 import { ThemeProvider, useTheme } from "../src/ui/theme";
 
 export default function Layout() {
   return (
-    <Shell baseURL={process.env.EXPO_PUBLIC_API_URL ?? ""} renderers={defaultRenderers}>
+    // What this app keeps is said here and nowhere else: the one device store,
+    // the one maker of idempotency keys and the one network listener. Without a
+    // store the kit holds nothing and every write behaves as it did before.
+    <Shell
+      baseURL={process.env.EXPO_PUBLIC_API_URL ?? ""}
+      renderers={defaultRenderers}
+      store={device.store}
+      mint={device.mint}
+      reach={device.reach}
+    >
       <ThemeProvider>
         <Root />
       </ThemeProvider>

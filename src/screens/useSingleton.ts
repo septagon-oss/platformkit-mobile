@@ -26,8 +26,10 @@ import {
   values,
   verbRefusal,
   writeControls,
+  writePath,
   type Row,
 } from "../core/derive";
+import { keyed } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import type { Phase } from "../ui/organisms/ResourceForm";
@@ -35,7 +37,7 @@ import { useTheme } from "../ui/theme";
 import { refusalFields, refusalOf, screenCopy } from "./failure";
 
 export function useSingleton(entry: Entry) {
-  const { api, wrote } = useShell();
+  const { api, wrote, outbox } = useShell();
   const { mode } = useTheme();
   const navigation = useNavigation();
   const [row, setRow] = useState<Row | undefined>();
@@ -205,8 +207,26 @@ export function useSingleton(entry: Entry) {
       // only the ones somebody touched. `writeControls` is that rule: what nobody was
       // asked to type rides back as the row gave it, and `values` coerces only what
       // an editor drew, so a stored item survives the round trip.
-      const written = await api.replace(entry, values(writeControls(entry, row, controls), held));
+      const body = values(writeControls(entry, row, controls), held);
+      const live = (idem?: string) => api.replace(entry, body, ...keyed(idem));
+      // A singleton has one row and no id to fetch back, so a PUT that vanishes
+      // offline is unrecoverable by the person: it is held instead.
+      const answer = outbox
+        ? await outbox.submit(
+            { kind: "replace", resourceKey: key(entry), path: writePath(entry), body },
+            live,
+          )
+        : { sent: true as const, row: await live() };
       if (!alive.current) return;
+      if (!answer.sent) {
+        // The row on screen stays what it was, and so does the draft: this phone
+        // holds the change and says so, rather than showing an edit that never
+        // went anywhere.
+        setDetail(copy.state.holding(copy.state.held.title));
+        setPhase("editing");
+        return;
+      }
+      const written = answer.row;
       setRow(written);
       setHeld({});
       setErrors({});
@@ -229,7 +249,7 @@ export function useSingleton(entry: Entry) {
       setAwaiting(firstProblem(controls, fields) ?? "");
       setRefusals((n) => n + 1);
     }
-  }, [api, entry, row, controls, held, wrote, copy, phase]);
+  }, [api, entry, row, controls, held, wrote, copy, phase, outbox]);
 
   return {
     row,

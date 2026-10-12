@@ -1481,7 +1481,7 @@ PK_KERNEL_SERVER=https://forge.example PK_KERNEL_REPOSITORY=septagon-oss/platfor
 `CatalogError`'s own sentence printed verbatim rather than re-formatted, so the
 line a red night prints is the runtime's and the nightly gains every rule the
 parser gains (`SUPPORTED_CATALOG_VERSION` is imported where a refused document
-is *built* — the test raises the stamp from it instead of writing the number, and
+is _built_ — the test raises the stamp from it instead of writing the number, and
 the script never needs it because the parser is what consults it); `hash` and
 `isRecord` from
 [scripts/catalog.ts](scripts/catalog.ts), which had both and exported one; that
@@ -1493,7 +1493,7 @@ header and `mobile-e2e.yml`'s concurrency block and its "nothing continues on
 error" rule. **Added** — `scripts/kernel_main.ts` and the workflow, because
 nothing here could read a moving `main`: `catalog.ts`'s `raw()` refuses any host
 but `github.com`, its `fetchAt` carries no authorisation and every caller hands it
-a *recorded* commit, and `drift` prints what moved and exits 0 whatever it finds,
+a _recorded_ commit, and `drift` prints what moved and exits 0 whatever it finds,
 so an existing unit could fetch a pin but not a tip; `endpoints()`, the one owner
 of a kernel fetch address; and the two document judges. **Made reusable** —
 `endpoints(d).raw(file,
@@ -1543,6 +1543,121 @@ make response acceptance explicit before data reaches a screen.
 **Made reusable** — `@septagon-oss/platformkit-mobile/generated`, each shell API's bound
 `operations`, and `request(method, path, validate, body?)` let renderer packs consume
 the documented operations and validate their own JSON routes through that transport.
+
+A write made where no network reaches is kept on the device and sent when one
+returns. `createOutbox` holds `{kind, resourceKey, path, body}` under the selected
+server and the signed-in person, mints one `Idempotency-Key` per write before its
+first attempt leaves the phone and hands it to the screen's own typed call — the
+held row keeps that same string as its id, so the attempt that may have landed and
+the replay that follows name one write — and drains held writes in append order,
+one at a time, sending with the session current at send time. A 4xx stops that
+write alone and keeps the server's decoded reason for Retry and Discard; a server
+that is present and unhappy stops the pass; a deadline after a send makes the write
+`unknown`, which only a person may resolve, because the kernel ignores the key
+until T-0293 lands. `createReadCache`
+answers an unreachable read with the last response this phone got for that exact
+path, and a list and a detail ask it: both read through `answered()`, which
+answers from the cache when the server cannot be reached at all and calls
+straight through where the shell has no device store. The address is the
+request's own, spelled by `listQuery` and `rowAddress` in `src/effects/api.ts`,
+so a page that lands replaces the page it is for rather than sitting beside it
+under another name. What `answered()` says about where the answer came from is
+drawn: a list or a record the phone answered rather than the server carries the
+`offline` line with the moment it last arrived, said by `deriveOffline` in
+`src/core/feedback.ts` and drawn by the same notice a refusal uses, in the copy
+table's own words in both languages. A form and a singleton still call `Api`
+directly: a form's fields are the person's own, and a singleton is one row.
+Signing out clears what is held, so every door that leaves a sign-in — Home's
+account menu, the sign-in screen's way to another server, and its clearing of a
+saved sign-in — goes through `useSignOut`, which asks and names the count while
+this phone still owes the server a write.
+
+**Reused** — `createApi`'s deadline, problem decoding (`ApiError {status, detail,
+fields}`) and `writePath`/`commandPath` addressing, `row`/`page` validation,
+`src/core/feedback.ts`'s `offline` state with its `updatedAt` line, `copy.state.*`,
+the shell's `writes`/`wrote` staleness counter, `src/effects/session.ts`'s ordered
+chain and versioned-record rule, `src/ui/chooser.ts`'s `confirm`, and routebook's
+store discipline (serialise, parse-on-read, one size constant read and written,
+refuse to move another's record).
+**Added** — `src/core/outbox.ts` (the held-write record, its state table, the body
+and key bounds), `src/effects/outbox.ts` (hold, submit, retry, discard, a drain
+that runs on the queue's one lane and keeps a refused item where it is),
+`src/core/read-cache.ts` and `src/effects/read-cache.ts` (which answer earns a row,
+which address it answers for), `src/effects/native-store.ts` (`expo-sqlite`,
+`PRAGMA user_version`) and `src/effects/native-reach.ts` (`expo-network` as a
+trigger only). Nothing existing
+could carry them: the kit's only device storage was one secure session record, and
+`RequestOptions` could carry no header a caller chose, so an idempotency key could
+not be sent at all. `answered()` is how any screen asks for a read it wants answered
+from the device, and `listQuery`/`rowAddress` are how its address is spelled, so no
+caller has to guess how the transport spells a window.
+**Made reusable** — the two table ports (`OutboxStore`, `ReadStore`) with a
+conformance double beside them (`tests/fakes/store.ts`) that enforces the scope rule
+in every method, the `Idempotency-Key` request option on `Api.request`, the `may`
+port through which a composition re-checks its own catalog rule before a held verb
+is re-sent, and `DeviceStore`/`createReach` as the pattern of putting one native
+module behind one port.
+
+### Limits and reuse of the held write
+
+- Ordering says _the queue's writes keep their own order, whoever asked for them_,
+  because two writes to one record are statements about the same row and the older
+  one that lands last takes the newer edit off it. One queue runs one write at a
+  time, so a Retry pressed while a drain is waiting for an older write's answer
+  waits behind that answer. Serial sends are not yet ordered ones, so `overtakenBy`
+  in `src/core/outbox.ts` says who is next: a Retry on a row that an older held
+  write of the same record is still ahead of runs the queue from its head and takes
+  that row when its turn comes rather than pushing it past, and a write made while
+  the phone is back online goes through the caller's own call — the response is
+  what the screen needs to close its sheet — behind the writes the queue already
+  holds. `Outbox.submit` still answers `sent: true` the moment the server answers
+  that call, which is the only answer a form can use, and it never waits for the
+  drain it asks the queue for afterwards — only for the writes that came before it.
+  When that wait ends with an older write of the same record the phone could still
+  send — one the server told it to wait (5xx, 408, 429) or never took, or one a 4xx
+  left refused for its person — `submit` keeps this write and answers `sent: false`,
+  the answer a phone with no network gets, rather than landing an edit the older
+  write would take off the record the moment its person retries it. The form stays
+  open saying the phone holds the change, and the write leaves with the row it
+  waited for. A blocked write holds back only the writes to its own record: another
+  record's write, and a second create, go on the wire at once.
+- A 4xx stops its own write and the queue goes on past it, including past a later
+  write to the same record, because `next` picks up the first queued row: a refused
+  write a newer one has since overtaken can still be retried, and then lands last.
+  Nothing on the phone can tell a refused write whose record has moved on from one
+  whose record has not — only the server knows, and it answers again at the next
+  send — so the row is named as refused and that retry stays the person's decision.
+  A write made now does wait behind a refused row, so this gap is the drain's
+  carrying a queued row past a refused one, and resolving the refused row — Retry
+  or Discard — is what puts the order back.
+- A request that is already on its way cannot be discarded: `discard` refuses a
+  row in `sending`, and the row shows Discard disabled while it is busy, because
+  the answer will move that row whichever way the person feels about it now.
+- A `fetch` that rejects after the request left but before any header arrived is
+  indistinguishable from one that never left, and no client change can tell them
+  apart: the phone holds such a write and may send it twice. Both attempts carry
+  the one key the queue minted before the first left, which is what lets a kernel
+  honouring `Idempotency-Key` (T-0293) match them and answer the replay with the
+  first answer; until that lands the key is sent and ignored, and the duplicate is
+  possible. What the client can and does stop at the case it can see — an answer
+  whose body was cut off is never re-sent.
+- A phone that cold-starts with no network cannot say who its saved session
+  belongs to: `identity` comes only from a server that answers, so until one
+  reaches the server once the app holds nothing and shows nothing that an
+  earlier run left. The rows are on the device and appear at the next load that
+  reaches the server.
+- The composition root supplies the device store, the key maker and the network
+  listener, so the app holds, sends and reads. A page answered from the device is
+  drawn as what it is — `deriveOffline`'s line above the rows — but the line is
+  the whole of what it says: no screen offers a "work offline" switch, and a list
+  never prefetches a window nobody has asked for.
+- The queue's cases are `node:test` files under `tests/` (`tests/outbox.test.ts`
+  and the held-write files beside it), run by `npm test` beside the Jest suite; the
+  brief asked for Jest with a fake network, and the fake network is the same one
+  either way — `tests/fakes/store.ts` plus a `fetch` the test supplies.
+- Nothing here has been seen on a device: no `e2e/flows/held-write.yaml` exists,
+  and `expo-sqlite` is exercised in tests through a `node:sqlite` stand-in that
+  binds parameters the way the native sources do.
 
 ## Say what went wrong in plain words
 

@@ -281,23 +281,23 @@
       "unreachable": 0
     },
     "behaviour": {
-      "files": 171,
-      "cases": 840,
-      "ms": 1371703,
-      "testsMs": 42656.10000000001,
+      "files": 191,
+      "cases": 900,
+      "ms": 1441134,
+      "testsMs": 43316.60000000003,
       "runners": {
-        "jest": 65,
-        "node": 106
+        "jest": 68,
+        "node": 123
       },
       "unreachable": 0
     },
     "composition": {
-      "files": 45,
-      "cases": 180,
-      "ms": 922044,
-      "testsMs": 19276,
+      "files": 54,
+      "cases": 195,
+      "ms": 1136424,
+      "testsMs": 22483,
       "runners": {
-        "jest": 45
+        "jest": 54
       },
       "unreachable": 0
     },
@@ -2699,6 +2699,33 @@
       "runsNowhere": false
     },
     {
+      "file": "tests/native-store-scope.test.tsx",
+      "runner": "jest",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a settle and a drop name the server and the person as well as the id. The adapter runs here over node:sqlite through an expo-sqlite stand-in that binds positional parameters the way expo-sqlite does on a device \u2014 parameter i at index i + 1, and a parameter with no placeholder dropped without a word, because neither platform checks the bind's return code (node_modules/expo-sqlite/ios/SQLiteModule.swift getBindParamIndex and bindStatementParam; android/.../SQLiteModule.kt `statement.ref.bindStatementParam`). It is a .tsx file only so Jest, which can mock expo-sqlite, discovers it; it needs a Node that ships node:sqlite.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 19973,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": ["one sign-in cannot claim or discard another sign-in's held write"],
+      "tests": [
+        {
+          "title": "one sign-in cannot claim or discard another sign-in's held write",
+          "ms": 8,
+          "measured": false
+        }
+      ],
+      "loaded": 110,
+      "coveredProdLines": 641,
+      "onlyProdLines": null,
+      "testsMs": 8
+    },
+    {
       "file": "tests/screens/nativeImage.test.tsx",
       "runner": "jest",
       "layer": "behaviour",
@@ -4923,6 +4950,74 @@
       "tier": "push(scoped)+merge(full)",
       "reach": "npm test (jest half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/ui/held-write-row.test.tsx",
+      "runner": "jest",
+      "layer": "behaviour",
+      "cases": 3,
+      "rule": "A write this phone is holding is shown as what it is: not saved, not lost, and with the two acts that belong to the person. The sentence comes from src/core/outbox.ts's own projection, so the row cannot restate the rule.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 15243,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "a write the server refused says so in the server's own words",
+        "Retry and Discard name the one write they are about",
+        "a write on its way is not offered again"
+      ],
+      "tests": [
+        {
+          "title": "a write the server refused says so in the server's own words",
+          "ms": 10,
+          "measured": false
+        },
+        {
+          "title": "Retry and Discard name the one write they are about",
+          "ms": 13,
+          "measured": false
+        },
+        {
+          "title": "a write on its way is not offered again",
+          "ms": 2,
+          "measured": false
+        }
+      ],
+      "loaded": 110,
+      "coveredProdLines": 611,
+      "onlyProdLines": null,
+      "testsMs": 25
+    },
+    {
+      "file": "tests/ui/home-held-writes.test.tsx",
+      "runner": "jest",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "What this phone is holding is on the home screen, above the resources, with the two acts that belong to the person. A write that left the sheet and never reached the server is invisible unless this screen says it is here.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 16223,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": ["what this phone is holding stands above the resources, with its two acts"],
+      "tests": [
+        {
+          "title": "what this phone is holding stands above the resources, with its two acts",
+          "ms": 21,
+          "measured": false
+        }
+      ],
+      "loaded": 112,
+      "coveredProdLines": 1075,
+      "onlyProdLines": null,
+      "testsMs": 21
     },
     {
       "file": "tests/ui/interaction.test.tsx",
@@ -13558,6 +13653,566 @@
       "runsNowhere": false
     },
     {
+      "file": "tests/outbox-a-blocked-older-update-keeps-the-newer-behind-it.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 2,
+      "rule": "Two held updates to one record are two statements about one row, and the older one must reach the server first whatever the person presses. So a Retry on the newer of the two sends nothing newer while the older is still owed: the queue runs from its head, the older write is tried, and when the server is still not taking it the newer one stays on the phone behind it. And a write made while the phone is online, to a record whose older update a 4xx left refused, waits behind that refused row and lands after it once Retry gets the older one through.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1886,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a Retry on the newer of two held updates sends nothing newer while the older is still owed",
+        "a write made online behind a refused update to its record lands after it once Retry gets the older through"
+      ],
+      "tests": [
+        {
+          "title": "a Retry on the newer of two held updates sends nothing newer while the older is still owed",
+          "ms": 34.006696,
+          "measured": false
+        },
+        {
+          "title": "a write made online behind a refused update to its record lands after it once Retry gets the older through",
+          "ms": 3.607875,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14214,
+      "onlyProdLines": null,
+      "testsMs": 37.6
+    },
+    {
+      "file": "tests/outbox-a-held-back-write-holds-back-only-its-own-record.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 2,
+      "rule": "Waiting behind the queue is a rule about one record, not about the queue: two writes to one address are statements about the same row, and two writes to two addresses are statements about different rows. So a submission that finds an older write still queued goes at once when that write is about another record, and a create goes even when the blocked write names the same collection, because a create names a collection rather than a record. A phone that held every write behind the head of a stalled queue would be refusing to write while it is online, which is the opposite of what the queue is for.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 986,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "an update to another row is not held back by an update the server will not take",
+        "a create is not held back by a blocked write to the collection it names"
+      ],
+      "tests": [
+        {
+          "title": "an update to another row is not held back by an update the server will not take",
+          "ms": 38.360281,
+          "measured": false
+        },
+        {
+          "title": "a create is not held back by a blocked write to the collection it names",
+          "ms": 2.622802,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14194,
+      "onlyProdLines": null,
+      "testsMs": 41
+    },
+    {
+      "file": "tests/outbox-answered-write-not-resent.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "A write the server already took is never held for a second send: the kernel does not yet honour the Idempotency-Key a held write carries, so a second POST of a create is a second record. A connection that drops while the answer's body is read happened after the server answered.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 990,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": ["a write whose answer was cut off after the server took it is not sent again"],
+      "tests": [
+        {
+          "title": "a write whose answer was cut off after the server took it is not sent again",
+          "ms": 28.936385,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14148,
+      "onlyProdLines": null,
+      "testsMs": 28.9
+    },
+    {
+      "file": "tests/outbox-first-attempt-carries-the-key.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "A write the transport refused before any header arrived may still have reached the server: React Native's fetch cannot tell the two apart. The only thing that lets the server spot the replay as a repeat is that the first attempt and the replay carry the same Idempotency-Key, so the key has to exist before the first attempt leaves the phone, not be minted when the write is held afterwards.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 978,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a write held after its first attempt failed is replayed with the key that attempt carried"
+      ],
+      "tests": [
+        {
+          "title": "a write held after its first attempt failed is replayed with the key that attempt carried",
+          "ms": 32.548487,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14175,
+      "onlyProdLines": null,
+      "testsMs": 32.5
+    },
+    {
+      "file": "tests/outbox-held-write-leaves-by-itself.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "A write this phone held goes to the server once the server can be reached again, without the person finding it and pressing Retry: the next write that does reach the server is proof the network is back, and the held one goes with it. And a write the server already answered is never held for a second send, because the kernel does not yet honour the Idempotency-Key it carries.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 974,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": ["a held write goes once the next write reaches the server"],
+      "tests": [
+        {
+          "title": "a held write goes once the next write reaches the server",
+          "ms": 37.250086,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14176,
+      "onlyProdLines": null,
+      "testsMs": 37.3
+    },
+    {
+      "file": "tests/outbox-newer-update-waits-for-a-stopped-pass.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 2,
+      "rule": "(no first comment; first test title) retrying an older held update after server unavailable never overwrites a newer submission",
+      "ruleSource": "first test title",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 969,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "retrying an older held update after server unavailable never overwrites a newer submission",
+        "retrying an older held update after network unreachable never overwrites a newer submission"
+      ],
+      "tests": [
+        {
+          "title": "retrying an older held update after server unavailable never overwrites a newer submission",
+          "ms": 35.044596,
+          "measured": false
+        },
+        {
+          "title": "retrying an older held update after network unreachable never overwrites a newer submission",
+          "ms": 1.935661,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14216,
+      "onlyProdLines": null,
+      "testsMs": 37
+    },
+    {
+      "file": "tests/outbox-replay-carries-the-write.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 3,
+      "rule": "Rules this file holds. A write the phone kept goes back on a wire as the request it was: a delete carries no body at all, and a write with a body carries the document the form produced \u2014 an object, never the text of one. Sending, refusing and sending again never rewrite what is kept on the device: the row holds the same characters until it goes.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 960,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a held delete is replayed as a delete that carries no body",
+        "a refused send keeps the person's own characters and the next send carries them again",
+        "a row this phone cannot read is refused by the name of what is wrong and stays for the person"
+      ],
+      "tests": [
+        {
+          "title": "a held delete is replayed as a delete that carries no body",
+          "ms": 27.997338,
+          "measured": false
+        },
+        {
+          "title": "a refused send keeps the person's own characters and the next send carries them again",
+          "ms": 5.993979,
+          "measured": false
+        },
+        {
+          "title": "a row this phone cannot read is refused by the name of what is wrong and stays for the person",
+          "ms": 0.957622,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14212,
+      "onlyProdLines": null,
+      "testsMs": 34.9
+    },
+    {
+      "file": "tests/outbox-request-body.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 4,
+      "rule": "(no first comment; first test title) a held create sends the original JSON object on drain and Retry",
+      "ruleSource": "first test title",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 972,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a held create sends the original JSON object on drain and Retry",
+        "a held update sends the original JSON object on drain and Retry",
+        "a held replace sends the original JSON object on drain and Retry",
+        "a held command sends the original JSON object on drain and Retry"
+      ],
+      "tests": [
+        {
+          "title": "a held create sends the original JSON object on drain and Retry",
+          "ms": 33.804792,
+          "measured": false
+        },
+        {
+          "title": "a held update sends the original JSON object on drain and Retry",
+          "ms": 1.594921,
+          "measured": false
+        },
+        {
+          "title": "a held replace sends the original JSON object on drain and Retry",
+          "ms": 1.015238,
+          "measured": false
+        },
+        {
+          "title": "a held command sends the original JSON object on drain and Retry",
+          "ms": 0.923319,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14207,
+      "onlyProdLines": null,
+      "testsMs": 37.3
+    },
+    {
+      "file": "tests/outbox-retry-keeps-held-order.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "(no first comment; first test title) retry waits for an older held update before sending the newer update to the same row",
+      "ruleSource": "first test title",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1031,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "retry waits for an older held update before sending the newer update to the same row"
+      ],
+      "tests": [
+        {
+          "title": "retry waits for an older held update before sending the newer update to the same row",
+          "ms": 37.051498,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14174,
+      "onlyProdLines": null,
+      "testsMs": 37.1
+    },
+    {
+      "file": "tests/outbox-retry-of-a-later-write-sends-the-earlier-first.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "(no first comment; first test title) retry on the later of two held updates to one row never lets the earlier one land last",
+      "ruleSource": "first test title",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1037,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "retry on the later of two held updates to one row never lets the earlier one land last"
+      ],
+      "tests": [
+        {
+          "title": "retry on the later of two held updates to one row never lets the earlier one land last",
+          "ms": 34.475883,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14178,
+      "onlyProdLines": null,
+      "testsMs": 34.5
+    },
+    {
+      "file": "tests/outbox-retry-of-the-earlier-write-goes-first.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "A held write's Retry gets that write to the server; it never sends the pressed row out of order and it never wedges the queue. So the press on the *older* of two held updates to one record is the plain case: that update goes first, the queue follows with the newer one, and the record ends with the edit the person made last. A cure that drained only from the head of the whole queue, or that refused Retry whenever anything was held, would fail here.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1073,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a Retry pressed on the earlier of two held updates sends that one first and the queue follows"
+      ],
+      "tests": [
+        {
+          "title": "a Retry pressed on the earlier of two held updates sends that one first and the queue follows",
+          "ms": 41.811124,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14183,
+      "onlyProdLines": null,
+      "testsMs": 41.8
+    },
+    {
+      "file": "tests/outbox-write-made-now-goes-behind-an-idle-held-write.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "The held update is queued and no drain is running (the last pass ended on a",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1026,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": ["a write made now to a row with an older held update is never overwritten by it"],
+      "tests": [
+        {
+          "title": "a write made now to a row with an older held update is never overwritten by it",
+          "ms": 38.260275,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14174,
+      "onlyProdLines": null,
+      "testsMs": 38.3
+    },
+    {
+      "file": "tests/outbox-write-made-now-waits-behind-the-held-one.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "One queue runs one write at a time, whichever button asked for it. A write the person makes now is a write to the same queue that holds an older one, so it waits behind the older write's answer instead of landing on top of it: the held PATCH still on a wire is the older statement about the same row. The queue is draining by itself here \u2014 a Discard offered it the turn, as the Home screen's Discard does \u2014 so nothing the person does next may slip past the request that is already waiting for its answer.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 994,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": ["a write the person makes now waits for the held write to the same row"],
+      "tests": [
+        {
+          "title": "a write the person makes now waits for the held write to the same row",
+          "ms": 41.241761,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14177,
+      "onlyProdLines": null,
+      "testsMs": 41.2
+    },
+    {
+      "file": "tests/outbox.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 20,
+      "rule": "The outbox keeps a write the person made that the server never received, and sends held writes in the order they were made. These cases are its contract: order, one key per write, a refusal that stops that write alone, a fate that is not knowable, and one sign-in's queue never being another's. The double in tests/fakes/store.ts carries the same columns and the same scope rule as the SQLite adapter, so each decision is made once, above both.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1136,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a write made while the network will not take it is kept and is not counted as written",
+        "a held body survives exactly as the form produced it, money untouched",
+        "every attempt of one held write says the same idempotency key",
+        "a write the server answers goes once, under the key a replay would have carried, and is counted once",
+        "a screen's own call is what goes on the wire while the server answers",
+        "the queue drains in the order the writes were made, one at a time",
+        "a refusal stops that write and the queue continues with the next",
+        "a refused write is never sent again by itself",
+        "Retry sends the same key again, clears the row and counts the write once",
+        "Discard deletes the write, the queue continues, and a second Discard is a no-op",
+        "a network that never took the request returns the write to queued and ends the pass",
+        "one sign-in's queue is not another's",
+        "a write left sending is answered from its row, not from memory",
+        "a second claim of a sending write moves nothing",
+        "a deadline after a send leaves the write unknown and never sends it again",
+        "an answer that fails its validator keeps the write on the phone",
+        "signing out clears this person's held writes and nobody else's",
+        "nothing that signs in is written to the device store",
+        "outcomeOf names the server being unhappy, the network, and a fate nobody knows",
+        "a phone that hears no network holds the write without trying the wire"
+      ],
+      "tests": [
+        {
+          "title": "a write made while the network will not take it is kept and is not counted as written",
+          "ms": 25.670432,
+          "measured": false
+        },
+        {
+          "title": "a held body survives exactly as the form produced it, money untouched",
+          "ms": 1.349927,
+          "measured": false
+        },
+        {
+          "title": "every attempt of one held write says the same idempotency key",
+          "ms": 10.827602,
+          "measured": false
+        },
+        {
+          "title": "a write the server answers goes once, under the key a replay would have carried, and is counted once",
+          "ms": 1.430878,
+          "measured": false
+        },
+        {
+          "title": "a screen's own call is what goes on the wire while the server answers",
+          "ms": 0.666443,
+          "measured": false
+        },
+        {
+          "title": "the queue drains in the order the writes were made, one at a time",
+          "ms": 4.314101,
+          "measured": false
+        },
+        {
+          "title": "a refusal stops that write and the queue continues with the next",
+          "ms": 9.289236,
+          "measured": false
+        },
+        {
+          "title": "a refused write is never sent again by itself",
+          "ms": 2.249081,
+          "measured": false
+        },
+        {
+          "title": "Retry sends the same key again, clears the row and counts the write once",
+          "ms": 2.763092,
+          "measured": false
+        },
+        {
+          "title": "Discard deletes the write, the queue continues, and a second Discard is a no-op",
+          "ms": 2.729901,
+          "measured": false
+        },
+        {
+          "title": "a network that never took the request returns the write to queued and ends the pass",
+          "ms": 1.581246,
+          "measured": false
+        },
+        {
+          "title": "one sign-in's queue is not another's",
+          "ms": 1.514733,
+          "measured": false
+        },
+        {
+          "title": "a write left sending is answered from its row, not from memory",
+          "ms": 0.480679,
+          "measured": false
+        },
+        {
+          "title": "a second claim of a sending write moves nothing",
+          "ms": 0.222031,
+          "measured": false
+        },
+        {
+          "title": "a deadline after a send leaves the write unknown and never sends it again",
+          "ms": 41.419651,
+          "measured": false
+        },
+        {
+          "title": "an answer that fails its validator keeps the write on the phone",
+          "ms": 2.989581,
+          "measured": false
+        },
+        {
+          "title": "signing out clears this person's held writes and nobody else's",
+          "ms": 0.521034,
+          "measured": false
+        },
+        {
+          "title": "nothing that signs in is written to the device store",
+          "ms": 0.640395,
+          "measured": false
+        },
+        {
+          "title": "outcomeOf names the server being unhappy, the network, and a fate nobody knows",
+          "ms": 0.165686,
+          "measured": false
+        },
+        {
+          "title": "a phone that hears no network holds the write without trying the wire",
+          "ms": 0.646537,
+          "measured": false
+        }
+      ],
+      "loaded": 47,
+      "coveredProdLines": 14232,
+      "onlyProdLines": null,
+      "testsMs": 111.5
+    },
+    {
       "file": "tests/page-envelope.test.ts",
       "runner": "node",
       "layer": "behaviour",
@@ -14052,6 +14707,159 @@
       "tier": "push(scoped)+merge(full)",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/read-cache-answers-who-is-asking.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 3,
+      "rule": "Rules this file holds. An answer the phone keeps is kept for the person whose request brought it, whoever is signed in when it arrives. The offline fallback answers for whoever is asking now, from that scope's own rows: nobody reads the last page of the person who was here before them. One window asked twice keeps one row, spelled the way the transport spells it, so the page that lands replaces the page a person is looking at.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 1008,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "an answer that lands after the sign-in changed is kept for the person who asked for it",
+        "an offline read answers from the rows of whoever is asking now",
+        "one window asked twice keeps one row, spelled as the transport spells it"
+      ],
+      "tests": [
+        {
+          "title": "an answer that lands after the sign-in changed is kept for the person who asked for it",
+          "ms": 3.525453,
+          "measured": false
+        },
+        {
+          "title": "an offline read answers from the rows of whoever is asking now",
+          "ms": 1.079277,
+          "measured": false
+        },
+        {
+          "title": "one window asked twice keeps one row, spelled as the transport spells it",
+          "ms": 0.654992,
+          "measured": false
+        }
+      ],
+      "loaded": 48,
+      "coveredProdLines": 13993,
+      "onlyProdLines": null,
+      "testsMs": 5.3
+    },
+    {
+      "file": "tests/read-cache-session-transition.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 2,
+      "rule": "Either refusing an obsolete read or completing it for its original scope is acceptable; persisting its data under the new scope is not.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 995,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a read finishing after the person changes never enters the new scope's cache",
+        "a read finishing after the server changes never enters the new scope's cache"
+      ],
+      "tests": [
+        {
+          "title": "a read finishing after the person changes never enters the new scope's cache",
+          "ms": 1.658348,
+          "measured": false
+        },
+        {
+          "title": "a read finishing after the server changes never enters the new scope's cache",
+          "ms": 0.193769,
+          "measured": false
+        }
+      ],
+      "loaded": 48,
+      "coveredProdLines": 13891,
+      "onlyProdLines": null,
+      "testsMs": 1.9
+    },
+    {
+      "file": "tests/read-cache.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 9,
+      "rule": "The read cache answers a screen from the last response this phone received for one read address when the server cannot be reached. These cases hold which response earns a row, which address a stored one may answer for, and that a server that answered is never overwritten by the phone's own memory.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 977,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a read the phone could not reach is answered from the last page it got",
+        "the answer is for the address it was read at, and for that one only",
+        "a read the server refused is what the server said, not the cache",
+        "a page beyond the first window is never kept, and a second first page replaces the one kept",
+        "a read made before anyone is signed in is neither cached nor answered from the cache",
+        "one person's cached page never answers for another",
+        "a cached answer this version cannot read is lost, not guessed at",
+        "a store call that names no sign-in is refused in the method it names",
+        "a deadline is silence too, so the cache answers it as it answers no network"
+      ],
+      "tests": [
+        {
+          "title": "a read the phone could not reach is answered from the last page it got",
+          "ms": 5.057687,
+          "measured": false
+        },
+        {
+          "title": "the answer is for the address it was read at, and for that one only",
+          "ms": 0.689536,
+          "measured": false
+        },
+        {
+          "title": "a read the server refused is what the server said, not the cache",
+          "ms": 0.370906,
+          "measured": false
+        },
+        {
+          "title": "a page beyond the first window is never kept, and a second first page replaces the one kept",
+          "ms": 0.565777,
+          "measured": false
+        },
+        {
+          "title": "a read made before anyone is signed in is neither cached nor answered from the cache",
+          "ms": 0.419927,
+          "measured": false
+        },
+        {
+          "title": "one person's cached page never answers for another",
+          "ms": 0.400521,
+          "measured": false
+        },
+        {
+          "title": "a cached answer this version cannot read is lost, not guessed at",
+          "ms": 0.306006,
+          "measured": false
+        },
+        {
+          "title": "a store call that names no sign-in is refused in the method it names",
+          "ms": 0.20037,
+          "measured": false
+        },
+        {
+          "title": "a deadline is silence too, so the cache answers it as it answers no network",
+          "ms": 0.369103,
+          "measured": false
+        }
+      ],
+      "loaded": 48,
+      "coveredProdLines": 13912,
+      "onlyProdLines": null,
+      "testsMs": 8.4
     },
     {
       "file": "tests/reentry.test.ts",
@@ -17165,6 +17973,97 @@
       "runsNowhere": false
     },
     {
+      "file": "tests/screens/offline-detail-says-when-it-was-saved.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 1,
+      "rule": "A record the phone answered rather than the server is drawn with the same quiet line a list carries: what it is, and when this device last received it. One derivation (deriveOffline) says it for both pages, so a record read on the train cannot be shown in the tunnel as though it had just been read.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 29273,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "a record answered from the phone says it is offline and when it was last updated"
+      ],
+      "tests": [
+        {
+          "title": "a record answered from the phone says it is offline and when it was last updated",
+          "ms": 44,
+          "measured": false
+        }
+      ],
+      "loaded": 142,
+      "coveredProdLines": 1546,
+      "onlyProdLines": null,
+      "testsMs": 44
+    },
+    {
+      "file": "tests/screens/offline-list-says-when-it-was-saved.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 1,
+      "rule": "A page answered from the phone rather than the server is drawn with a quiet line that says so and when it was saved: a person in a tunnel must be able to tell yesterday's list from today's. The words are the copy table's own.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 26758,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": ["a list answered from the phone says it is offline and when it was last updated"],
+      "tests": [
+        {
+          "title": "a list answered from the phone says it is offline and when it was last updated",
+          "ms": 1127,
+          "measured": false
+        }
+      ],
+      "loaded": 140,
+      "coveredProdLines": 1660,
+      "onlyProdLines": null,
+      "testsMs": 1127
+    },
+    {
+      "file": "tests/screens/offline-resource-reads.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 2,
+      "rule": "(no first comment; first test title) a resource list reopened offline shows its last successful page",
+      "ruleSource": "first test title",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 22079,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "a resource list reopened offline shows its last successful page",
+        "a resource detail reopened offline shows its last successful row"
+      ],
+      "tests": [
+        {
+          "title": "a resource list reopened offline shows its last successful page",
+          "ms": 83,
+          "measured": false
+        },
+        {
+          "title": "a resource detail reopened offline shows its last successful row",
+          "ms": 4,
+          "measured": false
+        }
+      ],
+      "loaded": 137,
+      "coveredProdLines": 1340,
+      "onlyProdLines": null,
+      "testsMs": 87
+    },
+    {
       "file": "tests/screens/record-command-at-collection-address.test.tsx",
       "runner": "jest",
       "layer": "composition",
@@ -17221,6 +18120,62 @@
       "tier": "merge",
       "reach": "npm test (jest half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/screens/sign-in-door-asks-before-held-writes-go.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 1,
+      "rule": "The sign-in screen has its own way to another server when a sign-in loaded the person but not the catalog \u2014 a network that dropped half-way through, which is the phone this queue was written for. Signing out clears what the phone holds, so that door asks first while a write is held, as the home screen's does.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 25803,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "the sign-in screen's way to another server does not sign out unasked while a write is held"
+      ],
+      "tests": [
+        {
+          "title": "the sign-in screen's way to another server does not sign out unasked while a write is held",
+          "ms": 196,
+          "measured": false
+        }
+      ],
+      "loaded": 135,
+      "coveredProdLines": 1295,
+      "onlyProdLines": null,
+      "testsMs": 196
+    },
+    {
+      "file": "tests/screens/sign-out-asks-before-held-writes-go.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 1,
+      "rule": "Signing out clears what this phone is holding, so every way out asks first while a write is held \u2014 including the one a catalog that could not be read offers, which is exactly the screen a phone that lost its network lands on.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 23996,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": ["leaving for another server while a write is held does not sign out unasked"],
+      "tests": [
+        {
+          "title": "leaving for another server while a write is held does not sign out unasked",
+          "ms": 304,
+          "measured": false
+        }
+      ],
+      "loaded": 155,
+      "coveredProdLines": 1291,
+      "onlyProdLines": null,
+      "testsMs": 304
     },
     {
       "file": "tests/screens/singleton-cancelled-refusal.test.tsx",
@@ -17292,6 +18247,53 @@
       "coveredProdLines": 1374,
       "onlyProdLines": null,
       "testsMs": 16
+    },
+    {
+      "file": "tests/screens/typed-write-names-the-write-the-queue-holds.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 4,
+      "rule": "A sheet's own typed call carries the idempotency key the queue minted for the write \u2014 not only the later replay does. The attempt the transport refused may have reached the server, and a server that honours the header can only match the replay to it when both attempts named the same write, which is the same string the held row is kept under.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 24424,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "the write a sheet makes while the network will not take it names itself on the attempt that failed",
+        "the edit a sheet makes names itself the same way, on the attempt that failed",
+        "the delete a record asks about names itself on the attempt that failed",
+        "the command a person answers yes to names itself on the attempt that failed"
+      ],
+      "tests": [
+        {
+          "title": "the write a sheet makes while the network will not take it names itself on the attempt that failed",
+          "ms": 17,
+          "measured": false
+        },
+        {
+          "title": "the edit a sheet makes names itself the same way, on the attempt that failed",
+          "ms": 7,
+          "measured": false
+        },
+        {
+          "title": "the delete a record asks about names itself on the attempt that failed",
+          "ms": 5,
+          "measured": false
+        },
+        {
+          "title": "the command a person answers yes to names itself on the attempt that failed",
+          "ms": 43,
+          "measured": false
+        }
+      ],
+      "loaded": 137,
+      "coveredProdLines": 1565,
+      "onlyProdLines": null,
+      "testsMs": 72
     },
     {
       "file": "tests/screens/useActivity.test.tsx",
@@ -18393,6 +19395,35 @@
       "runsNowhere": false
     },
     {
+      "file": "tests/shell-held-write-order.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 1,
+      "rule": "(no first comment; first test title) refreshing the catalog does not send the next held write before the first finishes",
+      "ruleSource": "first test title",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 24077,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "refreshing the catalog does not send the next held write before the first finishes"
+      ],
+      "tests": [
+        {
+          "title": "refreshing the catalog does not send the next held write before the first finishes",
+          "ms": 463,
+          "measured": false
+        }
+      ],
+      "loaded": 138,
+      "coveredProdLines": 1618,
+      "onlyProdLines": null,
+      "testsMs": 463
+    },
+    {
       "file": "tests/shell-identity-login-transition.test.tsx",
       "runner": "jest",
       "layer": "composition",
@@ -18463,6 +19494,33 @@
       "tier": "merge",
       "reach": "npm test (jest half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/shell-read-scope-shape.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 1,
+      "rule": "One owner decides what a scope is. The queue asks `heldScope`, which normalises the server the way the transport does, so a server saved with a trailing slash is the same server; a page that asks the read cache instead of that rule would keep its answers under a different name than the writes beside them \u2014 and a name the cache refuses is no answers at all, quietly.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 19021,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": ["a server typed with a trailing slash is one scope for the queue and the cache"],
+      "tests": [
+        {
+          "title": "a server typed with a trailing slash is one scope for the queue and the cache",
+          "ms": 88,
+          "measured": false
+        }
+      ],
+      "loaded": 138,
+      "coveredProdLines": 1602,
+      "onlyProdLines": null,
+      "testsMs": 88
     },
     {
       "file": "tests/shell-response-contract.test.tsx",
@@ -18681,6 +19739,47 @@
       "tier": "merge",
       "reach": "npm test (jest half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/ui/list-from-the-phone-says-so.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 3,
+      "rule": "An empty page this phone answered is not \"nothing exists\": it is \"nothing was there the last time this device heard\". The list says which of the two it is, and does not write \"none yet\" over an answer it cannot vouch for.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 18949,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "an empty page the phone answered says the device is offline rather than that nothing exists",
+        "an empty page the server answered is still the collection having nothing in it",
+        "the line a stored page carries offers the read again"
+      ],
+      "tests": [
+        {
+          "title": "an empty page the phone answered says the device is offline rather than that nothing exists",
+          "ms": 812,
+          "measured": false
+        },
+        {
+          "title": "an empty page the server answered is still the collection having nothing in it",
+          "ms": 7,
+          "measured": false
+        },
+        {
+          "title": "the line a stored page carries offers the read again",
+          "ms": 7,
+          "measured": false
+        }
+      ],
+      "loaded": 128,
+      "coveredProdLines": 1435,
+      "onlyProdLines": null,
+      "testsMs": 826
     },
     {
       "file": "tests/chart-axis-position.case.mjs",

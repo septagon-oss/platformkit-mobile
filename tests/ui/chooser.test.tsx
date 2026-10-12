@@ -31,6 +31,33 @@ describe("chooser", () => {
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
+  test("where the sheet's module is not in the build, the same question is the alert", () => {
+    const sheet = jest
+      .spyOn(ActionSheetIOS, "showActionSheetWithOptions")
+      .mockImplementation(() => {
+        throw new Error("ActionSheetManager doesn't exist");
+      });
+    const alert = jest.spyOn(Alert, "alert").mockImplementation(() => undefined);
+    const discard = jest.fn();
+    confirm(
+      "1 write has not left this phone. Discard it before signing out?",
+      { label: "Discard", destructive: true, onPress: discard },
+      "dark",
+      { cancel: "Keep on this phone" },
+    );
+    expect(sheet).toHaveBeenCalledTimes(1);
+    // A question the platform cannot draw as a sheet is still a question: the
+    // alert asks it, so the button that asked never dies on the person.
+    expect(alert).toHaveBeenCalledWith(
+      "1 write has not left this phone. Discard it before signing out?",
+      undefined,
+      [
+        { text: "Keep on this phone", style: "cancel" },
+        { text: "Discard", style: "destructive", onPress: discard },
+      ],
+    );
+  });
+
   test("elsewhere it is the alert, the way out first where Android reads the dismissive button", () => {
     jest.replaceProperty(Platform, "OS", "android");
     const alert = jest.spyOn(Alert, "alert").mockImplementation(() => undefined);

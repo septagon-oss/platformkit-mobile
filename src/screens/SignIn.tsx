@@ -4,6 +4,7 @@
 // open one — so a product composes this screen rather than forking it.
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
+import { useSignOut } from "./useSignOut";
 import React, { useState } from "react";
 import { useShell } from "../shell";
 import { SignInForm } from "../ui/organisms/SignInForm";
@@ -18,7 +19,13 @@ interface Props {
 
 export function SignIn({ title }: Props = {}) {
   const feedback = useFeedback();
-  const { state, baseURL, signIn, signOut, refresh, returning } = useShell();
+  const { state, baseURL, signIn, refresh, returning } = useShell();
+  // Both ways off this screen — the failed phase's way to another server and the
+  // anonymous phase's clearing of a saved sign-in — leave through the one door
+  // that asks while this phone holds a write. Signing out clears what is held,
+  // and a screen that reached for `signOut` itself would throw that work away
+  // on a button whose label only said "another server".
+  const leave = useSignOut();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const submit = async (url: string, email: string, password: string) => {
@@ -52,7 +59,7 @@ export function SignIn({ title }: Props = {}) {
         busy={busy}
         error={error}
         onSubmit={(u, e, p) => void submit(u, e, p)}
-        onClear={() => void signOut()}
+        onClear={leave}
         {...(title ? { title } : {})}
       />
     </>

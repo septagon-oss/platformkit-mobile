@@ -28,6 +28,8 @@ export interface Props {
   readonly refreshing: boolean;
   readonly more: boolean;
   readonly error: string;
+  /** savedAt says this page came from the phone rather than the server, and when it last arrived. */
+  readonly savedAt?: string;
   readonly order: Order;
   /** sheet is which of the two order sheets the person has opened, if either. */
   readonly sheet?: "none" | "sort" | "filters";

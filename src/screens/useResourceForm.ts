@@ -23,8 +23,10 @@ import {
   text,
   values,
   verbRefusal,
+  writePath,
   type Row,
 } from "../core/derive";
+import { keyed } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import type { Phase } from "../ui/organisms/ResourceForm";
@@ -32,7 +34,7 @@ import { useTheme } from "../ui/theme";
 import { refusalFields, refusalOf, screenCopy } from "./failure";
 
 export function useResourceForm(entry: Entry, id: string | undefined) {
-  const { api, wrote, typed, keep, say } = useShell();
+  const { api, wrote, typed, keep, say, outbox } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
@@ -248,9 +250,38 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     setAwaiting("");
     try {
       const body = values(controls, held);
-      const written = id ? await api.update(entry, id, body) : await api.create(entry, body);
-      wrote(key(entry));
+      // `idem` is the write's idempotency key, minted by the queue before the
+      // first attempt and named on the request: the attempt that may have landed
+      // and the replay that follows a hold are then one write to a server that
+      // honours the header.
+      const live = (idem?: string) => {
+        const options = keyed(idem);
+        return id ? api.update(entry, id, body, ...options) : api.create(entry, body, ...options);
+      };
+      // One write, one decision: it went, or this phone is holding it. A held
+      // write is not saved, so nothing here says it was — the sheet closes and
+      // the held row says what it is, in the server's own words when it refuses.
+      const answer = outbox
+        ? await outbox.submit(
+            {
+              kind: id ? "update" : "create",
+              resourceKey: key(entry),
+              path: id ? `${writePath(entry)}/${encodeURIComponent(id)}` : writePath(entry),
+              body,
+            },
+            live,
+          )
+        : { sent: true as const, row: await live() };
       if (!alive.current) return;
+      if (!answer.sent) {
+        // The body is on this phone and the row on Home names it, so the draft has
+        // nothing left to hold: a second copy of the same words saved by hand would
+        // be a second write.
+        setPhase("saved");
+        return;
+      }
+      const written = answer.row;
+      wrote(key(entry));
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       // The sheet is about to leave, so the sentence that says the write landed
       // cannot live in it: it is filed for the address the person lands on, where
@@ -278,7 +309,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setRefusals((n) => n + 1);
       setPhase("editing");
     }
-  }, [phase, controls, held, id, api, entry, wrote, copy, create, say]);
+  }, [phase, controls, held, id, api, entry, wrote, copy, create, say, outbox]);
 
   // Cancel is the third door out of a dirty sheet, and it asks the same question the
   // gesture and the system back are asked: an answer of "Keep editing" leaves the

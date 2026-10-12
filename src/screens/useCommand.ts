@@ -17,6 +17,7 @@ import { Alert } from "react-native";
 import { key, type Command, type Entry } from "../core/catalog";
 import {
   changedFields,
+  commandPath,
   commandSections,
   commandTitle,
   failureSubject,
@@ -25,6 +26,7 @@ import {
   screenPath,
   values,
 } from "../core/derive";
+import { keyed } from "../effects/api";
 import { refusalFields, refusalOf, screenCopy } from "./failure";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
@@ -47,7 +49,7 @@ export interface Running {
 
 /** useCommandForm is a command with an argument: the sheet that sends it. */
 export function useCommandForm(entry: Entry, id: string | undefined, c: Command): Running {
-  const { api, wrote } = useShell();
+  const { api, wrote, outbox } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
@@ -133,9 +135,29 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     }
     setPhase("running");
     try {
-      await api.command(entry, id, c.verb, values(controls, held));
+      const body = values(controls, held);
+      const live = (idem?: string) => api.command(entry, id, c.verb, body, ...keyed(idem));
+      // A command is the write most worth holding: it is the one the person
+      // cannot repeat by retyping a field, and the server that never heard it
+      // never ran it. A command this phone is holding has not run, and says so.
+      const answer = outbox
+        ? await outbox.submit(
+            {
+              kind: "command",
+              resourceKey: key(entry),
+              path: commandPath(entry, c.verb, id),
+              body,
+            },
+            live,
+          )
+        : { sent: true as const, row: await live() };
       if (!alive.current) return;
-      wrote(key(entry));
+      if (answer.sent) wrote(key(entry));
+      else {
+        setDetail(copy.state.holding(copy.state.held.title));
+        setPhase("editing");
+        return;
+      }
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPhase("ran");
       leave();
@@ -147,7 +169,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
       setErrors(refusalFields(said.verdict));
       setDetail(said.text);
     }
-  }, [api, entry, id, c, controls, held, wrote, leave, copy]);
+  }, [api, entry, id, c, controls, held, wrote, leave, copy, outbox]);
 
   return { blocks, held, errors, detail, phase, change, fieldRefused, run, cancel: leave };
 }
@@ -158,7 +180,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
  * because there is no form on screen to put it under.
  */
 export function useCommandAsk(entry: Entry, id: string | undefined) {
-  const { api, wrote } = useShell();
+  const { api, wrote, outbox } = useShell();
   const { mode } = useTheme();
   const [busy, setBusy] = useState("");
 
@@ -174,8 +196,27 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
           onPress: async () => {
             setBusy(c.verb);
             try {
-              await api.command(entry, id, c.verb);
-              wrote(key(entry));
+              // A command that takes no argument sends no argument at all, key or
+              // no key: the key rides after the argument slot it does not use.
+              const live = (idem?: string) =>
+                idem === undefined
+                  ? api.command(entry, id, c.verb)
+                  : api.command(entry, id, c.verb, undefined, { idempotencyKey: idem });
+              const answer = outbox
+                ? await outbox.submit(
+                    {
+                      kind: "command",
+                      resourceKey: key(entry),
+                      path: commandPath(entry, c.verb, id),
+                    },
+                    live,
+                  )
+                : { sent: true as const, row: await live() };
+              if (answer.sent) wrote(key(entry));
+              else {
+                const words = screenCopy();
+                Alert.alert(title, words.state.holding(words.state.held.title));
+              }
               void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } catch (e) {
               // A report, not a question: the platform's alert with its one OK,
@@ -196,7 +237,7 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
         { message: c.description || `This runs ${c.verb} on the ${entry.entity}.` },
       );
     },
-    [api, entry, id, wrote, mode],
+    [api, entry, id, wrote, mode, outbox],
   );
 
   return { ask, busy };

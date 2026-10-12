@@ -18,6 +18,7 @@ import {
 } from "../core/catalog";
 import { row, page, identity, trail, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
+import { keyRefusal } from "../core/outbox";
 
 import { createClient, type Client } from "../generated/client";
 import { getValidRequestBody } from "../generated/core/utils.gen";
@@ -98,10 +99,51 @@ export interface Window {
   readonly filters?: readonly string[];
 }
 
+/**
+ * listQuery is a window spelled the way `list` sends it. The read cache keys a
+ * page by the same address, so the page that lands replaces the one a person is
+ * looking at instead of sitting beside it under another name.
+ */
+export function listQuery({
+  offset = 0,
+  limit = PER_PAGE,
+  sort = "",
+  filters = [],
+}: Window): string {
+  const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (sort) q.set("sort", sort);
+  for (const f of filters) q.append("filter", f);
+  return q.toString();
+}
+
+/** rowAddress is where one row of an entry lives, which is what a cache row is named for. */
+export function rowAddress(e: Entry, id: string): string {
+  return `${e.path}/${encodeURIComponent(id)}`;
+}
+
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface RequestOptions {
   readonly signal?: AbortSignal;
+  /**
+   * idempotencyKey is the header the kernel honours once T-0293 lands; until
+   * then the phone sends it and the server ignores it. The outbox mints it
+   * before a write's first attempt leaves the phone and keeps it as the row's
+   * id, so the attempt that may have landed and the replay that follows name
+   * the same write. A request no queue could ever replay carries none.
+   */
+  readonly idempotencyKey?: string;
+}
+
+/**
+ * keyed is the options argument a typed write takes besides its own: the
+ * idempotency key the queue minted for it, or nothing at all where no queue
+ * exists to replay it. A call made without an argument is not the same call as
+ * one made with an empty one — the write a phone cannot hold is left exactly the
+ * call it was before the queue existed.
+ */
+export function keyed(idempotencyKey: string | undefined): readonly [] | readonly [RequestOptions] {
+  return idempotencyKey === undefined ? [] : [{ idempotencyKey }];
 }
 
 export interface Api {
@@ -135,10 +177,23 @@ export interface Api {
    * because a singleton's write is a PUT of the whole of it.
    */
   one(e: Entry): Promise<Record<string, unknown>>;
-  replace(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
-  create(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
-  update(e: Entry, id: string, values: Record<string, unknown>): Promise<Record<string, unknown>>;
-  remove(e: Entry, id: string): Promise<void>;
+  replace(
+    e: Entry,
+    values: Record<string, unknown>,
+    options?: RequestOptions,
+  ): Promise<Record<string, unknown>>;
+  create(
+    e: Entry,
+    values: Record<string, unknown>,
+    options?: RequestOptions,
+  ): Promise<Record<string, unknown>>;
+  update(
+    e: Entry,
+    id: string,
+    values: Record<string, unknown>,
+    options?: RequestOptions,
+  ): Promise<Record<string, unknown>>;
+  remove(e: Entry, id: string, options?: RequestOptions): Promise<void>;
   /**
    * command runs one of the entry's lifecycle routes and answers the row it
    * left behind. id is the row it is about, or nothing for a command about the
@@ -151,6 +206,7 @@ export interface Api {
     id: string | undefined,
     verb: string,
     values?: Record<string, unknown>,
+    options?: RequestOptions,
   ): Promise<Record<string, unknown>>;
   /** cookie is the session the shell should persist, or undefined when signed out. */
   readonly cookie: () => string | undefined;
@@ -223,6 +279,7 @@ export function createApi(
       cookie: string | undefined;
       generation: number;
     },
+    idempotencyKey?: string,
   ): Promise<{ text: string; status: number; headers: Headers; bytes?: ArrayBuffer }> {
     apiPath(path);
     if (method === "GET" && body !== undefined)
@@ -237,6 +294,13 @@ export function createApi(
     delete headers.origin;
     delete headers["sec-fetch-site"];
     if (body !== undefined) headers["Content-Type"] = "application/json";
+    // A header is one token or nothing: a value with a CR or an LF in it would
+    // be a second request, not a key, and no caller's choice may open that door.
+    if (idempotencyKey !== undefined) {
+      const refused = keyRefusal(idempotencyKey);
+      if (refused) throw new TypeError(refused);
+      headers["Idempotency-Key"] = idempotencyKey;
+    }
     const sendingCookie = prepared ? prepared.cookie : cookie;
     if (sendingCookie) headers.Cookie = sendingCookie;
     const stop = new AbortController();
@@ -252,6 +316,11 @@ export function createApi(
     let text = "";
     let responseHeaders = new Headers();
     let bytes: ArrayBuffer | undefined;
+    // answered says the server took the request and said something: from that
+    // moment on, a failure belongs to reading its answer, not to a network that
+    // never carried the request. The two are not the same write: one may have
+    // landed, and the kernel does not honour an Idempotency-Key until T-0293.
+    let answered = false;
     try {
       if (prepared?.body != null) init.body = prepared.body;
       if (body !== undefined) {
@@ -259,6 +328,7 @@ export function createApi(
         if (init.body === undefined) throw new TypeError("The request body is not JSON.");
       }
       const res = await fetchImpl(base + path, init);
+      answered = true;
       // The cookie comes off the response this call was answered with, before
       // anything else, because it is what the next call presents.
       const set = res.headers.get("Set-Cookie");
@@ -283,6 +353,11 @@ export function createApi(
           `${base} did not answer within ${Math.round(timeout / 1000)} seconds.`,
         );
       if (signal?.aborted) throw cancelled();
+      // The server had already answered when this failure happened, so the
+      // write may be in the database: it is an unreadable answer, which is what
+      // a held write is never resent for, and never the network's own failure.
+      if (answered)
+        throw new ResponseError(status, `Invalid response at ${path}: its body never arrived.`);
       throw e;
     } finally {
       clearTimeout(bell);
@@ -343,10 +418,10 @@ export function createApi(
     path: string,
     validate: (value: unknown) => T,
     body?: unknown,
-    { signal }: RequestOptions = {},
+    { signal, idempotencyKey }: RequestOptions = {},
   ): Promise<T> {
     if (typeof validate !== "function") throw new TypeError("A response validator is required.");
-    const { value, status } = await read(method, path, body, signal);
+    const { value, status } = await read(method, path, body, signal, idempotencyKey);
     try {
       return validate(value);
     } catch {
@@ -356,7 +431,10 @@ export function createApi(
     }
   }
 
-  async function documented<T>(operation: (client: Client) => Promise<T>): Promise<T> {
+  function documented<T>(
+    operation: (client: Client) => Promise<T>,
+    idempotencyKey?: string,
+  ): Promise<T> {
     const sessionCookie = cookie;
     const sessionGeneration = generation;
     const bodies = new WeakMap<Request, BodyInit | null>();
@@ -376,12 +454,19 @@ export function createApi(
       if (!bodies.has(request)) throw new TypeError("Expected a generated request.");
       const body = bodies.get(request) ?? null;
       if (body instanceof FormData) request.headers.delete("Content-Type");
-      const result = await call(method, path, undefined, request.signal, {
-        body,
-        headers: request.headers,
-        cookie: sessionCookie,
-        generation: sessionGeneration,
-      });
+      const result = await call(
+        method,
+        path,
+        undefined,
+        request.signal,
+        {
+          body,
+          headers: request.headers,
+          cookie: sessionCookie,
+          generation: sessionGeneration,
+        },
+        idempotencyKey,
+      );
       const status = result.status;
       if (!route.statuses.includes(status))
         throw new ResponseError(
@@ -433,6 +518,7 @@ export function createApi(
     path: string,
     body?: unknown,
     signal?: AbortSignal,
+    idempotencyKey?: string,
   ): Promise<{ value: unknown; status: number }> {
     apiPath(path);
     if (method === "GET" && body !== undefined)
@@ -447,10 +533,13 @@ export function createApi(
         if (serialized === undefined) throw new TypeError("The request body is not JSON.");
         wireBody = JSON.parse(serialized);
       }
-      const result = await documented((client) => route.run(client, path, wireBody, signal));
+      const result = await documented(
+        (client) => route.run(client, path, wireBody, signal),
+        idempotencyKey,
+      );
       return { status: result.response.status, value: result.data };
     }
-    const { text, status } = await call(method, path, body, signal);
+    const { text, status } = await call(method, path, body, signal, undefined, idempotencyKey);
     try {
       return { status, value: text === "" ? undefined : JSON.parse(text) };
     } catch {
@@ -463,8 +552,15 @@ export function createApi(
     path: string,
     validate: (value: unknown) => T,
     body?: unknown,
+    options: RequestOptions = {},
   ): Promise<T> {
-    const { value, status } = await read(method, path, body);
+    const { value, status } = await read(
+      method,
+      path,
+      body,
+      options.signal,
+      options.idempotencyKey,
+    );
     try {
       return validate(value);
     } catch (error) {
@@ -524,40 +620,42 @@ export function createApi(
       );
       return parseCatalog(result.data, notice);
     },
-    async list(e, { offset = 0, limit = PER_PAGE, sort = "", filters = [] } = {}) {
-      const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-      if (sort) q.set("sort", sort);
-      for (const f of filters) q.append("filter", f);
-      const body = await json("GET", `${e.path}?${q}`, page.parse);
+    async list(e, window = {}) {
+      const body = await json("GET", `${e.path}?${listQuery(window)}`, page.parse);
       return { items: body.items ?? [], total: body.total ?? 0 };
     },
     async get(e, id) {
-      return json("GET", `${e.path}/${encodeURIComponent(id)}`, row.parse);
+      return json("GET", rowAddress(e, id), row.parse);
     },
     async one(e) {
       return json("GET", e.path, row.parse);
     },
-    async replace(e, values) {
+    async replace(e, values, options) {
       // A singleton prints no operation set and no write path of its own, but
       // kit/rest mounts its PUT where it mounts any other write: follow the
       // entry, do not assume the read address.
-      return json("PUT", writePath(e), row.parse, values);
+      return json("PUT", writePath(e), row.parse, values, options);
     },
-    async create(e, values) {
-      return json("POST", writePath(e), row.parse, values);
+    async create(e, values, options) {
+      return json("POST", writePath(e), row.parse, values, options);
     },
-    async update(e, id, values) {
-      return json("PATCH", `${writePath(e)}/${encodeURIComponent(id)}`, row.parse, values);
+    async update(e, id, values, options) {
+      return json("PATCH", `${writePath(e)}/${encodeURIComponent(id)}`, row.parse, values, options);
     },
-    async remove(e, id) {
+    async remove(e, id, options) {
       const path = `${writePath(e)}/${encodeURIComponent(id)}`;
       apiPath(path);
       const route = documentedRoute("DELETE", path);
-      if (route) await documented((client) => route.run(client, path));
-      else await call("DELETE", path);
+      if (route)
+        await documented(
+          (client) => route.run(client, path, undefined, options?.signal),
+          options?.idempotencyKey,
+        );
+      else
+        await call("DELETE", path, undefined, options?.signal, undefined, options?.idempotencyKey);
     },
-    async command(e, id, verb, values) {
-      return json("POST", commandPath(e, verb, id), row.parse, values);
+    async command(e, id, verb, values, options) {
+      return json("POST", commandPath(e, verb, id), row.parse, values, options);
     },
   };
 }
