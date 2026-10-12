@@ -835,6 +835,42 @@ focus restoration and authenticated device journeys must still be verified on
 that binary. Node tests, component tests and JavaScript exports are separate
 source evidence; they do not establish those runtime results.
 
+### How a rich text body reads
+
+A `widget:richtext` field holds the Markdown the server validated and normalised
+(PlatformKit decision 0069 §1), so reading it on the phone is a reading of a shape: a
+blank line between blocks, a fenced block carrying its own blank lines, and a figure —
+one image, its own paragraph, its title as its caption. `proseBlocks` cuts the body
+into text runs and figures and never repairs one; a body holding a shape §1 could not
+have stored (an image inside a sentence, a `pk-file:` that is not an identifier, a
+heading outside `##`–`####`) is refused as `unsupported-format` so a screen draws the
+whole body as prose rather than less of it. `Prose` draws the runs in the kit's type and
+the figures in the slot the media family already owns: the box is reserved from the
+frame the server measured, so no paragraph moves when the bytes arrive; a figure that
+did not arrive says `Image unavailable` in the reader's language and keeps every word
+around it; a decorative figure is nothing to open, and a ready one is.
+`MarkdownProse` is the only file that names a Markdown library — `src/ui/` draws what it
+is handed and knows no library, no transport and no file byte. Until the file read
+reaches each figure, generated screens still show a rich text body as prose.
+
+**Reused** — `MediaItem`, `ImageSlotProps` and the media family's
+`loading | ready | error | unavailable` life cycle with its `imageUnavailable`,
+`retryImage` and `open` words, unchanged; `build`, `Validation` and the existing
+`unsupported-format` issue code; `Text`, `Skeleton`, `Button`, `testable`, `theme`,
+`scale` and the generated token palette; `tests/fakes/presentation.ts`. **Added** —
+`src/core/prose.ts`, because the phone had never read a Markdown body and nothing here
+carried the file module's served-width set (which is why `variantWidth` lives beside the
+segmentation and not beside a loader), plus the spoiler escape that keeps a sentence
+readable on both media; `src/ui/organisms/Prose.tsx`, because no Markdown reader
+existed; `src/screens/MarkdownProse.tsx`, because a third-party face enters through a
+screen and not through `src/ui/`. **Made reusable** — `deriveProse`'s figure view model
+(`slot`, `canOpen`, `canRetry`, `openLabel`, `retryLabel`), which is what
+`RecordFact` and any later prose surface will draw with no rule of their own;
+`phoneEditorHolds`, the eligibility gate the editor takes before offering a body as rich
+text; and the slot discipline — `renderMarkdown`/`renderFigure` in props, library and
+bytes supplied by the screen — which is `PhotoViewer`'s `renderImage` pattern proven for
+a Markdown face, ready for the editor's host port.
+
 ### Shared package
 
 **Reused** — `package.json`'s identity fields, the `files` allowlist

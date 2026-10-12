@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `2e341d701` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `87baac63b` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 29 | 181 | 46.9 s | 65 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 196 | 918 | 43.8 s | 1445 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 198 | 918 | 43.8 s | 1445 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 57 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 338
+* keep: 340
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 338 — 157 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* files inventoried: 340 — 158 `tests/*.test.ts` (node), 126 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1305; cases in files no runner reaches: 35
 * isolated wall time: contract 65 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -170,6 +170,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/player-toggle-dominant.test.tsx | jest | behaviour | 2 | 19025 | 14 | 0 | 0 of 2 | — | 0 | keep | The card a person stops on answers one verb right now — play, or pause — and the two skips beside it are corrections to that answer. Drawn as three discs of on… |
 | tests/ui/player-words-not-cut.test.tsx | jest | behaviour | 4 | 19021 | 21 | 0 | 0 of 4 | — | 0 | keep | What is playing has to be readable, not merely present. The strip over a list is one line tall by design; the card a person stops on is not, and drawing it lik… |
 | tests/ui/pricing-withdrawal.test.tsx | jest | behaviour | 4 | 19724 | 131 | 22 | 0 of 4 | — | 0 | keep | Coming back from lost pricing needs a press, not a quiet refill, and no plan may keep a value or an offer the current read no longer allows. |
+| tests/ui/prose-reader.test.tsx | jest | behaviour |  |  |  |  | not measured | — | 0 | keep | A rich text body is read natively: every construct 0069 §1 allows comes back as text a person can read, in both modes, with the figure's box reserved by the fr… |
 | tests/ui/record-menu-opens-under-its-header.test.tsx | jest | behaviour | 1 | 20512 | 22 | 0 | 0 of 1 | — | 0 | keep | The `…` sits in the native header, which stays put while the record scrolls, so what it opens appears where the person was looking: the open menu is the first … |
 | tests/ui/refused-field-asks-for-its-box.test.tsx | jest | behaviour | 4 | 16050 | 405 |  | not measured | — | 0 | keep | The sheet does not merely say which field is wrong, it asks for that field: the organism keeps the ref of every box it drew and, when the hook names the field … |
 | tests/ui/resource-list-spoken-time.test.tsx | jest | behaviour | 2 | 20368 | 937 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) en generated list announces the exact local instant through its composed row |
@@ -283,6 +284,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/pricing-offer-unit.test.ts | node | behaviour | 6 | 951 | 216 | 0 | 0 of 6 | — | 0 | keep | An amount a person chooses a plan on is a promise about a schedule: EUR 12.99 paid every month and EUR 12.99 paid once a year are the same four figures and two… |
 | tests/pricing-withdrawal.test.ts | node | behaviour | 2 | 735 | 18.8 | 2 | 0 of 2 | — | 0 | keep | Offers and plan values are facts the caller was allowed to read. When they are withdrawn the table drops them and disables the action rather than substituting … |
 | tests/progress.test.ts | node | behaviour | 12 | 316 | 29.8 | 0 | 0 of 12 | — | 0 | keep | The one arithmetic a meter, a stepper rail and a player's scrubber share. Each case is a number chosen so a wrong rounding, a swapped numerator or a invented d… |
+| tests/prose-body-reads-as-blocks.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A rich text body is the Markdown the server stored (0069 §1), so reading it is a reading of that shape: a blank line between blocks, a figure a paragraph of it… |
 | tests/range-clock-change.test.ts | node | behaviour | 3 | 758 | 32.3 | 1 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a booking slot crossing the clock change names both endpoint zones |
 | tests/range-one-sentence.test.ts | node | behaviour | 3 | 288 | 20.1 | 1 | 1 of 3 | — | 0 | keep | A span of time is one sentence. Formatting two instants and joining them wrote the day twice, the zone twice and a raw offset in parentheses — which is what ma… |
 | tests/read-cache-answers-who-is-asking.test.ts | node | behaviour | 3 | 1008 | 5.3 |  | not measured | — | 0 | keep | Rules this file holds. An answer the phone keeps is kept for the person whose request brought it, whoever is signed in when it arrives. The offline fallback an… |
