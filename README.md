@@ -1304,12 +1304,38 @@ mounted.
 The `mobile-e2e` workflow runs every flow on each push to main and nightly,
 against a kernel it serves itself, and carries no `continue-on-error`: a journey
 that skipped would leave the coverage the gate above counts looking like a
-figure nobody earned. It needs two repository variables and no secret —
-`PK_KERNEL_IMAGE`, the kernel to serve, pinned to a digest because this
-repository has no Go toolchain and cannot build one, and `PK_MOBILE_AVD`, the
-Android Virtual Device to boot — and it refuses by name when either is missing.
+figure nobody earned. It runs on `pkit-ci-android`, the label whose image carries
+the Android SDK, an AVD, Maestro and `/dev/kvm`; the plain Linux host it used to
+ask for answered its probe with `missing: adb emulator maestro psql keytool` on
+every run of main, which is a probe refusing correctly rather than a journey
+failing, and the label is a rule a test holds from here. It needs one repository
+variable — `PK_MOBILE_AVD`, the Android Virtual Device to boot, refused by name
+when it is missing — and one read-only secret, `PK_KERNEL_TOKEN`, the same one
+[kernel-main.yml](.gitea/workflows/kernel-main.yml) reads the kernel with: this
+forge requires sign-in to read `septagon-oss/platformkit` and a job token is
+nobody on a repository it was not issued for, so a checkout of the kernel that
+carried no token of its own is a step no run gets past; where the secret is unset
+the checkout falls back to the job token, so the refusal is the forge's own — a
+checkout that failed, naming the repository — and not an empty input. Which
+kernel to serve is not a variable:
+the job checks out the commit [testdata/catalog.source.json](testdata/catalog.source.json)
+and [testdata/openapi.source.json](testdata/openapi.source.json) already record
+as `upstream.commit` — at that object id, never a branch — and builds it with the
+Go version that build's own `go.mod` asks for, so the server the flows write
+through is the server the fixtures describe. That pair is read in one place,
+`scripts/e2e/mobile_ci.sh --kernel-pin`: it refuses naming the record that is
+missing or holds a commit shorter than forty hex characters, and names both
+records when they name different builds, because then the fixtures are not one
+build's. The step that runs it ends the job on that refusal — the commit is
+assigned in a statement of its own, not substituted inside the `echo` that
+publishes it — because an empty step output is a ref the checkout fills with the
+kernel's default branch, which is the one build this journey must never serve.
 Its own database, tenant, administrator and password are created by the run and
-dropped with it, and the Maestro report is printed in the job log. The device is
+dropped with it, and the Maestro report is printed in the job log. The wait for
+`/health` has a bound, and a kernel that stays alive and answers nothing ends the
+run naming the port, the commit it was built from and its own log — a journey run
+against no server would report thirteen timeouts and say nothing about the server
+that never bound. The device is
 host-level, so the job's concurrency group is named for the device and not the
 ref, and the step that boots the emulator refuses a host that already has a
 device attached — in any state adb lists it, because an `offline` entry is
@@ -1319,8 +1345,9 @@ that serial only while it is the sole device the host has: a launch that failed
 cannot then be read as a device somebody else booted. A workflow file cannot
 hold a machine against a job that is not its own, so it declines the machine
 instead of sharing one. What a checkout cannot see is whether this forge fires
-`schedule:` or whether the label answers `actions/setup-node` and
-`services:` — the first run is what will tell, and
+`schedule:`, or whether that label answers `actions/setup-node`,
+`actions/setup-go`, a `services:` block and a checkout of another repository —
+the first run is what will tell, and
 until then no journey here has been shown passing on a device. What that job
 proves is these journeys; the kernel's `mobile_flow_pass_rate` is read from the
 kernel's own manifest, and stays where that manifest puts it until a kernel-side
@@ -1335,15 +1362,20 @@ guard-with-its-own-fixtures shape for `tests/flow-coverage.test.ts`, and —
 copied and cited in each file's header — the kernel's `scripts/mobile_e2e.sh`
 serve-and-wait fixture, its `.gitea/workflows/mobile.yml` step list, its
 `postgres-init.sql` role, and the tool search and refusal of its
-`e2e/maestro/README.md`. **Added** — `scripts/e2e/mobile_ci.sh`, because nothing
-in this repository has ever started a server (`android.sh` required one somebody
-else had started) and no existing unit could state the claim that a device which
-signed in can use what the served catalog published; and
-`.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all.
+`e2e/maestro/README.md`; and, for the run that serves the kernel, that job's
+`pkit-ci-android` label and its `actions/setup-go` pin, and the `upstream.commit`
+the two provenance records already held. **Added** — `scripts/e2e/mobile_ci.sh`,
+because nothing in this repository has ever started a server (`android.sh`
+required one somebody else had started) and no existing unit could state the
+claim that a device which signed in can use what the served catalog published;
+and `.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all.
 **Made reusable** — `scripts/e2e/run.sh`, one last mile (install, reverse, run
 the directory, write the JUnit) that any future runner calls instead of
 repeating, `scripts/e2e/tools.sh`, the tool search and the refusal that says
-where it looked, and `# screen:` as the way a journey says what it proves — so
+where it looked, `scripts/e2e/mobile_ci.sh --kernel-pin`, which answers the one
+question "which kernel commit do these fixtures describe" for anything that has
+to serve that build or fetch it, and `# screen:` as the way a journey says what
+it proves — so
 the next screen added under `app/` arrives with a journey or with a failing
 check.
 

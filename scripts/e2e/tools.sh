@@ -10,6 +10,12 @@
 # and Maestro is a launch script plus a lib directory, so the host that has it
 # keeps it under a tools prefix of its own — $MAESTRO_HOME, or
 # ~/.local/share/platformkit-tools/maestro/bin where that loop's tooling puts it.
+# Two kinds of host answer this loop and the roots are written for both: the
+# pkit-ci-android runner image exports ANDROID_HOME=/opt/android-sdk, with adb in
+# platform-tools and the emulator beside it, and MAESTRO_HOME=/opt/maestro with
+# its binary under bin/, and a developer's machine keeps the SDK wherever its
+# installer put it and exports nothing — which is what $ANDROID_SDK_ROOT,
+# ~/Android/Sdk and the XDG root are for.
 # "Missing" means *nowhere it is looked for*, so the search scope is part of any
 # claim about a tool (platformkit's e2e/maestro/README.md:20-28). A tool that
 # exists and is not looked for is a journey that reports itself impossible.

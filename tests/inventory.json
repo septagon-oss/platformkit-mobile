@@ -271,23 +271,23 @@
   },
   "totals": {
     "contract": {
-      "files": 26,
-      "cases": 172,
-      "ms": 62922,
-      "testsMs": 46254.3,
+      "files": 29,
+      "cases": 181,
+      "ms": 64719,
+      "testsMs": 46911.60000000001,
       "runners": {
-        "node": 26
+        "node": 29
       },
       "unreachable": 0
     },
     "behaviour": {
-      "files": 194,
-      "cases": 915,
-      "ms": 1444238,
-      "testsMs": 43361.00000000004,
+      "files": 196,
+      "cases": 918,
+      "ms": 1445375,
+      "testsMs": 43814.00000000003,
       "runners": {
         "jest": 68,
-        "node": 126
+        "node": 128
       },
       "unreachable": 0
     },
@@ -1307,6 +1307,59 @@
       "runsNowhere": false
     },
     {
+      "file": "tests/journey-job-runs-on-the-runner-that-has-a-device.test.ts",
+      "runner": "node",
+      "layer": "contract",
+      "cases": 5,
+      "rule": "The device journey runs on `pkit-ci-android`, the runner whose image carries adb, the emulator, Maestro and /dev/kvm, and its probe step refuses by name on a host that does not. A label is one string in one workflow, so without this file nothing here holds it: one edit could move the job back to a plain Linux runner, where the probe is right to refuse and every push to main goes red having walked no flow. The same job builds the kernel it serves from the commit this repository's two provenance records agree on, so that pin \u2014 and whatever stops there being one \u2014 is held here too.",
+      "ruleSource": "first comment",
+      "tier": "push",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "nothing else in the suite reads jobs.journey at all: the label, the probe's place as the job's first command, the runner named inside the probe's refusal, the prefixes that search walks and the kernel commit the two provenance records agree on are held only here \u2014 the closest sibling, tests/journey-report-path.test.ts, reads one line of the same job and none of these. Its cases, titles and cost come from the one-file run named under measured.commands.node; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
+      "ms": 836,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "the journey job asks for the runner whose image carries a device, and is the only job that does",
+        "the probe is the job's first command, and the only one that asks",
+        "the probe finds adb, the emulator and Maestro where the image and a workstation install them",
+        "the probe's refusal names the runner the job is on",
+        "the kernel the journeys serve is the commit the two provenance records agree on"
+      ],
+      "tests": [
+        {
+          "title": "the journey job asks for the runner whose image carries a device, and is the only job that does",
+          "ms": 40.298383,
+          "measured": false
+        },
+        {
+          "title": "the probe is the job's first command, and the only one that asks",
+          "ms": 4.848397,
+          "measured": false
+        },
+        {
+          "title": "the probe finds adb, the emulator and Maestro where the image and a workstation install them",
+          "ms": 170.025634,
+          "measured": false
+        },
+        {
+          "title": "the probe's refusal names the runner the job is on",
+          "ms": 0.509292,
+          "measured": false
+        },
+        {
+          "title": "the kernel the journeys serve is the commit the two provenance records agree on",
+          "ms": 209.513347,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 425.2
+    },
+    {
       "file": "tests/kernel-main-bound.test.ts",
       "runner": "node",
       "layer": "contract",
@@ -1795,6 +1848,74 @@
       "tier": "push",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/kernel-pin-step-publishes-nothing-without-provenance.test.ts",
+      "runner": "node",
+      "layer": "contract",
+      "cases": 1,
+      "rule": "A missing provenance record must end the pin step before it publishes anything: an empty ref would let the next checkout choose the kernel's default branch. Each record is removed in turn, with the other still naming a valid commit.",
+      "ruleSource": "first comment",
+      "tier": "push",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 415,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": ["the pin step publishes nothing when either provenance record is missing"],
+      "tests": [
+        {
+          "title": "the pin step publishes nothing when either provenance record is missing",
+          "ms": 82.776424,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 82.8
+    },
+    {
+      "file": "tests/kernel-pin-step-refuses-what-the-records-cannot-name.test.ts",
+      "runner": "node",
+      "layer": "contract",
+      "cases": 3,
+      "rule": "The step that names the kernel to build is the job's refusal when the two provenance records cannot name one: a record missing, a commit that is not a full object id, or two records naming different builds. What the harness prints is only a refusal if the step that runs it ends there: a step that goes green with an empty commit hands the checkout no ref, and a checkout with no ref takes the repository's default branch \u2014 the one thing the journey must never build.",
+      "ruleSource": "first comment",
+      "tier": "push",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 546,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "the pin step names the commit when the records agree",
+        "the pin step ends the job when the records name different builds",
+        "the pin step ends the job when a record is not a full object id"
+      ],
+      "tests": [
+        {
+          "title": "the pin step names the commit when the records agree",
+          "ms": 59.708149,
+          "measured": false
+        },
+        {
+          "title": "the pin step ends the job when the records name different builds",
+          "ms": 45.342833,
+          "measured": false
+        },
+        {
+          "title": "the pin step ends the job when a record is not a full object id",
+          "ms": 44.236747,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 149.3
     },
     {
       "file": "tests/layers.test.ts",
@@ -13154,6 +13275,35 @@
       "runsNowhere": false
     },
     {
+      "file": "tests/kernel-checkout-reads-with-the-repository-secret.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "The device journey checks the kernel out of this forge's septagon-oss/platformkit at the commit the fixtures name. On this forge a job token reads the repository it was issued for and no other \u2014 kernel-main.yml says so where it reads the same repository, and the anonymous git read answers 401 \u2014 so a checkout of the kernel that carries no token of its own is a step no run gets past. The step reads with the same repository secret kernel-main reads with, and does not leave it in the checkout's own configuration afterwards.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 423,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "the kernel checkout authorises with the secret kernel-main reads the kernel with"
+      ],
+      "tests": [
+        {
+          "title": "the kernel checkout authorises with the secret kernel-main reads the kernel with",
+          "ms": 20.327431,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 20.3
+    },
+    {
       "file": "tests/kit-quantity-states.test.ts",
       "runner": "node",
       "layer": "behaviour",
@@ -15641,6 +15791,41 @@
       "tier": "push(scoped)+merge(full)",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/served-kernel-that-never-answers-refuses-the-journey.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 2,
+      "rule": "The harness waits for the kernel it served to answer /health, with a bound of sixty turns. What happens at the end of that bound is the whole difference between a red that names the server and a red that names thirteen flows: a loop that simply ends would hand `scripts/e2e/run.sh` a port that holds nothing, and every journey would then be refused by its own timeout while the log said nothing about the server that never bound. So the bound refuses, prints what the kernel logged, and the journeys are not reached. The cases below plant the tools the harness asks for, and a kernel of their own \u2014 one that stays alive and answers nothing, one that answers \u2014 so what is under test is the branch after the wait and not a device or a database.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 714,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a kernel alive and answering no /health ends the run naming the wait, the port and its own log",
+        "the same harness reaches the journeys when the served kernel answers /health"
+      ],
+      "tests": [
+        {
+          "title": "a kernel alive and answering no /health ends the run naming the wait, the port and its own log",
+          "ms": 305.932772,
+          "measured": false
+        },
+        {
+          "title": "the same harness reaches the journeys when the served kernel answers /health",
+          "ms": 126.802615,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 432.7
     },
     {
       "file": "tests/session-load-order.test.ts",
