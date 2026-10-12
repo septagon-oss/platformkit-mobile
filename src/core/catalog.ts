@@ -670,7 +670,7 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
 export function parseCatalog(input: unknown, notice: HintNotice = () => {}): Catalog {
   if (!isRecord(input)) throw new CatalogError("document", "is not an object");
   const version = catalogVersion(input.catalogVersion);
-  const result = zCatalog.safeParse({ ...input, catalogVersion: version });
+  const result = catalogSchema.safeParse({ ...input, catalogVersion: version });
   if (!result.success) {
     const issue = result.error.issues[0]!;
     const at = issuePath(result.error);
