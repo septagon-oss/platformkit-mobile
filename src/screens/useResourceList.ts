@@ -25,7 +25,8 @@ import {
 } from "../core/derive";
 import { refusalOf } from "./failure";
 import { systemClock } from "./clock";
-import { PER_PAGE } from "../effects/api";
+import { listQuery, PER_PAGE } from "../effects/api";
+import { answered } from "../effects/read-cache";
 import { useShell } from "../shell";
 
 // The API's own ceiling on one request; a list that has grown past it re-reads
@@ -35,7 +36,7 @@ const MAX_ROWS = 200;
 type Why = "first" | "more" | "refresh" | "stale";
 
 export function useResourceList(entry: Entry, format: Formatting, clock: Clock = systemClock) {
-  const { api, writes } = useShell();
+  const { api, writes, reads } = useShell();
   const k = key(entry);
   // Strings and a frozen bundle, so they stay stable between renders; the
   // `format` object itself is new every render, and a load keyed by it would
@@ -43,6 +44,9 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
   const { copy, locale, timeZone, ownZone } = format;
   const [rows, setRows] = useState<readonly Row[]>([]);
   const [total, setTotal] = useState(0);
+  // When this phone last received the rows on screen, and nothing when the
+  // server sent them: where what is on screen came from is the person's to know.
+  const [savedAt, setSavedAt] = useState<string | undefined>(undefined);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -67,20 +71,31 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
         why === "stale" ? Math.min(MAX_ROWS, Math.max(PER_PAGE, shown.current)) : PER_PAGE;
       if (why === "refresh") setRefreshing(true);
       else setLoading(true);
+      const window = {
+        offset,
+        limit,
+        sort: order.sort,
+        filters: queryFilters(order),
+      };
       try {
-        const got = await api.list(entry, {
-          offset,
-          limit,
-          sort: order.sort,
-          filters: queryFilters(order),
-        });
+        // The window is asked for through the read cache, so a list opened where
+        // the server cannot be reached shows the last page this phone received
+        // instead of an error. The address is the request's own, spelled by the
+        // transport, so a page that lands replaces the one it is for.
+        const got = await answered(
+          reads,
+          { kind: "page", resourceKey: k, path: entry.path, offset },
+          listQuery(window),
+          () => api.list(entry, window),
+        );
         if (generation.current !== started) return;
         setRows((prev) => {
-          const next = more ? [...prev, ...got.items] : got.items;
+          const next = more ? [...prev, ...got.value.items] : got.value.items;
           shown.current = next.length;
           return next;
         });
-        setTotal(got.total);
+        setTotal(got.value.total);
+        setSavedAt(got.source === "device" ? got.savedAt : undefined);
         setError("");
         read.current = clock.now();
       } catch (e) {
@@ -111,7 +126,7 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
         }
       }
     },
-    [api, entry, order, copy, locale, timeZone, ownZone, clock],
+    [api, reads, entry, order, k, copy, locale, timeZone, ownZone, clock],
   );
 
   // The first window, and again whenever the order changes.
@@ -148,6 +163,7 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
   return {
     rows,
     total,
+    savedAt,
     error,
     loading,
     refreshing,

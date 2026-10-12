@@ -109,6 +109,9 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     say: jest.fn<ShellValue["say"]>(),
     heard: jest.fn<ShellValue["heard"]>(() => ""),
     returning: undefined,
+    // No device store: a screen under test writes live, as it did before the kit could hold a write.
+    outbox: undefined,
+    reads: undefined,
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),
     signIn: jest.fn<ShellValue["signIn"]>(async () => undefined),

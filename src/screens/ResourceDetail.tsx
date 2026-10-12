@@ -9,9 +9,11 @@ import { doors } from "../core/catalog";
 import {
   deriveDisclosure,
   deriveEventActivity,
+  deriveOffline,
   recordHeader,
   rowCommands,
   screenPath,
+  type Presentation,
 } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
@@ -22,12 +24,14 @@ import { useResourceDetail } from "./useResourceDetail";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
   const feedback = useFeedback();
+  const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
   const detail = useResourceDetail(entry, id, feedback);
   const activity = useActivity(entry, id);
-  const activityModel = deriveEventActivity(activity, {
-    ...feedback,
-    weekStartsOn: 1,
-  });
+  const activityModel = deriveEventActivity(activity, presentation);
+  // A row this phone answered rather than the server says so, in the same words a
+  // list uses: deriveOffline is that sentence's only owner.
+  const offline =
+    detail.savedAt === undefined ? undefined : deriveOffline(detail.savedAt, presentation);
   const { run, busy } = useCommandRun(entry, id);
   const router = useRouter();
   // Edit and Delete are separate doors: a resource may mount PATCH without
@@ -121,6 +125,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         saved={detail.saved}
         {...(detail.refusal ? { refusal: detail.refusal } : {})}
         onRetry={detail.reload}
+        {...(offline?.ok ? { offline: offline.value } : {})}
         onDismiss={detail.dismiss}
         onBack={detail.leave}
         menuOpen={detail.menu}

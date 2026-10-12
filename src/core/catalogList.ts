@@ -21,7 +21,7 @@ import {
   type DataSection,
   type Filter,
 } from "./collections";
-import { deriveState, type Action } from "./feedback";
+import { deriveOffline, deriveState, type Action } from "./feedback";
 import { deriveSurface, type SurfaceModel } from "./surfaces";
 import type { Presentation } from "./presentation";
 import { build, countText, type Content, type Validation } from "./shared";
@@ -36,6 +36,12 @@ export interface CatalogListInput {
   readonly error: string;
   readonly order: Order;
   readonly canCreate: boolean;
+  /**
+   * savedAt is the instant the page on screen reached this phone, present only
+   * when the phone answered it rather than the server. It is what makes the list
+   * say so: rows that arrived yesterday are not drawn as today's.
+   */
+  readonly savedAt?: string;
 }
 
 /**
@@ -78,6 +84,10 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
           ),
         )
       : undefined;
+    // Nothing on screen came from the server, so the list owes the person the
+    // sentence that says so, with the moment the rows last arrived.
+    const offline =
+      input.savedAt === undefined ? undefined : v.take(deriveOffline(input.savedAt, p));
     const sections: readonly DataSection[] = [
       {
         id: "records",
@@ -98,75 +108,80 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
         ? {
             phase: "ready",
             value: sections,
-            refresh: state ? "error" : input.refreshing ? "loading" : "idle",
-            ...(state ? { notice: state } : {}),
+            refresh: state ? "error" : input.refreshing ? "loading" : offline ? "offline" : "idle",
+            ...(state ? { notice: state } : offline ? { notice: offline } : {}),
           }
         : phase === "loading"
           ? { phase: "loading" }
           : phase === "error"
             ? { phase: "error", state: state! }
-            : {
-                phase: "empty",
-                state: v.take(
-                  deriveState(
-                    // Which of the three empties this is, and what to do about it,
-                    // are two different questions and the copy table answers both in
-                    // both languages. Nothing is composed out of English here: a list
-                    // narrowed to nothing says so and offers the way back, and a list
-                    // that holds nothing because it is new says that instead — which
-                    // is why `filtered`, and not the sort, decides between them.
-                    isFiltered
-                      ? {
-                          kind: "empty",
-                          title: p.copy.kit.noMatching(named.plural),
-                          body: p.copy.kit.filteredBody,
-                          ...(input.canCreate
-                            ? {
-                                action: {
-                                  intent: "next" as const,
-                                  control: {
-                                    id: "new",
-                                    label: p.copy.kit.newNamed(named.singular),
-                                    tone: "primary" as const,
-                                    state: "ready" as const,
+            : offline
+              ? // An empty page this phone answered is not "nothing exists": it is
+                // "nothing existed the last time this device heard". Saying which of
+                // the two it is belongs to the person, not to a guess.
+                { phase: "offline", state: offline }
+              : {
+                  phase: "empty",
+                  state: v.take(
+                    deriveState(
+                      // Which of the three empties this is, and what to do about it,
+                      // are two different questions and the copy table answers both in
+                      // both languages. Nothing is composed out of English here: a list
+                      // narrowed to nothing says so and offers the way back, and a list
+                      // that holds nothing because it is new says that instead — which
+                      // is why `filtered`, and not the sort, decides between them.
+                      isFiltered
+                        ? {
+                            kind: "empty",
+                            title: p.copy.kit.noMatching(named.plural),
+                            body: p.copy.kit.filteredBody,
+                            ...(input.canCreate
+                              ? {
+                                  action: {
+                                    intent: "next" as const,
+                                    control: {
+                                      id: "new",
+                                      label: p.copy.kit.newNamed(named.singular),
+                                      tone: "primary" as const,
+                                      state: "ready" as const,
+                                    },
                                   },
-                                },
-                              }
-                            : {}),
-                          secondary: {
-                            intent: "next" as const,
-                            control: {
-                              id: "clear-filters",
-                              label: p.copy.kit.clearFilters,
-                              tone: "secondary" as const,
-                              state: "ready" as const,
+                                }
+                              : {}),
+                            secondary: {
+                              intent: "next" as const,
+                              control: {
+                                id: "clear-filters",
+                                label: p.copy.kit.clearFilters,
+                                tone: "secondary" as const,
+                                state: "ready" as const,
+                              },
                             },
-                          },
-                        }
-                      : {
-                          kind: "empty",
-                          title: p.copy.kit.emptyNone(named.plural),
-                          body: input.canCreate
-                            ? p.copy.kit.emptyCreate(named.singular)
-                            : p.copy.kit.emptyArrive(named.plural),
-                          ...(input.canCreate
-                            ? {
-                                action: {
-                                  intent: "next" as const,
-                                  control: {
-                                    id: "new",
-                                    label: p.copy.kit.newNamed(named.singular),
-                                    tone: "primary" as const,
-                                    state: "ready" as const,
+                          }
+                        : {
+                            kind: "empty",
+                            title: p.copy.kit.emptyNone(named.plural),
+                            body: input.canCreate
+                              ? p.copy.kit.emptyCreate(named.singular)
+                              : p.copy.kit.emptyArrive(named.plural),
+                            ...(input.canCreate
+                              ? {
+                                  action: {
+                                    intent: "next" as const,
+                                    control: {
+                                      id: "new",
+                                      label: p.copy.kit.newNamed(named.singular),
+                                      tone: "primary" as const,
+                                      state: "ready" as const,
+                                    },
                                   },
-                                },
-                              }
-                            : {}),
-                        },
-                    p,
+                                }
+                              : {}),
+                          },
+                      p,
+                    ),
                   ),
-                ),
-              };
+                };
     const filters: readonly Filter[] = filterFields(entry).map((field) => {
       const choices = [
         { id: "all", label: p.copy.kit.all, value: "", enabled: true },

@@ -67,6 +67,7 @@ export function ResourceList({ entry }: ScreenProps) {
         refreshing={list.refreshing}
         more={list.more}
         error={list.error}
+        {...(list.savedAt === undefined ? {} : { savedAt: list.savedAt })}
         order={list.order}
         sheet={sheet}
         onSheet={setSheet}

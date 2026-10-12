@@ -29,6 +29,7 @@ export {
 } from "./presentation";
 export {
   deriveState,
+  deriveOffline,
   retry,
   readPhase,
   type Action,

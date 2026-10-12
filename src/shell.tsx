@@ -14,8 +14,15 @@ import type { Entry } from "./core/catalog";
 import { initial, reduce, type State } from "./core/state";
 import type { Remembered, Who } from "./core/reentry";
 import { samePerson, who as whoOf } from "./core/reentry";
+import type { PendingWrite } from "./core/outbox";
+import { heldScope } from "./core/outbox";
+import type { Clock } from "./core/presentation";
 import { TIMEOUT, createApi, type Api, type Identity } from "./effects/api";
+import { createOutbox, type Outbox, type OutboxStore } from "./effects/outbox";
+import { createReadCache, type ReadCache, type ReadStore } from "./effects/read-cache";
 import { sessions } from "./effects/native-session";
+import type { Reach } from "./effects/native-reach";
+import { systemClock } from "./screens/clock";
 import type { Renderers } from "./renderers";
 import { catalogFailure } from "./screens/failure";
 
@@ -30,6 +37,10 @@ export interface ShellValue {
   /** writes counts what this app wrote to each resource ("module/entity"), so a screen knows whether what it shows is stale. */
   readonly writes: Readonly<Record<string, number>>;
   readonly wrote: (key: string) => void;
+  /** outbox is what this phone still owes the server, or nothing where no store was supplied. */
+  readonly outbox: OutboxValue | undefined;
+  /** reads answers an unreachable read from the last response this phone got. */
+  readonly reads: ReadCache | undefined;
   /** where the person standing in front of the app is; every route file says so as it draws. */
   readonly saw: (href: string) => void;
   /** what the person has typed into the sheet at this address, while the server refuses the
@@ -60,9 +71,37 @@ export function useShell(): ShellValue {
   return v;
 }
 
+/**
+ * OutboxValue is the queue as a screen sees it: the writes this phone is holding
+ * and the acts a person may take on one. A screen never reads the store.
+ */
+export interface OutboxValue {
+  readonly items: readonly PendingWrite[];
+  readonly submit: Outbox["submit"];
+  readonly retry: (id: string) => Promise<void>;
+  readonly discard: (id: string) => Promise<void>;
+  readonly drain: Outbox["drain"];
+}
+
 interface Props {
   readonly baseURL: string;
   readonly renderers: Renderers;
+  /**
+   * store is the device's two tables, supplied by the composition root; the kit
+   * opens no database of its own, so a host without one (a test, a web build)
+   * simply has no queue and no cache, and every write behaves as it did.
+   */
+  readonly store?: { readonly outbox: OutboxStore; readonly reads: ReadStore };
+  /** clock is what stamps a held write; the queue's order never comes from it. */
+  readonly clock?: Clock;
+  /** mint names an idempotency key: expo-crypto's randomUUID on a device. */
+  readonly mint?: () => string;
+  /**
+   * reach is the device's own network listener. It is a trigger and a hint and
+   * never an authority: it delays a pass and says when a pass is worth starting,
+   * and the queue's authority stays whether a request reached the server.
+   */
+  readonly reach?: Reach;
   readonly children: React.ReactNode;
 }
 
@@ -87,7 +126,24 @@ function message(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
 }
 
-export function Shell({ baseURL: initialURL, renderers, children }: Props) {
+/**
+ * refuseMint is the absence of a key maker, said at the first held write rather
+ * than as a key that could repeat: a duplicate Idempotency-Key is worse than no
+ * key at all, so the composition root names one (expo-crypto's randomUUID).
+ */
+function refuseMint(): string {
+  throw new Error("A device store needs Shell's mint prop: the maker of an idempotency key.");
+}
+
+export function Shell({
+  baseURL: initialURL,
+  renderers,
+  store,
+  clock,
+  mint,
+  reach,
+  children,
+}: Props) {
   const [state, dispatch] = useReducer(reduce, initial);
   // What this app was doing when the server refused it, in holders with one writer
   // each: where the person is (`saw`, reported by every route), which session is live
@@ -212,6 +268,119 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
   const active = useRef(connection);
   const { api, baseURL } = connection;
 
+  // The queue belongs to the person the server named and the origin the Api
+  // talks to: an unsigned phone holds nothing for whoever signs in next.
+  const [held, setHeld] = useState<readonly PendingWrite[]>([]);
+  // The catalog is read through a ref: what the server mounts decides whether a
+  // held command may go back on a wire, but a catalog refresh is no reason to
+  // build a second queue with a single-flight flag of its own, which is what a
+  // dependency on it would do.
+  const mountedCatalog = useRef(state.catalog);
+  useEffect(() => {
+    mountedCatalog.current = state.catalog;
+  }, [state.catalog]);
+  // Who the queue and the cache belong to: the sign-in's own id, not the object
+  // that names it, which a refresh replaces while the queue is mid-pass.
+  const userId = identity?.userId;
+  const outbox = useMemo(
+    () =>
+      store && userId
+        ? createOutbox({
+            store: store.outbox,
+            api,
+            clock: clock ?? systemClock,
+            mint: mint ?? refuseMint,
+            // One owner for what a scope is: a server saved with a trailing
+            // slash is the same server, and heldScope says so the way createApi
+            // normalises it. An address or a sign-in it cannot name holds
+            // nothing, which is the honest answer rather than a silent no.
+            scope: () => heldScope(baseURL, userId),
+            notice: wrote,
+            // may is this composition's own rule, read again before a held verb
+            // goes back on a wire: the catalog is the authority on what the
+            // server mounts, and a resource that left it has no address to send to.
+            may: (item) =>
+              mountedCatalog.current === undefined ||
+              mountedCatalog.current.resources.some(
+                (r) => `${r.module}/${r.entity}` === item.resourceKey,
+              )
+                ? undefined
+                : "This resource is no longer offered by the server.",
+            ...(reach ? { reached: () => reach.up() } : {}),
+          })
+        : undefined,
+    // A refresh asks who this is again, and the answer is a new object naming the
+    // same person. The queue belongs to that person, so it is keyed by the id that
+    // names them: rebuilding it on every identity would start a second queue with a
+    // single-flight flag of its own, and the next held write would go before the
+    // first had been answered.
+    [store, api, baseURL, userId, clock, mint, reach, wrote],
+  );
+  const reads = useMemo(
+    () =>
+      store && userId
+        ? createReadCache({
+            store: store.reads,
+            clock: clock ?? systemClock,
+            // The same rule the queue asks, so one owner decides what a scope is:
+            // a server saved or typed with a trailing slash is the same server, and
+            // answers kept for it are found by the page that asks again tomorrow.
+            scope: () => heldScope(baseURL, userId),
+          })
+        : undefined,
+    [store, baseURL, userId, clock],
+  );
+
+  useEffect(() => {
+    if (!outbox) return;
+    // `mounted` is this effect's own, and says what `live` above — the session the
+    // transport may still answer for — never means: whether the screen that asked
+    // for the queue is still here to be told what it holds.
+    let mounted = true;
+    void (async () => {
+      await outbox.open();
+      if (!mounted) return;
+      setHeld(await outbox.list());
+      // A phone that starts with work owed sends it as soon as it can say who it
+      // is: the queue was waiting for the sign-in, not for a button.
+      void outbox.drain();
+    })();
+    const stop = outbox.subscribe((next) => {
+      if (mounted) setHeld(next);
+    });
+    return () => {
+      mounted = false;
+      stop();
+    };
+  }, [outbox]);
+
+  useEffect(() => {
+    // The device says the network came back: that is the moment the queue was
+    // written for, and nobody has to find the row and press Retry for it.
+    if (!outbox || !reach) return;
+    return reach.subscribe((up) => {
+      if (up) void outbox.drain();
+    });
+  }, [outbox, reach]);
+
+  const outboxValue = useMemo<OutboxValue | undefined>(
+    () =>
+      outbox && {
+        // A phone with no queue holds nothing, whoever's rows a previous render
+        // was shown: what is on screen belongs to the person the queue is scoped to.
+        items: outbox ? held : [],
+        submit: outbox.submit,
+        drain: outbox.drain,
+        retry: async (id) => {
+          await outbox.retry(id);
+        },
+        discard: async (id) => {
+          await outbox.discard(id);
+        },
+      },
+    [outbox, held],
+  );
+
   const connect = useCallback((url: string, next: Api) => {
     const value = { api: next, baseURL: url };
     active.current = value;
@@ -304,6 +473,8 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       say,
       heard,
       returning,
+      outbox: outboxValue,
+      reads,
       entry: (module, entity) =>
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
       async signIn(url, email, password) {
@@ -360,6 +531,9 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
         dispatch({ type: "signed-out", generation: started });
         // Revoke remotely when reachable; local clearing must not wait for it.
         void previous.api.logout().catch(() => undefined);
+        // A person who chose to keep their held writes never reaches this line:
+        // every door that leaves asks first (src/screens/useSignOut.ts).
+        outbox?.clear();
         try {
           await sessions.clear(previous.baseURL);
         } catch {
@@ -379,6 +553,7 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       },
     }),
     [
+      outbox,
       api,
       baseURL,
       state,
@@ -392,6 +567,8 @@ export function Shell({ baseURL: initialURL, renderers, children }: Props) {
       say,
       heard,
       returning,
+      outboxValue,
+      reads,
       begin,
       connect,
       load,

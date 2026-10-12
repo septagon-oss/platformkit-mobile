@@ -46,6 +46,7 @@ import { FormField } from "./molecules/FormField";
 import { LoadMore } from "./molecules/LoadMore";
 import { Row } from "./molecules/Row";
 import { Section } from "./molecules/Section";
+import { HeldWriteRow } from "./molecules/HeldWriteRow";
 import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
@@ -614,6 +615,24 @@ function Samples({
           caption={feedback.copy.kit.workspaceAddress}
           value={server}
           onChange={setServer}
+        />
+      </Section>
+
+      {/* The words are the copy table's own (src/core/copy.ts, state.refused and
+          state.held); the view model above them comes from src/core/outbox.ts. */}
+      <Section title="A write this phone is holding">
+        <HeldWriteRow
+          view={{
+            id: "example",
+            title: "Not sent",
+            body: "title is required",
+            when: "Last updated 6 Oct 2026",
+            retry: "Retry",
+            discard: "Discard",
+            busy: false,
+          }}
+          onRetry={none}
+          onDiscard={none}
         />
       </Section>
 

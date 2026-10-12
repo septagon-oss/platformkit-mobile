@@ -40,10 +40,17 @@ const forbid = (files, patterns) => ({
 });
 
 const react = ["react", "react-native", "react-native/*", "expo", "expo/*", "expo-*", "@expo/*"];
-// Effects may use the secure store and nothing else of Expo: the bare package,
-// its subpaths, every expo-* module and the @expo scope are one list, so a
+// Effects may name the four Expo modules the kit's own effects compose and
+// nothing else: the secure store keeps the session, the device store keeps a
+// held write and a cached read, the crypto module mints an idempotency key and
+// the network module says whether trying is worth it. The bare package, its
+// subpaths, every other expo-* module and the @expo scope are one list, so a
 // bare `import from "expo"` is refused like the rest.
-const expoButSecureStore = ["expo", "expo/*", "expo-*", "!expo-secure-store", "@expo/*"];
+const expoButSecureStore = [
+  "expo", "expo/*", "expo-*",
+  "!expo-secure-store", "!expo-sqlite", "!expo-crypto", "!expo-network",
+  "@expo/*",
+];
 const generatedEffects = [
   "**/generated/*", "**/generated/index", "**/generated/index.ts",
   "**/generated/client", "**/generated/client/**", "**/generated/core/**",
