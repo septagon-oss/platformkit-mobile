@@ -203,16 +203,18 @@ jobs:
         # This repository has no Go module and no toolchain of its own, which is why
         # the kernel used to arrive as an image somebody else published. It publishes
         # no image of itself; its own journey builds it in the job, and this step is
-        # that. CGO_ENABLED=0 and -trimpath are deploy/Dockerfile's own build line, so
-        # the binary is the one the kernel's image recipe makes and needs no C compiler
-        # on this image. The binary lands outside the checkout, and its path is exported
+        # that. The flags are deploy/Dockerfile's build line with -buildvcs=false added:
+        # that stamping step asks git for the revision and Go exits 128 when git cannot
+        # answer — a runner whose checkout directory git refuses to own would otherwise
+        # fail here for a value no journey reads — and the kernel's own Makefile builds
+        # the same way. The binary lands outside the checkout, and its path is exported
         # rather than named at job level: a job-level entry cannot carry a step output,
         # and scripts/e2e/mobile_ci.sh refuses by name when the export never arrived —
         # which is also why act_runner's ordering of a job env against $GITHUB_ENV
         # cannot matter here, since nothing else can stand in PK_KERNEL_BIN's place.
         run: |
           cd kernel-src
-          CGO_ENABLED=0 go build -trimpath -o "$GITHUB_WORKSPACE/kernel-bin/platformkit" ./apps/platformkit
+          CGO_ENABLED=0 go build -buildvcs=false -trimpath -o "$GITHUB_WORKSPACE/kernel-bin/platformkit" ./apps/platformkit
           echo "PK_KERNEL_BIN=$GITHUB_WORKSPACE/kernel-bin/platformkit" >> "$GITHUB_ENV"
 
       - name: Prepare the role the served kernel connects as
