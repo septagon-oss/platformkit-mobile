@@ -9,6 +9,8 @@ export function bindOperations(
     appAccessRequest: (
       options: Omit<types.AppAccessRequestData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.appAccessRequest({ ...options, client, throwOnError: true })),
+    appConnection: (options: Omit<types.AppConnectionData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.appConnection({ ...options, client, throwOnError: true })),
     appResources: (options: Omit<types.AppResourcesData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.appResources({ ...options, client, throwOnError: true })),
     auditEventList: (options: Omit<types.AuditEventListData, "url"> & { signal?: AbortSignal }) =>
@@ -159,10 +161,30 @@ export function bindOperations(
     contentContentPublish: (
       options: Omit<types.ContentContentPublishData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.contentContentPublish({ ...options, client, throwOnError: true })),
+    contentContentReviewTranslation: (
+      options: Omit<types.ContentContentReviewTranslationData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) =>
+        sdk.contentContentReviewTranslation({ ...options, client, throwOnError: true }),
+      ),
+    contentContentSuggestTranslation: (
+      options: Omit<types.ContentContentSuggestTranslationData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) =>
+        sdk.contentContentSuggestTranslation({ ...options, client, throwOnError: true }),
+      ),
+    contentContentTranslate: (
+      options: Omit<types.ContentContentTranslateData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.contentContentTranslate({ ...options, client, throwOnError: true })),
     contentContentUnpublish: (
       options: Omit<types.ContentContentUnpublishData, "url"> & { signal?: AbortSignal },
     ) =>
       invoke((client) => sdk.contentContentUnpublish({ ...options, client, throwOnError: true })),
+    contentContentUntranslate: (
+      options: Omit<types.ContentContentUntranslateData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.contentContentUntranslate({ ...options, client, throwOnError: true })),
     fileFileList: (options: Omit<types.FileFileListData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.fileFileList({ ...options, client, throwOnError: true })),
     fileFileUpload: (options: Omit<types.FileFileUploadData, "url"> & { signal?: AbortSignal }) =>
@@ -252,6 +274,9 @@ export function bindOperations(
     tenantTenantSuspend: (
       options: Omit<types.TenantTenantSuspendData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.tenantTenantSuspend({ ...options, client, throwOnError: true })),
+    authMailDelivery: (
+      options: Omit<types.AuthMailDeliveryData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authMailDelivery({ ...options, client, throwOnError: true })),
     authPasswordForgot: (
       options: Omit<types.AuthPasswordForgotData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.authPasswordForgot({ ...options, client, throwOnError: true })),
@@ -325,6 +350,42 @@ export function bindOperations(
     userUserSetPassword: (
       options: Omit<types.UserUserSetPasswordData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.userUserSetPassword({ ...options, client, throwOnError: true })),
+    webhookDeliveryList: (
+      options: Omit<types.WebhookDeliveryListData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookDeliveryList({ ...options, client, throwOnError: true })),
+    webhookDeliveryRead: (
+      options: Omit<types.WebhookDeliveryReadData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookDeliveryRead({ ...options, client, throwOnError: true })),
+    webhookDeliveryReplay: (
+      options: Omit<types.WebhookDeliveryReplayData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookDeliveryReplay({ ...options, client, throwOnError: true })),
+    webhookEndpointList: (
+      options: Omit<types.WebhookEndpointListData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointList({ ...options, client, throwOnError: true })),
+    webhookEndpointCreate: (
+      options: Omit<types.WebhookEndpointCreateData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointCreate({ ...options, client, throwOnError: true })),
+    webhookEndpointDelete: (
+      options: Omit<types.WebhookEndpointDeleteData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointDelete({ ...options, client, throwOnError: true })),
+    webhookEndpointRead: (
+      options: Omit<types.WebhookEndpointReadData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointRead({ ...options, client, throwOnError: true })),
+    webhookEndpointUpdate: (
+      options: Omit<types.WebhookEndpointUpdateData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointUpdate({ ...options, client, throwOnError: true })),
+    webhookEndpointDisable: (
+      options: Omit<types.WebhookEndpointDisableData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointDisable({ ...options, client, throwOnError: true })),
+    webhookEndpointEnable: (
+      options: Omit<types.WebhookEndpointEnableData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointEnable({ ...options, client, throwOnError: true })),
+    webhookEndpointRotate: (
+      options: Omit<types.WebhookEndpointRotateData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointRotate({ ...options, client, throwOnError: true })),
+    webhookEndpointTarget: (
+      options: Omit<types.WebhookEndpointTargetData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.webhookEndpointTarget({ ...options, client, throwOnError: true })),
   };
 }
 export type Operations = ReturnType<typeof bindOperations>;

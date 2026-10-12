@@ -123,8 +123,10 @@ read, how an entry asks for it, and which screens the schema already does well.
 The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
 with its public commit and SHA-256 in
 [testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
-95 paths and 112 operations. `npm run api` generates the TypeScript types, Zod
-validators, SDK and documented route table in `src/generated/`; `npm run
+110 paths and 130 operations, among them a read's `?lang`, a stored picture's
+`?w`, the four translation members of a content record, and the `translatable`
+and `keys` members of a catalogue field. `npm run api` generates the TypeScript
+types, Zod validators, SDK and documented route table in `src/generated/`; `npm run
 check:api` regenerates into a temporary directory and refuses changed, missing
 or extra files. It runs offline as part of `npm run check`. Refresh the public
 document and provenance deliberately before regenerating. Node 22.18 or newer

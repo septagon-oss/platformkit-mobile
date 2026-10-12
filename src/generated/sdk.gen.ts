@@ -12,6 +12,9 @@ import type {
   AppAccessRequestData,
   AppAccessRequestErrors,
   AppAccessRequestResponses,
+  AppConnectionData,
+  AppConnectionErrors,
+  AppConnectionResponses,
   AppResourcesData,
   AppResourcesErrors,
   AppResourcesResponses,
@@ -60,6 +63,9 @@ import type {
   AuthLogoutData,
   AuthLogoutErrors,
   AuthLogoutResponses,
+  AuthMailDeliveryData,
+  AuthMailDeliveryErrors,
+  AuthMailDeliveryResponses,
   AuthMeData,
   AuthMeErrors,
   AuthMeResponses,
@@ -189,9 +195,21 @@ import type {
   ContentContentReadData,
   ContentContentReadErrors,
   ContentContentReadResponses,
+  ContentContentReviewTranslationData,
+  ContentContentReviewTranslationErrors,
+  ContentContentReviewTranslationResponses,
+  ContentContentSuggestTranslationData,
+  ContentContentSuggestTranslationErrors,
+  ContentContentSuggestTranslationResponses,
+  ContentContentTranslateData,
+  ContentContentTranslateErrors,
+  ContentContentTranslateResponses,
   ContentContentUnpublishData,
   ContentContentUnpublishErrors,
   ContentContentUnpublishResponses,
+  ContentContentUntranslateData,
+  ContentContentUntranslateErrors,
+  ContentContentUntranslateResponses,
   ContentContentUpdateData,
   ContentContentUpdateErrors,
   ContentContentUpdateResponses,
@@ -351,8 +369,45 @@ import type {
   UserUserUpdateData,
   UserUserUpdateErrors,
   UserUserUpdateResponses,
+  WebhookDeliveryListData,
+  WebhookDeliveryListErrors,
+  WebhookDeliveryListResponses,
+  WebhookDeliveryReadData,
+  WebhookDeliveryReadErrors,
+  WebhookDeliveryReadResponses,
+  WebhookDeliveryReplayData,
+  WebhookDeliveryReplayErrors,
+  WebhookDeliveryReplayResponses,
+  WebhookEndpointCreateData,
+  WebhookEndpointCreateErrors,
+  WebhookEndpointCreateResponses,
+  WebhookEndpointDeleteData,
+  WebhookEndpointDeleteErrors,
+  WebhookEndpointDeleteResponses,
+  WebhookEndpointDisableData,
+  WebhookEndpointDisableErrors,
+  WebhookEndpointDisableResponses,
+  WebhookEndpointEnableData,
+  WebhookEndpointEnableErrors,
+  WebhookEndpointEnableResponses,
+  WebhookEndpointListData,
+  WebhookEndpointListErrors,
+  WebhookEndpointListResponses,
+  WebhookEndpointReadData,
+  WebhookEndpointReadErrors,
+  WebhookEndpointReadResponses,
+  WebhookEndpointRotateData,
+  WebhookEndpointRotateErrors,
+  WebhookEndpointRotateResponses,
+  WebhookEndpointTargetData,
+  WebhookEndpointTargetErrors,
+  WebhookEndpointTargetResponses,
+  WebhookEndpointUpdateData,
+  WebhookEndpointUpdateErrors,
+  WebhookEndpointUpdateResponses,
 } from "./types.gen";
 import {
+  zAppConnectionResponse,
   zAppResourcesResponse,
   zAuditEventListResponse,
   zAuditEventReadResponse,
@@ -369,6 +424,7 @@ import {
   zAuthLoginPasskeyVerifyResponse,
   zAuthLoginResponse,
   zAuthLogoutResponse,
+  zAuthMailDeliveryResponse,
   zAuthMeResponse,
   zAuthOidcCallbackResponse,
   zAuthOidcStartResponse,
@@ -412,7 +468,11 @@ import {
   zContentContentPublicResponse,
   zContentContentPublishResponse,
   zContentContentReadResponse,
+  zContentContentReviewTranslationResponse,
+  zContentContentSuggestTranslationResponse,
+  zContentContentTranslateResponse,
   zContentContentUnpublishResponse,
+  zContentContentUntranslateResponse,
   zContentContentUpdateResponse,
   zFileFileDeleteResponse,
   zFileFileEraseResponse,
@@ -461,6 +521,18 @@ import {
   zUserUserRolesResponse,
   zUserUserSetPasswordResponse,
   zUserUserUpdateResponse,
+  zWebhookDeliveryListResponse,
+  zWebhookDeliveryReadResponse,
+  zWebhookDeliveryReplayResponse,
+  zWebhookEndpointCreateResponse,
+  zWebhookEndpointDeleteResponse,
+  zWebhookEndpointDisableResponse,
+  zWebhookEndpointEnableResponse,
+  zWebhookEndpointListResponse,
+  zWebhookEndpointReadResponse,
+  zWebhookEndpointRotateResponse,
+  zWebhookEndpointTargetResponse,
+  zWebhookEndpointUpdateResponse,
 } from "./zod.gen";
 
 export type Options<
@@ -496,6 +568,20 @@ export const appAccessRequest = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * This workspace's name, mark and accent, and how one signs in here
+ *
+ * What a shell may show before anybody has signed in: nothing about a person, a count or a plan. The workspace comes from the request's own host and from nothing else, so there is no parameter to enumerate. A host that serves no workspace is refused rather than answered with an empty body, which would be an oracle for which hosts exist.
+ */
+export const appConnection = <ThrowOnError extends boolean = false>(
+  options: Options<AppConnectionData, ThrowOnError>,
+): RequestResult<AppConnectionResponses, AppConnectionErrors, ThrowOnError> =>
+  options.client.get<AppConnectionResponses, AppConnectionErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAppConnectionResponse.parseAsync(data),
+    url: "/api/v1/app/connection",
+    ...options,
   });
 
 /**
@@ -1293,7 +1379,7 @@ export const contentContentRead = <ThrowOnError extends boolean = false>(
 /**
  * Update a content
  *
- * Only the fields present in the body change; read-only fields are refused.
+ * Only the fields present in the body change; read-only fields are refused. With ?lang= naming a language other than the tenant's own, the body writes that language's translation of its fields and the record itself is untouched.
  */
 export const contentContentUpdate = <ThrowOnError extends boolean = false>(
   options: Options<ContentContentUpdateData, ThrowOnError>,
@@ -1345,6 +1431,82 @@ export const contentContentPublish = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Mark a content's translation reviewed
+ *
+ * Names the fields a person has checked against the source. A field whose source has moved since it was translated is refused.
+ */
+export const contentContentReviewTranslation = <ThrowOnError extends boolean = false>(
+  options: Options<ContentContentReviewTranslationData, ThrowOnError>,
+): RequestResult<
+  ContentContentReviewTranslationResponses,
+  ContentContentReviewTranslationErrors,
+  ThrowOnError
+> =>
+  options.client.post<
+    ContentContentReviewTranslationResponses,
+    ContentContentReviewTranslationErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) =>
+      await zContentContentReviewTranslationResponse.parseAsync(data),
+    url: "/api/v1/content/contents/{id}/review-translation",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Ask the machine for a draft of a content
+ *
+ * Saves the machine's text as a draft nobody has reviewed; it is never served publicly until a person marks it reviewed. Refuses, writing nothing, when the installation names no machine translator.
+ */
+export const contentContentSuggestTranslation = <ThrowOnError extends boolean = false>(
+  options: Options<ContentContentSuggestTranslationData, ThrowOnError>,
+): RequestResult<
+  ContentContentSuggestTranslationResponses,
+  ContentContentSuggestTranslationErrors,
+  ThrowOnError
+> =>
+  options.client.post<
+    ContentContentSuggestTranslationResponses,
+    ContentContentSuggestTranslationErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) =>
+      await zContentContentSuggestTranslationResponse.parseAsync(data),
+    url: "/api/v1/content/contents/{id}/suggest-translation",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Translate a content
+ *
+ * Writes this language's text of the named fields, stamped as typed by a person. The record's own fields are untouched.
+ */
+export const contentContentTranslate = <ThrowOnError extends boolean = false>(
+  options: Options<ContentContentTranslateData, ThrowOnError>,
+): RequestResult<ContentContentTranslateResponses, ContentContentTranslateErrors, ThrowOnError> =>
+  options.client.post<
+    ContentContentTranslateResponses,
+    ContentContentTranslateErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zContentContentTranslateResponse.parseAsync(data),
+    url: "/api/v1/content/contents/{id}/translate",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Unpublish content
  *
  * Takes it back to a draft, from published or from archived, and clears the publication time.
@@ -1359,6 +1521,32 @@ export const contentContentUnpublish = <ThrowOnError extends boolean = false>(
   >({
     responseValidator: async (data) => await zContentContentUnpublishResponse.parseAsync(data),
     url: "/api/v1/content/contents/{id}/unpublish",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Remove a content's translation
+ *
+ * Deletes this language's rows for the named fields, or for every field when none is named. The record itself is untouched.
+ */
+export const contentContentUntranslate = <ThrowOnError extends boolean = false>(
+  options: Options<ContentContentUntranslateData, ThrowOnError>,
+): RequestResult<
+  ContentContentUntranslateResponses,
+  ContentContentUntranslateErrors,
+  ThrowOnError
+> =>
+  options.client.post<
+    ContentContentUntranslateResponses,
+    ContentContentUntranslateErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zContentContentUntranslateResponse.parseAsync(data),
+    url: "/api/v1/content/contents/{id}/untranslate",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1868,6 +2056,24 @@ export const tenantTenantSuspend = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Ask whether the mail this call asked for was refused
+ *
+ * Answers two words about the mail the call bearing this request id caused — failed when a transport refused that mail, pending otherwise — and names no address, no kind and no reason. Only this call's own delivery record is read, and only of the mails a call like this one always causes: an id whose mail went out, an id that left no record, an id whose flow sends no mail to an address nobody has, and an id from another tenant are answered identically, so the door cannot be walked for the addresses that have a record or an account.
+ */
+export const authMailDelivery = <ThrowOnError extends boolean = false>(
+  options: Options<AuthMailDeliveryData, ThrowOnError>,
+): RequestResult<AuthMailDeliveryResponses, AuthMailDeliveryErrors, ThrowOnError> =>
+  options.client.post<AuthMailDeliveryResponses, AuthMailDeliveryErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthMailDeliveryResponse.parseAsync(data),
+    url: "/api/v1/public/auth/mail-delivery",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Send me a reset link
  *
  * An address nobody has and an address somebody has are the same answer and the same work: this route publishes one event and the worker decides whether anybody is there, so neither the body nor a stopwatch tells them apart. The mail that does not arrive is the message. The 429 is about the address asking, never the address asked about.
@@ -2025,7 +2231,7 @@ export const siteSettingsSave = <ThrowOnError extends boolean = false>(
 /**
  * List tasks
  *
- * Sortable and filterable by: id, createdAt, updatedAt, title, description, status, priority, source, sourceRef, assigneeId, dueAt, slaDeadline, slaBreached, resolvedAt, resolution
+ * Sortable and filterable by: id, createdAt, updatedAt, title, description, status, priority, source, sourceRef, assigneeId, dueAt, slaDeadline, slaBreached, resolvedAt, resolution, revision
  */
 export const taskTaskList = <ThrowOnError extends boolean = false>(
   options: Options<TaskTaskListData, ThrowOnError>,
@@ -2333,6 +2539,192 @@ export const userUserSetPassword = <ThrowOnError extends boolean = false>(
   options.client.post<UserUserSetPasswordResponses, UserUserSetPasswordErrors, ThrowOnError>({
     responseValidator: async (data) => await zUserUserSetPasswordResponse.parseAsync(data),
     url: "/api/v1/user/users/{id}/set-password",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * List deliverys
+ *
+ * Sortable and filterable by: id, createdAt, updatedAt, seq, endpointId, eventId, eventName, attempt, cause, state, availableAt, attemptedAt, statusCode, reason
+ */
+export const webhookDeliveryList = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookDeliveryListData, ThrowOnError>,
+): RequestResult<WebhookDeliveryListResponses, WebhookDeliveryListErrors, ThrowOnError> =>
+  options.client.get<WebhookDeliveryListResponses, WebhookDeliveryListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookDeliveryListResponse.parseAsync(data),
+    url: "/api/v1/webhook/deliveries",
+    ...options,
+  });
+
+/**
+ * Read a delivery
+ */
+export const webhookDeliveryRead = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookDeliveryReadData, ThrowOnError>,
+): RequestResult<WebhookDeliveryReadResponses, WebhookDeliveryReadErrors, ThrowOnError> =>
+  options.client.get<WebhookDeliveryReadResponses, WebhookDeliveryReadErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookDeliveryReadResponse.parseAsync(data),
+    url: "/api/v1/webhook/deliveries/{id}",
+    ...options,
+  });
+
+/**
+ * Send one event to one endpoint again
+ *
+ * Queues a new attempt, marked as a replay, for the event and endpoint of the delivery named. An endpoint that is disabled is refused with 409 and nothing is written; a pair with an attempt already waiting answers with that attempt and writes nothing.
+ */
+export const webhookDeliveryReplay = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookDeliveryReplayData, ThrowOnError>,
+): RequestResult<WebhookDeliveryReplayResponses, WebhookDeliveryReplayErrors, ThrowOnError> =>
+  options.client.post<WebhookDeliveryReplayResponses, WebhookDeliveryReplayErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookDeliveryReplayResponse.parseAsync(data),
+    url: "/api/v1/webhook/deliveries/{id}/replay",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * List endpoints
+ *
+ * Sortable and filterable by: id, createdAt, updatedAt, name, url, status, disabledAt, disabledReason, lastSuccessAt, createdBy
+ */
+export const webhookEndpointList = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointListData, ThrowOnError>,
+): RequestResult<WebhookEndpointListResponses, WebhookEndpointListErrors, ThrowOnError> =>
+  options.client.get<WebhookEndpointListResponses, WebhookEndpointListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointListResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints",
+    ...options,
+  });
+
+/**
+ * Register a webhook endpoint
+ *
+ * An HTTPS address that wants events, and the event types it wants. Every event type must be one this application emits. The signing secret is answered once, here, and by nothing else: a caller who loses it rotates. The address is refused if it is not https or is not one this deployment dials.
+ */
+export const webhookEndpointCreate = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointCreateData, ThrowOnError>,
+): RequestResult<WebhookEndpointCreateResponses, WebhookEndpointCreateErrors, ThrowOnError> =>
+  options.client.post<WebhookEndpointCreateResponses, WebhookEndpointCreateErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointCreateResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Delete a endpoint
+ */
+export const webhookEndpointDelete = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointDeleteData, ThrowOnError>,
+): RequestResult<WebhookEndpointDeleteResponses, WebhookEndpointDeleteErrors, ThrowOnError> =>
+  options.client.delete<WebhookEndpointDeleteResponses, WebhookEndpointDeleteErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointDeleteResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints/{id}",
+    ...options,
+  });
+
+/**
+ * Read a endpoint
+ */
+export const webhookEndpointRead = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointReadData, ThrowOnError>,
+): RequestResult<WebhookEndpointReadResponses, WebhookEndpointReadErrors, ThrowOnError> =>
+  options.client.get<WebhookEndpointReadResponses, WebhookEndpointReadErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointReadResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints/{id}",
+    ...options,
+  });
+
+/**
+ * Update a endpoint
+ *
+ * Only the fields present in the body change; read-only fields are refused.
+ */
+export const webhookEndpointUpdate = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointUpdateData, ThrowOnError>,
+): RequestResult<WebhookEndpointUpdateResponses, WebhookEndpointUpdateErrors, ThrowOnError> =>
+  options.client.patch<WebhookEndpointUpdateResponses, WebhookEndpointUpdateErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointUpdateResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Disable a webhook endpoint
+ *
+ * Stops delivery now and ends this endpoint's queued attempts with a reason. Its history stays readable, and re-enabling delivers later events only.
+ */
+export const webhookEndpointDisable = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointDisableData, ThrowOnError>,
+): RequestResult<WebhookEndpointDisableResponses, WebhookEndpointDisableErrors, ThrowOnError> =>
+  options.client.post<WebhookEndpointDisableResponses, WebhookEndpointDisableErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointDisableResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints/{id}/disable",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Enable a webhook endpoint
+ *
+ * Takes a disabled endpoint back and starts the fault clock again. Enabling an enabled endpoint changes nothing.
+ */
+export const webhookEndpointEnable = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointEnableData, ThrowOnError>,
+): RequestResult<WebhookEndpointEnableResponses, WebhookEndpointEnableErrors, ThrowOnError> =>
+  options.client.post<WebhookEndpointEnableResponses, WebhookEndpointEnableErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointEnableResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints/{id}/enable",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Replace an endpoint's signing secret
+ *
+ * Mints a new secret and answers with it once. The old one stops signing immediately and is kept for a day so a delivery already in flight can still be explained to a receiver that has not picked up the new one.
+ */
+export const webhookEndpointRotate = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointRotateData, ThrowOnError>,
+): RequestResult<WebhookEndpointRotateResponses, WebhookEndpointRotateErrors, ThrowOnError> =>
+  options.client.post<WebhookEndpointRotateResponses, WebhookEndpointRotateErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointRotateResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints/{id}/rotate",
+    ...options,
+  });
+
+/**
+ * Change what an endpoint receives and where
+ *
+ * Replaces the address and the event list. Both are re-checked: the address against this deployment's policy, and every name against what this application emits.
+ */
+export const webhookEndpointTarget = <ThrowOnError extends boolean = false>(
+  options: Options<WebhookEndpointTargetData, ThrowOnError>,
+): RequestResult<WebhookEndpointTargetResponses, WebhookEndpointTargetErrors, ThrowOnError> =>
+  options.client.post<WebhookEndpointTargetResponses, WebhookEndpointTargetErrors, ThrowOnError>({
+    responseValidator: async (data) => await zWebhookEndpointTargetResponse.parseAsync(data),
+    url: "/api/v1/webhook/endpoints/{id}/target",
     ...options,
     headers: {
       "Content-Type": "application/json",
