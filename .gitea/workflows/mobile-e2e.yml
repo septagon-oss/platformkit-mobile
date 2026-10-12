@@ -82,8 +82,10 @@ jobs:
       # harness refuses by name when it is missing rather than booting something it
       # cannot name. Which kernel to serve is not a variable: the job builds the
       # commit this repository's own provenance records name, three steps below.
-      # No secret belongs to this job — the tenant, its administrator and that
-      # administrator's password are created by the run and dropped with it.
+      # One repository secret belongs to this job: the read-only one on the step
+      # that checks the kernel out below. Everything else — the tenant, its
+      # administrator and that administrator's password — is created by the run and
+      # dropped with it.
       PK_MOBILE_AVD: ${{ vars.PK_MOBILE_AVD }}
       # Where the harness leaves the report so the step below can print it: the
       # work directory is removed whichever step failed, and the report outlives it.
@@ -177,7 +179,17 @@ jobs:
         # commit that is not forty hex characters, or disagrees with the other — a
         # job that served one and skipped the other would test a server no fixture
         # describes.
-        run: echo "commit=$(scripts/e2e/mobile_ci.sh --kernel-pin)" >> "$GITHUB_OUTPUT"
+        # The commit is assigned in a statement of its own rather than
+        # substituted inside the echo's argument, because the harness's refusal has
+        # to end this step: a command substitution in an argument cannot fail the
+        # command that carries it, so the step would go green with `commit=` empty,
+        # and a checkout of another repository handed an empty ref takes that
+        # repository's default branch — the one build this journey must never serve.
+        # An assignment takes the status of the substitution in it, so under the
+        # runner's own `bash -e` the refusal ends the step here, before the checkout.
+        run: |
+          commit="$(scripts/e2e/mobile_ci.sh --kernel-pin)"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
 
       # The forge's own septagon-oss/platformkit, at an object id and never a branch:
       # the provenance record names the public repository the fixture was fetched
@@ -190,6 +202,16 @@ jobs:
           ref: ${{ steps.pin.outputs.commit }}
           path: kernel-src
           fetch-depth: 1
+          # A job token is a credential for the repository it was issued for, and
+          # since 2026-10-08 this forge requires sign-in to read the kernel at all, so
+          # the token this job is given answers 404 on septagon-oss/platformkit —
+          # kernel-main.yml records that measurement where it reads the same
+          # repository over HTTP. The read therefore names PK_KERNEL_TOKEN, the one
+          # read-only repository secret set for both jobs, and falls back to the job
+          # token where none is set: the refusal stays the forge's own — a checkout
+          # that failed, naming the repository — and never a step that quietly reads
+          # nothing at all.
+          token: ${{ secrets.PK_KERNEL_TOKEN || secrets.GITHUB_TOKEN }}
           persist-credentials: false
 
       # The Go version the kernel's own go.mod asks for, and cache off: platformkit's

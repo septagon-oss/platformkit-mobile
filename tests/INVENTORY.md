@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `2e02ee198` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `97e393e3b` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 27 | 177 | 46.7 s | 64 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 194 | 915 | 43.4 s | 1444 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 28 | 180 | 46.8 s | 64 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 195 | 916 | 43.4 s | 1445 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 57 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 334
+* keep: 336
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 334 — 153 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1298; cases in files no runner reaches: 35
-* isolated wall time: contract 64 s, behaviour 1444 s, composition 1188 s, journey 0 s
+* files inventoried: 336 — 155 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1302; cases in files no runner reaches: 35
+* isolated wall time: contract 64 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -106,6 +106,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/kernel-main-deadline.test.ts | node | contract | 5 | 11235 | 10555.8 | 0 | 3 of 5 | — | 0 | keep | These cases hold one rule about the nightly's own failure modes: a read that never answers is a red that names itself, not a job that sits until something else… |
 | tests/kernel-main-response.test.ts | node | contract | 2 | 11614 | 10987.5 | 0 | 0 of 2 | — | 0 | keep | A response header is not a completed read. The shipped command must refuse a stalled catalogue body and a missing catalogue, retaining the commit it learned. T… |
 | tests/kernel-main.test.ts | node | contract | 23 | 1883 | 1189.3 | 0 | 2 of 23 | — | 0 | keep | The nightly's whole rule lives in scripts/kernel_main.ts, and every case here runs the pair that workflow step runs — `readKernelMain` over a transport double,… |
+| tests/kernel-pin-step-refuses-what-the-records-cannot-name.test.ts | node | contract | 3 | 546 | 149.3 |  | not measured | — | 0 | keep | The step that names the kernel to build is the job's refusal when the two provenance records cannot name one: a record missing, a commit that is not a full obj… |
 | tests/layers.test.ts | node | contract | 12 | 4120 | 3005.2 | 0 | 0 of 12 | — | 0 | keep | (no first comment; first test title) atoms and molecules cannot depend on an organism or a screen layout |
 | tests/package.test.ts | node | contract | 1 | 4334 | 2654.6 | 0 | 0 of 1 | — | 0 | keep | npm 12 keys the pack report by package name; earlier versions return an array. The name is read from the manifest rather than written here, so the pack, the in… |
 | tests/publish-registry-credential.test.ts | node | contract | 2 | 2789 | 2394.8 | 0 | 0 of 2 | — | 0 | keep | The publish step's credential, as the real npm reads it. The workflow writes the token into a userconfig keyed by the registry's address, and npm sends it only… |
@@ -249,6 +250,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/jest-worker-pool.test.ts | node | behaviour | 1 | 372 | 63 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) the component suites run in a worker pool the repository fixes, not one the machine sizes |
 | tests/journey-report-path.test.ts | node | behaviour | 1 | 318 | 2.1 | 0 | 0 of 1 | — | 0 | keep | The job's last word on a journey is the JUnit file its report step prints, and that step refuses when the file is absent. That refusal only means "the journeys… |
 | tests/journey-report-refusal.test.ts | node | behaviour | 1 | 320 | 16.4 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) the report step refuses absent or empty evidence and prints a completed report |
+| tests/kernel-checkout-reads-with-the-repository-secret.test.ts | node | behaviour | 1 | 423 | 20.3 |  | not measured | — | 0 | keep | The device journey checks the kernel out of this forge's septagon-oss/platformkit at the commit the fixtures name. On this forge a job token reads the reposito… |
 | tests/kit-quantity-states.test.ts | node | behaviour | 2 | 933 | 120.4 | 0 | 0 of 2 | — | 0 | keep | A stepper that cannot move is a control drawn in the ink of a control that is out of reach. The kit demonstrates a step at its floor on the quantity specimens,… |
 | tests/kit-step-verbs-name-their-destination.test.ts | node | behaviour | 4 | 1204 | 406.6 | 0 | 0 of 4 | — | 0 | keep | A step the person can see the end of moves with a word for the step ("Next", "Back", "Skip": the stepper's family, whose stages are drawn above it). A step tha… |
 | tests/list-selection-withdrawal.test.ts | node | behaviour | 1 | 763 | 17.5 | 0 | 0 of 1 | — | 0 | keep | A bulk action runs against every id it is handed, so selection is derived rather than carried: ids arrive in any order and may repeat, a refresh that drops or … |

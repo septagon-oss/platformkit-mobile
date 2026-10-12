@@ -1309,8 +1309,15 @@ the Android SDK, an AVD, Maestro and `/dev/kvm`; the plain Linux host it used to
 ask for answered its probe with `missing: adb emulator maestro psql keytool` on
 every run of main, which is a probe refusing correctly rather than a journey
 failing, and the label is a rule a test holds from here. It needs one repository
-variable and no secret — `PK_MOBILE_AVD`, the Android Virtual Device to boot —
-and refuses by name when it is missing. Which kernel to serve is not a variable:
+variable — `PK_MOBILE_AVD`, the Android Virtual Device to boot, refused by name
+when it is missing — and one read-only secret, `PK_KERNEL_TOKEN`, the same one
+[kernel-main.yml](.gitea/workflows/kernel-main.yml) reads the kernel with: this
+forge requires sign-in to read `septagon-oss/platformkit` and a job token is
+nobody on a repository it was not issued for, so a checkout of the kernel that
+carried no token of its own is a step no run gets past; where the secret is unset
+the checkout falls back to the job token, so the refusal is the forge's own — a
+checkout that failed, naming the repository — and not an empty input. Which
+kernel to serve is not a variable:
 the job checks out the commit [testdata/catalog.source.json](testdata/catalog.source.json)
 and [testdata/openapi.source.json](testdata/openapi.source.json) already record
 as `upstream.commit` — at that object id, never a branch — and builds it with the
@@ -1319,7 +1326,10 @@ through is the server the fixtures describe. That pair is read in one place,
 `scripts/e2e/mobile_ci.sh --kernel-pin`: it refuses naming the record that is
 missing or holds a commit shorter than forty hex characters, and names both
 records when they name different builds, because then the fixtures are not one
-build's.
+build's. The step that runs it ends the job on that refusal — the commit is
+assigned in a statement of its own, not substituted inside the `echo` that
+publishes it — because an empty step output is a ref the checkout fills with the
+kernel's default branch, which is the one build this journey must never serve.
 Its own database, tenant, administrator and password are created by the run and
 dropped with it, and the Maestro report is printed in the job log. The device is
 host-level, so the job's concurrency group is named for the device and not the

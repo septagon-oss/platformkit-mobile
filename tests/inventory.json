@@ -271,23 +271,23 @@
   },
   "totals": {
     "contract": {
-      "files": 27,
-      "cases": 177,
-      "ms": 63758,
-      "testsMs": 46679.50000000001,
+      "files": 28,
+      "cases": 180,
+      "ms": 64304,
+      "testsMs": 46828.80000000001,
       "runners": {
-        "node": 27
+        "node": 28
       },
       "unreachable": 0
     },
     "behaviour": {
-      "files": 194,
-      "cases": 915,
-      "ms": 1444238,
-      "testsMs": 43361.00000000004,
+      "files": 195,
+      "cases": 916,
+      "ms": 1444661,
+      "testsMs": 43381.30000000003,
       "runners": {
         "jest": 68,
-        "node": 126
+        "node": 127
       },
       "unreachable": 0
     },
@@ -1848,6 +1848,47 @@
       "tier": "push",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/kernel-pin-step-refuses-what-the-records-cannot-name.test.ts",
+      "runner": "node",
+      "layer": "contract",
+      "cases": 3,
+      "rule": "The step that names the kernel to build is the job's refusal when the two provenance records cannot name one: a record missing, a commit that is not a full object id, or two records naming different builds. What the harness prints is only a refusal if the step that runs it ends there: a step that goes green with an empty commit hands the checkout no ref, and a checkout with no ref takes the repository's default branch \u2014 the one thing the journey must never build.",
+      "ruleSource": "first comment",
+      "tier": "push",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 546,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "the pin step names the commit when the records agree",
+        "the pin step ends the job when the records name different builds",
+        "the pin step ends the job when a record is not a full object id"
+      ],
+      "tests": [
+        {
+          "title": "the pin step names the commit when the records agree",
+          "ms": 59.708149,
+          "measured": false
+        },
+        {
+          "title": "the pin step ends the job when the records name different builds",
+          "ms": 45.342833,
+          "measured": false
+        },
+        {
+          "title": "the pin step ends the job when a record is not a full object id",
+          "ms": 44.236747,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 149.3
     },
     {
       "file": "tests/layers.test.ts",
@@ -13205,6 +13246,35 @@
       "tier": "push(scoped)+merge(full)",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/kernel-checkout-reads-with-the-repository-secret.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 1,
+      "rule": "The device journey checks the kernel out of this forge's septagon-oss/platformkit at the commit the fixtures name. On this forge a job token reads the repository it was issued for and no other \u2014 kernel-main.yml says so where it reads the same repository, and the anonymous git read answers 401 \u2014 so a checkout of the kernel that carries no token of its own is a step no run gets past. The step reads with the same repository secret kernel-main reads with, and does not leave it in the checkout's own configuration afterwards.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 423,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "the kernel checkout authorises with the secret kernel-main reads the kernel with"
+      ],
+      "tests": [
+        {
+          "title": "the kernel checkout authorises with the secret kernel-main reads the kernel with",
+          "ms": 20.327431,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 20.3
     },
     {
       "file": "tests/kit-quantity-states.test.ts",
