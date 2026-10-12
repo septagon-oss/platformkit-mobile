@@ -274,6 +274,11 @@ export const kitEnglish = {
   image: "Image",
   imageFromFiles: "Choose a file to put in the body",
   noFilesToInsert: "This workspace holds no file to put in the body yet.",
+  // A body written in the reader's own language is a translation of the record, and the
+  // two are written at different addresses: a save that changed both at once would be half
+  // a translation and half an edit, which is why the sheet asks for one at a time.
+  mixedLanguageWrite:
+    "You changed a translated field and one the record holds in its own language. Save one, then the other.",
   table: "Data table",
   // What a plot says before its numbers: the one observation a person came to
   // read. The axis supplies the rest of the sentence.
@@ -520,6 +525,8 @@ export const kitPortuguese: KitWords = {
   image: "Imagem",
   imageFromFiles: "Escolha um ficheiro para colocar no texto",
   noFilesToInsert: "Este espaço ainda não tem ficheiro para colocar no texto.",
+  mixedLanguageWrite:
+    "Alterou um campo traduzido e um que o registo guarda no seu próprio idioma. Guarde um e depois o outro.",
   table: "Tabela de dados",
   peak: "Pico",
   range: "Intervalo",

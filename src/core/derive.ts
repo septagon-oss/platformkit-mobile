@@ -4,7 +4,7 @@
 // is "Open" in a cell there and in a cell here.
 import { proseSpoken } from "./prose";
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
-import { copyLanguage, type Copy } from "./copy";
+import { copyLanguage, type Copy, type Language } from "./copy";
 import type { EntrySubject } from "./failure";
 import type { DataCell } from "./collections";
 import type { Status } from "./shared";
@@ -1045,17 +1045,84 @@ export function richBody(f: Field, value: unknown): string | undefined {
  * person is reading is not information about the record.
  */
 export function translationNote(f: Field, row: Row, format: Formatting): string | undefined {
-  const served: unknown = row._i18n;
-  if (typeof served !== "object" || served === null || Array.isArray(served)) return undefined;
-  const said: unknown = (served as Record<string, unknown>)[f.name];
-  if (typeof said !== "object" || said === null || Array.isArray(said)) return undefined;
-  const locale = (said as { locale?: unknown }).locale;
-  if (typeof locale !== "string") return undefined;
+  const locale = servedLanguage(row, f.name);
+  if (locale === undefined) return undefined;
   const mine = copyLanguage(format.locale);
   const theirs = copyLanguage(locale);
   if (mine === theirs) return undefined;
   const kit = format.copy.kit;
   return kit.shownInLanguage(theirs === "pt" ? kit.languagePortuguese : kit.languageEnglish);
+}
+
+/**
+ * servedLanguage is the language the server says one field's words arrived in. `_i18n` is
+ * the response's own note of the translatable fields it served: nothing here is guessed
+ * from what the text looks like, and a field the server said nothing about has no language
+ * this phone can claim to know.
+ */
+export function servedLanguage(row: Row, name: string): string | undefined {
+  const served: unknown = row._i18n;
+  if (typeof served !== "object" || served === null || Array.isArray(served)) return undefined;
+  const said: unknown = (served as Record<string, unknown>)[name];
+  if (typeof said !== "object" || said === null || Array.isArray(said)) return undefined;
+  const locale = (said as { locale?: unknown }).locale;
+  return typeof locale === "string" && locale !== "" ? locale : undefined;
+}
+
+/**
+ * WriteLanguage is a sheet's Save in one language: the words it carries, and the fields it
+ * may not carry in the same request.
+ */
+export interface WriteLanguage {
+  readonly locale: string;
+  /** translated is every changed field this language owns. */
+  readonly translated: readonly string[];
+  /** other is every changed field it does not: a body cannot hold both kinds at once. */
+  readonly other: readonly string[];
+}
+
+/**
+ * writeLanguage is the language a sheet writes its changes in, and nothing when it writes
+ * the record's own copy. A changed field that the catalogue declares translatable and the
+ * server named in the language this sheet reads in holds that language's words: sending them
+ * with no language would file a translation as the record's own and destroy the source, so
+ * the write names the language the server named instead. Everything else — a field the server
+ * named in another language, one it said nothing about, or one that is not translatable at
+ * all — is the record's own copy and is written as it has always been: without a language.
+ *
+ * A language write can carry only the fields that language owns, because the record itself
+ * is written without the parameter: `other` is what the sheet therefore cannot save in the
+ * same breath, and the sheet says so rather than sending half of what was asked.
+ */
+export function writeLanguage(
+  row: Row | undefined,
+  controls: readonly Control[],
+  held: Readonly<Record<string, string>>,
+  speaking: Language,
+): WriteLanguage | undefined {
+  if (row === undefined) return undefined;
+  const changed = changedFields(controls, held);
+  const translated: string[] = [];
+  const other: string[] = [];
+  let locale: string | undefined;
+  for (const name of changed) {
+    const field = controls.find((c) => c.field.name === name)?.field;
+    const said = field?.translatable === true ? servedLanguage(row, name) : undefined;
+    if (said === undefined || copyLanguage(said) !== speaking) {
+      other.push(name);
+      continue;
+    }
+    // One request carries one language: a second translated field named in another language
+    // is a second write, and the sheet asks for it separately rather than quietly picking one.
+    if (locale !== undefined && locale !== said) {
+      other.push(name);
+      continue;
+    }
+    if (locale === undefined) locale = said;
+    translated.push(name);
+  }
+  if (locale === undefined) return undefined;
+  return { locale, translated, other };
 }
 
 /** control is one field as a form holds it: the same rules wherever the field came from. */

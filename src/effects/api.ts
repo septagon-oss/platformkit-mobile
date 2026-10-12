@@ -133,6 +133,14 @@ export interface RequestOptions {
    * the same write. A request no queue could ever replay carries none.
    */
   readonly idempotencyKey?: string;
+  /**
+   * lang names the language a write's body is written in. A translatable record is one the
+   * server holds in more than a language, and the same PATCH answers two different questions:
+   * without the parameter it writes the record, with it the body writes that language's
+   * translation and the record is untouched. A sheet therefore says which of the two it is
+   * doing rather than leaving the server to guess from the words in its body.
+   */
+  readonly lang?: string;
 }
 
 /**
@@ -142,8 +150,28 @@ export interface RequestOptions {
  * one made with an empty one — the write a phone cannot hold is left exactly the
  * call it was before the queue existed.
  */
-export function keyed(idempotencyKey: string | undefined): readonly [] | readonly [RequestOptions] {
-  return idempotencyKey === undefined ? [] : [{ idempotencyKey }];
+export function keyed(
+  idempotencyKey: string | undefined,
+  lang = "",
+): readonly [] | readonly [RequestOptions] {
+  if (idempotencyKey === undefined && lang === "") return [];
+  return [
+    {
+      ...(idempotencyKey === undefined ? {} : { idempotencyKey }),
+      ...(lang === "" ? {} : { lang }),
+    },
+  ];
+}
+
+/**
+ * langQuery is the language member of an address, or nothing at all for a write of the
+ * record's own copy. The tag goes on as the server printed it, percent-encoded: a language
+ * tag is the server's own string, not one this phone may spell.
+ */
+export function langQuery(options?: RequestOptions): string {
+  return options?.lang === undefined || options.lang === ""
+    ? ""
+    : `?lang=${encodeURIComponent(options.lang)}`;
 }
 
 export interface Api {
@@ -670,7 +698,15 @@ export function createApi(
       return json("POST", writePath(e), row.parse, values, options);
     },
     async update(e, id, values, options) {
-      return json("PATCH", `${writePath(e)}/${encodeURIComponent(id)}`, row.parse, values, options);
+      // The language belongs to the address, not the body: the kernel reads it as a parameter
+      // of the route, and a held write replays by the address it was filed under.
+      return json(
+        "PATCH",
+        `${writePath(e)}/${encodeURIComponent(id)}${langQuery(options)}`,
+        row.parse,
+        values,
+        options,
+      );
     },
     async remove(e, id, options) {
       const path = `${writePath(e)}/${encodeURIComponent(id)}`;

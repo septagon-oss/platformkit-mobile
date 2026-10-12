@@ -2,7 +2,7 @@
 // a request rejected with into the four facts a `catch` arm can honestly state,
 // and asks the pure rule. Every hook calls this rather than reading `e.message`,
 // because a second chain of instanceof tests is a second classification.
-import { copyForLocale, type Copy } from "../core/copy";
+import { copyForLocale, copyLanguage, type Copy, type Language } from "../core/copy";
 import {
   classifyFailure,
   noFields,
@@ -23,6 +23,15 @@ import { ApiError, ResponseError } from "../effects/api";
  */
 export function screenCopy(locale?: string): Copy {
   return copyForLocale(locale ?? Intl.DateTimeFormat().resolvedOptions().locale);
+}
+
+/**
+ * screenLanguage is the one language this phone reads in, for the rules that ask which
+ * language a person is holding words in. It is the same reading that chose the kit's own
+ * sentences, so a record's language and the sheet's words cannot drift apart.
+ */
+export function screenLanguage(): Language {
+  return copyLanguage(Intl.DateTimeFormat().resolvedOptions().locale);
 }
 
 /**
