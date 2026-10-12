@@ -24,20 +24,25 @@ export const SERVED_WIDTHS = [480, 960, 1440, 1920] as const;
 export type ServedWidth = (typeof SERVED_WIDTHS)[number];
 
 /**
- * variantWidth is the plan for one frame in one slot: the largest served width that
- * fits the slot and stays strictly below the frame's own width, or 0 for the stored
- * frame itself when no variant is smaller than it.
+ * variantWidth is the plan for one frame in one slot: which width of the file to ask
+ * the server for, or 0 to ask for the frame as stored.
  *
- * `slotPx` is the slot in device pixels (dp × pixelRatio), because a loader decodes at
- * the pixels it paints and a slot wider than the widest variant still gets that
- * widest variant. An unknown frame answers 0: nothing is planned without a number.
+ * The frame itself is the best fit as soon as it is no wider than the slot, so it is
+ * what gets asked for: a smaller variant painted into a wider box is the phone throwing
+ * away pixels it was offered, and a variant is never upscaled, so no wider one exists.
+ * Only a frame wider than the slot is scaled down, and then to the largest served width
+ * that fits it. `slotPx` is the slot in device pixels (dp × pixelRatio), because a
+ * loader decodes at the pixels it paints; a slot wider than the widest variant still
+ * gets that widest variant. An unknown frame answers 0: nothing is planned without a
+ * number, and the bare address always answers.
  */
 export function variantWidth(slotPx: number, frameWidth: number): ServedWidth | 0 {
   if (!Number.isFinite(slotPx) || slotPx <= 0) return 0;
   if (!Number.isSafeInteger(frameWidth) || frameWidth <= 0) return 0;
+  if (frameWidth <= slotPx) return 0;
   let plan: ServedWidth | 0 = 0;
   for (const width of SERVED_WIDTHS) {
-    if (width > slotPx || width >= frameWidth) break;
+    if (width > slotPx) break;
     plan = width;
   }
   return plan;

@@ -855,7 +855,9 @@ fenced block without its example turning into headings and figures. The same rea
 answers `phoneEditorHolds`, which
 therefore calls a fence quoting a table no table. `Prose` draws the runs in the kit's type and
 the figures in the slot the media family already owns: the box is reserved from the
-frame the server measured, so no paragraph moves when the bytes arrive; a figure that
+frame the server measured, so no paragraph moves when the bytes arrive; the byte itself is
+asked for at the width this device can paint (`variantWidth`, and the bare content address
+when the stored frame already fits, because no variant is ever upscaled); a figure that
 did not arrive says `Image unavailable` in the reader's language and keeps every word
 around it; a decorative figure is nothing to open and nothing a person listening is told
 about at all, and a ready one is invited by name.

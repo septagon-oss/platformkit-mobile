@@ -12,17 +12,24 @@ import type { ImageResource } from "./media";
 /**
  * contentAddress is one file's bytes: the row's address with the content member under it.
  * It is a path, not a URL — the caller puts it on the server the session belongs to.
+ *
+ * `width` is the planned width from `variantWidth`: the pin's `w` member says "serve
+ * this planned width rather than the stored frame", and a number outside the file
+ * module's rendered set is refused by name, so only a planned one is ever printed. Zero
+ * prints no query at all, which is the bare address — the frame as stored.
  */
-export function contentAddress(e: Entry, id: string): string {
-  return `${rowAddress(e, id)}/content`;
+export function contentAddress(e: Entry, id: string, width = 0): string {
+  const path = `${rowAddress(e, id)}/content`;
+  return width === 0 ? path : `${path}?w=${width}`;
 }
 
 /**
  * fileResource prepares one file's bytes for whoever will paint them: the authenticated
  * address of the content member, the session this app holds as a header (a native image
  * loader is no browser and sends no cookie of its own), and the identity a loader caches
- * on — the file's own content hash, with this phone's retry count after it so the attempt
- * that asks again is not mistaken for the attempt that was refused.
+ * on — the file's own content hash, with the width this phone planned and its retry count
+ * after it, so the attempt that asks again, or asks at another width, is not mistaken for
+ * the attempt that was refused.
  *
  * Nothing is prepared for a read this phone cannot authorise: no file module in this
  * server's catalogue, no server or session to name means no address is asked at all, and
@@ -35,6 +42,8 @@ export function fileResource(input: {
   readonly id: string;
   /** version is the file's own content version (its hash), or "" when no row named one. */
   readonly version: string;
+  /** width is the planned served width, or 0 for the frame as stored. */
+  readonly width: number;
   /** attempt counts this phone's asks for this file, so a retry is a new request. */
   readonly attempt: number;
   readonly cookie: string | undefined;
@@ -47,8 +56,10 @@ export function fileResource(input: {
   return {
     scope: JSON.stringify([scope.server, scope.userId]),
     id: input.id,
-    version: `${input.version}#${input.attempt}`,
-    uri: `${scope.server}${contentAddress(input.entry, input.id)}`,
+    // The width the phone asked for belongs to the identity it caches on: the same
+    // picture re-planned into a wider slot is a different set of bytes.
+    version: `${input.version}#${input.width}#${input.attempt}`,
+    uri: `${scope.server}${contentAddress(input.entry, input.id, input.width)}`,
     ...(input.cookie === undefined ? {} : { headers: { Cookie: input.cookie } }),
   };
 }

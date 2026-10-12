@@ -11,10 +11,11 @@
 // frame nobody measured, or painting a picture over a caption that is not its own, would
 // both be the phone inventing what the server never said.
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useWindowDimensions } from "react-native";
 import { key } from "../core/catalog";
 import type { Presentation, Row } from "../core/derive";
 import type { MediaItem } from "../core/media";
-import { deriveProse, proseBlocks, type ProseFigure } from "../core/prose";
+import { deriveProse, proseBlocks, variantWidth, type ProseFigure } from "../core/prose";
 import { rowAddress } from "../effects/api";
 import { fileResource } from "../effects/files";
 import { answered } from "../effects/read-cache";
@@ -81,6 +82,11 @@ function frameOf(row: Row): Frame | null {
  */
 export function RichTextBody({ presentation, source, testID, fallback }: Props) {
   const { api, entry, reads, baseURL, identity } = useShell();
+  const viewport = useWindowDimensions();
+  // A figure in a body is painted no wider than the screen it is on, so the width to ask
+  // the file module for is planned against the screen's own pixels: the widest variant
+  // this device could need, and the frame as stored whenever the frame already fits.
+  const slotPx = viewport.width * viewport.scale;
   const figures = useMemo(() => figuresIn(source), [source]);
   const wanted = useMemo(() => figures.map((figure) => figure.file).join(","), [figures]);
   // The file module as this server's catalogue names it. Absent means there is nothing
@@ -187,6 +193,7 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
           entry: files,
           id: file,
           version: rows[file]?.version ?? "",
+          width: variantWidth(slotPx, rows[file]?.width ?? 0),
           attempt: attempts[file] ?? 0,
           cookie: api.cookie(),
         });

@@ -1,9 +1,11 @@
 // A rich text figure names a file, not a picture: the body points at `file/files`, that
 // row's own measurements reserve the box, and the bytes are asked for at the file's
-// content address with the session this app holds. A file this phone cannot read takes
+// content address — at the width this device can paint, or as stored when the frame
+// already fits — with the session this app holds. A file this phone cannot read takes
 // the native reading of the whole body away — and every word of the body stays on it.
 import { beforeEach, expect, jest, test } from "@jest/globals";
 import { render, screen, waitFor, within } from "@testing-library/react-native";
+import { Dimensions } from "react-native";
 import React from "react";
 import type { Entry } from "../../src/core/catalog";
 import { ResourceDetail } from "../../src/screens/ResourceDetail";
@@ -30,6 +32,10 @@ jest.mock("../../src/shell", () => ({
 beforeEach(() => {
   reset();
   resetAsked();
+  // The device these journeys are read on: a 390 dp phone at 3×, so a figure in a body
+  // can be painted across 1170 device pixels and no further.
+  const phone = { width: 390, height: 844, scale: 3, fontScale: 1, statusbarHeight: 0 };
+  Dimensions.set({ window: phone, screen: phone });
 });
 
 const FILE = "3f6f0b7f-2b6f-4d8b-9d3a-6f0f3f0f9c31";
@@ -82,10 +88,12 @@ test("a figure reads its own row for the frame and asks for its bytes at the fil
   // The row is read like every other row this screen reads.
   await waitFor(() => expect(api.get).toHaveBeenCalledWith(files, FILE));
   // The bytes come from the address the pinned document gives that file, with the
-  // session on them: a native image loader sends no cookie of its own.
+  // session on them: a native image loader sends no cookie of its own. The frame is
+  // 1440 wide and the slot 1170 device pixels, so the width asked for is the largest
+  // the file module renders that fits — a phone never downloads a frame it cannot paint.
   await waitFor(() => expect(asked).toHaveLength(1));
   expect(asked[0]).toEqual({
-    uri: `https://acme.test/api/v1/file/files/${FILE}/content`,
+    uri: `https://acme.test/api/v1/file/files/${FILE}/content?w=960`,
     headers: { Cookie: "pk=1" },
     label: "The bridge at dusk",
   });
@@ -96,6 +104,21 @@ test("a figure reads its own row for the frame and asks for its bytes at the fil
   const reader = within(screen.getByTestId("field-body-prose"));
   expect(reader.getByText("South span")).toBeOnTheScreen();
   expect(reader.getByText("fresh water")).toBeOnTheScreen();
+});
+
+test("a frame that already fits its slot is asked for as stored", async () => {
+  await read(() => ({
+    id: FILE,
+    name: "bridge.heic",
+    width: 900,
+    height: 1200,
+    sha256: "ab12cd34",
+  }));
+  // A narrower variant painted into a wider box is the phone throwing away pixels the
+  // server offered it, and no wider variant exists to ask for: the bare address — the
+  // frame as stored — is the honest request.
+  await waitFor(() => expect(asked).toHaveLength(1));
+  expect(asked[0]!.uri).toBe(`https://acme.test/api/v1/file/files/${FILE}/content`);
 });
 
 test("a file this phone cannot read takes the native reading away and keeps every word", async () => {
