@@ -174,6 +174,21 @@ for the version being released.
   this, editing Portuguese on a Portuguese phone overwrote the English it was translated
   from. `Api.update` takes the language on its request options, and a held write replays at
   the same address it was filed under.
+- Additive to `./effects/api`: `served(e, id)`, which is `get(e, id)`'s read keeping the tag that
+  read's `Content-Language` printed beside the row rather than dropping it (`Api.get` answers the
+  row alone, unchanged). A record with a translatable field is answered *in a language*, and a
+  write naming none is filed as the record's own copy, so the tag a person read their words in is
+  the tag their Save names: `writeLanguage` takes it as a fifth, optional argument, and a sheet
+  that read a record in Portuguese now writes every translatable field it changed in Portuguese —
+  including the complete translation `_i18n` says nothing about, because there is nothing to say,
+  and the fallback whose note names English precisely because Portuguese has no row and English is
+  what the translator was shown to write. Both of those shapes were overwriting the source.
+- An upload keeps the form it was given. `upload(e, form, query)` handed that form to the
+  generated operation's serializer, which builds one out of an object's entries and so turned a
+  form that already existed into a text field named after its own internals: the request carried
+  no file part, no filename and no bytes, and the file module refused it. A body that is already a
+  multipart form now reaches `fetch` unchanged, which is what lets a picture taken on the phone
+  enter a body as the row the server made for it.
 
 ## 0.2.0
 
