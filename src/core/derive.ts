@@ -998,6 +998,17 @@ export function kind(f: Field): ControlKind {
   }
 }
 
+/**
+ * richBody is the Markdown a phone reads rather than prints: the body of a field whose
+ * author declared `widget: richtext`, and nothing for any other field or for a value with
+ * no words in it. The declaration is the catalogue's; the body is what the server stored.
+ */
+export function richBody(f: Field, value: unknown): string | undefined {
+  if (f.widget !== "richtext") return undefined;
+  const body = text(value);
+  return body === "" ? undefined : body;
+}
+
 /** control is one field as a form holds it: the same rules wherever the field came from. */
 function control(f: Field, value: string, immutable: boolean): Control {
   const k = kind(f);

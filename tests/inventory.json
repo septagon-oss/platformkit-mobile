@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 201,
+   "files": 202,
    "cases": 918,
    "ms": 1445375,
    "testsMs": 43814.00000000003,
    "runners": {
     "jest": 71,
-    "node": 130
+    "node": 131
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 58,
+   "files": 59,
    "cases": 206,
    "ms": 1188175,
    "testsMs": 22569,
    "runners": {
-    "jest": 58
+    "jest": 59
    },
    "unreachable": 0
   },
@@ -15191,6 +15191,26 @@
    "onlyProdLines": null
   },
   {
+   "file": "tests/prose-fence-keeps-shorter-markers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "A fenced code block may quote a shorter fence. Its opening marker's whole width defines the closing marker, so the quoted heading and image remain code.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-fence-keeps-shorter-markers.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/range-clock-change.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -18631,6 +18651,26 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/generated-richtext-record-renders-natively.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "A generated record reads a richtext declaration without a product renderer. Markdown headings become native text while a plain text field keeps its syntax.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/generated-richtext-record-renders-natively.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/newer-shell-fallback.test.tsx",

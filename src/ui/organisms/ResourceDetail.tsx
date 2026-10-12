@@ -7,7 +7,7 @@
 // Edit and the `…` that holds Delete live in the native header, which the screen
 // composition sets; the menu itself opens here, under the header, because that is
 // where the person looked when they pressed it.
-import React from "react";
+import React, { type ReactNode } from "react";
 import { View } from "react-native";
 import type { Entry } from "../../core/catalog";
 import {
@@ -18,6 +18,7 @@ import {
   recordInformation,
   recordSections,
   refusalAction,
+  richBody,
   type DetailItem,
   type DisclosureModel,
   type Names,
@@ -97,6 +98,14 @@ export interface Props {
   readonly activity?: ActivityProps;
   /** actions are the lifecycle commands this caller may run on the record. */
   readonly actions?: ActionsProps;
+  /**
+   * richText draws one rich text body as the phone reads it. The screen supplies it, and
+   * with it the Markdown face and the figure loader this layer cannot own. `fallback` is
+   * the value shape this organism already built: a surface that cannot read this whole
+   * body draws that, so a refusal costs the record its native type and never a line of it.
+   * Absent means this surface has no reader at all.
+   */
+  readonly richText?: (body: string, testID: string, fallback: ReactNode) => ReactNode;
 }
 
 export function ResourceDetail({
@@ -116,6 +125,7 @@ export function ResourceDetail({
   information,
   activity,
   actions,
+  richText,
 }: Props) {
   const s = useStyles(kitStyles);
   // Which button a refusal offers is the classifier's answer, not this
@@ -192,6 +202,7 @@ export function ResourceDetail({
                   item={item}
                   row={row}
                   names={names}
+                  {...(richText === undefined ? {} : { richText })}
                 />
               ))}
             </Section>
@@ -217,6 +228,7 @@ export function ResourceDetail({
               item={item}
               row={row}
               names={names}
+              {...(richText === undefined ? {} : { richText })}
             />
           ))}
         </SummaryDetail>
@@ -229,19 +241,27 @@ export function ResourceDetail({
  * RecordFact is one fact about a record: the label the author gave the field, the
  * value in the shape its type deserves, and the row named after the field, so a
  * journey finds it by the name the API document gives it and never by the label's
- * spelling. Every block draws its rows this way, Record information included.
+ * spelling. A field whose author declared rich text is read by `richText` where a
+ * reader was supplied and the body can be read whole (`richBody`, and `richText`'s own
+ * answer for a body it cannot read); every other value takes the shape `Value` gives it.
+ * Every block draws its rows this way, Record information included.
  */
 function RecordFact({
   feedback,
   item,
   row,
   names,
+  richText,
 }: {
   readonly feedback: Feedback;
   readonly item: DetailItem;
   readonly row: Item;
   readonly names?: Names | undefined;
+  readonly richText?: Props["richText"] | undefined;
 }) {
+  const stored = row[item.field.name];
+  const plain = <Value presentation={feedback} field={item.field} value={stored} names={names} />;
+  const body = richText === undefined ? undefined : richBody(item.field, stored);
   return (
     <DetailRow
       testID={`field-${item.field.name}`}
@@ -249,12 +269,9 @@ function RecordFact({
       value={item.value}
       {...(item.spoken === undefined ? {} : { spoken: item.spoken })}
       shown={
-        <Value
-          presentation={feedback}
-          field={item.field}
-          value={row[item.field.name]}
-          names={names}
-        />
+        body === undefined || richText === undefined
+          ? plain
+          : richText(body, `field-${item.field.name}-prose`, plain)
       }
     />
   );

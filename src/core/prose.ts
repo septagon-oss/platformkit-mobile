@@ -99,6 +99,10 @@ interface Group {
  * A blank line inside a fence belongs to the fence, which may hold as many as it
  * likes; an unterminated fence answers null, because a body whose fence never closed
  * has no block boundaries left to trust.
+ *
+ * A fence ends on a marker of its own character at least as wide as the one that opened
+ * it, which is what lets a body quote Markdown: a body that describes a fenced block
+ * opens with four backticks, and the three inside it are literal code, not an ending.
  */
 function cut(source: string): readonly Group[] | null {
   const groups: Group[] = [];
@@ -115,8 +119,14 @@ function cut(source: string): readonly Group[] | null {
   for (const line of source.split("\n")) {
     const marker = FENCE.exec(line);
     const opens = fence === undefined && marker !== null;
-    const closes = fence !== undefined && line.trimStart().startsWith(fence);
-    if (opens) fence = marker![1]!.slice(0, 3);
+    // The whole run the author typed is the marker, not its first three characters: a
+    // line of the same character shorter than the opening one is content, not an ending.
+    const closes =
+      fence !== undefined &&
+      marker !== null &&
+      marker[1]![0] === fence[0] &&
+      marker[1]!.length >= fence.length;
+    if (opens) fence = marker![1]!;
     else if (closes) fence = undefined;
     else if (fence === undefined && line.trim() === "") {
       flush();

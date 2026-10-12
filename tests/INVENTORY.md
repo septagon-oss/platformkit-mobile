@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `1c798c001` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `6c0fa5452` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 30 | 181 | 46.9 s | 65 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 201 | 918 | 43.8 s | 1445 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 58 | 206 | 22.6 s | 1188 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 202 | 918 | 43.8 s | 1445 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 59 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 345
+* keep: 347
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 345 — 160 `tests/*.test.ts` (node), 129 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* files inventoried: 347 — 161 `tests/*.test.ts` (node), 130 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1305; cases in files no runner reaches: 35
 * isolated wall time: contract 65 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -289,6 +289,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/progress.test.ts | node | behaviour | 12 | 316 | 29.8 | 0 | 0 of 12 | — | 0 | keep | The one arithmetic a meter, a stepper rail and a player's scrubber share. Each case is a number chosen so a wrong rounding, a swapped numerator or a invented d… |
 | tests/prose-body-reads-as-blocks.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A rich text body is the Markdown the server stored (0069 §1), so reading it is a reading of that shape: a blank line between blocks, a figure a paragraph of it… |
 | tests/prose-code-keeps-its-content.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | 0069 §1 allows fenced code with any content and inline code with any content, and the server stores both as written. The reader's refusals — an image outside a… |
+| tests/prose-fence-keeps-shorter-markers.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A fenced code block may quote a shorter fence. Its opening marker's whole width defines the closing marker, so the quoted heading and image remain code. |
 | tests/range-clock-change.test.ts | node | behaviour | 3 | 758 | 32.3 | 1 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a booking slot crossing the clock change names both endpoint zones |
 | tests/range-one-sentence.test.ts | node | behaviour | 3 | 288 | 20.1 | 1 | 1 of 3 | — | 0 | keep | A span of time is one sentence. Formatting two instants and joining them wrote the day twice, the zone twice and a raw offset in parentheses — which is what ma… |
 | tests/read-cache-answers-who-is-asking.test.ts | node | behaviour | 3 | 1008 | 5.3 |  | not measured | — | 0 | keep | Rules this file holds. An answer the phone keeps is kept for the person whose request brought it, whoever is signed in when it arrives. The offline fallback an… |
@@ -352,6 +353,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/custom-renderer-catalog-withdrawal.test.tsx | jest | composition | 2 | 18420 | 59 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom detail renderer is unreachable after its catalog entry is withdrawn |
 | tests/screens/custom-renderer-session-isolation.test.tsx | jest | composition | 2 | 19295 | 438 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom renderer follows only the current session catalog |
 | tests/screens/example-task-detail.test.tsx | jest | composition | 6 | 18703 | 189 | 20 | 1 of 6 | — | 0 | keep | The example pack is the pattern a product copies, so what is proved here is the pattern's two halves: a screen whose data arrives as the operation's own respon… |
+| tests/screens/generated-richtext-record-renders-natively.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A generated record reads a richtext declaration without a product renderer. Markdown headings become native text while a plain text field keeps its syntax. |
 | tests/screens/newer-shell-fallback.test.tsx | jest | composition | 6 | 23705 | 570 | 0 | 0 of 6 | — | 0 | keep | A catalogue document, as the server prints it, that names a pack this build carries but cannot draw yet: the record is still read and drawn by the generated de… |
 | tests/screens/offline-detail-says-when-it-was-saved.test.tsx | jest | composition | 1 | 29273 | 44 |  | not measured | — | 0 | keep | A record the phone answered rather than the server is drawn with the same quiet line a list carries: what it is, and when this device last received it. One der… |
 | tests/screens/offline-list-says-when-it-was-saved.test.tsx | jest | composition | 1 | 26758 | 1127 |  | not measured | — | 0 | keep | A page answered from the phone rather than the server is drawn with a quiet line that says so and when it was saved: a person in a tunnel must be able to tell … |

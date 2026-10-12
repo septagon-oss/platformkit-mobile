@@ -41,17 +41,22 @@ export function Prose({
   testID,
 }: Props) {
   const s = useStyles(styles);
+  // One name for this reader, and every block and figure under it is named from it: two
+  // rich text bodies on one screen are then two readers a journey can tell apart, while a
+  // reader nobody names keeps the plain `prose` names it has always had.
+  const at = testID ?? "prose";
   return (
-    <View style={s.body} {...testable(testID ?? "prose")}>
+    <View style={s.body} {...testable(at)}>
       {model.blocks.map((block) =>
         block.kind === "markdown" ? (
-          <View key={block.id} {...testable(`prose-${block.id}`)}>
+          <View key={block.id} {...testable(`${at}-${block.id}`)}>
             {renderMarkdown(block.source, block.id)}
           </View>
         ) : (
           <Figure
             key={block.id}
             figure={block}
+            scope={at}
             renderFigure={renderFigure}
             onOpenFigure={onOpenFigure}
             onRetryFigure={onRetryFigure}
@@ -70,11 +75,13 @@ export function Prose({
  */
 function Figure({
   figure,
+  scope,
   renderFigure,
   onOpenFigure,
   onRetryFigure,
 }: {
   readonly figure: ProseBlockModel & { kind: "figure" };
+  readonly scope: string;
   readonly renderFigure?: Props["renderFigure"] | undefined;
   readonly onOpenFigure?: ((id: string) => void) | undefined;
   readonly onRetryFigure?: ((id: string) => void) | undefined;
@@ -94,7 +101,7 @@ function Figure({
       style={s.figure}
       accessibilityElementsHidden={decorative}
       importantForAccessibility={decorative ? "no-hide-descendants" : "auto"}
-      {...testable(`prose-figure-${figure.id}`)}
+      {...testable(`${scope}-figure-${figure.id}`)}
     >
       <Pressable
         accessible
@@ -103,14 +110,14 @@ function Figure({
         accessibilityHint={open ? figure.openLabel : undefined}
         disabled={!open}
         onPress={() => onOpenFigure?.(figure.id)}
-        {...testable(`prose-figure-open-${figure.id}`)}
+        {...testable(`${scope}-figure-open-${figure.id}`)}
       >
         <View style={[s.box, box]}>
           {figure.state === "loading" ? (
             <Skeleton
               label={figure.loadingLabel}
               motion={figure.motion}
-              testID={`prose-figure-loading-${figure.id}`}
+              testID={`${scope}-figure-loading-${figure.id}`}
             />
           ) : figure.canRetry ? (
             <Text role="caption" tone="muted">
@@ -132,7 +139,7 @@ function Figure({
           tone="plain"
           motion={figure.motion}
           onPress={() => onRetryFigure(figure.id)}
-          testID={`prose-figure-retry-${figure.id}`}
+          testID={`${scope}-figure-retry-${figure.id}`}
         />
       ) : null}
     </View>
