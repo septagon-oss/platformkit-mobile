@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `5991a3c72` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `b239ef665` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 30 | 181 | 46.9 s | 65 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 205 | 918 | 43.8 s | 1445 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 70 | 206 | 22.6 s | 1188 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 207 | 918 | 43.8 s | 1445 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 72 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 361
+* keep: 365
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 361 — 164 `tests/*.test.ts` (node), 141 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* files inventoried: 365 — 166 `tests/*.test.ts` (node), 143 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1305; cases in files no runner reaches: 35
 * isolated wall time: contract 65 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -200,6 +200,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-delete-journey-taps-the-answer-the-question-offers.test.ts | node | behaviour | 2 | 314 | 5.3 | 0 | 0 of 2 | — | 0 | keep | Tapping the menu's Delete row opens a question the journey must answer: the delete is the run's own tidying, and a flow that leaves the question standing fails… |
 | tests/a-fact-the-header-drew-is-not-a-row-below-it.test.ts | node | behaviour | 1 | 1080 | 18.1 | 0 | 0 of 1 | — | 0 | keep | A fact is drawn once, at the highest place that draws it (0085; README "How a record opens": "A field that a higher place drew is not a row anywhere below it",… |
 | tests/a-field-kept-off-a-screen-is-not-drawn-or-named.test.ts | node | behaviour | 4 | 1133 | 36.2 | 0 | 0 of 4 | — | 0 | keep | One rule, read at the screens it reaches: a field its author kept off a screen is neither drawn nor named on that screen. `visibility` decides which columns a … |
+| tests/a-file-upload-sends-the-form-its-caller-built.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A picture's bytes leave the phone as one multipart form, and the form its caller built is the document the transport sends. The generated serializer builds a f… |
 | tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts | node | behaviour | 2 | 309 | 8.5 | 0 | 1 of 2 | — | 0 | keep | Maestro reads a text selector as regex source, not as a JavaScript literal: its YAML reader keeps the scalar whole and StringUtils.toRegexSafe compiles what it… |
 | tests/a-form-asks-only-what-a-person-can-answer.test.ts | node | behaviour | 15 | 1149 | 32.1 | 17 | 1 of 15 | — | 0 | keep | A form asks only what a person can answer (0085). Three rules decide what a sheet holds and in what order it holds it, and all three are answers of the core: t… |
 | tests/a-form-keeps-what-the-person-typed.test.ts | node | behaviour | 12 | 1833 | 22.2 |  | not measured | — | 0 | keep | A form keeps what the person typed, and says exactly what to fix (0085). Four rules decide that, and all four are answers of the core: what the sheet may refus… |
@@ -209,6 +210,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts | node | behaviour | 13 | 1214 | 43.4 | 0 | 0 of 13 | — | 0 | keep | A list row says which record it is, what state that record is in, and what sets it apart — and nothing else. The four answers come from four declarations (the … |
 | tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts | node | behaviour | 7 | 868 | 15.9 |  | not measured | — | 0 | keep | A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one … |
 | tests/a-record-opens-on-what-it-is.test.ts | node | behaviour | 10 | 1225 | 51.7 | 2 | 0 of 10 | — | 0 | keep | A record opens on what it is, not on how it is stored (0085). The whole of the hierarchy is one pure function of the entry and the row — `recordHeader`, `recor… |
+| tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are writ… |
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
 | tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts | node | behaviour | 2 | 1007 | 10.7 |  | not measured | — | 0 | keep | A whole-row replace carries what nobody typed exactly as the read returned it. The body builder is `writeControls`, and two of its promises have no case of the… |
 | tests/activity-actor-snapshot.test.ts | node | behaviour | 2 | 748 | 15.5 | 0 | 0 of 2 | — | 0 | keep | An activity row may name its actor only from the directory snapshot read with it. Once that snapshot is withdrawn the row says a name is unavailable — never th… |
@@ -335,9 +337,11 @@ suite whatever the push tier selected, and a selection that named no file says s
 | test file | runner | layer | cases | wall ms | tests ms | only-it-covers (prod lines) | tests with a line no other test covers | production files only it loads | flaky / reach | verdict | the rule it proves |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | tests/route.test.tsx | jest | composition | 10 | 24265 | 1028 | 0 | 0 of 10 | — | 0 | keep | A renderer pack's screen: it says what it was given. |
+| tests/screens/a-complete-translation-save-keeps-the-source.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | Content-Language names the requested locale; _i18n may instead name the source of a fallback. A translator's edit in that locale must preserve the source in bo… |
 | tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering. |
 | tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
+| tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A camera image must reach the real API transport as a native file part, retain its session, and enter the body only after the file endpoint accepts that part. |
 | tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A picture taken on the phone is stored as a file before the body points at it: the body never learns an address that only this phone could read. |
 | tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at th… |
 | tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload. |

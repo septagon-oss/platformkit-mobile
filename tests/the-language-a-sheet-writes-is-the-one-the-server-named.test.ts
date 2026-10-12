@@ -1,13 +1,16 @@
-// A record's words arrive in some language, and the server says which: `_i18n` names the
-// translatable fields it served and the language each one's words are in. What a sheet may
-// write, and where, follows from that note alone — never from what the text looks like. Four
-// answers are owed here: a changed field the server named in the language the sheet reads in
-// is written *in that language* (a PATCH that names no language writes the record, so
-// Portuguese words sent bare would be filed as the English they were translated from); a
-// changed field named in a language the sheet does not read is the record's own copy and is
-// written bare, as it always was; a field the server said nothing about is the record's own
-// copy too; and a translation changed beside a field that language cannot carry is two writes
-// at two addresses, which is a refusal rather than half of one.
+// A record's words arrive in some language, and the server says which — in `_i18n`, naming the
+// translatable fields it served and the language each one's words are in, and on the answer itself,
+// with the tag the whole response was written in. What a sheet may write, and where, follows from
+// those two alone — never from what the text looks like. Six answers are owed here: a changed field
+// the server named in the language the sheet reads in is written *in that language* (a PATCH that
+// names no language writes the record, so Portuguese words sent bare would be filed as the English
+// they were translated from); a changed field named in a language the sheet does not read is the
+// record's own copy and is written bare, as it always was; a field the server said nothing about is
+// the record's own copy too; a translation changed beside a field that language cannot carry is two
+// writes at two addresses, which is a refusal rather than half of one; and on a read the server
+// answered *in a language*, every translatable field the person changed belongs to it — whether it
+// carried no note because it is that language's own text, or carried another language's note because
+// that other language is the fallback the translator was shown in order to write this one.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
@@ -89,4 +92,31 @@ test("a translation changed beside a field that language cannot carry names what
     ["title"],
     "the record itself is written without the parameter, so the sheet may not send both at once",
   );
+});
+
+test("a complete translation the answer named no note for is written in the language the answer was served in", () => {
+  const entry = noteEntry();
+  // A field that is the reading language's own reviewed text is the one field the server leaves
+  // out of `_i18n`: there is nothing to say about it. The answer's own tag is all the sheet has,
+  // and the only reading of it that keeps the source is that these words *are* that language's.
+  const row = readBack("Dê água fresca.", undefined);
+  const held = { body: "Dê água fresca. Sempre." };
+  const asked = writeLanguage(row, formControls(entry, row, false), held, "pt", "pt");
+  assert.ok(asked, "a body read in Portuguese and edited in Portuguese is Portuguese");
+  assert.equal(asked.locale, "pt");
+  assert.deepEqual([...asked.translated], ["body"]);
+  assert.deepEqual([...asked.other], []);
+});
+
+test("a translation written over the source a missing row fell back to is written in the language that was asked for", () => {
+  const entry = noteEntry();
+  // `_i18n` here names another language precisely because this one has no row yet: the English in
+  // the box is the thing a reader of Portuguese was shown in order to write it. Sending what they
+  // typed back over that note would file the translation as the source it translates.
+  const row = readBack("Provide fresh water.", { body: { locale: "en", status: "missing" } });
+  const held = { body: "Dê água fresca." };
+  const asked = writeLanguage(row, formControls(entry, row, false), held, "pt", "pt");
+  assert.ok(asked, "the fallback is the words shown, not the words written");
+  assert.equal(asked.locale, "pt");
+  assert.deepEqual([...asked.translated], ["body"]);
 });

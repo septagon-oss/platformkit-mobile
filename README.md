@@ -894,12 +894,17 @@ holds. A picture taken or chosen here is sent up as the multipart upload the doc
 the body as the one line a figure is, pointing at the row the server answered with and never
 at an address only this phone could read. A table and a task list stay the plain Markdown
 box's, with the sentence naming what the phone cannot hold. The language slice is a read and
-one write: every request prints the phone's own `Accept-Language`; `_i18n` — the server's own
-note of which language a translatable field's words arrived in — is said beside the field in
-the language the person is reading in (`Mostrado em inglês — ainda não traduzido`); and a
-Save of a field the server named in that reader's own language names the language back
-(`?lang=`) and carries only the fields that language owns, saying so when the sheet changed
-the record's own fields beside them. A body's words sent with no language would be filed as
+one write: every request prints the phone's own `Accept-Language`, and an answer that is written
+in a language says which with `Content-Language`, kept beside the row it came with (`Api.served`)
+rather than inside it; `_i18n` — the server's own note of which language a translatable field's
+words arrived in, and of the field that fell back to another language's because this one has no row
+yet — is said beside the field in the language the person is reading in
+(`Mostrado em inglês — ainda não traduzido`); and a Save names the language back (`?lang=`) for
+every translatable field it changed on a read the server answered *in* a language — whether that
+field carried a note of its own or carried none because it is that language's own text, or another
+language's because the fallback is what a translator was shown in order to write it — carrying only
+the fields that language owns, saying so when the sheet changed the record's own fields beside
+them. A body's words sent with no language would be filed as
 the record's own copy, over the source they were translated from, which is the write this
 rule exists to refuse. The phone's own words (its buttons, its refusals, its "Image
 unavailable") follow the reader's language, while a body arrives in whatever language the

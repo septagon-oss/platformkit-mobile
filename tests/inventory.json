@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 205,
+   "files": 207,
    "cases": 918,
    "ms": 1445375,
    "testsMs": 43814.00000000003,
    "runners": {
     "jest": 71,
-    "node": 134
+    "node": 136
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 70,
+   "files": 72,
    "cases": 206,
    "ms": 1188175,
    "testsMs": 22569,
    "runners": {
-    "jest": 70
+    "jest": 72
    },
    "unreachable": 0
   },
@@ -8312,6 +8312,26 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-file-upload-sends-the-form-its-caller-built.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "A picture's bytes leave the phone as one multipart form, and the form its caller built is the document the transport sends. The generated serializer builds a form out of an object's entries and knows nothing of a form that already exists: run over one it prints that form's own internals into a text field, and the file module is left a field named after them and no file to store \u2014 which is a refusal it cannot trace back to the write that caused it. Two answers are owed here: the form that arrives at the server is the one that was handed over, part and all, at the address the document gives an upload; and an address the document holds no multipart route at is refused by name before a byte of anyone's picture is sent.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-file-upload-sends-the-form-its-caller-built.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -9227,6 +9247,26 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are written in. The read keeps that tag beside the row rather than inside it: the row stays the server's own document, and a sheet that later sends words back has to name the language they are written in, because a write naming no language writes the record rather than the language it was read in. Three answers are owed here: the tag is kept exactly as it was printed, an answer that named no language leaves the row the record's own copy \u2014 which is what a row with no language has always been \u2014 and a tag no request this phone could build would carry counts as nothing said rather than as a guess.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts",
@@ -17410,6 +17450,26 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/screens/a-complete-translation-save-keeps-the-source.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "Content-Language names the requested locale; _i18n may instead name the source of a fallback. A translator's edit in that locale must preserve the source in both cases.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-complete-translation-save-keeps-the-source.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -17498,6 +17558,26 @@
    "coveredProdLines": 1423,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "A camera image must reach the real API transport as a native file part, retain its session, and enter the body only after the file endpoint accepts that part.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx",

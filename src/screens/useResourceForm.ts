@@ -47,6 +47,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // This sheet's own address, which is what the shell files what is typed under.
   const here = address("form", entry, id);
   const [row, setRow] = useState<Row | undefined>();
+  // The language this row was served in, kept beside it rather than inside it: the row stays
+  // the server's own document, and Save needs the tag to say which language its words are
+  // written in. "" is a read that named no language, which is the record's own copy.
+  const [servedIn, setServedIn] = useState("");
   const [phase, setPhase] = useState<Phase>(create ? "editing" : "loading");
   // A sheet that mounts while the server is refusing the session that would have
   // saved it starts from what was typed there, rather than from nothing.
@@ -94,9 +98,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     if (!id) return;
     const started = ++generation.current;
     try {
-      const got = await api.get(entry, id);
+      const got = await api.served(entry, id);
       if (generation.current !== started) return;
-      setRow(got);
+      setRow(got.row);
+      setServedIn(got.language);
       setPhase("editing");
     } catch (e) {
       if (generation.current !== started) return;
@@ -265,7 +270,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       // the same thing back. A body of somebody's Portuguese sent without its language would
       // be filed as the record's own copy, over the source that translation was made from,
       // and no later read of the record would show that it had happened.
-      const language = writeLanguage(row, controls, held, screenLanguage());
+      const language = writeLanguage(row, controls, held, screenLanguage(), servedIn);
       if (language !== undefined && language.other.length > 0) {
         // A translation and the record's own fields are two writes at two addresses; half of
         // one is not a thing this sheet sends.
@@ -350,7 +355,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setRefusals((n) => n + 1);
       setPhase("editing");
     }
-  }, [phase, controls, held, row, id, api, entry, wrote, copy, create, say, outbox]);
+  }, [phase, controls, held, row, servedIn, id, api, entry, wrote, copy, create, say, outbox]);
 
   // Cancel is the third door out of a dirty sheet, and it asks the same question the
   // gesture and the system back are asked: an answer of "Keep editing" leaves the

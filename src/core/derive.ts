@@ -1090,6 +1090,14 @@ export interface WriteLanguage {
  * named in another language, one it said nothing about, or one that is not translatable at
  * all — is the record's own copy and is written as it has always been: without a language.
  *
+ * `served` is the tag the read of this row was answered in, straight off the response, and ""
+ * when it named none. A row answered *in a language* was read in it, so every translatable
+ * field its person changed holds that language's words whichever way `_i18n` fell out: a
+ * field with no note is that language's own text, and a field noted as another language's was
+ * shown as that other language precisely so this reader could write its own. Either one sent
+ * bare would file the translation over the source it was made from. Where the read named no
+ * language, `_i18n` stays the whole of the note, as it was before the header was read.
+ *
  * A language write can carry only the fields that language owns, because the record itself
  * is written without the parameter: `other` is what the sheet therefore cannot save in the
  * same breath, and the sheet says so rather than sending half of what was asked.
@@ -1099,6 +1107,7 @@ export function writeLanguage(
   controls: readonly Control[],
   held: Readonly<Record<string, string>>,
   speaking: Language,
+  served = "",
 ): WriteLanguage | undefined {
   if (row === undefined) return undefined;
   const changed = changedFields(controls, held);
@@ -1108,17 +1117,26 @@ export function writeLanguage(
   for (const name of changed) {
     const field = controls.find((c) => c.field.name === name)?.field;
     const said = field?.translatable === true ? servedLanguage(row, name) : undefined;
-    if (said === undefined || copyLanguage(said) !== speaking) {
+    // Which language this field's changed words belong to: the one the reading was served in
+    // when the response said so, and otherwise the one `_i18n` named, and only when that is a
+    // language this sheet's person reads.
+    const destination =
+      served !== ""
+        ? served
+        : said !== undefined && copyLanguage(said) === speaking
+          ? said
+          : undefined;
+    if (destination === undefined) {
       other.push(name);
       continue;
     }
     // One request carries one language: a second translated field named in another language
     // is a second write, and the sheet asks for it separately rather than quietly picking one.
-    if (locale !== undefined && locale !== said) {
+    if (locale !== undefined && locale !== destination) {
       other.push(name);
       continue;
     }
-    if (locale === undefined) locale = said;
+    if (locale === undefined) locale = destination;
     translated.push(name);
   }
   if (locale === undefined) return undefined;
