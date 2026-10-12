@@ -10,7 +10,10 @@
 # the same database of its own created here and dropped in a trap that runs
 # whichever step failed, the same configuration keys, the same
 # `bootstrap --tenant e2e --host localhost --language pt-PT`, the same
-# serve-and-wait on /health with the log printed when the process died. What is
+# serve-and-wait on /health with the log printed when the process died — and, where
+# the copy had dropped it, the refusal that ends the run when the sixty turns are
+# spent and nothing was answered, so a server that never bound is never reported as
+# thirteen journeys that failed. What is
 # new here is where the binary comes from: this repository has no Go module and
 # no toolchain, so the job builds it — from the commit this repository's own
 # provenance records already name. testdata/catalog.source.json and
