@@ -271,12 +271,12 @@
   },
   "totals": {
     "contract": {
-      "files": 28,
-      "cases": 180,
-      "ms": 64304,
-      "testsMs": 46828.80000000001,
+      "files": 29,
+      "cases": 181,
+      "ms": 64719,
+      "testsMs": 46911.60000000001,
       "runners": {
-        "node": 28
+        "node": 29
       },
       "unreachable": 0
     },
@@ -1848,6 +1848,33 @@
       "tier": "push",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/kernel-pin-step-publishes-nothing-without-provenance.test.ts",
+      "runner": "node",
+      "layer": "contract",
+      "cases": 1,
+      "rule": "A missing provenance record must end the pin step before it publishes anything: an empty ref would let the next checkout choose the kernel's default branch. Each record is removed in turn, with the other still naming a valid commit.",
+      "ruleSource": "first comment",
+      "tier": "push",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 415,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": ["the pin step publishes nothing when either provenance record is missing"],
+      "tests": [
+        {
+          "title": "the pin step publishes nothing when either provenance record is missing",
+          "ms": 82.776424,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 82.8
     },
     {
       "file": "tests/kernel-pin-step-refuses-what-the-records-cannot-name.test.ts",
