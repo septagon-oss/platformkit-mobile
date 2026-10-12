@@ -998,8 +998,11 @@ generator that already reads everything else out of it; `scripts/e2e/totp.py` an
 the factor person `scripts/e2e/mobile_ci.sh` enrols; and `e2e/flows/sign-in-factor.yaml`.
 **Made reusable** — `delegableScopes(permissions, declared)` is a plain function
 over two arguments, so an app whose surface differs from this one passes its own
-catalogue to the same rule; `KEY_NAME` and the mint's `tokenName` let a composing
-app name its own key; and the sign-out answers `SignOut`, so a product's screen
+catalogue to the same rule, and reaches it without forking anything: `<Shell>` takes
+that catalogue as `declaredGrants`, beside `KEY_NAME` and the `tokenName` that name
+its key, and passes it to `createApi`'s last argument, whose default is the
+catalogue the pinned document prints; and the sign-out answers `SignOut`, so a
+product's screen
 can tell apart the server having stopped the key, the person still having one to
 stop, and a connection that held none at all.
 

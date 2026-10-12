@@ -25,8 +25,8 @@ import { type Catalog, type Entry, parseCatalog, CatalogError } from "../core/ca
 import { row, page, identity, trail, issuedToken, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
 import { factorRequired, unrecognisedCaller } from "../core/signInOutcome";
-import { delegableScopes } from "../core/scopes";
-import { declaredGrants } from "../generated/grants.gen";
+import { type DeclaredPermission, delegableScopes } from "../core/scopes";
+import { declaredGrants as kitGrants } from "../generated/grants.gen";
 import { kitEnglish } from "../core/kitCopy";
 
 import { createClient, type Client } from "../generated/client";
@@ -261,12 +261,25 @@ interface SessionFrame {
   cookie?: string | undefined;
 }
 
+/**
+ * createApi is one connection to one server, carrying one key: every request the
+ * shell makes, over the transport it is given. The defaults are this kit's own
+ * words for itself, and each is the argument a composing app replaces when its
+ * surface differs from the pinned document — `timeout` is how long a request may
+ * take before it is given up on, `tokenName` is what this app calls its own key on
+ * the server's list of keys, and `declaredGrants` is the permission catalogue the
+ * mint may narrow a key to, by default the one the pinned document prints for this
+ * kit's own operations (src/generated/grants.gen.ts). A path that is not an
+ * encoded API path is refused before anything leaves, and every refusal comes back
+ * as an ApiError carrying the status, detail and problem type the server named.
+ */
 export function createApi(
   baseURL: string,
   fetchImpl: typeof fetch = fetch,
   initialBearer?: Bearer,
   timeout: number = TIMEOUT,
   tokenName: string = KEY_NAME,
+  declaredGrants: readonly DeclaredPermission[] = kitGrants,
 ): Api {
   let bearer: Bearer | undefined = initialBearer;
   /**
@@ -603,11 +616,12 @@ export function createApi(
   async function mint(who: Identity, frame: SessionFrame): Promise<Bearer> {
     // The scopes are not the identity's list: the mint refuses the wildcard the
     // built-in administrator role grants by, and asks for every scope to be a
-    // permission its own catalogue declares (src/core/scopes.ts says what the
-    // phone asks for instead, and why). An empty answer is refused here rather
-    // than sent: a person granted nothing signs in to nothing, and keeping the
-    // session instead would be a half credential whose every read is a 401 on a
-    // key this phone never minted.
+    // permission the catalogue this connection was built with declares — this
+    // kit's own document by default, whatever a composing app's modules declare
+    // (src/core/scopes.ts says what the phone asks for instead, and why). An empty
+    // answer is refused here rather than sent: a person granted nothing signs in to
+    // nothing, and keeping the session instead would be a half credential whose
+    // every read is a 401 on a key this phone never minted.
     const scopes = delegableScopes(who.permissions ?? [], declaredGrants);
     if (scopes.length === 0) throw new ApiError(403, NO_SCOPES);
     // expiresAt is left out: the server applies its own default lifetime and

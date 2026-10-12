@@ -20,44 +20,53 @@ import { createApi } from "../src/effects/api";
 import { WILDCARD, delegableScopes } from "../src/core/scopes";
 import { issuedTokenResponse, loginIdentity } from "./fakes/wire";
 
-/** signInThrough answers as the kernel does about one mint body and reports it. */
-function signInThrough(permissions: readonly string[]) {
+/** signInThrough answers as the kernel does about one mint body and reports it.
+ * `declared` is the catalogue that connection mints out of — the pinned document's
+ * own when it is left out, an app's own when a test names one. */
+function signInThrough(permissions: readonly string[], declared?: Declared[]) {
   const mints: { body: Record<string, unknown>; bearer: boolean }[] = [];
-  const api = createApi("https://scope.test", (async (url, init = {}) => {
-    const path = new URL(String(url)).pathname;
-    const headers = new Headers(init.headers);
-    if (path === "/api/v1/auth/login")
-      return new Response(JSON.stringify({ ...loginIdentity, permissions }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", "Set-Cookie": "pk=one; HttpOnly" },
+  const api = createApi(
+    "https://scope.test",
+    (async (url, init = {}) => {
+      const path = new URL(String(url)).pathname;
+      const headers = new Headers(init.headers);
+      if (path === "/api/v1/auth/login")
+        return new Response(JSON.stringify({ ...loginIdentity, permissions }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", "Set-Cookie": "pk=one; HttpOnly" },
+        });
+      if (path === "/api/v1/auth/tokens" && init.method === "POST") {
+        const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+        const scopes = (body.scopes ?? []) as string[];
+        const refused =
+          scopes.length === 0 ||
+          scopes.includes(WILDCARD) ||
+          scopes.some((scope) =>
+            (declared ?? readPermissions).some(
+              (permission) => permission.operator && permission.permission === scope,
+            ),
+          );
+        mints.push({ body, bearer: headers.get("authorization") === null });
+        if (refused)
+          return new Response(
+            JSON.stringify({
+              status: 422,
+              detail: "every scope has to be a permission this account already holds",
+            }),
+            { status: 422, headers: { "Content-Type": "application/problem+json" } },
+          );
+        return issuedTokenResponse({}, { scopes });
+      }
+      return new Response(JSON.stringify({ status: 404 }), {
+        status: 404,
+        headers: { "Content-Type": "application/problem+json" },
       });
-    if (path === "/api/v1/auth/tokens" && init.method === "POST") {
-      const body = JSON.parse(String(init.body)) as Record<string, unknown>;
-      const scopes = (body.scopes ?? []) as string[];
-      const refused =
-        scopes.length === 0 ||
-        scopes.includes(WILDCARD) ||
-        scopes.some((scope) =>
-          readPermissions.some(
-            (permission) => permission.operator && permission.permission === scope,
-          ),
-        );
-      mints.push({ body, bearer: headers.get("authorization") === null });
-      if (refused)
-        return new Response(
-          JSON.stringify({
-            status: 422,
-            detail: "every scope has to be a permission this account already holds",
-          }),
-          { status: 422, headers: { "Content-Type": "application/problem+json" } },
-        );
-      return issuedTokenResponse({}, { scopes });
-    }
-    return new Response(JSON.stringify({ status: 404 }), {
-      status: 404,
-      headers: { "Content-Type": "application/problem+json" },
-    });
-  }) as typeof fetch);
+    }) as typeof fetch,
+    undefined,
+    undefined,
+    undefined,
+    declared,
+  );
   return { api, mints };
 }
 
@@ -144,4 +153,24 @@ test("an account granted nothing is refused a key in the phone's own words", asy
   await assert.rejects(api.signIn(loginIdentity.email, "password"), /grants nothing/);
   assert.deepEqual(mints, [], "nothing is asked of the mint");
   assert.equal(api.bearer(), undefined);
+});
+
+// The catalogue is an argument, not a constant the rule reaches for: an app whose
+// own modules name permissions the pinned document does not print mints a key that
+// carries them, because the mint checks a scope against the surface the caller
+// actually calls. A kit that read only its own generated list would hand such an
+// app the kernel's permissions and none of its own.
+test("an app's own catalogue is the one its key is minted out of", async () => {
+  const own = { permission: "agenda:publish", operator: false, surface: "app" };
+  const { api, mints } = signInThrough([WILDCARD], [...readPermissions, own]);
+  assert.equal((await api.signIn(loginIdentity.email, "password")).kind, "signed-in");
+  const scopes = mints[0]!.body.scopes as string[];
+  assert.ok(
+    scopes.includes(own.permission),
+    "a permission only this app declares is in the key that app mints",
+  );
+  assert.ok(
+    appGrants.every((grant) => scopes.includes(grant.permission)),
+    "and the permissions the document declares are still there",
+  );
 });

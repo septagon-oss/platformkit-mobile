@@ -24,6 +24,7 @@ import {
 } from "./effects/api";
 import { sessions } from "./effects/native-session";
 import type { Session } from "./effects/session";
+import type { DeclaredPermission } from "./core/scopes";
 import type { Renderers } from "./renderers";
 
 export interface ShellValue {
@@ -75,6 +76,15 @@ interface Props {
    * The mint reads it and nothing else does; the kit's own word is "This phone".
    */
   readonly tokenName?: string;
+  /**
+   * declaredGrants is the permission catalogue this app's key is minted out of: an
+   * app whose modules name permissions the pinned document does not print passes
+   * their catalogue, and a wildcard holder is narrowed to it rather than to the
+   * kit's own surface. Like tokenName the mint reads it and nothing else does — a
+   * key read back out of storage mints nothing — and left out it is the catalogue
+   * the document prints, which is this kit's surface and no other.
+   */
+  readonly declaredGrants?: readonly DeclaredPermission[];
 }
 
 function message(e: unknown): string {
@@ -105,7 +115,13 @@ function held(session: Session | undefined): Bearer | undefined {
     : undefined;
 }
 
-export function Shell({ baseURL: initialURL, renderers, children, tokenName = KEY_NAME }: Props) {
+export function Shell({
+  baseURL: initialURL,
+  renderers,
+  children,
+  tokenName = KEY_NAME,
+  declaredGrants,
+}: Props) {
   const [state, dispatch] = useReducer(reduce, initial);
   const [connection, setConnection] = useState(() => ({
     api: createApi(initialURL),
@@ -208,7 +224,7 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
         // The new catalog may be ready before its own identity request settles.
         setIdentity(undefined);
         dispatch({ type: "sign-in", generation: started });
-        const a = createApi(url, undefined, undefined, undefined, tokenName);
+        const a = createApi(url, undefined, undefined, undefined, tokenName, declaredGrants);
         try {
           const answer = await a.signIn(email, password);
           if (answer.kind === "factor-required") {
@@ -346,7 +362,20 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
         return load(current, begin(), active.current.baseURL);
       },
     }),
-    [api, baseURL, state, renderers, identity, writes, wrote, begin, connect, load, tokenName],
+    [
+      api,
+      baseURL,
+      state,
+      renderers,
+      identity,
+      writes,
+      wrote,
+      begin,
+      connect,
+      load,
+      tokenName,
+      declaredGrants,
+    ],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
