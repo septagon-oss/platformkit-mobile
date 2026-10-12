@@ -141,11 +141,25 @@ export function ResourceForm({
   const current = (c: Control) => held[c.field.name] ?? c.value;
   // Where the keyboard's caret last stood in each box, as that box reported it: a formatting
   // control writes its marks where the person was typing, and a box that never reported one
-  // is edited at its end. Each control was made by the render that holds this draft, so the
-  // value it edits is the one on the screen when the control is pressed.
+  // is edited at its end.
   const [carets, setCarets] = useState<Record<string, Caret>>({});
+  // The body each box shows, and where its caret last stood, read at the moment an edit is
+  // applied rather than the moment a control was pressed. The two are not the same instant
+  // twice over: a body read from the server has not been typed in and is still what the
+  // person sees, and an answer that arrives from the file list a second later lands among
+  // whatever has been typed since it was asked for. The map is written as this renders, so
+  // it is never behind the box it names.
+  const drafts = useRef(new Map<string, Draft>());
+  drafts.current = new Map(
+    blocks.flatMap((block) =>
+      block.controls.map(
+        (c) =>
+          [c.field.name, { text: current(c), caret: carets[c.field.name] ?? NO_CARET }] as const,
+      ),
+    ),
+  );
   const apply = (name: string, edit: (draft: Draft) => Draft) => {
-    const draft: Draft = { text: held[name] ?? "", caret: carets[name] ?? NO_CARET };
+    const draft = drafts.current.get(name) ?? { text: held[name] ?? "", caret: NO_CARET };
     const next = edit(draft);
     if (next.text === draft.text) return;
     onChange(name, next.text);
