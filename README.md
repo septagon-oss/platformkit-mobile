@@ -1750,3 +1750,44 @@ identified leaves no address, no email and no text behind, and a boot-restored
 cookie that is already dead keeps today's path: the sign-in's own notice about
 the saved sign-in, not this one. A cookie expiring on a handset is not proven
 here; the cases run against the real `<Shell>` over a recorded fetch.
+
+## Read the first journey end to end
+
+A tenant's first screenful is a list of records, one record, and the command
+sheet that changes it. Three surfaces decide whether that reads as a product or
+as an inventory: what the sheet says it runs, what a pointer at another record
+shows, and whether the words on screen are the server's or the phone's.
+
+**Reused** — `confirmation.body` and `successMessage` on `CommandHints`, and
+`reference.resource` on `FieldHints`, as the words and the mounted resource the
+kernel already serves; `saidValue`'s way of letting a hint decide what a field
+reads as; `NameFields.displayName`/`title`/`name` and `humanize` for reading a
+name off a record; `kitCopy`, so the two words a document cannot name belong to
+the kit; `pick`, `list`, `screenPath` and `key` for the reads themselves;
+`Button`, `LabeledValues`, `Value` and `Chip`, which draw the sheet and the
+pointer without a new atom.
+
+**Added** — `commandWording(entry, actsOn, copy)`, the one wording a command
+sheet speaks and the line a success leaves behind: the command's own label, the
+title of the record it runs on, the consequence the server described (or the
+summary, when the server gave a title and no body), and `{label} done` when it
+gave neither; `pointedAt`, `referenceWordFor` and `pointerTargets`/
+`controlPointers`, which read a pointer as the name it resolved to, as
+`Assigned` for a person and `Linked` for anything else, and never as the
+identifier it holds; `Names` and its key, so a resolved name travels to the
+place that draws it instead of being looked up there; `useRecordNames` and
+`useDirectoryNames`, one read per record on a record's screen and one page per
+resource on a window of rows; and `e2e/flows/first-journey.yaml`, the signed-in
+journey that makes a record with a deadline, reads its state pill and its
+deadline with no identifier on the screen until Record information is opened,
+finds it again through a filter, amends it and deletes it.
+
+**Made reusable** — `Names` as the prop every surface that draws a field takes,
+so the next module with a pointer pays nothing; `acts` on `ResourceForm`, the
+subject-and-consequence pair any command sheet can hand the sheet body;
+`pointerTargets`/`controlPointers` asking only what the medium draws, so a
+screen that shows two facts reads two records; the settled-map discipline in
+`useReferenceNames`, where a refusal ends that pointer for the visit and a
+withdrawn session ends every name at once; and the `DUE_FIELD`/`STATUS_FIELD`/
+`STATUS_VALUE` the journeys now read from the environment, which is what lets a
+second client's flow exist without a word of its product in this repository.

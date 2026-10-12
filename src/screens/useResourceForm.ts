@@ -12,8 +12,11 @@ import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
 import { address } from "../core/reentry";
+import { useRecordNames } from "./useReferenceNames";
 import {
   changedFields,
+  controlPointers,
+  formControls,
   failureSubject,
   firstProblem,
   formSections,
@@ -115,9 +118,17 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // read back flat, which is what a body and a refusal are built from. One order,
   // computed once, so the order a person is asked in cannot drift from the order
   // the sheet writes.
+  // The records the greyed boxes point at are read once for the sheet, so the
+  // person reads a name where the row holds an identifier and the write still
+  // sends what it was given (`Control.echo`).
+  const asked = useMemo(
+    () => controlPointers(formControls(entry, row, create), row),
+    [entry, row, create],
+  );
+  const names = useRecordNames(asked);
   const blocks = useMemo(
-    () => formSections(entry, row, create, copy.kit.overview),
-    [entry, row, create, copy.kit.overview],
+    () => formSections(entry, row, create, copy.kit.overview, names),
+    [entry, row, create, copy.kit.overview, names],
   );
   const controls = useMemo(() => blocks.flatMap((b) => b.controls), [blocks]);
   // Dirty means changed, not touched: a person who typed something and put it back

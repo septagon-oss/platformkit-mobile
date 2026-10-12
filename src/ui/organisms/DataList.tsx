@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { DataListModel, Order } from "../../core/derive";
+import type { DataListModel, Names, Order } from "../../core/derive";
 import { ActionControl } from "../atoms/ActionControl";
 import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";
@@ -16,6 +16,8 @@ import { kitStyles } from "../layout";
 import { useStyles } from "../theme";
 export interface Props {
   readonly model: DataListModel;
+  /** names resolves the records a cell points at, so a row reads a name where the row holds an identifier. */
+  readonly names?: Names | undefined;
   readonly onOpen?: (id: string) => void;
   readonly onRowAction?: (rowId: string, actionId: string) => void;
   readonly onView?: (id: string) => void;
@@ -32,6 +34,7 @@ export interface Props {
   readonly rowTestID?: (id: string) => string;
 }
 export function DataList({
+  names,
   model,
   onOpen,
   onRowAction,
@@ -153,6 +156,7 @@ export function DataList({
                             presentation={model.feedback}
                             field={cell.field!}
                             value={cell.raw}
+                            names={names}
                           />
                         ))}
                     </>

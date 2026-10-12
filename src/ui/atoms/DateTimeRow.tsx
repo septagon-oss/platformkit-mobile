@@ -127,8 +127,11 @@ export function DateTimeRow({
     });
   };
 
+  // Android's tappable node is the pressable, not the row around it: the test id
+  // a journey taps by has to be the button, or the tap finds a view that cannot
+  // be tapped and the journey fails on a control a person can see and press.
   return (
-    <View style={s.row} {...testable(testID)}>
+    <View style={s.row}>
       <Pressable
         style={s.press}
         onPress={ask}
@@ -138,6 +141,7 @@ export function DateTimeRow({
         aria-valuetext={value ? text(value) : copy.notSet}
         accessibilityHint={copy.openHint}
         aria-disabled={disabled}
+        {...testable(testID)}
       >
         <View style={s.value}>
           <Icon name="calendar" size="sm" tone="muted" />

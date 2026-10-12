@@ -20,6 +20,7 @@ import {
   refusalAction,
   type DetailItem,
   type DisclosureModel,
+  type Names,
   type Feedback,
   type FailureVerdict,
   type Row as Item,
@@ -45,6 +46,12 @@ export interface Props {
   readonly feedback: Feedback;
   readonly entry: Entry;
   readonly row: Item | undefined;
+  /**
+   * names is what this screen resolved of the records this row points at. Every
+   * value drawn below reads through it, so a pointer is a name or the word
+   * saying there is one, and never the identifier the row holds for it.
+   */
+  readonly names?: Names | undefined;
   readonly error: string;
   /**
    * saved is the sentence a write said — "Note created", "Changes saved". The screen
@@ -96,6 +103,7 @@ export function ResourceDetail({
   feedback,
   entry,
   row,
+  names,
   error,
   saved = "",
   refusal,
@@ -128,9 +136,11 @@ export function ResourceDetail({
         failureSubject(entry),
       )
     : undefined;
-  const header = row ? recordHeader(entry, row, feedback, feedback.copy.kit.untitled) : undefined;
-  const blocks = row ? recordSections(entry, row, feedback) : [];
-  const details = row ? recordInformation(entry, row, feedback) : [];
+  const header = row
+    ? recordHeader(entry, row, feedback, feedback.copy.kit.untitled, names)
+    : undefined;
+  const blocks = row ? recordSections(entry, row, feedback, names) : [];
+  const details = row ? recordInformation(entry, row, feedback, names) : [];
   return (
     <Screen testID="resource-detail">
       {saved ? <Notice testID="record-saved" tone="ok" announcement="polite" text={saved} /> : null}
@@ -176,7 +186,13 @@ export function ResourceDetail({
           {blocks.map((block) => (
             <Section key={block.key || "overview"} title={block.label}>
               {block.items.map((item) => (
-                <RecordFact key={item.field.name} feedback={feedback} item={item} row={row} />
+                <RecordFact
+                  key={item.field.name}
+                  feedback={feedback}
+                  item={item}
+                  row={row}
+                  names={names}
+                />
               ))}
             </Section>
           ))}
@@ -195,7 +211,13 @@ export function ResourceDetail({
           onExpanded={information.onExpanded}
         >
           {details.map((item) => (
-            <RecordFact key={item.field.name} feedback={feedback} item={item} row={row} />
+            <RecordFact
+              key={item.field.name}
+              feedback={feedback}
+              item={item}
+              row={row}
+              names={names}
+            />
           ))}
         </SummaryDetail>
       ) : null}
@@ -213,10 +235,12 @@ function RecordFact({
   feedback,
   item,
   row,
+  names,
 }: {
   readonly feedback: Feedback;
   readonly item: DetailItem;
   readonly row: Item;
+  readonly names?: Names | undefined;
 }) {
   return (
     <DetailRow
@@ -224,7 +248,14 @@ function RecordFact({
       term={item.label}
       value={item.value}
       {...(item.spoken === undefined ? {} : { spoken: item.spoken })}
-      shown={<Value presentation={feedback} field={item.field} value={row[item.field.name]} />}
+      shown={
+        <Value
+          presentation={feedback}
+          field={item.field}
+          value={row[item.field.name]}
+          names={names}
+        />
+      }
     />
   );
 }

@@ -8,7 +8,7 @@ import test from "node:test";
 import { parseAllDocuments } from "yaml";
 import { kitEnglish } from "../src/core/kitCopy";
 
-for (const name of ["create", "detail", "edit", "list", "record", "verb"]) {
+for (const name of ["create", "detail", "edit", "first-journey", "list", "record", "verb"]) {
   test(`${name} delete selector matches the dialog answer as raw regex source`, () => {
     const documents = parseAllDocuments(readFileSync(`e2e/flows/${name}.yaml`, "utf8"));
     const steps = documents[1]!.toJSON() as { tapOn?: string | { id?: string; text?: string } }[];

@@ -4,12 +4,13 @@ import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import { doors, type Command } from "../core/catalog";
-import { collectionCommands, noun, screenPath } from "../core/derive";
+import { collectionCommands, noun, pointerTargets, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
 import { useCommandAsk } from "./useCommand";
 import { useResourceList } from "./useResourceList";
+import { useDirectoryNames } from "./useReferenceNames";
 export function ResourceList({ entry }: ScreenProps) {
   const feedback = useFeedback();
   const list = useResourceList(entry, feedback);
@@ -19,6 +20,11 @@ export function ResourceList({ entry }: ScreenProps) {
   const open = (id: string) => router.push(`${at}/${encodeURIComponent(id)}`);
   const add = useCallback(() => router.push(`${at}/new`), [router, at]);
   const { sheet, setSheet } = list;
+  // A row that points at another record names it: one page of each resource this
+  // window points at, which is the same read the trail makes for its actors, and
+  // a value outside the page keeps the word rather than quoting an identifier.
+  const asked = useMemo(() => pointerTargets(entry, list.rows, "row"), [entry, list.rows]);
+  const names = useDirectoryNames(asked);
   // What the header's one door is called. A string in a frozen bundle, which is what
   // makes it a usable memo dependency below — the `feedback` object around it is
   // fresh every render because it reads the clock.
@@ -62,6 +68,7 @@ export function ResourceList({ entry }: ScreenProps) {
         presentation={{ ...feedback, weekStartsOn: 1 }}
         entry={entry}
         rows={list.rows}
+        names={names}
         total={list.total}
         loading={list.loading}
         refreshing={list.refreshing}

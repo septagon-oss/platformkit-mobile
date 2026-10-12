@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `9dd247e8c` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `d5c5671` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 26 | 172 | 46.3 s | 63 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 191 | 900 | 43.3 s | 1441 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 54 | 195 | 22.5 s | 1136 s | 0 |
-| journey | what a person does on a device or in a browser | nightly / before a release | 55 | 47 | 0.0 s | 0 s | 43 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 194 | 915 | 43.4 s | 1444 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 57 | 206 | 22.6 s | 1188 s | 0 |
+| journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 326
+* keep: 333
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 326 — 149 `tests/*.test.ts` (node), 122 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 12 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1267; cases in files no runner reaches: 35
-* isolated wall time: contract 63 s, behaviour 1441 s, composition 1136 s, journey 0 s
+* files inventoried: 333 — 152 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1293; cases in files no runner reaches: 35
+* isolated wall time: contract 63 s, behaviour 1444 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -188,6 +188,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/tag-draft-correction.test.tsx | jest | behaviour | 1 | 18095 | 29 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) correcting a refused tag replaces the draft without storing its accepted prefix |
 | tests/ui/theme.test.tsx | jest | behaviour | 3 | 17888 | 39 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a client palette reaches shared components in both modes with its resolved native faces |
 | tests/ui/viewer-image-adapter.test.tsx | jest | behaviour | 3 | 19046 | 171 | 0 | 0 of 3 | — | 0 | keep | An open viewer keeps the image adapter it chose: the selected photo stays mounted while it loads, and an error or unavailable image offers recovery for that sa… |
+| tests/a-command-says-what-it-runs-on-and-what-it-does.test.ts | node | behaviour | 5 | 1373 | 15.4 |  | not measured | — | 0 | keep | What a person is told about one command, said once for the dialog, the sheet and the sentence said afterwards. The title is the command's own word and the answ… |
 | tests/a-declared-visibility-and-hide-list-agree-on-every-column.test.ts | node | behaviour | 1 | 1082 | 17.8 | 0 | 0 of 1 | — | 0 | keep | A list's columns answer one question of a field, however the two tags combine: a declared visibility wins over `hideList` both ways (`shown` reclaims the colum… |
 | tests/a-delete-journey-taps-the-answer-the-question-offers.test.ts | node | behaviour | 2 | 314 | 5.3 | 0 | 0 of 2 | — | 0 | keep | Tapping the menu's Delete row opens a question the journey must answer: the delete is the run's own tidying, and a flow that leaves the question standing fails… |
 | tests/a-fact-the-header-drew-is-not-a-row-below-it.test.ts | node | behaviour | 1 | 1080 | 18.1 | 0 | 0 of 1 | — | 0 | keep | A fact is drawn once, at the highest place that draws it (0085; README "How a record opens": "A field that a higher place drew is not a row anywhere below it",… |
@@ -195,9 +196,11 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts | node | behaviour | 2 | 309 | 8.5 | 0 | 1 of 2 | — | 0 | keep | Maestro reads a text selector as regex source, not as a JavaScript literal: its YAML reader keeps the scalar whole and StringUtils.toRegexSafe compiles what it… |
 | tests/a-form-asks-only-what-a-person-can-answer.test.ts | node | behaviour | 15 | 1149 | 32.1 | 17 | 1 of 15 | — | 0 | keep | A form asks only what a person can answer (0085). Three rules decide what a sheet holds and in what order it holds it, and all three are answers of the core: t… |
 | tests/a-form-keeps-what-the-person-typed.test.ts | node | behaviour | 12 | 1833 | 22.2 |  | not measured | — | 0 | keep | A form keeps what the person typed, and says exactly what to fix (0085). Four rules decide that, and all four are answers of the core: what the sheet may refus… |
+| tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts | node | behaviour | 3 | 856 | 13.9 |  | not measured | — | 0 | keep | A box nobody can type into that points at another record draws that record's name — or the word for a pointer with no name — and the whole-row replace still se… |
 | tests/a-keep-reason-names-siblings-the-table-holds.test.ts | node | behaviour | 2 | 304 | 3.7 |  | not measured | — | 0 | keep | A keep reason is what root reads before a prune (0088), so what it points at has to be there to read: every tests/ or e2e/ test path a verdictReason names is a… |
 | tests/a-list-orders-itself-and-narrows-itself.test.ts | node | behaviour | 13 | 1269 | 69.4 | 61 | 5 of 13 | — | 0 | keep | How a list is being read is two questions, and the kit asks them separately: in what order, and narrowed how. A sheet of orders words each one for the type of … |
 | tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts | node | behaviour | 13 | 1214 | 43.4 | 0 | 0 of 13 | — | 0 | keep | A list row says which record it is, what state that record is in, and what sets it apart — and nothing else. The four answers come from four declarations (the … |
+| tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts | node | behaviour | 7 | 868 | 15.9 |  | not measured | — | 0 | keep | A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one … |
 | tests/a-record-opens-on-what-it-is.test.ts | node | behaviour | 10 | 1225 | 51.7 | 2 | 0 of 10 | — | 0 | keep | A record opens on what it is, not on how it is stored (0085). The whole of the hierarchy is one pure function of the entry and the row — `recordHeader`, `recor… |
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
 | tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts | node | behaviour | 2 | 1007 | 10.7 |  | not measured | — | 0 | keep | A whole-row replace carries what nobody typed exactly as the read returned it. The body builder is `writeControls`, and two of its promises have no case of the… |
@@ -229,7 +232,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/flow-claim-header.test.ts | node | behaviour | 1 | 320 | 7.3 | 0 | 0 of 1 | — | 0 | keep | A flow says which screen it proves in its header comment, above the configuration and the `---` that starts its steps. A `# screen:` line among the steps is a … |
 | tests/flow-coverage.test.ts | node | behaviour | 10 | 373 | 52.7 | 0 | 0 of 10 | — | 0 | keep | A journey earns its place by naming the screen it proves, and the rule that keeps the set complete is scripts/check_flows.ts — the gate `npm run check` already… |
 | tests/flow-folder-coverage.test.ts | node | behaviour | 1 | 297 | 7.2 | 0 | 0 of 1 | — | 0 | keep | `maestro test e2e/flows` with no workspace config plans the flows matching its default glob `*`, which does not cross a folder: a journey one folder down never… |
-| tests/flow-served-vocabulary.test.ts | node | behaviour | 1 | 291 | 4.3 | 0 | 0 of 1 | — | 0 | keep | The served kernel's vocabulary — which resource, its known field, which command and its argument — is named once, in the mobile-e2e job's env, and a flow reads… |
+| tests/flow-served-vocabulary.test.ts | node | behaviour | 1 | 298 | 3.5 | 0 | 0 of 1 | — | 0 | keep | The served kernel's vocabulary — which resource, its known field, which command and its argument — is named once, in the mobile-e2e job's env, and a flow reads… |
 | tests/flow-workspace-key-spelling.test.ts | node | behaviour | 4 | 301 | 17.4 | 0 | 0 of 4 | — | 0 | keep | YAML spells one key several ways. Maestro's workspace planner reads each of these as `flows: [index.yaml]` and plans index.yaml alone, so other.yaml runs nowhe… |
 | tests/flow-workspace-null-selection.test.ts | node | behaviour | 1 | 292 | 7.3 | 0 | 0 of 1 | — | 0 | keep | WorkspaceExecutionPlanner.plan (Maestro 2.8.0) plans both files when the last flows key is null. A prior selection no longer narrows the run. |
 | tests/flow-workspace-plan.test.ts | node | behaviour | 6 | 313 | 31.9 | 0 | 5 of 6 | — | 0 | keep | `tests/flow-workspace-selection.test.ts` proves the invariant: a screen whose only journey is excluded from the plan is uncovered. These cases hold the edges o… |
@@ -317,7 +320,9 @@ suite whatever the push tier selected, and a selection that named no file says s
 | test file | runner | layer | cases | wall ms | tests ms | only-it-covers (prod lines) | tests with a line no other test covers | production files only it loads | flaky / reach | verdict | the rule it proves |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | tests/route.test.tsx | jest | composition | 10 | 24265 | 1028 | 0 | 0 of 10 | — | 0 | keep | A renderer pack's screen: it says what it was given. |
+| tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
+| tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx | jest | composition | 2 | 17918 | 11 |  | not measured | — | 0 | keep | A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answe… |
 | tests/screens/activity-catalog-withdrawal-inflight.test.tsx | jest | composition | 2 | 23253 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a late actor lookup cannot restore identity after catalog withdrawal |
 | tests/screens/activity-directory-catalog-withdrawal.test.tsx | jest | composition | 2 | 23238 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light catalog withdrawal removes cached actor details while retaining readable history |
 | tests/screens/activity-directory-denial.test.tsx | jest | composition | 5 | 23634 | 769 | 0 | 0 of 5 | — | 0 | keep | A directory refusal empties the actor names a trail shows, and a response to a request the screen no longer wants cannot put them back: the detail keeps its ow… |
@@ -341,6 +346,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/offline-list-says-when-it-was-saved.test.tsx | jest | composition | 1 | 26758 | 1127 |  | not measured | — | 0 | keep | A page answered from the phone rather than the server is drawn with a quiet line that says so and when it was saved: a person in a tunnel must be able to tell … |
 | tests/screens/offline-resource-reads.test.tsx | jest | composition | 2 | 22079 | 87 |  | not measured | — | 0 | keep | (no first comment; first test title) a resource list reopened offline shows its last successful page |
 | tests/screens/record-command-at-collection-address.test.tsx | jest | composition | 3 | 23933 | 64 | 0 | 0 of 3 | — | 0 | keep | A command is about one record or about the collection (src/core/catalog.ts: "{entry.path}/{id}/{verb}, or {entry.path}/{verb} when collection"). The collection… |
+| tests/screens/reference-name-resolves-or-says-linked.test.tsx | jest | composition | 7 | 16461 | 30 |  | not measured | — | 0 | keep | A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the i… |
 | tests/screens/sign-in-door-asks-before-held-writes-go.test.tsx | jest | composition | 1 | 25803 | 196 |  | not measured | — | 0 | keep | The sign-in screen has its own way to another server when a sign-in loaded the person but not the catalog — a network that dropped half-way through, which is t… |
 | tests/screens/sign-out-asks-before-held-writes-go.test.tsx | jest | composition | 1 | 23996 | 304 |  | not measured | — | 0 | keep | Signing out clears what this phone is holding, so every way out asks first while a write is held — including the one a catalog that could not be read offers, w… |
 | tests/screens/singleton-cancelled-refusal.test.tsx | jest | composition | 1 | 21526 | 37 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) cancelling a refused singleton draft allows the next valid edit to save |
@@ -421,6 +427,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | e2e/flows/create.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | A new record: the sheet a New button opens, what it refuses, and where a saved one lands. An empty record is refused before anything is sent, and the sheet kee… |
 | e2e/flows/detail.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | One record as a screen: what it is and what distinguishes it first, its fields that have values, and its own identifier kept in the collapsed Record informatio… |
 | e2e/flows/edit.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | An edit: the sheet opens holding what the record says, Cancel changes nothing, and what is saved is what the record says afterwards. |
+| e2e/flows/first-journey.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | The first journey a person takes on the kernel's reference application: sign in, open the served resource, make a record with a deadline, read what the record … |
 | e2e/flows/gallery-page.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | One page of the library, at its own route. The page names itself in its display line, the states it holds arrive behind the disclosure a phone puts them in, an… |
 | e2e/flows/gallery.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | The library on one screen, in both modes. The gallery route exists only in the verification profile, which is the build these flows run on. |
 | e2e/flows/home.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | The first screen a signed-in person is given: the catalog the server named, one row per entry the caller may reach, and the account door in the header. It name… |
