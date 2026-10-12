@@ -24,7 +24,10 @@ for (const page of ["list", "home", "navigate", "form", "steps"]) {
     assert.ifError(measured.error);
     assert.equal(measured.status, 0, measured.stderr);
     const records = measured.stdout.split("\n").filter((line) => line.startsWith("{"));
-    assert.deepEqual(records.map((line) => JSON.parse(line).width), [390, 1440]);
+    assert.deepEqual(
+      records.map((line) => JSON.parse(line).width),
+      [390, 1440],
+    );
     const directory = mkdtempSync(join(tmpdir(), "gallery-floor-"));
     try {
       const file = join(directory, "measurements.jsonl");

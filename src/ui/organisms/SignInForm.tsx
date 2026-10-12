@@ -48,6 +48,12 @@ export interface Props {
   readonly booting?: boolean;
   /** failed is why a saved sign-in could not be opened; it is offered a retry and a way to another server. */
   readonly failed?: string;
+  /** expired is the line for a session the server refused while it was in use: this person is
+   * not signing in here, they are signing back in, and nothing about the form asks them to
+   * start over. It carries no action, because signing in is what the form below does. */
+  readonly expired?: string;
+  /** initialEmail is who that session belonged to, so the address is not asked for twice. */
+  readonly initialEmail?: string;
   readonly onRetry?: () => void;
 }
 
@@ -62,6 +68,8 @@ export function SignInForm({
   title = "Sign in",
   booting = false,
   failed = "",
+  expired = "",
+  initialEmail = "",
   onRetry,
   step = "credentials",
   code = "",
@@ -75,7 +83,7 @@ export function SignInForm({
   const kit = feedback.copy.kit;
   const [enteredURL, setURL] = useState<string>();
   const url = enteredURL ?? baseURL;
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   /**
    * typed is what each field holds the moment a control is pressed. A pressed
@@ -188,7 +196,7 @@ export function SignInForm({
   }
   return (
     <Screen form testID="sign-in">
-      {head(title, "Use the address this tenant knows you by.")}
+      {head(title, feedback.copy.kit.signInIntro)}
       {error ? (
         <Notice
           announcement="urgent"
@@ -196,6 +204,9 @@ export function SignInForm({
           action={{ label: feedback.retryLabel, onPress: () => submit() }}
           testID="sign-in-error"
         />
+      ) : null}
+      {expired ? (
+        <Notice announcement="polite" tone="warning" text={expired} testID="sign-in-expired" />
       ) : null}
       {notice ? (
         <Notice
@@ -208,6 +219,7 @@ export function SignInForm({
       ) : null}
       <Section>
         <ServerField
+          caption={feedback.copy.kit.workspaceAddress}
           value={url}
           onChange={(v) => {
             typed.current.url = v;

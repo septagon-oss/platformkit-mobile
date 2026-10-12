@@ -30,7 +30,13 @@ const measure = () => {
         glyph = { left: mark.left, width: mark.width, height: mark.height };
       }
     }
-    return { left: rect.left, width: rect.width, height: rect.height, centre: rect.left + rect.width / 2, glyph };
+    return {
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+      centre: rect.left + rect.width / 2,
+      glyph,
+    };
   };
   return {
     card: bounds("gallery-player"),

@@ -12,10 +12,24 @@ interface Props {
   /** form keeps the keyboard off the field being edited and lets a tap land on a control. */
   readonly form?: boolean;
   readonly scroll?: boolean;
+  /**
+   * scrollViewRef is this page's scroll view, for the one thing only the page knows how
+   * to ask of it: bringing the field a refusal is about above the keyboard. The template
+   * holds no rule about which field that is — it hands out the handle and the organism
+   * decides — and React Native's own `scrollResponderScrollNativeHandleToKeyboard` does
+   * the measuring.
+   */
+  readonly scrollViewRef?: React.Ref<ScrollView>;
   readonly testID?: string;
 }
 
-export function Screen({ children, form = false, scroll: scrolling = true, testID }: Props) {
+export function Screen({
+  children,
+  form = false,
+  scroll: scrolling = true,
+  scrollViewRef,
+  testID,
+}: Props) {
   const canvas = useCanvas();
   if (!scrolling)
     return (
@@ -25,6 +39,7 @@ export function Screen({ children, form = false, scroll: scrolling = true, testI
     );
   const scroll = (
     <ScrollView
+      ref={scrollViewRef}
       style={canvas.page}
       contentContainerStyle={canvas.content}
       // What makes the content start under the native header and the large

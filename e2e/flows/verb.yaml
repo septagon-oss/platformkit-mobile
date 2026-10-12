@@ -69,12 +69,14 @@ env:
 - extendedWaitUntil:
     visible: ${TITLE} resolved
     timeout: 20000
+- tapOn:
+    id: "record-menu"
 - scrollUntilVisible:
     element:
       id: "delete"
 - tapOn:
     id: "delete"
-- tapOn: "Delete"
+- tapOn: (?i)^Delete [^‘’?]+$
 - extendedWaitUntil:
     visible:
       id: "resource-list"

@@ -72,6 +72,40 @@ const routes = [
   },
   {
     method: "POST",
+    pattern: new RegExp("^/api/v1/auth/challenge/passkey/begin$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authChallengePasskeyBegin({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authChallengePasskeyBegin<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/auth/challenge/passkey/verify$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authChallengePasskeyVerify({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authChallengePasskeyVerify<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
     pattern: new RegExp("^/api/v1/auth/challenge/verify$"),
     statuses: [200],
     json: true,
@@ -101,6 +135,40 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.authFactorList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/auth/factors/passkey/begin$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authFactorPasskeyBegin({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authFactorPasskeyBegin<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/auth/factors/passkey/finish$"),
+    statuses: [201],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authFactorPasskeyFinish({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authFactorPasskeyFinish<true>>[0]);
       return result;
     },
   },
@@ -186,6 +254,40 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.authLogin<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/auth/login/passkey/begin$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authLoginPasskeyBegin({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authLoginPasskeyBegin<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/auth/login/passkey/verify$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authLoginPasskeyVerify({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authLoginPasskeyVerify<true>>[0]);
       return result;
     },
   },
@@ -326,6 +428,57 @@ const routes = [
     },
   },
   {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/auth/saml/callback$"),
+    statuses: [204],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authSamlCallback({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authSamlCallback<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/auth/saml/metadata$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authSamlMetadata({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authSamlMetadata<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/auth/saml/start$"),
+    statuses: [204],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authSamlStart({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authSamlStart<true>>[0]);
+      return result;
+    },
+  },
+  {
     method: "GET",
     pattern: new RegExp("^/api/v1/auth/sessions$"),
     statuses: [200],
@@ -373,6 +526,23 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.authSessionRevoke<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/auth/settings/passkey-sign-in$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authPasskeySignInSet({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authPasskeySignInSet<true>>[0]);
       return result;
     },
   },
@@ -922,6 +1092,23 @@ const routes = [
   },
   {
     method: "GET",
+    pattern: new RegExp("^/api/v1/file/files/[^/]+/uses$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.fileFileUses({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.fileFileUses<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
     pattern: new RegExp("^/api/v1/notification/notifications$"),
     statuses: [200],
     json: true,
@@ -1206,6 +1393,40 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.tenantTenantRename<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/ops/tenant/tenants/[^/]+/saml$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.tenantTenantSetSaml({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.tenantTenantSetSaml<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/ops/tenant/tenants/[^/]+/saml/clear$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.tenantTenantClearSaml({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.tenantTenantClearSaml<true>>[0]);
       return result;
     },
   },

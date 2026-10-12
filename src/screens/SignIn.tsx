@@ -8,6 +8,7 @@
 // the session.
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
+import { useSignOut } from "./useSignOut";
 import React, { useRef, useState } from "react";
 import { useShell } from "../shell";
 import { ApiError } from "../effects/api";
@@ -23,7 +24,13 @@ interface Props {
 
 export function SignIn({ title }: Props = {}) {
   const feedback = useFeedback();
-  const { state, baseURL, signIn, answerFactor, signOut, refresh } = useShell();
+  const { state, baseURL, signIn, answerFactor, refresh, returning } = useShell();
+  // Both ways off this screen — the failed phase's way to another server and the
+  // anonymous phase's clearing of a saved sign-in — leave through the one door
+  // that asks while this phone holds a write. Signing out clears what is held,
+  // and a screen that reached for `signOut` itself would throw that work away
+  // on a button whose label only said "another server".
+  const leave = useSignOut();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   /**
@@ -100,12 +107,14 @@ export function SignIn({ title }: Props = {}) {
         baseURL={baseURL}
         notice={failed ? "" : (state.error ?? "")}
         booting={state.phase === "booting" || state.phase === "loading"}
-        failed={failed ? (state.error ?? "The catalog could not be read.") : ""}
+        failed={failed ? (state.error ?? feedback.copy.failure.loadCatalog) : ""}
+        expired={state.reason === "expired" ? feedback.copy.failure.signedOut : ""}
+        {...(returning ? { initialEmail: returning.email } : {})}
         onRetry={() => void refresh()}
         busy={busy}
         error={error}
         onSubmit={(u, e, p) => void submit(u, e, p)}
-        onClear={() => void signOut()}
+        onClear={leave}
         step={step}
         code={code}
         onCodeChange={setCode}

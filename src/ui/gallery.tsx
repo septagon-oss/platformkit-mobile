@@ -46,6 +46,7 @@ import { FormField } from "./molecules/FormField";
 import { LoadMore } from "./molecules/LoadMore";
 import { Row } from "./molecules/Row";
 import { Section } from "./molecules/Section";
+import { HeldWriteRow } from "./molecules/HeldWriteRow";
 import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
@@ -60,6 +61,7 @@ import { SelectionControl } from "./atoms/SelectionControl";
 import { Price } from "./atoms/Price";
 import { ActionBar } from "./molecules/ActionBar";
 import { ChoiceChips } from "./molecules/ChoiceChips";
+import { ChoiceRows } from "./molecules/ChoiceRows";
 import { DisclosureSection } from "./molecules/DisclosureSection";
 import { DayStrip } from "./molecules/DayStrip";
 import { QuantityControl } from "./molecules/QuantityControl";
@@ -190,53 +192,61 @@ export function Gallery({
         }
       >
         <Section title={words.appearance}>
-          <ChoiceRow
-            copy={copy.choice}
-            label={words.appearance}
-            value={mode}
-            options={[
-              { value: "light", label: words.light },
-              { value: "dark", label: words.dark },
-            ]}
-            onChange={(value) => setMode(value === "dark" ? "dark" : "light")}
-            testID="gallery-mode"
-          />
-          <ChoiceRow
-            copy={copy.choice}
-            label={words.language}
-            value={copy.language}
-            options={[
-              { value: "en", label: words.english },
-              { value: "pt", label: words.portuguese },
-            ]}
-            onChange={(value) => setLanguage(value === "pt" ? "pt" : "en")}
-            testID="gallery-language"
-          />
-          <ChoiceRow
-            copy={copy.choice}
-            label={words.locale}
-            value={shown.locale}
-            options={[...new Set([presentation.locale, "en-GB", "pt-PT", "pt-BR"])].map(
-              (value) => ({ value, label: value }),
-            )}
-            onChange={setLocale}
-            testID="gallery-locale"
-          />
-          <ChoiceRow
-            copy={copy.choice}
-            label={words.case}
-            value={caseId}
-            options={[
-              { value: "primitives/default", label: words.primitives },
-              ...kitCaseIds.map((id) => ({ value: id, label: id })),
-              ...(cases.ok ? cases.value.map(({ id }) => ({ value: id, label: id })) : []),
-            ]}
-            onChange={(id) => {
-              setCaseId(id);
-              setAction("");
-            }}
-            testID="gallery-case"
-          />
+          <FormField label={words.appearance}>
+            <ChoiceRow
+              copy={copy.choice}
+              label={words.appearance}
+              value={mode}
+              options={[
+                { value: "light", label: words.light },
+                { value: "dark", label: words.dark },
+              ]}
+              onChange={(value) => setMode(value === "dark" ? "dark" : "light")}
+              testID="gallery-mode"
+            />
+          </FormField>
+          <FormField label={words.language}>
+            <ChoiceRow
+              copy={copy.choice}
+              label={words.language}
+              value={copy.language}
+              options={[
+                { value: "en", label: words.english },
+                { value: "pt", label: words.portuguese },
+              ]}
+              onChange={(value) => setLanguage(value === "pt" ? "pt" : "en")}
+              testID="gallery-language"
+            />
+          </FormField>
+          <FormField label={words.locale}>
+            <ChoiceRow
+              copy={copy.choice}
+              label={words.locale}
+              value={shown.locale}
+              options={[...new Set([presentation.locale, "en-GB", "pt-PT", "pt-BR"])].map(
+                (value) => ({ value, label: value }),
+              )}
+              onChange={setLocale}
+              testID="gallery-locale"
+            />
+          </FormField>
+          <FormField label={words.case}>
+            <ChoiceRow
+              copy={copy.choice}
+              label={words.case}
+              value={caseId}
+              options={[
+                { value: "primitives/default", label: words.primitives },
+                ...kitCaseIds.map((id) => ({ value: id, label: id })),
+                ...(cases.ok ? cases.value.map(({ id }) => ({ value: id, label: id })) : []),
+              ]}
+              onChange={(id) => {
+                setCaseId(id);
+                setAction("");
+              }}
+              testID="gallery-case"
+            />
+          </FormField>
         </Section>
         {!cases.ok ? (
           <Notice text={cases.issues[0]!.message} announcement="urgent" />
@@ -543,7 +553,12 @@ function Samples({
           photographs it: a refused field is the kit's drawing of that bar, and
           the picture has to name the block it came from. */}
       <Section title="Fields" testID="gallery-block:primitives-fields">
-        <FormField label="Words" required help="Some help under the field.">
+        <FormField
+          label="Words"
+          required
+          copy={feedback.copy.kit}
+          help="Some help under the field."
+        >
           <TextField
             value={words}
             onChangeText={setWords}
@@ -554,10 +569,10 @@ function Samples({
         <FormField label="Refused" error="is required">
           <TextField value="" onChangeText={none} invalid accessibilityLabel="Refused" />
         </FormField>
-        <FormField label="Notes">
+        <FormField label="Notes" required={false} copy={feedback.copy.kit}>
           <TextField kind="textarea" value="" onChangeText={none} accessibilityLabel="Notes" />
         </FormField>
-        <FormField label="Amount">
+        <FormField label="Amount" required={false} copy={feedback.copy.kit}>
           <TextField kind="number" value="1,5" onChangeText={none} accessibilityLabel="Amount" />
         </FormField>
         <FormField label="Identifier" help="The identifier of the related record.">
@@ -568,10 +583,12 @@ function Samples({
             accessibilityLabel="Identifier"
           />
         </FormField>
-        <FormField label="Pinned" bare>
-          <SwitchRow label="Pinned" value={on} onValueChange={setOn} help="A yes or a no." />
+        {/* One layout for every control: the word above, the control below, in each
+            of these three rows as in the five text boxes over them. */}
+        <FormField label="Pinned" help="A yes or a no.">
+          <SwitchRow label="Pinned" value={on} onValueChange={setOn} />
         </FormField>
-        <FormField label="Status" bare>
+        <FormField label="Status">
           <ChoiceRow
             copy={feedback.copy.choice}
             label="Status"
@@ -580,7 +597,7 @@ function Samples({
             onChange={setChoice}
           />
         </FormField>
-        <FormField label="Due" bare>
+        <FormField label="Due">
           <DateTimeRow
             copy={feedback.copy.dateTime}
             initialValue={initialDate}
@@ -591,15 +608,44 @@ function Samples({
             text={(value) => timeText(value, feedback)}
           />
         </FormField>
-        <FormField label="Tags" help="Comma separated.">
-          <TagsField label="Tags" value={tags} onChange={setTags} />
+        <FormField label="Tags">
+          <TagsField label="Tags" value={tags} onChange={setTags} copy={feedback.copy.kit} />
         </FormField>
-        <ServerField value={server} onChange={setServer} />
+        <ServerField
+          caption={feedback.copy.kit.workspaceAddress}
+          value={server}
+          onChange={setServer}
+        />
+      </Section>
+
+      {/* The words are the copy table's own (src/core/copy.ts, state.refused and
+          state.held); the view model above them comes from src/core/outbox.ts. */}
+      <Section title="A write this phone is holding">
+        <HeldWriteRow
+          view={{
+            id: "example",
+            title: "Not sent",
+            body: "title is required",
+            when: "Last updated 6 Oct 2026",
+            retry: "Retry",
+            discard: "Discard",
+            busy: false,
+          }}
+          onRetry={none}
+          onDiscard={none}
+        />
       </Section>
 
       <Section title="Rows" footer="A footer says something about the group.">
-        <Row title="A row that opens" cells={["Status: Open", "Rank: 2"]} onPress={none} />
-        <Row title="A row that does not" cells={["Read only"]} />
+        <Row
+          title="A row that opens"
+          cells={[
+            { label: "Status", value: "Open" },
+            { label: "Rank", value: "2" },
+          ]}
+          onPress={none}
+        />
+        <Row title="A row that does not" cells={[{ value: "Read only" }]} />
         <Row title="Delete" tone="destructive" onPress={none} />
       </Section>
 
@@ -859,6 +905,8 @@ function KitSamples({
       return <SelectionControl model={k.selection} onChange={send} />;
     case "choice-chips":
       return <ChoiceChips model={k.choices} onChange={choice} />;
+    case "choice-rows":
+      return <ChoiceRows model={k.choices} onChange={choice} />;
     case "action-bar":
       return <ActionBar model={k.actions} onAction={action} />;
     case "model-state":

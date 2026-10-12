@@ -94,6 +94,26 @@ const KEY = /^(?:"([A-Za-z][\w-]*)"|'([A-Za-z][\w-]*)'|([A-Za-z][\w-]*))[ ]*:(?:
 const ENTRY = /^[ ]*-[ ]+(.*\S)$/;
 /** REMARK is a blank line or a comment, which carries no field and joins no list. */
 const REMARK = /^[ \t]*(#.*)?$/;
+/**
+ * SELECTOR is a line whose value Maestro reads as the *words* of an element: what
+ * a tap lands on, what a visibility assertion looks for, and the `text` field of a
+ * selector spelled as a mapping. These four keys are where a flow says what to
+ * look for rather than where to look, which is why only they are read below.
+ */
+const SELECTOR = /^[ ]*(?:-[ ]+)?(tapOn|assertVisible|assertNotVisible|text):[ ]*(.*\S)[ ]*$/;
+/**
+ * SLASHED is a text selector spelled as a JavaScript regex literal — the pattern
+ * between two slashes. Maestro reads the value as regex source, not as a literal:
+ * its YAML reader keeps the scalar whole (`maestro.orchestra.yaml.StringElementSelector`
+ * holds `asText(...)`) and `maestro.utils.StringUtils.toRegexSafe` compiles it as
+ * written, matched against the element's text as a whole string. So the slashes are
+ * two characters the element would have to carry, and a journey written this way
+ * cannot tap what it names on any device — measured against maestro-cli-2.8.0, where
+ * `/(?i)^Delete [^‘’?]+$/` matches neither `Delete note` nor `DELETE NOTE`, while the
+ * same expression without the wrappers matches both. What lives between the slashes
+ * is the pattern; the slashes are what goes.
+ */
+const SLASHED = /^\/.*\/$/;
 /** isFilter tells the one field the plan is built from from the other readable field, whose value no plan consults. */
 const isFilter = (field: string): field is Filter => field === "flows";
 
@@ -534,6 +554,16 @@ function flowFolders(root: string): string[] {
     .sort();
 }
 
+/**
+ * words cuts one selector value down to what Maestro is handed: the remark goes,
+ * then one pair of quotes, which YAML resolves and the matcher never sees.
+ */
+function words(value: string): string {
+  const text = remark(value).trim();
+  const quote = text[0] === '"' || text[0] === "'" ? text[0] : null;
+  return quote !== null && text.length > 1 && text.endsWith(quote) ? text.slice(1, -1) : text;
+}
+
 /** screenClaims reads what each flow says it proves: every `# screen: app/…` line in its header, in file order. */
 export function screenClaims(root: string): Map<string, string[]> {
   const named = new Map<string, string[]>();
@@ -571,6 +601,19 @@ export function checkFlows(root: string): string[] {
       const ok =
         dynamic < 0 ? ids.whole.has(id) : ids.prefixes.some((p) => p === id.slice(0, dynamic));
       if (!ok) problems.push(`${f}: no component sets testID ${id}`);
+    }
+    // A selector that can match nothing costs a journey at its next step and says
+    // nothing about the screen it was proving, so it is refused where the words are.
+    for (const [at, line] of text.split(BREAK).entries()) {
+      const selector = SELECTOR.exec(line);
+      if (!selector) continue;
+      const value = words(selector[2]!);
+      if (SLASHED.test(value))
+        problems.push(
+          `${f} line ${at + 1}: ${selector[1]}: ${value} spells its words as a /regex/ literal, and ` +
+            "Maestro reads a text selector as regex source, so the slashes are two characters the " +
+            "element's text would have to carry and nothing can ever be tapped",
+        );
     }
   }
   // The set of journeys is only complete if a flow says which screen it is

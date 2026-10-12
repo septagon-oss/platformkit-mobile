@@ -8,7 +8,7 @@ import { DateTimeRow } from "../../src/ui/atoms/DateTimeRow";
 import { ThemeProvider } from "../../src/ui/theme";
 
 const seed = new Date("2027-02-09T16:35:00Z");
-const format = { locale: "pt-PT", timeZone: "Europe/Lisbon" };
+const format = { locale: "pt-PT", timeZone: "Europe/Lisbon", ownZone: "Europe/Lisbon" };
 const base = {
   copy: deriveCopy("pt").dateTime,
   initialValue: seed,

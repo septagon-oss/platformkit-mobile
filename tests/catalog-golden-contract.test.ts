@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createApi } from "../src/effects/api";
 
-for (const name of ["catalog.json", "catalog.control-plane.json"]) {
+for (const name of ["catalog.json", "catalog.control-plane.json", "catalog.hints.json"]) {
   test(`the ${name} golden is a catalogue both catalog reads accept`, async () => {
     const body = readFileSync(`testdata/${name}`, "utf8");
     const resources = (JSON.parse(body) as { resources: unknown[] }).resources.length;

@@ -1,10 +1,15 @@
 // useCommand runs one of an entry's lifecycle commands.
 //
-// A command that takes no argument is a question, not a form: the platform's
-// own dialog asks it, with the command's own description as the sentence,
-// because that description is the one in the API document and nobody should
-// write a second one here. A command that takes an argument is a sheet, and
-// this hook is what that sheet saves through.
+// A command that takes no argument is a question, not a form: the platform's own
+// dialog asks it, titled with the command's label and answered with that same
+// word. A command that takes an argument is a sheet, and this hook is what that
+// sheet saves through.
+//
+// What a person is told about a command — its title, its answer, the record it
+// runs on, what running it does and what the record says afterwards — is
+// `commandWording`'s answer, read once here and drawn by whichever surface shows
+// it. The developer's `description` of the wire member is never among them, and
+// neither is a sentence invented about a consequence nobody declared.
 //
 // Either way the write counter is bumped, so the detail beneath and its
 // activity re-read themselves: a command is exactly the kind of change that
@@ -15,8 +20,23 @@ import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Command, type Entry } from "../core/catalog";
-import { commandControls, commandTitle, humanize, problems, values } from "../core/derive";
-import { ApiError } from "../effects/api";
+import { address } from "../core/reentry";
+import {
+  changedFields,
+  commandPath,
+  commandSections,
+  commandTitle,
+  commandWording,
+  failureSubject,
+  label,
+  problems,
+  screenPath,
+  values,
+  type CommandWording,
+  type Row,
+} from "../core/derive";
+import { keyed } from "../effects/api";
+import { refusalFields, refusalOf, screenCopy } from "./failure";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import { useTheme } from "../ui/theme";
@@ -24,27 +44,66 @@ import { useTheme } from "../ui/theme";
 export type Phase = "editing" | "running" | "ran";
 
 export interface Running {
-  readonly controls: ReturnType<typeof commandControls>;
+  readonly blocks: ReturnType<typeof commandSections>;
   readonly held: Readonly<Record<string, string>>;
   readonly errors: Readonly<Record<string, string>>;
   readonly detail: string;
+  /** A control that will not store what it holds says so here; see `useResourceForm`. */
+  readonly fieldRefused: (name: string, refused: boolean) => void;
   readonly phase: Phase;
+  /** wording is what this sheet says about the command: its title, its answer, the record it acts on, what running it does and what the record says afterwards. */
+  readonly wording: CommandWording;
   readonly change: (name: string, value: string) => void;
   readonly run: () => Promise<void>;
   readonly cancel: () => void;
 }
 
+/**
+ * useRecordTitle is the words the record a command acts on answers with, read for
+ * the sheet that has to name them. A row this person may not read costs the line
+ * and not the action: the answer stays "" and the sheet, its controls and its run
+ * button are exactly what they were, because whether the verb belongs to them is
+ * the server's answer to the run, not this read's.
+ */
+export function useRecordTitle(entry: Entry, id: string | undefined): string {
+  const { api } = useShell();
+  // The answer is held with the id it was read for, so a sheet shown for another
+  // record says nothing until its own read answers — no reset to write, and no
+  // title outliving the record it belongs to.
+  const [read, setRead] = useState<{ on?: string; title: string }>({ title: "" });
+  useEffect(() => {
+    let alive = true;
+    if (!id) return () => void (alive = false);
+    void (async () => {
+      try {
+        const row: Row = await api.get(entry, id);
+        // The record is named by the one chain that names it everywhere else, and
+        // an untitled row says nothing here rather than quoting an identifier.
+        if (alive) setRead({ on: id, title: label(entry, row, () => "", "record") });
+      } catch {
+        // Silence: the line is not drawn, and the command is still offered.
+      }
+    })();
+    return () => void (alive = false);
+  }, [api, entry, id]);
+  return read.on === id ? read.title : "";
+}
+
 /** useCommandForm is a command with an argument: the sheet that sends it. */
 export function useCommandForm(entry: Entry, id: string | undefined, c: Command): Running {
-  const { api, wrote } = useShell();
+  const { api, wrote, say, outbox } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
+  const actsOn = useRecordTitle(entry, id);
   // Memoised for the same reason useResourceForm memoises its own: run closes
-  // over the controls, ResourceCommand memoises the header options over run,
+  // over the argument's controls, ResourceCommand memoises the header options over run,
   // and a fresh array on every render makes both of those memos a lie — which
   // is the shape of the navigator loop this app has already been bitten by.
-  const controls = useMemo(() => commandControls(c), [c]);
+  const blocks = useMemo(() => commandSections(c), [c]);
+  const controls = useMemo(() => blocks.flatMap((b) => b.controls), [blocks]);
+  const copy = screenCopy();
+  const wording = commandWording(c, actsOn, copy);
   const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [detail, setDetail] = useState("");
@@ -66,7 +125,9 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
       alive.current = false;
     };
   }, []);
-  const dirty = Object.keys(held).length > 0;
+  // Changed, not touched — the one predicate every protected form in this app asks,
+  // so an argument typed and put back is never worth a question.
+  const dirty = changedFields(controls, held).length > 0;
 
   const change = useCallback((name: string, value: string) => {
     setHeld((was) => ({ ...was, [name]: value }));
@@ -84,7 +145,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     confirm(
       "Discard this?",
       {
-        label: "Discard",
+        label: copy.kit.discard,
         destructive: true,
         onPress: () => {
           left.current = true;
@@ -92,20 +153,60 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
         },
       },
       mode,
-      { message: `The ${commandTitle(c).toLowerCase()} has not run.`, cancel: "Keep editing" },
+      {
+        message: `The ${commandTitle(c).toLowerCase()} has not run.`,
+        cancel: copy.kit.keepEditing,
+      },
     );
   });
 
+  // A box that will not store what it holds says so here, and the run below meets
+  // the same answer as a `problems` refusal. See `useResourceForm` for the rule.
+  const refusing = useRef<Readonly<Record<string, boolean>>>({});
+  const fieldRefused = useCallback((name: string, refused: boolean) => {
+    if ((refusing.current[name] ?? false) === refused) return;
+    const next = { ...refusing.current };
+    if (refused) next[name] = true;
+    else delete next[name];
+    refusing.current = next;
+  }, []);
+
   const run = useCallback(async () => {
-    const wrong = problems(controls, held);
-    if (Object.keys(wrong).length > 0) {
+    const wrong = problems(controls, held, copy.kit);
+    if (Object.keys(wrong).length > 0 || Object.keys(refusing.current).length > 0) {
       setErrors(wrong);
       return;
     }
     setPhase("running");
     try {
-      await api.command(entry, id, c.verb, values(controls, held));
+      const body = values(controls, held);
+      const live = (idem?: string) => api.command(entry, id, c.verb, body, ...keyed(idem));
+      // A command is the write most worth holding: it is the one the person
+      // cannot repeat by retyping a field, and the server that never heard it
+      // never ran it. A command this phone is holding has not run, and says so.
+      const answer = outbox
+        ? await outbox.submit(
+            {
+              kind: "command",
+              resourceKey: key(entry),
+              path: commandPath(entry, c.verb, id),
+              body,
+            },
+            live,
+          )
+        : { sent: true as const, row: await live() };
       if (!alive.current) return;
+      if (!answer.sent) {
+        setDetail(copy.state.holding(copy.state.held.title));
+        setPhase("editing");
+        return;
+      }
+      // This sheet is on its way out, so the sentence that says the command ran
+      // is filed for the record it ran on, which reads it once on arrival — the
+      // channel a save already uses, and the only one. A command about the whole
+      // list has no record to land on and files nothing, and a command the phone
+      // is holding has not run.
+      if (id) say(address("detail", entry, id), wording.success);
       wrote(key(entry));
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPhase("ran");
@@ -113,16 +214,14 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
     } catch (e) {
       if (!alive.current) return;
       setPhase("editing");
-      if (e instanceof ApiError) {
-        setErrors(e.fields);
-        setDetail(e.detail || `${commandTitle(c)} was refused.`);
-        return;
-      }
-      setDetail(e instanceof Error ? e.message : `${commandTitle(c)} did not run.`);
+      const said = refusalOf(e, "command", failureSubject(entry, commandTitle(c)), copy);
+      if (said.verdict.outcome === "silent") return;
+      setErrors(refusalFields(said.verdict));
+      setDetail(said.text);
     }
-  }, [api, entry, id, c, controls, held, wrote, leave]);
+  }, [api, entry, id, c, controls, held, wrote, say, leave, copy, wording, outbox]);
 
-  return { controls, held, errors, detail, phase, change, run, cancel: leave };
+  return { blocks, held, errors, detail, phase, wording, change, fieldRefused, run, cancel: leave };
 }
 
 /**
@@ -131,41 +230,96 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
  * because there is no form on screen to put it under.
  */
 export function useCommandAsk(entry: Entry, id: string | undefined) {
-  const { api, wrote } = useShell();
+  const { api, wrote, say, outbox } = useShell();
   const { mode } = useTheme();
   const [busy, setBusy] = useState("");
 
   const ask = useCallback(
     (c: Command) => {
-      // The dialog is titled with the command's summary and answered with its
-      // verb: the question is a sentence, the answer is a word.
-      const title = commandTitle(c);
+      // The dialog is titled with the command's own word and answered with that
+      // same word; what it says under the title is what running it does. The
+      // record the command acts on is the screen the dialog is drawn over, so it
+      // is not repeated inside the question, and a command about the whole list
+      // has no record to name.
+      const { title, button, consequence, success } = commandWording(c, "", screenCopy());
       confirm(
         title,
         {
-          label: humanize(c.verb),
+          label: button,
           onPress: async () => {
             setBusy(c.verb);
             try {
-              await api.command(entry, id, c.verb);
-              wrote(key(entry));
+              // A command that takes no argument sends no argument at all, key or
+              // no key: the key rides after the argument slot it does not use.
+              const live = (idem?: string) =>
+                idem === undefined
+                  ? api.command(entry, id, c.verb)
+                  : api.command(entry, id, c.verb, undefined, { idempotencyKey: idem });
+              const answer = outbox
+                ? await outbox.submit(
+                    {
+                      kind: "command",
+                      resourceKey: key(entry),
+                      path: commandPath(entry, c.verb, id),
+                    },
+                    live,
+                  )
+                : { sent: true as const, row: await live() };
+              if (answer.sent) {
+                // The record the dialog was drawn over is what says what its
+                // command did; a command about the whole list has no record to
+                // land on, and one the phone is holding has not run.
+                if (id) say(address("detail", entry, id), success);
+                wrote(key(entry));
+              } else {
+                const words = screenCopy();
+                Alert.alert(title, words.state.holding(words.state.held.title));
+              }
               void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } catch (e) {
               // A report, not a question: the platform's alert with its one OK,
               // because there is no form on screen to put the refusal under.
-              const why = e instanceof ApiError ? e.detail : "";
-              Alert.alert(title, why || (e instanceof Error ? e.message : "That did not run."));
+              // The report is the classified sentence, so an unanswered command
+              // says nothing is known rather than claiming the command failed.
+              Alert.alert(
+                title,
+                refusalOf(e, "command", failureSubject(entry, title), screenCopy()).text ||
+                  screenCopy().failure.commandFailed(title),
+              );
             } finally {
               setBusy("");
             }
           },
         },
         mode,
-        { message: c.description || `This runs ${c.verb} on the ${entry.entity}.` },
+        { message: consequence },
       );
     },
-    [api, entry, id, wrote, mode],
+    [api, entry, id, wrote, say, mode, outbox],
   );
 
   return { ask, busy };
+}
+
+/**
+ * useCommandRun is what a record screen does with the commands its entry names:
+ * one with no argument is asked here, one with an argument opens its own sheet.
+ * That difference is one rule — where the command is going decides which door it
+ * is behind — so it has one owner, and the generated detail and a renderer pack
+ * both call this rather than each spelling the address out again.
+ */
+export function useCommandRun(entry: Entry, id: string | undefined) {
+  const { ask, busy } = useCommandAsk(entry, id);
+  const router = useRouter();
+  const run = useCallback(
+    (c: Command) => {
+      if (c.fields.length === 0) return ask(c);
+      if (id)
+        router.push(
+          `${screenPath(entry)}/${encodeURIComponent(id)}/run/${encodeURIComponent(c.verb)}`,
+        );
+    },
+    [ask, id, router, entry],
+  );
+  return { run, busy };
 }

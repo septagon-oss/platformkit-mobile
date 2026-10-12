@@ -11,32 +11,60 @@ import { useNavigation, useRouter } from "expo-router";
 import { usePreventRemove } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
+import { address } from "../core/reentry";
+import { useRecordNames } from "./useReferenceNames";
 import {
+  changedFields,
+  controlPointers,
   formControls,
+  failureSubject,
+  firstProblem,
+  formSections,
+  noun,
   problems,
   screenPath,
   text,
   values,
   verbRefusal,
+  writePath,
   type Row,
 } from "../core/derive";
-import { ApiError } from "../effects/api";
+import { keyed } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import type { Phase } from "../ui/organisms/ResourceForm";
 import { useTheme } from "../ui/theme";
+import { refusalFields, refusalOf, screenCopy } from "./failure";
 
 export function useResourceForm(entry: Entry, id: string | undefined) {
-  const { api, wrote } = useShell();
+  const { api, wrote, typed, keep, say, outbox } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   const create = !id;
+  const copy = screenCopy();
+  // This sheet's own address, which is what the shell files what is typed under.
+  const here = address("form", entry, id);
   const [row, setRow] = useState<Row | undefined>();
   const [phase, setPhase] = useState<Phase>(create ? "editing" : "loading");
-  const [held, setHeld] = useState<Readonly<Record<string, string>>>({});
+  // A sheet that mounts while the server is refusing the session that would have
+  // saved it starts from what was typed there, rather than from nothing.
+  const [held, setHeld] = useState<Readonly<Record<string, string>>>(() => typed(here) ?? {});
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [detail, setDetail] = useState("");
+  // The field the sheet is waiting on: the first one it asks for that carries a
+  // sentence. The organism brings it forward; typing into it is what clears it.
+  const [awaiting, setAwaiting] = useState("");
+  // How many times this sheet has refused. A second Save on a sheet nobody mended asks
+  // for the same field, so `awaiting` alone says nothing new and the organism's effect
+  // would not run again; the count is what makes the second refusal a new request for
+  // the box. Every refusal counts itself, named or not.
+  const [refusals, setRefusals] = useState(0);
+  // A person's own answer of "Discard" - or a Cancel over a sheet with nothing to
+  // discard. Leaving is an instruction to the effect below rather than a call to the
+  // router: the guard has to lift in a render before the screen departs, or the stack
+  // hands this departure back to the guard and asks the same question twice.
+  const [leaving, setLeaving] = useState(false);
   const [saved, setSaved] = useState<Row | undefined>();
   const generation = useRef(0);
   // Leaving happens once. The effect below depends on the router, whose
@@ -71,7 +99,9 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setPhase("editing");
     } catch (e) {
       if (generation.current !== started) return;
-      setDetail(e instanceof Error ? e.message : "This record could not be read.");
+      const said = refusalOf(e, "read", failureSubject(entry), copy);
+      if (said.verdict.outcome === "silent") return;
+      setDetail(said.text);
       setPhase("failed");
     }
   }, [api, entry, id]);
@@ -84,8 +114,50 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     })();
   }, [load]);
 
-  const controls = useMemo(() => formControls(entry, row, create), [entry, row, create]);
-  const dirty = Object.keys(held).length > 0;
+  // The sheet's blocks are the entry's sections; the controls are those blocks
+  // read back flat, which is what a body and a refusal are built from. One order,
+  // computed once, so the order a person is asked in cannot drift from the order
+  // the sheet writes.
+  // The records the greyed boxes point at are read once for the sheet, so the
+  // person reads a name where the row holds an identifier and the write still
+  // sends what it was given (`Control.echo`).
+  const asked = useMemo(
+    () => controlPointers(formControls(entry, row, create), row),
+    [entry, row, create],
+  );
+  const names = useRecordNames(asked);
+  const blocks = useMemo(
+    () => formSections(entry, row, create, copy.kit.overview, names),
+    [entry, row, create, copy.kit.overview, names],
+  );
+  const controls = useMemo(() => blocks.flatMap((b) => b.controls), [blocks]);
+  // Dirty means changed, not touched: a person who typed something and put it back
+  // changed nothing, and asking them whether to throw it away wastes the question.
+  const dirty = changedFields(controls, held).length > 0;
+  // The same contents, held for the callbacks that must not change identity: the
+  // sheet puts Save and Cancel in the navigator's options, and an option rebuilt
+  // on every render is an instruction the navigator repeats forever.
+  const contents = useRef<Readonly<Record<string, string>>>(held);
+
+  // What the sheet asks before it throws away what a person wrote, in the words the
+  // copy table holds in both languages. One function, asked by the guard the platform
+  // honours and by the header's Cancel alike, so neither can dismiss a dirty sheet
+  // alone and the two answers are the same two continuations.
+  const askDiscard = useCallback(
+    (discard: () => void) => {
+      confirm(
+        copy.kit.discardChanges,
+        {
+          label: copy.kit.discard,
+          destructive: true,
+          onPress: discard,
+        },
+        mode,
+        { message: copy.kit.discardUnsaved, cancel: copy.kit.keepEditing },
+      );
+    },
+    [copy, mode],
+  );
 
   // usePreventRemove is what a native stack honours: it covers the swipe and
   // the system back as well as the header's Cancel. It guards the editing
@@ -93,19 +165,25 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // dismissed by this app rather than by a person, and a guard that is still
   // registered then leaves the native screen refusing the dismissal it was
   // just asked for.
-  usePreventRemove(phase === "editing" && dirty, ({ data }) => {
-    confirm(
-      "Discard changes?",
-      { label: "Discard", destructive: true, onPress: () => navigation.dispatch(data.action) },
-      mode,
-      { message: "What you typed here will be lost.", cancel: "Keep editing" },
-    );
-  });
+  // `leaving` lifts the guard one render before the sheet departs by Cancel: a
+  // departure taken while this is armed is handed back to it by the stack, and the
+  // person answers the same question twice. The gesture and the system back need no
+  // such flag - the action this callback re-dispatches already carries the route as
+  // visited, which is why that door asks once.
+  usePreventRemove(phase === "editing" && dirty && !leaving, ({ data }) =>
+    askDiscard(() => {
+      // Discarded means the shell keeps none of it either.
+      keep(here, {});
+      navigation.dispatch(data.action);
+    }),
+  );
 
   // Leaving happens after the render that cleared the guard above.
   useEffect(() => {
     if (phase !== "saved" || left.current) return;
     left.current = true;
+    // The row is on the server now: this sheet holds nothing anybody still needs.
+    keep(here, {});
     const at = screenPath(entry);
     // A sheet opened from a link has nothing to go back to; the record it just
     // wrote is where it belongs.
@@ -113,14 +191,49 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     else if (router.canGoBack()) router.back();
     else if (id) router.replace(`${at}/${encodeURIComponent(id)}`);
     else router.replace(at);
-  }, [phase, saved, create, entry, id, router]);
+  }, [phase, saved, create, entry, id, router, here, keep]);
+
+  // Cancel's "Discard" leaves here, one render after the flag above lifted the guard,
+  // and not from the dialog's own button. One screen leaves once, which is why this
+  // shares `left` with the departure above instead of keeping a flag of its own.
+  useEffect(() => {
+    if (!leaving || left.current) return;
+    left.current = true;
+    // Discarded means the shell keeps none of it either.
+    keep(here, {});
+    // Back to whatever opened the sheet; a sheet opened by a link has nothing to go
+    // back to, so it lands on the list of what it did not write.
+    if (router.canGoBack()) router.back();
+    else router.replace(screenPath(entry));
+  }, [leaving, entry, here, keep, router]);
 
   // Every callback this hook hands out is stable, because the screen puts them
   // in the options it gives the navigator, and options rebuilt on each render
   // are an instruction repeated forever.
-  const change = useCallback((name: string, value: string) => {
-    setHeld((h) => ({ ...h, [name]: value }));
-    setErrors(({ [name]: _, ...rest }) => rest);
+  const change = useCallback(
+    (name: string, value: string) => {
+      contents.current = { ...contents.current, [name]: value };
+      setHeld(contents.current);
+      setErrors(({ [name]: _, ...rest }) => rest);
+      // The field the sheet was waiting on is the one the person is mending.
+      if (name === awaiting) setAwaiting("");
+      keep(here, contents.current);
+    },
+    [here, keep, awaiting],
+  );
+
+  /* One field can refuse what it holds without the core being able to see it: a
+   * comma-joined box keeps a word it cannot store out of the value, and the text
+   * stays on screen. `refusing` is the set of those fields, and a save meets the
+   * same answer as a `problems` refusal — nothing leaves the phone while a field the
+   * person is being asked to fix still stands. */
+  const refusing = useRef<Readonly<Record<string, boolean>>>({});
+  const fieldRefused = useCallback((name: string, refused: boolean) => {
+    if ((refusing.current[name] ?? false) === refused) return;
+    const next = { ...refusing.current };
+    if (refused) next[name] = true;
+    else delete next[name];
+    refusing.current = next;
   }, []);
 
   const save = useCallback(async () => {
@@ -134,38 +247,93 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setDetail(verbRefusal(create ? "create" : "update"));
       return;
     }
-    const refused = problems(controls, held);
-    if (Object.keys(refused).length > 0) {
+    const refused = problems(controls, held, copy.kit);
+    if (Object.keys(refused).length > 0 || Object.keys(refusing.current).length > 0) {
       setErrors(refused);
-      setDetail("Some fields need attention.");
+      // The kit's own word for it: the sentence is the one the copy table holds.
+      setDetail(copy.kit.validation);
+      setAwaiting(firstProblem(controls, refused) ?? "");
+      setRefusals((n) => n + 1);
       return;
     }
     setPhase("saving");
     setDetail("");
+    setAwaiting("");
     try {
       const body = values(controls, held);
-      const written = id ? await api.update(entry, id, body) : await api.create(entry, body);
-      wrote(key(entry));
+      // `idem` is the write's idempotency key, minted by the queue before the
+      // first attempt and named on the request: the attempt that may have landed
+      // and the replay that follows a hold are then one write to a server that
+      // honours the header.
+      const live = (idem?: string) => {
+        const options = keyed(idem);
+        return id ? api.update(entry, id, body, ...options) : api.create(entry, body, ...options);
+      };
+      // One write, one decision: it went, or this phone is holding it. A held
+      // write is not saved, so nothing here says it was — the sheet closes and
+      // the held row says what it is, in the server's own words when it refuses.
+      const answer = outbox
+        ? await outbox.submit(
+            {
+              kind: id ? "update" : "create",
+              resourceKey: key(entry),
+              path: id ? `${writePath(entry)}/${encodeURIComponent(id)}` : writePath(entry),
+              body,
+            },
+            live,
+          )
+        : { sent: true as const, row: await live() };
       if (!alive.current) return;
+      if (!answer.sent) {
+        // The body is on this phone and the row on Home names it, so the draft has
+        // nothing left to hold: a second copy of the same words saved by hand would
+        // be a second write.
+        setPhase("saved");
+        return;
+      }
+      const written = answer.row;
+      wrote(key(entry));
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // The sheet is about to leave, so the sentence that says the write landed
+      // cannot live in it: it is filed for the address the person lands on, where
+      // that record's own screen reads it once. A create lands on the row the
+      // server just made, an edit back on the one this sheet was called by.
+      say(
+        create
+          ? `${screenPath(entry)}/${encodeURIComponent(text(written.id))}`
+          : address("detail", entry, id),
+        create ? copy.kit.created(noun(entry).singular) : copy.kit.changesSaved,
+      );
       setSaved(written);
       setPhase("saved");
     } catch (e) {
       if (!alive.current) return;
-      if (e instanceof ApiError) {
-        setErrors(e.fields);
-        setDetail(e.detail || "That could not be saved.");
-      } else {
-        setDetail(e instanceof Error ? e.message : "That could not be saved.");
-      }
+      const said = refusalOf(e, create ? "create" : "update", failureSubject(entry), copy);
+      if (said.verdict.outcome === "silent") return;
+      // A 422 that named fields colours those fields and adds no sentence; an
+      // unanswered save says what is honest — that nothing is known. The values the
+      // person typed stay exactly where they are: no failure path touches `held`.
+      const fields = refusalFields(said.verdict);
+      setErrors(fields);
+      setDetail(said.text);
+      setAwaiting(firstProblem(controls, fields) ?? "");
+      setRefusals((n) => n + 1);
       setPhase("editing");
     }
-  }, [phase, controls, held, id, api, entry, wrote]);
+  }, [phase, controls, held, id, api, entry, wrote, copy, create, say, outbox]);
 
+  // Cancel is the third door out of a dirty sheet, and it asks the same question the
+  // gesture and the system back are asked: an answer of "Keep editing" leaves the
+  // person where they were with the draft and the guard both intact.
   const cancel = useCallback(() => {
-    if (router.canGoBack()) router.back();
-    else router.replace(screenPath(entry));
-  }, [router, entry]);
+    // Both answers leave through the flag rather than the router, so the guard lifts in
+    // a render before anything is dismissed. Leaving from here would put a `back()` in
+    // front of a guard that is still armed, and the stack would ask it - so the person
+    // would answer "Discard changes?" a second time for the same Cancel.
+    const leave = () => setLeaving(true);
+    if (phase !== "editing" || !dirty) leave();
+    else askDiscard(leave);
+  }, [phase, dirty, askDiscard]);
 
   // Retrying is something a person did, so it may say so at once.
   const reload = useCallback(() => {
@@ -174,5 +342,19 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     void load();
   }, [load]);
 
-  return { create, controls, held, errors, detail, phase, change, save, cancel, reload };
+  return {
+    create,
+    blocks,
+    held,
+    errors,
+    detail,
+    awaiting,
+    refusals,
+    phase,
+    change,
+    fieldRefused,
+    save,
+    cancel,
+    reload,
+  };
 }

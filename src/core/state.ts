@@ -9,6 +9,11 @@ export interface State {
   readonly phase: Phase;
   readonly catalog?: Catalog;
   readonly error?: string;
+  /** reason names the anonymous the person is standing in. "expired" is the one the
+   * server refused: this app still knows who they were and where they were, and asks
+   * to be signed in again rather than signed in for the first time. Absent means the
+   * ordinary sign-in screen, which is every path that never had a session to lose. */
+  readonly reason?: "expired";
 }
 
 export type Event = { readonly generation: number } & (
@@ -18,6 +23,7 @@ export type Event = { readonly generation: number } & (
   | { readonly type: "catalog"; readonly catalog: Catalog }
   | { readonly type: "failed"; readonly error: string }
   | { readonly type: "signed-out"; readonly error?: string }
+  | { readonly type: "expired" }
 );
 
 export const initial: State = { phase: "booting", generation: 0 };
@@ -42,6 +48,15 @@ export function reduce(s: State, e: Event): State {
     case "failed":
       return generation === s.generation && s.phase === "loading"
         ? { phase: "failed", generation, error: e.error }
+        : s;
+    case "expired":
+      // The server refused a session this app was using. Only a phase that has
+      // one may lose it: a refusal that describes a shell which is booting,
+      // anonymous, signing in or failed was answered by a session that is
+      // already gone, and moves nobody. The catalogue goes with the session;
+      // what the person was doing stays with the shell, not the state.
+      return s.phase === "ready" || s.phase === "loading"
+        ? { phase: "anonymous", generation, reason: "expired" }
         : s;
   }
 }

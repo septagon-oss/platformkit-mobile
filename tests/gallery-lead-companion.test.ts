@@ -13,6 +13,7 @@ const english: Presentation = {
   copy: deriveCopy("en"),
   locale: "en-GB",
   timeZone: "UTC",
+  ownZone: "UTC",
   now: "2026-08-14T12:00:00Z",
   weekStartsOn: 1,
   motion: "reduced",

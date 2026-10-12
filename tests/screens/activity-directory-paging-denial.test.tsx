@@ -105,7 +105,9 @@ for (const mode of ["light", "dark"] as const) {
           includeHiddenElements: true,
         }).length,
       }).toEqual({ text: 0, accessible: 0 });
-      expect(screen.getAllByText(actor).length).toBeGreaterThan(0);
+      // Enrichment is gone, which the row says in words and never by quoting the id.
+      expect(screen.getAllByText("Name unavailable").length).toBeGreaterThan(0);
+      expect(screen.queryAllByText(actor, { includeHiddenElements: true })).toHaveLength(0);
       expect(screen.getByText("Refreshed")).toBeOnTheScreen();
 
       // Permanently hiding enrichment cannot satisfy the expected behavior.

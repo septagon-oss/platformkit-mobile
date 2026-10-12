@@ -6,6 +6,8 @@
 // puts it: iOS draws Cancel apart at the foot of the sheet; Android reads the
 // dismissive button on the left and the affirmative on the right and keeps at
 // most three, so Cancel goes first there and is never the button that is cut.
+// Where the sheet's module is not in the build — every host the kit tests itself
+// in is one — the same question becomes the alert rather than refusing to ask.
 import { ActionSheetIOS, Alert, Platform } from "react-native";
 import type { Mode } from "./tokens";
 
@@ -32,18 +34,25 @@ export function choose(
   const cancel = wording.cancel ?? "Cancel";
   if (Platform.OS === "ios") {
     const destructive = choices.flatMap((c, i) => (c.destructive ? [i] : []));
-    ActionSheetIOS.showActionSheetWithOptions(
-      {
-        title,
-        ...(wording.message ? { message: wording.message } : {}),
-        options: [...choices.map((c) => c.label), cancel],
-        cancelButtonIndex: choices.length,
-        destructiveButtonIndex: destructive.length > 0 ? destructive : null,
-        userInterfaceStyle: mode,
-      },
-      (index) => choices[index]?.onPress(),
-    );
-    return;
+    try {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title,
+          ...(wording.message ? { message: wording.message } : {}),
+          options: [...choices.map((c) => c.label), cancel],
+          cancelButtonIndex: choices.length,
+          destructiveButtonIndex: destructive.length > 0 ? destructive : null,
+          userInterfaceStyle: mode,
+        },
+        (index) => choices[index]?.onPress(),
+      );
+      return;
+    } catch {
+      // The sheet is a native module a build may not carry, and a question that
+      // cannot be drawn as a sheet is still a question: it goes on with the
+      // platform's other dialog rather than taking the button that asked it
+      // down with it.
+    }
   }
   Alert.alert(title, wording.message, [
     { text: cancel, style: "cancel" },

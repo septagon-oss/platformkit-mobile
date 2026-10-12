@@ -57,7 +57,11 @@ the screens in the theme that follows the device's appearance, and configures
 the native stack whose headers every screen uses.
 `src/shell.tsx` owns session restoration, sign-in, the answer to a second
 factor, sign-out, catalog loading and a count of what this app wrote to each
-resource, so a list or a detail knows when what it shows is stale.
+resource, so a list or a detail knows when what it shows is stale. It also owns
+the expired-session boundary: the transport reports that a server answered 401,
+and the shell alone decides that this session is over, what the person was doing
+when it ended, and who that belongs to (`src/core/reentry.ts` holds the rule; no
+screen is asked to notice).
 The resource route files delegate to `src/route.tsx`, which finds the catalog
 entry and chooses a custom or generated screen.
 
@@ -130,17 +134,19 @@ A custom screen belongs in the renderer pack passed to `Shell` in
 `app/_layout.tsx`. The [Renderers type](src/renderers.ts) maps `module/entity`
 to optional `list`, `detail`, `form` and `command` components. Each receives an
 `entry` and, when applicable, an `id`; command screens also receive the `verb`.
-Any omitted component falls back to the generated screen. Custom components
-belong in `src/screens/`, where effects become props for the atomic UI layers.
-Add a custom screen when the workflow needs something the resource schema
-cannot express.
+Any omitted component falls back to the generated screen. A product's custom
+screens belong in `src/screens/`, where effects become props for the atomic UI
+layers. Add a custom screen when the workflow needs something the resource
+schema cannot express, and read
+[the pack contract](#a-modules-own-screen) first: it names what a screen may
+read, how an entry asks for it, and which screens the schema already does well.
 
 ## HTTP contract
 
 The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
 with its public commit and SHA-256 in
 [testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
-82 paths and 101 operations. `npm run api` generates the TypeScript types, Zod
+95 paths and 112 operations. `npm run api` generates the TypeScript types, Zod
 validators, SDK and documented route table in `src/generated/`; `npm run
 check:api` regenerates into a temporary directory and refuses changed, missing
 or extra files. It runs offline as part of `npm run check`. Refresh the public
@@ -164,7 +170,8 @@ Generated schemas keep JSON numbers as numbers, without string coercion; this
 does not establish lossless support for every int64 monetary value.
 
 Custom renderers receive the generated methods on the current shell API's
-`operations` property, already bound to its connection and validators:
+`operations` property, already bound to its connection and validators, and a
+screen's own accessor over them is `useOperation` above:
 
 ```ts
 const result = await api.operations.taskTaskRead({ path: { id } });
@@ -174,7 +181,7 @@ const task = result.data;
 Each method accepts its generated body, path, query and header inputs, plus an
 optional `signal`. Its types do not accept a different URL, transport or validator.
 These types are not a runtime security boundary for a caller that bypasses them.
-Generated types are also exported from `platformkit-mobile/generated`.
+Generated types are also exported from `@septagon-oss/platformkit-mobile/generated`.
 
 There is no shared client instance or per-composition regeneration. The generated
 client covers only the pinned document. Catalog entries outside that document
@@ -204,6 +211,357 @@ status 0. Neither transport nor cancellation proves that a write was rolled back
 does not retry requests automatically. Recover uncertain writes through the
 module's persisted read contract before offering another submission. Screen
 generation guards still decide whether a response belongs to the current view.
+
+### What the catalogue says about how it reads
+
+An entry, a field and a command may each carry a `presentation` object: the
+resource's own words for how it should read ("Tarefa", "Em aberto", which field
+titles a row, which value is good, which command is the system's). The phone
+parses them into `hints` on the entry, field and command — never raw wire bytes,
+so `presentation` reaches no component — and every one of them is read in
+`src/core/derive.ts`, where the resource's words are read today. For a resource
+that declares nothing the default *is* the previous rule, so honouring the whole
+contract changes no screen until a server declares a hint.
+
+A hint is never the reason a workspace is refused. The generated schema prints
+`additionalProperties: false`, so one mistyped noun would cost every screen in
+the app; the hint therefore enters the phone's own parser as `unknown`, and
+`hintEntry`/`hintField`/`hintCommand` decide its shape, member by member. A
+member of the wrong kind, a name outside a vocabulary this build can draw, or a
+pointer at a field the entry does not have falls back to the documented default,
+the rest of the same hint survives, and the defect names itself once through the
+`HintNotice` the caller supplies — `Api.catalog(notice?)` passes one that logs
+each distinct (path, reason) per connection. `parseCatalog` without a notice says
+nothing, which is what keeps the nightly's use of it unchanged. The two
+exceptions to per-member reading: an entry's `sections` is taken whole or not at
+all, because a block with no key or label is no block — and a field that named one
+of the blocks the entry lost is left in the overview, since a record cannot be
+grouped under a heading nobody declared; and a field both `hidden` and `required`
+stays in the form, because the person's only path to a submittable create is never
+taken away for an author's slip.
+
+A declared word is the author's and is used as written — never humanised,
+re-cased or re-pluralised — so `copy.ts` holds one new string, `kit.untitled`, for
+the record whose schema names nothing to read from.
+
+A declared visibility is read on every screen it speaks about. `hidden` is the one
+visibility no screen draws — off the list, off the record's own page and off the
+form, its value left in the schema, the JSON and the PATCH where nothing a person
+reads is built from it — and `detail` is a record's own answer, which a row has no
+room for. A row asks one question of every field it could draw (`rowContent` in
+`derive.ts`) and asks it of the field it leads with, the line under that name and
+the cells beside it alike, so a field its author kept for the record neither titles
+a row, is quoted under its name, nor reaches it as a column — however the entry's
+hints point at it. Its columns and the field that leads them are chosen from one
+list (`rowFields`), so they cannot disagree about the answer: an identity picked
+from the whole schema would put the value back through the column every row leads
+on, which is the web shell's rule for the same reason (`known(onList(…))` in
+`ui/resource/resource.go`). A hint that points where its screen may not read —
+`primaryField`, `previewField`, `summaryFields` or `statusField` naming a `hidden`
+field, or one of the row's three naming a `detail` one — names nothing and lets the
+default read on (a `detail` field stays the record's own name and the record's own
+state, which is what `primaryField` and `statusField` answer there): the reference
+kernel refuses that document at mount (`kit/rest/hints.go`, `namedFieldFault`), and
+one author's slip is not worth this app's screens.
+
+### How a list row reads
+
+A row answers four questions and no fifth: **which record is this**, **what state is it
+in**, **what does the record say about itself**, and **what sets it apart from its
+neighbours**. `listRow` in `src/core/derive.ts` assembles the answers from the four rules
+that already owned them — the field a row is called by (`rowPrimary`), the state the entry
+declares (`statusField` with its `enumLabels` and `enumTones`, read through the one
+`statusPill` a record reads too), the line under the name (`listPreview(entry, "row")`) and
+the couple of values beside it (`listCells`, budgeted at two whoever named the fields) —
+and nothing else. The state
+is one of those four answers and not two: the value `statusField` names is the row's pill,
+in the column `Row` reserves for it, and is never one of the two cells beside the title,
+even where an author points `summaryFields` at it — a fact is drawn once, at the place that
+owes it, which is the rule that keeps a record's header out of its own rows. A row is never
+titled by an identifier and never filled with one: the stamps and the id are plumbing, are
+not cells whoever pointed at them, and the record spells them out in its own "Record
+information" block for the person who needs them. Two cells is the budget in both of the
+branches that choose them: a declared `summaryFields` longer than the line keeps its first
+two, in its author's order, because the row owns the slots and a phone has no room for a
+third whoever asked for one. `hideList` is asked the question
+it answers — which columns a list has — so the paragraph every schema marks
+`hideList` lines a record, which has room for it, and not a row, which does not; a row
+with nothing worth reading under its name shows nothing there, never a dash. A value that
+was never answered prints no cell, and a pill is never drawn for a state the document did
+not declare, so an un-hinted resource shows a title, its line, and its values.
+
+How the list is being read is two questions, and the kit asks them separately. **In what
+order** is the sort sheet: newest, oldest, then one row per direction for each field the
+entry may be ordered by (`sortable`, else the field a row is called by and the date fields
+it declares), worded for that field's type — "Due at, soonest first", "Rank, low to high",
+"Title, A–Z" — in the reader's language. Nothing without an honest direction word, and
+nothing that is plumbing, is offered. **Narrowed how** is the filters sheet: one group per
+filterable field, each leading with "All" so the group always answers, and one action that
+empties them all, present only where it has something to empty. Clearing filters keeps the
+sort, because ordering is not narrowing — which is the same fact that makes
+`sorted-but-unfiltered` answer "No notes yet" and never "No matching notes", and why the
+count on the toolbar says "Filters · 2" for two filters and no order. The two controls sit
+in a toolbar row under the header, where the list is; that row is named for itself ("List
+controls") and not for one of the two doors it holds, so a reader hears a group and then its
+two doors, and a choice in the filters sheet carries the name of the group it narrows.
+Neither control is offered on a list that holds nothing and has nothing filtered.
+
+**Reused** — `rowPrimary`, `label(…, "row")`, `statusField`, `enumLabel`, `enumTone`,
+`badgeTone`, `listColumns`, `listCells`, `listPreview`, `saidValue`, `display`, `hasValue`,
+`filterFields`, `queryFilters`, `noOrder` and `nounPhrase` in the core; `DataRow.status`,
+`DataCell`, `Filter`, `Sort`, `deriveChoices`, `deriveActions` and `deriveDataList` in the
+list family, whose `targets` are the orders both sheets offer; `deriveSurface` and
+`DetailSheet` for the sheets, `ActionBar` for the toolbar, and `Value`, `Labelled`,
+`Badge`, `Notice`, `Row` — with `Row`'s `shown`, `trailing` and `selected` props, all three
+of which were declared, documented and passed by nobody until this delivery. **Added** —
+`listRow`, because the row was an object literal inside the list adapter and no function
+answered "this record as a line"; `statusPill`, which is `recordHeader`'s pill extracted,
+since a record and a row colouring one value differently is one rule written twice;
+`sortFields`, `deriveSortSheet`, `deriveFilterSheet` and `deriveListToolbar`, because the
+brief's toolbar is a control with a count and a visibility rule that belongs to neither
+sheet; and `ChoiceRows`, because the inventory held `ChoiceChips` (a wrapping wall — the
+thing being replaced) and `SlotOption` (the same idea welded to a capacity model), and no
+sheet-sized group of rows: it is `Row` in a radiogroup and nothing else. **Made
+reusable** — `statusPill` is now the only reading of a declared state, so any surface that
+wants a pill asks it rather than restating it; `listPreview(entry, where)` is the medium-
+aware rule every future screen reads; `filtered`/`reordered`/`activeFilters` are three
+questions any screen can ask without the old word conflating them; the sortable hint, the
+two ids `sort-sheet`/`filter-sheet` and the `list-toolbar` id are what a journey and a
+renderer pack reach for; and `kitCopy` gained the direction words, the three empty answers
+and "All"/"Clear filters" in `en` and `pt`, so the next screen that orders or narrows a
+list writes no sentence of its own.
+
+### How a record opens
+
+One rule decides the whole of a record's hierarchy: **a fact is drawn once, at the
+highest place that draws it.** The places, in order, are the title, the status pill,
+the one summary line, the overview blocks and the collapsed "Record information". A
+field that a higher place drew is not a row anywhere below it — which is why the
+record is not called by its own name twice and why the field the entry points at with
+`statusField` is not repeated under the pill it just filled.
+
+Three total functions in `src/core/derive.ts` answer that, each a pure function of the
+entry, the row and the reader: `recordHeader` (the primary field's value, the declared
+`statusField`'s pill with the declared `enumTones` colour, `listPreview`'s one line —
+never a pill inferred from "the first enum", never a dash for a line nobody filled
+in), `recordSections` (the fields with values, grouped by the entry's declared
+`sections` in declared order, each block in schema order, fields naming no block in a
+final "Overview", an empty block left out) and `recordInformation` (the identifier,
+the two stamps, then every field the document keeps for this screen that no higher
+place drew — in that order, collapsed and last, its identifier selectable and
+monospaced). `hasValue` is the one emptiness test, and it is the reading side of the
+line `values` draws when it builds a PATCH: `false` and `0` are facts and keep their
+row, while nothing, an untouched blank, an empty list and a switch nobody answered do
+not. `hidden` beats every declaration here: its value and its label reach no sentence
+on any screen. A record with nothing to say answers no blocks at all — no placeholder
+sentence, because 0085 defers an "Add {field}" affordance until it has an interaction
+contract.
+
+Delete lives in the header's `…` — drawn only where the resource mounts DELETE and the
+caller may use it, opened inline as the first row under that header and above every
+row of the record, and asked in 0085's words ("Delete '{title}'?" / "You can't undo
+this in the app." / "Cancel", "Delete {singular}"). A command the catalogue marks
+`system` is never offered at all, and a command's row carries its own title with no
+developer prose under it. The trail names people — "You", a name, the system, or "Name
+unavailable" — and never a user id; where the plan excludes it the section is not
+drawn.
+
+**Reused** — the hint surface T-0328 landed (`EntryHints.sections`,
+`FieldHints.section`/`visibility`/`enumLabels`/`enumTones`, `CommandHints.system`) read
+through `label`, `primary`, `statusField`, `enumLabel`, `enumTone`, `badgeTone`,
+`listPreview`, `fieldLabel`, `saidValue`, `display`, `neverShown`, `commandTitle` and
+`offered`; `DetailItem`, `DetailRow` and `Value` for every row; `Section`, `Row`,
+`Badge`, `Screen`, `Notice` and `Skeleton` for the drawing; `SummaryDetail` →
+`DisclosureSection` → `deriveDisclosure` for the collapsed section; `doors`/`offers`
+for the delete door and `confirm` in `src/ui/chooser.ts` for the question; `nounPhrase`
+for the noun in a sentence and `kitCopy` for every word. **Added** —
+`recordHeader`, `recordSections`, `recordInformation` and `hasValue` in the core, plus
+`informationFields`, because the inventory held no function answering "this record's
+fields that have values, grouped": `detailItems` was the only reading of one record and
+it returned one flat list, which is what made a screen open on its own identifier; the
+two hint half-pairs (`statusField`, `enumTone`/`badgeTone`) were parsed and read
+nowhere until this delivery drew them. **Made reusable** — the three functions are the
+record's hierarchy as data, so a client's renderer pack can take the header block, the
+blocks or the plumbing apart without redrawing the screen; `hasValue` is the emptiness
+rule for any screen that reads a row; `Value` now paints a closed set with the tone the
+document declared for that value, which is the pill a list row wants next; and
+`record-menu`/`record-information` are the two ids a journey finds a record's header
+menu and its collapsed block by.
+
+### How a form asks
+
+Three questions decide what a sheet holds, and all three are answered in
+`src/core/derive.ts` rather than by the screen that draws them. **The set** is
+`formControls`' answer: every field the entry keeps for the form, minus the ones it
+hides — a `hidden` field is neither offered nor sent, so `source` and `source_ref`
+never reach a label, a control or a request body. The one exception is a field that is
+hidden *and* required: the person's only path to a submittable create is never taken
+away, so it stays in the sheet marked required, and the parser names that pair once in
+the developer's channel. **The grouping** is the entry's own `sections`, in declared
+order, with the fields that named no block landing in a last block carrying the word the
+caller was handed (`copy.kit.overview`, "Visão geral" on a Portuguese phone); an entry
+that declares no blocks gets one block with no heading, because the sheet is the group.
+**The order inside a block** is `orderControls`: the field the record is called by
+first, then required, then optional, and schema order within each of those. Schema
+order alone put a required `pinned` below an optional `body`; the identity field leads
+even when it is optional, and never leaves the block its entry filed it in.
+`formSections` answers all three at once as blocks, and `commandSections` answers a
+command's argument the same way with no identity to lead on. Neither moves a byte
+`values` sends: reordering what is drawn does not reorder what is written.
+
+Help is the author's line. A field's `hints.help` is drawn under the field and
+announced with it; the developer's `doc`, which describes a wire member, is
+never drawn or announced on any form, sheet title or command screen — the same text
+that used to put "Lifecycle state" in front of a person is now a note only a developer
+sees, and no list carries a help sentence anybody did not write. Two sentences are the
+kit's own rather than an author's, and they are the sheet's to draw, not the
+derivation's: `changedByCommand` under a value only a command of its own changes, and
+`identifierOnly` under a reference box that takes an identifier because no picker
+exists yet. `control` hands back `hints.help` and nothing else, because a sentence
+written there could only ever be in one language; these two sit in `src/core/kitCopy.ts`
+with every other word a screen says.
+
+One name is drawn above every control, by `FormField`, whatever the control is: a
+switch, a chooser, a date row and a tag box print no name of their own and announce the
+one the sheet gave them, so a control is named once and the columns line up. That
+announced name carries whether a person may leave the field empty, in the reader's own
+words ("Title, Required", "Pinned, Optional"), because `*` is not a word and a switch
+that says only "Pinned" says nothing about leaving it alone. `field-<name>` is the id a
+journey looks a control up by. The tag box announces it too — its input carries the
+name the sheet derived, so a person hearing the sheet hears "Tags, Required" and not
+only "Add to Tags", whose act the Add button names.
+
+A list field stores its items comma-joined, so one item can never hold the separator.
+`joinList` is the one spelling, `entryHoldsSeparator` is the box's rule and
+`valueHoldsSeparator` the save's: `TagsField` commits a word on Return or on Add,
+ignores a word already on the sheet, and refuses an entry holding a comma without
+writing it, keeping what the person typed and saying which word it refused; the core
+refuses a held value that does not spell its own items, so a list that arrived with a
+loose comma is refused before anything is sent and never reaches the server half-spelled.
+`tags-<label>`, `add-<label>` and `tags-fault-<label>` are the ids those three acts
+work through. Every word the box says, in English and Portuguese, comes from
+`src/core/kitCopy.ts`.
+
+**Reused** — `neverShown` and the hint surface T-0328 landed (`visibility`, `help`,
+`section`, `sections`, `singular`, `primaryField`) for what a sheet may offer and what
+it may say; `primary` and the `namedBy` chain behind it for the identity field that
+leads; `control`, `label`, `splitList`, `text`, `timeWire`, `numberValue` and
+`listValues` for each field's own shape; `values` and `problems` unchanged in what they
+write, so a reordered sheet sends the same body; `Section`, `FormField`, `TextField`,
+`Button`, `Icon`, `Text`, `SwitchRow`, `ChoiceRow`, `DateTimeRow` and `Notice` for the
+drawing, with the chip drawn by the `View` and `Icon` `TagsField` already used; `noun`
+for the kind a sheet is titled with and `kitCopy`'s existing `newNamed` pattern for the
+word over `editNamed`. **Added** — `formSections`, `commandSections`, `orderControls`,
+`joinList`, `entryHoldsSeparator` and `valueHoldsSeparator` in the core, because the
+inventory held `formControls` (the set) and no answer to "in what order, in what
+blocks, and which of these words is a person's"; `FormBlock` and `FormWords` are its
+two shapes. Five words joined the copy table in both languages (`editNamed`, `addTag`,
+`addTagTo`, `removeTag`, `commaInValue`), and two more joined it in this round so a
+Portuguese phone reads Portuguese where the sheet explains a control it did not get
+words for (`changedByCommand`, `identifierOnly`), which the table already held in
+English only as a literal inside the derivation. `required`/`optional`, which the table
+already held and nothing drew, are now drawn and announced by the sheet — a refusal or
+an affordance with no word in the table is one no phone can say. **Made reusable** — `formSections`
+hands a renderer pack the form as data (blocks, labels and ordered controls), so a
+custom sheet takes the kit's order without redrawing it; `orderControls` orders any
+control list against any identity field, which is what a command argument needed and
+what a filter sheet will want next; `FormField` is now the only place a field's name,
+its required-or-optional word and its refusal are drawn, so a control that grows a help
+line cannot disagree with the label above it; and the two comma predicates are the
+storage rule itself, which any other writer of a comma-joined field can ask.
+
+A sheet keeps what a person typed and says exactly what to mend. **Validation runs on
+Save**: `problems` answers a sentence per field — "Enter a title." for a box one types
+into, "Choose a due date." for a value one picks, "Enter a valid number.", "Enter a
+valid date and time." — and every one of them exists in `kitCopy` in English and
+Portuguese before a screen may hold it, because a fragment off the wire ("is not a
+number") is a second implementation of the copy table in a language nobody reads. The
+phone refuses only what the catalogue makes it certain of: required-and-empty, not-a-number,
+not-an-instant, and the two list rules above. A range, a unit, a uniqueness, a permission or
+a tenant policy stays the server's, arrives as a 422 whose `body.` prefix the transport strips,
+and is drawn under that field in the same shape. **The sheet then asks for one field**:
+`firstProblem` names the first control *in the sheet's own asked order* that carries a
+sentence — never the first key of the refusal, which arrives in wire order — the hook
+holds it as `awaiting` and counts its refusals as `refusals`, the organism focuses that box's
+ref and asks React Native's `scrollResponderScrollNativeHandleToKeyboard` to lift it above
+the keyboard; typing into the field awaited is what clears it, and a second Save over a
+sheet nobody mended asks for the same field again, which is what the count is for. A
+refusal about a control with no box to focus (a choice, a date row, a switch, a tag box)
+focuses nothing: `FormField` announces `label: error`, its error line is a
+polite live region and the notice above the fields is `urgent`. **Dirty means changed, not
+touched**: `changedFields` compares each control's effective value with the one the row
+arrived with, as what the value means — an instant by the instant it is, because the date row
+writes `timeWire` with milliseconds and the server spells the same instant without them, and
+a switch by on or off, because a row that stored nothing is off — so typing a word and putting
+it back, confirming the date the record already carried, or flicking a switch on and back asks
+nobody's permission; the one predicate is used by the sheet, by a command's argument and by the
+singleton, and the guard covers Cancel as well as system back and the swipe gesture. **One
+dismissal, one question**: Cancel asks its own answer and then leaves with the guard lifted by a
+render, because a `router.back()` taken while `usePreventRemove` is armed is handed back to it,
+and a person who was asked twice for the same draft was not asked once. **Values survive every
+failure** — a refused save, a 422 under its field, a 500 (`failure.saveFailed`), a
+transport that never answered (`failure.uncertain`, and a save is never replayed), a 409
+(`failure.revision`, no silent overwrite), a 401 (the draft stays filed under this address
+for this person) — because no failure path writes `held`. **Save exists only while the
+row is on screen**: the button is disabled outside `editing` and the transition rechecks
+`phase` and `offers` from inside, so a sheet reached by a link cannot write what it never read.
+A **singleton** gets the same protection: the same question before a dirty draft is thrown
+away, the same Save guard, an Edit drawn only once its row has been read, and a PUT built by
+`writeControls`, which carries every field this client may write — the ones the form drew, the
+hidden ones the author keeps as plumbing and the immutable echo of what the read returned —
+so a whole-row replace clears nothing by omission, while `id`, `createdAt` and `updatedAt`
+never travel back. What nobody is asked to type travels **unparsed**: a hidden or frozen field
+carries the row's own value (`Control.echo`), not that value re-spelled through an editor's
+one-string form, which is a spelling with no comma inside one list item and no empty item —
+`["North, West", "", " "]` stays three items rather than becoming `"North, West, "` split back
+into `"North"` and `"West"`. **A landed write says so**: one success haptic and one sentence that
+outlives the screen that wrote it — the shell holds one slot, filed by the destination address
+the writer names (`say`) and read once by the record that lands there (`heard`), for the
+visit it was heard in: a focus that hears nothing draws nothing — "Note
+created" after a create, "Changes saved" after an edit and after a singleton's PUT, drawn as
+an `ok` `Notice` with a polite live region beside the row it is about.
+
+**Reused** — `problems`, `values`, `formControls`, `formSections`, `orderControls`,
+`control`, `text`, `numberValue`, `timeValue`, `noun`, `fieldLabel` and `refusalFields`
+for what a refusal is made of and what a body is made of; the copy table's own
+function-shaped entries (`untitled`, `deleteQuestion`, `deleteAction`) as the model for
+the sentences that name a field or a resource; `TextField`'s existing `forwardRef`,
+`Screen form`'s keyboard handling, `FormField`'s announcement and `Notice`'s `ok` tone
+and live region for the drawing; `usePreventRemove` and `src/ui/chooser.ts`'s `confirm`,
+already used by three screens, for the question; the shell's existing holders (one draft
+keyed by its address, one write counter per resource) for the two things that must survive
+a screen. **Added** — `changedFields`, `firstProblem` and `writeControls` in the core, `Control.echo` — the row's
+own value for a field nobody is asked to type, which `values` sends unparsed — `awaiting` in
+both hooks, and ten sentences in `kitCopy` in both languages, because the
+trace's inventory held the set of controls and the body builder but no answer to "which
+field changed", "which field is being asked for" or "what does a whole-row replace
+carry", and no sentence anywhere in either language for a required field, a discarded
+draft or a write that landed; `ShellValue.say`/`heard` because nothing in the tree carried
+a sentence across a screen — the shell already owns exactly that kind of transient twice
+over (a draft, a write count) and nothing else does. `Screen` gained one optional
+`scrollViewRef`, which is the handle the page needs and no rule of its own. **Made
+reusable** — `writeControls` is the whole-row body, so any future PUT of one row (a
+settings resource, a masked form) keeps the fields it was not shown without learning what
+hidden means; `changedFields` and `firstProblem` are two hooks' worth of decisions in the
+core, exported, so a custom renderer pack gets the same dirty rule and the same field to
+focus; `FormWords` is now the whole seam between a refusal and its sentence, so the core
+writes no English at all; and `say`/`heard` is one sentence for one address, which is the
+carrier the next "the write landed" moment will need instead of a toast.
+
+What this does not reach, stated where a reader would look for it: four controls carry no
+box to focus — a choice, a date row, a switch and the tag box — so their refusal is announced
+where it stands and the keyboard goes to the first box that can be typed into; the sentence
+about a list item of the wrong type is still English written in the core ("contains a value
+that does not match its item type"), because no phone's table holds it in either language
+yet; a singleton PUT echoes what the read returned for an immutable field, and this kit has
+no live server to prove the kernel accepts its own echo rather than refusing it as a write
+of a field nobody may write; the *tag box* has no spelling for one item that carries a
+comma, so a stored item written some other way is drawn as two chips and saved back as two —
+what a person sees there is what the write holds, and nothing is rewritten behind their back,
+but nobody can type such an item back in, because the box refuses the separator on entry;
+and the English article rule chooses its article from a label's first letter rather than its
+meaning, so a field labelled `URL` is asked for as "Enter an uRL." and one labelled `Hour`
+as "Enter a hour.".
 
 ## Design
 
@@ -248,7 +606,99 @@ not a control that renders, and the kit commits to six things the checks name:
   exactly those bytes and that every committed picture is the bytes its row
   promises.
 
+**Reused** — `Button`'s existing shape list and `s.plain`'s way of painting an edge
+in the surface the word sits on, `Section`'s `divided` line (now the kit's only row
+separator), `Badge`'s neutral tone, `copy`'s existing "Not set" words, `Clock` and
+the `now` a screen already hands `useFeedback`, and `Intl` for both the clock and
+the distance. **Added** — `ownZone` on `Presentation` and `presentedInstant` in
+`src/core/presentation.ts`, because a formatter that asked the device which zone it
+is would put a mutable default in the core and leave every zone test depending on
+the machine, and nothing existing could say one instant twice — the words a glance
+reads and the whole date-time a reader speaks; `ListScreen`'s `grouped` branch,
+because both list templates lay out each item on its own and cannot hold one card
+across the rows they recycle; `hostLabel` and `plural`'s mass-noun set, because the
+derivation layer held neither and a screen may not parse an address inline.
+**Made reusable** — `presentedInstant`'s shown/exact pair, so any value cell, any
+detail row and the activity trail state one instant in two spellings (the trail's
+own private relative-time table is gone with it), `civilDay` for any sentence that
+needs "yesterday" rather than a date, and `ListScreen`'s `grouped` flag for the next
+screen that holds a handful of things a person may open.
+
 ## Consume the shared native source
+
+### A module's own screen
+
+A catalogue entry can name the screen it wants. `renderer` on an entry is
+presentation only: `{ "name": "task/tasks", "min_shell": 1 }` says draw this
+resource with the pack keyed `task/tasks`, and that only a shell from version 1
+onward can draw it. `packKey` picks the pack; `key` still names the resource, so
+one module's screen may be another module's row, and every read, write, door and
+permission keeps coming from the entry, the session and the server's answer —
+which pack draws a row is not an authorisation and cannot widen what a caller may
+do. A name this build does not carry, or a `min_shell` above this build's
+`SHELL_VERSION`, draws the generated screens; only the second case adds a quiet
+line in the page's foot, because that one is a screen a person can get by
+updating the app. `SHELL_VERSION` belongs to the kit rather than to a product:
+a pack ships inside the app binary, so a product cannot claim a capability the
+shell it composes lacks. A malformed `renderer` — no name, a `min_shell` that is
+not a whole number at least 1 — is read as no pack rather than refused: a slip in
+a screen's name may cost a person the screen made for them, not the catalogue.
+Whether a server ever prints the key is the kernel's; this build reads it as
+optional, on the same terms as version-2 `operations`.
+
+A pack screen reaches typed data by naming a generated operation, which is the
+reason a bespoke screen is worth writing at all:
+
+```tsx
+import { useOperation } from "@septagon-oss/platformkit-mobile/screens/useOperation";
+
+const read = useOperation("taskTaskRead", id === undefined ? undefined : { path: { id } });
+const title = read.data?.title ?? "";
+```
+
+`useOperation(name, input)` answers `ReadState` — `requested`, `data`, `error`
+and `reload` — and an `input` of `undefined` asks for nothing. The name must be a
+key of the generated `Operations`, and the body is what that operation's own
+generated validator accepted (see [HTTP contract](#http-contract)); a field the
+pinned document does not print fails `tsc` rather than drawing an empty line on a
+phone weeks later. `OperationName`, `OperationInput`, `OperationData` and
+`ReadState` come from `@septagon-oss/platformkit-mobile/renderers`, and a pack reaches the
+document through them rather than through the generated client. A write is the
+same surface, `api.operations.taskTaskAssign({ path: { id }, body })`, and
+`@septagon-oss/platformkit-mobile/screens/useCommand` exports the two hooks the generated
+screens use: `useCommandRun` sends a command with an argument to its own sheet
+and asks about one without, `useCommandAsk` is the asking half. So a pack that
+draws the entry's commands asks the same questions, posts to the same address and
+re-reads on the same write count. What stays internal is the generated screens'
+own hooks — a pack composes a screen, it does not take over the shell's.
+
+The kit's one example is
+[`src/examples/taskRenderers.tsx`](src/examples/taskRenderers.tsx), exported as
+`@septagon-oss/platformkit-mobile/examples/taskRenderers`. It is a pattern a product copies,
+not product UI: `app/_layout.tsx` keeps passing `defaultRenderers`, so no screen
+a person walks comes from it. It shows the one thing that earns a bespoke screen
+— `slaDeadline` and `slaBreached` read as one line, which no column can say —
+and nothing else: its title, priority and state are the columns the schema
+already describes, and its commands come from the entry through `Actions`.
+
+**Reused** — `parseCatalog` and its additive-optional extension, `Entry`, `key`
+and the version rule in `core/catalog.ts`, the `Notice`/`Spinner`/`Badge`/`DetailRow`/`Section`
+atoms and molecules, the `Actions` organism and the `Screen` template,
+`useFeedback` and the copy table, `rowCommands`, `useCommandAsk`, and the
+`createApi(url, fetchLike)` double the contract tests already drove.
+**Added** — `RendererRef`, `SHELL_VERSION`, `packKey` and `shellReady` in core,
+`OperationName`/`OperationInput`/`OperationData`/`ReadState` in the pack
+contract, `useOperation` and `useCommandRun` in `src/screens/`, and the example
+pack — because `defaultRenderers` was empty and no screen read a generated
+operation at all (`grep -rn "api.operations" src/screens` printed nothing on the
+commit this change starts from), so there was no accessor to extend and nothing
+existing could carry a read whose type comes from the document. **Made
+reusable** — `useOperation`, exported as `@septagon-oss/platformkit-mobile/screens/useOperation`
+for every pack a product writes, and the one shared `useCommandRun` now behind
+both the generated detail and a pack's own screen,
+`fakeApi(operations)` with `answering`/`recorded` in `tests/fakes/shell.ts` so
+the next screen is tested over a transport and its validators rather than a
+stub, and the exported example itself.
 
 ### Shared feedback
 
@@ -261,7 +711,7 @@ existing atoms had no common state or recovery contract. **Made reusable** —
 renderer pack use the same states, actions, tokens and conformance examples.
 
 Obtain an immutable English or Portuguese copy bundle with `deriveCopy('en')`
-or `deriveCopy('pt')` from `platformkit-mobile/core/derive`. Pass an explicit
+or `deriveCopy('pt')` from `@septagon-oss/platformkit-mobile/core/derive`. Pass an explicit
 `Presentation` with that bundle, locale, timezone, week start, sampled UTC clock
 value and motion preference to `deriveState(input, presentation)`. Language and
 formatting locale are independent; the gallery includes `en-GB`, `pt-PT` and
@@ -269,7 +719,7 @@ formatting locale are independent; the gallery includes `en-GB`, `pt-PT` and
 
 `deriveState` returns either `{ ok: true, value }` or `{ ok: false, issues }`, with
 no partial model. Render a successful value through
-`platformkit-mobile/screens/StateFeedback`, passing `model`, `onAction(id)` and
+`@septagon-oss/platformkit-mobile/screens/StateFeedback`, passing `model`, `onAction(id)` and
 an optional `testID`. This screen adapter composes the pure
 `ui/molecules/StateView` and performs iOS announcements when the message changes;
 Android and web use native live regions. The caller owns all reads, writes,
@@ -299,15 +749,27 @@ Direct consumers upgrading their source pin must migrate these required props:
   `deriveFeedback(copy, motion, { locale, timeZone })`. The in-repository screens
   adapt native preferences in `useFeedback`. `retry(feedback, callback)` now
   gets its label from core; the old Notice export re-exports that same helper.
-- The `ResourceForm` organism also requires `initialDate`. Generated form,
+- The `ResourceForm` organism also requires `initialDate`, and takes `blocks`
+  (the ordered groups `formSections` and `commandSections` answer) where it took a
+  flat list of `controls`: one name is drawn above every control, so the organism
+  needs to know which control begins a group. `FormField` takes `copy` (the kit
+  bundle) when it is to mark a field required or optional, `TagsField` requires
+  `copy` and takes the optional `announce` (the accessible name the sheet derived,
+  which a box outside a form does not have), and `SwitchRow` no longer takes `help` —
+  the name above the switch is where help belongs. `problems(controls, held, words)`
+  takes the reader's own bundle, because the sentence it refuses with is a word, not a
+  format string.
+  `sheet(title, entry)` is titled by the catalogue's declared name for the kind,
+  with the wire word from the address when no entry has been read. Generated form,
   command and singleton screens accept an optional `Clock` and sample it once
   per mounted screen; the default device clock lives in screen composition.
-- `timeText(date, formatting)`, `display(field, value, formatting)` and
-  `detailItems(entry, row, formatting)` require explicit formatting. The latter
-  two also use its copy bundle. `Value` and `Labelled` receive that value as
+- `timeText(date, formatting)`, `display(field, value, formatting)` and the
+  record's three answers (`recordHeader`, `recordSections`,
+  `recordInformation(entry, row, formatting)`) require explicit formatting. The
+  latter four also use its copy bundle. `Value` and `Labelled` receive that value as
   `presentation`. There is no mutable device-default date formatter.
 
-The public `platformkit-mobile/ui/gallery` export accepts `presentation`, optional
+The public `@septagon-oss/platformkit-mobile/ui/gallery` export accepts `presentation`, optional
 complete `palette`/`fonts`, `initialCaseId` and `initialMode`. Choose a rich-state
 case, language, locale and appearance in its controls. Hover, press and focus
 cases contain real controls to operate; their names do not simulate interaction.
@@ -399,16 +861,32 @@ source evidence; they do not establish those runtime results.
 
 ### Shared package
 
+**Reused** — `package.json`'s identity fields, the `files` allowlist
+[`tests/package.test.ts`](tests/package.test.ts) already enforces, the
+manifest/lockfile equality `scripts/source.ts` refuses on every check, and the
+pinned-action, read-only-permissions, checks-first skeleton of
+[`ci.yml`](.gitea/workflows/ci.yml) and
+[`release.yml`](.gitea/workflows/release.yml) carry this release. **Added** — a
+scoped name, a version, [`CHANGELOG.md`](CHANGELOG.md) and
+[`publish.yml`](.gitea/workflows/publish.yml), because this repository could not
+write to a registry at all, no existing file named a version a consumer may
+pin, and no YAML parser was a declared dependency of the check that has to read
+one. **Made reusable** — `npm run check:publish`, the one guard a push and a
+release both ask the same questions of; a changelog entry that states the
+catalogue version its release renders, which that guard reads; and a workflow
+whose only input is a tag, so the next version is a bump and an entry rather
+than a decision again.
+
 [package.json](package.json) exposes the existing implementation through package
-subpaths: `platformkit-mobile/shell`, `renderers`, `route`, `effects/api`,
+subpaths: `@septagon-oss/platformkit-mobile/shell`, `renderers`, `route`, `effects/api`,
 `core/catalog`, `core/derive`, `screens/<component>` and
 `ui/{atoms,molecules,organisms,templates}/<component>`. Theme and scale come from
-`platformkit-mobile/ui/theme` and `platformkit-mobile/ui/scale`. These exports
+`@septagon-oss/platformkit-mobile/ui/theme` and `@septagon-oss/platformkit-mobile/ui/scale`. These exports
 resolve directly to the TypeScript source used by this reference application.
 The consuming Expo application supplies its routes, identity, renderer pack and
 product screens, and composes one shared `Shell` and `ThemeProvider`.
 
-`platformkit-mobile/screens/SignIn` takes an optional `title`, the product's
+`@septagon-oss/platformkit-mobile/screens/SignIn` takes an optional `title`, the product's
 name over the form, and draws the shell's phases itself: a spinner while a
 saved sign-in is restored, and, when a saved sign-in could not be opened, the
 reason with Retry and a way to another server. A product that composes its
@@ -429,11 +907,11 @@ keep their objects stable between changes. The provider's `mode` prop still
 overrides the device appearance when the product requires it.
 
 Keep the application's design export in `testdata/design-tokens.json`. Reuse
-`render` from `platformkit-mobile/tools/tokens` in its `scripts/tokens.ts`:
+`render` from `@septagon-oss/platformkit-mobile/tools/tokens` in its `scripts/tokens.ts`:
 
 ```ts
 import { readFileSync, writeFileSync } from "node:fs";
-import { render } from "platformkit-mobile/tools/tokens";
+import { render } from "@septagon-oss/platformkit-mobile/tools/tokens";
 
 const document: unknown = JSON.parse(readFileSync("testdata/design-tokens.json", "utf8"));
 writeFileSync("src/ui/tokens.ts", render(document));
@@ -452,16 +930,59 @@ the build tool or Node APIs into runtime layers.
 The application owns its native dependencies and lockfile. Declare the native
 packages directly in that application at the versions used here so autolinking
 finds them and React, the router and their contexts have one installed instance.
-Pin the shared package to an exact published release or an HTTPS source archive
-whose URL names a full published commit ID. Commit the resulting application
-lockfile, including the resolved URL and integrity hash; branch archives and
-local checkout paths do not identify a fixed dependency.
+Pin the shared package to one published version, with no range:
 
-No npm registry release is published; `private: true` remains set.
+```json
+"@septagon-oss/platformkit-mobile": "0.2.0"
+```
+
+and name the registry that holds it in that application's own `.npmrc`, in the
+shape the forge documents for a scoped package. Which host the forge is belongs
+to the deployment, so this repository commits no registry address:
+
+```ini
+@septagon-oss:registry=https://<forge host>/api/packages/septagon-oss/npm/
+//<forge host>/api/packages/septagon-oss/npm/:_authToken=<read token>
+```
+
+Commit the resulting application lockfile, including the resolved URL and
+integrity hash; branch archives and local checkout paths do not identify a
+fixed dependency. Anonymous reads of the package scope are refused today, which
+is why the consumer's own line carries a token.
+
+An HTTPS source archive whose URL names a full published commit ID still
+installs, and is now the way to pin a commit from before this rename: an archive
+of this commit or later carries the scoped name above, and an older one answers
+only the unscoped `platformkit-mobile/...` spelling.
+
+The kit is published from the tag `kit-v<version>`, which has to name the
+version in `package.json`.
+[`publish.yml`](.gitea/workflows/publish.yml) runs `npm run check` first, then
+the same guard with the tag it was cut from
+(`node --import tsx scripts/publish.ts --check --tag <tag>`), then the one write
+— the kit to this
+forge's npm registry, authenticated by the repository secret
+`NPM_PUBLISH_TOKEN`. Until that secret exists every run refuses on the step that
+reads it and nothing reaches the registry. Before the write, that step asks the
+registry — with the same credential the write carries, because an anonymous read
+of this scope is refused and so answers nothing — whether it holds the version.
+A version the registry already holds is never written again: the fix for that
+refusal is a new version and a new tag. Any other answer, including no answer,
+refuses the run as well, because a publish may not rest on a question the run
+could not read the answer to. Only released versions are published: a prerelease
+is refused by `npm run check:publish`, because npm sends one under a dist-tag
+this release does not name.
+The `v*` namespace stays `release.yml`'s — it builds binaries and publishes no
+package, and Gitea anchors a ref glob, so neither tag namespace reaches the
+other's runs. [CHANGELOG.md](CHANGELOG.md) carries one section per version and
+states the catalogue version that release renders; `npm run check:publish`
+refuses a manifest version with no section here, or a section that names another
+catalogue version, so an entry cannot be skipped by the commit that bumps it.
+
 For local review, `npm pack --ignore-scripts --pack-destination /tmp` creates a
 source dependency archive. Its contents are `src/`, `scripts/tokens.ts`, the
-shared `scripts/android/` recipe, `LICENSE`, `NOTICE` and npm's package
-metadata and documentation.
+shared `scripts/android/` recipe, `CHANGELOG.md`, `NOTICE`, `LICENSE` and npm's
+package metadata and documentation.
 It contains the shared implementation, including generated design tokens. The
 reference application's routes, Docker setup and test tooling belong to the
 complete application handoff below. `npm run check` packs the dependency
@@ -471,12 +992,12 @@ type checking, bundling and device journeys remain separate verification steps.
 
 ### Build a consuming Android application
 
-The exported `platformkit-mobile/tools/android` entry is the same Bash recipe
+The exported `@septagon-oss/platformkit-mobile/tools/android` entry is the same Bash recipe
 used by this repository. After installing the consuming app's locked
 dependencies, run this from that app's root in the Android build environment:
 
 ```sh
-bash "$(node -p "require.resolve('platformkit-mobile/tools/android')")" "$PWD"
+bash "$(node -p "require.resolve('@septagon-oss/platformkit-mobile/tools/android')")" "$PWD"
 ```
 
 The target needs `package.json`, `package-lock.json` and an Expo app
@@ -582,7 +1103,7 @@ locally either way.
 ## Verify a change
 
 The repository CI runs `npm run check` on pull requests and main pushes.
-`npm run check` runs nine gates in order, and stops at the first that fails:
+`npm run check` runs eleven gates in order, and stops at the first that fails:
 `check:api` (offline generated source comparison),
 `check:sdk` (`EXPO_OFFLINE=1 expo install --check`: every installed native
 package against the ranges the pinned `expo` bundles, read from
@@ -608,8 +1129,16 @@ with an item left empty, unclosed or tab-indented, a filter pointing at no file
 beside it, a `tags:` read out of each flow's own header, an `excludeFlows:` no
 Maestro run applies at all — is refused by name rather than read as agreement;
 every id one of them names is a testID a component sets, every route screen under
-`app/` is named by some flow's `# screen:` header, and every flow names the
-screen it proves) and
+`app/` is named by some flow's `# screen:` header, every flow names the screen it
+proves, and every text selector is spelled as the regex source Maestro compiles it —
+between slashes the delimiters are two characters the element's own text would have to
+carry, so such a journey taps nothing and is refused where the words are written),
+`check:inventory` (the suite's own record in `tests/inventory.json` answers for this
+checkout: a reached test file with no row, a row whose file is gone, a row whose
+layer, tier, reach or rule the file no longer answers to, or a rise in the count of
+review-named files or of files no runner reaches — see *Which tests run where*
+below), `check:publish` (the manifest names a package the registry can hold and the
+changelog carries the entry this version's release is documented by) and
 `check:source` (the manifest and lockfile install from the
 registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the
@@ -617,7 +1146,9 @@ lockfile and their config plugins, the Android recipe, the bundler
 configuration and the design export. When a change moves it, run
 `npm run fingerprint` and say why in the commit, because that change needs a
 new binary. CI also exports both bundles, refuses a dependency advisory no
-review covers (see below), scans the history for secrets, runs the device
+review covers (see below), scans the history for secrets (one value is exempt,
+by its shape alone: the synthetic publish credential the release tests hand a
+fake npmrc, named in [.gitleaks.toml](.gitleaks.toml)), runs the device
 journeys against a pinned kernel image, and a weekly workflow reports what
 drifted without blocking anything. A nightly one blocks: [kernel-main.yml](.gitea/workflows/kernel-main.yml)
 reads kernel main and fails when this build cannot read it, which is the part no
@@ -697,6 +1228,71 @@ screen hooks over a fake Api (`tests/screens/`). Neither suite launches Expo,
 exercises a native device or connects to a live server. For a screen or session
 change, also exercise the affected journey on the target platform and report
 what you ran.
+
+### Which tests run where
+
+Four layers, one tier each (decision 0088). `tests/INVENTORY.md` and
+`tests/inventory.json` record every test file — its layer, what it costs, how many
+recent runs of `main` named it as a failure, the production lines nothing else
+covers, the rule it proves and the verdict proposed for it — and
+`npm run check:inventory`, the ninth gate of `npm run check`, re-reads the shape of
+every row from the checkout: a reached file with no row, a row whose file is gone, a
+row whose layer, tier, reach or rule the file no longer answers to, a `merge` or
+`delete` verdict with no successor named and no assertion mapped forward, or a rise in
+the count of review-named files or of files no runner reaches. It never decides
+whether a file runs — that is its runner's glob alone — so a wrong row cannot silence
+a test. The verdicts are a proposal: root ratifies the table before any prune commit,
+and no prune lands in this change. The layer is read from what a file **imports**, so
+a test that drives a tool by spawning it (`scripts/tiers.ts` under `tsx`, say) is
+filed by its own imports — behaviour — whatever its subject is; a row that means
+otherwise carries a `layerReason` and the gate takes the override.
+
+The tiers build on that table and add work rather than replacing it.
+`npm run test:contracts` is the contract tier — one process each for the pinned
+documents, the generated client, the published surface, the flows and the inventory.
+`npm run test:scope -- <base> --run` is the push tier's scope: the test files whose
+transitive imports reach a file the diff touches, computed from the suites' own import
+statements. It names any changed `src/` or `app/` file no suite imports at all and
+exits zero for it: every route under `app/` is in that set, because a suite mounts a
+screen through `tests/fakes/router` and a flow claims the route itself, so a scope
+that refused would turn away an ordinary change to the home screen before the required
+check had read it. A name belongs to the scope; a refusal belongs to `npm run check`.
+`npm run test:merge` is `npm run check` under the other tier's name, and it is what
+every push and every pull request still runs whole. `.gitea/workflows/nightly.yml`
+runs `npm run report:tests`, which publishes the slowest files, the slowest tests and
+the flaky rows as one JSON artefact read out of the inventory. A scoped run is never
+the only evidence a change gets: the selected subset is a faster first answer, and the
+full suite is the merge gate.
+
+**Reused** — `scripts/check_flows.ts` (its `--list`/refusals-as-strings CLI shape,
+which `scripts/inventory.ts` copies), `tests/component-suite-gate.test.ts` (the
+runner-discovery pins the tiers work around rather than replace),
+`tests/test-name-grammar.test.ts` (whose 0072 count the inventory keeps as a
+ratchet), `CLEANUP.md`'s per-folder coverage table as the shape of a baseline,
+`advisories.json` + `scripts/advisories.ts` (schema-first, unknown keys refused,
+entered as its own `check:*` step) as the shape of the inventory artifact, and
+`scripts/e2e/{run.sh,mobile_ci.sh}` with `e2e/flows` as the journey harness.
+**Added** — `scripts/inventory.ts`, because nothing in this repository named a test's
+layer, cost or reach, and the columns cannot be derived from a coverage report alone;
+`scripts/tiers.ts`, because 0088's push tier asks which tests a diff reaches and the
+inventory's `loaded` column is a count of one run, not a reverse index; the tier
+steps in `.gitea/workflows/ci.yml` and the nightly report job, because one tier ran
+everything today; and `tests/INVENTORY.md`, `tests/inventory.json` and
+`tests/duplicate-candidates.md`, which are the table root ratifies.
+**Made reusable** — the inventory's row shape and its `--sync`/`--measure` commands,
+so the next task that adds a test adds a row in the same commit and CI refuses the
+one that does not; `--measure` runs the file's own runner — node or jest — so a
+component suite costs one command rather than a hand-typed case list; `reachedBy` as a diff-to-tests lookup any later gate can call
+instead of re-deriving one; `baseline.unreachable`, which turns "this file runs
+nowhere" from a sentence in a report into a refusal; and `e2e/flows/session-restored.yaml`
+as the pattern for a journey whose assertions are only testIDs and words the screen it
+names actually draws (the sign-out journeys assert the `Sign out` label, which is
+`src/screens/Home.tsx`'s own literal rather than a word of `src/core/copy.ts`), and the
+shape of a `keep` reason — what only that row proves, the sibling that comes closest, which
+run its numbers came from, and no coverage claim a column left null cannot support. The
+reason's emptiness is refused by `checkInventory`; what it points at is read by
+`tests/a-keep-reason-names-siblings-the-table-holds.test.ts`, which refuses a named sibling
+that is no row of the table and a measured row still saying it is new.
 
 ### Run the device journeys
 
@@ -981,7 +1577,7 @@ carry the generated operations into the current screens.
 **Added** — the pinned public OpenAPI document, offline generation and drift check,
 generated TypeScript and Zod contracts, and required custom-response validators
 make response acceptance explicit before data reaches a screen.
-**Made reusable** — `platformkit-mobile/generated`, each shell API's bound
+**Made reusable** — `@septagon-oss/platformkit-mobile/generated`, each shell API's bound
 `operations`, and `request(method, path, validate, body?)` let renderer packs consume
 the documented operations and validate their own JSON routes through that transport.
 
@@ -1036,3 +1632,251 @@ words above change with it. The
 device journey for the code step is a state behind a password, so
 `design gate` measures `/sign-in` and not the step, and no emulator ran on this
 delivery: SecureStore and native cookie behaviour remain unproven here.
+
+A write made where no network reaches is kept on the device and sent when one
+returns. `createOutbox` holds `{kind, resourceKey, path, body}` under the selected
+server and the signed-in person, mints one `Idempotency-Key` per write before its
+first attempt leaves the phone and hands it to the screen's own typed call — the
+held row keeps that same string as its id, so the attempt that may have landed and
+the replay that follows name one write — and drains held writes in append order,
+one at a time, sending with the session current at send time. A 4xx stops that
+write alone and keeps the server's decoded reason for Retry and Discard; a server
+that is present and unhappy stops the pass; a deadline after a send makes the write
+`unknown`, which only a person may resolve, because the kernel ignores the key
+until T-0293 lands. `createReadCache`
+answers an unreachable read with the last response this phone got for that exact
+path, and a list and a detail ask it: both read through `answered()`, which
+answers from the cache when the server cannot be reached at all and calls
+straight through where the shell has no device store. The address is the
+request's own, spelled by `listQuery` and `rowAddress` in `src/effects/api.ts`,
+so a page that lands replaces the page it is for rather than sitting beside it
+under another name. What `answered()` says about where the answer came from is
+drawn: a list or a record the phone answered rather than the server carries the
+`offline` line with the moment it last arrived, said by `deriveOffline` in
+`src/core/feedback.ts` and drawn by the same notice a refusal uses, in the copy
+table's own words in both languages. A form and a singleton still call `Api`
+directly: a form's fields are the person's own, and a singleton is one row.
+Signing out clears what is held, so every door that leaves a sign-in — Home's
+account menu, the sign-in screen's way to another server, and its clearing of a
+saved sign-in — goes through `useSignOut`, which asks and names the count while
+this phone still owes the server a write.
+
+**Reused** — `createApi`'s deadline, problem decoding (`ApiError {status, detail,
+fields}`) and `writePath`/`commandPath` addressing, `row`/`page` validation,
+`src/core/feedback.ts`'s `offline` state with its `updatedAt` line, `copy.state.*`,
+the shell's `writes`/`wrote` staleness counter, `src/effects/session.ts`'s ordered
+chain and versioned-record rule, `src/ui/chooser.ts`'s `confirm`, and routebook's
+store discipline (serialise, parse-on-read, one size constant read and written,
+refuse to move another's record).
+**Added** — `src/core/outbox.ts` (the held-write record, its state table, the body
+and key bounds), `src/effects/outbox.ts` (hold, submit, retry, discard, a drain
+that runs on the queue's one lane and keeps a refused item where it is),
+`src/core/read-cache.ts` and `src/effects/read-cache.ts` (which answer earns a row,
+which address it answers for), `src/effects/native-store.ts` (`expo-sqlite`,
+`PRAGMA user_version`) and `src/effects/native-reach.ts` (`expo-network` as a
+trigger only). Nothing existing
+could carry them: the kit's only device storage was one secure session record, and
+`RequestOptions` could carry no header a caller chose, so an idempotency key could
+not be sent at all. `answered()` is how any screen asks for a read it wants answered
+from the device, and `listQuery`/`rowAddress` are how its address is spelled, so no
+caller has to guess how the transport spells a window.
+**Made reusable** — the two table ports (`OutboxStore`, `ReadStore`) with a
+conformance double beside them (`tests/fakes/store.ts`) that enforces the scope rule
+in every method, the `Idempotency-Key` request option on `Api.request`, the `may`
+port through which a composition re-checks its own catalog rule before a held verb
+is re-sent, and `DeviceStore`/`createReach` as the pattern of putting one native
+module behind one port.
+
+### Limits and reuse of the held write
+
+- Ordering says _the queue's writes keep their own order, whoever asked for them_,
+  because two writes to one record are statements about the same row and the older
+  one that lands last takes the newer edit off it. One queue runs one write at a
+  time, so a Retry pressed while a drain is waiting for an older write's answer
+  waits behind that answer. Serial sends are not yet ordered ones, so `overtakenBy`
+  in `src/core/outbox.ts` says who is next: a Retry on a row that an older held
+  write of the same record is still ahead of runs the queue from its head and takes
+  that row when its turn comes rather than pushing it past, and a write made while
+  the phone is back online goes through the caller's own call — the response is
+  what the screen needs to close its sheet — behind the writes the queue already
+  holds. `Outbox.submit` still answers `sent: true` the moment the server answers
+  that call, which is the only answer a form can use, and it never waits for the
+  drain it asks the queue for afterwards — only for the writes that came before it.
+  When that wait ends with an older write of the same record the phone could still
+  send — one the server told it to wait (5xx, 408, 429) or never took, or one a 4xx
+  left refused for its person — `submit` keeps this write and answers `sent: false`,
+  the answer a phone with no network gets, rather than landing an edit the older
+  write would take off the record the moment its person retries it. The form stays
+  open saying the phone holds the change, and the write leaves with the row it
+  waited for. A blocked write holds back only the writes to its own record: another
+  record's write, and a second create, go on the wire at once.
+- A 4xx stops its own write and the queue goes on past it, including past a later
+  write to the same record, because `next` picks up the first queued row: a refused
+  write a newer one has since overtaken can still be retried, and then lands last.
+  Nothing on the phone can tell a refused write whose record has moved on from one
+  whose record has not — only the server knows, and it answers again at the next
+  send — so the row is named as refused and that retry stays the person's decision.
+  A write made now does wait behind a refused row, so this gap is the drain's
+  carrying a queued row past a refused one, and resolving the refused row — Retry
+  or Discard — is what puts the order back.
+- A request that is already on its way cannot be discarded: `discard` refuses a
+  row in `sending`, and the row shows Discard disabled while it is busy, because
+  the answer will move that row whichever way the person feels about it now.
+- A `fetch` that rejects after the request left but before any header arrived is
+  indistinguishable from one that never left, and no client change can tell them
+  apart: the phone holds such a write and may send it twice. Both attempts carry
+  the one key the queue minted before the first left, which is what lets a kernel
+  honouring `Idempotency-Key` (T-0293) match them and answer the replay with the
+  first answer; until that lands the key is sent and ignored, and the duplicate is
+  possible. What the client can and does stop at the case it can see — an answer
+  whose body was cut off is never re-sent.
+- A phone that cold-starts with no network cannot say who its saved session
+  belongs to: `identity` comes only from a server that answers, so until one
+  reaches the server once the app holds nothing and shows nothing that an
+  earlier run left. The rows are on the device and appear at the next load that
+  reaches the server.
+- The composition root supplies the device store, the key maker and the network
+  listener, so the app holds, sends and reads. A page answered from the device is
+  drawn as what it is — `deriveOffline`'s line above the rows — but the line is
+  the whole of what it says: no screen offers a "work offline" switch, and a list
+  never prefetches a window nobody has asked for.
+- The queue's cases are `node:test` files under `tests/` (`tests/outbox.test.ts`
+  and the held-write files beside it), run by `npm test` beside the Jest suite; the
+  brief asked for Jest with a fake network, and the fake network is the same one
+  either way — `tests/fakes/store.ts` plus a `fetch` the test supplies.
+- Nothing here has been seen on a device: no `e2e/flows/held-write.yaml` exists,
+  and `expo-sqlite` is exercised in tests through a `node:sqlite` stand-in that
+  binds parameters the way the native sources do.
+
+## Say what went wrong in plain words
+
+A person reads a sentence, never a status code. `src/core/failure.ts` classifies
+one refusal together with the reason the screen asked for it — a first read, a
+refresh, a create, an update, a delete, a command, the catalogue — and answers
+with one copy key, one `IssueCode`, one action and whether the record stays on
+the screen. A refusal the server answered may be asked again; a write nobody
+answered is never sent again, which is why an unanswered save offers "Check the
+result" or "Dismiss" and never "Retry". `src/screens/failure.ts` is the single
+adapter from a thrown error to those facts, and the record, list, form, singleton,
+command and named-operation hooks, the shell's catalogue load and both generated
+screens draw the verdict instead of `e.message`. The activity trail's hook is the
+one read that still classifies its failure inline, so its sentence is the last
+wire text a phone can still be shown.
+
+**Reused** — `ApiError` with its `status` and `fields`, `IssueCode` and the
+immutable/correctable split `src/core/presentation.ts` already owns, the state
+machine in `deriveState` — whose rule that an immutable code carries no retry is
+what the grid's (code, action) pairs are held against in `tests/failure.test.ts`,
+while `refusalAction` is what picks the one button a screen shows,
+`issue()`'s recovery rule, `presentedTime` for the instant a refresh quotes,
+`plural`/`humanize` for the nouns a sentence names, `Notice`'s existing props, and
+`copy.state`'s `retry`/`dismiss`/`reconcile`/`unknownWrite` words. **Added** —
+`src/core/failure.ts`, because the tree could report a failure and could not
+classify one: no existing unit reads a status *and* a context, and a new module
+would have duplicated the closed `IssueCode` vocabulary; `Words.failure` (seventeen
+keys in `en` and `pt`, of which `thisRecord` and `thisWorkspace` are the two nouns
+a sentence names when no catalogue entry describes what it addressed), because the
+copy table held state words but no sentence
+that names what failed; `copyForLocale`, because a device locale is not one of the
+two languages the table holds and `deriveCopy` stays closed — and the phone itself
+is asked in `src/screens`, never in the core; `ResponseError`
+exported, because a body this build cannot read was indistinguishable from a
+server that answered, and the alternative was pattern-matching the English string
+`Invalid response at` — a wire string on screen. **Made reusable** — the
+(kind x context) grid as a test fixture in `tests/failure.test.ts`, which is the
+same table the classifier is written against and is run through the real
+`deriveState`, so the next sentence is added as a row and not a rumour;
+`refusalAction`, the one place that decides which button a refusal offers;
+`failureTone`, the one place that decides whether a sentence is drawn as an error
+or as a caution;
+`screenCopy`, the one place the phone's language becomes words; and
+`FailureSubject`, so a screen that has a noun to name has one way to hand it over.
+
+## Asked to sign in again
+
+A server that refuses a session this app was in the middle of using asks once.
+The transport reports the refusal at the one line where a status becomes a
+throw, `src/shell.tsx` alone decides whether it ends a session, and the person
+lands on sign-in with the sentence that says "again", their email prefilled,
+and — held for them — the address they were standing at and what they had typed
+into an open sheet. An attempt the server refuses leaves them exactly there with
+the same address and the same draft: a mistyped password is part of coming back
+in, not the end of it. Whoever completes the sign-in is compared with who the
+refused session belonged to before the new catalogue is drawn, so a different
+person starts at Home with none of it, and signing out leaves it behind at that
+moment rather than waiting for whoever signs in next.
+
+**Reused** — `src/core/state.ts`'s phases, generation drop and reducer, the
+generation discipline in `src/shell.tsx`, `ShellValue` and `useShell`,
+`createApi`'s single line where a status becomes a throw, `copy.failure.signedOut`
+through `sentence()` (the sentence already existed in `en` and `pt`; none was
+added), `src/effects/session.ts`'s versioned `clear(baseURL)`, `src/core/derive.ts`'s
+`screenPath`, `useFocusEffect` as the screens already use it, `Notice` (its
+`action` is already optional), and `tests/fakes/router.ts`'s `Redirect`.
+**Added** — one `expired` event and one `reason: "expired"` field, because a
+session the server refused is not the ordinary sign-in screen and every existing
+phase already meant something; the `refused` notice on `createApi`, because a
+per-hook 401 branch is a rule repeated in every hook and the brief forbids it;
+and `src/core/reentry.ts`, because nothing in the tree compared who a session
+belonged to with who is signing in now, or spelt a screen's address beyond
+`screenPath`. **Made reusable** — `saw`/`typed`/`keep` on `ShellValue`, so a
+screen reports where it is and a sheet's typed values have one holder that any
+other sheet can be filed the same way (the next one is a command's arguments,
+named under **Limits** below);
+`navigations` in the router fake, which makes "did the app take the person
+where they meant" an assertion instead of an inference; and the
+`tests/shell-expired-session-*.test.tsx` files as the shape of a session test:
+the real `<Shell>` over a recorded fetch, with the routes that walk the return
+leg mounted inside it.
+
+**Limits** — only a record form files what a person types into it: a command's
+arguments are not carried through the sign-in, so returning to a command sheet
+starts with empty fields. What is held lives in memory for the one sheet that was open, so a
+relaunch starts at Home. Identity on this wire is the server that made the
+session and the user id it named — the kernel answers no tenant here, and none
+is inferred from a catalogue or a resource id. A session the server never
+identified leaves no address, no email and no text behind, and a boot-restored
+cookie that is already dead keeps today's path: the sign-in's own notice about
+the saved sign-in, not this one. A cookie expiring on a handset is not proven
+here; the cases run against the real `<Shell>` over a recorded fetch.
+
+## Read the first journey end to end
+
+A tenant's first screenful is a list of records, one record, and the command
+sheet that changes it. Three surfaces decide whether that reads as a product or
+as an inventory: what the sheet says it runs, what a pointer at another record
+shows, and whether the words on screen are the server's or the phone's.
+
+**Reused** — `confirmation.body` and `successMessage` on `CommandHints`, and
+`reference.resource` on `FieldHints`, as the words and the mounted resource the
+kernel already serves; `saidValue`'s way of letting a hint decide what a field
+reads as; `NameFields.displayName`/`title`/`name` and `humanize` for reading a
+name off a record; `kitCopy`, so the two words a document cannot name belong to
+the kit; `pick`, `list`, `screenPath` and `key` for the reads themselves;
+`Button`, `LabeledValues`, `Value` and `Chip`, which draw the sheet and the
+pointer without a new atom.
+
+**Added** — `commandWording(entry, actsOn, copy)`, the one wording a command
+sheet speaks and the line a success leaves behind: the command's own label, the
+title of the record it runs on, the consequence the server described (or the
+summary, when the server gave a title and no body), and `{label} done` when it
+gave neither; `pointedAt`, `referenceWordFor` and `pointerTargets`/
+`controlPointers`, which read a pointer as the name it resolved to, as
+`Assigned` for a person and `Linked` for anything else, and never as the
+identifier it holds; `Names` and its key, so a resolved name travels to the
+place that draws it instead of being looked up there; `useRecordNames` and
+`useDirectoryNames`, one read per record on a record's screen and one page per
+resource on a window of rows; and `e2e/flows/first-journey.yaml`, the signed-in
+journey that makes a record with a deadline, reads its state pill and its
+deadline with no identifier on the screen until Record information is opened,
+finds it again through a filter, amends it and deletes it.
+
+**Made reusable** — `Names` as the prop every surface that draws a field takes,
+so the next module with a pointer pays nothing; `acts` on `ResourceForm`, the
+subject-and-consequence pair any command sheet can hand the sheet body;
+`pointerTargets`/`controlPointers` asking only what the medium draws, so a
+screen that shows two facts reads two records; the settled-map discipline in
+`useReferenceNames`, where a refusal ends that pointer for the visit and a
+withdrawn session ends every name at once; and the `DUE_FIELD`/`STATUS_FIELD`/
+`STATUS_VALUE` the journeys now read from the environment, which is what lets a
+second client's flow exist without a word of its product in this repository.

@@ -28,10 +28,12 @@ test("the selected tab is the tablist's single sequential keyboard stop", async 
   await withTabs(async (_page, tabs) => {
     assert.equal(await tabs.count(), 3);
     const stops = await tabs.evaluateAll((elements) =>
-      elements.filter((element) => element.tabIndex === 0).map((element) => ({
-        name: element.getAttribute("aria-label"),
-        selected: element.getAttribute("aria-selected"),
-      })),
+      elements
+        .filter((element) => element.tabIndex === 0)
+        .map((element) => ({
+          name: element.getAttribute("aria-label"),
+          selected: element.getAttribute("aria-selected"),
+        })),
     );
     assert.equal(stops.length, 1, JSON.stringify(stops));
     assert.equal(stops[0].selected, "true");

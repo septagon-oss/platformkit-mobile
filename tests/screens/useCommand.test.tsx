@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 describe("useCommandAsk", () => {
-  test("a command without an argument is a question in the API document's words, answered with its verb; yes runs it and counts the write", async () => {
+  test("a command without an argument is asked in its own words, answered with the same word, and says nothing it was not told; yes runs it and counts the write", async () => {
     const api = fakeApi();
     shell.value = shellValue(api);
     const { result } = await renderHook(() => useCommandAsk(note, undefined));
@@ -36,11 +36,16 @@ describe("useCommandAsk", () => {
     const [title, choice, , wording] = asked.mock.calls[0]!;
     expect(title).toBe(commandTitle(archive));
     expect(choice.label).toBe(humanize(archive.verb));
-    expect(wording).toEqual({ message: archive.description });
+    // Nothing in this document describes what running it does, and the summary is
+    // the title, so the question has no sentence under it. The developer's
+    // description of the wire member is never spoken to a person.
+    expect(wording).toEqual({ message: "" });
     await act(async () => {
       choice.onPress();
     });
     await waitFor(() => expect(api.command).toHaveBeenCalledWith(note, undefined, "archive"));
+    // A command about the list has no record to land on, so it files no sentence.
+    expect(shell.value!.say).not.toHaveBeenCalled();
     expect(shell.value!.wrote).toHaveBeenCalledWith("note/note");
     expect(result.current.busy).toBe("");
   });
@@ -56,7 +61,10 @@ describe("useCommandAsk", () => {
       asked.mock.calls[0]![1].onPress();
     });
     await waitFor(() =>
-      expect(alert).toHaveBeenCalledWith(commandTitle(archive), "Nothing to archive."),
+      expect(alert).toHaveBeenCalledWith(
+        commandTitle(archive),
+        "Archive every resolved note did not run.",
+      ),
     );
     expect(shell.value!.wrote).not.toHaveBeenCalled();
     expect(result.current.busy).toBe("");
@@ -68,7 +76,9 @@ describe("useCommandForm", () => {
     const api = fakeApi();
     shell.value = shellValue(api);
     const { result } = await renderHook(() => useCommandForm(note, "1", publish));
-    expect(result.current.controls.map((c) => c.field.name)).toEqual(["at"]);
+    expect(result.current.blocks.flatMap((b) => b.controls.map((c) => c.field.name))).toEqual([
+      "at",
+    ]);
     expect(result.current.phase).toBe("editing");
     await act(async () => result.current.change("at", "2026-02-01T09:00:00Z"));
     await act(async () => {
@@ -77,7 +87,13 @@ describe("useCommandForm", () => {
     expect(api.command).toHaveBeenCalledWith(note, "1", "publish", {
       at: expect.stringMatching(/^2026-02-01T09:00:00/),
     });
+    // The sheet leaves, so what it did is filed for the record it ran on, in the
+    // words this document's command declared none of — the kit's own frame.
+    expect(shell.value!.say).toHaveBeenCalledWith("/note/note/1", "Publish done");
     expect(shell.value!.wrote).toHaveBeenCalledWith("note/note");
+    expect(Math.max(...order(shell.value!.say))).toBeLessThan(
+      Math.min(...order(shell.value!.wrote)),
+    );
     expect(result.current.phase).toBe("ran");
     expect(router.back).toHaveBeenCalledTimes(1);
   });
@@ -95,7 +111,8 @@ describe("useCommandForm", () => {
     });
     expect(result.current.phase).toBe("editing");
     expect(result.current.errors).toEqual({ at: "must be in the future" });
-    expect(result.current.detail).toBe("Too early.");
+    // A 422 that named its field colours that field and adds no sentence above it.
+    expect(result.current.detail).toBe("");
     expect(router.back).not.toHaveBeenCalled();
     expect(shell.value!.wrote).not.toHaveBeenCalled();
   });
@@ -129,3 +146,9 @@ describe("useCommandForm", () => {
     await waitFor(() => expect(result.current.phase).toBe("ran"));
   });
 });
+
+/** a shell report as the fake recorded it: only the order two of them happened in. */
+type Ordered = { readonly mock: { readonly invocationCallOrder: readonly number[] } };
+const order = (report: ((...args: never[]) => void) & Partial<Ordered>) => [
+  ...(report.mock?.invocationCallOrder ?? []),
+];

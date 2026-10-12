@@ -2,17 +2,24 @@
 import { useEffect, useState } from "react";
 import { AccessibilityInfo } from "react-native";
 import {
-  deriveCopy,
   deriveFeedback,
+  type Clock,
   type Copy,
   type Feedback,
   type Formatting,
   type Motion,
 } from "../core/derive";
+import { systemClock } from "./clock";
+import { screenCopy } from "./failure";
 
 export function useFeedback(
-  copy: Copy = deriveCopy("en"),
+  // The words follow the phone: a Portuguese device reads Portuguese sentences,
+  // and every other tag falls back to English. `deriveCopy` stays closed to the
+  // two languages this table holds; `copyLanguage` is what reconciles a device's
+  // locale tag with them.
+  copy: Copy = screenCopy(),
   format?: Pick<Formatting, "locale" | "timeZone">,
+  clock: Clock = systemClock,
 ): Feedback {
   const [motion, setMotion] = useState<Motion>("reduced");
   useEffect(() => {
@@ -35,6 +42,15 @@ export function useFeedback(
       subscription.remove();
     };
   }, []);
-  const { locale, timeZone } = format ?? Intl.DateTimeFormat().resolvedOptions();
-  return deriveFeedback(copy, motion, { locale, timeZone });
+  // The device is asked once, and its zone stays the reader's own even where the
+  // caller asks for another zone's clock: a screen that prints the tenant's hours
+  // says so, and the phone's own reads as the person lives them.
+  const device = Intl.DateTimeFormat().resolvedOptions();
+  const { locale, timeZone } = format ?? device;
+  return deriveFeedback(copy, motion, {
+    locale,
+    timeZone,
+    ownZone: device.timeZone,
+    now: clock.now(),
+  });
 }

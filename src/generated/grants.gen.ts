@@ -21,6 +21,7 @@ export const declaredGrants: readonly DeclaredGrant[] = [
   { permission: "file:manage", operator: false, surface: "app" },
   { permission: "file:read", operator: false, surface: "app" },
   { permission: "file:retain", operator: false, surface: "app" },
+  { permission: "passkey:signin", operator: false, surface: "app" },
   { permission: "role:manage", operator: false, surface: "app" },
   { permission: "site:manage", operator: false, surface: "app" },
   { permission: "task:read", operator: false, surface: "app" },

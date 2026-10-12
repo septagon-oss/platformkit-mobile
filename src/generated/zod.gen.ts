@@ -41,8 +41,23 @@ export const zClearOutputBody = z.object({
   signedOut: z.boolean(),
 });
 
+export const zCommandConfirmation = z.object({
+  body: z.string(),
+  confirmLabel: z.string(),
+  title: z.string(),
+});
+
 export const zCommandInputStructBody = z.object({
   $schema: z.url().readonly().optional(),
+});
+
+export const zCommandPresentation = z.object({
+  confirmation: zCommandConfirmation.optional(),
+  destructive: z.boolean().optional(),
+  label: z.string().optional(),
+  primary: z.boolean().optional(),
+  successMessage: z.string().optional(),
+  system: z.boolean().optional(),
 });
 
 export const zContent = z.object({
@@ -67,6 +82,11 @@ export const zDelete = z.object({
 export const zDoneOutputBody = z.object({
   $schema: z.url().readonly().optional(),
   done: z.boolean(),
+});
+
+export const zEntitySection = z.object({
+  key: z.string(),
+  label: z.string(),
 });
 
 export const zEraseBody = z.object({
@@ -99,15 +119,38 @@ export const zEvent = z.object({
 });
 
 export const zFactor = z.object({
+  $schema: z.url().readonly().optional(),
   enrolledAt: z.iso.datetime({ offset: true }),
   id: z.string(),
   kind: z.string(),
+  name: z.string().max(40).optional(),
 });
 
 export const zFactorsOutputBody = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zFactor).nullable(),
   total: z.number().int(),
+});
+
+export const zFieldMoney = z.object({
+  currencyField: z.string(),
+  scale: z.number().int(),
+});
+
+export const zFieldReference = z.object({
+  resource: z.string(),
+});
+
+export const zFieldHints = z.object({
+  enumLabels: z.record(z.string(), z.string()).optional(),
+  enumTones: z.record(z.string(), z.string()).optional(),
+  format: z.string().optional(),
+  help: z.string().optional(),
+  label: z.string().optional(),
+  money: zFieldMoney.optional(),
+  reference: zFieldReference.optional(),
+  section: z.string().optional(),
+  visibility: z.string().optional(),
 });
 
 export const zField = z.object({
@@ -120,6 +163,7 @@ export const zField = z.object({
   maxLength: z.number().int().optional(),
   name: z.string(),
   present: z.string().optional(),
+  presentation: zFieldHints.optional(),
   readOnly: z.boolean().optional(),
   required: z.boolean().optional(),
   type: z.string(),
@@ -131,34 +175,16 @@ export const zCommand = z.object({
   description: z.string().optional(),
   fields: z.array(zField).nullish(),
   path: z.string().optional(),
+  presentation: zCommandPresentation.optional(),
   summary: z.string().optional(),
   verb: z.string(),
-});
-
-export const zEntry = z.object({
-  commands: z.array(zCommand).nullish(),
-  entity: z.string(),
-  fields: z.array(zField).nullable(),
-  immutable: z.array(z.string()).nullish(),
-  module: z.string(),
-  operations: z.array(z.string()).nullish(),
-  path: z.string(),
-  screen: z.string().optional(),
-  singleton: z.boolean().optional(),
-  writable: z.boolean(),
-  write_path: z.string().optional(),
-});
-
-export const zCatalog = z.object({
-  $schema: z.url().readonly().optional(),
-  catalogVersion: z.number().int(),
-  resources: z.array(zEntry).nullable(),
 });
 
 export const zFile = z.object({
   $schema: z.url().readonly().optional(),
   contentType: z.string().max(120).optional(),
   createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  height: z.number().int().readonly().optional(),
   id: z.string().readonly().optional(),
   kind: z.string().max(32).optional(),
   name: z.string().min(1).max(255),
@@ -167,6 +193,7 @@ export const zFile = z.object({
   updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
   uploader: z.uuid().readonly().optional(),
   visibility: z.enum(["private", "public"]).optional().default("private"),
+  width: z.number().int().readonly().optional(),
 });
 
 export const zFinishTotpInputBody = z.object({
@@ -340,6 +367,40 @@ export const zPageNotificationBody = z.object({
   total: z.number().int(),
 });
 
+export const zPasskeyBeginAssertionInputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  email: z.email().max(320),
+});
+
+export const zPasskeyChallenge = z.object({
+  $schema: z.url().readonly().optional(),
+  ceremony: z.uuid(),
+  options: z.unknown(),
+});
+
+export const zPasskeyFinishInputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  ceremony: z.uuid(),
+  name: z.string().max(40).optional(),
+  response: z.unknown(),
+});
+
+export const zPasskeySignInSettingInputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  enabled: z.boolean(),
+});
+
+export const zPasskeySignInSettingOutputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  enabled: z.boolean(),
+});
+
+export const zPasskeyVerifyInputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  ceremony: z.uuid(),
+  response: z.unknown(),
+});
+
 export const zPasswordBody = z.object({
   $schema: z.url().readonly().optional(),
   password: z.string().min(12).max(256),
@@ -441,6 +502,48 @@ export const zResolveBody = z.object({
   resolution: z.string().max(4000).optional(),
 });
 
+export const zResourceGroup = z.object({
+  key: z.string(),
+  label: z.string(),
+});
+
+export const zEntryPresentation = z.object({
+  description: z.string().optional(),
+  emptyDescription: z.string().optional(),
+  group: zResourceGroup.optional(),
+  icon: z.string().optional(),
+  order: z.number().int().optional(),
+  plural: z.string().optional(),
+  previewField: z.string().optional(),
+  primaryField: z.string().optional(),
+  sections: z.array(zEntitySection).optional(),
+  singular: z.string().optional(),
+  sortable: z.array(z.string()).optional(),
+  statusField: z.string().optional(),
+  summaryFields: z.array(z.string()).optional(),
+});
+
+export const zEntry = z.object({
+  commands: z.array(zCommand).nullish(),
+  entity: z.string(),
+  fields: z.array(zField).nullable(),
+  immutable: z.array(z.string()).nullish(),
+  module: z.string(),
+  operations: z.array(z.string()).nullish(),
+  path: z.string(),
+  presentation: zEntryPresentation.optional(),
+  screen: z.string().optional(),
+  singleton: z.boolean().optional(),
+  writable: z.boolean(),
+  write_path: z.string().optional(),
+});
+
+export const zCatalog = z.object({
+  $schema: z.url().readonly().optional(),
+  catalogVersion: z.number().int(),
+  resources: z.array(zEntry).nullable(),
+});
+
 export const zRetainBody = z.object({
   $schema: z.url().readonly().optional(),
   reason: z.string().min(1).max(500),
@@ -481,6 +584,16 @@ export const zRolesOutputBody = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zRole).nullable(),
   total: z.number().int(),
+});
+
+export const zSamlSettings = z.object({
+  $schema: z.url().readonly().optional(),
+  emailAttribute: z.string().max(256),
+  entityId: z.string().max(512),
+  metadataUrl: z.string().max(2048).optional(),
+  metadataXml: z.string().max(65536).optional(),
+  registration: z.string().optional(),
+  roles: z.array(z.string()).nullish(),
 });
 
 export const zSessionListing = z.object({
@@ -611,6 +724,15 @@ export const zTokensOutputBody = z.object({
   total: z.number().int(),
 });
 
+export const zUseRow = z.object({
+  Entity: z.string(),
+  Field: z.string(),
+  Locale: z.string(),
+  Module: z.string(),
+  Record: z.string(),
+  createdAt: z.iso.datetime({ offset: true }),
+});
+
 export const zUser = z.object({
   $schema: z.url().readonly().optional(),
   createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
@@ -715,8 +837,15 @@ export const zEventWritable = z.object({
   traceparent: z.string().optional(),
 });
 
+export const zFactorWritable = z.object({
+  enrolledAt: z.iso.datetime({ offset: true }),
+  id: z.string(),
+  kind: z.string(),
+  name: z.string().max(40).optional(),
+});
+
 export const zFactorsOutputBodyWritable = z.object({
-  items: z.array(zFactor).nullable(),
+  items: z.array(zFactorWritable).nullable(),
   total: z.number().int(),
 });
 
@@ -863,6 +992,34 @@ export const zPageNotificationBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPasskeyBeginAssertionInputBodyWritable = z.object({
+  email: z.email().max(320),
+});
+
+export const zPasskeyChallengeWritable = z.object({
+  ceremony: z.uuid(),
+  options: z.unknown(),
+});
+
+export const zPasskeyFinishInputBodyWritable = z.object({
+  ceremony: z.uuid(),
+  name: z.string().max(40).optional(),
+  response: z.unknown(),
+});
+
+export const zPasskeySignInSettingInputBodyWritable = z.object({
+  enabled: z.boolean(),
+});
+
+export const zPasskeySignInSettingOutputBodyWritable = z.object({
+  enabled: z.boolean(),
+});
+
+export const zPasskeyVerifyInputBodyWritable = z.object({
+  ceremony: z.uuid(),
+  response: z.unknown(),
+});
+
 export const zPasswordBodyWritable = z.object({
   password: z.string().min(12).max(256),
 });
@@ -919,7 +1076,7 @@ export const zPageProposalBodyWritable = z.object({
 
 export const zRecoveryCodesOutputBodyWritable = z.object({
   codes: z.array(z.string()).nullable(),
-  factor: zFactor.optional(),
+  factor: zFactorWritable.optional(),
 });
 
 export const zRenameWritable = z.object({
@@ -972,6 +1129,15 @@ export const zRolesBodyWritable = z.object({
 export const zRolesOutputBodyWritable = z.object({
   items: z.array(zRoleWritable).nullable(),
   total: z.number().int(),
+});
+
+export const zSamlSettingsWritable = z.object({
+  emailAttribute: z.string().max(256),
+  entityId: z.string().max(512),
+  metadataUrl: z.string().max(2048).optional(),
+  metadataXml: z.string().max(65536).optional(),
+  registration: z.string().optional(),
+  roles: z.array(z.string()).nullish(),
 });
 
 export const zSessionsOutputBodyWritable = z.object({
@@ -1118,6 +1284,20 @@ export const zAuditEventReadPath = z.object({
  */
 export const zAuditEventReadResponse = zEvent;
 
+export const zAuthChallengePasskeyBeginBody = zPasskeyBeginAssertionInputBodyWritable;
+
+/**
+ * OK
+ */
+export const zAuthChallengePasskeyBeginResponse = zPasskeyChallenge;
+
+export const zAuthChallengePasskeyVerifyBody = zPasskeyVerifyInputBodyWritable;
+
+/**
+ * OK
+ */
+export const zAuthChallengePasskeyVerifyResponse = zIdentity;
+
 export const zAuthChallengeVerifyBody = zVerifyFactorInputBodyWritable;
 
 /**
@@ -1129,6 +1309,18 @@ export const zAuthChallengeVerifyResponse = zIdentity;
  * OK
  */
 export const zAuthFactorListResponse = zFactorsOutputBody;
+
+/**
+ * OK
+ */
+export const zAuthFactorPasskeyBeginResponse = zPasskeyChallenge;
+
+export const zAuthFactorPasskeyFinishBody = zPasskeyFinishInputBodyWritable;
+
+/**
+ * Created
+ */
+export const zAuthFactorPasskeyFinishResponse = zFactor;
 
 /**
  * Created
@@ -1162,6 +1354,18 @@ export const zAuthLoginBody = zLoginInputBodyWritable;
  * OK
  */
 export const zAuthLoginResponse = zIdentity;
+
+/**
+ * OK
+ */
+export const zAuthLoginPasskeyBeginResponse = zPasskeyChallenge;
+
+export const zAuthLoginPasskeyVerifyBody = zPasskeyVerifyInputBodyWritable;
+
+/**
+ * OK
+ */
+export const zAuthLoginPasskeyVerifyResponse = zIdentity;
 
 /**
  * OK
@@ -1219,6 +1423,21 @@ export const zAuthRoleSetPath = z.object({
 export const zAuthRoleSetResponse = zRole;
 
 /**
+ * No Content
+ */
+export const zAuthSamlCallbackResponse = z.void();
+
+/**
+ * OK
+ */
+export const zAuthSamlMetadataResponse = z.string();
+
+/**
+ * No Content
+ */
+export const zAuthSamlStartResponse = z.void();
+
+/**
  * OK
  */
 export const zAuthSessionListResponse = zSessionsOutputBody;
@@ -1236,6 +1455,13 @@ export const zAuthSessionRevokePath = z.object({
  * OK
  */
 export const zAuthSessionRevokeResponse = zDoneOutputBody;
+
+export const zAuthPasskeySignInSetBody = zPasskeySignInSettingInputBodyWritable;
+
+/**
+ * OK
+ */
+export const zAuthPasskeySignInSetResponse = zPasskeySignInSettingOutputBody;
 
 /**
  * OK
@@ -1461,6 +1687,7 @@ export const zFileFileUploadBody = z.unknown();
 export const zFileFileUploadQuery = z.object({
   visibility: z.enum(["private", "public"]).optional().default("private"),
   kind: z.string().max(32).optional(),
+  image: z.boolean().optional().default(false),
 });
 
 /**
@@ -1533,6 +1760,15 @@ export const zFileFileRetainPath = z.object({
  * OK
  */
 export const zFileFileRetainResponse = zHold;
+
+export const zFileFileUsesPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zFileFileUsesResponse = z.array(zUseRow).nullable();
 
 export const zNotificationNotificationListQuery = z.object({
   limit: z.number().int().min(1).max(200).optional().default(50),
@@ -1698,6 +1934,26 @@ export const zTenantTenantRenamePath = z.object({
  * OK
  */
 export const zTenantTenantRenameResponse = zTenant;
+
+export const zTenantTenantSetSamlBody = zSamlSettingsWritable;
+
+export const zTenantTenantSetSamlPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zTenantTenantSetSamlResponse = zTenant;
+
+export const zTenantTenantClearSamlPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zTenantTenantClearSamlResponse = zTenant;
 
 export const zTenantTenantSuspendPath = z.object({
   id: z.uuid(),

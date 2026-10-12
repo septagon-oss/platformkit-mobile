@@ -1,0 +1,22 @@
+# The secret scan the ci and release workflows run through scripts/gitleaks.sh.
+# It reads the whole history, so a string a test wrote once stays under it
+# whatever the tree looks like today.
+title = "platformkit-mobile secret scan"
+
+# A custom config replaces gitleaks' own rules; this one adds an exemption to them.
+# Without this section the history would be checked against the exemption below and
+# nothing else, which is a scan that passes by looking at nothing.
+[extend]
+useDefault = true
+
+# One fixture is exempt, by its whole shape and not by its file. The release tests
+# run the publish step's own body, which writes a credential into a fake npmrc, and
+# their in-process registry answers only the request that carries it
+# (`tests/publish-registry-credential.test.ts`) while the workflow test refuses a
+# step that prints it: a test that held no credential would prove nothing about the
+# write. Nothing outside those tests issues the string. A longer run of hex, another
+# prefix or any other credential-shaped literal stops here, in this repository and
+# in its history.
+[allowlist]
+  description = "the synthetic publish credential the release tests hand a fake npmrc"
+  regexes = ['''npm_publish_secret_[0-9a-f]{6}\b''']

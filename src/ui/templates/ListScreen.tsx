@@ -3,9 +3,10 @@
 // and skeleton rows before the first page. What a row is comes from the
 // caller.
 import type { Feedback } from "../../core/derive";
-import React, { type ReactElement, type ReactNode } from "react";
-import { FlatList, SectionList, RefreshControl, StyleSheet, View } from "react-native";
+import React, { Fragment, type ReactElement, type ReactNode } from "react";
+import { FlatList, RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
 import { Skeleton } from "../atoms/Skeleton";
+import { Section } from "../molecules/Section";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { useCanvas } from "./canvas";
@@ -23,6 +24,13 @@ interface Props<T> {
   readonly header?: ReactNode;
   readonly footer?: ReactNode;
   readonly empty: ReactNode;
+  /**
+   * grouped draws the rows inside one inset card instead of one card per row. The
+   * screen that holds the handful of things a person may open — Home and its
+   * resources — reads as one group of choices; a list the server pages keeps the
+   * virtualised view, which cannot hold one surface across the rows it recycles.
+   */
+  readonly grouped?: boolean;
   readonly testID?: string;
 }
 
@@ -38,11 +46,53 @@ export function ListScreen<T>({
   header,
   footer,
   empty,
+  grouped = false,
   testID,
 }: Props<T>) {
   const t = useTheme();
   const s = useStyles(styles);
   const canvas = useCanvas();
+  // What surrounds the rows is named once, so a grouped page and a list cannot
+  // grow two different refreshes, empty states or footers.
+  const refresh = (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={t.color.accentDefault}
+    />
+  );
+  const region = (
+    <View style={s.empty}>
+      {loading ? (
+        <Skeleton label={feedback.loadingLabel} motion={feedback.motion} variant="rows" lines={6} />
+      ) : (
+        empty
+      )}
+    </View>
+  );
+  if (grouped)
+    return (
+      <ScrollView
+        style={canvas.page}
+        contentContainerStyle={canvas.content}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        refreshControl={refresh}
+        {...testable(testID)}
+      >
+        {header ? <View style={s.header}>{header}</View> : null}
+        {data.length === 0 ? (
+          region
+        ) : (
+          <Section>
+            {data.map((item) => (
+              <Fragment key={keyOf(item)}>{render(item)}</Fragment>
+            ))}
+          </Section>
+        )}
+        {footer ?? null}
+      </ScrollView>
+    );
   return (
     <FlatList
       data={data}
@@ -54,31 +104,12 @@ export function ListScreen<T>({
       // collapse as they scroll.
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={t.color.accentDefault}
-        />
-      }
+      refreshControl={refresh}
       onEndReached={onEndReached}
       onEndReachedThreshold={0.4}
       ListHeaderComponent={header ? <View style={s.header}>{header}</View> : null}
       ListFooterComponent={footer ? <>{footer}</> : null}
-      ListEmptyComponent={
-        <View style={s.empty}>
-          {loading ? (
-            <Skeleton
-              label={feedback.loadingLabel}
-              motion={feedback.motion}
-              variant="rows"
-              lines={6}
-            />
-          ) : (
-            empty
-          )}
-        </View>
-      }
+      ListEmptyComponent={region}
       {...testable(testID)}
     />
   );

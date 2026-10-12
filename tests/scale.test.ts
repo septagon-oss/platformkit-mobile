@@ -9,7 +9,7 @@ import test from "node:test";
 // comment. Zero is not a distance, a percentage is a string, a token halved
 // is still the token, and flex, opacity, elevation and letter spacing are not
 // lengths; a literal added to an inset is.
-const ROOTS = ["src/ui", "src/screens", "src/route.tsx", "src/shell.tsx", "app"];
+const ROOTS = ["src/ui", "src/screens", "src/examples", "src/route.tsx", "src/shell.tsx", "app"];
 const EXEMPT = new Set(["src/ui/scale.ts"]);
 const LENGTH =
   /\b((?:padding|margin)(?:Top|Bottom|Left|Right|Start|End|Horizontal|Vertical)?|gap|rowGap|columnGap|borderRadius|width|height|minWidth|minHeight|maxWidth|maxHeight|top|bottom|left|right|hitSlop|size|fontSize|lineHeight)\s*[:=]\s*\{?\s*(?:[\w.]+\s*[+-]\s*)*([1-9]\d*(?:\.\d+)?)\b/g;

@@ -96,7 +96,9 @@ for (const mode of ["light", "dark"] as const) {
         expect(screen.queryByText("Refreshed", { includeHiddenElements: true })).toBeNull();
         expect(screen.queryByTestId("activity-more", { includeHiddenElements: true })).toBeNull();
       } else {
-        expect(screen.getByText(actor)).toBeOnTheScreen();
+        // The trail is still readable without the directory: the person is named as
+        // unavailable, and the id they are stored under stays out of the sentence.
+        expect(screen.getByText("Name unavailable")).toBeOnTheScreen();
         expect(screen.getByText("Refreshed")).toBeOnTheScreen();
       }
 

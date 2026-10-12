@@ -21,12 +21,24 @@ import type {
   AuditEventReadData,
   AuditEventReadErrors,
   AuditEventReadResponses,
+  AuthChallengePasskeyBeginData,
+  AuthChallengePasskeyBeginErrors,
+  AuthChallengePasskeyBeginResponses,
+  AuthChallengePasskeyVerifyData,
+  AuthChallengePasskeyVerifyErrors,
+  AuthChallengePasskeyVerifyResponses,
   AuthChallengeVerifyData,
   AuthChallengeVerifyErrors,
   AuthChallengeVerifyResponses,
   AuthFactorListData,
   AuthFactorListErrors,
   AuthFactorListResponses,
+  AuthFactorPasskeyBeginData,
+  AuthFactorPasskeyBeginErrors,
+  AuthFactorPasskeyBeginResponses,
+  AuthFactorPasskeyFinishData,
+  AuthFactorPasskeyFinishErrors,
+  AuthFactorPasskeyFinishResponses,
   AuthFactorTotpBeginData,
   AuthFactorTotpBeginErrors,
   AuthFactorTotpBeginResponses,
@@ -38,6 +50,12 @@ import type {
   AuthFactorWithdrawResponses,
   AuthLoginData,
   AuthLoginErrors,
+  AuthLoginPasskeyBeginData,
+  AuthLoginPasskeyBeginErrors,
+  AuthLoginPasskeyBeginResponses,
+  AuthLoginPasskeyVerifyData,
+  AuthLoginPasskeyVerifyErrors,
+  AuthLoginPasskeyVerifyResponses,
   AuthLoginResponses,
   AuthLogoutData,
   AuthLogoutErrors,
@@ -51,6 +69,9 @@ import type {
   AuthOidcStartData,
   AuthOidcStartErrors,
   AuthOidcStartResponses,
+  AuthPasskeySignInSetData,
+  AuthPasskeySignInSetErrors,
+  AuthPasskeySignInSetResponses,
   AuthPasswordChangeData,
   AuthPasswordChangeErrors,
   AuthPasswordChangeResponses,
@@ -75,6 +96,15 @@ import type {
   AuthRoleSetData,
   AuthRoleSetErrors,
   AuthRoleSetResponses,
+  AuthSamlCallbackData,
+  AuthSamlCallbackErrors,
+  AuthSamlCallbackResponses,
+  AuthSamlMetadataData,
+  AuthSamlMetadataErrors,
+  AuthSamlMetadataResponses,
+  AuthSamlStartData,
+  AuthSamlStartErrors,
+  AuthSamlStartResponses,
   AuthSessionListData,
   AuthSessionListErrors,
   AuthSessionListResponses,
@@ -201,6 +231,9 @@ import type {
   FileFileUploadData,
   FileFileUploadErrors,
   FileFileUploadResponses,
+  FileFileUsesData,
+  FileFileUsesErrors,
+  FileFileUsesResponses,
   NotificationNotificationListData,
   NotificationNotificationListErrors,
   NotificationNotificationListResponses,
@@ -246,6 +279,9 @@ import type {
   TenantTenantClearOidcData,
   TenantTenantClearOidcErrors,
   TenantTenantClearOidcResponses,
+  TenantTenantClearSamlData,
+  TenantTenantClearSamlErrors,
+  TenantTenantClearSamlResponses,
   TenantTenantCreateData,
   TenantTenantCreateErrors,
   TenantTenantCreateResponses,
@@ -276,6 +312,9 @@ import type {
   TenantTenantSetOidcData,
   TenantTenantSetOidcErrors,
   TenantTenantSetOidcResponses,
+  TenantTenantSetSamlData,
+  TenantTenantSetSamlErrors,
+  TenantTenantSetSamlResponses,
   TenantTenantSuspendData,
   TenantTenantSuspendErrors,
   TenantTenantSuspendResponses,
@@ -317,16 +356,23 @@ import {
   zAppResourcesResponse,
   zAuditEventListResponse,
   zAuditEventReadResponse,
+  zAuthChallengePasskeyBeginResponse,
+  zAuthChallengePasskeyVerifyResponse,
   zAuthChallengeVerifyResponse,
   zAuthFactorListResponse,
+  zAuthFactorPasskeyBeginResponse,
+  zAuthFactorPasskeyFinishResponse,
   zAuthFactorTotpBeginResponse,
   zAuthFactorTotpFinishResponse,
   zAuthFactorWithdrawResponse,
+  zAuthLoginPasskeyBeginResponse,
+  zAuthLoginPasskeyVerifyResponse,
   zAuthLoginResponse,
   zAuthLogoutResponse,
   zAuthMeResponse,
   zAuthOidcCallbackResponse,
   zAuthOidcStartResponse,
+  zAuthPasskeySignInSetResponse,
   zAuthPasswordChangeResponse,
   zAuthPasswordForgotResponse,
   zAuthPasswordResetResponse,
@@ -335,6 +381,9 @@ import {
   zAuthResendVerificationResponse,
   zAuthRoleListResponse,
   zAuthRoleSetResponse,
+  zAuthSamlCallbackResponse,
+  zAuthSamlMetadataResponse,
+  zAuthSamlStartResponse,
   zAuthSessionListResponse,
   zAuthSessionRevokeAllResponse,
   zAuthSessionRevokeResponse,
@@ -373,6 +422,7 @@ import {
   zFileFileReleaseResponse,
   zFileFileRetainResponse,
   zFileFileUploadResponse,
+  zFileFileUsesResponse,
   zNotificationNotificationListResponse,
   zNotificationNotificationReadResponse,
   zSiteSettingsReadResponse,
@@ -387,6 +437,7 @@ import {
   zTaskTaskUpdateResponse,
   zTenantTenantAddHostResponse,
   zTenantTenantClearOidcResponse,
+  zTenantTenantClearSamlResponse,
   zTenantTenantCreateResponse,
   zTenantTenantDeleteResponse,
   zTenantTenantInviteResponse,
@@ -397,6 +448,7 @@ import {
   zTenantTenantRenameResponse,
   zTenantTenantSetLocaleResponse,
   zTenantTenantSetOidcResponse,
+  zTenantTenantSetSamlResponse,
   zTenantTenantSuspendResponse,
   zUserInvitationCreateResponse,
   zUserUserApproveRegistrationResponse,
@@ -487,6 +539,58 @@ export const auditEventRead = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Begin answering a second factor with a passkey
+ *
+ * The passkey half of the sign-in /login refused to finish. The request is the same one whether or not this address holds a passkey - no allow list is sent, so this leg cannot be asked who has one.
+ */
+export const authChallengePasskeyBegin = <ThrowOnError extends boolean = false>(
+  options: Options<AuthChallengePasskeyBeginData, ThrowOnError>,
+): RequestResult<
+  AuthChallengePasskeyBeginResponses,
+  AuthChallengePasskeyBeginErrors,
+  ThrowOnError
+> =>
+  options.client.post<
+    AuthChallengePasskeyBeginResponses,
+    AuthChallengePasskeyBeginErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zAuthChallengePasskeyBeginResponse.parseAsync(data),
+    url: "/api/v1/auth/challenge/passkey/begin",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Answer a second factor with a passkey
+ *
+ * The second half of a sign-in, and only ever of one: the first-factor proof /login minted is spent here before the passkey opens anything, so a signature over a challenge this server minted is still not a sign-in for an account that never offered its password. An unknown passkey, a passkey of another tenant's host, a person who cannot sign in, a wrong signature and an expired prompt are one answer at one cost.
+ */
+export const authChallengePasskeyVerify = <ThrowOnError extends boolean = false>(
+  options: Options<AuthChallengePasskeyVerifyData, ThrowOnError>,
+): RequestResult<
+  AuthChallengePasskeyVerifyResponses,
+  AuthChallengePasskeyVerifyErrors,
+  ThrowOnError
+> =>
+  options.client.post<
+    AuthChallengePasskeyVerifyResponses,
+    AuthChallengePasskeyVerifyErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zAuthChallengePasskeyVerifyResponse.parseAsync(data),
+    url: "/api/v1/auth/challenge/passkey/verify",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Answer a second factor
  *
  * The second half of a sign-in, and only ever of one. The caller is somebody /login or the provider leg just refused to finish without a code, and that refusal is what makes this answer spendable; a code presented by itself - a recovery code from a leaked file, a TOTP read out to whoever phished it - is refused as one answer and at one cost with a wrong code, and spends nothing. For an address that was just refused, this takes the address and the code, or the address and a recovery code, and opens the session the first half had already earned. A wrong code, a replayed step, a spent recovery code, an address with no factor and an address nobody has are one answer at one cost.
@@ -516,6 +620,42 @@ export const authFactorList = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => await zAuthFactorListResponse.parseAsync(data),
     url: "/api/v1/auth/factors",
     ...options,
+  });
+
+/**
+ * Begin enrolling a passkey
+ *
+ * Asks this person's device for a passkey and returns the options a browser hands to navigator.credentials.create. Beyond the challenge, nothing is written: the passkey exists only when the finish leg has seen a signature nobody else could have produced, so closing this tab leaves no factor and changes nothing about how this person signs in.
+ */
+export const authFactorPasskeyBegin = <ThrowOnError extends boolean = false>(
+  options: Options<AuthFactorPasskeyBeginData, ThrowOnError>,
+): RequestResult<AuthFactorPasskeyBeginResponses, AuthFactorPasskeyBeginErrors, ThrowOnError> =>
+  options.client.post<AuthFactorPasskeyBeginResponses, AuthFactorPasskeyBeginErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthFactorPasskeyBeginResponse.parseAsync(data),
+    url: "/api/v1/auth/factors/passkey/begin",
+    ...options,
+  });
+
+/**
+ * Finish enrolling a passkey
+ *
+ * Enrols the credential the ceremony answered, named what its owner called it. The response holds the public key's identifier to nobody: the factor, as the list shows it. A passkey already enrolled here for another account is refused with the reason, and enrols nothing.
+ */
+export const authFactorPasskeyFinish = <ThrowOnError extends boolean = false>(
+  options: Options<AuthFactorPasskeyFinishData, ThrowOnError>,
+): RequestResult<AuthFactorPasskeyFinishResponses, AuthFactorPasskeyFinishErrors, ThrowOnError> =>
+  options.client.post<
+    AuthFactorPasskeyFinishResponses,
+    AuthFactorPasskeyFinishErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zAuthFactorPasskeyFinishResponse.parseAsync(data),
+    url: "/api/v1/auth/factors/passkey/finish",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -571,7 +711,7 @@ export const authFactorTotpFinish = <ThrowOnError extends boolean = false>(
 /**
  * Withdraw one of my second factors
  *
- * Stops one factor working. The last one on the account is refused: a person cannot, by one click, turn their account back into a password — enrol another first, then retire this one.
+ * Stops one factor working. The last one on the account is refused with 409: a person cannot, by one click, turn their account back into a password — enrol another first, then retire this one. A passkey this installation retired as suspect does not count as one that remains, so retiring it is never what takes the last way in away.
  */
 export const authFactorWithdraw = <ThrowOnError extends boolean = false>(
   options: Options<AuthFactorWithdrawData, ThrowOnError>,
@@ -593,6 +733,38 @@ export const authLogin = <ThrowOnError extends boolean = false>(
   options.client.post<AuthLoginResponses, AuthLoginErrors, ThrowOnError>({
     responseValidator: async (data) => await zAuthLoginResponse.parseAsync(data),
     url: "/api/v1/auth/login",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Begin signing in with a passkey alone
+ *
+ * The usernameless ceremony: no address is offered and none is learned. A tenant that has not enabled passkey sign-in is refused with the reason, which is the one thing this leg refuses on its own.
+ */
+export const authLoginPasskeyBegin = <ThrowOnError extends boolean = false>(
+  options: Options<AuthLoginPasskeyBeginData, ThrowOnError>,
+): RequestResult<AuthLoginPasskeyBeginResponses, AuthLoginPasskeyBeginErrors, ThrowOnError> =>
+  options.client.post<AuthLoginPasskeyBeginResponses, AuthLoginPasskeyBeginErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthLoginPasskeyBeginResponse.parseAsync(data),
+    url: "/api/v1/auth/login/passkey/begin",
+    ...options,
+  });
+
+/**
+ * Sign in with a passkey alone
+ *
+ * Opens the session the passkey earned, for a tenant that enabled the door. Which door a ceremony belongs to is the server's own record from the moment it was begun, so a prompt begun where a password was expected cannot be answered here instead.
+ */
+export const authLoginPasskeyVerify = <ThrowOnError extends boolean = false>(
+  options: Options<AuthLoginPasskeyVerifyData, ThrowOnError>,
+): RequestResult<AuthLoginPasskeyVerifyResponses, AuthLoginPasskeyVerifyErrors, ThrowOnError> =>
+  options.client.post<AuthLoginPasskeyVerifyResponses, AuthLoginPasskeyVerifyErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthLoginPasskeyVerifyResponse.parseAsync(data),
+    url: "/api/v1/auth/login/passkey/verify",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -725,6 +897,48 @@ export const authRoleSet = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Finish SAML single sign-on
+ *
+ * Verifies the assertion the IdP posted — its signature, its audience, its recipient, its window and the request it answers — spends its id so it cannot be presented twice, and opens the same session any other door opens. An unsigned assertion, one addressed to another tenant, and one already spent are each refused, and a refusal writes nothing at all: an assertion stays presentable until a session for it commits.
+ */
+export const authSamlCallback = <ThrowOnError extends boolean = false>(
+  options: Options<AuthSamlCallbackData, ThrowOnError>,
+): RequestResult<AuthSamlCallbackResponses, AuthSamlCallbackErrors, ThrowOnError> =>
+  options.client.post<AuthSamlCallbackResponses, AuthSamlCallbackErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthSamlCallbackResponse.parseAsync(data),
+    url: "/api/v1/auth/saml/callback",
+    ...options,
+  });
+
+/**
+ * This tenant's service provider metadata
+ *
+ * The EntityDescriptor an identity provider administrator configures against: this tenant's entity ID, and the assertion consumer service on this host. It is public and carries no secret — the SP is unsigned, so the document names no key.
+ */
+export const authSamlMetadata = <ThrowOnError extends boolean = false>(
+  options: Options<AuthSamlMetadataData, ThrowOnError>,
+): RequestResult<AuthSamlMetadataResponses, AuthSamlMetadataErrors, ThrowOnError> =>
+  options.client.get<AuthSamlMetadataResponses, AuthSamlMetadataErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthSamlMetadataResponse.parseAsync(data),
+    url: "/api/v1/auth/saml/metadata",
+    ...options,
+  });
+
+/**
+ * Begin SAML single sign-on
+ *
+ * Redirects to this tenant's identity provider with a deflated SAMLRequest, and remembers the request id in the browser so the answer can be recognised as an answer to it.
+ */
+export const authSamlStart = <ThrowOnError extends boolean = false>(
+  options: Options<AuthSamlStartData, ThrowOnError>,
+): RequestResult<AuthSamlStartResponses, AuthSamlStartErrors, ThrowOnError> =>
+  options.client.get<AuthSamlStartResponses, AuthSamlStartErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthSamlStartResponse.parseAsync(data),
+    url: "/api/v1/auth/saml/start",
+    ...options,
+  });
+
+/**
  * List my sessions
  *
  * Every live session this person has, most recently seen first, with the browser and address each was opened with and the one making the request marked. A session is named by its ref and never by its id: this list is something a person reads, not something a client presents.
@@ -764,6 +978,24 @@ export const authSessionRevoke = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => await zAuthSessionRevokeResponse.parseAsync(data),
     url: "/api/v1/auth/sessions/{ref}/revoke",
     ...options,
+  });
+
+/**
+ * Say whether a passkey may be the whole sign-in here
+ *
+ * Opens or shuts this tenant's usernameless door. A passkey is a second factor from the moment it is enrolled and this route changes nothing about that: what it decides is whether a password is ever offered first, which is a different promise about what a stolen password costs, and the tenant's own administrator makes it. Says the state the tenant is in afterwards: setting the value that is already set changes nothing and publishes nothing.
+ */
+export const authPasskeySignInSet = <ThrowOnError extends boolean = false>(
+  options: Options<AuthPasskeySignInSetData, ThrowOnError>,
+): RequestResult<AuthPasskeySignInSetResponses, AuthPasskeySignInSetErrors, ThrowOnError> =>
+  options.client.post<AuthPasskeySignInSetResponses, AuthPasskeySignInSetErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthPasskeySignInSetResponse.parseAsync(data),
+    url: "/api/v1/auth/settings/passkey-sign-in",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -1286,6 +1518,20 @@ export const fileFileRetain = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * List the records that reference a file
+ *
+ * Which record's field, in which locale, shows this file's image — the records a library's details panel links to. A file nobody shows answers an empty list; a file this caller may not read answers 404.
+ */
+export const fileFileUses = <ThrowOnError extends boolean = false>(
+  options: Options<FileFileUsesData, ThrowOnError>,
+): RequestResult<FileFileUsesResponses, FileFileUsesErrors, ThrowOnError> =>
+  options.client.get<FileFileUsesResponses, FileFileUsesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileFileUsesResponse.parseAsync(data),
+    url: "/api/v1/file/files/{id}/uses",
+    ...options,
+  });
+
+/**
  * List my notifications
  *
  * The caller's own notifications, newest first. There is no route that lists anybody else's.
@@ -1573,6 +1819,38 @@ export const tenantTenantRename = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * Say which SAML identity provider a tenant signs in against
+ *
+ * Sets the service provider entity ID, the IdP's metadata — a URL, a document, or both — the attribute that carries the address, and what an address the provider vouches for and this tenant has no account for does: disabled, existing or provision. Setting the same values again changes nothing and publishes nothing. Nothing is fetched here: a metadata URL that cannot be reached reads as the 503 sign-in already answers for a wrong issuer.
+ */
+export const tenantTenantSetSaml = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantSetSamlData, ThrowOnError>,
+): RequestResult<TenantTenantSetSamlResponses, TenantTenantSetSamlErrors, ThrowOnError> =>
+  options.client.post<TenantTenantSetSamlResponses, TenantTenantSetSamlErrors, ThrowOnError>({
+    responseValidator: async (data) => await zTenantTenantSetSamlResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/saml",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Take a tenant's SAML provider away
+ *
+ * After this the tenant's SAML sign-in answers 404 and its people sign in the way they did before that provider: with a password, or at its OIDC issuer, which this route leaves alone. People already signed in stay signed in.
+ */
+export const tenantTenantClearSaml = <ThrowOnError extends boolean = false>(
+  options: Options<TenantTenantClearSamlData, ThrowOnError>,
+): RequestResult<TenantTenantClearSamlResponses, TenantTenantClearSamlErrors, ThrowOnError> =>
+  options.client.post<TenantTenantClearSamlResponses, TenantTenantClearSamlErrors, ThrowOnError>({
+    responseValidator: async (data) => await zTenantTenantClearSamlResponse.parseAsync(data),
+    url: "/api/v1/ops/tenant/tenants/{id}/saml/clear",
+    ...options,
   });
 
 /**

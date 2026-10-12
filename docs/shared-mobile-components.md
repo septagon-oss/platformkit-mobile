@@ -75,8 +75,16 @@ and keeps that small indicator still.
 `copy.choice`; `DateTimeRow` receives `copy.dateTime`, `initialValue` and `timeZone`.
 Its native picker callbacks ignore a newly disabled or unmounted control, and
 Clear is unavailable for required or disabled values. `ResourceForm` also
-requires `initialDate`; form, command and singleton screen compositions sample
-their injected `Clock` once at mount. `timeText`, `display` and `detailItems` require explicit formatting,
+requires `initialDate` and the `blocks` that `formSections` answers (ordered groups,
+where it took a flat list of controls); form, command and singleton screen compositions sample
+their injected `Clock` once at mount. `SwitchRow`, `ChoiceRow` and `DateTimeRow` draw
+no label of their own and take the announced `name`; `FormField` takes `copy` to mark a
+field required or optional in the reader's words, and `TagsField` takes `copy`, the
+optional `announce` the sheet derived for it, and owns the comma rule that keeps one
+list item free of the separator; the two sentences a sheet owes a person about a
+control it has no author's hint for are table words (`changedByCommand`,
+`identifierOnly`), drawn by `ResourceForm` rather than written into the derivation. `timeText`, `display` and the record's section
+functions require explicit formatting,
 and Value/Labelled receive it as `presentation`. These remove the shared mutable
 formatter and component-owned choice words. `StateFeedback` is the optional
 screen adapter for iOS announcements; Gallery accepts its `renderState` slot.
@@ -93,7 +101,7 @@ integration-error and state-gallery words; subsequent families add the typed EN/
 This extends the existing native library. `src/core/derive.ts` remains the public
 owner of the values, labels, controls and decisions that UI draws. It may delegate
 to focused pure files inside `src/core/` and re-export their types; consumers use
-the existing `platformkit-mobile/core/derive` subpath. Neither React, native APIs,
+the existing `@septagon-oss/platformkit-mobile/core/derive` subpath. Neither React, native APIs,
 network access, storage, the clock nor mutable configuration enters core.
 
 The existing consumer is `src/screens/useResourceList.ts` →
@@ -386,8 +394,13 @@ handle preference changes while mounted and default to still until resolved.
 `DataRow = { id: ID; title: string; summary?: string; cells: readonly
 { id: ID; label: string; value: string }[]; status?: Status; selectable: boolean;
 selectionReason?: string; open?: Action; actions: readonly Action[] }`.
-The catalog adapter obtains title/cells from `label`, `listCells`, `listPreview`
-and `display`; custom screens supply equivalent generic inputs to derive.
+The catalog adapter obtains a row from `listRow`, which is `rowPrimary`, `statusPill`,
+`listPreview(entry, "row")` and `listCells` (at most two whoever named them — a declared
+`summaryFields` keeps its first two — and never the identifier, either stamp, or the state
+the row already wears as its pill) read through `label`, `enumLabel`, `enumTone`, `badgeTone` and `display`; a cell
+carries the `Field` behind it, which is how `Value` draws it in the shape its type
+deserves and `Labelled` keeps a short label only for a value that cannot speak for
+itself. Custom screens supply equivalent generic inputs to derive.
 
 `DataSection = { id: ID; title: string; rows: readonly DataRow[];
 total?: number; collapsible: boolean }`. Totals are nonnegative safe integers
@@ -427,8 +440,13 @@ its busy/disabled state and emits the current Order/groupId without persisting i
 | --- | --- | --- |
 | `ChoiceChips` / molecule | `model: ChoiceGroupModel`, `onChange(ID \| undefined)`; single selection, wrapping chips with radio/selected semantics. An optional clear control emits `undefined` only when not required. Derivation shares the choice decision with ChoiceRow. | `choice-chips/default`, `selected`, `disabled-option`, `required`, `long-labels`, plus pressed/focus; R10, R23. |
 | `SelectionControl` / atom | `model: { label; selected: boolean \| 'mixed'; enabled; reason? }`, `onChange(boolean)`. Mixed activation selects all eligible loaded rows; selected activation clears them. | `selection-control/off`, `on`, `mixed`, `disabled`, plus pressed/focus; R02's selection affordance adapted to a native checkbox. |
-| `ActionBar` / molecule | `model: { label; actions: readonly Action[] }`, `onAction(id)`. Preserve supplied order; wrap full labels; no nested pressable parent. | `action-bar/one`, `multiple`, `destructive`, `busy`, `disabled`, `long-copy`; R03, R09. |
-| `DataList` / organism | `model: DataListModel`; `onOpen(rowId)`, `onRowAction(rowId,actionId)`, `onOrder(Order)`, `onView(id)`, `onViewAction(id,actionId)`, `onSaveView({order,groupId?})`, `onSelection(ids)`, `onCollapse(ids)`, `onBulkAction(actionId,ids)`, `onRefresh()`, `onMore()`. Only supplied controls are rendered. | `data-list/grouped`, `ungrouped`, `counts-unknown`, `collapsed`, `filtered-empty`, `inline-actions`, `saved-view`, `view-dirty`, `selection-none`, `selection-some`, `selection-all-loaded`, `selection-unavailable`, `paging`, `page-error`, `refresh-error`, plus common states; R02, R23. |
+| `ActionBar` / molecule | `model: { label; actions: readonly Action[] }`, `onAction(id)`. Preserve supplied order; wrap full labels; no nested pressable parent. `label` names the *bar* a reader hears (`listControls` for a list's toolbar, never one of the doors inside it), and a supplied `testID` is the bar's own id as well as the prefix of every control inside it. | `action-bar/one`, `multiple`, `destructive`, `busy`, `disabled`, `long-copy`; R03, R09. |
+| `DataList` / organism | `model: DataListModel`; `onOpen(rowId)`, `onRowAction(rowId,actionId)`, `onView(id)`, `onViewAction(id,actionId)`, `onSaveView({order,groupId?})`, `onSelection(ids)`, `onCollapse(ids)`, `onBulkAction(actionId,ids)`, `onRefresh()`, `onMore()`. Only supplied controls are rendered. The order it was read with stays in the model
+(`filters`, `sort` and their `targets`); the controls that change it are the toolbar row and
+the two sheets the list screen draws over it (`deriveListToolbar`, `deriveSortSheet`,
+`deriveFilterSheet`, `ChoiceRows`), not the list's own header, so an organism that composes
+`DataList` directly supplies them from those targets, keying each group's choices with the
+group's own name (`filters-<field>/<value>`) so two closed sets never share one id. | `data-list/grouped`, `ungrouped`, `counts-unknown`, `collapsed`, `filtered-empty`, `inline-actions`, `saved-view`, `view-dirty`, `selection-none`, `selection-some`, `selection-all-loaded`, `selection-unavailable`, `paging`, `page-error`, `refresh-error`, plus common states; R02, R23. |
 
 Selection is **loaded-row scope**, never “all results on the server.” The helper
 intersects requested IDs with eligible loaded rows and emits them in section/row
@@ -455,8 +473,9 @@ not last-wins data replacement.
 close: Action; dismissal: 'allowed' | 'confirm' | 'blocked'; reason?: string;
 actions: readonly Action[]; contentState?: StateInput }`.
 Confirm/blocked require a localized reason. Content is a React child slot; core
-does not accept React nodes. `DetailRowsModel` uses the existing `detailItems`
-rule; an optional Activity child is composed by the organism/screen.
+does not accept React nodes. `DetailRowsModel` uses the existing
+`recordSections` and `recordInformation` rules; an optional Activity child is
+composed by the organism/screen.
 
 | Component / layer | Props and events | Gallery cases; reference |
 | --- | --- | --- |

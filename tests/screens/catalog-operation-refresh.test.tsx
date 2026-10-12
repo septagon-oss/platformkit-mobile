@@ -1,6 +1,6 @@
 import React from "react";
 import { beforeEach, expect, jest, test } from "@jest/globals";
-import { act, render, renderHook, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react-native";
 import type { Entry } from "../../src/core/catalog";
 import { ResourceDetail } from "../../src/screens/ResourceDetail";
 import { ResourceList } from "../../src/screens/ResourceList";
@@ -37,7 +37,8 @@ test("a mounted list withdraws both create controls when its catalogue changes",
   await waitFor(() => expect(screen.getByRole("button", { name: /^New / })).toBeOnTheScreen());
   expect(screen.getByRole("button", { name: "New" })).toBeOnTheScreen();
   await rendered.rerender(view(<ResourceList entry={readOnly} />));
-  expect(screen.getByRole("button", { name: "Order" })).toBeOnTheScreen();
+  // The list itself stayed: what went is the doors, not the screen behind them.
+  expect(screen.getByText("No notes yet")).toBeOnTheScreen();
   expect(screen.queryByRole("button", { name: "New" })).toBeNull();
   expect(screen.queryByRole("button", { name: /^New / })).toBeNull();
   await rendered.rerender(view(<ResourceList entry={note} />));
@@ -46,10 +47,15 @@ test("a mounted list withdraws both create controls when its catalogue changes",
 
 test("a mounted record clears Edit and Delete when its catalogue withdraws writes", async () => {
   const rendered = await render(view(<ResourceDetail entry={note} id="17" />));
+  await waitFor(() => expect(screen.getByTestId("record-menu")).toBeOnTheScreen());
+  await fireEvent.press(screen.getByTestId("record-menu"));
   await waitFor(() => expect(screen.getByTestId("delete")).toBeOnTheScreen());
   expect(screen.getByRole("button", { name: "Edit" })).toBeOnTheScreen();
   await rendered.rerender(view(<ResourceDetail entry={readOnly} id="17" />));
+  // Both doors went with the catalogue: no Edit, and no `…` left to hold a Delete
+  // the resource no longer mounts.
   expect(screen.queryByTestId("delete")).toBeNull();
+  expect(screen.queryByTestId("record-menu")).toBeNull();
   expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
   expect(header.options?.headerRight).toBeInstanceOf(Function);
   expect(header.options?.headerRight?.()).toBeNull();

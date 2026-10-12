@@ -7,7 +7,20 @@ import { flowFiles } from "../scripts/check_flows";
 // command and its argument — is named once, in the mobile-e2e job's env, and a
 // flow reads it through ${MODULE}, ${KNOWN}, ${VERB}… A flow that spells one of
 // those words itself fails the day the job names a different resource.
-const SERVED = ["MODULE", "ENTITY", "KNOWN", "VERB", "VERB_FIELD"] as const;
+// `STATUS_VALUE` is the served vocabulary too, and deliberately not in this
+// list: the journey taps that choice by its id and asserts the *word* the pill
+// and the chip say, which is the phone's reading of the value and the assertion
+// the journey exists to make. Spelling the id in a quoted string is what this
+// test refuses, and the id is never quoted.
+const SERVED = [
+  "MODULE",
+  "ENTITY",
+  "KNOWN",
+  "VERB",
+  "VERB_FIELD",
+  "DUE_FIELD",
+  "STATUS_FIELD",
+] as const;
 
 test("a journey names the served kernel's vocabulary only through the job's variables", () => {
   const job = readFileSync(".gitea/workflows/mobile-e2e.yml", "utf8");

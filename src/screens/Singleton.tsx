@@ -6,7 +6,7 @@ import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
 import { doors } from "../core/catalog";
-import { humanize, type Clock } from "../core/derive";
+import { noun, type Clock } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail } from "../ui/organisms/ResourceDetail";
@@ -30,7 +30,7 @@ export function Singleton({
   // Memoised because the navigator is told its options on every render.
   const options = useMemo(
     () => ({
-      title: humanize(entry.entity),
+      title: noun(entry).singular,
       headerLargeTitleEnabled: !editing,
       // Both sides of every option are spelled out, including the empty ones.
       // A native stack keeps what it was last given, so options that merely
@@ -52,9 +52,15 @@ export function Singleton({
                 testID="save"
               />
             )
-          : () => <Button placement="header" label="Edit" icon="edit" onPress={edit} />,
+          : // A row this app never read is a row it cannot replace: a failed read
+            // leaves no Edit, so nobody stands one tap from a PUT of an empty form
+            // over a record the phone has not seen. `useSingleton`'s own `save`
+            // refuses the same call from inside.
+            phase === "editing"
+            ? () => <Button placement="header" label="Edit" icon="edit" onPress={edit} />
+            : () => null,
     }),
-    [entry.entity, may, editing, saving, edit, cancel, save],
+    [entry.entity, may, editing, saving, phase, edit, cancel, save],
   );
 
   return (
@@ -64,12 +70,15 @@ export function Singleton({
         <ResourceForm
           feedback={feedback}
           initialDate={initialDate}
-          controls={one.controls}
+          blocks={one.blocks}
           held={one.held}
           errors={one.errors}
           detail={one.detail}
+          awaiting={one.awaiting}
+          refusals={one.refusals}
           phase={saving ? "saving" : "editing"}
           onChange={one.change}
+          onFieldRefused={one.fieldRefused}
           onRetry={one.reload}
         />
       ) : (
@@ -78,6 +87,7 @@ export function Singleton({
           entry={entry}
           row={one.row}
           error={phase === "failed" ? one.detail : ""}
+          saved={one.saved}
           onRetry={() => void one.reload()}
         />
       )}

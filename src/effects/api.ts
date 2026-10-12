@@ -21,9 +21,16 @@
 // kept only the key could neither ask who it is nor stop its own key. A key
 // restored from storage comes back with no session, which is why signing out says
 // whether the server stopped the key or only this phone forgot it.
-import { type Catalog, type Entry, parseCatalog, CatalogError } from "../core/catalog";
+import {
+  type Catalog,
+  type Entry,
+  type HintNotice,
+  parseCatalog,
+  CatalogError,
+} from "../core/catalog";
 import { row, page, identity, trail, issuedToken, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
+import { keyRefusal } from "../core/outbox";
 import { factorRequired, unrecognisedCaller } from "../core/signInOutcome";
 import { type DeclaredPermission, delegableScopes } from "../core/scopes";
 import { declaredGrants as kitGrants } from "../generated/grants.gen";
@@ -67,7 +74,13 @@ export class ApiError extends Error {
   }
 }
 
-class ResponseError extends ApiError {}
+/**
+ * ResponseError is a refusal whose body this build could not read — a malformed
+ * document or a catalogue newer than it understands. The status it carries is
+ * still the server's answer; the class says the *body* is what failed, which is
+ * the difference between "the server is down" and "update the app".
+ */
+export class ResponseError extends ApiError {}
 
 /**
  * Identity is who a sign-in belongs to, as the auth module answers.
@@ -168,10 +181,51 @@ export interface Window {
   readonly filters?: readonly string[];
 }
 
+/**
+ * listQuery is a window spelled the way `list` sends it. The read cache keys a
+ * page by the same address, so the page that lands replaces the one a person is
+ * looking at instead of sitting beside it under another name.
+ */
+export function listQuery({
+  offset = 0,
+  limit = PER_PAGE,
+  sort = "",
+  filters = [],
+}: Window): string {
+  const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (sort) q.set("sort", sort);
+  for (const f of filters) q.append("filter", f);
+  return q.toString();
+}
+
+/** rowAddress is where one row of an entry lives, which is what a cache row is named for. */
+export function rowAddress(e: Entry, id: string): string {
+  return `${e.path}/${encodeURIComponent(id)}`;
+}
+
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface RequestOptions {
-  readonly signal?: AbortSignal;
+  readonly signal?: AbortSignal | undefined;
+  /**
+   * idempotencyKey is the header the kernel honours once T-0293 lands; until
+   * then the phone sends it and the server ignores it. The outbox mints it
+   * before a write's first attempt leaves the phone and keeps it as the row's
+   * id, so the attempt that may have landed and the replay that follows name
+   * the same write. A request no queue could ever replay carries none.
+   */
+  readonly idempotencyKey?: string | undefined;
+}
+
+/**
+ * keyed is the options argument a typed write takes besides its own: the
+ * idempotency key the queue minted for it, or nothing at all where no queue
+ * exists to replay it. A call made without an argument is not the same call as
+ * one made with an empty one — the write a phone cannot hold is left exactly the
+ * call it was before the queue existed.
+ */
+export function keyed(idempotencyKey: string | undefined): readonly [] | readonly [RequestOptions] {
+  return idempotencyKey === undefined ? [] : [{ idempotencyKey }];
 }
 
 export interface Api {
@@ -209,7 +263,7 @@ export interface Api {
    * changes nothing in what was learned about the key.
    */
   logout(): Promise<SignOut>;
-  catalog(): Promise<Catalog>;
+  catalog(notice?: HintNotice): Promise<Catalog>;
   /** list is a window of rows, in an order, through equality filters spelled field:value. */
   list(e: Entry, q?: Window): Promise<Page>;
   get(e: Entry, id: string): Promise<Record<string, unknown>>;
@@ -219,10 +273,23 @@ export interface Api {
    * because a singleton's write is a PUT of the whole of it.
    */
   one(e: Entry): Promise<Record<string, unknown>>;
-  replace(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
-  create(e: Entry, values: Record<string, unknown>): Promise<Record<string, unknown>>;
-  update(e: Entry, id: string, values: Record<string, unknown>): Promise<Record<string, unknown>>;
-  remove(e: Entry, id: string): Promise<void>;
+  replace(
+    e: Entry,
+    values: Record<string, unknown>,
+    options?: RequestOptions,
+  ): Promise<Record<string, unknown>>;
+  create(
+    e: Entry,
+    values: Record<string, unknown>,
+    options?: RequestOptions,
+  ): Promise<Record<string, unknown>>;
+  update(
+    e: Entry,
+    id: string,
+    values: Record<string, unknown>,
+    options?: RequestOptions,
+  ): Promise<Record<string, unknown>>;
+  remove(e: Entry, id: string, options?: RequestOptions): Promise<void>;
   /**
    * command runs one of the entry's lifecycle routes and answers the row it
    * left behind. id is the row it is about, or nothing for a command about the
@@ -235,6 +302,7 @@ export interface Api {
     id: string | undefined,
     verb: string,
     values?: Record<string, unknown>,
+    options?: RequestOptions,
   ): Promise<Record<string, unknown>>;
   /** bearer is the key this connection signs with, or undefined when signed out. */
   readonly bearer: () => Bearer | undefined;
@@ -291,6 +359,11 @@ export function createApi(
   timeout: number = TIMEOUT,
   tokenName: string = KEY_NAME,
   declaredGrants: readonly DeclaredPermission[] = kitGrants,
+  /** refused is called with nothing but the fact that this server answered 401 for this
+   * transport. Every request — generated operation, `me`, the catalogue, the event trail,
+   * a write — is answered at one line, so this is the one place a session's refusal can
+   * be heard: the transport reports it, and the shell is what decides what it means. */
+  refused?: () => void,
 ): Api {
   let bearer: Bearer | undefined = initialBearer;
   /**
@@ -300,6 +373,21 @@ export function createApi(
    * above are the only ones it stands at.
    */
   let session: string | undefined;
+  /**
+   * warnOnce is where a malformed presentation hint goes: a fallback the person
+   * never sees and never reads, and an author's one line. "Once" means once per
+   * distinct (document path, reason) for this connection — the parse runs once per
+   * served body, so a workspace that declares the same typo in ten hints says it
+   * ten ways once each, and a refresh repeats nothing. The core keeps no console
+   * (AGENTS.md) and no state; this transport is the reader that owns both.
+   */
+  const noticed = new Set<string>();
+  const warnOnce: HintNotice = (at, why) => {
+    const key = `${at}\u0000${why}`;
+    if (noticed.has(key)) return;
+    noticed.add(key);
+    console.warn(`catalog hint: ${at} ${why}`);
+  };
   const base = baseURL.replace(/\/+$/, "");
 
   function apiPath(path: string): void {
@@ -331,11 +419,12 @@ export function createApi(
       cookie: string | undefined;
       /** frame is the sign-in whose session this request carries; the answer's
        * Set-Cookie belongs to it and to nothing else. */
-      frame?: SessionFrame;
+      frame?: SessionFrame | undefined;
       /** key is the bearer this request presents in place of the held one —
        * the one request a sign-out makes to spend a key it is about to forget. */
-      key?: Bearer;
+      key?: Bearer | undefined;
     },
+    idempotencyKey?: string,
   ): Promise<{ text: string; status: number; headers: Headers; bytes?: ArrayBuffer }> {
     apiPath(path);
     if (method === "GET" && body !== undefined)
@@ -349,6 +438,13 @@ export function createApi(
     delete headers.origin;
     delete headers["sec-fetch-site"];
     if (body !== undefined) headers["Content-Type"] = "application/json";
+    // A header is one token or nothing: a value with a CR or an LF in it would
+    // be a second request, not a key, and no caller's choice may open that door.
+    if (idempotencyKey !== undefined) {
+      const refusal = keyRefusal(idempotencyKey);
+      if (refusal) throw new TypeError(refusal);
+      headers["Idempotency-Key"] = idempotencyKey;
+    }
     // One credential per request, never both: the session belongs to the frame
     // that is minting its key, and every other request carries the key alone.
     const sendingCookie = prepared?.cookie;
@@ -370,6 +466,11 @@ export function createApi(
     let text = "";
     let responseHeaders = new Headers();
     let bytes: ArrayBuffer | undefined;
+    // answered says the server took the request and said something: from that
+    // moment on, a failure belongs to reading its answer, not to a network that
+    // never carried the request. The two are not the same write: one may have
+    // landed, and the kernel does not honour an Idempotency-Key until T-0293.
+    let answered = false;
     try {
       if (prepared?.body != null) init.body = prepared.body;
       if (body !== undefined) {
@@ -377,6 +478,7 @@ export function createApi(
         if (init.body === undefined) throw new TypeError("The request body is not JSON.");
       }
       const res = await fetchImpl(base + path, init);
+      answered = true;
       // A session is kept only for the sign-in frame that was answered with it,
       // and only long enough to mint with it. No response sets a credential any
       // later request presents.
@@ -402,12 +504,23 @@ export function createApi(
           `${base} did not answer within ${Math.round(timeout / 1000)} seconds.`,
         );
       if (signal?.aborted) throw cancelled();
+      // The server had already answered when this failure happened, so the
+      // write may be in the database: it is an unreadable answer, which is what
+      // a held write is never resent for, and never the network's own failure.
+      if (answered)
+        throw new ResponseError(status, `Invalid response at ${path}: its body never arrived.`);
       throw e;
     } finally {
       clearTimeout(bell);
       signal?.removeEventListener("abort", cancel);
     }
-    if (status >= 400) throw problem(status, text);
+    if (status >= 400) {
+      // 401 is a fact about the session rather than about this request, and the
+      // request's caller is not the unit that owns a session. The notice goes out
+      // before the throw, so the shell hears it whoever was waiting on this call.
+      if (status === 401) refused?.();
+      throw problem(status, text);
+    }
     return { text, status, headers: responseHeaders, ...(bytes === undefined ? {} : { bytes }) };
   }
 
@@ -448,11 +561,14 @@ export function createApi(
   }
 
   /**
-   * refused says the server answered this request with a verdict of its own (a
-   * 4xx) rather than failing to answer it, or answering with something this
-   * contract cannot read. Only a verdict may be turned into a returned answer.
+   * serverRefused says the server answered this request with a verdict of its own
+   * (a 4xx) rather than failing to answer it, or answering with something this
+   * contract cannot read. Only a verdict may be turned into a returned answer. It
+   * is not the transport's `refused` notice, which says one status and nothing
+   * else: a verdict belongs to the request that was answered, the notice to the
+   * session the answer describes.
    */
-  function refused(error: unknown): boolean {
+  function serverRefused(error: unknown): boolean {
     return error instanceof ApiError && error.status >= 400 && error.status < 500;
   }
 
@@ -467,10 +583,10 @@ export function createApi(
     path: string,
     validate: (value: unknown) => T,
     body?: unknown,
-    { signal }: RequestOptions = {},
+    { signal, idempotencyKey }: RequestOptions = {},
   ): Promise<T> {
     if (typeof validate !== "function") throw new TypeError("A response validator is required.");
-    const { value, status } = await read(method, path, body, signal);
+    const { value, status } = await read(method, path, body, { signal, idempotencyKey });
     try {
       return validate(value);
     } catch {
@@ -480,12 +596,25 @@ export function createApi(
     }
   }
 
+  /**
+   * carried is what one request presents besides its own body: the sign-in frame
+   * whose session it mints with, a key to present in place of the held one, and the
+   * idempotency key the queue minted for the write. Each is named by a caller inside
+   * this file — a sign-in leg, a sign-out, the queue — and a request carried by none
+   * presents the key this connection holds and nothing else.
+   */
+  interface Carried {
+    readonly session?: SessionFrame | undefined;
+    readonly key?: Bearer | undefined;
+    readonly idempotencyKey?: string | undefined;
+  }
+
   async function documented<T>(
     operation: (client: Client) => Promise<T>,
-    session?: SessionFrame,
-    key?: Bearer,
+    carried: Carried = {},
   ): Promise<T> {
-    const sendingCookie = session?.cookie;
+    const { session: frame, key, idempotencyKey } = carried;
+    const sendingCookie = frame?.cookie;
     const bodies = new WeakMap<Request, BodyInit | null>();
     const nativeFetch: typeof fetch = async (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
@@ -503,13 +632,20 @@ export function createApi(
       if (!bodies.has(request)) throw new TypeError("Expected a generated request.");
       const body = bodies.get(request) ?? null;
       if (body instanceof FormData) request.headers.delete("Content-Type");
-      const result = await call(method, path, undefined, request.signal, {
-        body,
-        headers: request.headers,
-        cookie: sendingCookie,
-        ...(session ? { frame: session } : {}),
-        ...(key ? { key } : {}),
-      });
+      const result = await call(
+        method,
+        path,
+        undefined,
+        request.signal,
+        {
+          body,
+          headers: request.headers,
+          cookie: sendingCookie,
+          ...(frame ? { frame } : {}),
+          ...(key ? { key } : {}),
+        },
+        idempotencyKey,
+      );
       const status = result.status;
       if (!route.statuses.includes(status))
         throw new ResponseError(
@@ -560,10 +696,11 @@ export function createApi(
     method: RequestMethod,
     path: string,
     body?: unknown,
-    signal?: AbortSignal,
-    session?: SessionFrame,
-    key?: Bearer,
+    options: RequestOptions = {},
+    carried: Carried = {},
   ): Promise<{ value: unknown; status: number }> {
+    const { signal, idempotencyKey } = options;
+    const { session: frame, key } = carried;
     apiPath(path);
     if (method === "GET" && body !== undefined)
       throw new TypeError("A GET request cannot have a body.");
@@ -577,20 +714,20 @@ export function createApi(
         if (serialized === undefined) throw new TypeError("The request body is not JSON.");
         wireBody = JSON.parse(serialized);
       }
-      const result = await documented(
-        (client) => route.run(client, path, wireBody, signal),
-        session,
+      const result = await documented((client) => route.run(client, path, wireBody, signal), {
+        session: frame,
         key,
-      );
+        idempotencyKey,
+      });
       return { status: result.response.status, value: result.data };
     }
-    const { text, status } = await call(
-      method,
-      path,
-      body,
-      signal,
-      key ? { body: null, headers: new Headers(), cookie: undefined, key } : undefined,
-    );
+    // A route outside the document carries its credential the same way: whatever
+    // this request was told to present goes on the wire in place of the held key.
+    const prepared =
+      frame === undefined && key === undefined
+        ? undefined
+        : { body: null, headers: new Headers(), cookie: frame?.cookie, key, frame };
+    const { text, status } = await call(method, path, body, signal, prepared, idempotencyKey);
     try {
       return { status, value: text === "" ? undefined : JSON.parse(text) };
     } catch {
@@ -603,10 +740,10 @@ export function createApi(
     path: string,
     validate: (value: unknown) => T,
     body?: unknown,
-    session?: SessionFrame,
-    key?: Bearer,
+    options: RequestOptions = {},
+    carried: Carried = {},
   ): Promise<T> {
-    const { value, status } = await read(method, path, body, undefined, session, key);
+    const { value, status } = await read(method, path, body, options, carried);
     try {
       return validate(value);
     } catch (error) {
@@ -637,7 +774,14 @@ export function createApi(
     if (scopes.length === 0) throw new ApiError(403, NO_SCOPES);
     // expiresAt is left out: the server applies its own default lifetime and
     // the phone cannot judge its own clock against it.
-    const key = await json("POST", TOKENS, issuedToken.parse, { name: tokenName, scopes }, frame);
+    const key = await json(
+      "POST",
+      TOKENS,
+      issuedToken.parse,
+      { name: tokenName, scopes },
+      {},
+      { session: frame },
+    );
     session = frame.cookie;
     return key;
   }
@@ -655,7 +799,8 @@ export function createApi(
           "/api/v1/auth/login",
           identity.parse,
           { email, password },
-          session,
+          {},
+          { session },
         );
       } catch (e) {
         // The kernel answers a missing second factor with a 401 shaped exactly
@@ -679,7 +824,8 @@ export function createApi(
         CHALLENGE_VERIFY,
         identity.parse,
         { email, code: code.trim() },
-        session,
+        {},
+        { session },
       );
       const key = await mint(who, session);
       bearer = key;
@@ -720,8 +866,8 @@ export function createApi(
           `${TOKENS}/${encodeURIComponent(key.id)}/revoke`,
           () => undefined,
           undefined,
-          sign === undefined ? undefined : { cookie: sign },
-          sign === undefined ? key : undefined,
+          {},
+          sign === undefined ? { key } : { session: { cookie: sign } },
         );
       } catch (error) {
         // A refusal is the server's own no about this key, and the caller has to
@@ -730,7 +876,7 @@ export function createApi(
         // if the two halves were one. A server that refused to answer at all — a
         // 503, or an answer in a shape this contract refuses — is held below rather
         // than thrown here, so the session it is signed out of is still closed.
-        if (!refused(error)) unanswered = error;
+        if (!serverRefused(error)) unanswered = error;
         else {
           revoked = false;
           unrecognised = sign === undefined && unrecognisedCaller(error);
@@ -743,7 +889,7 @@ export function createApi(
       // failure, is not the key's: see SignOut.
       if (sign !== undefined) {
         try {
-          await json("POST", LOGOUT, () => undefined, undefined, { cookie: sign });
+          await json("POST", LOGOUT, () => undefined, undefined, {}, { session: { cookie: sign } });
         } catch {
           // A session this phone could not close is the server's to end at its own
           // lifetime: the verdict about the key above stands, and no sentence about
@@ -764,7 +910,10 @@ export function createApi(
           "/api/v1/auth/me",
           identity.parse,
           undefined,
-          session === undefined ? undefined : { cookie: session },
+          {},
+          {
+            session: session === undefined ? undefined : { cookie: session },
+          },
         );
       } catch (error) {
         if (error instanceof ResponseError) throw error;
@@ -785,7 +934,7 @@ export function createApi(
         throw e;
       }
     },
-    async catalog() {
+    async catalog(notice: HintNotice = warnOnce) {
       // Legacy compatibility belongs to the normalized core view. The public
       // generated operation must keep its stricter wire response validator.
       const result = await documented((client) =>
@@ -793,46 +942,47 @@ export function createApi(
           url: "/api/v1/app/resources",
           throwOnError: true,
           responseValidator: async (value) => {
-            parseCatalog(value);
+            parseCatalog(value, notice);
           },
         }),
       );
-      return parseCatalog(result.data);
+      return parseCatalog(result.data, notice);
     },
-    async list(e, { offset = 0, limit = PER_PAGE, sort = "", filters = [] } = {}) {
-      const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-      if (sort) q.set("sort", sort);
-      for (const f of filters) q.append("filter", f);
-      const body = await json("GET", `${e.path}?${q}`, page.parse);
+    async list(e, window = {}) {
+      const body = await json("GET", `${e.path}?${listQuery(window)}`, page.parse);
       return { items: body.items ?? [], total: body.total ?? 0 };
     },
     async get(e, id) {
-      return json("GET", `${e.path}/${encodeURIComponent(id)}`, row.parse);
+      return json("GET", rowAddress(e, id), row.parse);
     },
     async one(e) {
       return json("GET", e.path, row.parse);
     },
-    async replace(e, values) {
+    async replace(e, values, options) {
       // A singleton prints no operation set and no write path of its own, but
       // kit/rest mounts its PUT where it mounts any other write: follow the
       // entry, do not assume the read address.
-      return json("PUT", writePath(e), row.parse, values);
+      return json("PUT", writePath(e), row.parse, values, options);
     },
-    async create(e, values) {
-      return json("POST", writePath(e), row.parse, values);
+    async create(e, values, options) {
+      return json("POST", writePath(e), row.parse, values, options);
     },
-    async update(e, id, values) {
-      return json("PATCH", `${writePath(e)}/${encodeURIComponent(id)}`, row.parse, values);
+    async update(e, id, values, options) {
+      return json("PATCH", `${writePath(e)}/${encodeURIComponent(id)}`, row.parse, values, options);
     },
-    async remove(e, id) {
+    async remove(e, id, options) {
       const path = `${writePath(e)}/${encodeURIComponent(id)}`;
       apiPath(path);
       const route = documentedRoute("DELETE", path);
-      if (route) await documented((client) => route.run(client, path));
-      else await call("DELETE", path);
+      if (route)
+        await documented((client) => route.run(client, path, undefined, options?.signal), {
+          idempotencyKey: options?.idempotencyKey,
+        });
+      else
+        await call("DELETE", path, undefined, options?.signal, undefined, options?.idempotencyKey);
     },
-    async command(e, id, verb, values) {
-      return json("POST", commandPath(e, verb, id), row.parse, values);
+    async command(e, id, verb, values, options) {
+      return json("POST", commandPath(e, verb, id), row.parse, values, options);
     },
   };
 }

@@ -1,0 +1,63 @@
+# What the suite costs and what it fails at, published where a person and a probe can
+# read it. 0088 rule 5 gives the nightly tier the slowest-tests and flake reports; both
+# are read out of tests/inventory.json — the wall time and per-test time the measuring
+# pass recorded, and the runs of main whose logs named a file as a failure — and written
+# as one JSON file. Nothing here decides whether a test runs: the inventory re-check
+# refuses a table that stopped answering the checkout, and `npm run check` remains the
+# required check that every push and every pull request runs.
+#
+# What the nightly does NOT run, and why:
+# - the browser specimens (`tests/*.case.mjs`, `tests/*.spec.ts`) need REVIEW_GALLERY_URL
+#   and a Playwright install this package does not carry. Which of them earn nightly
+#   minutes is the design owner's call; tests/INVENTORY.md lists each with its rule.
+# - the device journeys, which are mobile-e2e.yml's, on a runner that has an emulator.
+name: nightly
+
+on:
+  schedule:
+    # A different minute and hour from the drift report (06:17 Monday) and the kernel
+    # contract (04:47), so no two nightly jobs want the same runner at once. Whether
+    # this forge runs `schedule:` at all is unverified, so the job carries
+    # workflow_dispatch too.
+    - cron: '37 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reports:
+    runs-on: pkit-ci-linux-amd64
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+      - run: npm ci --no-audit --no-fund
+
+      # The table's shape re-read from this checkout: files, layers, tiers, reach. The
+      # numbers it quotes stay the record of the pass that took them, so this is the
+      # only job that may say a row went stale.
+      - name: The suite's record answers for this checkout
+        run: npm run check:inventory
+
+      - name: What the suite costs, and what it failed
+        env:
+          PK_TEST_REPORT_DIR: ${{ runner.temp }}
+        run: |
+          npm run report:tests
+          cat "$PK_TEST_REPORT_DIR/slowest-tests.json"
+
+      - name: Publish the reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: suite-reports
+          path: ${{ runner.temp }}/slowest-tests.json

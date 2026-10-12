@@ -10,15 +10,26 @@ interface Props {
   readonly term: string;
   /** value is what a screen reader hears, and what a row without a shape shows. */
   readonly value: string;
+  /**
+   * spoken is what the row announces instead of `value`, for the one value shown
+   * in shorthand: the cell reads "5 minutes ago" and the row says the whole local
+   * date-time, so a glance and a reader get the same fact at their own speed.
+   */
+  readonly spoken?: string;
   /** shown replaces that text with the value in the shape its type deserves. */
   readonly shown?: ReactNode;
   readonly testID?: string;
 }
 
-export function DetailRow({ term, value, shown, testID }: Props) {
+export function DetailRow({ term, value, spoken, shown, testID }: Props) {
   const s = useStyles(styles);
   return (
-    <View style={s.row} accessible accessibilityLabel={`${term}, ${value}`} {...testable(testID)}>
+    <View
+      style={s.row}
+      accessible
+      accessibilityLabel={`${term}, ${spoken ?? value}`}
+      {...testable(testID)}
+    >
       <Text role="caption" tone="muted" uppercase>
         {term}
       </Text>

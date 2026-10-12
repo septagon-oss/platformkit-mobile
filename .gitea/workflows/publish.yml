@@ -1,0 +1,115 @@
+# A tag publishes the kit to this forge's package registry. Nothing here builds
+# a binary: release.yml owns the `v*` namespace, publishes nothing, and Gitea
+# anchors a ref glob, so `kit-v*` cannot match `v0.2.0` and `v*` cannot match
+# `kit-v0.2.0` — one release may carry one tag, the other, or both.
+#
+# The order of the steps is the rule. Everything that can be refused offline
+# comes first — the repository's own checks, then the agreements the tag has to
+# keep with the manifest — and the one write comes last, behind the credential
+# and the registry's own immutability. A step that refuses publishes nothing:
+# the (name, version) pair is the whole idempotency key, so a re-pushed tag or a
+# rerun meets the same refusals instead of overwriting a version somebody has
+# already installed.
+name: publish
+
+on:
+  push:
+    tags: ['kit-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A publish in flight is never cancelled: the group is one ref, and the run
+  # that got here may already have written the version.
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: pkit-ci-linux-amd64
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check
+
+      # The tag is the only thing that says which version this run is about, so
+      # it is checked against the manifest it releases — the same script
+      # `npm run check:publish` runs on every push, asked the extra question a
+      # push cannot answer. A tag cut from the wrong commit is deleted and
+      # re-cut; nothing here wrote anything to find out.
+      - name: The tag names this version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: node --import tsx scripts/publish.ts --check --tag "$TAG"
+
+      # The one write, and the one reader of the token. A secret the repository
+      # never created expands to the empty string, so the refusal has to be a
+      # test this step runs: until NPM_PUBLISH_TOKEN exists every publish run
+      # ends on its first line naming it, and the registry holds nothing.
+      #
+      # The credential reaches npm through a userconfig this step creates for
+      # itself in a private directory and removes on the way out. A committed
+      # .npmrc is refused by scripts/source.ts as local configuration, and the
+      # registry's address is derived here from the forge the job is running on
+      # rather than committed, because which host the forge is is deployment,
+      # not package metadata.
+      - name: Publish the kit to the forge registry
+        env:
+          NPM_PUBLISH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+          NPM_REGISTRY: ${{ github.server_url }}/api/packages/${{ github.repository_owner }}/npm/
+        run: |
+          set -eu
+          test -n "${NPM_PUBLISH_TOKEN:-}" || {
+            echo "::error::repository secret NPM_PUBLISH_TOKEN is not set; the kit is not published until it exists"
+            exit 1
+          }
+          test -n "${NPM_REGISTRY:-}"
+          # Gitea's own npm route, made from the forge's address and the
+          # organisation that owns the package. An empty context would leave a
+          # relative path here, and npm would read that as some other registry.
+          case "$NPM_REGISTRY" in
+            http*://*/api/packages/*/npm/) ;;
+            *)
+              echo "::error::the forge gave this job no registry to publish to: $NPM_REGISTRY"
+              exit 1 ;;
+          esac
+          package=$(node -p "const p = JSON.parse(require('fs').readFileSync('package.json', 'utf8')); p.name + ' ' + p.version")
+          name=${package% *}
+          version=${package#* }
+          home=$(mktemp -d)
+          trap 'rm -rf "$home"' EXIT
+          umask 077
+          printf '%s\n' "//${NPM_REGISTRY#*://}:_authToken=${NPM_PUBLISH_TOKEN}" > "$home/.npmrc"
+          unset NPM_PUBLISH_TOKEN
+          # Named on each command line, not exported: a step started by `npm run`
+          # inherits an `npm_config_userconfig` that outranks anything this step
+          # exports, and npm would then read some other file for the credential.
+          npm_at=(--userconfig "$home/.npmrc" --registry "$NPM_REGISTRY")
+          # Never the write that takes the last one away. The question is asked
+          # with the credential, because the forge answers an anonymous read of
+          # this scope with 401: asked without it, every answer — including the
+          # version already being there — reads as "not published", and the
+          # refusal below could never fire. Only the answer that says this
+          # version is not here permits the write; anything else — a 401, a
+          # registry that is not answering — refuses the run too, because
+          # nothing here may write on a question it could not read the answer to.
+          if seen=$(npm "${npm_at[@]}" view "${name}@${version}" 2>&1); then
+            echo "::error::${name}@${version} is already published; bump package.json and cut a new tag"
+            exit 1
+          fi
+          case "$seen" in
+            *E404*) ;;
+            *)
+              printf '%s\n' "$seen" >&2
+              echo "::error::the registry could not answer whether ${name}@${version} is published; nothing was published"
+              exit 1 ;;
+          esac
+          npm "${npm_at[@]}" publish --access public

@@ -199,7 +199,11 @@ const styles = (t: Theme) =>
       gap: t.space.xs,
       maxWidth: "100%",
     },
-    header: { paddingHorizontal: t.space.sm, borderRadius: 0 },
+    // A control in the native header is a word in the header's own band, so its
+    // edge is painted in that band: the border the base carries survives, in the
+    // colour it sits on, which is what leaves no frame at rest and still leaves the
+    // ring's mechanism — a border to recolour — for a keyboard user's focus.
+    header: { paddingHorizontal: t.space.sm, borderRadius: 0, borderColor: t.color.surfaceCanvas },
     primary: { backgroundColor: t.color.accentDefault, borderColor: t.color.accentDefault },
     destructive: { backgroundColor: t.color.statusDanger, borderColor: t.color.statusDanger },
     secondary: {

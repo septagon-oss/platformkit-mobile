@@ -14,7 +14,7 @@ interface Words {
     readonly notSet: string;
     readonly openHint: string;
   };
-  readonly value: { readonly yes: string; readonly no: string };
+  readonly value: { readonly yes: string; readonly no: string; readonly notSet: string };
   readonly state: {
     readonly loading: string;
     readonly empty: { readonly title: string; readonly body: string };
@@ -26,8 +26,44 @@ interface Words {
     readonly reconcile: string;
     readonly unknownWrite: string;
     readonly updatedAt: (instant: string) => string;
+    /** held is a write on this phone that has not reached the server. */
+    readonly held: { readonly title: string; readonly body: string };
+    /** holding is what the screen that made a write says when the write stayed: it names the act and where to find the write, in the section's own words. */
+    readonly holding: (where: string) => string;
+    /** refused is a held write the server answered 4xx to; its own words come from the record. */
+    readonly refused: { readonly title: string; readonly body: string };
+    /** discard throws the person's own work away, which is not what `dismiss` says. */
+    readonly discard: string;
+    /** signOutHeld is the question every way out of a sign-in asks while this phone still holds writes; signing out discards them. */
+    readonly signOutHeld: (owed: number) => string;
+    /** keep is the answer that stops at the way out: the person stays signed in and the writes stay here. */
+    readonly keep: string;
   };
   readonly issue: { readonly invalid: string; readonly unsupported: string };
+  /** What went wrong, in plain words. Nouns and the quoted instant arrive from the
+   * catalogue and the reader's clock: no sentence here names a product or a resource. */
+  readonly failure: {
+    readonly connection: string;
+    readonly loadFailed: (plural: string) => string;
+    readonly refreshFailed: (instant: string) => string;
+    readonly saveFailed: string;
+    readonly deleteFailed: (singular: string) => string;
+    readonly commandFailed: (title: string) => string;
+    readonly uncertain: string;
+    readonly signedOut: string;
+    readonly excluded: (feature: string) => string;
+    readonly noAccess: string;
+    readonly gone: string;
+    readonly revision: (singular: string) => string;
+    readonly backTo: (plural: string) => string;
+    readonly update: string;
+    readonly loadCatalog: string;
+    /** The noun a refusal names when the call addressed no catalogue entry: a named
+     * operation reads a record, the catalogue load opens a workspace. A person reads
+     * these words, so the table holds them; a Portuguese phone reads Portuguese. */
+    readonly thisRecord: string;
+    readonly thisWorkspace: string;
+  };
   /** A disclosure control names what it holds, not how it behaves: "Expand" describes
    * the control, "Show loading, empty and unavailable examples" describes the screen. */
   readonly disclosure: {
@@ -66,16 +102,22 @@ export interface Copy extends Words {
   readonly language: Language;
 }
 
+// One answer for "nothing is stored here", written once and named by each group
+// that needs it: a date field with no instant and a switch with no answer are the
+// same fact about the record, and a person should read the same two words.
+const notSetEn = "Not set";
+const notSetPt = "Não definido";
+
 const en: Words = {
   kit: kitEnglish,
   choice: { placeholder: "Choose", cancel: "Cancel", hint: "Opens the choices" },
   dateTime: {
     set: "Set",
     clear: "Clear",
-    notSet: "Not set",
+    notSet: notSetEn,
     openHint: "Opens the date and time dialogs",
   },
-  value: { yes: "Yes", no: "No" },
+  value: { yes: "Yes", no: "No", notSet: notSetEn },
   state: {
     loading: "Loading",
     empty: { title: "Nothing here yet", body: "What arrives will be listed here." },
@@ -87,10 +129,41 @@ const en: Words = {
     reconcile: "Check the result",
     unknownWrite: "The change may have been saved. Check its result before submitting again.",
     updatedAt: (instant) => `Last updated ${instant}`,
+    held: {
+      title: "Held on this phone",
+      body: "It will send when this phone reaches the server.",
+    },
+    holding: (where) => `This phone is holding it. It is listed under ${where} until it sends.`,
+    refused: { title: "Not sent", body: "The server refused it." },
+    discard: "Discard",
+    signOutHeld: (owed) =>
+      owed === 1
+        ? "1 write has not left this phone. Discard it before signing out?"
+        : `${owed} writes have not left this phone. Discard them before signing out?`,
+    keep: "Keep on this phone",
   },
   issue: {
     invalid: "This information is not valid.",
     unsupported: "This format is not supported.",
+  },
+  failure: {
+    connection: "We couldn't connect. Check your connection and try again.",
+    loadFailed: (plural) => `We couldn't load ${plural}.`,
+    refreshFailed: (instant) => `Couldn't refresh. Showing the last update from ${instant}.`,
+    saveFailed: "We couldn't save your changes.",
+    deleteFailed: (singular) => `We couldn't delete this ${singular}.`,
+    commandFailed: (title) => `${title} did not run.`,
+    uncertain: "We couldn't confirm whether your changes were saved.",
+    signedOut: "Sign in again to continue.",
+    excluded: (feature) => `This account's plan does not include ${feature}.`,
+    noAccess: "You no longer have access to this item.",
+    gone: "This item is no longer available.",
+    revision: (singular) => `This ${singular} changed while you were editing.`,
+    backTo: (plural) => `Back to ${plural}`,
+    update: "Update the app to open this workspace.",
+    loadCatalog: "We couldn't open this workspace.",
+    thisRecord: "this record",
+    thisWorkspace: "this workspace",
   },
   disclosure: {
     reveal: (what) => `Show ${what}`,
@@ -128,10 +201,10 @@ const pt: Words = {
   dateTime: {
     set: "Definir",
     clear: "Limpar",
-    notSet: "Não definido",
+    notSet: notSetPt,
     openHint: "Abre os seletores de data e hora",
   },
-  value: { yes: "Sim", no: "Não" },
+  value: { yes: "Sim", no: "Não", notSet: notSetPt },
   state: {
     loading: "A carregar",
     empty: { title: "Ainda não há nada aqui", body: "O que chegar será apresentado aqui." },
@@ -147,8 +220,40 @@ const pt: Words = {
     unknownWrite:
       "A alteração pode ter sido guardada. Verifique o resultado antes de enviar novamente.",
     updatedAt: (instant) => `Última atualização: ${instant}`,
+    held: {
+      title: "Guardado neste telefone",
+      body: "Será enviado quando este telefone alcançar o servidor.",
+    },
+    holding: (where) => `Este telefone está a guardá-lo. Está listado em ${where} até ser enviado.`,
+    refused: { title: "Não enviado", body: "O servidor recusou-o." },
+    discard: "Descartar",
+    signOutHeld: (owed) =>
+      owed === 1
+        ? "1 gravação ainda não saiu deste telefone. Descartá-la antes de terminar a sessão?"
+        : `${owed} gravações ainda não saíram deste telefone. Descartá-las antes de terminar a sessão?`,
+    keep: "Manter neste telefone",
   },
   issue: { invalid: "Esta informação não é válida.", unsupported: "Este formato não é suportado." },
+  failure: {
+    connection: "Não foi possível ligar-nos. Verifique a sua ligação e tente novamente.",
+    loadFailed: (plural) => `Não foi possível carregar ${plural}.`,
+    refreshFailed: (instant) =>
+      `Não foi possível atualizar. A mostrar a última atualização de ${instant}.`,
+    saveFailed: "Não foi possível guardar as suas alterações.",
+    deleteFailed: (singular) => `Não foi possível eliminar ${singular}.`,
+    commandFailed: (title) => `${title} não foi executado.`,
+    uncertain: "Não foi possível confirmar se as suas alterações foram guardadas.",
+    signedOut: "Inicie novamente a sessão para continuar.",
+    excluded: (feature) => `O plano desta conta não inclui ${feature}.`,
+    noAccess: "Já não tem acesso a este item.",
+    gone: "Este item já não está disponível.",
+    revision: (singular) => `Este ${singular} mudou enquanto estava a editar.`,
+    backTo: (plural) => `Voltar a ${plural}`,
+    update: "Atualize a aplicação para abrir esta área de trabalho.",
+    loadCatalog: "Não foi possível abrir esta área de trabalho.",
+    thisRecord: "este registo",
+    thisWorkspace: "esta área de trabalho",
+  },
   disclosure: {
     reveal: (what) => `Mostrar ${what}`,
     conceal: (what) => `Ocultar ${what}`,
@@ -192,9 +297,12 @@ function bundle(language: Language, words: Words): Copy {
       empty: Object.freeze(words.state.empty),
       error: Object.freeze(words.state.error),
       offline: Object.freeze(words.state.offline),
+      held: Object.freeze(words.state.held),
+      refused: Object.freeze(words.state.refused),
       success: Object.freeze(words.state.success),
     }),
     issue: Object.freeze(words.issue),
+    failure: Object.freeze(words.failure),
     disclosure: Object.freeze(words.disclosure),
     gallery: Object.freeze(words.gallery),
   });
@@ -206,4 +314,25 @@ const copies = Object.freeze({ en: bundle("en", en), pt: bundle("pt", pt) });
 export function deriveCopy(language: Language): Copy {
   if (language !== "en" && language !== "pt") throw new RangeError("unsupported-format: copy");
   return copies[language];
+}
+
+/**
+ * The bundle a locale tag reads in: the words follow the tag, with English behind
+ * every other language. This is the whole reconciliation between a locale tag and
+ * the two languages the table holds — a tag is not a language, so it cannot be
+ * handed to `deriveCopy` directly. Who supplies the tag is the caller's business:
+ * a screen asks its phone, a test decides for itself. The core never asks.
+ */
+export function copyForLocale(locale: string | undefined): Copy {
+  return deriveCopy(copyLanguage(locale));
+}
+
+/**
+ * The language a locale tag reads in: the primary subtag decides, so "pt-BR",
+ * "pt_PT" and "PT" are Portuguese and anything else reads in English. A locale tag
+ * is not a language, so it cannot be handed to `deriveCopy` directly — this is the
+ * one place the two are reconciled.
+ */
+export function copyLanguage(locale: string | undefined): Language {
+  return typeof locale === "string" && locale.toLowerCase().startsWith("pt") ? "pt" : "en";
 }

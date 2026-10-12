@@ -1,0 +1,105 @@
+# The first journey a person takes on the kernel's reference application: sign
+# in, open the served resource, make a record with a deadline, read what the
+# record says about itself, find it again in the list, amend it and delete it.
+#
+# Each segment is one already proven elsewhere; what this journey owns is the
+# whole being walkable in one sitting, and the two things no sibling asserts: a
+# record and a row state their condition in the same pill, and an identifier is
+# nowhere on a screen until the person asks for Record information.
+#
+# MODULE/ENTITY/KNOWN name the served resource and the field a row is known by,
+# DUE_FIELD its deadline and STATUS_FIELD the field of declared states — all
+# facts about the kernel the job names. STATUS_VALUE is the state a fresh record
+# is in, and the choice is tapped by its id; the *word* the pill says is the
+# phone's own reading of that value, asserted below as a word and never as an id.
+# screen: app/sign-in.tsx
+# screen: app/index.tsx
+# screen: app/[module]/[entity]/index.tsx
+# screen: app/[module]/[entity]/new.tsx
+# screen: app/[module]/[entity]/[id]/index.tsx
+# screen: app/[module]/[entity]/[id]/edit.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- extendedWaitUntil:
+    visible:
+      id: "resource-form"
+    timeout: 15000
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE} journey
+- hideKeyboard
+- tapOn:
+    id: "input-${DUE_FIELD}"
+- tapOn: (?i)^ok$
+- tapOn: (?i)^ok$
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- assertVisible: ${TITLE} journey
+- assertVisible: Open
+- assertVisible:
+    id: "field-${DUE_FIELD}"
+- assertVisible: (?i)^due.*$
+# No element's whole text is an identifier while the record is on its own
+# overview, and one tap on Record information — which draws nothing until it is
+# opened — makes one visible. Reachable, not hidden.
+- assertNotVisible: (?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+- tapOn:
+    id: "record-information"
+- assertVisible: (?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+- back
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertVisible: ${TITLE} journey
+- assertVisible: Open
+- tapOn: "Filters"
+- tapOn:
+    id: "filters-${STATUS_FIELD}/value%3A${STATUS_VALUE}"
+- assertVisible: (?i)^clear filters$
+- back
+- tapOn: ${TITLE} journey
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- tapOn: "Edit"
+- tapOn:
+    id: "input-${KNOWN}"
+- eraseText
+- inputText: ${TITLE} journey amended
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible: ${TITLE} journey amended
+    timeout: 15000
+- assertVisible:
+    id: "record-saved"
+- tapOn:
+    id: "record-menu"
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: (?i)^Delete [^‘’?]+$
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} journey amended

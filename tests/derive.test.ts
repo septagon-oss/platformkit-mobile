@@ -9,20 +9,28 @@ import {
   commandOf,
   commandScope,
   commandTitle,
-  detailItems,
+  deriveCopy,
   display,
   formControls,
   humanize,
-  known,
+  hostLabel,
   label,
+  primary,
+  civilDay,
   listCells,
   listColumns,
   listPreview,
-  narrowed,
+  filtered,
+  reordered,
+  activeFilters,
+  recordHeader,
+  recordInformation,
+  recordSections,
   rowCommands,
   noOrder,
   numberValue,
   plural,
+  presentedInstant,
   problems,
   queryFilters,
   sortOptions,
@@ -32,7 +40,19 @@ import {
   timeWire,
   screenPath,
   values,
+  type Formatting,
 } from "../src/core/derive";
+
+// ---------------------------------------------------------------------------
+// Where a write goes, and which doors are drawn. One implementation of each,
+// which is why these cases are here and not in the screens that use them.
+// ---------------------------------------------------------------------------
+
+import { doors, offers, type Entry } from "../src/core/catalog";
+import { commandPath, verbRefusal, writePath } from "../src/core/derive";
+
+/** The words a sheet hands `problems`: a refusal is a line of the copy table, not a string written here. */
+const kit = deriveCopy("en").kit;
 
 // An instant reads in the device's zone; the test's device is in UTC.
 process.env.TZ = "UTC";
@@ -58,10 +78,13 @@ test("humanize reads like the web shell", () => {
   assert.equal(humanize("mark-paid"), "Mark paid");
 });
 
-test("the row is known by its first writable string", () => {
-  assert.equal(known(note.fields).name, "title");
-  assert.equal(label(note, row), "Buy milk");
-  assert.equal(label(note, { id: "9" }), "9");
+test("the row is known by its primary field, and a nameless one says so", () => {
+  assert.equal(primary(note)!.name, "title");
+  assert.equal(label(note, row, deriveCopy("en").kit.untitled), "Buy milk");
+  // An un-hinted entry whose row carries no title reads as the record it is, not
+  // as the identifier nobody came to read: the fabricated `id` fallback is gone.
+  assert.equal(label(note, { id: "9" }, deriveCopy("en").kit.untitled), "Untitled Note");
+  assert.equal(label(note, { id: "9" }, deriveCopy("pt").kit.untitled), "Note sem título");
 });
 
 test("the list leads with the known field and hides what the schema hides", () => {
@@ -74,21 +97,56 @@ test("the list leads with the known field and hides what the schema hides", () =
 test("display is the same answer as rest.Display", () => {
   const f = (name: string) => note.fields.find((x) => x.name === name)!;
   assert.equal(display(f("pinned"), true, feedback), "Yes");
-  assert.equal(display(f("pinned"), undefined, feedback), "No");
+  // A switch with no answer says there is none; only a switch answered "off" says No.
+  assert.equal(display(f("pinned"), undefined, feedback), "Not set");
+  assert.equal(display(f("pinned"), null, feedback), "Not set");
+  assert.equal(display(f("pinned"), false, feedback), "No");
   assert.equal(display(f("status"), "open", feedback), "Open");
-  assert.equal(display(f("createdAt"), row.createdAt, feedback), "Sep 5, 2026, 10:20 AM UTC");
+  // A record the phone has not reached yet is a date, never "ago", and its own
+  // zone needs no label on the clock it prints.
+  assert.equal(display(f("createdAt"), row.createdAt, feedback), "Sep 5, 10:20 AM");
   assert.equal(display(f("tags"), ["a", "b"], feedback), "a, b");
   assert.equal(display(f("rank"), 2, feedback), "2");
   assert.equal(display(f("body"), "", feedback), "—");
 });
 
-test("detail shows every field in schema order", () => {
-  const items = detailItems(note, row, feedback);
-  assert.equal(items[0]!.label, "Id");
-  assert.equal(items.find((i) => i.label === "Status")!.value, "Open");
+test("an un-hinted record opens on what it is, and keeps its plumbing to itself", () => {
+  const untitled = feedback.copy.kit.untitled;
+  const header = recordHeader(note, row, feedback, untitled);
+  assert.equal(header.title, "Buy milk", "the field called title names the record");
+  assert.equal("status" in header, false, "no pill is inferred from the first enum");
+  assert.equal(header.summary, "Two litres", "one line tells two records apart");
+
+  const blocks = recordSections(note, row, feedback);
+  assert.deepEqual(
+    blocks.map((b) => b.label),
+    ["Overview"],
+    "an entry that declares no sections gets the one block the catalogue's own parser names",
+  );
+  assert.deepEqual(
+    blocks[0]!.items.map((i) => i.field.name),
+    ["status", "rank", "pinned", "tags"],
+    "schema order, with the header's own fields and the stamps left out",
+  );
   // Each item carries the schema entry it came from: the screen names its row
   // after the field, and never re-derives which column a fact belongs to.
-  assert.equal(items.find((i) => i.label === "Status")!.field.name, "status");
+  assert.equal(blocks[0]!.items[0]!.field.name, "status");
+  assert.equal(blocks[0]!.items[0]!.label, "Status");
+  assert.equal(blocks[0]!.items[0]!.value, "Open");
+
+  // The identifier and the stamps are the record's plumbing: drawn, in one place,
+  // and nowhere else. `tags` holds nothing in this row, so it is drawn nowhere.
+  assert.deepEqual(
+    recordInformation(note, row, feedback).map((i) => i.field.name),
+    ["id", "createdAt"],
+  );
+  assert.equal(
+    [...blocks.flatMap((b) => b.items), ...recordInformation(note, row, feedback)].some(
+      (i) => i.field.name === "title" || i.field.name === "body",
+    ),
+    false,
+    "the header drew both, so no block repeats them",
+  );
 });
 
 test("form controls derive from the schema", () => {
@@ -134,10 +192,184 @@ test("a screen path is module/entity", () => {
 test("an instant is parsed, rendered where the phone is, and sent as the API takes it", () => {
   const at = timeValue("2026-01-31T09:00:00Z")!;
   assert.equal(timeWire(at), "2026-01-31T09:00:00.000Z");
-  assert.equal(timeText(at, feedback), "Jan 31, 2026, 09:00 AM UTC");
+  // A form edits the whole instant, so the exact spelling keeps the year and — the
+  // fake's zone is the fake reader's own — says no zone.
+  assert.equal(timeText(at, feedback), "Jan 31, 2026, 09:00 AM");
+  assert.equal(
+    timeText(at, { ...feedback, ownZone: "America/New_York" }),
+    "Jan 31, 2026, 09:00 AM UTC",
+  );
   assert.equal(timeValue(""), undefined);
   assert.equal(timeValue("yesterday"), undefined);
   assert.equal(timeValue(undefined), undefined);
+});
+
+test("an address is read as the host its owner typed, and nothing else", () => {
+  assert.equal(hostLabel("https://acme.example.com"), "acme.example.com");
+  assert.equal(hostLabel("https://acme.example.com/"), "acme.example.com");
+  assert.equal(hostLabel("http://10.0.2.2:8888"), "10.0.2.2:8888");
+  // The scheme's own port is not part of an address, and a host is not spelled in capitals.
+  assert.equal(hostLabel("https://ACME.example.com:443/x?a=1#h"), "acme.example.com");
+  // A credential in an address is never repeated on a screen.
+  assert.equal(hostLabel("http://user:pw@acme.test:8080/p"), "acme.test:8080");
+  assert.equal(hostLabel("http://[::1]:8080/x"), "[::1]:8080");
+  assert.equal(hostLabel("https://acme.test/privacy"), "acme.test");
+  for (const unreadable of ["", "   ", "not a url", "file:///etc/passwd"])
+    assert.equal(hostLabel(unreadable), "", unreadable);
+});
+
+test("many of an entity is its name with an s, unless the word is already many", () => {
+  assert.equal(plural("task"), "tasks");
+  assert.equal(plural("settings"), "settings");
+  assert.equal(plural("plan"), "plans");
+  // A mass noun and a word that already ends in s keep their spelling: "contents",
+  // "staffs" and "medias" are not what an entity named "content" or "staff" is called.
+  for (const mass of [
+    "content",
+    "settings",
+    "news",
+    "media",
+    "data",
+    "staff",
+    "feedback",
+    "information",
+  ])
+    assert.equal(plural(mass), mass, mass);
+  assert.equal(plural("contents"), "contents");
+});
+
+/** One instant, read under one set of formatting: the rule's own words. */
+const read = (at: string, under: Partial<Formatting>) =>
+  presentedInstant(timeValue(at)!, { ...feedback, ...under });
+
+const lisbon = { locale: "en-GB", timeZone: "Europe/Lisbon", ownZone: "Europe/Lisbon" };
+const york = { locale: "en-US", timeZone: "America/New_York", ownZone: "America/New_York" };
+const utc = { locale: "en-US", timeZone: "UTC", ownZone: "UTC" };
+
+// Every row is one line of the rule: what the eye reads, and what a reader says
+// aloud. The instants are fixed, so a row decides the same sentence next year.
+test("a past instant is a distance while a distance is the answer", () => {
+  const cases: readonly [string, string, string, string][] = [
+    // 5 minutes ago, and the minute before that, which is only "just now".
+    ["2026-07-01T11:59:30Z", "2026-07-01T12:00:00Z", "Just now", "1 Jul 2026, 12:59"],
+    ["2026-07-01T12:00:00Z", "2026-07-01T12:05:00Z", "5 minutes ago", "1 Jul 2026, 13:00"],
+    // An hour of recency is told as a duration across midnight; the day word takes
+    // over only once the clock itself has left today.
+    ["2026-06-30T23:30:00Z", "2026-07-01T00:20:00Z", "50 minutes ago", "1 Jul 2026, 00:30"],
+    ["2026-06-30T23:00:00Z", "2026-07-01T01:00:00Z", "2 hours ago", "1 Jul 2026, 00:00"],
+    ["2026-07-05T12:00:00Z", "2026-07-08T12:00:00Z", "3 days ago", "5 Jul 2026, 13:00"],
+    // A distance is counted in the reader's calendar days, so an instant written
+    // later in its day than the moment reading it is still the day it is on.
+    ["2026-06-29T20:00:00Z", "2026-07-01T12:00:00Z", "2 days ago", "29 Jun 2026, 21:00"],
+    ["2026-06-25T22:00:00Z", "2026-07-01T12:00:00Z", "6 days ago", "25 Jun 2026, 23:00"],
+    // A week off is a date: nobody counts days that far back. The week is the
+    // reader's week of calendar days, so a seventh day is a date even when fewer
+    // than 168 hours have passed.
+    ["2026-06-24T22:30:00Z", "2026-07-01T12:00:00Z", "24 Jun, 23:30", "24 Jun 2026, 23:30"],
+    ["2026-07-01T12:00:00Z", "2026-07-08T12:00:00Z", "1 Jul, 13:00", "1 Jul 2026, 13:00"],
+    ["2026-02-01T09:00:00Z", "2026-07-08T12:00:00Z", "1 Feb, 09:00", "1 Feb 2026, 09:00"],
+  ];
+  for (const [at, now, shown, exact] of cases) {
+    const said = read(at, { ...lisbon, now });
+    assert.equal(said.shown, shown, `${at} at ${now}`);
+    assert.equal(said.exact, exact, `${at} at ${now}`);
+  }
+  // Yesterday keeps its clock, because which day it was is half the fact.
+  const yesterday = read("2026-06-30T14:12:00Z", { ...utc, now: "2026-07-01T15:00:00Z" });
+  assert.equal(yesterday.shown, "Yesterday, 02:12 PM");
+  assert.equal(yesterday.exact, "Jun 30, 2026, 02:12 PM");
+  // A record a year old is said with its year, in either direction.
+  assert.equal(
+    read("2025-09-05T09:20:00Z", { ...utc, now: "2026-07-18T09:00:00Z" }).shown,
+    "Sep 5, 2025, 09:20 AM",
+  );
+});
+
+test("the civil day an instant falls on is the day in the zone the reader is in", () => {
+  // Half past eleven on the 30th in UTC is already the 1st in Lisbon: which day a
+  // sentence calls an instant depends on where the reader is standing, which is why
+  // the day count and the clock are read in one zone and never in two.
+  const at = timeValue("2026-06-30T23:30:00Z")!;
+  assert.equal(civilDay(at, "Europe/Lisbon"), civilDay(at, "UTC") + 1);
+  assert.equal(civilDay(at, "Pacific/Kiritimati"), civilDay(at, "UTC") + 1);
+  assert.equal(civilDay(at, "Pacific/Honolulu"), civilDay(at, "UTC"));
+});
+
+test("a future instant is a date, because it has not happened", () => {
+  // A server clock a little ahead of the phone is no further off than one a
+  // little behind it: a minute either side of now is still now.
+  assert.equal(
+    read("2026-07-01T09:00:30Z", { ...lisbon, now: "2026-07-01T09:00:00Z" }).shown,
+    "Just now",
+  );
+  // A deadline tomorrow is tomorrow and the hour it is due at.
+  const tomorrow = read("2026-07-02T16:00:00Z", { ...lisbon, now: "2026-07-01T09:00:00Z" });
+  assert.equal(tomorrow.shown, "Tomorrow, 17:00");
+  assert.equal(tomorrow.exact, "2 Jul 2026, 17:00");
+  // Later today is only ever the hour; further off is the day, and the year only
+  // when it is not the year the reader is in.
+  assert.equal(
+    read("2026-07-01T22:00:00Z", { ...lisbon, now: "2026-07-01T09:00:00Z" }).shown,
+    "23:00",
+  );
+  assert.equal(
+    read("2026-10-14T14:00:00Z", { ...utc, now: "2026-07-01T09:00:00Z" }).shown,
+    "Oct 14, 02:00 PM",
+  );
+  assert.equal(
+    read("2027-01-31T15:00:00Z", { ...utc, now: "2026-07-01T09:00:00Z" }).shown,
+    "Jan 31, 2027, 03:00 PM",
+  );
+});
+
+test("a clock is read in the phone's zone and named only when it is not its own", () => {
+  // The acceptance: the same two instants on a Lisbon phone and a New York one.
+  const summer = "2026-07-01T12:00:00Z",
+    winter = "2026-01-15T12:00:00Z",
+    now = "2026-10-09T09:00:00Z";
+  assert.match(read(summer, { ...lisbon, now }).shown, /^1 Jul, 13:00$/);
+  assert.match(read(winter, { ...lisbon, now }).shown, /^15 Jan, 12:00$/);
+  assert.match(read(summer, { ...york, now }).shown, /^Jul 1, 08:00 AM$/);
+  assert.match(read(winter, { ...york, now }).shown, /^Jan 15, 07:00 AM$/);
+  // Hours kept in another zone are a quotation, and say which zone quoted them —
+  // every spelling that prints a clock, and none that prints a duration.
+  const foreign = { locale: "en-GB", timeZone: "Europe/Lisbon", ownZone: "UTC", now };
+  assert.equal(read(summer, foreign).shown, "1 Jul, 13:00 WEST");
+  assert.equal(
+    read("2026-07-01T12:00:00Z", { ...foreign, now: "2026-07-01T12:05:00Z" }).shown,
+    "5 minutes ago",
+  );
+  assert.equal(
+    read("2026-06-30T14:12:00Z", { ...foreign, now: "2026-07-01T15:00:00Z" }).shown,
+    "Yesterday, 15:12 WEST",
+  );
+});
+
+test("a relative instant is said in the copy's own language, and begins as a sentence", () => {
+  // The words are ICU's in the copy's language, capitalised as a sentence: a value
+  // cell is the whole sentence, so "há" would begin it in lower case.
+  const pt = {
+    locale: "pt-PT",
+    timeZone: "Europe/Lisbon",
+    ownZone: "Europe/Lisbon",
+    copy: deriveCopy("pt"),
+  };
+  assert.equal(
+    read("2026-07-01T12:00:00Z", { ...pt, now: "2026-07-01T12:05:00Z" }).shown,
+    "Há 5 minutos",
+  );
+  assert.equal(
+    read("2026-06-30T14:12:00Z", { ...pt, now: "2026-07-01T15:00:00Z" }).shown,
+    "Ontem, 15:12",
+  );
+  assert.equal(
+    read("2026-07-01T14:12:00Z", { ...pt, now: "2026-07-03T15:00:00Z" }).shown,
+    "Anteontem",
+  );
+  assert.equal(
+    read("2026-07-01T12:00:00Z", { ...pt, now: "2026-07-01T12:00:20Z" }).shown,
+    "Agora mesmo",
+  );
 });
 
 test("a typed number may carry a decimal comma and a sign; anything else is not a number", () => {
@@ -149,27 +381,52 @@ test("a typed number may carry a decimal comma and a sign; anything else is not 
   assert.equal(numberValue("two"), undefined);
 });
 
-test("a form refuses a number or an instant that is not one before the server sees it", () => {
+test("a form refuses a required field left empty and a value that is not of its kind, in sentences", () => {
   const controls = formControls(note, undefined, true);
-  assert.deepEqual(problems(controls, { rank: "abc" }), { rank: "is not a number" });
-  assert.deepEqual(problems(controls, { rank: "3" }), {});
-  assert.deepEqual(problems(controls, {}), {});
+  // Validation on submit: every answer is a sentence naming what to mend, and the
+  // number's own sentence replaces the wire fragment this build used to print.
+  assert.deepEqual(problems(controls, { title: "Buy milk", rank: "abc" }, kit), {
+    rank: "Enter a valid number.",
+  });
+  assert.deepEqual(problems(controls, { title: "Buy milk", rank: "3" }, kit), {});
+  assert.deepEqual(problems(controls, { title: "Buy milk", body: "tomorrow" }, kit), {});
+  // An empty required field is a refusal now, and it names the field: this is the
+  // check the sheet runs before it sends, the one whose field it then focuses.
+  assert.deepEqual(problems(controls, {}, kit), { title: "Enter a title." });
 });
 
-test("the orders a list offers are newest, oldest and each visible column both ways", () => {
-  const labels = sortOptions(note).map((o) => o.label);
+test("the orders a list offers are newest, oldest, and the fields it orders by worded for their type", () => {
+  const labels = sortOptions(note, feedback).map((o) => o.label);
   assert.deepEqual(labels.slice(0, 2), ["Newest first", "Oldest first"]);
-  assert.ok(labels.includes("Title, ascending"));
-  assert.ok(labels.includes("Rank, descending"));
-  assert.ok(!labels.includes("Pinned, ascending"));
+  // The field the list leads rows with, both ways, and nothing else: this entry
+  // declares no `sortable`, so the sheet answers the primary field and the date
+  // fields it holds — and `note` holds no date field but the two stamps.
+  assert.deepEqual(labels, ["Newest first", "Oldest first", "Title, A–Z", "Title, Z–A"]);
+  // A chip wall named every column, incl. the plumbing and every long paragraph;
+  // the words "ascending"/"descending" were what it said instead of an order.
+  assert.ok(!labels.some((l) => /ascending|descending/.test(l)));
+  assert.ok(!labels.some((l) => /Pinned|Status|Body|Created|Updated/.test(l)));
 });
 
 test("filters are spelled the way the API takes them, and narrowing is visible", () => {
   assert.deepEqual(queryFilters(noOrder), []);
   assert.deepEqual(queryFilters({ sort: "", filters: { status: "open" } }), ["status:open"]);
-  assert.equal(narrowed(noOrder), false);
-  assert.equal(narrowed({ sort: "title", filters: {} }), true);
-  assert.equal(narrowed({ sort: "", filters: { status: "open" } }), true);
+  // Ordering and narrowing are two questions. "Newest first" and "soonest first"
+  // both show every record there is, so a sort never answers "no matching notes".
+  assert.equal(reordered(noOrder), false);
+  assert.equal(reordered({ sort: "title", filters: {} }), true);
+  assert.equal(filtered(noOrder), false);
+  assert.equal(filtered({ sort: "title", filters: {} }), false);
+  assert.equal(filtered({ sort: "", filters: { status: "open" } }), true);
+  // What the filters button counts is what clearing it would take away.
+  assert.equal(activeFilters({ sort: "title", filters: { status: "open" } }, note), 1);
+  assert.equal(activeFilters({ sort: "", filters: { whoKnows: "x" } }, note), 0);
+  for (const order of [
+    noOrder,
+    { sort: "title", filters: {} },
+    { sort: "", filters: { status: "open" } },
+  ])
+    assert.ok(activeFilters(order, note) > 0 ? filtered(order) : true);
 });
 
 test("a comma-separated field is split once, for the control and for the API", () => {
@@ -193,22 +450,29 @@ test("many of an entity is its name with an s, unless it already ends in one", (
   assert.equal(plural("plan"), "plans");
 });
 
-test("a row shows what tells two records apart, not the times every record has", () => {
+test("a row shows the two values that tell it apart, and none of the times every record has", () => {
   const names = listCells(note).map((f) => f.name);
-  assert.deepEqual(names, ["status", "pinned", "rank"]);
+  assert.deepEqual(names, ["status", "pinned"]);
   // The name of the row is not repeated beneath it, and the id is never a cell.
   assert.ok(!names.includes("title"));
   assert.ok(!names.includes("id"));
+  // One line of a phone holds two values beside the record's own line; the third
+  // cell was scanned by nobody and pushed the line out of the row.
+  assert.ok(!names.includes("rank"));
+  assert.ok(!names.includes("createdAt"));
 });
 
-test("a row previews the record's own words, and does not repeat them as a cell", () => {
-  // body is a long text hidden from the table's columns, which is exactly the
-  // field worth reading under the row's name.
-  assert.equal(listPreview(note)?.name, "body");
+test("a row's own line is what a row has room for, which is not what a record has room for", () => {
+  // body carries `hideList`, the schema's own "no table can hold this". A record
+  // has room for the paragraph and lines itself with it; a row has one line and
+  // shows its title and two values instead — never a dash where a line went.
+  assert.equal(listPreview(note, "row"), undefined);
+  assert.equal(listPreview(note, "record")?.name, "body");
   assert.ok(!listCells(note).some((f) => f.name === "body"));
-  // An entity with no long text has no line to preview.
+  // An entity with no long text has no line to preview at all.
   const terse = { ...note, fields: note.fields.filter((f) => f.name !== "body") };
-  assert.equal(listPreview(terse), undefined);
+  assert.equal(listPreview(terse, "row"), undefined);
+  assert.equal(listPreview(terse, "record"), undefined);
 });
 
 test("a command's argument is a form built by the rules a field is built by", () => {
@@ -219,7 +483,11 @@ test("a command's argument is a form built by the rules a field is built by", ()
   assert.equal(at.kind, "text");
   assert.equal(at.label, "At");
   assert.equal(at.readOnly, false);
-  assert.equal(at.help, "When it goes out; now if left empty");
+  assert.equal(
+    at.help,
+    "",
+    "the member's doc is a note about the wire; a command sheet says nothing until an author hints it",
+  );
   // A command that takes nothing has no controls, which is what makes it a
   // question rather than a sheet.
   assert.deepEqual(commandControls(note.commands.find((c) => c.verb === "archive")!), []);
@@ -297,7 +565,7 @@ test("list values retain declared integer, float, boolean and string elements", 
     labels: "2, false",
     legacy: "7, 8",
   };
-  assert.deepEqual(problems(controls, held), {});
+  assert.deepEqual(problems(controls, held, kit), {});
   assert.deepEqual(values(controls, held), {
     counts: [-4, 0, 12],
     ratios: [1.25, -0.5, 100],
@@ -333,20 +601,12 @@ test("invalid typed list items refuse the whole input without filtering or round
       undefined,
       true,
     );
-    assert.deepEqual(problems(controls, { items: raw }), {
+    assert.deepEqual(problems(controls, { items: raw }, kit), {
       items: "contains a value that does not match its item type",
     });
     assert.deepEqual(values(controls, { items: raw }), {});
   }
 });
-
-// ---------------------------------------------------------------------------
-// Where a write goes, and which doors are drawn. One implementation of each,
-// which is why these cases are here and not in the screens that use them.
-// ---------------------------------------------------------------------------
-
-import { doors, offers, type Entry } from "../src/core/catalog";
-import { commandPath, verbRefusal, writePath } from "../src/core/derive";
 
 const control = parseCatalog(
   JSON.parse(

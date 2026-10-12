@@ -118,7 +118,9 @@ for (const mode of ["light", "dark"] as const) {
       });
       shell.value = shellValue(current, { state });
       await rerender(detail());
-      const visibleActor = change === "catalog refresh" ? actor : "Current reader 319";
+      // A replacement catalogue drops the directory read with the old route: the row
+      // says the name is unavailable, and never the id.
+      const visibleActor = change === "catalog refresh" ? "Name unavailable" : "Current reader 319";
       await waitFor(() => expect(screen.getByText(visibleActor)).toBeOnTheScreen());
 
       // The old directory succeeds only after the replacement route has loaded.

@@ -33,6 +33,25 @@ jobs:
           node-version-file: .nvmrc
           cache: ''
       - run: npm ci --no-audit --no-fund
+
+      # The contract tier, first: one process per pinned document, generated client,
+      # published surface, native fingerprint, flow set and suite inventory. Minutes, and
+      # the answer a person wants before the suites finish (0088 rule 5).
+      - name: The wire, the manifest and the suite's own record
+        run: npm run test:contracts
+
+      # 0088 rule 5's push tier names the behaviour and composition tests the change
+      # reaches, read from the imports the suites actually take. It adds work and never
+      # replaces it: the required check below runs both suites undiscovered-scoped on
+      # every push and every pull request, whatever this step selected.
+      - name: The tests this change reaches
+        env:
+          PK_BASE: ${{ github.base_ref || github.event.before }}
+        run: |
+          if git rev-parse -q --verify "$PK_BASE^{commit}" >/dev/null 2>&1; then base="$PK_BASE"; else base=origin/main; fi
+          echo "scoping the push tier to the change against $base"
+          npm run test:scope -- "$base" --run
+
       - run: npm run check
 
       - name: Both bundles compile

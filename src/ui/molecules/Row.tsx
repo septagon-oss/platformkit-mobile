@@ -1,5 +1,7 @@
 // Row is how a list shows one thing: its name, up to a few cells beneath, a
-// chevron that says it opens. It is a phone's table.
+// chevron that says it opens. It is a phone's table. A row draws no separator of
+// its own: the group it sits in separates its rows, so a row outside a group is
+// one thing on a page and not a fragment of a table.
 import React, { useState, type ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Icon } from "../atoms/Icon";
@@ -13,7 +15,7 @@ interface Props {
   /** eyebrow is the category the row sits in, above its name. */
   readonly eyebrow?: string;
   /** cells are what a screen reader hears, and what is shown when nothing else is given. */
-  readonly cells?: readonly string[];
+  readonly cells?: readonly RowCell[];
   /** summary is a line of the record's own words, under its name. */
   readonly summary?: string;
   /** shown replaces those cells with the values in the shapes their types deserve. */
@@ -27,10 +29,34 @@ interface Props {
   readonly busy?: boolean;
   /** selected is the row a filter or a single choice stands on, not a row being pressed. */
   readonly selected?: boolean;
+  /**
+   * role is which control this row is to a reader. A row on a list is a button that
+   * opens something; a row that *is* the choice — one line of a sheet of orders — is a
+   * radio, and a group of them is read down as one question.
+   */
+  readonly role?: "button" | "radio";
   /** opens says pressing leads somewhere, which is what the chevron promises. */
   readonly opens?: boolean;
   readonly testID?: string;
 }
+
+/**
+ * RowCell is one value under a row's name. The eye reads `value` and a reader
+ * hears `spoken` when there is one: a time is shown as a distance and said as the
+ * whole local date-time, so a row that reads "Created: 5 minutes ago" says
+ * "Created: 1 Jul 2026, 13:00". A cell with no label is the value alone.
+ */
+export interface RowCell {
+  readonly label?: string;
+  readonly value: string;
+  readonly spoken?: string;
+}
+
+/** said is one cell as words — the shorthand the eye reads, or the fact a reader hears. */
+const said = (cell: RowCell, aloud: boolean): string =>
+  [cell.label, aloud ? (cell.spoken ?? cell.value) : cell.value]
+    .filter((part): part is string => !!part)
+    .join(": ");
 
 export function Row({
   title,
@@ -43,6 +69,7 @@ export function Row({
   tone = "primary",
   busy = false,
   selected,
+  role = "button",
   opens: leads,
   testID,
 }: Props) {
@@ -62,11 +89,13 @@ export function Row({
       disabled={!onPress || busy}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
-      accessibilityRole="button"
+      accessibilityRole={role}
       aria-busy={busy}
       aria-disabled={!onPress || busy}
-      {...chosenState("button", selected)}
-      accessibilityLabel={[eyebrow, title, ...cells].filter(Boolean).join(", ")}
+      {...chosenState(role, selected)}
+      accessibilityLabel={[eyebrow, title, ...cells.map((cell) => said(cell, true))]
+        .filter(Boolean)
+        .join(", ")}
       android_ripple={{ color: t.color.borderDefault }}
       {...testable(testID)}
     >
@@ -95,7 +124,7 @@ export function Row({
           <View style={s.cells}>{shown}</View>
         ) : cells.length > 0 ? (
           <Text role="caption" tone="muted" numberOfLines={2}>
-            {cells.join("  ·  ")}
+            {cells.map((cell) => said(cell, false)).join("  ·  ")}
           </Text>
         ) : null}
       </View>
@@ -114,8 +143,6 @@ const styles = (t: Theme) =>
       alignItems: "center",
       gap: t.space.sm,
       paddingVertical: t.space.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: t.state.divider,
     },
     text: { flex: 1, gap: t.space.xs / 2 },
     cells: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: t.space.sm },

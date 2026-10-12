@@ -4,7 +4,16 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
-import { deriveEventActivity, formControls, noOrder, sortOptions } from "../../src/core/derive";
+import {
+  deriveCopy,
+  deriveDisclosure,
+  deriveEventActivity,
+  deriveFeedback,
+  formSections,
+  noOrder,
+  sortOptions,
+  type Presentation,
+} from "../../src/core/derive";
 import { Home } from "../../src/ui/organisms/Home";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
@@ -32,7 +41,6 @@ describe("ResourceList", () => {
         more={false}
         error="Connection lost."
         order={{ sort: "", filters: {} }}
-        ordering={false}
         onOrder={none}
         onOpen={none}
         onMore={none}
@@ -57,7 +65,6 @@ describe("ResourceList", () => {
     more: false,
     error: "",
     order: noOrder,
-    ordering: false,
     onOrder: none,
     onMore: none,
     onRefresh: none,
@@ -66,11 +73,13 @@ describe("ResourceList", () => {
   test("a row is its name and what tells it apart, and opens by id", async () => {
     const onOpen = jest.fn();
     await inTheme(<ResourceList presentation={presentation} {...props} onOpen={onOpen} />);
-    // The cells are the closed set, the yes-or-no and the number, in that
-    // order: not the times every record has.
+    // The cells are the closed set and the yes-or-no: two values, in that order,
+    // which is what one line of a phone holds. The number ranks behind them and
+    // the times every record has are never cells at all.
     await fireEvent.press(
-      screen.getByRole("button", { name: "Buy milk, Status: Open, Pinned: No, Rank: 2" }),
+      screen.getByRole("button", { name: "Buy milk, Status: Open, Pinned: No" }),
     );
+    expect(screen.queryByText(/Rank/)).toBeNull();
     expect(onOpen).toHaveBeenCalledWith("1");
   });
 
@@ -95,18 +104,79 @@ describe("ResourceList", () => {
     expect(screen.queryByRole("button", { name: "New note" })).toBeNull();
   });
 
-  test("the orders offered are newest, oldest and each visible column both ways", () => {
-    const labels = sortOptions(note).map((o) => o.label);
-    expect(labels.slice(0, 2)).toEqual(["Newest first", "Oldest first"]);
-    expect(labels).toContain("Title, ascending");
+  test("the state a row wears as its pill is not said again beside its name", async () => {
+    // The hinted note declares `status` as its state and points its summary at that
+    // same field. One value, one drawing: the pill in the column `Row` reserves for it,
+    // and no cell repeating it under the field's own word. Two identical badges on one
+    // row is what this refuses, so it counts what is drawn rather than the model.
+    const hinted = parseCatalog(JSON.parse(readFileSync("testdata/catalog.hints.json", "utf8")))
+      .resources[0]!;
+    await inTheme(
+      <ResourceList
+        presentation={presentation}
+        {...props}
+        entry={hinted}
+        rows={[{ id: "1", title: "Buy milk", status: "open", pinned: false }]}
+        onOpen={none}
+      />,
+    );
+    expect(screen.getAllByText("Em aberto")).toHaveLength(1);
+    expect(screen.queryByText("State")).toBeNull();
+    await screen.unmount();
+    // An entry that declares no state has no pill to defer to, and the same value is
+    // then the row's own cell — the rule holds from both sides of the declaration.
+    await inTheme(<ResourceList presentation={presentation} {...props} onOpen={none} />);
+    expect(
+      screen.getByRole("button", { name: "Buy milk, Status: Open, Pinned: No" }),
+    ).toBeOnTheScreen();
+  });
+
+  test("the orders offered are newest, oldest and the field the list leads with, both ways", () => {
+    const labels = sortOptions(note, presentation).map((o) => o.label);
+    expect(labels).toEqual(["Newest first", "Oldest first", "Title, A–Z", "Title, Z–A"]);
+  });
+});
+
+describe("ResourceDetail's one sentence", () => {
+  const row = { id: "note-7", title: "Kickoff", status: "open" };
+
+  test("the record says once what the write said, beside the row it is about", async () => {
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        saved="Note created"
+        onRetry={none}
+      />,
+    );
+    // A confirmation, not an alarm: the ok tone, and a polite live region, because a
+    // person who just wrote the record should hear it without being interrupted by it.
+    const said = screen.getAllByTestId("record-saved").at(-1)!;
+    expect(said).toHaveTextContent(/Note created/);
+    const spoken = screen.getByText(/Note created/).parent!;
+    expect(spoken).toHaveProp("accessibilityLiveRegion", "polite");
+    expect(spoken).toHaveProp("accessibilityRole", "text");
+    expect(screen.queryByTestId("refusal")).toBeNull();
+    // The record is still the record: the sentence sits above its facts, in place of
+    // nothing.
+    expect(screen.getByTestId("resource-detail")).toBeOnTheScreen();
+  });
+
+  test("a record nobody just wrote says nothing about a write", async () => {
+    await inTheme(
+      <ResourceDetail feedback={feedback} entry={note} row={row} error="" onRetry={none} />,
+    );
+    expect(screen.queryByTestId("record-saved")).toBeNull();
   });
 });
 
 describe("ResourceForm", () => {
-  const controls = formControls(note, undefined, true);
+  const blocks = formSections(note, undefined, true, feedback.copy.kit.overview);
   const base = {
     initialDate: new Date("2026-08-11T08:20:00Z"),
-    controls,
+    blocks,
     held: {},
     errors: {},
     detail: "",
@@ -137,7 +207,94 @@ describe("ResourceForm", () => {
   test("while saving, every control is off", async () => {
     await inTheme(<ResourceForm feedback={feedback} {...base} phase="saving" />);
     expect(screen.getByTestId("input-title")).toBeDisabled();
-    expect(screen.getByRole("switch", { name: "Pinned" })).toBeDisabled();
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeDisabled();
+  });
+
+  test("each control announces whether a person may leave it, in the sheet's own words", async () => {
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="editing" />);
+    // The words are the copy table's, and they ride the control the eye is on —
+    // `* ` is not a word, and a switch that says only "Pinned" says nothing about
+    // whether leaving it is allowed.
+    expect(screen.getByTestId("input-title").props.accessibilityLabel).toBe("Title, Required");
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeOnTheScreen();
+    // The tag box announces the name the sheet derived, not only the act of its own
+    // Add button: a person hearing the sheet hears whether the list may be left empty.
+    expect(screen.getByTestId("tags-tags").props.accessibilityLabel).toBe("Tags, Optional");
+    expect(screen.getAllByText(/\(Optional\)/).length).toBeGreaterThan(3);
+  });
+
+  test("a list field a person owes is announced as owed", async () => {
+    const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+    const fields = doc.resources.find((r: { entity: string }) => r.entity === "note").fields;
+    fields.find((f: { name: string }) => f.name === "tags").required = true;
+    const owed = parseCatalog(doc).resources.find((r) => r.entity === "note")!;
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(owed, undefined, true, feedback.copy.kit.overview)}
+      />,
+    );
+    // "Add to Tags" names the button's act; the box itself answers whether the
+    // person may leave the list empty, which is the same word the label above it gives.
+    expect(screen.getByTestId("tags-tags").props.accessibilityLabel).toBe("Tags, Required");
+    expect(screen.getByRole("button", { name: "Add to Tags" })).toBeOnTheScreen();
+  });
+
+  test("a value only a command changes is explained in the language the phone reads", async () => {
+    const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: false, tags: [] };
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, row, false, feedback.copy.kit.overview)}
+      />,
+    );
+    expect(screen.getByText(feedback.copy.kit.changedByCommand)).toBeOnTheScreen();
+    // The sentence is the table's, so the same sheet on a Portuguese phone says it in
+    // Portuguese: it is drawn by the sheet rather than written into the derivation.
+    const there: Presentation = { ...presentation, copy: deriveCopy("pt") };
+    const pt = deriveFeedback(there.copy, there.motion, there);
+    await inTheme(
+      <ResourceForm
+        feedback={pt}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, row, false, pt.copy.kit.overview)}
+      />,
+    );
+    expect(screen.getByText(pt.copy.kit.changedByCommand)).toBeOnTheScreen();
+    expect(screen.queryByText(feedback.copy.kit.changedByCommand)).toBeNull();
+  });
+
+  test("every control is named once, above the control, whatever the control is", async () => {
+    await inTheme(<ResourceForm feedback={feedback} {...base} phase="editing" />);
+    // A sheet that named a switch on its own row and a text box above its box would
+    // say the same fact in two places and line nothing up. One name, drawn once by
+    // FormField, for the atom that announces it and the control underneath it.
+    for (const name of ["Title", "Body", "Rank", "Pinned", "Tags"])
+      expect(screen.getAllByText(new RegExp(`^${name}( \\(Optional\\))?$`))).toHaveLength(1);
+    expect(screen.getByRole("switch", { name: "Pinned, Optional" })).toBeOnTheScreen();
+    expect(screen.getByTestId("field-pinned")).toBeOnTheScreen();
+  });
+
+  test("a field that refuses what it holds says so to the sheet, by name", async () => {
+    const refused = jest.fn();
+    await inTheme(
+      <ResourceForm
+        feedback={feedback}
+        {...base}
+        phase="editing"
+        blocks={formSections(note, undefined, true, feedback.copy.kit.overview)}
+        onFieldRefused={refused}
+      />,
+    );
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work, home");
+    expect(refused).toHaveBeenCalledWith("tags", true);
+    await fireEvent.changeText(screen.getByTestId("tags-tags"), "work home");
+    expect(refused).toHaveBeenLastCalledWith("tags", false);
   });
 
   test("a failed load offers a retry and no controls", async () => {
@@ -152,9 +309,92 @@ describe("ResourceForm", () => {
 });
 
 describe("ResourceDetail", () => {
-  test("every field in schema order, and delete only for a caller who may", async () => {
-    const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: ["a"] };
+  const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: ["a"] };
+
+  /**
+   * informationModel is the Record information disclosure as the screen hands it
+   * over, open or closed: the open state is the screen's, the organism draws it.
+   */
+  const informationModel = (expanded: boolean) => {
+    const model = deriveDisclosure(
+      {
+        id: "record-information",
+        title: feedback.copy.kit.recordInformation,
+        summary: feedback.copy.kit.recordInformationHolds,
+        reveals: feedback.copy.kit.recordInformationContent,
+        expanded,
+        depth: 1,
+        enabled: true,
+      },
+      presentation,
+    );
+    if (!model.ok) throw new Error(JSON.stringify(model.issues));
+    return model.value;
+  };
+
+  test("the record opens on what it holds, and keeps its own history to itself", async () => {
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        information={{ model: informationModel(false), onExpanded: none }}
+      />,
+    );
+    // The fields with values are drawn, named after the field they came from, so a
+    // journey finds a row by the name the API document gives it.
+    expect(screen.getByLabelText("Status, Open")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
+    // The record is *called* Buy milk; that is the header's fact, and repeating it as
+    // a field would say there are two. An un-hinted entry declares no status, so the
+    // record draws no pill rather than guessing one from the first enum.
+    expect(screen.queryByLabelText(/Buy milk/)).toBeNull();
+    // And the identifier, the stamps and the rest of the plumbing wait collapsed at
+    // the foot of the screen: the person who wants them asks for them.
+    expect(screen.queryByTestId("field-id")).toBeNull();
+    expect(screen.getByRole("button", { name: "Show the identifier and the timestamps" }));
+    await screen.unmount();
+
+    const onExpanded = jest.fn();
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        information={{ model: informationModel(false), onExpanded }}
+      />,
+    );
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Show the identifier and the timestamps" }),
+    );
+    expect(onExpanded).toHaveBeenCalledWith(true);
+    await screen.unmount();
+
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        information={{ model: informationModel(true), onExpanded: none }}
+      />,
+    );
+    expect(screen.getByTestId("field-id")).toBeOnTheScreen();
+    // And only what the row answers: this one carries no `updatedAt`, so no "Updated
+    // at" row is drawn to be a dash.
+    expect(screen.queryByTestId("field-updatedAt")).toBeNull();
+    await screen.unmount();
+  });
+
+  test("the destructive row lives in the menu, and the menu only for a caller who may", async () => {
     const onDelete = jest.fn();
+    // The door is there, but the `…` has not been pressed: nothing destructive sits
+    // on the screen waiting to be missed.
     await inTheme(
       <ResourceDetail
         feedback={feedback}
@@ -165,16 +405,32 @@ describe("ResourceDetail", () => {
         onDelete={onDelete}
       />,
     );
-    expect(screen.getByLabelText("Title, Buy milk")).toBeOnTheScreen();
-    // A field's row is named after the field, so a journey finds it by the name
-    // the API document gives it and never by the label's spelling.
-    expect(screen.getByTestId("field-title")).toBeOnTheScreen();
-    expect(screen.getByLabelText("Pinned, Yes")).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Delete note" })).toBeNull();
+    await screen.unmount();
+    await inTheme(
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        onDelete={onDelete}
+        menuOpen
+      />,
+    );
     await fireEvent.press(screen.getByRole("button", { name: "Delete note" }));
     expect(onDelete).toHaveBeenCalledTimes(1);
     await screen.unmount();
+    // No DELETE on the resource, no row whatever the menu does.
     await inTheme(
-      <ResourceDetail feedback={feedback} entry={note} row={row} error="" onRetry={none} />,
+      <ResourceDetail
+        feedback={feedback}
+        entry={note}
+        row={row}
+        error=""
+        onRetry={none}
+        menuOpen
+      />,
     );
     expect(screen.queryByRole("button", { name: "Delete note" })).toBeNull();
   });
@@ -192,7 +448,9 @@ describe("Actions", () => {
     );
     await fireEvent.press(screen.getByRole("button", { name: "Publish a note" }));
     expect(onRun).toHaveBeenCalledWith(commands[0]);
-    expect(screen.getByText(/Makes the note visible/)).toBeOnTheScreen();
+    // The row is titled and tapped; the developer's sentence about idempotence is
+    // nothing a person choosing an action needs (0085).
+    expect(screen.queryByText(/Makes the note visible/)).toBeNull();
   });
 
   test("a command about the collection is under the list, not on a row", async () => {
@@ -210,7 +468,6 @@ describe("Actions", () => {
           more: false,
           error: "",
           order: noOrder,
-          ordering: false,
           onOrder: none,
           onMore: none,
           onRefresh: none,
@@ -283,9 +540,12 @@ describe("Activity", () => {
 
   test("the trail says what happened, who did it and how long ago", async () => {
     await inTheme(<ResourceDetail feedback={feedback} {...detail} activity={adapt(trail)} />);
-    expect(screen.getByLabelText("Updated by Joao, 2 minutes ago")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Updated by Joao, Sep 7, 2026, 11:58 AM")).toBeOnTheScreen();
+    // A glance reads the distance; a reader is told which instant it is the distance to.
+    expect(screen.getByText("2 minutes ago")).toBeOnTheScreen();
     // An event nobody signed is the system's, not a blank line.
-    expect(screen.getByLabelText("Created by the system, yesterday")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Created by the system, Sep 6, 2026, 09:00 AM")).toBeOnTheScreen();
+    expect(screen.getByText("Yesterday, 09:00 AM")).toBeOnTheScreen();
   });
 
   test("a trail with older lines offers to read them, once", async () => {
@@ -314,7 +574,7 @@ describe("Activity", () => {
     expect(screen.queryByRole("button", { name: "Show older" })).toBeNull();
   });
 
-  test("a plan that does not include the trail says so, and is not an error", async () => {
+  test("a plan that does not include the trail draws no section at all", async () => {
     await inTheme(
       <ResourceDetail
         feedback={feedback}
@@ -322,7 +582,10 @@ describe("Activity", () => {
         activity={adapt({ ...trail, events: [], excluded: true })}
       />,
     );
-    expect(screen.getByText(/plan does not include the activity trail/)).toBeOnTheScreen();
+    // Not the plan's notice as the record's content, and not the empty state's lie
+    // either: the section is simply not there.
+    expect(screen.queryByText(/plan does not include the activity trail/)).toBeNull();
+    expect(screen.queryByText("Activity")).toBeNull();
     expect(screen.queryByText("Nothing has happened to this record yet.")).toBeNull();
   });
 
@@ -344,7 +607,7 @@ describe("Activity", () => {
 });
 
 describe("Home", () => {
-  test("one row per resource, read-only ones say so", async () => {
+  test("the resources are one group of rows, and a read-only one says so", async () => {
     const onOpen = jest.fn();
     const entries = [note, { ...note, entity: "tag", writable: false }];
     await inTheme(
@@ -352,12 +615,39 @@ describe("Home", () => {
         feedback={feedback}
         entries={entries}
         refreshing={false}
+        account="joao@acme.test"
+        held={[]}
+        onRetryHeld={none}
+        onDiscardHeld={none}
         onOpen={onOpen}
         onRefresh={none}
       />,
     );
-    await fireEvent.press(screen.getByRole("button", { name: /Tags, In note, read only/ }));
+    // One list, one group: the resources are rows of one card, not a card apiece, and
+    // a row says what it is rather than which module it came in on.
+    expect(screen.getAllByTestId("home")).toHaveLength(1);
+    expect(screen.getByText("joao@acme.test")).toBeOnTheScreen();
+    expect(screen.getByTestId("open-note-note")).toBeOnTheScreen();
+    expect(screen.queryByText(/In note/)).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: /Tags, Read only/ }));
     expect(onOpen).toHaveBeenCalledWith(entries[1]);
+  });
+
+  test("a signed-in screen with no account to name shows the rows alone", async () => {
+    const entries = [note];
+    await inTheme(
+      <Home
+        feedback={feedback}
+        entries={entries}
+        refreshing={false}
+        held={[]}
+        onRetryHeld={none}
+        onDiscardHeld={none}
+        onOpen={() => undefined}
+        onRefresh={none}
+      />,
+    );
+    expect(screen.getByTestId("open-note-note")).toBeOnTheScreen();
   });
 });
 
@@ -379,6 +669,27 @@ describe("SignInForm", () => {
     await fireEvent.changeText(screen.getByTestId("password"), " pw ");
     await fireEvent.press(screen.getByRole("button", { name: "Sign in" }));
     expect(onSubmit).toHaveBeenCalledWith("https://acme.test", "a@acme.test", " pw ");
+  });
+
+  test("the form asks for the workspace address in the person's words, not in tenancy jargon", async () => {
+    await inTheme(
+      <SignInForm
+        feedback={feedback}
+        baseURL="https://acme.test"
+        notice=""
+        busy={false}
+        error=""
+        onSubmit={none}
+        onClear={none}
+      />,
+    );
+    expect(
+      screen.getByText("Enter your workspace address and the email you use there."),
+    ).toBeOnTheScreen();
+    expect(screen.getByText("Workspace address")).toBeOnTheScreen();
+    // The input itself says what it holds, and keeps the id the sign-in flow types into.
+    expect(screen.getByTestId("server").props.accessibilityLabel).toBe("Workspace address");
+    expect(screen.queryByText(/tenant/i)).toBeNull();
   });
 
   test('the product\'s name stands over the form, and "Sign in" when it has none to say', async () => {

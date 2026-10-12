@@ -87,7 +87,7 @@ fi
 # The served kernel's vocabulary, named by the job and never guessed here: what a
 # writable resource is, and which lifecycle command to run to its end. run.sh
 # states the contract again to whoever runs it alone, in the same words.
-for name in MODULE ENTITY KNOWN VERB VERB_FIELD VERB_TITLE; do
+for name in MODULE ENTITY KNOWN VERB VERB_FIELD VERB_TITLE DUE_FIELD STATUS_FIELD STATUS_VALUE; do
   [ -n "${!name:-}" ] || {
     echo "mobile_ci: $name names nothing; the job names the served kernel's vocabulary." >&2
     exit 1

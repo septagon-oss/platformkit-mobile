@@ -90,8 +90,15 @@ export type Command = {
   description?: string;
   fields?: Array<Field> | null;
   path?: string;
+  presentation?: CommandPresentation;
   summary?: string;
   verb: string;
+};
+
+export type CommandConfirmation = {
+  body: string;
+  confirmLabel: string;
+  title: string;
 };
 
 export type CommandInputStructBody = {
@@ -99,6 +106,15 @@ export type CommandInputStructBody = {
    * A URL to the JSON Schema for this object.
    */
   readonly $schema?: string;
+};
+
+export type CommandPresentation = {
+  confirmation?: CommandConfirmation;
+  destructive?: boolean;
+  label?: string;
+  primary?: boolean;
+  successMessage?: string;
+  system?: boolean;
 };
 
 export type Content = {
@@ -158,6 +174,11 @@ export type DoneOutputBody = {
   done: boolean;
 };
 
+export type EntitySection = {
+  key: string;
+  label: string;
+};
+
 export type Entry = {
   commands?: Array<Command> | null;
   entity: string;
@@ -166,10 +187,27 @@ export type Entry = {
   module: string;
   operations?: Array<string> | null;
   path: string;
+  presentation?: EntryPresentation;
   screen?: string;
   singleton?: boolean;
   writable: boolean;
   write_path?: string;
+};
+
+export type EntryPresentation = {
+  description?: string;
+  emptyDescription?: string;
+  group?: ResourceGroup;
+  icon?: string;
+  order?: number;
+  plural?: string;
+  previewField?: string;
+  primaryField?: string;
+  sections?: Array<EntitySection>;
+  singular?: string;
+  sortable?: Array<string>;
+  statusField?: string;
+  summaryFields?: Array<string>;
 };
 
 export type EraseBody = {
@@ -247,9 +285,17 @@ export type Event = {
 };
 
 export type Factor = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
   enrolledAt: string;
   id: string;
   kind: string;
+  /**
+   * What this person called this passkey; empty for a TOTP, which has no name to give
+   */
+  name?: string;
 };
 
 export type FactorsOutputBody = {
@@ -271,10 +317,36 @@ export type Field = {
   maxLength?: number;
   name: string;
   present?: string;
+  presentation?: FieldHints;
   readOnly?: boolean;
   required?: boolean;
   type: string;
   widget?: string;
+};
+
+export type FieldHints = {
+  enumLabels?: {
+    [key: string]: string;
+  };
+  enumTones?: {
+    [key: string]: string;
+  };
+  format?: string;
+  help?: string;
+  label?: string;
+  money?: FieldMoney;
+  reference?: FieldReference;
+  section?: string;
+  visibility?: string;
+};
+
+export type FieldMoney = {
+  currencyField: string;
+  scale: number;
+};
+
+export type FieldReference = {
+  resource: string;
 };
 
 export type File = {
@@ -287,6 +359,10 @@ export type File = {
    */
   contentType?: string;
   readonly createdAt?: string;
+  /**
+   * Pixels down, as stored
+   */
+  readonly height?: number;
   readonly id?: string;
   /**
    * Retention class, as the product names it
@@ -313,6 +389,10 @@ export type File = {
    * Who may read it
    */
   visibility?: "private" | "public";
+  /**
+   * Pixels across, as stored
+   */
+  readonly width?: number;
 };
 
 export type FinishTotpInputBody = {
@@ -721,6 +801,82 @@ export type PageUserBody = {
   total: number;
 };
 
+export type PasskeyBeginAssertionInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The address that was just refused its second factor
+   */
+  email: string;
+};
+
+export type PasskeyChallenge = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  ceremony: string;
+  options: unknown;
+};
+
+export type PasskeyFinishInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The ceremony begin returned
+   */
+  ceremony: string;
+  /**
+   * What to call this passkey, up to 40 characters
+   */
+  name?: string;
+  /**
+   * The credential response navigator.credentials.create handed back, verbatim
+   */
+  response: unknown;
+};
+
+export type PasskeySignInSettingInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Whether a passkey may be the whole sign-in at this tenant
+   */
+  enabled: boolean;
+};
+
+export type PasskeySignInSettingOutputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The state the tenant is in now; a call that changed nothing reports the value that was already set
+   */
+  enabled: boolean;
+};
+
+export type PasskeyVerifyInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The ceremony begin returned
+   */
+  ceremony: string;
+  /**
+   * The credential assertion navigator.credentials.get handed back, verbatim
+   */
+  response: unknown;
+};
+
 export type PasswordBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -931,6 +1087,11 @@ export type ResolveBody = {
   resolution?: string;
 };
 
+export type ResourceGroup = {
+  key: string;
+  label: string;
+};
+
 export type RetainBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1013,6 +1174,37 @@ export type RolesOutputBody = {
   readonly $schema?: string;
   items: Array<Role> | null;
   total: number;
+};
+
+export type SamlSettings = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The assertion attribute that carries the address
+   */
+  emailAttribute: string;
+  /**
+   * This installation's SAML identity for that tenant — the audience every assertion must name
+   */
+  entityId: string;
+  /**
+   * Where the IdP documents itself; https unless it is local
+   */
+  metadataUrl?: string;
+  /**
+   * The IdP's EntityDescriptor, kept so a metadata URL that goes offline does not close this tenant's door; authoritative when present
+   */
+  metadataXml?: string;
+  /**
+   * disabled, existing or provision: what an address the provider vouches for and this tenant has no account for does
+   */
+  registration?: string;
+  /**
+   * What a provisioned person is given, and only under provision
+   */
+  roles?: Array<string> | null;
 };
 
 export type SessionListing = {
@@ -1254,6 +1446,18 @@ export type TokensOutputBody = {
   total: number;
 };
 
+export type UseRow = {
+  Entity: string;
+  Field: string;
+  Locale: string;
+  Module: string;
+  Record: string;
+  /**
+   * When this use began
+   */
+  createdAt: string;
+};
+
 export type User = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1452,8 +1656,18 @@ export type EventWritable = {
   traceparent?: string;
 };
 
+export type FactorWritable = {
+  enrolledAt: string;
+  id: string;
+  kind: string;
+  /**
+   * What this person called this passkey; empty for a TOTP, which has no name to give
+   */
+  name?: string;
+};
+
 export type FactorsOutputBodyWritable = {
-  items: Array<Factor> | null;
+  items: Array<FactorWritable> | null;
   total: number;
 };
 
@@ -1749,6 +1963,58 @@ export type PageUserBodyWritable = {
   total: number;
 };
 
+export type PasskeyBeginAssertionInputBodyWritable = {
+  /**
+   * The address that was just refused its second factor
+   */
+  email: string;
+};
+
+export type PasskeyChallengeWritable = {
+  ceremony: string;
+  options: unknown;
+};
+
+export type PasskeyFinishInputBodyWritable = {
+  /**
+   * The ceremony begin returned
+   */
+  ceremony: string;
+  /**
+   * What to call this passkey, up to 40 characters
+   */
+  name?: string;
+  /**
+   * The credential response navigator.credentials.create handed back, verbatim
+   */
+  response: unknown;
+};
+
+export type PasskeySignInSettingInputBodyWritable = {
+  /**
+   * Whether a passkey may be the whole sign-in at this tenant
+   */
+  enabled: boolean;
+};
+
+export type PasskeySignInSettingOutputBodyWritable = {
+  /**
+   * The state the tenant is in now; a call that changed nothing reports the value that was already set
+   */
+  enabled: boolean;
+};
+
+export type PasskeyVerifyInputBodyWritable = {
+  /**
+   * The ceremony begin returned
+   */
+  ceremony: string;
+  /**
+   * The credential assertion navigator.credentials.get handed back, verbatim
+   */
+  response: unknown;
+};
+
 export type PasswordBodyWritable = {
   /**
    * The new password; at least twelve characters
@@ -1850,7 +2116,7 @@ export type ProposalWritable = {
 
 export type RecoveryCodesOutputBodyWritable = {
   codes: Array<string> | null;
-  factor?: Factor;
+  factor?: FactorWritable;
 };
 
 export type RenameWritable = {
@@ -1939,6 +2205,33 @@ export type RolesBodyWritable = {
 export type RolesOutputBodyWritable = {
   items: Array<RoleWritable> | null;
   total: number;
+};
+
+export type SamlSettingsWritable = {
+  /**
+   * The assertion attribute that carries the address
+   */
+  emailAttribute: string;
+  /**
+   * This installation's SAML identity for that tenant — the audience every assertion must name
+   */
+  entityId: string;
+  /**
+   * Where the IdP documents itself; https unless it is local
+   */
+  metadataUrl?: string;
+  /**
+   * The IdP's EntityDescriptor, kept so a metadata URL that goes offline does not close this tenant's door; authoritative when present
+   */
+  metadataXml?: string;
+  /**
+   * disabled, existing or provision: what an address the provider vouches for and this tenant has no account for does
+   */
+  registration?: string;
+  /**
+   * What a provisioned person is given, and only under provision
+   */
+  roles?: Array<string> | null;
 };
 
 export type SessionsOutputBodyWritable = {
@@ -2292,6 +2585,84 @@ export type AuditEventReadResponses = {
 
 export type AuditEventReadResponse = AuditEventReadResponses[keyof AuditEventReadResponses];
 
+export type AuthChallengePasskeyBeginData = {
+  body: PasskeyBeginAssertionInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/challenge/passkey/begin";
+};
+
+export type AuthChallengePasskeyBeginErrors = {
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+};
+
+export type AuthChallengePasskeyBeginError =
+  AuthChallengePasskeyBeginErrors[keyof AuthChallengePasskeyBeginErrors];
+
+export type AuthChallengePasskeyBeginResponses = {
+  /**
+   * OK
+   */
+  200: PasskeyChallenge;
+};
+
+export type AuthChallengePasskeyBeginResponse =
+  AuthChallengePasskeyBeginResponses[keyof AuthChallengePasskeyBeginResponses];
+
+export type AuthChallengePasskeyVerifyData = {
+  body: PasskeyVerifyInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/challenge/passkey/verify";
+};
+
+export type AuthChallengePasskeyVerifyErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+};
+
+export type AuthChallengePasskeyVerifyError =
+  AuthChallengePasskeyVerifyErrors[keyof AuthChallengePasskeyVerifyErrors];
+
+export type AuthChallengePasskeyVerifyResponses = {
+  /**
+   * OK
+   */
+  200: Identity;
+};
+
+export type AuthChallengePasskeyVerifyResponse =
+  AuthChallengePasskeyVerifyResponses[keyof AuthChallengePasskeyVerifyResponses];
+
 export type AuthChallengeVerifyData = {
   body: VerifyFactorInputBodyWritable;
   path?: never;
@@ -2362,6 +2733,72 @@ export type AuthFactorListResponses = {
 };
 
 export type AuthFactorListResponse = AuthFactorListResponses[keyof AuthFactorListResponses];
+
+export type AuthFactorPasskeyBeginData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/factors/passkey/begin";
+};
+
+export type AuthFactorPasskeyBeginErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type AuthFactorPasskeyBeginError =
+  AuthFactorPasskeyBeginErrors[keyof AuthFactorPasskeyBeginErrors];
+
+export type AuthFactorPasskeyBeginResponses = {
+  /**
+   * OK
+   */
+  200: PasskeyChallenge;
+};
+
+export type AuthFactorPasskeyBeginResponse =
+  AuthFactorPasskeyBeginResponses[keyof AuthFactorPasskeyBeginResponses];
+
+export type AuthFactorPasskeyFinishData = {
+  body: PasskeyFinishInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/factors/passkey/finish";
+};
+
+export type AuthFactorPasskeyFinishErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+};
+
+export type AuthFactorPasskeyFinishError =
+  AuthFactorPasskeyFinishErrors[keyof AuthFactorPasskeyFinishErrors];
+
+export type AuthFactorPasskeyFinishResponses = {
+  /**
+   * Created
+   */
+  201: Factor;
+};
+
+export type AuthFactorPasskeyFinishResponse =
+  AuthFactorPasskeyFinishResponses[keyof AuthFactorPasskeyFinishResponses];
 
 export type AuthRecoveryCodesRotateData = {
   body?: never;
@@ -2485,6 +2922,10 @@ export type AuthFactorWithdrawErrors = {
    */
   404: Problem;
   /**
+   * Conflict
+   */
+  409: Problem;
+  /**
    * Unprocessable Entity
    */
   422: Problem;
@@ -2554,6 +2995,84 @@ export type AuthLoginResponses = {
 };
 
 export type AuthLoginResponse = AuthLoginResponses[keyof AuthLoginResponses];
+
+export type AuthLoginPasskeyBeginData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/login/passkey/begin";
+};
+
+export type AuthLoginPasskeyBeginErrors = {
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+};
+
+export type AuthLoginPasskeyBeginError =
+  AuthLoginPasskeyBeginErrors[keyof AuthLoginPasskeyBeginErrors];
+
+export type AuthLoginPasskeyBeginResponses = {
+  /**
+   * OK
+   */
+  200: PasskeyChallenge;
+};
+
+export type AuthLoginPasskeyBeginResponse =
+  AuthLoginPasskeyBeginResponses[keyof AuthLoginPasskeyBeginResponses];
+
+export type AuthLoginPasskeyVerifyData = {
+  body: PasskeyVerifyInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/login/passkey/verify";
+};
+
+export type AuthLoginPasskeyVerifyErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+};
+
+export type AuthLoginPasskeyVerifyError =
+  AuthLoginPasskeyVerifyErrors[keyof AuthLoginPasskeyVerifyErrors];
+
+export type AuthLoginPasskeyVerifyResponses = {
+  /**
+   * OK
+   */
+  200: Identity;
+};
+
+export type AuthLoginPasskeyVerifyResponse =
+  AuthLoginPasskeyVerifyResponses[keyof AuthLoginPasskeyVerifyResponses];
 
 export type AuthLogoutData = {
   body?: never;
@@ -2839,6 +3358,117 @@ export type AuthRoleSetResponses = {
 
 export type AuthRoleSetResponse = AuthRoleSetResponses[keyof AuthRoleSetResponses];
 
+export type AuthSamlCallbackData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/saml/callback";
+};
+
+export type AuthSamlCallbackErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthSamlCallbackError = AuthSamlCallbackErrors[keyof AuthSamlCallbackErrors];
+
+export type AuthSamlCallbackResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type AuthSamlCallbackResponse = AuthSamlCallbackResponses[keyof AuthSamlCallbackResponses];
+
+export type AuthSamlMetadataData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/saml/metadata";
+};
+
+export type AuthSamlMetadataErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+};
+
+export type AuthSamlMetadataError = AuthSamlMetadataErrors[keyof AuthSamlMetadataErrors];
+
+export type AuthSamlMetadataResponses = {
+  /**
+   * OK
+   */
+  200: string;
+};
+
+export type AuthSamlMetadataResponse = AuthSamlMetadataResponses[keyof AuthSamlMetadataResponses];
+
+export type AuthSamlStartData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/saml/start";
+};
+
+export type AuthSamlStartErrors = {
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthSamlStartError = AuthSamlStartErrors[keyof AuthSamlStartErrors];
+
+export type AuthSamlStartResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type AuthSamlStartResponse = AuthSamlStartResponses[keyof AuthSamlStartResponses];
+
 export type AuthSessionListData = {
   body?: never;
   path?: never;
@@ -2941,6 +3571,33 @@ export type AuthSessionRevokeResponses = {
 
 export type AuthSessionRevokeResponse =
   AuthSessionRevokeResponses[keyof AuthSessionRevokeResponses];
+
+export type AuthPasskeySignInSetData = {
+  body: PasskeySignInSettingInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/settings/passkey-sign-in";
+};
+
+export type AuthPasskeySignInSetErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type AuthPasskeySignInSetError =
+  AuthPasskeySignInSetErrors[keyof AuthPasskeySignInSetErrors];
+
+export type AuthPasskeySignInSetResponses = {
+  /**
+   * OK
+   */
+  200: PasskeySignInSettingOutputBody;
+};
+
+export type AuthPasskeySignInSetResponse =
+  AuthPasskeySignInSetResponses[keyof AuthPasskeySignInSetResponses];
 
 export type AuthTokenListData = {
   body?: never;
@@ -4039,6 +4696,10 @@ export type FileFileUploadData = {
      * Retention class, as the product names it
      */
     kind?: string;
+    /**
+     * Treat these bytes as an image: measure the frame, and refuse what no decoder reads
+     */
+    image?: boolean;
   };
   url: "/api/v1/file/files";
 };
@@ -4452,6 +5113,52 @@ export type FileFileRetainResponses = {
 };
 
 export type FileFileRetainResponse = FileFileRetainResponses[keyof FileFileRetainResponses];
+
+export type FileFileUsesData = {
+  body?: never;
+  path: {
+    /**
+     * The file's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/file/files/{id}/uses";
+};
+
+export type FileFileUsesErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileFileUsesError = FileFileUsesErrors[keyof FileFileUsesErrors];
+
+export type FileFileUsesResponses = {
+  /**
+   * OK
+   */
+  200: Array<UseRow> | null;
+};
+
+export type FileFileUsesResponse = FileFileUsesResponses[keyof FileFileUsesResponses];
 
 export type NotificationNotificationListData = {
   body?: never;
@@ -5249,6 +5956,101 @@ export type TenantTenantRenameResponses = {
 
 export type TenantTenantRenameResponse =
   TenantTenantRenameResponses[keyof TenantTenantRenameResponses];
+
+export type TenantTenantSetSamlData = {
+  body: SamlSettingsWritable;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/saml";
+};
+
+export type TenantTenantSetSamlErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantSetSamlError = TenantTenantSetSamlErrors[keyof TenantTenantSetSamlErrors];
+
+export type TenantTenantSetSamlResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantSetSamlResponse =
+  TenantTenantSetSamlResponses[keyof TenantTenantSetSamlResponses];
+
+export type TenantTenantClearSamlData = {
+  body?: never;
+  path: {
+    /**
+     * The tenant's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/ops/tenant/tenants/{id}/saml/clear";
+};
+
+export type TenantTenantClearSamlErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type TenantTenantClearSamlError =
+  TenantTenantClearSamlErrors[keyof TenantTenantClearSamlErrors];
+
+export type TenantTenantClearSamlResponses = {
+  /**
+   * OK
+   */
+  200: Tenant;
+};
+
+export type TenantTenantClearSamlResponse =
+  TenantTenantClearSamlResponses[keyof TenantTenantClearSamlResponses];
 
 export type TenantTenantSuspendData = {
   body?: never;

@@ -1,6 +1,6 @@
 # A new record: the sheet a New button opens, what it refuses, and where a
-# saved one lands. An empty record is refused by the server, and the sheet keeps
-# its place and says so — the write that found nothing is the one that must.
+# saved one lands. An empty record is refused before anything is sent, and the sheet
+# keeps its place and says so — the write that found nothing is the one that must.
 # screen: app/[module]/[entity]/new.tsx
 appId: ${APP_ID}
 env:
@@ -14,7 +14,13 @@ env:
       id: "resource-list"
     timeout: 15000
 - tapOn: "New"
-- assertVisible: "New ${ENTITY}"
+# The sheet is titled with the word the catalogue gave the resource under the copy
+# table's own, and the word for a resource that declares no name is this build's
+# reading of the address's own — capitalised, the way every header says a noun. The
+# journey therefore matches the wire name it passed case-insensitively rather than
+# spelling a case it did not choose; Maestro reads a text selector as regex source
+# matched against the whole of an element's text, so the exact form would tap nothing.
+- assertVisible: (?i)^New ${ENTITY}$
 - assertVisible:
     id: "resource-form"
 - tapOn: "Cancel"
@@ -49,12 +55,14 @@ env:
       id: "resource-detail"
     timeout: 15000
 - assertVisible: ${TITLE} create
+- tapOn:
+    id: "record-menu"
 - scrollUntilVisible:
     element:
       id: "delete"
 - tapOn:
     id: "delete"
-- tapOn: "Delete"
+- tapOn: (?i)^Delete [^‘’?]+$
 - extendedWaitUntil:
     visible:
       id: "resource-list"

@@ -9,24 +9,22 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import type { Field } from "../../core/catalog";
-import { type Formatting, display, humanize, splitList, text } from "../../core/derive";
-import { Badge, type BadgeTone } from "../atoms/Badge";
+import {
+  type Formatting,
+  type Names,
+  badgeTone,
+  display,
+  enumTone,
+  fieldLabel,
+  points,
+  splitList,
+  text,
+} from "../../core/derive";
+import { Badge } from "../atoms/Badge";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
-
-/**
- * tone gives each value of a closed set its own colour. The schema orders
- * those values and the order is the only signal there is, so the first is
- * informational and the rest walk the status colours; nothing here pretends
- * to know that "done" is good or "archived" is bad.
- */
-const tones: readonly BadgeTone[] = ["info", "ok", "warning", "danger"];
-export function enumTone(f: Field, value: string): BadgeTone {
-  const i = (f.enum ?? []).indexOf(value);
-  return i < 0 ? "neutral" : (tones[i % tones.length] ?? "neutral");
-}
 
 interface Props {
   readonly presentation: Formatting;
@@ -34,25 +32,38 @@ interface Props {
   readonly value: unknown;
   /** compact is a value on a list row, where there is one line to say it in. */
   readonly compact?: boolean;
+  /**
+   * names is what this screen resolved of the records its values point at, keyed
+   * the way `derive.nameKey` keys them. Absent means nothing was resolved, which
+   * is still not the identifier: a pointer says the word (`derive.referenceWord`).
+   */
+  readonly names?: Names | undefined;
   /** testID names whichever shape the value takes. */
   readonly testID?: string;
 }
 
-export function Value({ presentation, field, value, compact = false, testID }: Props) {
+export function Value({ presentation, field, value, compact = false, names, testID }: Props) {
   const s = useStyles(styles);
-  const shown = display(field, value, presentation);
+  const shown = display(field, value, presentation, names);
   const raw = text(value);
   const id = testable(testID);
 
   if (raw === "")
     return (
+      // The core's word for an empty value: a dash for a field with nothing in it,
+      // "Not set" for the switch that was never answered — a pill would claim a
+      // state, and there is none to claim.
       <Text role={compact ? "caption" : "body"} tone="muted" {...id}>
-        —
+        {shown}
       </Text>
     );
 
+  // A closed set is a word, and a word of its own colour is a claim about it, so the
+  // colour comes from what the document declared for that value (`enumTones`) and
+  // from nothing else. An unlabelled value — including one a closed set does not
+  // contain — stays neutral: position in a list is no such fact.
   if (field.enum && field.enum.length > 0)
-    return <Badge label={shown} tone={enumTone(field, raw)} {...id} />;
+    return <Badge label={shown} tone={badgeTone(enumTone(field, raw))} {...id} />;
 
   if (field.type === "bool")
     return <Badge label={shown} tone={value === true ? "ok" : "neutral"} {...id} />;
@@ -79,7 +90,11 @@ export function Value({ presentation, field, value, compact = false, testID }: P
       </View>
     );
 
-  if (field.type === "uuid" || field.widget === "entity-picker")
+  // An identifier is monospaced and selectable because a person reads it out
+  // letter by letter. A value that points at another record is not an identifier
+  // to anyone: it reads as that record's name, or as the word saying there is one,
+  // and both are ordinary words.
+  if ((field.type === "uuid" || field.widget === "entity-picker") && !points(field))
     return (
       <Text
         role="mono"
@@ -122,10 +137,12 @@ export function Labelled({
   presentation,
   field,
   value,
+  names,
 }: {
   readonly presentation: Formatting;
   readonly field: Field;
   readonly value: unknown;
+  readonly names?: Names | undefined;
 }) {
   const s = useStyles(styles);
   const speaks = (field.enum ?? []).length > 0;
@@ -133,10 +150,10 @@ export function Labelled({
     <View style={s.cell}>
       {speaks ? null : (
         <Text role="caption" tone="muted">
-          {humanize(field.name)}
+          {fieldLabel(field)}
         </Text>
       )}
-      <Value presentation={presentation} field={field} value={value} compact />
+      <Value presentation={presentation} field={field} value={value} names={names} compact />
     </View>
   );
 }

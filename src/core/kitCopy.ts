@@ -1,4 +1,23 @@
 // System words shared by the composed kit. Product nouns remain supplied content.
+
+/**
+ * englishArticle is the indefinite article a field's own word takes: none before an
+ * `s` (a joined list or a plural reads "Enter tags."), `an` before a vowel letter,
+ * `a` otherwise. This is English *spelling*, not English morphology — "Status" loses
+ * its article and "Data" keeps one — and the limit is written down rather than
+ * guessed at by a translator. Portuguese puts its label after a colon, where no
+ * article, no agreement and no case rule exists, which is the construction `untitled`
+ * already uses.
+ */
+const englishArticle = (field: string): string => {
+  const word = field.trim();
+  if (word === "" || /s$/i.test(word)) return "";
+  return /^[aeiou]/i.test(word) ? "an " : "a ";
+};
+
+/** lowerFirst keeps a word's own letters but not its own capital: an English sentence names the field mid-sentence. */
+const lowerFirst = (field: string): string => field.charAt(0).toLowerCase() + field.slice(1);
+
 export const kitEnglish = {
   by: "by",
   activityEmpty: "Nothing has happened to this record yet.",
@@ -9,12 +28,98 @@ export const kitEnglish = {
   select: "Select",
   selected: "Selected",
   unavailable: "No longer available. Choose again or refresh.",
+  // A catalogue entry may name a screen this build does not hold. The generic
+  // screens still draw the record, so this is the app saying it is behind, not a
+  // refusal — quiet, one line, and the only thing said about it.
+  shellUpdate: "Update the app for this record's full screen.",
+  // What the first screen says about the session: the address the person signed in
+  // at is the workspace's name until a name exists, the account under it is the
+  // person's own words, and a row that opens nothing is said to be read alone.
+  workspace: "Workspace",
+  readOnly: "Read only",
+  // A record whose schema names nothing to read as its title. The noun arrives
+  // from the catalogue, the way `failure.loadFailed` takes one: this is the only
+  // sentence the kit writes for a record it cannot name, and it is written once.
+  untitled: (singular: string) => `Untitled ${singular}`,
+  // A record's own words: the block that holds what the entry filed nowhere, the
+  // collapsed section that holds what a record keeps about itself rather than about
+  // its subject, and the three parts of the disclosure that opens it. `reveals` is a
+  // noun phrase because `disclosure.reveal` builds the sentence around it.
+  overview: "Overview",
+  recordInformation: "Record information",
+  recordInformationHolds: "The record’s identifier and the moments it changed.",
+  recordInformationContent: "the identifier and the timestamps",
+  // What a trail calls a person whose name the directory does not hold. Never the id:
+  // a user id on a screen is a fact about the store, quoted to a person who cannot
+  // look anything up with it.
+  nameUnavailable: "Name unavailable",
+  // A delete, asked in the words 0085 sets down: the record by its own name, the
+  // warning plain, and an answer that names what it does. "Permanently" is not
+  // claimed: a soft-deleting resource is recoverable by an administrator.
+  deleteQuestion: (title: string) => `Delete ‘${title}’?`,
+  deleteWarning: "You can’t undo this in the app.",
+  deleteAction: (singular: string) => `Delete ${singular}`,
+  moreOptions: "More options",
+  justNow: "Just now",
+  // The distances a time is read as, spelled by the kit where the engine has no Intl.RelativeTimeFormat (Hermes on
+  // Android). They say what Intl says in each language, so a phone and a test read the same words.
+  minuteAgo: "1 minute ago",
+  minutesAgo: "{n} minutes ago",
+  hourAgo: "1 hour ago",
+  hoursAgo: "{n} hours ago",
+  yesterday: "yesterday",
+  twoDaysAgo: "2 days ago",
+  daysAgo: "{n} days ago",
+  tomorrow: "tomorrow",
+  signInIntro: "Enter your workspace address and the email you use there.",
+  workspaceAddress: "Workspace address",
   allLoaded: "Select loaded items",
   of: "of",
   selection: "Selection",
   filters: "Filters",
   moreFilters: "More filters",
   sort: "Sort",
+  // The bar under the header that holds both doors. It is named for itself: the
+  // accessible name of a group of controls that repeated one of its own buttons
+  // would tell a reader the bar *is* that button.
+  listControls: "List controls",
+  // A filter group always answers, so the choice that narrows nothing is "All", the
+  // reading of the group, and never "Clear", which is what a reset at the group's edge
+  // is called (`clear` above stays that word's owner).
+  all: "All",
+  clearFilters: "Clear filters",
+  filtersActive: (count: string) => `Filters · ${count}`,
+  // The two doors a list's toolbar holds. `new` is the header's word for a record of
+  // no known kind; `newNamed` names the kind the catalogue gave it.
+  new: "New",
+  newNamed: (singular: string) => `New ${singular}`,
+  // The other sheet's title. `new` names a record of no known kind, this names the
+  // record a person opened their own sheet to change, in the words the catalogue
+  // gave its resource: a header that said `Edit note` while the toolbar under it
+  // said `New Note` was spelling one kind of thing two ways.
+  editNamed: (singular: string) => `Edit ${singular}`,
+  // The three answers an empty list gives, which are three different facts: nothing
+  // has arrived yet, nothing arrived that matches, and nothing can arrive yet.
+  emptyNone: (plural: string) => `No ${plural} yet`,
+  emptyCreate: (singular: string) => `Create a ${singular} to get started.`,
+  // The sentence opens with the noun, so it is capitalised here: this kit wrote the
+  // fallback plural lower-case and a sentence may not begin with it. A declared name
+  // arrives as its author wrote it, and capitalising what is already capitalised does
+  // nothing.
+  emptyArrive: (plural: string) =>
+    `${plural.charAt(0).toUpperCase()}${plural.slice(1)} will appear here when they're available.`,
+  noMatching: (plural: string) => `No matching ${plural}`,
+  filteredBody: "Try another search or clear your filters.",
+  // The direction words a sort sheet says. Which words a field takes is its type's,
+  // so a phone never reads "ascending" for a deadline and never reads English at all.
+  sortNewest: "Newest first",
+  sortOldest: "Oldest first",
+  sortAZ: (word: string) => `${word}, A–Z`,
+  sortZA: (word: string) => `${word}, Z–A`,
+  sortSoon: (word: string) => `${word}, soonest first`,
+  sortLate: (word: string) => `${word}, latest first`,
+  sortLow: (word: string) => `${word}, low to high`,
+  sortHigh: (word: string) => `${word}, high to low`,
   views: "Saved views",
   unsaved: "Unsaved changes",
   expand: "Expand",
@@ -34,7 +139,6 @@ export const kitEnglish = {
   after: "After",
   missing: "Not supplied",
   redacted: "Redacted",
-  excluded: "This account’s plan does not include the activity trail.",
   older: "Show older",
   back: "Back",
   next: "Next",
@@ -44,9 +148,59 @@ export const kitEnglish = {
   skipped: "Skipped",
   required: "Required",
   optional: "Optional",
+  // The tag box: one word for the act, one sentence to name whose list it is, one
+  // to name which chip goes. A list stores its items comma-joined, so the box that
+  // writes one item says so when a person types the separator. The field's own word
+  // keeps the case its author gave it — one sentence, spelled one way, whether it is
+  // the placeholder in the box or the name the box announces.
+  addTag: "Add",
+  addTagTo: (label: string) => `Add to ${label}`,
+  removeTag: (tag: string) => `Remove ${tag}`,
+  commaInValue: "Remove the comma from this value.",
+  // The two sentences a sheet owes a person whatever the field's author wrote, and
+  // the only two the kit writes into a form: a value that is greyed out has to say
+  // what changes it, and a box that takes an identifier has to say that nothing
+  // picks the record out yet. They live here rather than in the derivation of a
+  // control so a Portuguese phone reads Portuguese (`control` hands back the
+  // author's line and nothing else), and they are drawn by `ResourceForm`.
+  changedByCommand: "Changed by a command of its own, not by this form.",
+  identifierOnly: "The identifier of the related record. There is no picker for it yet.",
+  // What a value that points at another record says when this phone cannot read
+  // the record it points at. Never the stored identifier: "3f2a…" is a fact about
+  // the store, and a person cannot look anything up with it. Which of the two
+  // words a pointer says is decided by what it points at — a record of the
+  // directory of people is *assigned*, anything else is *linked* — and never by
+  // whether a read happened to answer, so the word says nothing about a request
+  // this person may not have been allowed to make.
+  referenceAssigned: "Assigned",
+  referenceLinked: "Linked",
+  // What a command says it did when the document declared no sentence: the verb
+  // or label the person just tapped, in the frame this bundle holds. The label
+  // arrives from the served document, so on a Portuguese phone the kernel's
+  // Portuguese label enters a Portuguese frame.
+  commandDone: (label: string) => `${label} done`,
   saveExit: "Save and exit",
   steps: "Steps",
   validation: "Review the highlighted fields.",
+  // What a sheet says when it refuses on submit, in sentences a person can mend by
+  // typing. A field is named either here or by the announcement that wraps it
+  // (`FormField` reads `label: error` on iOS), which is why the number and the
+  // instant name the box rather than repeat its label. The English article rule is
+  // spelled once, below.
+  fieldRequired: (field: string) => `Enter ${englishArticle(field)}${lowerFirst(field)}.`,
+  fieldChoiceRequired: (field: string) => `Choose ${englishArticle(field)}${lowerFirst(field)}.`,
+  fieldNumber: "Enter a valid number.",
+  fieldTime: "Enter a valid date and time.",
+  // What a sheet asks before it throws away what a person wrote, and what a write
+  // that landed says. Both outlive their own screen — the question is asked of a
+  // dismissal and the sentence is read by the record the write moved to — so both
+  // are the kit's words, not a screen's.
+  discardChanges: "Discard changes?",
+  discardUnsaved: "Your changes haven’t been saved.",
+  keepEditing: "Keep editing",
+  discard: "Discard",
+  created: (singular: string) => `${singular} created`,
+  changesSaved: "Changes saved",
   available: "Available",
   soldOut: "Sold out",
   full: "Not enough places",
@@ -196,7 +350,12 @@ export const kitEnglish = {
   keyNotStopped:
     "This device's key could not be revoked from here; remove it from your account's devices.",
 } as const;
-export type KitWords = { readonly [K in keyof typeof kitEnglish]: string };
+// Each word keeps its own shape, widened from the literal it is written as: most
+// are strings, and the few that take a noun as data (`untitled`) are functions
+// here exactly as they are in the table. A flat `string` for every key would
+// force the noun-taking ones back into English.
+type KitWord<T> = T extends string ? string : T;
+export type KitWords = { readonly [K in keyof typeof kitEnglish]: KitWord<(typeof kitEnglish)[K]> };
 export const kitPortuguese: KitWords = {
   by: "por",
   activityEmpty: "Ainda nada aconteceu a este registo.",
@@ -207,12 +366,56 @@ export const kitPortuguese: KitWords = {
   select: "Selecionar",
   selected: "Selecionado",
   unavailable: "Já não está disponível. Escolha novamente ou atualize.",
+  shellUpdate: "Atualize a aplicação para o ecrã completo deste registo.",
+  workspace: "Espaço de trabalho",
+  readOnly: "Apenas leitura",
+  untitled: (singular: string) => `${singular} sem título`,
+  overview: "Visão geral",
+  recordInformation: "Informações do registo",
+  recordInformationHolds: "O identificador do registo e os momentos em que mudou.",
+  recordInformationContent: "o identificador e as datas",
+  nameUnavailable: "Nome indisponível",
+  deleteQuestion: (title: string) => `Eliminar ‘${title}’?`,
+  deleteWarning: "Não é possível anular esta ação na aplicação.",
+  deleteAction: (singular: string) => `Eliminar ${singular}`,
+  moreOptions: "Mais opções",
+  justNow: "Agora mesmo",
+  minuteAgo: "há 1 minuto",
+  minutesAgo: "há {n} minutos",
+  hourAgo: "há 1 hora",
+  hoursAgo: "há {n} horas",
+  yesterday: "ontem",
+  twoDaysAgo: "anteontem",
+  daysAgo: "há {n} dias",
+  tomorrow: "amanhã",
+  signInIntro: "Indique o endereço do espaço de trabalho e o email que usa nele.",
+  workspaceAddress: "Endereço do espaço de trabalho",
   allLoaded: "Selecionar itens carregados",
   of: "de",
   selection: "Seleção",
   filters: "Filtros",
   moreFilters: "Mais filtros",
   sort: "Ordenação",
+  listControls: "Controles da lista",
+  all: "Todos",
+  clearFilters: "Limpar filtros",
+  filtersActive: (count: string) => `Filtros · ${count}`,
+  new: "Novo",
+  newNamed: (singular: string) => `Novo ${singular}`,
+  editNamed: (singular: string) => `Editar ${singular}`,
+  emptyNone: (plural: string) => `Ainda não há ${plural}`,
+  emptyCreate: (singular: string) => `Crie um ${singular} para começar.`,
+  emptyArrive: (plural: string) => `Os ${plural} aparecem aqui quando estão disponíveis.`,
+  noMatching: (plural: string) => `Nenhum ${plural} corresponde`,
+  filteredBody: "Experimente outra pesquisa ou limpe os filtros.",
+  sortNewest: "Mais recentes primeiro",
+  sortOldest: "Mais antigos primeiro",
+  sortAZ: (word: string) => `${word}, A–Z`,
+  sortZA: (word: string) => `${word}, Z–A`,
+  sortSoon: (word: string) => `${word}, mais próximo primeiro`,
+  sortLate: (word: string) => `${word}, mais distante primeiro`,
+  sortLow: (word: string) => `${word}, crescente`,
+  sortHigh: (word: string) => `${word}, decrescente`,
   views: "Vistas guardadas",
   unsaved: "Alterações por guardar",
   expand: "Expandir",
@@ -229,7 +432,6 @@ export const kitPortuguese: KitWords = {
   after: "Depois",
   missing: "Não fornecido",
   redacted: "Ocultado",
-  excluded: "Esta conta não inclui o histórico de atividade.",
   older: "Mostrar anteriores",
   back: "Voltar",
   next: "Seguinte",
@@ -239,9 +441,28 @@ export const kitPortuguese: KitWords = {
   skipped: "Saltado",
   required: "Obrigatório",
   optional: "Opcional",
+  addTag: "Adicionar",
+  addTagTo: (label: string) => `Adicionar a ${label}`,
+  removeTag: (tag: string) => `Remover ${tag}`,
+  commaInValue: "Remova a vírgula deste valor.",
+  changedByCommand: "Alterado por um comando próprio, não por este formulário.",
+  identifierOnly: "O identificador do registo relacionado. Ainda não há seletor para ele.",
+  referenceAssigned: "Atribuído",
+  referenceLinked: "Vinculado",
+  commandDone: (label: string) => `${label} concluído`,
   saveExit: "Guardar e sair",
   steps: "Etapas",
   validation: "Reveja os campos assinalados.",
+  fieldRequired: (field: string) => `Campo obrigatório: ${field}.`,
+  fieldChoiceRequired: (field: string) => `Campo obrigatório: ${field}.`,
+  fieldNumber: "Introduza um número válido.",
+  fieldTime: "Introduza uma data e hora válidas.",
+  discardChanges: "Descartar alterações?",
+  discardUnsaved: "As suas alterações não foram guardadas.",
+  keepEditing: "Continuar a editar",
+  discard: "Descartar",
+  created: (singular: string) => `Registo criado: ${singular}`,
+  changesSaved: "Alterações guardadas",
   available: "Disponível",
   soldOut: "Esgotado",
   full: "Lugares insuficientes",

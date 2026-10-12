@@ -35,6 +35,7 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     "expo-secure-store",
+    "expo-sqlite",
     "expo-font",
     "expo-image",
     "@maplibre/maplibre-react-native",

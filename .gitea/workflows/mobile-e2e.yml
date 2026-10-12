@@ -92,6 +92,12 @@ jobs:
       VERB: resolve
       VERB_FIELD: resolution
       VERB_TITLE: Resolve a task
+      # The same kind of fact, for the journey that walks the first one end to
+      # end: which field of the served resource holds a deadline, which one
+      # states its condition, and which state a fresh record is in.
+      DUE_FIELD: dueAt
+      STATUS_FIELD: status
+      STATUS_VALUE: open
     services:
       postgres:
         image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94

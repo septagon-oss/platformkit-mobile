@@ -206,6 +206,27 @@ export function deriveState(input: StateInput, p: Presentation): Result<StateMod
   };
 }
 
+/**
+ * deriveOffline is the quiet line a page answered from this phone carries: what
+ * it is, and when this device last received what it shows. A list and a record
+ * say it through this one call, so the sentence that tells a person in a tunnel
+ * that yesterday's rows are not today's has one owner, and a screen can never
+ * draw stored rows as though they had just arrived.
+ */
+export function deriveOffline(savedAt: Instant, p: Presentation): Result<StateModel> {
+  return deriveState(
+    {
+      kind: "offline",
+      updatedAt: savedAt,
+      action: {
+        intent: "retry-read",
+        control: { id: "refresh", label: p.copy.state.retry, tone: "plain", state: "ready" },
+      },
+    },
+    p,
+  );
+}
+
 /** Legacy callback shape; label derivation has one core owner. */
 export function retry(copy: { readonly retryLabel: string }, onPress: () => void) {
   return { label: copy.retryLabel, onPress };

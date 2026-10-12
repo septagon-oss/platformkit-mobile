@@ -3,25 +3,32 @@
 import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
 import { doors, type Command } from "../core/catalog";
-import { collectionCommands, humanize, plural, screenPath } from "../core/derive";
+import { collectionCommands, noun, pointerTargets, screenPath } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
 import { useCommandAsk } from "./useCommand";
-import { systemClock } from "./clock";
 import { useResourceList } from "./useResourceList";
-
+import { useDirectoryNames } from "./useReferenceNames";
 export function ResourceList({ entry }: ScreenProps) {
   const feedback = useFeedback();
-  const list = useResourceList(entry);
+  const list = useResourceList(entry, feedback);
   const { ask, busy } = useCommandAsk(entry, undefined);
   const router = useRouter();
   const at = screenPath(entry);
   const open = (id: string) => router.push(`${at}/${encodeURIComponent(id)}`);
   const add = useCallback(() => router.push(`${at}/new`), [router, at]);
-  const { toggleOrdering } = list;
+  const { sheet, setSheet } = list;
+  // A row that points at another record names it: one page of each resource this
+  // window points at, which is the same read the trail makes for its actors, and
+  // a value outside the page keeps the word rather than quoting an identifier.
+  const asked = useMemo(() => pointerTargets(entry, list.rows, "row"), [entry, list.rows]);
+  const names = useDirectoryNames(asked);
+  // What the header's one door is called. A string in a frozen bundle, which is what
+  // makes it a usable memo dependency below — the `feedback` object around it is
+  // fresh every render because it reads the clock.
+  const addWord = feedback.copy.kit.new;
   // New is drawn when this caller may write *and* the server mounted a create
   // for the resource; one gate is not enough and neither is drawn alone. The
   // plain boolean is what the header memo below depends on: `doors` answers a
@@ -44,30 +51,33 @@ export function ResourceList({ entry }: ScreenProps) {
   // each time and the renders never settle.
   const options = useMemo(
     () => ({
-      title: humanize(plural(entry.entity)),
-      headerRight: () => (
-        <View style={styles.actions}>
-          <Button placement="header" label="Order" icon="sort" onPress={toggleOrdering} />
-          {mayCreate ? <Button placement="header" label="New" icon="add" onPress={add} /> : null}
-        </View>
-      ),
+      title: noun(entry).plural,
+      // The header holds the one thing this screen can *do*. How the list is being
+      // read — in what order, narrowed how — is the list's own row under the header,
+      // where a person is already looking at the list. Two header buttons compete for
+      // a thumb at the edge of the screen, and neither says what it currently does.
+      headerRight: () =>
+        mayCreate ? <Button placement="header" label={addWord} icon="add" onPress={add} /> : null,
     }),
-    [entry.entity, mayCreate, toggleOrdering, add],
+    [entry.entity, mayCreate, addWord, add],
   );
   return (
     <>
       <Stack.Screen options={options} />
       <ResourceListView
-        presentation={{ ...feedback, now: systemClock.now(), weekStartsOn: 1 }}
+        presentation={{ ...feedback, weekStartsOn: 1 }}
         entry={entry}
         rows={list.rows}
+        names={names}
         total={list.total}
         loading={list.loading}
         refreshing={list.refreshing}
         more={list.more}
         error={list.error}
+        {...(list.savedAt === undefined ? {} : { savedAt: list.savedAt })}
         order={list.order}
-        ordering={list.ordering}
+        sheet={sheet}
+        onSheet={setSheet}
         onOrder={list.setOrder}
         onOpen={open}
         onMore={list.loadMore}
@@ -79,6 +89,5 @@ export function ResourceList({ entry }: ScreenProps) {
   );
 }
 
-// The header's two buttons sit side by side; a layout, not a distance, so it
-// needs no theme.
-const styles = StyleSheet.create({ actions: { flexDirection: "row" } });
+// One header door, and it is only there when the caller may write: a layout would
+// be a rule about a button that may not be drawn.

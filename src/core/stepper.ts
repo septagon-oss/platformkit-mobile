@@ -145,6 +145,7 @@ export function stepTransition(
   const p = presentation ?? {
     locale: "en-GB",
     timeZone: "UTC",
+    ownZone: "UTC",
     weekStartsOn: 1,
     now: "2000-01-01T00:00:00Z",
     motion: "reduced",
