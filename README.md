@@ -72,6 +72,11 @@ format that held a session cookie loads as the server it names, so an upgrade
 signs in again rather than failing. `src/effects/native-session.ts`
 supplies Expo SecureStore. Each shell operation has a generation; the core
 rejects obsolete responses after sign-out, another sign-in or a newer refresh.
+An answer to a second factor is an operation of its own in that sense too: it
+makes its own connection to the server that refused the password, so the key it
+mints belongs to that answer alone, and an answer that lost the race — which the
+kernel expects, since it spends the proof of the first factor once — gives back its
+own key and never the one a newer answer earned.
 
 `src/ui/` is the component library, in one direction of imports that ESLint
 enforces (`eslint.config.mjs`): `atoms/` are single controls and words,
@@ -1019,7 +1024,12 @@ connection that holds no key, and one whose key the server refuses as a caller i
 does not know (the kernel answers a dead bearer at every door as an anonymous
 caller — a 403 naming `AUTH_ANONYMOUS`, never a 401), leaves nothing live to
 remove, and the screen says nothing about a key rather than sending the person to
-remove a device that is not there or already stopped. Whether the kernel ever
+remove a device that is not there or already stopped. The sentence is about the key
+and nothing else: when the server stopped the key and then failed to close the
+sign-in that minted it, the phone says nothing, because that session sits in no
+store, is presented by no later request and left this phone's memory with the call,
+so there is no door left to walk to and no second ask to make — a notice spent on it
+would report a stopped key as live. Whether the kernel ever
 gives a scoped credential a door to retire its own key is the kernel's to decide;
 if it does, a restored key stops itself at sign-out, and this paragraph and the
 words above change with it. The
