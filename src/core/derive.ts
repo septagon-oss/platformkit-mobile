@@ -2,6 +2,7 @@
 // only an entry's schema. The rules are the web generator's (ui/screens in the
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
+import { proseSpoken } from "./prose";
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
 import type { Copy } from "./copy";
 import type { EntrySubject } from "./failure";
@@ -562,10 +563,11 @@ export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | 
 
 /**
  * saidValue is a field's value as the eye reads it and as a reader says it aloud.
- * The two are the same words except for an instant: a cell shows the distance
- * ("5 minutes ago") and a screen reader says the whole local date-time. No
- * `spoken` means the shown words are the whole fact, which is true of every other
- * field type.
+ * The two are the same words except twice: an instant, because a cell shows the
+ * distance ("5 minutes ago") and a screen reader says the whole local date-time; and a
+ * rich text body, because the record shows it in the kit's type (`Prose`) and the syntax
+ * the server stored is not part of what a person is being told. No `spoken` means the
+ * shown words are the whole fact, which is true of every other field type.
  */
 export function saidValue(
   f: Field,
@@ -575,7 +577,12 @@ export function saidValue(
 ): { readonly value: string; readonly spoken?: string } {
   const at = f.type === "time" ? timeValue(v) : undefined;
   const instant = at ? presentedInstant(at, format) : undefined;
-  return { value: display(f, v, format, names), ...(instant ? { spoken: instant.exact } : {}) };
+  const body = richBody(f, v);
+  const said = instant !== undefined ? instant.exact : body === undefined ? "" : proseSpoken(body);
+  return {
+    value: display(f, v, format, names),
+    ...(said === "" ? {} : { spoken: said }),
+  };
 }
 
 /**

@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 202,
+   "files": 203,
    "cases": 918,
    "ms": 1445375,
    "testsMs": 43814.00000000003,
    "runners": {
     "jest": 71,
-    "node": 131
+    "node": 132
    },
    "unreachable": 0
   },
@@ -15164,6 +15164,26 @@
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
    "ms": null,
    "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-body-reads-as-blocks.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
+   "file": "tests/prose-body-says-its-words.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "A rich text body is drawn by `Prose` in the kit's type and said aloud by `proseSpoken`: the same words, at two speeds. These cases hold what a person hearing the record is told \u2014 the author's sentences, a code block read as written, a figure named \u2014 and what they are never told: the markup that only tells a screen how to draw, a link's address, a checked box read out as brackets, or a `##` where a heading stands.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-body-says-its-words.test.ts fills wall time, cases and titles from one run of this file",
    "titles": [],
    "tests": [],
    "loaded": null,

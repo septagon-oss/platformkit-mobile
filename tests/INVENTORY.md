@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `3c7bd2f83` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `01b0f13a6` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 30 | 181 | 46.9 s | 65 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 202 | 918 | 43.8 s | 1445 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 203 | 918 | 43.8 s | 1445 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 60 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 348
+* keep: 349
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 348 — 161 `tests/*.test.ts` (node), 131 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* files inventoried: 349 — 162 `tests/*.test.ts` (node), 131 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1305; cases in files no runner reaches: 35
 * isolated wall time: contract 65 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -288,6 +288,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/pricing-withdrawal.test.ts | node | behaviour | 2 | 735 | 18.8 | 2 | 0 of 2 | — | 0 | keep | Offers and plan values are facts the caller was allowed to read. When they are withdrawn the table drops them and disables the action rather than substituting … |
 | tests/progress.test.ts | node | behaviour | 12 | 316 | 29.8 | 0 | 0 of 12 | — | 0 | keep | The one arithmetic a meter, a stepper rail and a player's scrubber share. Each case is a number chosen so a wrong rounding, a swapped numerator or a invented d… |
 | tests/prose-body-reads-as-blocks.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A rich text body is the Markdown the server stored (0069 §1), so reading it is a reading of that shape: a blank line between blocks, a figure a paragraph of it… |
+| tests/prose-body-says-its-words.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A rich text body is drawn by `Prose` in the kit's type and said aloud by `proseSpoken`: the same words, at two speeds. These cases hold what a person hearing t… |
 | tests/prose-code-keeps-its-content.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | 0069 §1 allows fenced code with any content and inline code with any content, and the server stores both as written. The reader's refusals — an image outside a… |
 | tests/prose-fence-keeps-shorter-markers.test.ts | node | behaviour |  |  |  |  | not measured | — | 0 | keep | A fenced code block may quote a shorter fence. Its opening marker's whole width defines the closing marker, so the quoted heading and image remain code. |
 | tests/range-clock-change.test.ts | node | behaviour | 3 | 758 | 32.3 | 1 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a booking slot crossing the clock change names both endpoint zones |

@@ -872,13 +872,17 @@ to reserve, and the bytes at the file's own content address, prepared by `fileRe
 with the session's scope — and the reader is named after the field it reads
 (`field-<name>-prose`), so two bodies on one screen stay two readers. A body that cannot
 be read whole, because a construct refuses the segmentation or a figure's file cannot be
-read, is drawn as the value `Value` gives it: the whole body as text, never less of it.
+read, is drawn as the value `Value` gives it: the whole body as text, never less of it. The
+row is announced by `proseSpoken` — the same body with none of the characters that only tell
+a screen how to draw them — so a person hearing the record is told its sentences, a code block
+as written and a figure by name, and never a `##` where a heading stands.
 
 **Limits** — the reading of a body is here; its writing and its translating are not.
 There is no native editor, no upload and
 no language slice yet, and the full translator side-by-side view stays on the web: the
-phone reads a body in the reader's own language and offers no second column of another
-language beside it.
+phone's own words (its buttons, its refusals, its "Image unavailable") follow the reader's
+language, while a body arrives in the language the record is kept in — nothing asks the
+server for another one yet, and no second column of a translation is offered beside it.
 
 **Reused** — `MediaItem`, `ImageSlotProps` and the media family's
 `loading | ready | error | unavailable` life cycle with its `imageUnavailable`,

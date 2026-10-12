@@ -264,6 +264,86 @@ export function phoneEditorHolds(source: string): readonly string[] {
 }
 
 /**
+ * MARKED is the paired inline markup a normalised body can wear, in the order it is
+ * removed: a picture's own name is read before a link, because a picture is what a link
+ * would otherwise match. Each pair is removed only when it closes — `snake_case`, `2 * 3`
+ * and a lone backtick keep their characters, because nothing marked them.
+ */
+const MARKED: readonly [RegExp, string][] = [
+  [/!\[([^\]]*)\]\([^)]*\)/g, "$1"],
+  [/\[([^\]]*)\]\([^)]*\)/g, "$1"],
+  [/\*\*([^*]+)\*\*/g, "$1"],
+  [/__([^_]+)__/g, "$1"],
+  [/\*([^*]+)\*/g, "$1"],
+  [/~~([^~]+)~~/g, "$1"],
+  [/`([^`]+)`/g, "$1"],
+];
+
+/** LIST, TASK and TABLE_ROW are a block's own marks: where a line stops being a sentence. */
+const LIST = /^(\s*)(?:[-*+]|\d+[.)])\s+/,
+  TASK = /^(\s*)\[[ xX]\]\s+/,
+  SEPARATOR = /^\s*\|?[\s:|-]*\|[\s:|-]*\|?\s*$/;
+
+/**
+ * proseSpoken is a body said aloud: every word its author wrote, and none of the
+ * characters whose only job is to tell a screen how to draw them.
+ *
+ * It is the one place a body becomes speech — the drawn form belongs to `Prose` and the
+ * face a screen supplies — so a person hearing a record is told its sentences rather than
+ * the syntax that made them, and a row that shows native type never announces `##`. A
+ * heading's words, a list item's words, a quote's words and a table's cells in row order
+ * are kept; a fenced block is read exactly as written, because code is read as written;
+ * a figure is named by its alt and its caption, and a decorative picture says nothing.
+ * A body the segmentation refused comes back as it was stored, because that is the shape
+ * on the screen and what a person hears should be what is drawn.
+ *
+ * The marks the eye uses for order and for a task checked off are dropped: they are how
+ * the block looks, not what it says. Nothing here repairs or reorders a body.
+ */
+export function proseSpoken(source: string): string {
+  const split = proseBlocks(source);
+  if (!split.ok) return source;
+  const groups = cut(source) ?? [];
+  const said: string[] = [];
+  split.blocks.forEach((block, at) => {
+    if (block.kind === "figure") {
+      const named = [block.alt, block.caption].filter((word) => word !== "").join(", ");
+      if (named !== "") said.push(named);
+      return;
+    }
+    const group = groups[at];
+    if (group === undefined) return;
+    group.lines.forEach((line, index) => {
+      const spoken = speakLine(line, group.code[index] === true);
+      if (spoken !== "") said.push(spoken);
+    });
+  });
+  return said.join("\n").trim();
+}
+
+/**
+ * speakLine is one line said. A fence marker line says nothing and its code is kept whole;
+ * a prose line loses its block marks, then its paired inline markup, and a table row is
+ * read cell by cell because "vertical bar" is not a word of the sentence.
+ */
+function speakLine(line: string, code: boolean): string {
+  if (FENCE.test(line)) return "";
+  if (code) return line;
+  const bare = line.replace(QUOTE, "").replace(HEADING, "").replace(LIST, "$1").replace(TASK, "");
+  const row = bare.trim();
+  if (row.includes("-") && SEPARATOR.test(row)) return "";
+  const cells =
+    row.startsWith("|") || row.endsWith("|")
+      ? row
+          .split("|")
+          .map((cell) => cell.trim())
+          .filter((cell) => cell !== "")
+          .join(", ")
+      : bare;
+  return MARKED.reduce((text, [mark, words]) => text.replace(mark, words), cells).trim();
+}
+
+/**
  * tableRows says whether a block holds a GFM table: a delimiter row under a header
  * row. It reads the block's prose, so a fence that quotes a table is not one, and
  * reads past a blockquote marker, so a table quoted into a blockquote still is one —

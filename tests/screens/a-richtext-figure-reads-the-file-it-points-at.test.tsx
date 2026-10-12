@@ -104,6 +104,11 @@ test("a figure reads its own row for the frame and asks for its bytes at the fil
   const reader = within(screen.getByTestId("field-body-prose"));
   expect(reader.getByText("South span")).toBeOnTheScreen();
   expect(reader.getByText("fresh water")).toBeOnTheScreen();
+  // The row is announced by the body's own words, not by the syntax the screen no longer
+  // shows: a person hearing this record hears the sentence, not `**`.
+  const spokenRow = screen.getByTestId("field-body").props.accessibilityLabel ?? "";
+  expect(spokenRow).toContain("Give fresh water every morning.");
+  expect(spokenRow).not.toContain("**");
 });
 
 test("a frame that already fits its slot is asked for as stored", async () => {
