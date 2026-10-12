@@ -92,20 +92,6 @@ function message(e: unknown): string {
 }
 
 /**
- * challenge is the address that accepted a password and answered that it needs a
- * second factor. The window that refusal opened lives on that server's clock and
- * in no table this phone can read, so the code goes back to that address and to
- * no other: the address field is where the *next* sign-in goes, not where this one
- * is answered. Only the address survives the refusal — the connection that was
- * refused is not kept, because every answer makes its own connection and is the
- * only holder of the key that answer mints. An answer that lost the race then has
- * nothing to give back but its own, and a key a newer answer earned is out of the
- * reach of anything the older one does. The address is held for one sign-in —
- * until a key is minted, a password is refused, this phone signs out, or a newer
- * attempt opens a window of its own.
- */
-
-/**
  * held is the key a saved record carries, or nothing when it names a server
  * alone. Half a key never reaches here: the record that carries one is refused
  * before the shell sees it (src/effects/session.ts).
@@ -130,6 +116,18 @@ export function Shell({
   }));
   const active = useRef(connection);
   const generation = useRef(0);
+  /**
+   * challenge is the address that accepted a password and answered that it needs a
+   * second factor. The window that refusal opened lives on that server's clock and in
+   * no table this phone can read, so the code goes back to that address and to no
+   * other: the address field is where the *next* sign-in goes, not where this one is
+   * answered. Only the address survives the refusal — the connection that was refused
+   * is not kept, because every answer makes its own connection and is the only holder
+   * of the key that answer mints, which leaves an answer that lost the race nothing
+   * to give back but its own. The address is held for one sign-in: until a key is
+   * minted, a password is refused, this phone signs out, or a newer attempt opens a
+   * window of its own.
+   */
   const challenge = useRef<string | undefined>(undefined);
   const [identity, setIdentity] = useState<Identity | undefined>();
   const [writes, setWrites] = useState<Readonly<Record<string, number>>>({});
