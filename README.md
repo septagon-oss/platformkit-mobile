@@ -198,7 +198,7 @@ titles a row, which value is good, which command is the system's). The phone
 parses them into `hints` on the entry, field and command — never raw wire bytes,
 so `presentation` reaches no component — and every one of them is read in
 `src/core/derive.ts`, where the resource's words are read today. For a resource
-that declares nothing the default *is* the previous rule, so honouring the whole
+that declares nothing the default _is_ the previous rule, so honouring the whole
 contract changes no screen until a server declares a hint.
 
 A hint is never the reason a workspace is refused. The generated schema prints
@@ -373,7 +373,7 @@ Three questions decide what a sheet holds, and all three are answered in
 `formControls`' answer: every field the entry keeps for the form, minus the ones it
 hides — a `hidden` field is neither offered nor sent, so `source` and `source_ref`
 never reach a label, a control or a request body. The one exception is a field that is
-hidden *and* required: the person's only path to a submittable create is never taken
+hidden _and_ required: the person's only path to a submittable create is never taken
 away, so it stays in the sheet marked required, and the parser names that pair once in
 the developer's channel. **The grouping** is the entry's own `sections`, in declared
 order, with the fields that named no block landing in a last block carrying the word the
@@ -458,7 +458,7 @@ phone refuses only what the catalogue makes it certain of: required-and-empty, n
 not-an-instant, and the two list rules above. A range, a unit, a uniqueness, a permission or
 a tenant policy stays the server's, arrives as a 422 whose `body.` prefix the transport strips,
 and is drawn under that field in the same shape. **The sheet then asks for one field**:
-`firstProblem` names the first control *in the sheet's own asked order* that carries a
+`firstProblem` names the first control _in the sheet's own asked order_ that carries a
 sentence — never the first key of the refusal, which arrives in wire order — the hook
 holds it as `awaiting` and counts its refusals as `refusals`, the organism focuses that box's
 ref and asks React Native's `scrollResponderScrollNativeHandleToKeyboard` to lift it above
@@ -533,7 +533,7 @@ about a list item of the wrong type is still English written in the core ("conta
 that does not match its item type"), because no phone's table holds it in either language
 yet; a singleton PUT echoes what the read returned for an immutable field, and this kit has
 no live server to prove the kernel accepts its own echo rather than refusing it as a write
-of a field nobody may write; the *tag box* has no spelling for one item that carries a
+of a field nobody may write; the _tag box_ has no spelling for one item that carries a
 comma, so a stored item written some other way is drawn as two chips and saved back as two —
 what a person sees there is what the write holds, and nothing is rewritten behind their back,
 but nobody can type such an item back in, because the box refuses the separator on entry;
@@ -849,9 +849,10 @@ heading outside `##`–`####`) is refused as `unsupported-format` so a screen dr
 whole body as prose rather than less of it. Those questions are asked of the body's
 prose only: a fence and a code span hold what §1 stored verbatim, so a `# comment` in a
 shell block, an image quoted in a fence or the `pk-file:` scheme named in a span is code
-and is drawn as it was written — and a fence is ended only by a marker of its own
-character at least as wide as the one that opened it, which is how a body can describe a
-fenced block without its example turning into headings and figures. The same reading
+and is drawn as it was written — and a fence is ended only by a line that carries nothing
+but a marker of its own character at least as wide as the one that opened it, which is how
+a body can describe a fenced block, and quote three backticks in a sentence of code, without
+its example turning into headings and figures. The same reading
 answers `phoneEditorHolds`, which
 therefore calls a fence quoting a table no table. `Prose` draws the runs in the kit's type and
 the figures in the slot the media family already owns: the box is reserved from the
@@ -870,19 +871,31 @@ A generated record reads its own rich text field: `derive.richBody` answers whic
 one and `RichTextBody` supplies the reading — each figure's `file/files` row for the frame
 to reserve, and the bytes at the file's own content address, prepared by `fileResource`
 with the session's scope — and the reader is named after the field it reads
-(`field-<name>-prose`), so two bodies on one screen stay two readers. A body that cannot
-be read whole, because a construct refuses the segmentation or a figure's file cannot be
-read, is drawn as the value `Value` gives it: the whole body as text, never less of it. The
-row is announced by `proseSpoken` — the same body with none of the characters that only tell
+(`field-<name>-prose`), so two bodies on one screen stay two readers. Such a field is never
+the record's printed summary line (`listPreview` prints no body it cannot print without its
+syntax), which is what keeps the reader on the page for an entry that hints nothing.
+A body whose shape the reader refuses is drawn as the value `Value` gives it: the whole
+body as text, never less of it. A figure whose file this session cannot read costs nothing
+but its own picture — its row's refusal is said as `Image unavailable`, with the caption the
+author wrote and the way back to ask again — and the prose around it keeps reading natively.
+The row is announced by `proseSpoken` — the same body with none of the characters that only tell
 a screen how to draw them — so a person hearing the record is told its sentences, a code block
 as written and a figure by name, and never a `##` where a heading stands.
 
-**Limits** — the reading of a body is here; its writing and its translating are not.
-There is no native editor, no upload and
-no language slice yet, and the full translator side-by-side view stays on the web: the
-phone's own words (its buttons, its refusals, its "Image unavailable") follow the reader's
-language, while a body arrives in the language the record is kept in — nothing asks the
-server for another one yet, and no second column of a translation is offered beside it.
+**Limits** — the reading of a body is here, and so is the first writing of one: an
+editable `widget: richtext` field offers Bold, Italic, Heading, List and Image over the box
+(`RichTextToolbar`, and `src/core/richtext.ts` is the one code that edits the draft, at the
+caret the box last reported). A picture is inserted as the one line a figure is, for a file
+this server already holds and this session may list: capture from the camera or the photo
+library, and upload of a file this phone has never sent, need a native module this build does
+not carry. A table and a task list stay the plain Markdown box's, with the sentence naming
+what the phone cannot hold. The language slice is a read: every request prints the phone's
+own `Accept-Language`, and `_i18n` — the server's own note of which language a translatable
+field's words arrived in — is said beside the field in the language the person is reading in
+(`Mostrado em inglês — ainda não traduzido`). Writing a translation, choosing the language on
+the phone, and the translator's side-by-side view stay on the web: the phone's own words (its
+buttons, its refusals, its "Image unavailable") follow the reader's language, while a body
+arrives in whatever language the server had for it, and now says which one that was.
 
 **Reused** — `MediaItem`, `ImageSlotProps` and the media family's
 `loading | ready | error | unavailable` life cycle with its `imageUnavailable`,
@@ -1173,7 +1186,7 @@ carry, so such a journey taps nothing and is refused where the words are written
 `check:inventory` (the suite's own record in `tests/inventory.json` answers for this
 checkout: a reached test file with no row, a row whose file is gone, a row whose
 layer, tier, reach or rule the file no longer answers to, or a rise in the count of
-review-named files or of files no runner reaches — see *Which tests run where*
+review-named files or of files no runner reaches — see _Which tests run where_
 below), `check:publish` (the manifest names a package the registry can hold and the
 changelog carries the entry this version's release is documented by) and
 `check:source` (the manifest and lockfile install from the
@@ -1517,8 +1530,9 @@ those bytes plus those entries instead. The generated catalog types retain `scre
 changes a native route or draws a new control. `display`, `maxLength`, `translatable` and
 `keys` are declared by the document and carried by the field view with no screen of their
 own — a test distinguishes retained metadata from rendered behavior, and only a stray JSON
-member outside the document is refused. The `richtext` widget is read natively (under
-*How a rich text body reads* above); it still has no native editor.
+member outside the document is refused. The `richtext` widget is read natively and written
+with the marks that reader draws back (under
+_How a rich text body reads_ above); capture and upload are not in this build.
 
 **Reused** — `parseCatalog`'s supported-version and path checks, `CatalogError`, and
 the `writable` gate the screens already consulted; the New, Edit, Delete and Save
@@ -1783,7 +1797,7 @@ while `refusalAction` is what picks the one button a screen shows,
 `plural`/`humanize` for the nouns a sentence names, `Notice`'s existing props, and
 `copy.state`'s `retry`/`dismiss`/`reconcile`/`unknownWrite` words. **Added** —
 `src/core/failure.ts`, because the tree could report a failure and could not
-classify one: no existing unit reads a status *and* a context, and a new module
+classify one: no existing unit reads a status _and_ a context, and a new module
 would have duplicated the closed `IssueCode` vocabulary; `Words.failure` (seventeen
 keys in `en` and `pt`, of which `thisRecord` and `thisWorkspace` are the two nouns
 a sentence names when no catalogue entry describes what it addressed), because the
