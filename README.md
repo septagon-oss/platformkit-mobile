@@ -885,7 +885,7 @@ as written and a figure by name, and never a `##` where a heading stands.
 **Limits** — the reading of a body is here, and so is the writing of one: an
 editable `widget: richtext` field offers Bold, Italic, Heading, List and Image over the box
 (`RichTextToolbar`, and `src/core/richtext.ts` is the one code that edits the draft, at the
-caret the box last reported, of the body the box *shows* — marking a word of a freshly read
+caret the box last reported, of the body the box _shows_ — marking a word of a freshly read
 note marks that note rather than an empty box, and a figure whose answer arrives a second
 later lands among whatever has been typed since it was asked). `Image` asks where the
 picture comes from: this phone's camera, its photo library, or a file this server already
@@ -900,11 +900,17 @@ rather than inside it; `_i18n` — the server's own note of which language a tra
 words arrived in, and of the field that fell back to another language's because this one has no row
 yet — is said beside the field in the language the person is reading in
 (`Mostrado em inglês — ainda não traduzido`); and a Save names the language back (`?lang=`) for
-every translatable field it changed on a read the server answered *in* a language — whether that
+every translatable field it changed on a read the server answered _in_ a language — whether that
 field carried a note of its own or carried none because it is that language's own text, or another
 language's because the fallback is what a translator was shown in order to write it — carrying only
 the fields that language owns, saying so when the sheet changed the record's own fields beside
-them. A body's words sent with no language would be filed as
+them. A field the catalogue does not declare translatable is the record's own however the reading
+was served, and the sheet writes it without the parameter rather than meeting the refusal the
+server would answer it with at a language address. Where a write names no language it carries what
+the person wrote and the fields the read showed as the record's own, and **not** a translatable
+field nobody edited: those words came off a reading in another language, an unchanged field has
+nothing new to give the record, and the sheet would rather send too little than file somebody
+else's translation as the source it translates. A body's words sent with no language would be filed as
 the record's own copy, over the source they were translated from, which is the write this
 rule exists to refuse. The phone's own words (its buttons, its refusals, its "Image
 unavailable") follow the reader's language, while a body arrives in whatever language the

@@ -1070,6 +1070,32 @@ export function servedLanguage(row: Row, name: string): string | undefined {
 }
 
 /**
+ * heldLanguage is the language one field's words on a sheet belong to, and nothing when they
+ * are the record's own copy. The catalogue must declare the field translatable: a field with
+ * one language's words has no language to write at, however the reading was served, and the
+ * server answers a field it cannot translate at a language address with a refusal that saves
+ * nothing. Beyond that declaration the answer decides and never the text — the response's own
+ * tag first, because a row served *in* a language shows this person that language's words
+ * whichever way `_i18n` fell out: a field with no note is that language's own reviewed text,
+ * which is the one field the note has nothing to say about, and a field noted as another
+ * language's was shown as that language precisely so this reader could write their own. Where
+ * the read named no language the note alone decides, and only when it names a language this
+ * sheet's person reads: another language's note over an untagged answer is the record's own
+ * copy, shown as it is.
+ */
+function heldLanguage(
+  row: Row,
+  field: Field,
+  speaking: Language,
+  served: string,
+): string | undefined {
+  if (field.translatable !== true) return undefined;
+  if (served !== "") return served;
+  const said = servedLanguage(row, field.name);
+  return said !== undefined && copyLanguage(said) === speaking ? said : undefined;
+}
+
+/**
  * WriteLanguage is a sheet's Save in one language: the words it carries, and the fields it
  * may not carry in the same request.
  */
@@ -1091,16 +1117,15 @@ export interface WriteLanguage {
  * all — is the record's own copy and is written as it has always been: without a language.
  *
  * `served` is the tag the read of this row was answered in, straight off the response, and ""
- * when it named none. A row answered *in a language* was read in it, so every translatable
- * field its person changed holds that language's words whichever way `_i18n` fell out: a
- * field with no note is that language's own text, and a field noted as another language's was
- * shown as that other language precisely so this reader could write its own. Either one sent
- * bare would file the translation over the source it was made from. Where the read named no
- * language, `_i18n` stays the whole of the note, as it was before the header was read.
+ * when it named none. `heldLanguage` reads both, and a changed field whose words it puts in a
+ * language the sheet's person reads is written in that language rather than bare: sent without
+ * one, they would file the translation over the source it was made from.
  *
  * A language write can carry only the fields that language owns, because the record itself
  * is written without the parameter: `other` is what the sheet therefore cannot save in the
- * same breath, and the sheet says so rather than sending half of what was asked.
+ * same breath, and the sheet says so rather than sending half of what was asked. A field the
+ * catalogue does not declare translatable is always `other` — it belongs at the record's own
+ * address, and this function names no language for it whatever the reading was served in.
  */
 export function writeLanguage(
   row: Row | undefined,
@@ -1116,16 +1141,8 @@ export function writeLanguage(
   let locale: string | undefined;
   for (const name of changed) {
     const field = controls.find((c) => c.field.name === name)?.field;
-    const said = field?.translatable === true ? servedLanguage(row, name) : undefined;
-    // Which language this field's changed words belong to: the one the reading was served in
-    // when the response said so, and otherwise the one `_i18n` named, and only when that is a
-    // language this sheet's person reads.
     const destination =
-      served !== ""
-        ? served
-        : said !== undefined && copyLanguage(said) === speaking
-          ? said
-          : undefined;
+      field === undefined ? undefined : heldLanguage(row, field, speaking, served);
     if (destination === undefined) {
       other.push(name);
       continue;
@@ -1141,6 +1158,46 @@ export function writeLanguage(
   }
   if (locale === undefined) return undefined;
   return { locale, translated, other };
+}
+
+/**
+ * saveBody is the body of one Save: the values this sheet may write at the address `writing`
+ * names, in that address's language.
+ *
+ * A language write carries only the fields that language owns. The record's own copy — `writing`
+ * naming no language — carries everything else the sheet holds, except a field whose words
+ * belong to a language and that nobody edited: those words came off a reading in that language,
+ * and the record's address files whatever reaches it as the record's own, over the source the
+ * translation was made from, which is the one write nobody can take back. A field nobody edited
+ * has no new words for the record either, so it is sent nowhere and keeps what it holds.
+ *
+ * `speaking` and `served` are the language this sheet reads in and the tag its read was answered
+ * under, the same two the language of the write is read off. A create has no reading, so nothing
+ * it holds can be another language's words and every field it asks about is sent.
+ */
+export function saveBody(
+  controls: readonly Control[],
+  held: Readonly<Record<string, string>>,
+  row: Row | undefined,
+  writing: WriteLanguage | undefined,
+  speaking: Language,
+  served = "",
+): Record<string, unknown> {
+  const every = values(controls, held);
+  if (writing !== undefined)
+    return Object.fromEntries(
+      Object.entries(every).filter(([name]) => writing.translated.includes(name)),
+    );
+  if (row === undefined) return every;
+  const changed = new Set(changedFields(controls, held));
+  const send: Record<string, unknown> = {};
+  for (const c of controls) {
+    const name = c.field.name;
+    if (!(name in every)) continue;
+    if (!changed.has(name) && heldLanguage(row, c.field, speaking, served) !== undefined) continue;
+    send[name] = every[name];
+  }
+  return send;
 }
 
 /** control is one field as a form holds it: the same rules wherever the field came from. */

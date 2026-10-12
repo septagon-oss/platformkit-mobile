@@ -22,9 +22,9 @@ import {
   formSections,
   noun,
   problems,
+  saveBody,
   screenPath,
   text,
-  values,
   verbRefusal,
   writeLanguage,
   writePath,
@@ -270,31 +270,27 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       // the same thing back. A body of somebody's Portuguese sent without its language would
       // be filed as the record's own copy, over the source that translation was made from,
       // and no later read of the record would show that it had happened.
-      const language = writeLanguage(row, controls, held, screenLanguage(), servedIn);
-      if (language !== undefined && language.other.length > 0) {
+      const speaking = screenLanguage();
+      const writing = writeLanguage(row, controls, held, speaking, servedIn);
+      if (writing !== undefined && writing.other.length > 0) {
         // A translation and the record's own fields are two writes at two addresses; half of
         // one is not a thing this sheet sends.
         setDetail(copy.kit.mixedLanguageWrite);
-        setAwaiting(language.other[0]!);
+        setAwaiting(writing.other[0]!);
         setRefusals((n) => n + 1);
         setPhase("editing");
         return;
       }
-      const everyValue = values(controls, held);
-      // A language write carries only the fields that language owns: the record is written
-      // without the parameter, so a body that mixed the two would be refused whole.
-      const body =
-        language === undefined
-          ? everyValue
-          : Object.fromEntries(
-              Object.entries(everyValue).filter(([name]) => language.translated.includes(name)),
-            );
+      // What the write carries follows from where it goes: a language write holds the fields
+      // that language owns, and the record's own copy holds none of the translations this
+      // person left alone.
+      const body = saveBody(controls, held, row, writing, speaking, servedIn);
       // `idem` is the write's idempotency key, minted by the queue before the
       // first attempt and named on the request: the attempt that may have landed
       // and the replay that follows a hold are then one write to a server that
       // honours the header.
       const live = (idem?: string) => {
-        const options = keyed(idem, language?.locale ?? "");
+        const options = keyed(idem, writing?.locale ?? "");
         return id ? api.update(entry, id, body, ...options) : api.create(entry, body, ...options);
       };
       // One write, one decision: it went, or this phone is holding it. A held
@@ -310,7 +306,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
               // wrong language is the write this sheet was told not to make.
               path: id
                 ? `${writePath(entry)}/${encodeURIComponent(id)}${langQuery(
-                    language === undefined ? undefined : { lang: language.locale },
+                    writing === undefined ? undefined : { lang: writing.locale },
                   )}`
                 : writePath(entry),
               body,

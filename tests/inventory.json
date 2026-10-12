@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 207,
+   "files": 208,
    "cases": 918,
    "ms": 1445375,
    "testsMs": 43814.00000000003,
    "runners": {
     "jest": 71,
-    "node": 136
+    "node": 137
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 72,
+   "files": 74,
    "cases": 206,
    "ms": 1188175,
    "testsMs": 22569,
    "runners": {
-    "jest": 72
+    "jest": 74
    },
    "unreachable": 0
   },
@@ -9269,6 +9269,26 @@
    "onlyProdLines": null
   },
   {
+   "file": "tests/a-save-carries-what-the-person-wrote.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading behind it, so every field it asks about is sent; an edit of the record's own copy sends a field nobody edited exactly as the read returned it, because the sheet shows the whole record; and a translatable field nobody edited on a read that arrived in a language is sent nowhere \u2014 its words are a translation's, and the record's own address files whatever reaches it as the record's own, over the source that translation was made from.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-save-carries-what-the-person-wrote.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -17660,6 +17680,26 @@
    "onlyProdLines": null
   },
   {
+   "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/screens/a-translatable-record-follows-the-device-language.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -18531,6 +18571,26 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "Saving without a changed translation must never copy its loaded words over the source, including when typing and undoing leaves the body exactly as it arrived.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/cancel-asks-once.test.tsx",

@@ -183,6 +183,15 @@ for the version being released.
   including the complete translation `_i18n` says nothing about, because there is nothing to say,
   and the fallback whose note names English precisely because Portuguese has no row and English is
   what the translator was shown to write. Both of those shapes were overwriting the source.
+- Additive to `./core/derive`: `saveBody` (the body of one Save: the values a sheet may write at
+  the address its language write names). It is what the two rules below are read from, so a sheet
+  holds neither: a language write carries the fields that language owns, and a write that names no
+  language carries every field except a translatable one that arrived with the row and that nobody
+  edited — the record's own address files whatever reaches it as the record's own, so an untouched
+  Portuguese body riding along with a title change used to overwrite the English it translates.
+  `writeLanguage` now gates on the catalogue's `translatable` before it reads the served tag, so a
+  source-only field edited on a translated read is written at the record's own address instead of
+  meeting the server's refusal there.
 - An upload keeps the form it was given. `upload(e, form, query)` handed that form to the
   generated operation's serializer, which builds one out of an object's entries and so turned a
   form that already existed into a text field named after its own internals: the request carried
