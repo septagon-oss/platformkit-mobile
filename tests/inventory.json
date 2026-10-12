@@ -281,23 +281,23 @@
       "unreachable": 0
     },
     "behaviour": {
-      "files": 193,
-      "cases": 912,
-      "ms": 1443382,
-      "testsMs": 43347.100000000035,
+      "files": 194,
+      "cases": 915,
+      "ms": 1444238,
+      "testsMs": 43361.00000000004,
       "runners": {
         "jest": 68,
-        "node": 125
+        "node": 126
       },
       "unreachable": 0
     },
     "composition": {
-      "files": 56,
-      "cases": 204,
-      "ms": 1170803,
-      "testsMs": 22524,
+      "files": 57,
+      "cases": 206,
+      "ms": 1188175,
+      "testsMs": 22569,
       "runners": {
-        "jest": 56
+        "jest": 57
       },
       "unreachable": 0
     },
@@ -8333,6 +8333,47 @@
       "coveredProdLines": 8706,
       "onlyProdLines": null,
       "testsMs": 22.2
+    },
+    {
+      "file": "tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 3,
+      "rule": "A box nobody can type into that points at another record draws that record's name \u2014 or the word for a pointer with no name \u2014 and the whole-row replace still sends the identifier the record was read with. The proof goes through `writeControls`, the path the sheet's own save takes, so a displayed name can never change what is sent, and the name is never mistaken for a value to validate or a change to save.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 856,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a greyed pointer box drawing a resolved name sends the identifier through the sheet's own write path",
+        "a greyed pointer box drawing the word for a pointer nobody could name sends the identifier through the sheet's own write path",
+        "a box a person can type into keeps the identifier it must send"
+      ],
+      "tests": [
+        {
+          "title": "a greyed pointer box drawing a resolved name sends the identifier through the sheet's own write path",
+          "ms": 12.071769,
+          "measured": false
+        },
+        {
+          "title": "a greyed pointer box drawing the word for a pointer nobody could name sends the identifier through the sheet's own write path",
+          "ms": 0.946481,
+          "measured": false
+        },
+        {
+          "title": "a box a person can type into keeps the identifier it must send",
+          "ms": 0.892671,
+          "measured": false
+        }
+      ],
+      "loaded": 30,
+      "coveredProdLines": 8974,
+      "onlyProdLines": null,
+      "testsMs": 13.9
     },
     {
       "file": "tests/a-keep-reason-names-siblings-the-table-holds.test.ts",
@@ -16775,6 +16816,41 @@
       "tier": "merge",
       "reach": "npm test (jest half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx",
+      "runner": "jest",
+      "layer": "composition",
+      "cases": 2,
+      "rule": "A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sentence the command leaves behind is filed at that record's address, in the kit's own frame when the document declared none, and it is filed before the write is counted \u2014 the record screen hears the sentence in the same focus that reconciles the write, so a later filing would be a sentence nobody reads.",
+      "ruleSource": "first comment",
+      "tier": "merge",
+      "reach": "npm test (jest half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+      "ms": 17372,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+      "titles": [
+        "yes files the kit's success line at the record's address before the write is counted",
+        "a refused command files no sentence and counts no write"
+      ],
+      "tests": [
+        {
+          "title": "yes files the kit's success line at the record's address before the write is counted",
+          "ms": 9,
+          "measured": false
+        },
+        {
+          "title": "a refused command files no sentence and counts no write",
+          "ms": 36,
+          "measured": false
+        }
+      ],
+      "loaded": 130,
+      "coveredProdLines": 1289,
+      "onlyProdLines": null,
+      "testsMs": 45
     },
     {
       "file": "tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx",
