@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 204,
+   "files": 205,
    "cases": 918,
    "ms": 1445375,
    "testsMs": 43814.00000000003,
    "runners": {
     "jest": 71,
-    "node": 133
+    "node": 134
    },
    "unreachable": 0
   },
@@ -17101,6 +17101,26 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/the-language-a-sheet-writes-is-the-one-the-server-named.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "A record's words arrive in some language, and the server says which: `_i18n` names the translatable fields it served and the language each one's words are in. What a sheet may write, and where, follows from that note alone \u2014 never from what the text looks like. Four answers are owed here: a changed field the server named in the language the sheet reads in is written *in that language* (a PATCH that names no language writes the record, so Portuguese words sent bare would be filed as the English they were translated from); a changed field named in a language the sheet does not read is the record's own copy and is written bare, as it always was; a field the server said nothing about is the record's own copy too; and a translation changed beside a field that language cannot carry is two writes at two addresses, which is a refusal rather than half of one.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/the-language-a-sheet-writes-is-the-one-the-server-named.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts",

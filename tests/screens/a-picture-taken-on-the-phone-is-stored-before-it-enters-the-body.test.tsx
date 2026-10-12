@@ -71,8 +71,8 @@ test("a picture taken here is stored as a file, and the body points at that file
   expect(camera).toBeDefined();
   await act(async () => camera!.onPress());
   await waitFor(() => expect(api.upload).toHaveBeenCalled());
-  const [entry_, form, query] = jest.mocked(api.upload).mock.calls[0]!;
-  expect(entry_.path).toBe(files.path);
+  const [where, form, query] = jest.mocked(api.upload).mock.calls[0]!;
+  expect(where.path).toBe(files.path);
   expect(query).toBe("?image=true");
   expect(form).toBeInstanceOf(FormData);
   expect(screen.getByTestId("input-body").props.value).toContain(
