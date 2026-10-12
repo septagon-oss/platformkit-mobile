@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `6c0fa5452` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `b4a75466a` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 30 | 181 | 46.9 s | 65 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 202 | 918 | 43.8 s | 1445 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 59 | 206 | 22.6 s | 1188 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 60 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 347
+* keep: 348
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 347 — 161 `tests/*.test.ts` (node), 130 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* files inventoried: 348 — 161 `tests/*.test.ts` (node), 131 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1305; cases in files no runner reaches: 35
 * isolated wall time: contract 65 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -334,6 +334,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/route.test.tsx | jest | composition | 10 | 24265 | 1028 | 0 | 0 of 10 | — | 0 | keep | A renderer pack's screen: it says what it was given. |
 | tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
+| tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at th… |
 | tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx | jest | composition | 2 | 17918 | 11 |  | not measured | — | 0 | keep | A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answe… |
 | tests/screens/activity-catalog-withdrawal-inflight.test.tsx | jest | composition | 2 | 23253 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a late actor lookup cannot restore identity after catalog withdrawal |
 | tests/screens/activity-directory-catalog-withdrawal.test.tsx | jest | composition | 2 | 23238 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light catalog withdrawal removes cached actor details while retaining readable history |

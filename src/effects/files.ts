@@ -25,7 +25,7 @@ export function contentAddress(e: Entry, id: string): string {
  * that asks again is not mistaken for the attempt that was refused.
  *
  * Nothing is prepared for a read this phone cannot authorise: no file module in this
- * server's catalogue, no named server or sign-in means no address is asked at all, and
+ * server's catalogue, no server or session to name means no address is asked at all, and
  * the figure says the picture is unavailable rather than asking anonymously.
  */
 export function fileResource(input: {
@@ -39,7 +39,10 @@ export function fileResource(input: {
   readonly attempt: number;
   readonly cookie: string | undefined;
 }): ImageResource | undefined {
-  const scope = heldScope(input.server, input.userId ?? "");
+  // Whose these bytes are: the person the server named, or, until it names one, the
+  // session that stands in for them. Either way a picture decoded under one session is
+  // never painted under another, and a read with neither is a read not made.
+  const scope = heldScope(input.server, input.userId ?? input.cookie ?? "");
   if (scope === undefined || input.entry === undefined) return undefined;
   return {
     scope: JSON.stringify([scope.server, scope.userId]),

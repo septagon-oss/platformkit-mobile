@@ -97,12 +97,8 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
 
   useEffect(() => {
     const ids = wanted === "" ? [] : wanted.split(",");
-    if (ids.length === 0) return;
+    if (ids.length === 0 || files === undefined) return;
     const started = ++generation.current;
-    if (files === undefined) {
-      setRows((held) => ({ ...held, ...Object.fromEntries(ids.map((id) => [id, null])) }));
-      return;
-    }
     void (async () => {
       for (const id of ids) {
         try {
@@ -143,6 +139,20 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
   const items = useMemo(() => {
     const out: Record<string, MediaItem> = {};
     for (const figure of figures) {
+      // Nothing to ask: this server's catalogue names no file module, so no figure can
+      // have its frame measured or its bytes read. Said as an unavailable figure — which
+      // stops the native reading of the whole body — rather than a wait that never ends.
+      if (files === undefined) {
+        out[figure.id] = {
+          id: figure.file,
+          width: 0,
+          height: 0,
+          description: figure.alt,
+          decorative: figure.alt === "",
+          state: "unavailable",
+        };
+        continue;
+      }
       const frame = rows[figure.file];
       // Its row has not been read yet: the figure says it is arriving and reserves no box.
       if (frame === undefined) continue;
@@ -157,7 +167,7 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
       };
     }
     return out;
-  }, [figures, rows, painted]);
+  }, [figures, rows, painted, files]);
 
   const model = deriveProse({ source, figures: items }, presentation);
   if (!model.ok) return <>{fallback}</>;

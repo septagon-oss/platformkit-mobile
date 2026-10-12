@@ -847,7 +847,10 @@ heading outside `##`–`####`) is refused as `unsupported-format` so a screen dr
 whole body as prose rather than less of it. Those questions are asked of the body's
 prose only: a fence and a code span hold what §1 stored verbatim, so a `# comment` in a
 shell block, an image quoted in a fence or the `pk-file:` scheme named in a span is code
-and is drawn as it was written — the same reading answers `phoneEditorHolds`, which
+and is drawn as it was written — and a fence is ended only by a marker of its own
+character at least as wide as the one that opened it, which is how a body can describe a
+fenced block without its example turning into headings and figures. The same reading
+answers `phoneEditorHolds`, which
 therefore calls a fence quoting a table no table. `Prose` draws the runs in the kit's type and
 the figures in the slot the media family already owns: the box is reserved from the
 frame the server measured, so no paragraph moves when the bytes arrive; a figure that
@@ -858,10 +861,17 @@ about at all, and a ready one is invited by name.
 is handed and knows no library, no transport and no file byte. The parser behind that face
 is `markdown-it@14.3.1`, held by one `overrides` entry: the face asks for `^10`, whose
 `linkify-it` carries two high filings with no release inside its reach, and 14.3.1 is the
-first release that answers every filing the registry names against either package. Until
-the file read reaches each figure, generated screens still show a rich text body as prose.
+first release that answers every filing the registry names against either package.
+A generated record reads its own rich text field: `derive.richBody` answers which field is
+one and `RichTextBody` supplies the reading — each figure's `file/files` row for the frame
+to reserve, and the bytes at the file's own content address, prepared by `fileResource`
+with the session's scope — and the reader is named after the field it reads
+(`field-<name>-prose`), so two bodies on one screen stay two readers. A body that cannot
+be read whole, because a construct refuses the segmentation or a figure's file cannot be
+read, is drawn as the value `Value` gives it: the whole body as text, never less of it.
 
-**Limits** — only the reading of a body is here. There is no native editor, no upload and
+**Limits** — the reading of a body is here; its writing and its translating are not.
+There is no native editor, no upload and
 no language slice yet, and the full translator side-by-side view stays on the web: the
 phone reads a body in the reader's own language and offers no second column of another
 language beside it.

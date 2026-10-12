@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 59,
+   "files": 60,
    "cases": 206,
    "ms": 1188175,
    "testsMs": 22569,
    "runners": {
-    "jest": 59
+    "jest": 60
    },
    "unreachable": 0
   },
@@ -17418,6 +17418,26 @@
    "coveredProdLines": 1423,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at the file's content address with the session this app holds. A file this phone cannot read takes the native reading of the whole body away \u2014 and every word of the body stays on it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",

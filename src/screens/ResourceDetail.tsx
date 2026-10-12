@@ -159,7 +159,12 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         // this screen that can ask for a figure's file, and the organism that decides
         // which field is one (derive.richBody).
         richText={(body, testID, fallback) => (
-          <RichTextBody presentation={presentation} source={body} testID={testID} fallback={fallback} />
+          <RichTextBody
+            presentation={presentation}
+            source={body}
+            testID={testID}
+            fallback={fallback}
+          />
         )}
       />
     </>

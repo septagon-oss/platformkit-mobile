@@ -113,13 +113,19 @@ function Figure({
         {...testable(`${scope}-figure-open-${figure.id}`)}
       >
         <View style={[s.box, box]}>
+          {/* The loader is mounted from the first frame, not from the first byte: the ask
+              for a picture is what turns `loading` into `ready`, so a slot that waited for
+              `ready` before mounting it would wait forever. The placeholder is drawn under
+              it, in the box the server's own measurements reserved, and the picture paints
+              over it as it arrives. */}
           {figure.state === "loading" ? (
             <Skeleton
               label={figure.loadingLabel}
               motion={figure.motion}
               testID={`${scope}-figure-loading-${figure.id}`}
             />
-          ) : figure.canRetry ? (
+          ) : null}
+          {figure.canRetry ? (
             <Text role="caption" tone="muted">
               {figure.reason}
             </Text>
