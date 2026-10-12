@@ -143,21 +143,23 @@ export function ResourceForm({
   // control writes its marks where the person was typing, and a box that never reported one
   // is edited at its end.
   const [carets, setCarets] = useState<Record<string, Caret>>({});
-  // The body each box shows, and where its caret last stood, read at the moment an edit is
-  // applied rather than the moment a control was pressed. The two are not the same instant
-  // twice over: a body read from the server has not been typed in and is still what the
-  // person sees, and an answer that arrives from the file list a second later lands among
-  // whatever has been typed since it was asked for. The map is written as this renders, so
-  // it is never behind the box it names.
+  // The body each box shows, and where its caret last stood, kept where an answer that
+  // arrives later can still read them: a formatting control writes where the person was
+  // typing, and a figure whose file list answered a second later belongs among whatever has
+  // been typed since it was asked for — a body read from the server has never been typed in
+  // and is still the body on the screen. `apply` runs from a press, outside any render, so
+  // this is refreshed after the render that committed the box, never during one.
   const drafts = useRef(new Map<string, Draft>());
-  drafts.current = new Map(
-    blocks.flatMap((block) =>
-      block.controls.map(
-        (c) =>
-          [c.field.name, { text: current(c), caret: carets[c.field.name] ?? NO_CARET }] as const,
+  useEffect(() => {
+    drafts.current = new Map(
+      blocks.flatMap((block) =>
+        block.controls.map(
+          (c) =>
+            [c.field.name, { text: current(c), caret: carets[c.field.name] ?? NO_CARET }] as const,
+        ),
       ),
-    ),
-  );
+    );
+  });
   const apply = (name: string, edit: (draft: Draft) => Draft) => {
     const draft = drafts.current.get(name) ?? { text: held[name] ?? "", caret: NO_CARET };
     const next = edit(draft);
@@ -165,8 +167,9 @@ export function ResourceForm({
     onChange(name, next.text);
     setCarets((at) => ({ ...at, [name]: next.caret }));
   };
-  // A figure is inserted for a file this server holds: the surface asks which one, and the
-  // line that figure is gets written at the caret by the one code that edits a draft.
+  // A figure is a file the server holds: the surface asks where the picture comes from and
+  // answers with the file it ended up as, and the line that figure is gets written at the
+  // caret by the one code that edits a draft.
   const placeFigure = (name: string, picked: { readonly name: string; readonly file: string }) =>
     apply(name, (draft) => insertLine(draft, figureLine(picked.name, picked.file)));
   const named = (c: Control) => `${c.label}, ${c.required ? kit.required : kit.optional}`;
