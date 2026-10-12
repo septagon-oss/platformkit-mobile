@@ -405,7 +405,10 @@ test("the workflow is scheduled, blocking, and asks for nothing but a read", () 
   assert.match(text, /^ {6}PK_KERNEL_REPOSITORY: septagon-oss\/platformkit$/m);
   // The job token is nobody on the kernel's repository since the forge began requiring sign-in to read,
   // so the read is made with a repository secret and falls back to the job token where none is set.
-  assert.match(text, /^ {6}GITHUB_TOKEN: \$\{\{ secrets\.PK_KERNEL_TOKEN \|\| secrets\.GITHUB_TOKEN \}\}$/m);
+  assert.match(
+    text,
+    /^ {6}GITHUB_TOKEN: \$\{\{ secrets\.PK_KERNEL_TOKEN \|\| secrets\.GITHUB_TOKEN \}\}$/m,
+  );
   assert.match(text, /^ {8}run: npm run check:kernel-main$/m);
   // The loop's own probe, as a case: what the metric measures is what the suite
   // protects. A comment that says the words would fail here too, which is the
