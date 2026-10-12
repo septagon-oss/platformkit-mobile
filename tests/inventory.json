@@ -281,13 +281,13 @@
       "unreachable": 0
     },
     "behaviour": {
-      "files": 195,
-      "cases": 916,
-      "ms": 1444661,
-      "testsMs": 43381.30000000003,
+      "files": 196,
+      "cases": 918,
+      "ms": 1445375,
+      "testsMs": 43814.00000000003,
       "runners": {
         "jest": 68,
-        "node": 127
+        "node": 128
       },
       "unreachable": 0
     },
@@ -15764,6 +15764,41 @@
       "tier": "push(scoped)+merge(full)",
       "reach": "npm test (node half)",
       "runsNowhere": false
+    },
+    {
+      "file": "tests/served-kernel-that-never-answers-refuses-the-journey.test.ts",
+      "runner": "node",
+      "layer": "behaviour",
+      "cases": 2,
+      "rule": "The harness waits for the kernel it served to answer /health, with a bound of sixty turns. What happens at the end of that bound is the whole difference between a red that names the server and a red that names thirteen flows: a loop that simply ends would hand `scripts/e2e/run.sh` a port that holds nothing, and every journey would then be refused by its own timeout while the log said nothing about the server that never bound. So the bound refuses, prints what the kernel logged, and the journeys are not reached. The cases below plant the tools the harness asks for, and a kernel of their own \u2014 one that stays alive and answers nothing, one that answers \u2014 so what is under test is the branch after the wait and not a device or a database.",
+      "ruleSource": "first comment",
+      "tier": "push(scoped)+merge(full)",
+      "reach": "npm test (node half)",
+      "runsNowhere": false,
+      "verdict": "keep",
+      "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+      "ms": 714,
+      "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+      "titles": [
+        "a kernel alive and answering no /health ends the run naming the wait, the port and its own log",
+        "the same harness reaches the journeys when the served kernel answers /health"
+      ],
+      "tests": [
+        {
+          "title": "a kernel alive and answering no /health ends the run naming the wait, the port and its own log",
+          "ms": 305.932772,
+          "measured": false
+        },
+        {
+          "title": "the same harness reaches the journeys when the served kernel answers /health",
+          "ms": 126.802615,
+          "measured": false
+        }
+      ],
+      "loaded": 0,
+      "coveredProdLines": 0,
+      "onlyProdLines": null,
+      "testsMs": 432.7
     },
     {
       "file": "tests/session-load-order.test.ts",

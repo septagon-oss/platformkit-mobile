@@ -1331,7 +1331,11 @@ assigned in a statement of its own, not substituted inside the `echo` that
 publishes it — because an empty step output is a ref the checkout fills with the
 kernel's default branch, which is the one build this journey must never serve.
 Its own database, tenant, administrator and password are created by the run and
-dropped with it, and the Maestro report is printed in the job log. The device is
+dropped with it, and the Maestro report is printed in the job log. The wait for
+`/health` has a bound, and a kernel that stays alive and answers nothing ends the
+run naming the port, the commit it was built from and its own log — a journey run
+against no server would report thirteen timeouts and say nothing about the server
+that never bound. The device is
 host-level, so the job's concurrency group is named for the device and not the
 ref, and the step that boots the emulator refuses a host that already has a
 device attached — in any state adb lists it, because an `offline` entry is

@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `69a324392` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `4050b3152` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 28 | 180 | 46.8 s | 64 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 195 | 916 | 43.4 s | 1445 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 196 | 918 | 43.8 s | 1445 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 57 | 206 | 22.6 s | 1188 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 56 | 48 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 336
+* keep: 337
 * merge: 0
 * delete: 0
 
@@ -46,8 +46,8 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 336 — 155 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1302; cases in files no runner reaches: 35
+* files inventoried: 337 — 156 `tests/*.test.ts` (node), 125 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 13 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1304; cases in files no runner reaches: 35
 * isolated wall time: contract 64 s, behaviour 1445 s, composition 1188 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
@@ -298,6 +298,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/scale.test.ts | node | behaviour | 2 | 344 | 7.9 | 0 | 0 of 2 | — | 0 | keep | A distance is written once, in src/ui/scale.ts. This reads every other presentation source and refuses a nonzero numeric literal where a style or a prop asks f… |
 | tests/secret-scan-exemption-target.test.ts | node | behaviour | 1 | 356 | 1.5 | 0 | 0 of 1 | — | 0 | keep | The history scan's exemption is matched against the secret a rule captured, not against the line that holds it. gitleaks reads `regexTarget = "line"` as "swall… |
 | tests/secret-scan-fixture-allowlist.test.ts | node | behaviour | 6 | 348 | 4.2 | 0 | 0 of 6 | — | 0 | keep | What the history scan is told to swallow, held to its size. `scripts/gitleaks.sh` reads every commit, so a credential-shaped string a test introduces stays und… |
+| tests/served-kernel-that-never-answers-refuses-the-journey.test.ts | node | behaviour | 2 | 714 | 432.7 |  | not measured | — | 0 | keep | The harness waits for the kernel it served to answer /health, with a bound of sixty turns. What happens at the end of that bound is the whole difference betwee… |
 | tests/session-load-order.test.ts | node | behaviour | 1 | 295 | 2.7 | 0 | 0 of 1 | — | 0 | keep | Secure storage holds one session at a time. A load that starts while a save is still writing has to answer with the session that replaced it, not the one it be… |
 | tests/session-save-order.test.ts | node | behaviour | 1 | 260 | 2.5 | 0 | 0 of 1 | — | 0 | keep | Saves settle in the order they were asked for. When a slow save is still writing, the session a relaunch restores is the one asked for last, never the one alre… |
 | tests/session.test.ts | node | behaviour | 7 | 273 | 5.9 | 4 | 1 of 7 | — | 0 | keep | (no first comment; first test title) one versioned secure record keeps origin and cookie together across launches |

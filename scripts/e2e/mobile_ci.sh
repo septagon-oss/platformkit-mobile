@@ -258,8 +258,12 @@ fi
 echo "mobile_ci: serving on $port"
 run_app run --config "$work/config.yaml" >"$work/app.log" 2>&1 &
 app_pid=$!
+served=false
 for _ in $(seq 1 60); do
-  if curl -fsS "http://localhost:$port/health" >/dev/null 2>&1; then break; fi
+  if curl -fsS "http://localhost:$port/health" >/dev/null 2>&1; then
+    served=true
+    break
+  fi
   if ! kill -0 "$app_pid" 2>/dev/null; then
     echo "mobile_ci: the server stopped before it served:" >&2
     cat "$work/app.log" >&2
@@ -267,6 +271,17 @@ for _ in $(seq 1 60); do
   fi
   sleep 1
 done
+# The bound itself needs a refusal: a process that is alive and silent has answered
+# nothing, and without this branch the loop simply ends, the journeys run against a
+# port that holds no server, and every flow's own timeout is reported as a device that
+# failed rather than a server that never came up. platformkit's harness refuses at this
+# same moment, and the log is the only place a configuration that would not bind — a
+# database it cannot reach, a NATS it cannot dial — is said at all.
+if ! $served; then
+  echo "mobile_ci: the kernel built from ${pin} stayed alive for 60 seconds and never answered /health on $port; its log:" >&2
+  cat "$work/app.log" >&2
+  exit 1
+fi
 
 # One contract, both runners: what this script invents it exports, and what the
 # job names arrives in the environment it was named in. TITLE stays run.sh's to
