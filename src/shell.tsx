@@ -350,9 +350,11 @@ export function Shell({
                 "The saved sign-in could not be cleared. Please try again before closing the app.",
             });
         }
-        // A server this phone could not ask keeps its exception, and the honest
-        // answer to "is my key still live" from a refusal to answer is that it
-        // may be: the notice is owed, not swallowed.
+        // A server that would not answer the ask about the key keeps its exception,
+        // and the honest answer to "is my key still live" from a refusal to answer is
+        // that it may be: the notice is owed, not swallowed. Nothing that failed after
+        // the key was answered arrives here — logout has reported the key by then and
+        // closes the session it minted that key with on its own terms (SignOut).
         const { live } = await stopped.catch(() => ({ live: true }));
         // One notice slot: a phone that could not clear its own storage has that
         // to say first, and it is about the phone. A connection that held no key,

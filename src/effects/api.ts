@@ -120,6 +120,14 @@ export type SignInStep =
  * not know (src/core/signInOutcome.ts's unrecognisedCaller), leave nothing to
  * remove, and a screen that sent the person off to remove it would be sending them
  * to a device that is not there or already stopped.
+ *
+ * The key is all this record speaks of. The sign-in session that minted it closes
+ * with it, and a session the server would not close says nothing about the key — the
+ * ask about the key went out with a different credential — and nothing the person
+ * could reach: that cookie is in no store, is presented by no later request, and
+ * leaves this phone's memory with the call, so there is no second ask to make and no
+ * device list that lists it. A notice spent on it would report a stopped key as
+ * live, which is the one thing a sign-out may not say.
  */
 export interface SignOut {
   readonly revoked: boolean;
@@ -196,6 +204,9 @@ export interface Api {
    * logout forgets this connection's key here and, when it holds the session that
    * minted the key, stops it on the server and closes that session too. The answer
    * says whether the server stopped it (SignOut); forgetting does not wait for one.
+   * Only the key's own failure to answer is thrown, and only after the session has
+   * been asked: a session the server would not close is the server's to end, and
+   * changes nothing in what was learned about the key.
    */
   logout(): Promise<SignOut>;
   catalog(): Promise<Catalog>;
@@ -696,6 +707,13 @@ export function createApi(
       // sign-in's session says the session is gone, and a dead session says
       // nothing about the key outliving it.
       let unrecognised = false;
+      /**
+       * unanswered is the revoke's own failure to answer at all. It is held while the
+       * session below is still asked and thrown once that is done: the key's verdict
+       * is then "unknown", and only the failure of the ask about the key may say so —
+       * nothing that happens afterwards may take its place.
+       */
+      let unanswered: unknown;
       try {
         await json(
           "POST",
@@ -709,23 +727,30 @@ export function createApi(
         // A refusal is the server's own no about this key, and the caller has to
         // be able to say it: reported rather than thrown, because this phone's
         // half of the sign-out is already done and a throw would be swallowed as
-        // if the two halves were one. Anything else — a server that answered 503,
-        // or answered in a shape this contract refuses — says nothing about the
-        // key and keeps its exception.
-        if (!refused(error)) throw error;
-        revoked = false;
-        unrecognised = sign === undefined && unrecognisedCaller(error);
+        // if the two halves were one. A server that refused to answer at all — a
+        // 503, or an answer in a shape this contract refuses — is held below rather
+        // than thrown here, so the session it is signed out of is still closed.
+        if (!refused(error)) unanswered = error;
+        else {
+          revoked = false;
+          unrecognised = sign === undefined && unrecognisedCaller(error);
+        }
       }
       // The session that signed in closes with the key it minted: a sign-out that
-      // left it standing would leave the person signed in somewhere. Its own
-      // refusal is not reported as the key's — the key was already stopped or not,
-      // and one sentence on screen answers one question.
-      if (sign !== undefined)
+      // left it standing would leave the person signed in somewhere. It is asked
+      // whatever the revoke answered — a key the server would not stop is still a
+      // session this phone no longer holds — and its own answer, refusal or
+      // failure, is not the key's: see SignOut.
+      if (sign !== undefined) {
         try {
           await json("POST", LOGOUT, () => undefined, undefined, { cookie: sign });
-        } catch (error) {
-          if (!refused(error)) throw error;
+        } catch {
+          // A session this phone could not close is the server's to end at its own
+          // lifetime: the verdict about the key above stands, and no sentence about
+          // a key that could not be stopped is sent the person from here.
         }
+      }
+      if (unanswered !== undefined) throw unanswered;
       return { revoked, live: !revoked && !unrecognised };
     },
     async me() {
