@@ -9,7 +9,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { expiredCredential, factorRequired } from "../src/core/signInOutcome";
+import {
+  ANONYMOUS_CODE,
+  expiredCredential,
+  factorRequired,
+  unrecognisedCaller,
+} from "../src/core/signInOutcome";
 
 const document = JSON.parse(readFileSync("testdata/openapi.json", "utf8")) as {
   paths: Record<string, Record<string, Record<string, unknown>>>;
@@ -94,4 +99,34 @@ test("a dead key is an expired credential; a price and a permission are not", ()
   assert.equal(expiredCredential({ status: 401, detail: 7 }), false);
   assert.equal(expiredCredential(null), false);
   assert.equal(expiredCredential(new Error("network unreachable")), false);
+});
+
+// kit/httpx/authorize.go refuses everything with a 403 — "Every refusal is a 403,
+// never a 401" — and a bearer that buys nobody is carried on as an anonymous
+// caller, so the dead key arrives as the 403 naming AUTH_ANONYMOUS at every door
+// the phone knocks on. The 403 that names the caller and refuses the asking
+// (AUTH_DENIED) is the opposite answer: that key is live and its person is simply
+// not granted, and a phone that read it as expiry would sign the person out of a
+// session that is working.
+test("a caller the server does not know is told from one it refuses the asking", () => {
+  const anonymous = { status: 403, type: "about:blank", detail: `${ANONYMOUS_CODE}: required` };
+  assert.equal(unrecognisedCaller(anonymous), true);
+  assert.equal(expiredCredential(anonymous), true);
+  // Named, and refused for what it asked: the key still works at other doors.
+  const denied = {
+    status: 403,
+    detail:
+      "AUTH_DENIED: this credential carries its own scope, and this operation answers only to its holder",
+  };
+  assert.equal(unrecognisedCaller(denied), false);
+  assert.equal(expiredCredential(denied), false);
+  // A refusal is read by its code, never by a sentence that happens to contain
+  // it: the kernel writes the code first.
+  assert.equal(
+    unrecognisedCaller({ status: 403, detail: "you may not read AUTH_ANONYMOUS events" }),
+    false,
+  );
+  assert.equal(unrecognisedCaller({ status: 401, detail: `${ANONYMOUS_CODE}: required` }), false);
+  assert.equal(unrecognisedCaller({ status: 403 }), false);
+  assert.equal(unrecognisedCaller(null), false);
 });

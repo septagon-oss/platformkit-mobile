@@ -1000,7 +1000,8 @@ the factor person `scripts/e2e/mobile_ci.sh` enrols; and `e2e/flows/sign-in-fact
 over two arguments, so an app whose surface differs from this one passes its own
 catalogue to the same rule; `KEY_NAME` and the mint's `tokenName` let a composing
 app name its own key; and the sign-out answers `SignOut`, so a product's screen
-can say whether the server stopped the key or only the phone forgot it.
+can tell apart the server having stopped the key, the person still having one to
+stop, and a connection that held none at all.
 
 Two limits belong with that. A key this phone _restored_ from secure storage
 carries no sign-in session with it — nothing here stores a session, and only the
@@ -1010,9 +1011,15 @@ this phone builds to, and it is a refusal the screen says out loud — "This dev
 key could not be revoked from here; remove it from your account's devices." —
 rather than a signed-out screen letting the person believe the credential dead: the
 account's list of its devices is the door that remains to a phone holding a key it
-cannot spend. Whether the kernel ever gives a scoped credential a door to retire
-its own key is the kernel's to decide; if it does, a restored key stops itself at
-sign-out, and this paragraph and the words above change with it. The
+cannot spend. That sentence is owed to such a key, and to no other: a sign-out on a
+connection that holds no key, and one whose key the server refuses as a caller it
+does not know (the kernel answers a dead bearer at every door as an anonymous
+caller — a 403 naming `AUTH_ANONYMOUS`, never a 401), leaves nothing live to
+remove, and the screen says nothing about a key rather than sending the person to
+remove a device that is not there or already stopped. Whether the kernel ever
+gives a scoped credential a door to retire its own key is the kernel's to decide;
+if it does, a restored key stops itself at sign-out, and this paragraph and the
+words above change with it. The
 device journey for the code step is a state behind a password, so
 `design gate` measures `/sign-in` and not the step, and no emulator ran on this
 delivery: SecureStore and native cookie behaviour remain unproven here.

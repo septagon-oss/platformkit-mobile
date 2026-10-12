@@ -129,36 +129,41 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
     setConnection(value);
   }, []);
 
-  const load = useCallback(async (a: Api, started: number, url: string) => {
-    if (generation.current !== started) return;
-    dispatch({ type: "session", generation: started });
-    try {
-      // Observe both responses together. A malformed identity fails this load
-      // in either arrival order, and neither request may reject unobserved.
-      const identity = a.me().then((who) => {
-        if (generation.current === started) setIdentity(who);
-      });
-      const [, catalog] = await Promise.all([identity, a.catalog()]);
-      if (generation.current === started) {
-        dispatch({ type: "catalog", generation: started, catalog });
-      }
-    } catch (e) {
+  const load = useCallback(
+    async (a: Api, started: number, url: string) => {
       if (generation.current !== started) return;
-      if (expiredCredential(e)) {
-        // The server refused this key — revoked, spent, or older than its own
-        // lifetime. There is nothing to revoke in answer to a 401 (the revoke
-        // is a signed-in request of its own), so the phone forgets the key and
-        // says what happened on the way back to the form, with the server
-        // still filled in. Signing in again is the only way out, and no screen
-        // or renderer is told to work that out for itself.
-        setIdentity(undefined);
-        dispatch({ type: "no-session", generation: started, error: kitEnglish.sessionExpired });
-        void sessions.clear(url).catch(() => undefined);
-        return;
+      dispatch({ type: "session", generation: started });
+      try {
+        // Observe both responses together. A malformed identity fails this load
+        // in either arrival order, and neither request may reject unobserved.
+        const identity = a.me().then((who) => {
+          if (generation.current === started) setIdentity(who);
+        });
+        const [, catalog] = await Promise.all([identity, a.catalog()]);
+        if (generation.current === started) {
+          dispatch({ type: "catalog", generation: started, catalog });
+        }
+      } catch (e) {
+        if (generation.current !== started) return;
+        if (expiredCredential(e)) {
+          // The server does not know this key — revoked from the account's devices,
+          // spent, or older than the lifetime its mint gave it. A key the kernel
+          // will not name has nothing to revoke in answer to it and nothing left to
+          // remove, so the phone drops the connection that carries it, forgets it
+          // here, and says what happened on the way back to the form with the
+          // server still filled in. Signing in again is the only way out, and no
+          // screen or renderer is told to work that out for itself.
+          setIdentity(undefined);
+          connect(url, createApi(url));
+          dispatch({ type: "no-session", generation: started, error: kitEnglish.sessionExpired });
+          void sessions.clear(url).catch(() => undefined);
+          return;
+        }
+        dispatch({ type: "failed", generation: started, error: message(e) });
       }
-      dispatch({ type: "failed", generation: started, error: message(e) });
-    }
-  }, []);
+    },
+    [connect],
+  );
 
   useEffect(() => {
     const started = begin();
@@ -211,11 +216,12 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
             // opened belongs to its clock, and the code step is the screen's,
             // not a phase of the session. What this phone does hold is the
             // refusal itself — the answer to a code spends a window only the
-            // server that refused can open.
-            if (generation.current === started) {
-              challenge.current = { api: a, baseURL: url };
-              dispatch({ type: "no-session", generation: started });
-            }
+            // server that refused can open. An attempt that lost the race opens
+            // no window here and hands back nothing: a code step drawn over the
+            // winner's session could only be refused.
+            if (generation.current !== started) return undefined;
+            challenge.current = { api: a, baseURL: url };
+            dispatch({ type: "no-session", generation: started });
             return answer;
           }
           if (generation.current !== started) {
@@ -319,10 +325,15 @@ export function Shell({ baseURL: initialURL, renderers, children, tokenName = KE
                 "The saved sign-in could not be cleared. Please try again before closing the app.",
             });
         }
-        const { revoked } = await stopped.catch(() => ({ revoked: false }));
+        // A server this phone could not ask keeps its exception, and the honest
+        // answer to "is my key still live" from a refusal to answer is that it
+        // may be: the notice is owed, not swallowed.
+        const { live } = await stopped.catch(() => ({ live: true }));
         // One notice slot: a phone that could not clear its own storage has that
-        // to say first, and it is about the phone.
-        if (!revoked && cleared && generation.current === started)
+        // to say first, and it is about the phone. A connection that held no key,
+        // and a key the server refused as a caller it does not know, leave no key
+        // standing, and no sentence about one is sent the person to their account.
+        if (live && cleared && generation.current === started)
           dispatch({
             type: "signed-out",
             generation: started,

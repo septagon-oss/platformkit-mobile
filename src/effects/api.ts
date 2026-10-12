@@ -24,7 +24,7 @@
 import { type Catalog, type Entry, parseCatalog, CatalogError } from "../core/catalog";
 import { row, page, identity, trail, issuedToken, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
-import { factorRequired } from "../core/signInOutcome";
+import { factorRequired, unrecognisedCaller } from "../core/signInOutcome";
 import { delegableScopes } from "../core/scopes";
 import { declaredGrants } from "../generated/grants.gen";
 import { kitEnglish } from "../core/kitCopy";
@@ -106,16 +106,24 @@ export type SignInStep =
   { readonly kind: "signed-in" } | { readonly kind: "factor-required"; readonly email: string };
 
 /**
- * SignOut is what a sign-out leaves: this phone has forgotten its key either way,
- * and `revoked` says whether the server said it stopped that key too. The two
- * differ for a key this phone restored from storage: it holds the secret but not
- * the session its mint used, and the revoke answers only to the holder, so the
- * forgotten key stays live until the person stops it where their account lists
- * its devices. A screen that said "signed out" over a revoked=false would be
- * saying the credential is dead.
+ * SignOut is what a sign-out leaves: this phone has forgotten its key either way.
+ * Two questions remain, and one sentence answers only one of them.
+ *
+ * `revoked` is what the server did: it stopped the key this connection held.
+ * `live` is what the person still has to do: this phone forgot a key the server
+ * may still spend. They differ for a key this phone restored from storage — it
+ * holds the secret but not the session its mint used, and the revoke answers only
+ * to the holder — so that key waits in the account's device list until the person
+ * stops it there, and a screen that said only "signed out" would hand them a live
+ * credential they believe dead. Both are false where there is no key to speak of:
+ * a connection that held none, and a key the server refuses as a caller it does
+ * not know (src/core/signInOutcome.ts's unrecognisedCaller), leave nothing to
+ * remove, and a screen that sent the person off to remove it would be sending them
+ * to a device that is not there or already stopped.
  */
 export interface SignOut {
   readonly revoked: boolean;
+  readonly live: boolean;
 }
 
 /** Screen projection; wire events are validated in full before reaching it. */
@@ -657,15 +665,23 @@ export function createApi(
       const sign = session;
       bearer = undefined;
       session = undefined;
-      if (!key) return { revoked: false };
+      // No key, no question: a connection that holds nothing sends no revoke and
+      // has no key for anyone to go and remove.
+      if (!key) return { revoked: false, live: false };
       // The key is revoked at its own address, addressed by its id and never by
       // its secret, and local forgetting does not wait for the answer. What the
       // request presents is the question this ordering decides: auth-token-revoke
       // is httpx.SignedIn(), which refuses a credential carrying its own scopes,
       // so the session that minted the key presents it where this phone still has
       // one, and a restored key presents itself and is refused. The refusal is not
-      // swallowed here: it is the revoked: false a screen then has to say out loud.
+      // swallowed here: it is the live: true a screen then has to say out loud.
       let revoked = true;
+      // unrecognised says the server refused this key as a caller it does not
+      // know, which is the end of the key wherever it is. That answer only speaks
+      // of the key when the key itself was presented: a revoke that went with the
+      // sign-in's session says the session is gone, and a dead session says
+      // nothing about the key outliving it.
+      let unrecognised = false;
       try {
         await json(
           "POST",
@@ -677,13 +693,14 @@ export function createApi(
         );
       } catch (error) {
         // A refusal is the server's own no about this key, and the caller has to
-        // be able to say it: reported as revoked: false rather than thrown,
-        // because this phone's half of the sign-out is already done and a throw
-        // would be swallowed as if the two halves were one. Anything else — a
-        // server that answered 503, or answered in a shape this contract refuses —
-        // says nothing about the key and keeps its exception.
+        // be able to say it: reported rather than thrown, because this phone's
+        // half of the sign-out is already done and a throw would be swallowed as
+        // if the two halves were one. Anything else — a server that answered 503,
+        // or answered in a shape this contract refuses — says nothing about the
+        // key and keeps its exception.
         if (!refused(error)) throw error;
         revoked = false;
+        unrecognised = sign === undefined && unrecognisedCaller(error);
       }
       // The session that signed in closes with the key it minted: a sign-out that
       // left it standing would leave the person signed in somewhere. Its own
@@ -695,7 +712,7 @@ export function createApi(
         } catch (error) {
           if (!refused(error)) throw error;
         }
-      return { revoked };
+      return { revoked, live: !revoked && !unrecognised };
     },
     async me() {
       // auth-me answers to the holder, so while this connection holds the session
