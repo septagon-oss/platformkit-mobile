@@ -6,7 +6,7 @@
 // itself, never through the 401 sentence the screen shows today.
 import { loginIdentity } from "../fakes/wire";
 import { afterEach, beforeEach, expect, jest, test } from "@jest/globals";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import React from "react";
 import { Shell } from "../../src/shell";
 import { SignIn } from "../../src/screens/SignIn";
@@ -64,9 +64,15 @@ async function passwordAccepted() {
     </Shell>,
   );
   await waitFor(() => expect(screen.getByTestId("email")).toBeTruthy());
-  fireEvent.changeText(screen.getByTestId("email"), loginIdentity.email);
-  fireEvent.changeText(screen.getByTestId("password"), "right password");
-  fireEvent.press(screen.getByTestId("submit"));
+  // One awaited act for the three events: React keeps a single stack of act
+  // scopes, and three events fired without awaiting open three scopes whose
+  // unwinding order it cannot recover from. Inside one awaited act they join the
+  // scope already open, so the case below starts on a clean one.
+  await act(() => {
+    fireEvent.changeText(screen.getByTestId("email"), loginIdentity.email);
+    fireEvent.changeText(screen.getByTestId("password"), "right password");
+    fireEvent.press(screen.getByTestId("submit"));
+  });
   await waitFor(() => expect(calls.map((c) => c.call)).toContain("POST /api/v1/auth/login"));
 }
 

@@ -6,7 +6,7 @@
 // forgetting itself: a session refused twice must have been cleared the first
 // time, because the second answer would otherwise write to storage, spend a
 // generation and leave a gap before the sign-in that follows.
-import { loginResponse } from "./fakes/wire";
+import { loginResponse, issuedToken, issuedTokenResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -33,17 +33,23 @@ jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactN
 
 const KEY = "platformkit.session";
 const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
-const saved = { version: 1, baseURL: "https://acme.test", cookie: "pk=stale" };
+const saved = {
+  version: 2,
+  baseURL: "https://acme.test",
+  token: issuedToken.token,
+  tokenId: issuedToken.id,
+};
 const person = {
   userId: "00000001-1111-4111-8111-111111111111",
   email: "a@acme.test",
   roles: [],
-  permissions: [],
+  permissions: ["task:read"],
 };
 const routes = {
   me: "GET /api/v1/auth/me",
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
+  tokens: "POST /api/v1/auth/tokens",
   logout: "POST /api/v1/auth/logout",
   list: "GET /api/v1/note/notes",
 };
@@ -79,7 +85,7 @@ const last = () => navigations[navigations.length - 1];
 /** clearedStorage counts the writes that dropped a cookie and kept the server —
  * what one dead session is asked to do exactly once. */
 const clearedStorage = () =>
-  storedRecords.filter((record) => !(JSON.parse(record) as { cookie?: string }).cookie).length;
+  storedRecords.filter((record) => !(JSON.parse(record) as { token?: string }).token).length;
 
 const realFetch = globalThis.fetch;
 beforeEach(() => {
@@ -111,7 +117,9 @@ describe("a refusal from a session that is already gone", () => {
         return reads === 2 ? unauthorized() : json({ items: [], total: 0 });
       }
       if (key === routes.login)
-        return loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } });
+        if (key === routes.login)
+          return loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } });
+      if (key === routes.tokens) return issuedTokenResponse();
       if (key === routes.me) return json(person);
       return json(catalogDoc);
     }) as typeof fetch;
@@ -172,7 +180,9 @@ describe("a refusal from a session that is already gone", () => {
         return reads.catalog === 2 ? refused[1]!.promise : json(catalogDoc);
       }
       if (key === routes.login)
-        return loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } });
+        if (key === routes.login)
+          return loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } });
+      if (key === routes.tokens) return issuedTokenResponse();
       return json({ items: [], total: 0 });
     }) as typeof fetch;
 

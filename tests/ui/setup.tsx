@@ -1,5 +1,3 @@
-// Before any import of React's act() is taken: this file replaces it.
-import "./act-queue";
 import { feedback, presentation } from "../fakes/presentation";
 // What every component test needs: the native modules that have no JavaScript
 // implementation under Jest, mocked to their shape so an atom that uses them

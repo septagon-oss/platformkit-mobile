@@ -4,7 +4,7 @@
 // that session belonged to, and — when the same person signs back in — sends
 // them back to that address and reads it again. Nothing about the move revokes
 // a cookie this app no longer holds, and nothing about it is decided per screen.
-import { loginResponse } from "./fakes/wire";
+import { loginResponse, issuedToken, issuedTokenResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -27,17 +27,23 @@ jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactN
 
 const KEY = "platformkit.session";
 const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
-const saved = { version: 1, baseURL: "https://acme.test", cookie: "pk=stale" };
+const saved = {
+  version: 2,
+  baseURL: "https://acme.test",
+  token: issuedToken.token,
+  tokenId: issuedToken.id,
+};
 const person = {
   userId: "00000001-1111-4111-8111-111111111111",
   email: "a@acme.test",
   roles: [],
-  permissions: [],
+  permissions: ["task:read"],
 };
 const routes = {
   me: "GET /api/v1/auth/me",
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
+  tokens: "POST /api/v1/auth/tokens",
   logout: "POST /api/v1/auth/logout",
   list: "GET /api/v1/note/notes",
 };
@@ -118,6 +124,7 @@ describe("an expired session", () => {
       [routes.me]: () => json(person),
       [routes.resources]: () => json(catalogDoc),
       [routes.login]: () => loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } }),
+      [routes.tokens]: () => issuedTokenResponse(),
       [routes.list]: () => (refusing ? unauthorized() : json(page)),
     });
     const { rerender } = await render(tree(1));
@@ -147,7 +154,7 @@ describe("an expired session", () => {
     // The dead cookie is gone from secure storage; its server stays there.
     await waitFor(() =>
       expect(JSON.parse(mockStore.get(KEY)!)).toEqual({
-        version: 1,
+        version: 2,
         baseURL: "https://acme.test",
       }),
     );

@@ -5,7 +5,7 @@
 // A session that cannot say who it is inherits nothing either. Signing out is the
 // same line said earlier: the person ending the session themselves leaves the
 // address and the sheet behind then, so nothing waits on the next sign-in.
-import { loginIdentity, loginResponse } from "./fakes/wire";
+import { loginIdentity, loginResponse, issuedToken, issuedTokenResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -28,17 +28,23 @@ jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactN
 
 const KEY = "platformkit.session";
 const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
-const saved = { version: 1, baseURL: "https://acme.test", cookie: "pk=stale" };
+const saved = {
+  version: 2,
+  baseURL: "https://acme.test",
+  token: issuedToken.token,
+  tokenId: issuedToken.id,
+};
 const former = {
   userId: "00000001-1111-4111-8111-111111111111",
   email: "a@acme.test",
   roles: [],
-  permissions: [],
+  permissions: ["task:read"],
 };
 const routes = {
   me: "GET /api/v1/auth/me",
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
+  tokens: "POST /api/v1/auth/tokens",
   list: "GET /api/v1/note/notes",
 };
 
@@ -87,6 +93,7 @@ function answering(who: unknown): void {
   globalThis.fetch = (async (input: string | URL | Request, init: RequestInit = {}) => {
     const key = `${init.method ?? "GET"} ${new URL(String(input)).pathname}`;
     if (key === routes.login) return loginResponse({ headers: { "Set-Cookie": "pk=new; Path=/" } });
+    if (key === routes.tokens) return issuedTokenResponse();
     if (key === routes.me) return json(who);
     return json(catalogDoc);
   }) as typeof fetch;
@@ -116,6 +123,7 @@ async function loseTheSession(who: unknown) {
     [routes.me]: () => json(who),
     [routes.resources]: () => json(catalogDoc),
     [routes.login]: () => loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } }),
+    [routes.tokens]: () => issuedTokenResponse(),
     [routes.list]: () => (refusing ? unauthorized() : json({ items: [], total: 0 })),
   });
   const { rerender } = await render(tree(1));
