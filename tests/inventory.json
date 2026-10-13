@@ -275,49 +275,78 @@
  },
  "totals": {
   "contract": {
-   "files": 30,
-   "cases": 182,
-   "ms": 64996,
-   "testsMs": 46918.00000000001,
+   "files": 34,
+   "cases": 188,
+   "ms": 69773,
+   "testsMs": 47330.200000000004,
    "runners": {
-    "node": 30
+    "node": 34
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 208,
-   "cases": 988,
-   "ms": 1505466,
-   "testsMs": 44140.800000000025,
+   "files": 217,
+   "cases": 1014,
+   "ms": 1512376,
+   "testsMs": 44626.70000000002,
    "runners": {
     "jest": 71,
-    "node": 137
+    "node": 146
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 75,
-   "cases": 234,
-   "ms": 1614680,
-   "testsMs": 26638,
+   "files": 87,
+   "cases": 260,
+   "ms": 1873227,
+   "testsMs": 30150,
    "runners": {
-    "jest": 75
+    "jest": 87
    },
    "unreachable": 0
   },
   "journey": {
-   "files": 56,
-   "cases": 48,
+   "files": 57,
+   "cases": 49,
    "ms": 0,
    "testsMs": 0,
    "runners": {
     "browser": 43,
-    "maestro": 13
+    "maestro": 14
    },
    "unreachable": 43
   }
  },
  "rows": [
+  {
+   "file": "tests/administrator-signs-in.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 1,
+   "rule": "An administrator signs in on the phone and holds a key, as a member does.  The kernel's built-in admin role grants the wildcard (modules/auth/internal/ seed.go: `admin := []string{contracts.Wildcard}`), and login answers a role's permissions as the role stores them (modules/auth/internal/service.go, identify), so an administrator's Identity names \"*\". auth-token-issue refuses that scope by name \u2014 \"the wildcard answers for every permission in the tenant and for no operator permission at all\" (modules/auth/internal/tokens.go, IssueToken) \u2014 with a 422. All three are read at the commit testdata/openapi.source.json pins.  The fake below is that commit's kernel for the two operations this sign-in makes, with its rule for the mint. A sign-in that learns what to ask for from another documented operation answers that one here too; a re-pinned kernel whose mint rule changed changes the rule here with it.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2166,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an administrator signs in on the phone and holds a key"
+   ],
+   "tests": [
+    {
+     "title": "an administrator signs in on the phone and holds a key",
+     "ms": 47.365231,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16363,
+   "onlyProdLines": null,
+   "testsMs": 47.4
+  },
   {
    "file": "tests/advisories.test.ts",
    "runner": "node",
@@ -784,6 +813,47 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/catalog-fallback-validation.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 3,
+   "rule": "Presentation fallback preserves the resource contract: a bad hint can cost its label, but never its fields, commands or validation of required members. The generated operation still owns its stricter published response contract.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1071,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "malformed hints at every nesting level preserve the unhinted catalog",
+    "fallback leaves missing required resource and command members refused by path",
+    "the shell accepts a hint fallback while the generated catalog operation refuses it"
+   ],
+   "tests": [
+    {
+     "title": "malformed hints at every nesting level preserve the unhinted catalog",
+     "ms": 12.550262,
+     "measured": false
+    },
+    {
+     "title": "fallback leaves missing required resource and command members refused by path",
+     "ms": 3.148864,
+     "measured": false
+    },
+    {
+     "title": "the shell accepts a hint fallback while the generated catalog operation refuses it",
+     "ms": 35.728328,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16405,
+   "onlyProdLines": null,
+   "testsMs": 51.4
   },
   {
    "file": "tests/catalog-golden-contract.test.ts",
@@ -1295,6 +1365,35 @@
    "testsMs": 303.6,
    "layerReason": "its subject is two tool scripts under scripts/ \u2014 the inventory re-check and the tier selection \u2014 which is the contract layer of a suite; the src/shell import the derivation reads is text inside one of its own fixtures, not an import of the shell",
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
+  },
+  {
+   "file": "tests/factor-person-provisioning.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 1,
+   "rule": "The device harness creates the person who answers the second factor, and the kernel it serves accepts that person.  At the commit testdata/openapi.source.json pins, POST /api/v1/user/users refuses a body that names roles \u2014 \"crud: invalid: roles belongs to a route of its own, not to this one\" \u2014 and roles are given at user-user-roles, POST /api/v1/user/users/{id}/roles. The stub server below answers with that rule and nothing more; as in mobile-factor-config, exported functions replace psql and curl and the case writes its own kernel stub for PK_KERNEL_BIN, so no database, server or emulator starts. The job builds that binary from the pinned commit (this repository holds no Go toolchain); everything the harness does with it \u2014 copy it into its run directory, bootstrap, serve, wait \u2014 is what runs here. It stops the harness at the first request after the person has a password.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 585,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the device harness creates its factor person in a shape the kernel accepts"
+   ],
+   "tests": [
+    {
+     "title": "the device harness creates its factor person in a shape the kernel accepts",
+     "ms": 271.665219,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 271.7
   },
   {
    "file": "tests/fingerprint.test.ts",
@@ -2676,6 +2775,35 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/sign-out-revokes-key.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 1,
+   "rule": "Signing out stops the key on the server, not only on the phone.  At the commit testdata/openapi.source.json pins, auth-token-revoke is declared httpx.SignedIn() (modules/auth/internal/token_routes.go), and a SignedIn operation refuses a credential that carries its own scopes with a 403 \u2014 \"this credential carries its own scope, and this operation answers only to its holder\" (kit/httpx/authorize.go). A key minted with scopes is such a credential. The fake below answers with those two rules: a scoped key is refused at every SignedIn door, the session a password opened is accepted there, and the revoke it accepts stops the key.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 955,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "signing out stops the key on the server"
+   ],
+   "tests": [
+    {
+     "title": "signing out stops the key on the server",
+     "ms": 41.734086,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16391,
+   "onlyProdLines": null,
+   "testsMs": 41.7
   },
   {
    "file": "tests/source.test.ts",
@@ -11524,6 +11652,47 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/factor-token-lifecycle.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "Who this is answers to the holder, not to a key narrowed to a list of permissions: auth-me is httpx.SignedIn(), and a scoped credential is refused at every one of those doors (kit/httpx/authorize.go). So the phone that wants an answer asks with the session its sign-in opened, and the alternative \u2014",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1018,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an accepted factor mints only the granted scopes with the server default lifetime",
+    "a factor refused with 401 mints nothing and leaves no bearer",
+    "a factor refused with 503 mints nothing and leaves no bearer"
+   ],
+   "tests": [
+    {
+     "title": "an accepted factor mints only the granted scopes with the server default lifetime",
+     "ms": 54.387308,
+     "measured": false
+    },
+    {
+     "title": "a factor refused with 401 mints nothing and leaves no bearer",
+     "ms": 2.474707,
+     "measured": false
+    },
+    {
+     "title": "a factor refused with 503 mints nothing and leaves no bearer",
+     "ms": 1.300396,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16415,
+   "onlyProdLines": null,
+   "testsMs": 58.2
+  },
+  {
    "file": "tests/failure.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -12964,6 +13133,35 @@
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
+   "file": "tests/flow-sign-in-factor.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "One journey Maestro plans (the set `check:flows` reads) signs in through the second-factor step: it claims the sign-in screen and answers the code step by the ids the screen sets, with the code from the environment the harness seeds \u2014 never a literal secret.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 226,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a planned journey signs in through the second-factor step"
+   ],
+   "tests": [
+    {
+     "title": "a planned journey signs in through the second-factor step",
+     "ms": 2.066201,
+     "measured": false
+    }
+   ],
+   "loaded": 1,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 2.1
+  },
+  {
    "file": "tests/flow-workspace-key-spelling.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -14296,6 +14494,94 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/mint-scopes.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 6,
+   "rule": "What a phone may ask the mint for, and what it must not ask for.  A bearer key is narrowed, never escalated: modules/auth/internal/tokens.go's IssueToken refuses a scope with no permission behind it, refuses the wildcard by name, and refuses a scope the holder's own roles do not already grant \u2014 and modules/auth/internal/seed.go grants the built-in administrator role the wildcard alone, so an account that is granted everything is answered with the wildcard and no permission at all (modules/auth/internal/service.go's identify). The phone therefore cannot forward the list a sign-in answered with; it turns it into permissions, out of the declarations the pinned document prints for its own surface (x-platformkit-auth), which is what src/core/scopes.ts is for.  An operator grant is the other half: contracts.Grants answers for it only by naming it, and contracts.CheckedPermissions refuses it outside the operator's own tenant. This phone calls the app surface and no other, so it never asks.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1005,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an account granted the wildcard is minted the permissions this phone can call",
+    "an account granted a role is minted the permissions that role names",
+    "a grant held only by the installation's operator stays out of a phone's key",
+    "the permissions a wildcard stands for are the ones the document declares, not a list written here",
+    "an account granted nothing is refused a key in the phone's own words",
+    "an app's own catalogue is the one its key is minted out of"
+   ],
+   "tests": [
+    {
+     "title": "an account granted the wildcard is minted the permissions this phone can call",
+     "ms": 42.086328,
+     "measured": false
+    },
+    {
+     "title": "an account granted a role is minted the permissions that role names",
+     "ms": 2.120953,
+     "measured": false
+    },
+    {
+     "title": "a grant held only by the installation's operator stays out of a phone's key",
+     "ms": 1.83847,
+     "measured": false
+    },
+    {
+     "title": "the permissions a wildcard stands for are the ones the document declares, not a list written here",
+     "ms": 0.23259,
+     "measured": false
+    },
+    {
+     "title": "an account granted nothing is refused a key in the phone's own words",
+     "ms": 1.691489,
+     "measured": false
+    },
+    {
+     "title": "an app's own catalogue is the one its key is minted out of",
+     "ms": 1.952281,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16366,
+   "onlyProdLines": null,
+   "testsMs": 49.9
+  },
+  {
+   "file": "tests/mobile-factor-config.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "As in maestro-device-selection, exported functions replace external tools, and the kernel the harness is handed is a file this case wrote: the same copy into the run directory, the same bootstrap, the same config beside it. Stop at bootstrap after copying the actual config: no database, daemon, network, emulator, or application server is started by this case.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 467,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the device harness supplies a factor key before bootstrapping its server"
+   ],
+   "tests": [
+    {
+     "title": "the device harness supplies a factor key before bootstrapping its server",
+     "ms": 176.88797,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 176.9
   },
   {
    "file": "tests/navigation.test.ts",
@@ -16432,6 +16718,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/restored-token-revocation.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "What survives a restart on this phone is the key alone \u2014 the session that signed in is held in memory for as long as the key it minted is held and never written down \u2014 and `auth-token-revoke` answers to that session, not to the key. So a sign-out has two true answers, decided by what the run still holds. A key minted by this run stops on the server, and the same key must no longer read. A key read back out of storage brings nothing but itself, so the sign-out forgets it here and says that this device could not revoke it, naming where the account can; a phone that minted no key and holds no session has no door through which to claim that key dead. When a scoped credential is given such a door, the restored arm below starts answering `revoked: true`, and that is the point to move its assertion down to the read the minted arm makes of its own key.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1023,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "sign-out stops a key through the session that minted it",
+    "signing out of a key restored from storage forgets it here and says it was not revoked"
+   ],
+   "tests": [
+    {
+     "title": "sign-out stops a key through the session that minted it",
+     "ms": 49.097986,
+     "measured": false
+    },
+    {
+     "title": "signing out of a key restored from storage forgets it here and says it was not revoked",
+     "ms": 4.117996,
+     "measured": false
+    }
+   ],
+   "loaded": 50,
+   "coveredProdLines": 16502,
+   "onlyProdLines": null,
+   "testsMs": 53.2
+  },
+  {
    "file": "tests/richtext-field-is-prose.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -17037,6 +17358,176 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/sign-in-doors-carry-no-browser-origin.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The two doors that mint a sign-in \u2014 the password at auth-login and the code at auth-challenge-verify \u2014 are refused by the kernel unless the request reads as same-site: kit/httpx's SameSite accepts a Sec-Fetch-Site of same-origin or none, or no Sec-Fetch-Site and either no Origin or one naming the request's own host, and modules/auth answers anything else with a 403 that tells the person to \"answer the second factor from the sign-in page itself\". A phone is the case that rule accepts by presenting nothing, so what src/effects/api.ts strips from a generated request before it leaves is the contract this file holds: no Origin, no Sec-Fetch-Site, and on these two public doors no credential of either kind, because a request that carried a cookie and a key together is answered as anonymous (kit/httpx/authenticate.go's ambiguousCredential).",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1013,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the password and the code are offered with no Origin, no Sec-Fetch-Site and no credential"
+   ],
+   "tests": [
+    {
+     "title": "the password and the code are offered with no Origin, no Sec-Fetch-Site and no credential",
+     "ms": 43.107907,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16406,
+   "onlyProdLines": null,
+   "testsMs": 43.1
+  },
+  {
+   "file": "tests/sign-in-outcome.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "A 401 from the password leg means two different things and the phone has to tell them apart without a server that says which: an account that also answers with a second factor, and a password that is simply wrong. src/core/signInOutcome .ts decides that from the problem's type when the document names one, and from the kernel's exact sentence while it does not \u2014 this file is the gate under that fallback. It reads the pinned document rather than restating it: the day auth-login's 401 arrives with a type of its own, the sentence stops being a rule and becomes a liability, and the case that goes red says so by name.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 239,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the pinned document still says nothing about which type a refused sign-in carries",
+    "a factor challenge is told from a wrong password by what the answer carries",
+    "a dead key is an expired credential; a price and a permission are not",
+    "a caller the server does not know is told from one it refuses the asking"
+   ],
+   "tests": [
+    {
+     "title": "the pinned document still says nothing about which type a refused sign-in carries",
+     "ms": 2.270459,
+     "measured": false
+    },
+    {
+     "title": "a factor challenge is told from a wrong password by what the answer carries",
+     "ms": 0.288263,
+     "measured": false
+    },
+    {
+     "title": "a dead key is an expired credential; a price and a permission are not",
+     "ms": 0.208376,
+     "measured": false
+    },
+    {
+     "title": "a caller the server does not know is told from one it refuses the asking",
+     "ms": 0.16758,
+     "measured": false
+    }
+   ],
+   "loaded": 1,
+   "coveredProdLines": 79,
+   "onlyProdLines": null,
+   "testsMs": 2.9
+  },
+  {
+   "file": "tests/sign-out-answers-for-its-key-alone.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "A sign-out answers for the key it held, and for nothing else.  Its two asks go out with two different credentials: the revoke with the session that minted the key, or with the key itself where the phone holds no session, and the close with that session alone (kit/httpx.SignedIn() refuses a scoped key at the revoke, and auth-logout answers to the holder). One can therefore be answered while the other is not, and the one sentence a signed-out screen has is about the key. So the key's verdict is what comes back and stands: a session the server would not close says nothing about a key already stopped and nothing the person could reach (src/effects/api.ts's SignOut), while a revoke that never answered at all is the one failure this call throws \u2014 and it throws only after the session it holds has been asked, because a sign-out that leaves a session standing leaves the person signed in somewhere.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 946,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a session the server would not close leaves the key's confirmed stop alone",
+    "a revoke that never answered closes the session it went out with and stays uncertain",
+    "a session close the server refused keeps the verdict the key already has",
+    "a sign-out that closes both asks says nothing beyond the key it stopped"
+   ],
+   "tests": [
+    {
+     "title": "a session the server would not close leaves the key's confirmed stop alone",
+     "ms": 46.352498,
+     "measured": false
+    },
+    {
+     "title": "a revoke that never answered closes the session it went out with and stays uncertain",
+     "ms": 4.401842,
+     "measured": false
+    },
+    {
+     "title": "a session close the server refused keeps the verdict the key already has",
+     "ms": 3.06565,
+     "measured": false
+    },
+    {
+     "title": "a sign-out that closes both asks says nothing beyond the key it stopped",
+     "ms": 3.170875,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16422,
+   "onlyProdLines": null,
+   "testsMs": 57
+  },
+  {
+   "file": "tests/sign-out-names-the-key-it-leaves.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "Signing out answers one question with two facts: whether the server stopped the key, and whether the person still has a key to stop. Only a key the phone forgot and the server may still spend is a key somebody has to go and remove \u2014 a connection that held none leaves nothing, and a key the server refuses as a caller it does not recognise is dead wherever it is. The kernel refuses everything with a 403 and names the code first (kit/httpx/authorize.go: \"Every refusal is a 403, never a 401\"), so the two 403s below \u2014 the one that knows the caller and refuses the asking, the one that knows nobody \u2014 are the whole of the difference the screen draws its sentence from.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 973,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a sign-out that holds no key asks nothing and leaves nothing to remove",
+    "a key refused at the door its holder alone answers is left for the person to stop",
+    "a key the server does not recognise leaves nothing live to remove",
+    "a sign-in whose own session the server no longer knows still leaves its key standing"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out that holds no key asks nothing and leaves nothing to remove",
+     "ms": 2.823322,
+     "measured": false
+    },
+    {
+     "title": "a key refused at the door its holder alone answers is left for the person to stop",
+     "ms": 28.680454,
+     "measured": false
+    },
+    {
+     "title": "a key the server does not recognise leaves nothing live to remove",
+     "ms": 1.159504,
+     "measured": false
+    },
+    {
+     "title": "a sign-in whose own session the server no longer knows still leaves its key standing",
+     "ms": 9.985769,
+     "measured": false
+    }
+   ],
+   "loaded": 49,
+   "coveredProdLines": 16420,
+   "onlyProdLines": null,
+   "testsMs": 42.6
   },
   {
    "file": "tests/slot-availability-withdrawal.test.ts",
@@ -18172,7 +18663,7 @@
    "runner": "jest",
    "layer": "composition",
    "cases": 3,
-   "rule": "A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at the file's content address \u2014 at the width this device can paint, or as stored when the frame already fits \u2014 with the session this app holds. A file this phone cannot read is said where it sits: the body keeps reading natively and no byte of the refused file is asked for.",
+   "rule": "A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at the file's content address \u2014 at the width this device can paint, or as stored when the frame already fits \u2014 with the key this app holds. A file this phone cannot read is said where it sits: the body keeps reading natively and no byte of the refused file is asked for.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
@@ -20118,6 +20609,82 @@
    "testsMs": 196
   },
   {
+   "file": "tests/screens/sign-in-factor-challenge.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A person who has enrolled a second factor is answered \"that password is right; this account also answers with a second factor\" (auth-login, 401). The sign-in screen then asks for the code (testIDs `challenge`, `code`, `verify`) and sends it to auth-challenge-verify; a wrong code keeps the step open. Each case reaches its assertion through the challenge step itself, never through the 401 sentence the screen shows today.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19706,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a factor-required answer opens the code step instead of an error",
+    "a wrong code is sent to the verify operation and keeps the code step open"
+   ],
+   "tests": [
+    {
+     "title": "a factor-required answer opens the code step instead of an error",
+     "ms": 217,
+     "measured": false
+    },
+    {
+     "title": "a wrong code is sent to the verify operation and keeps the code step open",
+     "ms": 76,
+     "measured": false
+    }
+   ],
+   "loaded": 146,
+   "coveredProdLines": 1769,
+   "onlyProdLines": null,
+   "testsMs": 293
+  },
+  {
+   "file": "tests/screens/sign-in-prefilled-email.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "Returning to a refused session asks for the password, with the email already shown. Both submission controls must send that shown address even when the person never edits it; changing it must still submit the new address.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21240,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "tapping Sign in submits the prefilled email without editing it",
+    "the password keyboard submits the prefilled email without editing it",
+    "editing a prefilled email submits the replacement address"
+   ],
+   "tests": [
+    {
+     "title": "tapping Sign in submits the prefilled email without editing it",
+     "ms": 30,
+     "measured": false
+    },
+    {
+     "title": "the password keyboard submits the prefilled email without editing it",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "editing a prefilled email submits the replacement address",
+     "ms": 19,
+     "measured": false
+    }
+   ],
+   "loaded": 138,
+   "coveredProdLines": 1436,
+   "onlyProdLines": null,
+   "testsMs": 64
+  },
+  {
    "file": "tests/screens/sign-out-asks-before-held-writes-go.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -21066,6 +21633,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/shell-bearer-credential.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A phone is not a browser: after a sign-in it mints a scoped bearer token (auth-token-issue), keeps only that in secure storage and presents it as `Authorization: Bearer` on the work it does \u2014 never the session cookie the login answered with, which is not stored and not what a list or a read is answered with.  Signing out revokes that token on the server (auth-token-revoke) and forgets it locally, and the revoke is the one request that cannot present the key: at the commit testdata/openapi.source.json pins, auth-token-revoke and auth-me are httpx.SignedIn(), and kit/httpx/authorize.go refuses a credential carrying its own scopes at every such door. The server below enforces that rule, so a revoke presented as the key answers 403 here as it does on a served kernel, and the session the sign-in opened is what the door takes instead.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22586,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a signed-in phone presents the token it minted and never the session cookie",
+    "signing out revokes the token on the server and forgets it locally"
+   ],
+   "tests": [
+    {
+     "title": "a signed-in phone presents the token it minted and never the session cookie",
+     "ms": 96,
+     "measured": false
+    },
+    {
+     "title": "signing out revokes the token on the server and forgets it locally",
+     "ms": 16,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1772,
+   "onlyProdLines": null,
+   "testsMs": 112
+  },
+  {
    "file": "tests/shell-concurrent-sign-ins.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -21102,6 +21704,35 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/shell-dead-key-on-restore.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A key the server no longer recognises \u2014 revoked from the account's devices, or past the lifetime the mint gave it \u2014 is answered the way the kernel answers everything it refuses: 403, never 401, with the code it names (kit/httpx/authorize.go: \"Every refusal is a 403, never a 401\"; a bearer that buys nobody goes on as anonymous and the door says AUTH_ANONYMOUS). A phone that restores such a key has one way out, and the shell owns it: forget the key, keep the server, and put the person on the sign-in form with the kit's expired words \u2014 not on the \"could not be opened\" screen whose Retry can never work.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19082,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a restored key the server no longer recognises puts the person on the sign-in form with the expired words"
+   ],
+   "tests": [
+    {
+     "title": "a restored key the server no longer recognises puts the person on the sign-in form with the expired words",
+     "ms": 546,
+     "measured": false
+    }
+   ],
+   "loaded": 146,
+   "coveredProdLines": 1710,
+   "onlyProdLines": null,
+   "testsMs": 546
   },
   {
    "file": "tests/shell-expired-session-another-identity-starts-at-home.test.tsx",
@@ -21374,6 +22005,135 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/shell-factor-challenge-address.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 7,
+   "rule": "A second factor spends a window one server opened and no other can read. These cases hold that address: the code is answered at the origin that refused to finish, the key it mints is saved against that origin, and a code with no refusal behind it never leaves the phone. The password leg and the transport are the ones under test, so the network is a recorder and the store is memory.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 23398,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a code that opens the session is answered at the origin that asked for it",
+    "the sign-in a code finishes is saved against the server that asked for the code",
+    "a newer sign-in owns the challenge the code will answer",
+    "a code with no refusal behind it is refused before any request leaves",
+    "signing out closes the challenge a later code cannot answer",
+    "a refused password leaves no challenge for the code step to answer",
+    "a refused code leaves the same challenge open on the same server"
+   ],
+   "tests": [
+    {
+     "title": "a code that opens the session is answered at the origin that asked for it",
+     "ms": 152,
+     "measured": false
+    },
+    {
+     "title": "the sign-in a code finishes is saved against the server that asked for the code",
+     "ms": 16,
+     "measured": false
+    },
+    {
+     "title": "a newer sign-in owns the challenge the code will answer",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "a code with no refusal behind it is refused before any request leaves",
+     "ms": 410,
+     "measured": false
+    },
+    {
+     "title": "signing out closes the challenge a later code cannot answer",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "a refused password leaves no challenge for the code step to answer",
+     "ms": 32,
+     "measured": false
+    },
+    {
+     "title": "a refused code leaves the same challenge open on the same server",
+     "ms": 15,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1815,
+   "onlyProdLines": null,
+   "testsMs": 649
+  },
+  {
+   "file": "tests/shell-factor-response-isolation.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A factor response belongs to the attempt that sent it. A late refusal must leave the key, storage and catalog of a newer accepted answer intact.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 24033,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a late refused factor leaves a newer accepted factor's key usable",
+    "the code field and verify control submit one factor while its answer is pending"
+   ],
+   "tests": [
+    {
+     "title": "a late refused factor leaves a newer accepted factor's key usable",
+     "ms": 95,
+     "measured": false
+    },
+    {
+     "title": "the code field and verify control submit one factor while its answer is pending",
+     "ms": 32,
+     "measured": false
+    }
+   ],
+   "loaded": 146,
+   "coveredProdLines": 1874,
+   "onlyProdLines": null,
+   "testsMs": 127
+  },
+  {
+   "file": "tests/shell-factor-server.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "(no first comment; first test title) the second factor is sent only to the server that accepted the password",
+   "ruleSource": "first test title",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18207,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the second factor is sent only to the server that accepted the password"
+   ],
+   "tests": [
+    {
+     "title": "the second factor is sent only to the server that accepted the password",
+     "ms": 88,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1656,
+   "onlyProdLines": null,
+   "testsMs": 88
+  },
+  {
    "file": "tests/shell-held-write-order.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -21477,6 +22237,35 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/shell-mints-out-of-the-apps-own-catalogue.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "An app's key is minted out of the permissions that app declares, not out of the kit's own list. A module outside this repository names permissions the pinned document has never heard of, and the mint checks a scope against the surface the caller actually calls \u2014 so the catalogue arrives through <Shell> beside the word that app calls its key, the same way tokenName does, and a wildcard holder is narrowed to the app's own surface rather than to the kit's.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20568,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "an app that declares its own permissions mints a key that carries them"
+   ],
+   "tests": [
+    {
+     "title": "an app that declares its own permissions mints a key that carries them",
+     "ms": 101,
+     "measured": false
+    }
+   ],
+   "loaded": 141,
+   "coveredProdLines": 1731,
+   "onlyProdLines": null,
+   "testsMs": 101
   },
   {
    "file": "tests/shell-read-scope-shape.test.tsx",
@@ -21604,6 +22393,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/shell-sign-out-after-key-death.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A key the server refused on the way in is a key this phone no longer has \u2014 not in storage, and not on the connection that carried it either. The sign-out that follows a sign-in the person never made has nothing to stop and nobody to send to their account's device list: it clears what the phone holds and says nothing about a key, because the server had already said it knows no such caller (kit/httpx/authorize.go answers a dead bearer at every door as an anonymous one \u2014 a 403 naming AUTH_ANONYMOUS).",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21944,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "signing out after the key died at restore asks the server nothing and says nothing about a key"
+   ],
+   "tests": [
+    {
+     "title": "signing out after the key died at restore asks the server nothing and says nothing about a key",
+     "ms": 365,
+     "measured": false
+    }
+   ],
+   "loaded": 146,
+   "coveredProdLines": 1738,
+   "onlyProdLines": null,
+   "testsMs": 365
+  },
+  {
    "file": "tests/shell-sign-out-during-sign-in.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -21640,6 +22458,111 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/shell-sign-out-session-unavailable.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Revoking a key and closing its minting session are distinct effects. A failed session close cannot make the screen say the confirmed key revoke failed.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25099,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a session-close failure does not report a confirmed key revoke as failed"
+   ],
+   "tests": [
+    {
+     "title": "a session-close failure does not report a confirmed key revoke as failed",
+     "ms": 95,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1763,
+   "onlyProdLines": null,
+   "testsMs": 95
+  },
+  {
+   "file": "tests/shell-sign-out-survivor.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "Signing out is two acts, and the screen has to tell them apart.  The phone always forgets its key. Whether the server stops it is a second question, and at the commit testdata/openapi.source.json pins it has two answers: auth-token-revoke is httpx.SignedIn(), and kit/httpx/authorize.go refuses a credential that carries its own scopes at every such door, so the key a sign-in minted can be spent by the session that opened it, while a key read back out of secure storage after a restart has no session left and cannot be. The fake below applies those two rules, so the notice is proved against the refusal rather than against a server that agrees to everything.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20661,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a phone that signed in here stops its key on the way out and says nothing else",
+    "a phone that restored its key says the server did not stop it"
+   ],
+   "tests": [
+    {
+     "title": "a phone that signed in here stops its key on the way out and says nothing else",
+     "ms": 363,
+     "measured": false
+    },
+    {
+     "title": "a phone that restored its key says the server did not stop it",
+     "ms": 17,
+     "measured": false
+    }
+   ],
+   "loaded": 146,
+   "coveredProdLines": 1893,
+   "onlyProdLines": null,
+   "testsMs": 380
+  },
+  {
+   "file": "tests/shell-sign-out-without-key.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A sign-out has two halves, and the notice about the second one is owed only when there was a key to stop. A phone that holds no key \u2014 a saved record it could not read, cleared from the sign-in form's own \"Clear saved sign-in\" \u2014 sends no revoke and has nothing the server could have refused, so the screen it lands on says nothing about a key: there is no device for the person to go and remove from their account.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22023,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "clearing a saved sign-in this phone could not read says nothing about a key",
+    "signing out while a sign-in is still pending says nothing about a key",
+    "signing out of a restored key the server already refused says nothing about a key"
+   ],
+   "tests": [
+    {
+     "title": "clearing a saved sign-in this phone could not read says nothing about a key",
+     "ms": 522,
+     "measured": false
+    },
+    {
+     "title": "signing out while a sign-in is still pending says nothing about a key",
+     "ms": 140,
+     "measured": false
+    },
+    {
+     "title": "signing out of a restored key the server already refused says nothing about a key",
+     "ms": 30,
+     "measured": false
+    }
+   ],
+   "loaded": 145,
+   "coveredProdLines": 1780,
+   "onlyProdLines": null,
+   "testsMs": 692
   },
   {
    "file": "tests/shell.test.tsx",
@@ -22783,6 +23706,23 @@
    "tier": "nightly",
    "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
    "runsNowhere": false
+  },
+  {
+   "file": "e2e/flows/sign-in-factor.yaml",
+   "runner": "maestro",
+   "layer": "journey",
+   "cases": 1,
+   "rule": "The second factor. A person whose account answers with one signs in as that person \u2014 not the password-only account the other journeys reuse \u2014 and answers the code step. The values come from the environment the harness seeds (scripts/e2e/mobile_ci.sh exports them); nothing here names a tenant or a secret, and the code the phone types is the account's own recovery code, which is why this journey is not sign-in.yaml with two more taps.",
+   "ruleSource": "first comment",
+   "tier": "nightly",
+   "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.maestro",
+   "claims": [
+    "app/sign-in.tsx"
+   ],
+   "steps": 1
   },
   {
    "file": "e2e/flows/sign-in.yaml",
