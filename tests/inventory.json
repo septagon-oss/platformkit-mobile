@@ -275,12 +275,12 @@
  },
  "totals": {
   "contract": {
-   "files": 29,
-   "cases": 175,
-   "ms": 66304,
-   "testsMs": 46566.40000000001,
+   "files": 30,
+   "cases": 178,
+   "ms": 67677,
+   "testsMs": 46610.40000000001,
    "runners": {
-    "node": 29
+    "node": 30
    },
    "unreachable": 0
   },
@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 68,
-   "cases": 229,
+   "files": 69,
+   "cases": 232,
    "ms": 1412128,
    "testsMs": 24952,
    "runners": {
-    "jest": 68
+    "jest": 69
    },
    "unreachable": 0
   },
@@ -784,6 +784,47 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/catalog-fallback-validation.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 3,
+   "rule": "Presentation fallback preserves the resource contract: a bad hint can cost its label, but never its fields, commands or validation of required members. The generated operation still owns its stricter published response contract.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1373,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "malformed hints at every nesting level preserve the unhinted catalog",
+    "fallback leaves missing required resource and command members refused by path",
+    "the shell accepts a hint fallback while the generated catalog operation refuses it"
+   ],
+   "tests": [
+    {
+     "title": "malformed hints at every nesting level preserve the unhinted catalog",
+     "ms": 9.161188,
+     "measured": false
+    },
+    {
+     "title": "fallback leaves missing required resource and command members refused by path",
+     "ms": 2.58926,
+     "measured": false
+    },
+    {
+     "title": "the shell accepts a hint fallback while the generated catalog operation refuses it",
+     "ms": 32.217551,
+     "measured": false
+    }
+   ],
+   "loaded": 48,
+   "coveredProdLines": 14713,
+   "onlyProdLines": null,
+   "testsMs": 44
   },
   {
    "file": "tests/catalog-golden-contract.test.ts",
@@ -19142,6 +19183,46 @@
    "coveredProdLines": 1623,
    "onlyProdLines": null,
    "testsMs": 224
+  },
+  {
+   "file": "tests/screens/sign-in-prefilled-email.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "Returning to a refused session asks for the password, with the email already shown. Both submission controls must send that shown address even when the person never edits it; changing it must still submit the new address.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins the prefilled email submitted through the composed SignIn screen, including both button and keyboard and the edited-address control. Cases and titles come from an actual failing Jest JSON run; two cases fail, so no duration or coverage measurement is claimed.",
+   "ms": null,
+   "exclusiveNotMeasured": "The run is red; no cost or exclusive-line measurement is claimed. npm run inventory -- --measure tests/screens/sign-in-prefilled-email.test.tsx can measure it after the contract passes.",
+   "titles": [
+    "tapping Sign in submits the prefilled email without editing it",
+    "the password keyboard submits the prefilled email without editing it",
+    "editing a prefilled email submits the replacement address"
+   ],
+   "tests": [
+    {
+     "title": "tapping Sign in submits the prefilled email without editing it",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "the password keyboard submits the prefilled email without editing it",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "editing a prefilled email submits the replacement address",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/sign-out-asks-before-held-writes-go.test.tsx",

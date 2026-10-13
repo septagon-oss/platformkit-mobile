@@ -90,21 +90,23 @@ export function SignInForm({
    * control is handed the callback from the render the person saw, so a value
    * read from that closure is the value from before they typed: each field's own
    * handler writes this object and each control reads it back, so a person who
-   * types and taps in one gesture submits what they typed. A code the caller
-   * takes back — a refusal empties the field — is reconciled in the frame the
-   * form draws it empty, the way ActionControl keeps its current model.
+   * types and taps in one gesture submits what they typed. The frame a form draws
+   * writes this object too, so the values it shows without being asked for — a
+   * returning person's address, the server's own address — and a code the caller
+   * takes back (a refusal empties the field) are held the same way as a value
+   * that was typed: what a control sends is what the person saw. ActionControl
+   * keeps its current model the same way.
    */
   const typed = useRef({ url: "", email: "", password: "", code: "" });
   useLayoutEffect(() => {
+    typed.current.url = url;
+    typed.current.email = email;
+    typed.current.password = password;
     typed.current.code = code;
-  }, [code]);
+  }, [url, email, password, code]);
   const submit = () => {
     if (!busy)
-      onSubmit(
-        (typed.current.url || url).trim(),
-        typed.current.email.trim(),
-        typed.current.password,
-      );
+      onSubmit(typed.current.url.trim(), typed.current.email.trim(), typed.current.password);
   };
   const head = (heading: string, text: string) => (
     <View style={[s.head, { paddingTop: insets.top + t.space.xl }]}>

@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `ecfe93c91` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `a515a1a73` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 29 | 175 | 46.6 s | 66 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 30 | 178 | 46.6 s | 68 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 203 | 941 | 43.8 s | 1451 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 68 | 229 | 25.0 s | 1412 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 69 | 232 | 25.0 s | 1412 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 357
+* keep: 359
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 357 — 164 `tests/*.test.ts` (node), 136 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1345; cases in files no runner reaches: 35
-* isolated wall time: contract 66 s, behaviour 1451 s, composition 1412 s, journey 0 s
+* files inventoried: 359 — 165 `tests/*.test.ts` (node), 137 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1351; cases in files no runner reaches: 35
+* isolated wall time: contract 68 s, behaviour 1451 s, composition 1412 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -96,6 +96,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/api-generation.test.ts | node | contract | 1 | 10017 | 8857 | 0 | 1 of 1 | scripts/api-config.ts, scripts/api.ts | 0 | keep | Generation is offline and deterministic. Missing, changed and extra output, or fixture bytes no longer vouched for by provenance, are refusals, not fixes. |
 | tests/api-parser-dependency.test.ts | node | contract | 2 | 355 | 61.1 | 0 | 0 of 2 | — | 0 | keep | Resolve from the generator's parser, not the root: a nested vulnerable copy must not hide behind the patched YAML parser used by unrelated tooling. |
 | tests/catalog-drift.test.ts | node | contract | 6 | 408 | 46.2 | 0 | 3 of 6 | — | 0 | keep | These cases hold one rule about the public module proxy: an attempt that answered nothing is not an answer, and `unreachable` is only told from `latest` if the… |
+| tests/catalog-fallback-validation.test.ts | node | contract | 3 | 1373 | 44 |  | not measured | — | 0 | keep | Presentation fallback preserves the resource contract: a bad hint can cost its label, but never its fields, commands or validation of required members. The gen… |
 | tests/catalog-golden-contract.test.ts | node | contract | 3 | 1288 | 65.8 | 0 | 0 of 3 | — | 0 | keep | The catalogue goldens copied from the kernel are answers the pinned HTTP document must accept: the shell's own catalog read and the strict generated appResourc… |
 | tests/catalog-operation-contract.test.ts | node | contract | 2 | 1255 | 52.1 | 0 | 0 of 2 | — | 0 | keep | The bound catalog operation must honor its generated return type even when the shell's compatibility adapter accepts an unstamped legacy catalog. |
 | tests/catalog.test.ts | node | contract | 26 | 1102 | 354.4 | 9 | 5 of 26 | — | 0 | keep | (no first comment; first test title) the golden catalog parses |
@@ -361,6 +362,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/reference-name-resolves-or-says-linked.test.tsx | jest | composition | 7 | 16461 | 30 |  | not measured | — | 0 | keep | A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the i… |
 | tests/screens/sign-in-door-asks-before-held-writes-go.test.tsx | jest | composition | 1 | 25803 | 196 |  | not measured | — | 0 | keep | The sign-in screen has its own way to another server when a sign-in loaded the person but not the catalog — a network that dropped half-way through, which is t… |
 | tests/screens/sign-in-factor-challenge.test.tsx | jest | composition | 2 | 19883 | 224 |  | not measured | — | 0 | keep | A person who has enrolled a second factor is answered "that password is right; this account also answers with a second factor" (auth-login, 401). The sign-in s… |
+| tests/screens/sign-in-prefilled-email.test.tsx | jest | composition | 3 |  |  |  | not measured | — | 0 | keep | Returning to a refused session asks for the password, with the email already shown. Both submission controls must send that shown address even when the person … |
 | tests/screens/sign-out-asks-before-held-writes-go.test.tsx | jest | composition | 1 | 23996 | 304 |  | not measured | — | 0 | keep | Signing out clears what this phone is holding, so every way out asks first while a write is held — including the one a catalog that could not be read offers, w… |
 | tests/screens/singleton-cancelled-refusal.test.tsx | jest | composition | 1 | 21526 | 37 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) cancelling a refused singleton draft allows the next valid edit to save |
 | tests/screens/singleton-preserves-hidden-values.test.tsx | jest | composition | 2 | 16760 | 16 |  | not measured | — | 0 | keep | (no first comment; first test title) a singleton PUT preserves hidden list commas when only its title changes |
