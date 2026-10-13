@@ -1494,8 +1494,11 @@ change reads this repository's report.
 A journey that fails says what the device saw. The step after the journeys runs
 `scripts/e2e/device_logs.sh`, which asks the emulator — still alive, still this
 job's own serial — for its crash buffer, its `am_crash`/`am_anr`/`am_proc_died`
-events and the app's own React Native lines, each read bounded by the `-t` the
-device itself honours. That is the difference between three owners of a fix: a
+events and the app's own React Native lines, each read bounded twice: by the `-t`
+the device itself honours, and by the deadline `PK_MOBILE_READ_TIMEOUT` sets (one
+minute by default), which ends a call to a device whose adbd has wedged so that a
+run stuck on one unreadable buffer still reaches the artifact step and the
+emulator teardown. That is the difference between three owners of a fix: a
 `FATAL EXCEPTION` in the crash buffer is the app's, a JavaScript error that
 resolved no module before the first frame is the app's at another line, and a
 device that answers nothing is the runner's — and a flow that timed out at
@@ -1507,8 +1510,9 @@ its run is readable. In it are Maestro's per-flow debug bundle — its screensho
 and view hierarchies, the only capture of the step that failed, since a screencap
 taken now photographs the last flow's screen — the device's log lines, the JUnit
 report, and the served kernel's own log, which `scripts/e2e/mobile_ci.sh` copies
-out of the work directory its trap deletes and which is the only record of a
-server that bound nothing. Maestro's bundle can hold what a journey typed, so
+out of the work directory its trap deletes. The job's log prints that log too
+wherever the server failed to serve; the copy is what outlives the run, the log's
+truncation and the database it names. Maestro's bundle can hold what a journey typed, so
 those files stay in the artifact and never in the job log: every such value is
 generated for one run and dies with its database. Both directories are named once,
 in the job's `env:` as `PK_MOBILE_DEBUG_DIR` and `PK_MOBILE_DIAGNOSTICS`, and

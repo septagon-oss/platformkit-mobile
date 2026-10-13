@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 223,
-   "cases": 1028,
-   "ms": 1537703,
-   "testsMs": 44977.00000000002,
+   "files": 226,
+   "cases": 1035,
+   "ms": 1542782,
+   "testsMs": 49166.60000000001,
    "runners": {
     "jest": 72,
-    "node": 151
+    "node": 154
    },
    "unreachable": 0
   },
@@ -11574,6 +11574,76 @@
    "testsMs": 77
   },
   {
+   "file": "tests/device-logs-end-a-read-that-never-answers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "`-t` bounds how far back a device reads and `-d` makes the read finish once it answers; neither is a bound on waiting for a device that never answers. An adb call against a wedged adbd simply does not return, and a diagnostics step that waits for one waits until the job's own ceiling \u2014 past the artifact step that keeps the evidence and past the teardown that frees the device for the next run. So every read this script sends carries a deadline of its own, and a read that meets it is named as one.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4385,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a device that never answers is ended read by read, and the listing is still reached",
+    "a read that answers inside its deadline is printed and never ended",
+    "the deadline a run defaults to leaves the artifact and the teardown their turn"
+   ],
+   "tests": [
+    {
+     "title": "a device that never answers is ended read by read, and the listing is still reached",
+     "ms": 4052.262126,
+     "measured": false
+    },
+    {
+     "title": "a read that answers inside its deadline is printed and never ended",
+     "ms": 23.388604,
+     "measured": false
+    },
+    {
+     "title": "the deadline a run defaults to leaves the artifact and the teardown their turn",
+     "ms": 0.590813,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 4076.2
+  },
+  {
+   "file": "tests/device-logs-list-the-bundle-and-never-print-it.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "Maestro's debug bundle can hold what a journey typed \u2014 a password, a factor code \u2014 so the job keeps it as an artifact and the job log only says which files it holds and how large each is. The diagnostics script is run as the step runs it, with adb a shell function, and a bundle file carrying a value that must not reach the job log.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 353,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the job log names each file of Maestro's bundle and its size, and never what it holds"
+   ],
+   "tests": [
+    {
+     "title": "the job log names each file of Maestro's bundle and its size, and never what it holds",
+     "ms": 42.149927,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 42.1
+  },
+  {
    "file": "tests/device-logs-name-the-device-and-bound-the-buffer.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -11613,6 +11683,47 @@
    "coveredProdLines": 0,
    "onlyProdLines": null,
    "testsMs": 113.1
+  },
+  {
+   "file": "tests/device-logs-print-when-nothing-can-be-kept.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The run's kept copy of the diagnostics lives in a directory the script writes to, and writing to it must never be what makes a read happen: a full disk or a workspace another job left unwritable would otherwise end every read before it started and say \"nothing readable in it from this device\" about a device that was never asked. The copy is a copy. What the job log prints is decided by the device, and what the filesystem answers is said once, as a lost copy.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 341,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a copy that fails halfway through is the copy's story and not the device's",
+    "a directory that cannot be written costs the kept copy and not the device's lines",
+    "a directory that can be written keeps what the job log printed, one file per section"
+   ],
+   "tests": [
+    {
+     "title": "a copy that fails halfway through is the copy's story and not the device's",
+     "ms": 26.372399,
+     "measured": false
+    },
+    {
+     "title": "a directory that cannot be written costs the kept copy and not the device's lines",
+     "ms": 23.335821,
+     "measured": false
+    },
+    {
+     "title": "a directory that can be written keeps what the job log printed, one file per section",
+     "ms": 21.552442,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 71.3
   },
   {
    "file": "tests/diagnostics-are-kept-and-hide-nothing.test.ts",
