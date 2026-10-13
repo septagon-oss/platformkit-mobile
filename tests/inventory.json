@@ -276,9 +276,9 @@
  "totals": {
   "contract": {
    "files": 30,
-   "cases": 181,
-   "ms": 64719,
-   "testsMs": 46911.60000000001,
+   "cases": 182,
+   "ms": 64996,
+   "testsMs": 46918.00000000001,
    "runners": {
     "node": 30
    },
@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 208,
-   "cases": 918,
-   "ms": 1445375,
-   "testsMs": 43814.00000000003,
+   "cases": 988,
+   "ms": 1505466,
+   "testsMs": 44140.800000000025,
    "runners": {
     "jest": 71,
     "node": 137
@@ -297,9 +297,9 @@
   },
   "composition": {
    "files": 75,
-   "cases": 206,
-   "ms": 1188175,
-   "testsMs": 22569,
+   "cases": 234,
+   "ms": 1614680,
+   "testsMs": 26638,
    "runners": {
     "jest": 75
    },
@@ -520,7 +520,7 @@
    "file": "tests/advisory-record-covers-the-markdown-face.test.ts",
    "runner": "node",
    "layer": "contract",
-   "cases": null,
+   "cases": 1,
    "rule": "The Markdown face brings markdown-it and linkify-it into the lockfile, and both carry high advisories the registry has published with no release this face can take (react-native-markdown-display pins markdown-it ^10). The repository's rule (scripts/advisories.ts, run blocking in CI) is that a high filing is either fixed by the version held or reviewed by name and version in advisories.json. This case asks that question of the two packages this face alone adds, from the two files in the checkout and nothing on the network, so a lockfile that holds them unreviewed is refused here as CI refuses it.",
    "ruleSource": "first comment",
    "tier": "push",
@@ -528,13 +528,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/advisory-record-covers-the-markdown-face.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 277,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "every package the Markdown face adds is fixed or reviewed by name and version"
+   ],
+   "tests": [
+    {
+     "title": "every package the Markdown face adds is fixed or reviewed by name and version",
+     "ms": 6.41705,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 6.4
   },
   {
    "file": "tests/android.test.ts",
@@ -6801,7 +6810,7 @@
    "file": "tests/ui/prose-code-reads-in-the-dark.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 3,
    "rule": "The reader is styled only by the kit's tokens, in both modes (0069 \u00a78: prose, figures, tables and code are styled only by tokens; dark mode is checked). A code block sits on the palette's muted surface and a heading takes the type scale's size, so in dark mode the code is readable on its own surface and no default of the Markdown face shows through.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -6809,19 +6818,40 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-code-reads-in-the-dark.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 16692,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a code block sits on the palette's muted surface in light mode",
+    "a code block sits on the palette's muted surface in dark mode",
+    "a heading and a paragraph take the type scale's size, not the face's default"
+   ],
+   "tests": [
+    {
+     "title": "a code block sits on the palette's muted surface in light mode",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a code block sits on the palette's muted surface in dark mode",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "a heading and a paragraph take the type scale's size, not the face's default",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 703,
+   "onlyProdLines": null,
+   "testsMs": 36
   },
   {
    "file": "tests/ui/prose-draws-no-face-of-its-own.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 2,
    "rule": "The reader is drawn only from the kit's tokens, in both modes \u2014 no colour, face or size of the Markdown library ever reaches a screen. One element cannot answer that: a style written under a key the library never reads is invisible to a case that looks at one block, and the library's own default lands on the screen beside it. So this asks the question of every element of a whole body: each colour must be a role of the palette, each face one of the three the theme names, each size one of the scale's.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -6829,19 +6859,34 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-draws-no-face-of-its-own.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 17666,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "every colour, face and size of a whole body is the kit's in light mode",
+    "every colour, face and size of a whole body is the kit's in dark mode"
+   ],
+   "tests": [
+    {
+     "title": "every colour, face and size of a whole body is the kit's in light mode",
+     "ms": 36,
+     "measured": false
+    },
+    {
+     "title": "every colour, face and size of a whole body is the kit's in dark mode",
+     "ms": 22,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 703,
+   "onlyProdLines": null,
+   "testsMs": 58
   },
   {
    "file": "tests/ui/prose-reader.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 8,
    "rule": "A rich text body is read natively: every construct 0069 \u00a71 allows comes back as text a person can read, in both modes, with the figure's box reserved by the frame the server measured so a paragraph below it never moves. The figure that never arrived says so with the kit's own words, and nothing else about the body is lost.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -6849,13 +6894,64 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-reader.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 18254,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "every construct of \u00a71 renders in light mode",
+    "every construct of \u00a71 renders in dark mode",
+    "a figure reserves the box its stored frame gives it, and says its caption once",
+    "a figure whose frame is not known yet is loading, and reserves nothing",
+    "a figure that cannot be opened says what it is instead of offering to open",
+    "a missing image says so and loses none of the text around it",
+    "a ready figure opens, and a decorative one is nothing a person is offered",
+    "a body the phone cannot draw is refused by the reader, not drawn as less"
+   ],
+   "tests": [
+    {
+     "title": "every construct of \u00a71 renders in light mode",
+     "ms": 44,
+     "measured": false
+    },
+    {
+     "title": "every construct of \u00a71 renders in dark mode",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a figure reserves the box its stored frame gives it, and says its caption once",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a figure whose frame is not known yet is loading, and reserves nothing",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a figure that cannot be opened says what it is instead of offering to open",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a missing image says so and loses none of the text around it",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a ready figure opens, and a decorative one is nothing a person is offered",
+     "ms": 16,
+     "measured": false
+    },
+    {
+     "title": "a body the phone cannot draw is refused by the reader, not drawn as less",
+     "ms": 1,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 750,
+   "onlyProdLines": null,
+   "testsMs": 103
   },
   {
    "file": "tests/ui/record-menu-opens-under-its-header.test.tsx",
@@ -8315,7 +8411,7 @@
    "file": "tests/a-file-upload-sends-the-form-its-caller-built.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 2,
    "rule": "A picture's bytes leave the phone as one multipart form, and the form its caller built is the document the transport sends. The generated serializer builds a form out of an object's entries and knows nothing of a form that already exists: run over one it prints that form's own internals into a text field, and the file module is left a field named after them and no file to store \u2014 which is a refusal it cannot trace back to the write that caused it. Two answers are owed here: the form that arrives at the server is the one that was handed over, part and all, at the address the document gives an upload; and an address the document holds no multipart route at is refused by name before a byte of anyone's picture is sent.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -8323,13 +8419,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-file-upload-sends-the-form-its-caller-built.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 2592,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the form an upload was handed is the form the file module is asked to store",
+    "an address the document holds no upload route at is refused before a byte is sent"
+   ],
+   "tests": [
+    {
+     "title": "the form an upload was handed is the form the file module is asked to store",
+     "ms": 39.629166,
+     "measured": false
+    },
+    {
+     "title": "an address the document holds no upload route at is refused before a byte is sent",
+     "ms": 2.449211,
+     "measured": false
+    }
+   ],
+   "loaded": 46,
+   "coveredProdLines": 15863,
+   "onlyProdLines": null,
+   "testsMs": 42.1
   },
   {
    "file": "tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts",
@@ -9252,7 +9363,7 @@
    "file": "tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 5,
    "rule": "A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are written in. The read keeps that tag beside the row rather than inside it: the row stays the server's own document, and a sheet that later sends words back has to name the language they are written in, because a write naming no language writes the record rather than the language it was read in. Three answers are owed here: the tag is kept exactly as it was printed, an answer that named no language leaves the row the record's own copy \u2014 which is what a row with no language has always been \u2014 and a tag no request this phone could build would carry counts as nothing said rather than as a guess.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -9260,19 +9371,52 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 1021,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a row read from an answer that names its language keeps the tag that answer printed",
+    "the language an answer was served in is the first tag it printed",
+    "an answer that names no language leaves the row the record's own copy",
+    "a language an answer named in a form no request could carry back is no language",
+    "the row a sheet reads is the same row whether or not it asks which language it came in"
+   ],
+   "tests": [
+    {
+     "title": "a row read from an answer that names its language keeps the tag that answer printed",
+     "ms": 31.321809,
+     "measured": false
+    },
+    {
+     "title": "the language an answer was served in is the first tag it printed",
+     "ms": 1.397435,
+     "measured": false
+    },
+    {
+     "title": "an answer that names no language leaves the row the record's own copy",
+     "ms": 0.740519,
+     "measured": false
+    },
+    {
+     "title": "a language an answer named in a form no request could carry back is no language",
+     "ms": 0.724531,
+     "measured": false
+    },
+    {
+     "title": "the row a sheet reads is the same row whether or not it asks which language it came in",
+     "ms": 1.953854,
+     "measured": false
+    }
+   ],
+   "loaded": 46,
+   "coveredProdLines": 15655,
+   "onlyProdLines": null,
+   "testsMs": 36.1
   },
   {
    "file": "tests/a-save-carries-what-the-person-wrote.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 3,
    "rule": "What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading behind it, so every field it asks about is sent; an edit of the record's own copy sends a field nobody edited exactly as the read returned it, because the sheet shows the whole record; and a translatable field nobody edited on a read that arrived in a language is sent nowhere \u2014 its words are a translation's, and the record's own address files whatever reaches it as the record's own, over the source that translation was made from.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -9280,13 +9424,34 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-save-carries-what-the-person-wrote.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 947,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a create sends every field the sheet asks about",
+    "the record's own copy keeps a field nobody edited",
+    "an edited source field does not carry a translation nobody edited"
+   ],
+   "tests": [
+    {
+     "title": "a create sends every field the sheet asks about",
+     "ms": 12.014905,
+     "measured": false
+    },
+    {
+     "title": "the record's own copy keeps a field nobody edited",
+     "ms": 1.128557,
+     "measured": false
+    },
+    {
+     "title": "an edited source field does not carry a translation nobody edited",
+     "ms": 0.660081,
+     "measured": false
+    }
+   ],
+   "loaded": 31,
+   "coveredProdLines": 9992,
+   "onlyProdLines": null,
+   "testsMs": 13.8
   },
   {
    "file": "tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts",
@@ -15214,7 +15379,7 @@
    "file": "tests/prose-body-reads-as-blocks.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 26,
    "rule": "A rich text body is the Markdown the server stored (0069 \u00a71), so reading it is a reading of that shape: a blank line between blocks, a figure a paragraph of its own, a fence that keeps its blank lines. These cases fix where the cuts fall, which width a frame gets in a slot, and which shapes the phone refuses to draw because the server would never have stored them.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -15222,19 +15387,178 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-body-reads-as-blocks.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 530,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "two headings, a paragraph and a list stay four runs in their own order",
+    "a figure is its own block between two paragraphs",
+    "a caption keeps the quote it escaped",
+    "an image with no alt and no title is a decorative figure",
+    "two figures keep their own ids in the order the body holds them",
+    "a body that is nothing but a figure is one block",
+    "a fenced block keeps its blank lines and its language header",
+    "a tilde fence closes on its own marker, not the first backtick",
+    "an unclosed fence is refused rather than drawn as an open paragraph",
+    "a table is one run, pipes and all",
+    "a nested list and a task list stay one run each",
+    "a blockquote and a thematic break are read as they were written",
+    "plain text with newlines is paragraphs, not a refusal",
+    "an image inside a sentence is refused: \u00a71 has no inline image",
+    "an image inside a list item is refused",
+    "a pk-file reference that is not a uuid is refused",
+    "an image addressed anywhere but pk-file is refused",
+    "a heading outside ## to #### is refused, and one inside is not",
+    "a link in any scheme the format allows is ordinary text to this reader",
+    "a frame wider than its slot gets the largest served width that fits the slot",
+    "a slot wider than the widest variant gets that variant, or the frame when it fits",
+    "a frame nobody measured plans nothing",
+    "a table is what the phone's rich editor cannot hold, and nothing else is",
+    "a span closed on the line below holds only its own words, and the prose after it is read",
+    "a table quoted into a blockquote is one the editor cannot hold either",
+    "a table drawn inside a code fence is not a table the editor would lose"
+   ],
+   "tests": [
+    {
+     "title": "two headings, a paragraph and a list stay four runs in their own order",
+     "ms": 3.033061,
+     "measured": false
+    },
+    {
+     "title": "a figure is its own block between two paragraphs",
+     "ms": 0.381887,
+     "measured": false
+    },
+    {
+     "title": "a caption keeps the quote it escaped",
+     "ms": 0.135711,
+     "measured": false
+    },
+    {
+     "title": "an image with no alt and no title is a decorative figure",
+     "ms": 0.083645,
+     "measured": false
+    },
+    {
+     "title": "two figures keep their own ids in the order the body holds them",
+     "ms": 0.169874,
+     "measured": false
+    },
+    {
+     "title": "a body that is nothing but a figure is one block",
+     "ms": 0.117357,
+     "measured": false
+    },
+    {
+     "title": "a fenced block keeps its blank lines and its language header",
+     "ms": 0.125843,
+     "measured": false
+    },
+    {
+     "title": "a tilde fence closes on its own marker, not the first backtick",
+     "ms": 0.171538,
+     "measured": false
+    },
+    {
+     "title": "an unclosed fence is refused rather than drawn as an open paragraph",
+     "ms": 0.10818,
+     "measured": false
+    },
+    {
+     "title": "a table is one run, pipes and all",
+     "ms": 0.080539,
+     "measured": false
+    },
+    {
+     "title": "a nested list and a task list stay one run each",
+     "ms": 0.098853,
+     "measured": false
+    },
+    {
+     "title": "a blockquote and a thematic break are read as they were written",
+     "ms": 0.09736,
+     "measured": false
+    },
+    {
+     "title": "plain text with newlines is paragraphs, not a refusal",
+     "ms": 0.108331,
+     "measured": false
+    },
+    {
+     "title": "an image inside a sentence is refused: \u00a71 has no inline image",
+     "ms": 0.101147,
+     "measured": false
+    },
+    {
+     "title": "an image inside a list item is refused",
+     "ms": 0.063888,
+     "measured": false
+    },
+    {
+     "title": "a pk-file reference that is not a uuid is refused",
+     "ms": 0.065531,
+     "measured": false
+    },
+    {
+     "title": "an image addressed anywhere but pk-file is refused",
+     "ms": 0.044893,
+     "measured": false
+    },
+    {
+     "title": "a heading outside ## to #### is refused, and one inside is not",
+     "ms": 0.074478,
+     "measured": false
+    },
+    {
+     "title": "a link in any scheme the format allows is ordinary text to this reader",
+     "ms": 0.042629,
+     "measured": false
+    },
+    {
+     "title": "a frame wider than its slot gets the largest served width that fits the slot",
+     "ms": 0.193829,
+     "measured": false
+    },
+    {
+     "title": "a slot wider than the widest variant gets that variant, or the frame when it fits",
+     "ms": 0.061654,
+     "measured": false
+    },
+    {
+     "title": "a frame nobody measured plans nothing",
+     "ms": 0.05408,
+     "measured": false
+    },
+    {
+     "title": "a table is what the phone's rich editor cannot hold, and nothing else is",
+     "ms": 0.392386,
+     "measured": false
+    },
+    {
+     "title": "a span closed on the line below holds only its own words, and the prose after it is read",
+     "ms": 0.21091,
+     "measured": false
+    },
+    {
+     "title": "a table quoted into a blockquote is one the editor cannot hold either",
+     "ms": 0.119001,
+     "measured": false
+    },
+    {
+     "title": "a table drawn inside a code fence is not a table the editor would lose",
+     "ms": 0.079848,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 854,
+   "onlyProdLines": null,
+   "testsMs": 6.2
   },
   {
    "file": "tests/prose-body-says-its-words.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 8,
    "rule": "A rich text body is drawn by `Prose` in the kit's type and said aloud by `proseSpoken`: the same words, at two speeds. These cases hold what a person hearing the record is told \u2014 the author's sentences, a code block read as written, a figure named \u2014 and what they are never told: the markup that only tells a screen how to draw, a link's address, a checked box read out as brackets, or a `##` where a heading stands.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -15242,19 +15566,70 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-body-says-its-words.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 273,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a heading, its emphasis and a link are said as their own words",
+    "a fenced block is said as the code it holds, and its marker says nothing",
+    "a list says its items and not its marks, checked off or not",
+    "a quoted line is said as the sentence it quotes",
+    "a table is said cell by cell, and its separator row says nothing",
+    "a figure is named by its alt and its caption, and a decorative one says nothing",
+    "a mark that never pairs is a character of the sentence, not markup",
+    "a body the reader refuses is said exactly as it was stored"
+   ],
+   "tests": [
+    {
+     "title": "a heading, its emphasis and a link are said as their own words",
+     "ms": 2.263758,
+     "measured": false
+    },
+    {
+     "title": "a fenced block is said as the code it holds, and its marker says nothing",
+     "ms": 0.198216,
+     "measured": false
+    },
+    {
+     "title": "a list says its items and not its marks, checked off or not",
+     "ms": 0.201052,
+     "measured": false
+    },
+    {
+     "title": "a quoted line is said as the sentence it quotes",
+     "ms": 0.15685,
+     "measured": false
+    },
+    {
+     "title": "a table is said cell by cell, and its separator row says nothing",
+     "ms": 0.193017,
+     "measured": false
+    },
+    {
+     "title": "a figure is named by its alt and its caption, and a decorative one says nothing",
+     "ms": 0.3243,
+     "measured": false
+    },
+    {
+     "title": "a mark that never pairs is a character of the sentence, not markup",
+     "ms": 0.190001,
+     "measured": false
+    },
+    {
+     "title": "a body the reader refuses is said exactly as it was stored",
+     "ms": 0.165085,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 857,
+   "onlyProdLines": null,
+   "testsMs": 3.7
   },
   {
    "file": "tests/prose-code-keeps-its-content.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 4,
    "rule": "0069 \u00a71 allows fenced code with any content and inline code with any content, and the server stores both as written. The reader's refusals \u2014 an image outside a figure, a `pk-file:` that is not a uuid, a heading outside `##`\u2013`####` \u2014 are about the body's own constructs, so a line of code that merely looks like one of them is still code. A description that carries a shell snippet with a comment line is an ordinary body, and the phone draws it whole.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -15262,19 +15637,46 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-code-keeps-its-content.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 327,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a comment line inside a fenced block is code, not a heading",
+    "image syntax quoted inside a fenced block is code, not an image",
+    "a pk-file: scheme named inside inline code is code, not a file reference",
+    "a heading-like line inside a fenced block in a list is still code"
+   ],
+   "tests": [
+    {
+     "title": "a comment line inside a fenced block is code, not a heading",
+     "ms": 3.387917,
+     "measured": false
+    },
+    {
+     "title": "image syntax quoted inside a fenced block is code, not an image",
+     "ms": 0.397254,
+     "measured": false
+    },
+    {
+     "title": "a pk-file: scheme named inside inline code is code, not a file reference",
+     "ms": 0.423604,
+     "measured": false
+    },
+    {
+     "title": "a heading-like line inside a fenced block in a list is still code",
+     "ms": 0.316846,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 838,
+   "onlyProdLines": null,
+   "testsMs": 4.5
   },
   {
    "file": "tests/prose-fence-keeps-a-marker-with-trailing-text.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 1,
    "rule": "A fence-like line followed by words is literal code, not a closing delimiter. The reader preserves that valid fenced block instead of refusing the whole body.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -15282,19 +15684,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-fence-keeps-a-marker-with-trailing-text.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 536,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a fence marker followed by text stays inside its code block"
+   ],
+   "tests": [
+    {
+     "title": "a fence marker followed by text stays inside its code block",
+     "ms": 7.647767,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 831,
+   "onlyProdLines": null,
+   "testsMs": 7.6
   },
   {
    "file": "tests/prose-fence-keeps-shorter-markers.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 2,
    "rule": "A fenced code block may quote a shorter fence. Its opening marker's whole width defines the closing marker, so the quoted heading and image remain code.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -15302,13 +15713,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/prose-fence-keeps-shorter-markers.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 351,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a shorter marker inside a fenced block does not end its literal content",
+    "a quoted heading and image inside a wide fence do not hold the editor"
+   ],
+   "tests": [
+    {
+     "title": "a shorter marker inside a fenced block does not end its literal content",
+     "ms": 2.507318,
+     "measured": false
+    },
+    {
+     "title": "a quoted heading and image inside a wide fence do not hold the editor",
+     "ms": 0.341392,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 837,
+   "onlyProdLines": null,
+   "testsMs": 2.8
   },
   {
    "file": "tests/range-clock-change.test.ts",
@@ -17166,21 +17592,60 @@
    "file": "tests/the-language-a-sheet-writes-is-the-one-the-server-named.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
-   "rule": "A record's words arrive in some language, and the server says which: `_i18n` names the translatable fields it served and the language each one's words are in. What a sheet may write, and where, follows from that note alone \u2014 never from what the text looks like. Four answers are owed here: a changed field the server named in the language the sheet reads in is written *in that language* (a PATCH that names no language writes the record, so Portuguese words sent bare would be filed as the English they were translated from); a changed field named in a language the sheet does not read is the record's own copy and is written bare, as it always was; a field the server said nothing about is the record's own copy too; and a translation changed beside a field that language cannot carry is two writes at two addresses, which is a refusal rather than half of one.",
+   "cases": 6,
+   "rule": "A record's words arrive in some language, and the server says which \u2014 in `_i18n`, naming the translatable fields it served and the language each one's words are in, and on the answer itself, with the tag the whole response was written in. What a sheet may write, and where, follows from those two alone \u2014 never from what the text looks like. Six answers are owed here: a changed field the server named in the language the sheet reads in is written *in that language* (a PATCH that names no language writes the record, so Portuguese words sent bare would be filed as the English they were translated from); a changed field named in a language the sheet does not read is the record's own copy and is written bare, as it always was; a field the server said nothing about is the record's own copy too; a translation changed beside a field that language cannot carry is two writes at two addresses, which is a refusal rather than half of one; and on a read the server answered *in a language*, every translatable field the person changed belongs to it \u2014 whether it carried no note because it is that language's own text, or carried another language's note because that other language is the fallback the translator was shown in order to write this one.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/the-language-a-sheet-writes-is-the-one-the-server-named.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 902,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a body served in the language the sheet reads in is written in that language",
+    "a body served in a language nobody reads here is the record's own, and is written bare",
+    "a body the server said nothing about is written without a language",
+    "a translation changed beside a field that language cannot carry names what it cannot write",
+    "a complete translation the answer named no note for is written in the language the answer was served in",
+    "a translation written over the source a missing row fell back to is written in the language that was asked for"
+   ],
+   "tests": [
+    {
+     "title": "a body served in the language the sheet reads in is written in that language",
+     "ms": 10.264838,
+     "measured": false
+    },
+    {
+     "title": "a body served in a language nobody reads here is the record's own, and is written bare",
+     "ms": 0.84298,
+     "measured": false
+    },
+    {
+     "title": "a body the server said nothing about is written without a language",
+     "ms": 0.539278,
+     "measured": false
+    },
+    {
+     "title": "a translation changed beside a field that language cannot carry names what it cannot write",
+     "ms": 0.573621,
+     "measured": false
+    },
+    {
+     "title": "a complete translation the answer named no note for is written in the language the answer was served in",
+     "ms": 0.432861,
+     "measured": false
+    },
+    {
+     "title": "a translation written over the source a missing row fell back to is written in the language that was asked for",
+     "ms": 0.391434,
+     "measured": false
+    }
+   ],
+   "loaded": 31,
+   "coveredProdLines": 9969,
+   "onlyProdLines": null,
+   "testsMs": 13
   },
   {
    "file": "tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts",
@@ -17473,7 +17938,7 @@
    "file": "tests/screens/a-complete-translation-save-keeps-the-source.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 2,
    "rule": "Content-Language names the requested locale; _i18n may instead name the source of a fallback. A translator's edit in that locale must preserve the source in both cases.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17481,19 +17946,34 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-complete-translation-save-keeps-the-source.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 20586,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "saving a complete Portuguese translation named by the response header preserves the English source",
+    "translating an English fallback in the requested Portuguese locale preserves the English source"
+   ],
+   "tests": [
+    {
+     "title": "saving a complete Portuguese translation named by the response header preserves the English source",
+     "ms": 145,
+     "measured": false
+    },
+    {
+     "title": "translating an English fallback in the requested Portuguese locale preserves the English source",
+     "ms": 43,
+     "measured": false
+    }
+   ],
+   "loaded": 141,
+   "coveredProdLines": 1784,
+   "onlyProdLines": null,
+   "testsMs": 188
   },
   {
    "file": "tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17501,13 +17981,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 27490,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a default richtext record renders headings and emphasis without a preview override"
+   ],
+   "tests": [
+    {
+     "title": "a default richtext record renders headings and emphasis without a preview override",
+     "ms": 66,
+     "measured": false
+    }
+   ],
+   "loaded": 148,
+   "coveredProdLines": 1851,
+   "onlyProdLines": null,
+   "testsMs": 66
   },
   {
    "file": "tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx",
@@ -17583,7 +18072,7 @@
    "file": "tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 3,
    "rule": "A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation over its source.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17591,19 +18080,40 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 26306,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a complete translated answer keeps both edits on refusal and saves a source edit after reversion",
+    "an answer naming a regional language keeps both edits on refusal and saves a source edit after reversion",
+    "an untagged answer with a field language keeps both edits on refusal and saves a source edit after reversion"
+   ],
+   "tests": [
+    {
+     "title": "a complete translated answer keeps both edits on refusal and saves a source edit after reversion",
+     "ms": 143,
+     "measured": false
+    },
+    {
+     "title": "an answer naming a regional language keeps both edits on refusal and saves a source edit after reversion",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "an untagged answer with a field language keeps both edits on refusal and saves a source edit after reversion",
+     "ms": 13,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 1711,
+   "onlyProdLines": null,
+   "testsMs": 168
   },
   {
    "file": "tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A camera image must reach the real API transport as a native file part, retain its session, and enter the body only after the file endpoint accepts that part.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17611,19 +18121,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 20976,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a camera file part survives generated serialization and is inserted after authenticated upload"
+   ],
+   "tests": [
+    {
+     "title": "a camera file part survives generated serialization and is inserted after authenticated upload",
+     "ms": 162,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1894,
+   "onlyProdLines": null,
+   "testsMs": 162
   },
   {
    "file": "tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A picture taken on the phone is stored as a file before the body points at it: the body never learns an address that only this phone could read.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17631,39 +18150,69 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 20228,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a picture taken here is stored as a file, and the body points at that file"
+   ],
+   "tests": [
+    {
+     "title": "a picture taken here is stored as a file, and the body points at that file",
+     "ms": 48,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1650,
+   "onlyProdLines": null,
+   "testsMs": 48
   },
   {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
-   "rule": "A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at the file's content address with the session this app holds. A file this phone cannot read takes the native reading of the whole body away \u2014 and every word of the body stays on it.",
+   "cases": 3,
+   "rule": "A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at the file's content address \u2014 at the width this device can paint, or as stored when the frame already fits \u2014 with the session this app holds. A file this phone cannot read is said where it sits: the body keeps reading natively and no byte of the refused file is asked for.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 22148,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a figure reads its own row for the frame and asks for its bytes at the file's address",
+    "a frame that already fits its slot is asked for as stored",
+    "a file this phone cannot read is said in its own frame and the body keeps reading"
+   ],
+   "tests": [
+    {
+     "title": "a figure reads its own row for the frame and asks for its bytes at the file's address",
+     "ms": 1168,
+     "measured": false
+    },
+    {
+     "title": "a frame that already fits its slot is asked for as stored",
+     "ms": 25,
+     "measured": false
+    },
+    {
+     "title": "a file this phone cannot read is said in its own frame and the body keeps reading",
+     "ms": 22,
+     "measured": false
+    }
+   ],
+   "loaded": 149,
+   "coveredProdLines": 1942,
+   "onlyProdLines": null,
+   "testsMs": 1215
   },
   {
    "file": "tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17671,19 +18220,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 21217,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "an editable richtext form exposes bold and image controls after reading the record"
+   ],
+   "tests": [
+    {
+     "title": "an editable richtext form exposes bold and image controls after reading the record",
+     "ms": 34,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1589,
+   "onlyProdLines": null,
+   "testsMs": 34
   },
   {
    "file": "tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores the figure.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17691,19 +18249,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 23646,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a failed figure can retry and replace its loading placeholder with the recovered image"
+   ],
+   "tests": [
+    {
+     "title": "a failed figure can retry and replace its loading placeholder with the recovered image",
+     "ms": 85,
+     "measured": false
+    }
+   ],
+   "loaded": 135,
+   "coveredProdLines": 1548,
+   "onlyProdLines": null,
+   "testsMs": 85
   },
   {
    "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17711,19 +18278,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 23943,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "renaming a source-only title on a Portuguese read saves the title and preserves both bodies"
+   ],
+   "tests": [
+    {
+     "title": "renaming a source-only title on a Portuguese read saves the title and preserves both bodies",
+     "ms": 104,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 1691,
+   "onlyProdLines": null,
+   "testsMs": 104
   },
   {
    "file": "tests/screens/a-translatable-record-follows-the-device-language.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 2,
    "rule": "A translatable record is requested in the device language. A source-language fallback is identified in Portuguese rather than silently shown as translated content.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -17731,13 +18307,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-translatable-record-follows-the-device-language.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 25311,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a Portuguese device asks for translatable content with Accept-Language",
+    "a missing Portuguese translation names the English fallback beside the body"
+   ],
+   "tests": [
+    {
+     "title": "a Portuguese device asks for translatable content with Accept-Language",
+     "ms": 582,
+     "measured": false
+    },
+    {
+     "title": "a missing Portuguese translation names the English fallback beside the body",
+     "ms": 29,
+     "measured": false
+    }
+   ],
+   "loaded": 152,
+   "coveredProdLines": 2224,
+   "onlyProdLines": null,
+   "testsMs": 611
   },
   {
    "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",
@@ -18596,7 +19187,7 @@
    "file": "tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 2,
    "rule": "Saving without a changed translation must never copy its loaded words over the source, including when typing and undoing leaves the body exactly as it arrived.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -18604,13 +19195,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 21679,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "saving an untouched Portuguese body preserves the English source",
+    "saving after reverting a Portuguese body preserves the English source"
+   ],
+   "tests": [
+    {
+     "title": "saving an untouched Portuguese body preserves the English source",
+     "ms": 118,
+     "measured": false
+    },
+    {
+     "title": "saving after reverting a Portuguese body preserves the English source",
+     "ms": 16,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 1686,
+   "onlyProdLines": null,
+   "testsMs": 134
   },
   {
    "file": "tests/screens/cancel-asks-once.test.tsx",
@@ -18905,7 +19511,7 @@
    "file": "tests/screens/editing-a-translation-keeps-the-source-language.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A translated read cannot be sent back as the source-language value on Save.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -18913,13 +19519,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/editing-a-translation-keeps-the-source-language.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 24330,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "saving Portuguese content preserves the English source and writes the Portuguese locale"
+   ],
+   "tests": [
+    {
+     "title": "saving Portuguese content preserves the English source and writes the Portuguese locale",
+     "ms": 180,
+     "measured": false
+    }
+   ],
+   "loaded": 141,
+   "coveredProdLines": 1791,
+   "onlyProdLines": null,
+   "testsMs": 180
   },
   {
    "file": "tests/screens/example-task-detail.test.tsx",
@@ -19016,7 +19631,7 @@
    "file": "tests/screens/generated-richtext-record-renders-natively.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 3,
    "rule": "A generated record reads a richtext declaration without a product renderer. Markdown headings become native text while a plain text field keeps its syntax.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -19024,13 +19639,34 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/generated-richtext-record-renders-natively.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 25745,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a generated richtext record draws native Markdown in light mode",
+    "a generated richtext record draws native Markdown in dark mode",
+    "a plain text record keeps Markdown punctuation as text"
+   ],
+   "tests": [
+    {
+     "title": "a generated richtext record draws native Markdown in light mode",
+     "ms": 59,
+     "measured": false
+    },
+    {
+     "title": "a generated richtext record draws native Markdown in dark mode",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a plain text record keeps Markdown punctuation as text",
+     "ms": 13,
+     "measured": false
+    }
+   ],
+   "loaded": 148,
+   "coveredProdLines": 1847,
+   "onlyProdLines": null,
+   "testsMs": 90
   },
   {
    "file": "tests/screens/newer-shell-fallback.test.tsx",
@@ -19340,7 +19976,7 @@
    "file": "tests/screens/refused-richtext-file-keeps-the-reader.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A tenant-scoped file read that answers 404 leaves a missing-image figure in the native body. The surrounding Markdown still renders, and no refused byte is asked for.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -19348,19 +19984,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/refused-richtext-file-keeps-the-reader.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 24221,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a second tenant's file refused with 404 keeps its missing figure and native prose"
+   ],
+   "tests": [
+    {
+     "title": "a second tenant's file refused with 404 keeps its missing figure and native prose",
+     "ms": 699,
+     "measured": false
+    }
+   ],
+   "loaded": 150,
+   "coveredProdLines": 2090,
+   "onlyProdLines": null,
+   "testsMs": 699
   },
   {
    "file": "tests/screens/richtext-formatting-preserves-the-loaded-body.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "Formatting a read value is an edit of that value, even before anyone types into it.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -19368,19 +20013,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/richtext-formatting-preserves-the-loaded-body.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 20623,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "bold on a selected word keeps every other word from the loaded body through Save"
+   ],
+   "tests": [
+    {
+     "title": "bold on a selected word keeps every other word from the loaded body through Save",
+     "ms": 50,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1727,
+   "onlyProdLines": null,
+   "testsMs": 50
   },
   {
    "file": "tests/screens/richtext-image-insertion-keeps-later-typing.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "Choosing a file is asynchronous; typing while it loads must survive the insertion.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -19388,19 +20042,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/richtext-image-insertion-keeps-later-typing.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 27817,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "an image chosen after another edit preserves the latest draft"
+   ],
+   "tests": [
+    {
+     "title": "an image chosen after another edit preserves the latest draft",
+     "ms": 179,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1641,
+   "onlyProdLines": null,
+   "testsMs": 179
   },
   {
    "file": "tests/screens/richtext-image-source-offers-camera-and-library.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "Inserting a new phone photo starts by choosing the photo library or camera.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -19408,13 +20071,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/richtext-image-source-offers-camera-and-library.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 28914,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "Image offers the photo library and camera even when the tenant has no uploaded files"
+   ],
+   "tests": [
+    {
+     "title": "Image offers the photo library and camera even when the tenant has no uploaded files",
+     "ms": 33,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1599,
+   "onlyProdLines": null,
+   "testsMs": 33
   },
   {
    "file": "tests/screens/sign-in-door-asks-before-held-writes-go.test.tsx",
@@ -21102,7 +21774,7 @@
    "file": "tests/ui/prose-code-reads-as-written.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 2,
    "rule": "Code is drawn as the author wrote it: a fenced block and an inline code span are literal in 0069 \u00a71 and in CommonMark, so no character inside them is escaped on the way to the face. A shell line such as `make || echo failed` reads the same on the phone as on the web, and a person who copies it from the screen copies a command that runs.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -21110,13 +21782,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/ui/prose-code-reads-as-written.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 21325,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a fenced block shows the bars it holds, with no escape added",
+    "an inline code span shows the bars it holds, with no escape added"
+   ],
+   "tests": [
+    {
+     "title": "a fenced block shows the bars it holds, with no escape added",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "an inline code span shows the bars it holds, with no escape added",
+     "ms": 6,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 701,
+   "onlyProdLines": null,
+   "testsMs": 23
   },
   {
    "file": "tests/chart-axis-position.case.mjs",
