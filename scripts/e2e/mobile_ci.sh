@@ -226,6 +226,10 @@ psql "$(swap "$admin_url" "$database")" -v ON_ERROR_STOP=1 -q \
 # emulator boots, not forty minutes into a journey. python3 rather than openssl
 # because it is already a tool this script demands.
 factor_key="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+# The kernel composes outbound webhooks and refuses to start without the key that wraps an endpoint's signing
+# secret: thirty-two bytes of this run's own, as platformkit's own journey writes, and nothing verifies a delivery
+# signed with them.
+webhook_key="$(python3 -c 'import secrets; print(secrets.token_hex(16))')"
 app_dsn="$(swap "$app_url" "$database")"
 migrate_dsn="$(swap "$admin_url" "$database")"
 cat >"$work/config.yaml" <<YAML
@@ -244,6 +248,8 @@ audit:
   retention_days: 365
 auth:
   factor_key: "$factor_key"
+webhook:
+  secret_key: "$webhook_key"
 files:
   dir: "$work/files"
 YAML
