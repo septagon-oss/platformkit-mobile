@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 74,
+   "files": 75,
    "cases": 206,
    "ms": 1188175,
    "testsMs": 22569,
    "runners": {
-    "jest": 74
+    "jest": 75
    },
    "unreachable": 0
   },
@@ -17578,6 +17578,26 @@
    "coveredProdLines": 1423,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation over its source.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx",
