@@ -30,6 +30,7 @@ export function fakeApi(operations: Partial<Operations> = {}): FakeApi {
   const bound = createApi("https://fake.test", (async () => {
     throw new Error("Supply the generated operation fake explicitly.");
   }) as typeof fetch).operations;
+  const get = jest.fn<Api["get"]>(async (_e, id) => ({ id }));
   return {
     operations: { ...bound, ...operations },
     // Jest erases the generic return parameter; this implementation obtains T
@@ -43,12 +44,18 @@ export function fakeApi(operations: Partial<Operations> = {}): FakeApi {
     logout: jest.fn<Api["logout"]>(async () => undefined),
     catalog: jest.fn<Api["catalog"]>(async () => catalog),
     list: jest.fn<Api["list"]>(async () => ({ items: [], total: 0 })),
-    get: jest.fn<Api["get"]>(async (_e, id) => ({ id })),
+    get,
+    // A row this fake remembers was never answered by anyone, so it arrived in no language: a
+    // screen reading through `served` sees the row its `get` override answers with and the empty
+    // tag. Which language a read really arrived in is a fact about a response, so a test that
+    // reads it goes through the transport that prints it.
+    served: jest.fn<Api["served"]>(async (e, id) => ({ row: await get(e, id), language: "" })),
     one: jest.fn<Api["one"]>(async () => ({ id: "one" })),
     replace: jest.fn<Api["replace"]>(async (_e, v) => ({ id: "one", ...v })),
     create: jest.fn<Api["create"]>(async (_e, v) => ({ id: "new", ...v })),
     update: jest.fn<Api["update"]>(async (_e, id, v) => ({ id, ...v })),
     remove: jest.fn<Api["remove"]>(async () => undefined),
+    upload: jest.fn<Api["upload"]>(async () => ({ id: "file-new" })),
     command: jest.fn<Api["command"]>(async (_e, id) => ({ id: id ?? "" })),
     cookie: jest.fn<Api["cookie"]>(() => "pk=1"),
   };

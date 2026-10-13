@@ -48,6 +48,9 @@ const independent = {
   "d3-shape": { version: "3.2.0", native: false },
   "@maplibre/maplibre-react-native": { version: "11.4.0", native: true },
   "react-native-zoom-toolkit": { version: "5.1.1", native: false },
+  // A Markdown face in JavaScript only: no codegen config, no android/ios source,
+  // so it is pinned exactly like the other pure-JS packages and never by the manifest.
+  "react-native-markdown-display": { version: "7.0.2", native: false },
 } as const;
 
 test("every dependency is checked against Expo or its exact independent pin", () => {

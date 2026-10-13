@@ -20,6 +20,7 @@ import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
 import { useActivity } from "./useActivity";
+import { RichTextBody } from "./RichTextBody";
 import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
 import { useRecordNames } from "./useReferenceNames";
@@ -154,6 +155,17 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
           : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}
         {...(canDelete ? { onDelete: detail.remove } : {})}
+        // A rich text body is read, not printed: the reader is supplied here because it is
+        // this screen that can ask for a figure's file, and the organism that decides
+        // which field is one (derive.richBody).
+        richText={(body, testID, fallback) => (
+          <RichTextBody
+            presentation={presentation}
+            source={body}
+            testID={testID}
+            fallback={fallback}
+          />
+        )}
       />
     </>
   );

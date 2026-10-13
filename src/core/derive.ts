@@ -2,8 +2,9 @@
 // only an entry's schema. The rules are the web generator's (ui/screens in the
 // public repository), restated in one place so the two shells agree — a status
 // is "Open" in a cell there and in a cell here.
+import { proseSpoken } from "./prose";
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
-import type { Copy } from "./copy";
+import { copyLanguage, type Copy, type Language } from "./copy";
 import type { EntrySubject } from "./failure";
 import type { DataCell } from "./collections";
 import type { Status } from "./shared";
@@ -548,24 +549,38 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
  */
 export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | undefined {
   const declared = e.hints?.previewField;
-  if (declared !== undefined) return e.fields.find((f) => f.name === declared && rowContent(f));
+  // A rich text body is never the summary line, declared or default: a printed line under
+  // a name can only print the Markdown the server stored, and that syntax is not part of
+  // what a person is told (`richBody`). Such a body is read by the medium that draws it —
+  // the record's own reader, where a heading is a heading — which is what keeps the
+  // reader on the page for an entry that hints nothing at all.
+  if (declared !== undefined)
+    return printed(e.fields.find((f) => f.name === declared && rowContent(f)));
   const named = rowPrimary(e);
   const speaks = where === "row" ? onList : rowContent;
-  return e.fields.find(
-    (f) =>
-      f.name !== named?.name &&
-      speaks(f) &&
-      !f.readOnly &&
-      (f.type === "text" || f.widget === "textarea"),
+  return printed(
+    e.fields.find(
+      (f) =>
+        f.name !== named?.name &&
+        speaks(f) &&
+        !f.readOnly &&
+        (f.type === "text" || f.widget === "textarea"),
+    ),
   );
+}
+
+/** printed is a field only while a line can print its value: a rich text body has no printed form. */
+function printed(f: Field | undefined): Field | undefined {
+  return f !== undefined && f.widget === "richtext" ? undefined : f;
 }
 
 /**
  * saidValue is a field's value as the eye reads it and as a reader says it aloud.
- * The two are the same words except for an instant: a cell shows the distance
- * ("5 minutes ago") and a screen reader says the whole local date-time. No
- * `spoken` means the shown words are the whole fact, which is true of every other
- * field type.
+ * The two are the same words except twice: an instant, because a cell shows the
+ * distance ("5 minutes ago") and a screen reader says the whole local date-time; and a
+ * rich text body, because the record shows it in the kit's type (`Prose`) and the syntax
+ * the server stored is not part of what a person is being told. No `spoken` means the
+ * shown words are the whole fact, which is true of every other field type.
  */
 export function saidValue(
   f: Field,
@@ -575,7 +590,12 @@ export function saidValue(
 ): { readonly value: string; readonly spoken?: string } {
   const at = f.type === "time" ? timeValue(v) : undefined;
   const instant = at ? presentedInstant(at, format) : undefined;
-  return { value: display(f, v, format, names), ...(instant ? { spoken: instant.exact } : {}) };
+  const body = richBody(f, v);
+  const said = instant !== undefined ? instant.exact : body === undefined ? "" : proseSpoken(body);
+  return {
+    value: display(f, v, format, names),
+    ...(said === "" ? {} : { spoken: said }),
+  };
 }
 
 /**
@@ -973,6 +993,12 @@ export interface Control {
    * so its text is what they typed or what the row handed the box.
    */
   readonly echo?: unknown;
+  /**
+   * rich says the author declared this field's value a rich text body, so the sheet offers
+   * the formatting controls over the box — the marks this phone's reader draws back, and
+   * the picture the body may point at. Absent means the box is only a box.
+   */
+  readonly rich?: boolean;
 }
 
 /** kind is the control a field gets: the tag when the entity named one, the type otherwise. */
@@ -998,6 +1024,182 @@ export function kind(f: Field): ControlKind {
   }
 }
 
+/**
+ * richBody is the Markdown a phone reads rather than prints: the body of a field whose
+ * author declared `widget: richtext`, and nothing for any other field or for a value with
+ * no words in it. The declaration is the catalogue's; the body is what the server stored.
+ */
+export function richBody(f: Field, value: unknown): string | undefined {
+  if (f.widget !== "richtext") return undefined;
+  const body = text(value);
+  return body === "" ? undefined : body;
+}
+
+/**
+ * translationNote is the sentence a record says when a field's words arrived in a language
+ * other than the one its person reads in. `_i18n` is the server's own record of the
+ * translatable fields it served: the language each one's words are in, and whether this
+ * reader's language had a row of its own. Nothing is guessed from the text — a body that
+ * reads like another language is still the body the server says it is — and a field served
+ * in the language the phone asked in says nothing, because a note about the language a
+ * person is reading is not information about the record.
+ */
+export function translationNote(f: Field, row: Row, format: Formatting): string | undefined {
+  const locale = servedLanguage(row, f.name);
+  if (locale === undefined) return undefined;
+  const mine = copyLanguage(format.locale);
+  const theirs = copyLanguage(locale);
+  if (mine === theirs) return undefined;
+  const kit = format.copy.kit;
+  return kit.shownInLanguage(theirs === "pt" ? kit.languagePortuguese : kit.languageEnglish);
+}
+
+/**
+ * servedLanguage is the language the server says one field's words arrived in. `_i18n` is
+ * the response's own note of the translatable fields it served: nothing here is guessed
+ * from what the text looks like, and a field the server said nothing about has no language
+ * this phone can claim to know.
+ */
+export function servedLanguage(row: Row, name: string): string | undefined {
+  const served: unknown = row._i18n;
+  if (typeof served !== "object" || served === null || Array.isArray(served)) return undefined;
+  const said: unknown = (served as Record<string, unknown>)[name];
+  if (typeof said !== "object" || said === null || Array.isArray(said)) return undefined;
+  const locale = (said as { locale?: unknown }).locale;
+  return typeof locale === "string" && locale !== "" ? locale : undefined;
+}
+
+/**
+ * heldLanguage is the language one field's words on a sheet belong to, and nothing when they
+ * are the record's own copy. The catalogue must declare the field translatable: a field with
+ * one language's words has no language to write at, however the reading was served, and the
+ * server answers a field it cannot translate at a language address with a refusal that saves
+ * nothing. Beyond that declaration the answer decides and never the text — the response's own
+ * tag first, because a row served *in* a language shows this person that language's words
+ * whichever way `_i18n` fell out: a field with no note is that language's own reviewed text,
+ * which is the one field the note has nothing to say about, and a field noted as another
+ * language's was shown as that language precisely so this reader could write their own. Where
+ * the read named no language the note alone decides, and only when it names a language this
+ * sheet's person reads: another language's note over an untagged answer is the record's own
+ * copy, shown as it is.
+ */
+function heldLanguage(
+  row: Row,
+  field: Field,
+  speaking: Language,
+  served: string,
+): string | undefined {
+  if (field.translatable !== true) return undefined;
+  if (served !== "") return served;
+  const said = servedLanguage(row, field.name);
+  return said !== undefined && copyLanguage(said) === speaking ? said : undefined;
+}
+
+/**
+ * WriteLanguage is a sheet's Save in one language: the words it carries, and the fields it
+ * may not carry in the same request.
+ */
+export interface WriteLanguage {
+  readonly locale: string;
+  /** translated is every changed field this language owns. */
+  readonly translated: readonly string[];
+  /** other is every changed field it does not: a body cannot hold both kinds at once. */
+  readonly other: readonly string[];
+}
+
+/**
+ * writeLanguage is the language a sheet writes its changes in, and nothing when it writes
+ * the record's own copy. A changed field that the catalogue declares translatable and the
+ * server named in the language this sheet reads in holds that language's words: sending them
+ * with no language would file a translation as the record's own and destroy the source, so
+ * the write names the language the server named instead. Everything else — a field the server
+ * named in another language, one it said nothing about, or one that is not translatable at
+ * all — is the record's own copy and is written as it has always been: without a language.
+ *
+ * `served` is the tag the read of this row was answered in, straight off the response, and ""
+ * when it named none. `heldLanguage` reads both, and a changed field whose words it puts in a
+ * language the sheet's person reads is written in that language rather than bare: sent without
+ * one, they would file the translation over the source it was made from.
+ *
+ * A language write can carry only the fields that language owns, because the record itself
+ * is written without the parameter: `other` is what the sheet therefore cannot save in the
+ * same breath, and the sheet says so rather than sending half of what was asked. A field the
+ * catalogue does not declare translatable is always `other` — it belongs at the record's own
+ * address, and this function names no language for it whatever the reading was served in.
+ */
+export function writeLanguage(
+  row: Row | undefined,
+  controls: readonly Control[],
+  held: Readonly<Record<string, string>>,
+  speaking: Language,
+  served = "",
+): WriteLanguage | undefined {
+  if (row === undefined) return undefined;
+  const changed = changedFields(controls, held);
+  const translated: string[] = [];
+  const other: string[] = [];
+  let locale: string | undefined;
+  for (const name of changed) {
+    const field = controls.find((c) => c.field.name === name)?.field;
+    const destination =
+      field === undefined ? undefined : heldLanguage(row, field, speaking, served);
+    if (destination === undefined) {
+      other.push(name);
+      continue;
+    }
+    // One request carries one language: a second translated field named in another language
+    // is a second write, and the sheet asks for it separately rather than quietly picking one.
+    if (locale !== undefined && locale !== destination) {
+      other.push(name);
+      continue;
+    }
+    if (locale === undefined) locale = destination;
+    translated.push(name);
+  }
+  if (locale === undefined) return undefined;
+  return { locale, translated, other };
+}
+
+/**
+ * saveBody is the body of one Save: the values this sheet may write at the address `writing`
+ * names, in that address's language.
+ *
+ * A language write carries only the fields that language owns. The record's own copy — `writing`
+ * naming no language — carries everything else the sheet holds, except a field whose words
+ * belong to a language and that nobody edited: those words came off a reading in that language,
+ * and the record's address files whatever reaches it as the record's own, over the source the
+ * translation was made from, which is the one write nobody can take back. A field nobody edited
+ * has no new words for the record either, so it is sent nowhere and keeps what it holds.
+ *
+ * `speaking` and `served` are the language this sheet reads in and the tag its read was answered
+ * under, the same two the language of the write is read off. A create has no reading, so nothing
+ * it holds can be another language's words and every field it asks about is sent.
+ */
+export function saveBody(
+  controls: readonly Control[],
+  held: Readonly<Record<string, string>>,
+  row: Row | undefined,
+  writing: WriteLanguage | undefined,
+  speaking: Language,
+  served = "",
+): Record<string, unknown> {
+  const every = values(controls, held);
+  if (writing !== undefined)
+    return Object.fromEntries(
+      Object.entries(every).filter(([name]) => writing.translated.includes(name)),
+    );
+  if (row === undefined) return every;
+  const changed = new Set(changedFields(controls, held));
+  const send: Record<string, unknown> = {};
+  for (const c of controls) {
+    const name = c.field.name;
+    if (!(name in every)) continue;
+    if (!changed.has(name) && heldLanguage(row, c.field, speaking, served) !== undefined) continue;
+    send[name] = every[name];
+  }
+  return send;
+}
+
 /** control is one field as a form holds it: the same rules wherever the field came from. */
 function control(f: Field, value: string, immutable: boolean): Control {
   const k = kind(f);
@@ -1012,6 +1214,8 @@ function control(f: Field, value: string, immutable: boolean): Control {
   return {
     kind: k,
     field: f,
+    // The declaration is the catalogue's; what it earns on a form is the editor's marks.
+    ...(f.widget === "richtext" ? { rich: true } : {}),
     label: fieldLabel(f),
     value,
     required: f.required === true,

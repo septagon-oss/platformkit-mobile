@@ -155,6 +155,49 @@ for the version being released.
   nothing else, and `changedByCommand` and `identifierOnly` (English and Portuguese) are
   drawn by `ResourceForm` — so what an English phone reads beside a greyed-out value is
   the same sentence as before, and a Portuguese phone reads one for the first time.
+- A picture in a rich text body may come from the phone itself. `Image` over an editable
+  `widget: richtext` box now asks where the picture comes from — this phone's camera, its
+  photo library, or a file the server already holds — and a picture taken or chosen here is
+  stored first: `./effects/api` gains `upload(e, form, query)`, the one multipart POST the
+  pinned document gives a file's bytes, answered with the row the server made, so the line
+  that enters the body points at that row and never at an address only this phone can read.
+  This needs a native module the kit did not carry: `expo-image-picker` is a new dependency,
+  and a client that pins this release gets a new native project and therefore a new binary.
+  A formatting mark is applied to the body the box shows rather than to whatever the sheet
+  happens to hold, and an answer that arrives after the person typed again is inserted into
+  the draft as it now stands: a mark over a freshly read body no longer writes `****` over
+  the body, and a figure no longer erases the sentence typed while its file was being listed.
+- Additive to `./core/derive`: `servedLanguage` (the language the server says one field's
+  words arrived in, read off `_i18n`) and `writeLanguage` (what a sheet's Save may name, and
+  which of its changed fields that language cannot carry). A save of a translated field now
+  sends `?lang=` with it, because a PATCH that names no language writes the record: without
+  this, editing Portuguese on a Portuguese phone overwrote the English it was translated
+  from. `Api.update` takes the language on its request options, and a held write replays at
+  the same address it was filed under.
+- Additive to `./effects/api`: `served(e, id)`, which is `get(e, id)`'s read keeping the tag that
+  read's `Content-Language` printed beside the row rather than dropping it (`Api.get` answers the
+  row alone, unchanged). A record with a translatable field is answered *in a language*, and a
+  write naming none is filed as the record's own copy, so the tag a person read their words in is
+  the tag their Save names: `writeLanguage` takes it as a fifth, optional argument, and a sheet
+  that read a record in Portuguese now writes every translatable field it changed in Portuguese —
+  including the complete translation `_i18n` says nothing about, because there is nothing to say,
+  and the fallback whose note names English precisely because Portuguese has no row and English is
+  what the translator was shown to write. Both of those shapes were overwriting the source.
+- Additive to `./core/derive`: `saveBody` (the body of one Save: the values a sheet may write at
+  the address its language write names). It is what the two rules below are read from, so a sheet
+  holds neither: a language write carries the fields that language owns, and a write that names no
+  language carries every field except a translatable one that arrived with the row and that nobody
+  edited — the record's own address files whatever reaches it as the record's own, so an untouched
+  Portuguese body riding along with a title change used to overwrite the English it translates.
+  `writeLanguage` now gates on the catalogue's `translatable` before it reads the served tag, so a
+  source-only field edited on a translated read is written at the record's own address instead of
+  meeting the server's refusal there.
+- An upload keeps the form it was given. `upload(e, form, query)` handed that form to the
+  generated operation's serializer, which builds one out of an object's entries and so turned a
+  form that already existed into a text field named after its own internals: the request carried
+  no file part, no filename and no bytes, and the file module refused it. A body that is already a
+  multipart form now reaches `fetch` unchanged, which is what lets a picture taken on the phone
+  enter a body as the row the server made for it.
 
 ## 0.2.0
 

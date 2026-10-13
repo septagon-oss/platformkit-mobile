@@ -260,7 +260,7 @@ test("the shell version is a whole number the screens may depend on", () => {
 // The commit testdata/catalog.source.json records. It is written here as a literal on
 // purpose: a re-pin should be a diff somebody reads, and a fixture that moved under a
 // test that only ever re-read it would report agreement about bytes nobody fetched.
-const PINNED = "cbaa47b4825a90d95d61b55f39ffdf7051adf1ba";
+const PINNED = "5c196c06e6846647aefcb25fd66081c6843d838e";
 
 const PIN_SHORT = PINNED.slice(0, 8);
 
@@ -555,6 +555,8 @@ test("a v2 document retains generated metadata without inventing controls", () =
   doc.resources[0].fields[1].display = true;
   doc.resources[0].fields[1].precision = 2;
   doc.resources[0].fields[2].widget = "richtext";
+  doc.resources[0].fields[2].translatable = true;
+  doc.resources[0].fields[2].keys = [{ name: "water", from: "kind", label: "What" }];
   const c = parseCatalog(doc);
   const note = c.resources[0]!;
   assert.equal(note.screen, "/app/note/notes");
@@ -573,4 +575,8 @@ test("a v2 document retains generated metadata without inventing controls", () =
   }
   // A widget the phone has no control for is still the widget the server named.
   assert.equal(note.fields[2]!.widget, "richtext");
+  // So are the two members a translatable field and a map-valued one are declared
+  // with: kept out of the phone's view, no screen could ever ask about them.
+  assert.equal(note.fields[2]!.translatable, true);
+  assert.deepEqual(note.fields[2]!.keys, [{ name: "water", from: "kind", label: "What" }]);
 });
