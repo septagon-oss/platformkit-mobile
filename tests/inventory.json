@@ -298,8 +298,8 @@
   "composition": {
    "files": 69,
    "cases": 232,
-   "ms": 1412128,
-   "testsMs": 24952,
+   "ms": 1440786,
+   "testsMs": 25005,
    "runners": {
     "jest": 69
    },
@@ -19195,9 +19195,9 @@
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "Pins the prefilled email submitted through the composed SignIn screen, including both button and keyboard and the edited-address control. Cases and titles come from an actual failing Jest JSON run; two cases fail, so no duration or coverage measurement is claimed.",
-   "ms": null,
-   "exclusiveNotMeasured": "The run is red; no cost or exclusive-line measurement is claimed. npm run inventory -- --measure tests/screens/sign-in-prefilled-email.test.tsx can measure it after the contract passes.",
+   "verdictReason": "Pins the prefilled email submitted through the composed SignIn screen, including both button and keyboard and the edited-address control. Cases, titles and durations come from the green Jest run this pin now answers; the exclusive-line columns wait for the coverage pass.",
+   "ms": 28658,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "tapping Sign in submits the prefilled email without editing it",
     "the password keyboard submits the prefilled email without editing it",
@@ -19206,23 +19206,24 @@
    "tests": [
     {
      "title": "tapping Sign in submits the prefilled email without editing it",
-     "ms": null,
+     "ms": 29,
      "measured": false
     },
     {
      "title": "the password keyboard submits the prefilled email without editing it",
-     "ms": null,
+     "ms": 11,
      "measured": false
     },
     {
      "title": "editing a prefilled email submits the replacement address",
-     "ms": null,
+     "ms": 13,
      "measured": false
     }
    ],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "loaded": 137,
+   "coveredProdLines": 1311,
+   "onlyProdLines": null,
+   "testsMs": 53
   },
   {
    "file": "tests/screens/sign-out-asks-before-held-writes-go.test.tsx",
