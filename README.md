@@ -146,8 +146,10 @@ read, how an entry asks for it, and which screens the schema already does well.
 The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
 with its public commit and SHA-256 in
 [testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
-95 paths and 112 operations. `npm run api` generates the TypeScript types, Zod
-validators, SDK and documented route table in `src/generated/`; `npm run
+110 paths and 130 operations, among them a read's `?lang`, a stored picture's
+`?w`, the four translation members of a content record, and the `translatable`
+and `keys` members of a catalogue field. `npm run api` generates the TypeScript
+types, Zod validators, SDK and documented route table in `src/generated/`; `npm run
 check:api` regenerates into a temporary directory and refuses changed, missing
 or extra files. It runs offline as part of `npm run check`. Refresh the public
 document and provenance deliberately before regenerating. Node 22.18 or newer
@@ -220,7 +222,7 @@ titles a row, which value is good, which command is the system's). The phone
 parses them into `hints` on the entry, field and command — never raw wire bytes,
 so `presentation` reaches no component — and every one of them is read in
 `src/core/derive.ts`, where the resource's words are read today. For a resource
-that declares nothing the default *is* the previous rule, so honouring the whole
+that declares nothing the default _is_ the previous rule, so honouring the whole
 contract changes no screen until a server declares a hint.
 
 A hint is never the reason a workspace is refused. The generated schema prints
@@ -395,7 +397,7 @@ Three questions decide what a sheet holds, and all three are answered in
 `formControls`' answer: every field the entry keeps for the form, minus the ones it
 hides — a `hidden` field is neither offered nor sent, so `source` and `source_ref`
 never reach a label, a control or a request body. The one exception is a field that is
-hidden *and* required: the person's only path to a submittable create is never taken
+hidden _and_ required: the person's only path to a submittable create is never taken
 away, so it stays in the sheet marked required, and the parser names that pair once in
 the developer's channel. **The grouping** is the entry's own `sections`, in declared
 order, with the fields that named no block landing in a last block carrying the word the
@@ -480,7 +482,7 @@ phone refuses only what the catalogue makes it certain of: required-and-empty, n
 not-an-instant, and the two list rules above. A range, a unit, a uniqueness, a permission or
 a tenant policy stays the server's, arrives as a 422 whose `body.` prefix the transport strips,
 and is drawn under that field in the same shape. **The sheet then asks for one field**:
-`firstProblem` names the first control *in the sheet's own asked order* that carries a
+`firstProblem` names the first control _in the sheet's own asked order_ that carries a
 sentence — never the first key of the refusal, which arrives in wire order — the hook
 holds it as `awaiting` and counts its refusals as `refusals`, the organism focuses that box's
 ref and asks React Native's `scrollResponderScrollNativeHandleToKeyboard` to lift it above
@@ -555,7 +557,7 @@ about a list item of the wrong type is still English written in the core ("conta
 that does not match its item type"), because no phone's table holds it in either language
 yet; a singleton PUT echoes what the read returned for an immutable field, and this kit has
 no live server to prove the kernel accepts its own echo rather than refusing it as a write
-of a field nobody may write; the *tag box* has no spelling for one item that carries a
+of a field nobody may write; the _tag box_ has no spelling for one item that carries a
 comma, so a stored item written some other way is drawn as two chips and saved back as two —
 what a person sees there is what the write holds, and nothing is rewritten behind their back,
 but nobody can type such an item back in, because the box refuses the separator on entry;
@@ -859,6 +861,105 @@ focus restoration and authenticated device journeys must still be verified on
 that binary. Node tests, component tests and JavaScript exports are separate
 source evidence; they do not establish those runtime results.
 
+### How a rich text body reads
+
+A `widget:richtext` field holds the Markdown the server validated and normalised
+(PlatformKit decision 0069 §1), so reading it on the phone is a reading of a shape: a
+blank line between blocks, a fenced block carrying its own blank lines, and a figure —
+one image, its own paragraph, its title as its caption. `proseBlocks` cuts the body
+into text runs and figures and never repairs one; a body holding a shape §1 could not
+have stored (an image inside a sentence, a `pk-file:` that is not an identifier, a
+heading outside `##`–`####`) is refused as `unsupported-format` so a screen draws the
+whole body as prose rather than less of it. Those questions are asked of the body's
+prose only: a fence and a code span hold what §1 stored verbatim, so a `# comment` in a
+shell block, an image quoted in a fence or the `pk-file:` scheme named in a span is code
+and is drawn as it was written — and a fence is ended only by a line that carries nothing
+but a marker of its own character at least as wide as the one that opened it, which is how
+a body can describe a fenced block, and quote three backticks in a sentence of code, without
+its example turning into headings and figures. The same reading
+answers `phoneEditorHolds`, which
+therefore calls a fence quoting a table no table. `Prose` draws the runs in the kit's type and
+the figures in the slot the media family already owns: the box is reserved from the
+frame the server measured, so no paragraph moves when the bytes arrive; the byte itself is
+asked for at the width this device can paint (`variantWidth`, and the bare content address
+when the stored frame already fits, because no variant is ever upscaled); a figure that
+did not arrive says `Image unavailable` in the reader's language and keeps every word
+around it; a decorative figure is nothing to open and nothing a person listening is told
+about at all, and a ready one is invited by name.
+`MarkdownProse` is the only file that names a Markdown library — `src/ui/` draws what it
+is handed and knows no library, no transport and no file byte. The parser behind that face
+is `markdown-it@14.3.1`, held by one `overrides` entry: the face asks for `^10`, whose
+`linkify-it` carries two high filings with no release inside its reach, and 14.3.1 is the
+first release that answers every filing the registry names against either package.
+A generated record reads its own rich text field: `derive.richBody` answers which field is
+one and `RichTextBody` supplies the reading — each figure's `file/files` row for the frame
+to reserve, and the bytes at the file's own content address, prepared by `fileResource`
+with the key's scope — and the reader is named after the field it reads
+(`field-<name>-prose`), so two bodies on one screen stay two readers. Such a field is never
+the record's printed summary line (`listPreview` prints no body it cannot print without its
+syntax), which is what keeps the reader on the page for an entry that hints nothing.
+A body whose shape the reader refuses is drawn as the value `Value` gives it: the whole
+body as text, never less of it. A figure whose file this session cannot read costs nothing
+but its own picture — its row's refusal is said as `Image unavailable`, with the caption the
+author wrote and the way back to ask again — and the prose around it keeps reading natively.
+The row is announced by `proseSpoken` — the same body with none of the characters that only tell
+a screen how to draw them — so a person hearing the record is told its sentences, a code block
+as written and a figure by name, and never a `##` where a heading stands.
+
+**Limits** — the reading of a body is here, and so is the writing of one: an
+editable `widget: richtext` field offers Bold, Italic, Heading, List and Image over the box
+(`RichTextToolbar`, and `src/core/richtext.ts` is the one code that edits the draft, at the
+caret the box last reported, of the body the box _shows_ — marking a word of a freshly read
+note marks that note rather than an empty box, and a figure whose answer arrives a second
+later lands among whatever has been typed since it was asked). `Image` asks where the
+picture comes from: this phone's camera, its photo library, or a file this server already
+holds. A picture taken or chosen here is sent up as the multipart upload the document names
+(`?image=true`, so a frame no decoder reads is refused before anything is kept) and enters
+the body as the one line a figure is, pointing at the row the server answered with and never
+at an address only this phone could read. A table and a task list stay the plain Markdown
+box's, with the sentence naming what the phone cannot hold. The language slice is a read and
+one write: every request prints the phone's own `Accept-Language`, and an answer that is written
+in a language says which with `Content-Language`, kept beside the row it came with (`Api.served`)
+rather than inside it; `_i18n` — the server's own note of which language a translatable field's
+words arrived in, and of the field that fell back to another language's because this one has no row
+yet — is said beside the field in the language the person is reading in
+(`Mostrado em inglês — ainda não traduzido`); and a Save names the language back (`?lang=`) for
+every translatable field it changed on a read the server answered _in_ a language — whether that
+field carried a note of its own or carried none because it is that language's own text, or another
+language's because the fallback is what a translator was shown in order to write it — carrying only
+the fields that language owns, saying so when the sheet changed the record's own fields beside
+them. A field the catalogue does not declare translatable is the record's own however the reading
+was served, and the sheet writes it without the parameter rather than meeting the refusal the
+server would answer it with at a language address. Where a write names no language it carries what
+the person wrote and the fields the read showed as the record's own, and **not** a translatable
+field nobody edited: those words came off a reading in another language, an unchanged field has
+nothing new to give the record, and the sheet would rather send too little than file somebody
+else's translation as the source it translates. A body's words sent with no language would be filed as
+the record's own copy, over the source they were translated from, which is the write this
+rule exists to refuse. The phone's own words (its buttons, its refusals, its "Image
+unavailable") follow the reader's language, while a body arrives in whatever language the
+server had for it and now says which one that was. Choosing the language on the phone, the
+translator's side-by-side view, and the overwrite of a translation that already stands — the
+kernel answers that one at the record's own translate route, which names the revision it
+cuts across — stay on the web.
+
+**Reused** — `MediaItem`, `ImageSlotProps` and the media family's
+`loading | ready | error | unavailable` life cycle with its `imageUnavailable`,
+`retryImage` and `open` words, unchanged; `build`, `Validation` and the existing
+`unsupported-format` issue code; `Text`, `Skeleton`, `Button`, `testable`, `theme`,
+`scale` and the generated token palette; `tests/fakes/presentation.ts`. **Added** —
+`src/core/prose.ts`, because the phone had never read a Markdown body and nothing here
+carried the file module's served-width set (which is why `variantWidth` lives beside the
+segmentation and not beside a loader); `src/ui/organisms/Prose.tsx`, because no Markdown reader
+existed; `src/screens/MarkdownProse.tsx`, because a third-party face enters through a
+screen and not through `src/ui/`. **Made reusable** — `deriveProse`'s figure view model
+(`slot`, `canOpen`, `canRetry`, `openLabel`, `retryLabel`), which is what
+`RecordFact` and any later prose surface will draw with no rule of their own;
+`phoneEditorHolds`, the eligibility gate the editor takes before offering a body as rich
+text; and the slot discipline — `renderMarkdown`/`renderFigure` in props, library and
+bytes supplied by the screen — which is `PhotoViewer`'s `renderImage` pattern proven for
+a Markdown face, ready for the editor's host port.
+
 ### Shared package
 
 **Reused** — `package.json`'s identity fields, the `files` allowlist
@@ -1136,7 +1237,7 @@ carry, so such a journey taps nothing and is refused where the words are written
 `check:inventory` (the suite's own record in `tests/inventory.json` answers for this
 checkout: a reached test file with no row, a row whose file is gone, a row whose
 layer, tier, reach or rule the file no longer answers to, or a rise in the count of
-review-named files or of files no runner reaches — see *Which tests run where*
+review-named files or of files no runner reaches — see _Which tests run where_
 below), `check:publish` (the manifest names a package the registry can hold and the
 changelog carries the entry this version's release is documented by) and
 `check:source` (the manifest and lockfile install from the
@@ -1341,12 +1442,38 @@ mounted.
 The `mobile-e2e` workflow runs every flow on each push to main and nightly,
 against a kernel it serves itself, and carries no `continue-on-error`: a journey
 that skipped would leave the coverage the gate above counts looking like a
-figure nobody earned. It needs two repository variables and no secret —
-`PK_KERNEL_IMAGE`, the kernel to serve, pinned to a digest because this
-repository has no Go toolchain and cannot build one, and `PK_MOBILE_AVD`, the
-Android Virtual Device to boot — and it refuses by name when either is missing.
+figure nobody earned. It runs on `pkit-ci-android`, the label whose image carries
+the Android SDK, an AVD, Maestro and `/dev/kvm`; the plain Linux host it used to
+ask for answered its probe with `missing: adb emulator maestro psql keytool` on
+every run of main, which is a probe refusing correctly rather than a journey
+failing, and the label is a rule a test holds from here. It needs one repository
+variable — `PK_MOBILE_AVD`, the Android Virtual Device to boot, refused by name
+when it is missing — and one read-only secret, `PK_KERNEL_TOKEN`, the same one
+[kernel-main.yml](.gitea/workflows/kernel-main.yml) reads the kernel with: this
+forge requires sign-in to read `septagon-oss/platformkit` and a job token is
+nobody on a repository it was not issued for, so a checkout of the kernel that
+carried no token of its own is a step no run gets past; where the secret is unset
+the checkout falls back to the job token, so the refusal is the forge's own — a
+checkout that failed, naming the repository — and not an empty input. Which
+kernel to serve is not a variable:
+the job checks out the commit [testdata/catalog.source.json](testdata/catalog.source.json)
+and [testdata/openapi.source.json](testdata/openapi.source.json) already record
+as `upstream.commit` — at that object id, never a branch — and builds it with the
+Go version that build's own `go.mod` asks for, so the server the flows write
+through is the server the fixtures describe. That pair is read in one place,
+`scripts/e2e/mobile_ci.sh --kernel-pin`: it refuses naming the record that is
+missing or holds a commit shorter than forty hex characters, and names both
+records when they name different builds, because then the fixtures are not one
+build's. The step that runs it ends the job on that refusal — the commit is
+assigned in a statement of its own, not substituted inside the `echo` that
+publishes it — because an empty step output is a ref the checkout fills with the
+kernel's default branch, which is the one build this journey must never serve.
 Its own database, tenant, administrator and password are created by the run and
-dropped with it, and the Maestro report is printed in the job log. The device is
+dropped with it, and the Maestro report is printed in the job log. The wait for
+`/health` has a bound, and a kernel that stays alive and answers nothing ends the
+run naming the port, the commit it was built from and its own log — a journey run
+against no server would report thirteen timeouts and say nothing about the server
+that never bound. The device is
 host-level, so the job's concurrency group is named for the device and not the
 ref, and the step that boots the emulator refuses a host that already has a
 device attached — in any state adb lists it, because an `offline` entry is
@@ -1356,8 +1483,9 @@ that serial only while it is the sole device the host has: a launch that failed
 cannot then be read as a device somebody else booted. A workflow file cannot
 hold a machine against a job that is not its own, so it declines the machine
 instead of sharing one. What a checkout cannot see is whether this forge fires
-`schedule:` or whether the label answers `actions/setup-node` and
-`services:` — the first run is what will tell, and
+`schedule:`, or whether that label answers `actions/setup-node`,
+`actions/setup-go`, a `services:` block and a checkout of another repository —
+the first run is what will tell, and
 until then no journey here has been shown passing on a device. What that job
 proves is these journeys; the kernel's `mobile_flow_pass_rate` is read from the
 kernel's own manifest, and stays where that manifest puts it until a kernel-side
@@ -1372,15 +1500,20 @@ guard-with-its-own-fixtures shape for `tests/flow-coverage.test.ts`, and —
 copied and cited in each file's header — the kernel's `scripts/mobile_e2e.sh`
 serve-and-wait fixture, its `.gitea/workflows/mobile.yml` step list, its
 `postgres-init.sql` role, and the tool search and refusal of its
-`e2e/maestro/README.md`. **Added** — `scripts/e2e/mobile_ci.sh`, because nothing
-in this repository has ever started a server (`android.sh` required one somebody
-else had started) and no existing unit could state the claim that a device which
-signed in can use what the served catalog published; and
-`.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all.
+`e2e/maestro/README.md`; and, for the run that serves the kernel, that job's
+`pkit-ci-android` label and its `actions/setup-go` pin, and the `upstream.commit`
+the two provenance records already held. **Added** — `scripts/e2e/mobile_ci.sh`,
+because nothing in this repository has ever started a server (`android.sh`
+required one somebody else had started) and no existing unit could state the
+claim that a device which signed in can use what the served catalog published;
+and `.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all.
 **Made reusable** — `scripts/e2e/run.sh`, one last mile (install, reverse, run
 the directory, write the JUnit) that any future runner calls instead of
 repeating, `scripts/e2e/tools.sh`, the tool search and the refusal that says
-where it looked, and `# screen:` as the way a journey says what it proves — so
+where it looked, `scripts/e2e/mobile_ci.sh --kernel-pin`, which answers the one
+question "which kernel commit do these fixtures describe" for anything that has
+to serve that build or fetch it, and `# screen:` as the way a journey says what
+it proves — so
 the next screen added under `app/` arrives with a journey or with a failing
 check.
 
@@ -1453,9 +1586,12 @@ surface, a command at a printed address of its own, and a singleton whose PUT
 follows it. The copy is not extended in place, because the hash that makes it
 trustworthy is a hash of the kernel's bytes; a test asserts the extension is
 those bytes plus those entries instead. The generated catalog types retain `screen` and `present` as metadata. Neither
-changes a native route or draws a new control. `display` and `maxLength` are not
-in this document pin; the `richtext` widget still has no native control. The
-catalog tests distinguish retained metadata from rendered behavior.
+changes a native route or draws a new control. `display`, `maxLength`, `translatable` and
+`keys` are declared by the document and carried by the field view with no screen of their
+own — a test distinguishes retained metadata from rendered behavior, and only a stray JSON
+member outside the document is refused. The `richtext` widget is read natively and written
+with the marks that reader draws back, a picture taken here included (under
+_How a rich text body reads_ above).
 
 **Reused** — `parseCatalog`'s supported-version and path checks, `CatalogError`, and
 the `writable` gate the screens already consulted; the New, Edit, Delete and Save
@@ -1772,7 +1908,7 @@ while `refusalAction` is what picks the one button a screen shows,
 `plural`/`humanize` for the nouns a sentence names, `Notice`'s existing props, and
 `copy.state`'s `retry`/`dismiss`/`reconcile`/`unknownWrite` words. **Added** —
 `src/core/failure.ts`, because the tree could report a failure and could not
-classify one: no existing unit reads a status *and* a context, and a new module
+classify one: no existing unit reads a status _and_ a context, and a new module
 would have duplicated the closed `IssueCode` vocabulary; `Words.failure` (seventeen
 keys in `en` and `pt`, of which `thisRecord` and `thisWorkspace` are the two nouns
 a sentence names when no catalogue entry describes what it addressed), because the

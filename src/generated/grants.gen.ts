@@ -30,4 +30,6 @@ export const declaredGrants: readonly DeclaredGrant[] = [
   { permission: "user:approve", operator: false, surface: "app" },
   { permission: "user:manage", operator: false, surface: "app" },
   { permission: "user:read", operator: false, surface: "app" },
+  { permission: "webhook:read", operator: false, surface: "app" },
+  { permission: "webhook:update", operator: false, surface: "app" },
 ];

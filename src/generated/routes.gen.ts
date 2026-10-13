@@ -21,6 +21,23 @@ const routes = [
   },
   {
     method: "GET",
+    pattern: new RegExp("^/api/v1/app/connection$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.appConnection({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.appConnection<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
     pattern: new RegExp("^/api/v1/app/resources$"),
     statuses: [200],
     json: true,
@@ -905,6 +922,57 @@ const routes = [
   },
   {
     method: "POST",
+    pattern: new RegExp("^/api/v1/content/contents/[^/]+/review-translation$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.contentContentReviewTranslation({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.contentContentReviewTranslation<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/content/contents/[^/]+/suggest-translation$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.contentContentSuggestTranslation({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.contentContentSuggestTranslation<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/content/contents/[^/]+/translate$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.contentContentTranslate({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.contentContentTranslate<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
     pattern: new RegExp("^/api/v1/content/contents/[^/]+/unpublish$"),
     statuses: [200],
     json: true,
@@ -917,6 +985,23 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.contentContentUnpublish<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/content/contents/[^/]+/untranslate$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.contentContentUntranslate({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.contentContentUntranslate<true>>[0]);
       return result;
     },
   },
@@ -1449,6 +1534,23 @@ const routes = [
   },
   {
     method: "POST",
+    pattern: new RegExp("^/api/v1/public/auth/mail-delivery$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authMailDelivery({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authMailDelivery<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
     pattern: new RegExp("^/api/v1/public/auth/password/forgot$"),
     statuses: [200],
     json: true,
@@ -1937,6 +2039,210 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.userUserSetPassword<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/webhook/deliveries$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookDeliveryList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookDeliveryList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/webhook/deliveries/[^/]+$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookDeliveryRead({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookDeliveryRead<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/webhook/deliveries/[^/]+/replay$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookDeliveryReplay({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookDeliveryReplay<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/webhook/endpoints$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/webhook/endpoints$"),
+    statuses: [201],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointCreate({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointCreate<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "DELETE",
+    pattern: new RegExp("^/api/v1/webhook/endpoints/[^/]+$"),
+    statuses: [204],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointDelete({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointDelete<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/webhook/endpoints/[^/]+$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointRead({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointRead<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "PATCH",
+    pattern: new RegExp("^/api/v1/webhook/endpoints/[^/]+$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointUpdate({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointUpdate<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/webhook/endpoints/[^/]+/disable$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointDisable({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointDisable<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/webhook/endpoints/[^/]+/enable$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointEnable({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointEnable<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/webhook/endpoints/[^/]+/rotate$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointRotate({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointRotate<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/webhook/endpoints/[^/]+/target$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.webhookEndpointTarget({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.webhookEndpointTarget<true>>[0]);
       return result;
     },
   },

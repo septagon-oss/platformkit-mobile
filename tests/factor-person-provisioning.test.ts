@@ -6,11 +6,14 @@
 // its own, not to this one" — and roles are given at user-user-roles,
 // POST /api/v1/user/users/{id}/roles. The stub server below answers with that
 // rule and nothing more; as in mobile-factor-config, exported functions replace
-// docker, psql and curl, so no database, container, server or emulator starts.
+// psql and curl and the case writes its own kernel stub for PK_KERNEL_BIN, so no
+// database, server or emulator starts. The job builds that binary from the pinned
+// commit (this repository holds no Go toolchain); everything the harness does with
+// it — copy it into its run directory, bootstrap, serve, wait — is what runs here.
 // It stops the harness at the first request after the person has a password.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -19,25 +22,24 @@ test("the device harness creates its factor person in a shape the kernel accepts
   const root = mkdtempSync(path.join(os.tmpdir(), "pk-factor-person-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const requests = path.join(root, "requests.log");
+  // The kernel the harness serves: a file this case wrote, which boots quietly and
+  // stays alive so the /health wait passes. It is a build of nothing.
+  const kernelStub = path.join(root, "platformkit");
+  writeFileSync(
+    kernelStub,
+    `#!/usr/bin/env bash
+case "$1" in
+  bootstrap) exit 0 ;;
+  run) exec sleep 20 ;;
+esac
+`,
+    { mode: 0o755 },
+  );
   const result = spawnSync(
     "bash",
     [
       "-c",
       `psql() { :; }
-docker() {
-  case "$1" in
-    create) printf 'fixture-container\\n' ;;
-    cp)
-      cat > "$3" <<'KERNEL'
-#!/usr/bin/env bash
-case "$1" in
-  bootstrap) exit 0 ;;
-  run) exec sleep 20 ;;
-esac
-KERNEL
-      ;;
-  esac
-}
 curl() {
   local out="" method=GET body="" url=""
   while [ $# -gt 0 ]; do
@@ -70,7 +72,7 @@ curl() {
   [ -n "$out" ] && printf '%s' "$answer" > "$out"
   printf '%s' "$status"
 }
-export -f docker psql curl
+export -f psql curl
 bash scripts/e2e/mobile_ci.sh fixture.apk`,
     ],
     {
@@ -83,7 +85,7 @@ bash scripts/e2e/mobile_ci.sh fixture.apk`,
         PLATFORMKIT_MOBILE_PORT: "8399",
         PLATFORMKIT_TEST_ADMIN_URL: "postgres://localhost/admin",
         PLATFORMKIT_TEST_DATABASE_URL: "postgres://localhost/app",
-        PK_KERNEL_IMAGE: `fixture.invalid/kernel@sha256:${"a".repeat(64)}`,
+        PK_KERNEL_BIN: kernelStub,
         MODULE: "task",
         ENTITY: "task",
         KNOWN: "title",

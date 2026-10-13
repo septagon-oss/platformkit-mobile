@@ -15,6 +15,17 @@ export type ApiToken = {
   scopes: Array<string> | null;
 };
 
+export type AccentRatio = {
+  /**
+   * Ratio against the dark canvas
+   */
+  dark: number;
+  /**
+   * Ratio against the light canvas
+   */
+  light: number;
+};
+
 export type AccessBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -117,6 +128,49 @@ export type CommandPresentation = {
   system?: boolean;
 };
 
+export type Connection = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Brand accent, #rrggbb
+   */
+  accent: string;
+  /**
+   * How the accent reads against the light and dark canvases
+   */
+  accentRatio: AccentRatio;
+  /**
+   * Path of this workspace's mark, when it has one
+   */
+  logoUrl?: string;
+  /**
+   * Which sign-in methods this workspace accepts now
+   */
+  methods: SignInMethods;
+  /**
+   * What this workspace calls itself
+   */
+  name: string;
+  /**
+   * Whether a forgotten password can be recovered here
+   */
+  recovery: RecoveryAvailability;
+  /**
+   * This workspace's settings write count, from 1
+   */
+  revision: number;
+  /**
+   * The sign-in door this installation mounted
+   */
+  signIn: SignInDoor;
+  /**
+   * Colour scheme, or system to follow the visitor's
+   */
+  theme: "light" | "dark" | "system";
+};
+
 export type Content = {
   /**
    * A URL to the JSON Schema for this object.
@@ -155,6 +209,44 @@ export type Content = {
   readonly updatedAt?: string;
 };
 
+export type ContentPatch = {
+  /**
+   * The content itself, in Markdown
+   */
+  body?: string;
+  /**
+   * page or post
+   */
+  kind?: "page" | "post";
+  /**
+   * URL name, unique within the tenant
+   */
+  slug?: string;
+  /**
+   * Headline
+   */
+  title?: string;
+};
+
+export type CreateBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The event types to deliver; each must be one this application emits
+   */
+  events: Array<string> | null;
+  /**
+   * What this endpoint is called
+   */
+  name: string;
+  /**
+   * The HTTPS address
+   */
+  url: string;
+};
+
 export type Delete = {
   /**
    * A URL to the JSON Schema for this object.
@@ -166,12 +258,119 @@ export type Delete = {
   confirm: string;
 };
 
+export type Delivery = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * 1 for the first attempt; the retry ladder's ordinal
+   */
+  readonly attempt: number;
+  /**
+   * When the request was sent
+   */
+  readonly attemptedAt?: string;
+  /**
+   * When this attempt may be made
+   */
+  readonly availableAt: string;
+  /**
+   * Why this row exists: a first attempt, a retry, or a replay an administrator asked for
+   */
+  readonly cause: "initial" | "retry" | "replay";
+  readonly createdAt?: string;
+  /**
+   * The endpoint this attempt was addressed to
+   */
+  readonly endpointId: string;
+  /**
+   * The event's own id, sent as webhook-id
+   */
+  readonly eventId: string;
+  /**
+   * The event type that matched, so the log answers why this delivery exists
+   */
+  readonly eventName: string;
+  readonly id?: string;
+  /**
+   * The CloudEvent as published, and the exact bytes signed
+   */
+  readonly payload: string;
+  /**
+   * Why this attempt failed, was dropped, or was retried
+   */
+  readonly reason?: string;
+  /**
+   * The log's own order
+   */
+  readonly seq: number;
+  /**
+   * What became of this attempt
+   */
+  readonly state: "queued" | "in_flight" | "sent" | "failed" | "dropped";
+  /**
+   * The HTTP status the receiver answered, 0 when nothing answered
+   */
+  readonly statusCode: number;
+  readonly updatedAt?: string;
+};
+
 export type DoneOutputBody = {
   /**
    * A URL to the JSON Schema for this object.
    */
   readonly $schema?: string;
   done: boolean;
+};
+
+export type Endpoint = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  readonly createdAt?: string;
+  /**
+   * The user who registered this endpoint
+   */
+  readonly createdBy?: string;
+  /**
+   * When this endpoint was disabled
+   */
+  readonly disabledAt?: string;
+  /**
+   * Why this endpoint was disabled
+   */
+  readonly disabledReason?: string;
+  /**
+   * Event types delivered to this address
+   */
+  events: Array<string> | null;
+  readonly id?: string;
+  /**
+   * When a delivery to this endpoint last succeeded
+   */
+  readonly lastSuccessAt?: string;
+  /**
+   * What this endpoint is called
+   */
+  name: string;
+  /**
+   * Whether this endpoint receives events
+   */
+  readonly status?: "enabled" | "disabled";
+  readonly updatedAt?: string;
+  /**
+   * HTTPS address events are POSTed to
+   */
+  url: string;
+};
+
+export type EndpointPatch = {
+  /**
+   * What this endpoint is called
+   */
+  name?: string;
 };
 
 export type EntitySection = {
@@ -247,6 +446,10 @@ export type Event = {
    */
   actor?: string;
   /**
+   * What kind of cause wrote this, when it was no session: user, system, seed or job
+   */
+  actorKind?: string;
+  /**
    * The address the call arrived from
    */
   clientIp?: string;
@@ -258,6 +461,10 @@ export type Event = {
    * The trail row's own id
    */
   id: string;
+  /**
+   * The person the run served, who did not sign in
+   */
+  initiator?: string;
   /**
    * The event's name
    */
@@ -274,6 +481,14 @@ export type Event = {
    * The call that caused this, as its caller was told it
    */
   requestId?: string;
+  /**
+   * The file that asked for the write, cited by the run that made it
+   */
+  sourceFile?: string;
+  /**
+   * The line of that file
+   */
+  sourceLine?: number;
   /**
    * The trace this event happened in, absent when nobody traced it
    */
@@ -314,12 +529,14 @@ export type Field = {
   elem?: string;
   enum?: Array<string> | null;
   hideList?: boolean;
+  keys?: Array<MapKey> | null;
   maxLength?: number;
   name: string;
   present?: string;
   presentation?: FieldHints;
   readOnly?: boolean;
   required?: boolean;
+  translatable?: boolean;
   type: string;
   widget?: string;
 };
@@ -380,6 +597,10 @@ export type File = {
    * Bytes
    */
   readonly size?: number;
+  /**
+   * Since when nothing shows it
+   */
+  readonly unusedSince?: string;
   readonly updatedAt?: string;
   /**
    * The user who uploaded it
@@ -547,6 +768,16 @@ export type IssueTokenInputBody = {
   scopes: Array<string> | null;
 };
 
+export type Issued = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  endpoint: Endpoint;
+  rotatedAt: string;
+  secret: string;
+};
+
 export type IssuedToken = {
   /**
    * A URL to the JSON Schema for this object.
@@ -590,6 +821,35 @@ export type LoginInputBody = {
   password: string;
 };
 
+export type MailDeliveryInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The X-Request-ID of the call that asked for the mail
+   */
+  requestId: string;
+};
+
+export type MailDeliveryOutputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Whether the mail that call asked for was refused
+   */
+  state: "pending" | "failed";
+};
+
+export type MapKey = {
+  from?: string;
+  label?: string;
+  name: string;
+  widget?: string;
+};
+
 export type NavItem = {
   /**
    * What the link says
@@ -623,6 +883,7 @@ export type NewTenant = {
    * A URL to the JSON Schema for this object.
    */
   readonly $schema?: string;
+  demo?: boolean;
   /**
    * The first host this tenant is served at, which is its primary one
    */
@@ -719,6 +980,28 @@ export type PageContentBody = {
    */
   readonly $schema?: string;
   items: Array<Content> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
+export type PageDeliveryBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Delivery> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
+export type PageEndpointBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Endpoint> | null;
   limit: number;
   offset: number;
   total: number;
@@ -945,6 +1228,34 @@ export type Plan = {
   readonly updatedAt?: string;
 };
 
+export type PlanPatch = {
+  /**
+   * Whether this plan accepts new subscriptions
+   */
+  active?: boolean;
+  /**
+   * Stable identifier, unique within the tenant
+   */
+  code?: string;
+  /**
+   * ISO 4217 code
+   */
+  currency?: string;
+  features?: Array<string> | null;
+  /**
+   * How long one period lasts
+   */
+  interval?: "month" | "year";
+  /**
+   * Display name
+   */
+  name?: string;
+  /**
+   * Price of one interval, in the currency's minor unit
+   */
+  priceCents?: number;
+};
+
 export type Problem = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1030,6 +1341,13 @@ export type Proposal = {
   readonly verdict: "" | "approved" | "declined";
 };
 
+export type RecoveryAvailability = {
+  /**
+   * Whether a forgotten password can be recovered here
+   */
+  available: boolean;
+};
+
 export type RecoveryCodesOutputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1037,6 +1355,17 @@ export type RecoveryCodesOutputBody = {
   readonly $schema?: string;
   codes: Array<string> | null;
   factor?: Factor;
+};
+
+export type RegistrationDoor = {
+  /**
+   * Where the registration form posts
+   */
+  address: string;
+  /**
+   * Which registration form to render
+   */
+  kind: string;
 };
 
 export type Rename = {
@@ -1244,6 +1573,33 @@ export type SetLocale = {
   supported: Array<string> | null;
 };
 
+export type SignInDoor = {
+  /**
+   * Where credentials are posted
+   */
+  address: string;
+  registration?: RegistrationDoor;
+};
+
+export type SignInMethods = {
+  /**
+   * Whether an OpenID Connect provider is configured for this workspace
+   */
+  oidc: boolean;
+  /**
+   * Whether a passkey alone signs in here
+   */
+  passkey: boolean;
+  /**
+   * Whether a password is accepted here
+   */
+  password: boolean;
+  /**
+   * Whether a SAML provider is configured for this workspace
+   */
+  saml: boolean;
+};
+
 export type SiteSettings = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1362,6 +1718,21 @@ export type TotpEnrolment = {
   uri?: string;
 };
 
+export type TargetBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The event types to deliver
+   */
+  events: Array<string> | null;
+  /**
+   * The HTTPS address
+   */
+  url: string;
+};
+
 export type Task = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1394,6 +1765,10 @@ export type Task = {
    */
   readonly resolvedAt?: string;
   /**
+   * This row's own write count, from 1
+   */
+  readonly revision?: number;
+  /**
    * True once the deadline elapsed with the task unresolved
    */
   slaBreached?: boolean;
@@ -1420,6 +1795,35 @@ export type Task = {
   readonly updatedAt?: string;
 };
 
+export type TaskPatch = {
+  /**
+   * Detailed description of the task
+   */
+  description?: string;
+  dueAt?: string | null;
+  /**
+   * Task priority
+   */
+  priority?: "low" | "normal" | "high" | "critical";
+  slaDeadline?: string | null;
+  /**
+   * Origin of the task
+   */
+  source?: string;
+  /**
+   * Reference into the source system
+   */
+  sourceRef?: string;
+  /**
+   * Lifecycle state
+   */
+  status?: "open" | "acknowledged" | "in_progress" | "resolved" | "closed";
+  /**
+   * Short summary of the task
+   */
+  title?: string;
+};
+
 export type Tenant = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1427,6 +1831,7 @@ export type Tenant = {
   readonly $schema?: string;
   createdAt: string;
   defaultLocale: string;
+  demo: boolean;
   hosts: Array<string> | null;
   id: string;
   locales: Array<string> | null;
@@ -1444,6 +1849,50 @@ export type TokensOutputBody = {
   readonly $schema?: string;
   items: Array<ApiToken> | null;
   total: number;
+};
+
+export type TranslateBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Each field's revision as read; 0 for a field with no translation yet
+   */
+  expected?: {
+    [key: string]: number;
+  };
+  /**
+   * The language being written: a tag this tenant is served in, other than its own
+   */
+  lang: string;
+  /**
+   * The text of each translatable field, keyed by field name
+   */
+  values: {
+    [key: string]: string;
+  };
+};
+
+export type TranslationFieldsBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Each field's revision as read; 0 for a field with no translation yet
+   */
+  expected?: {
+    [key: string]: number;
+  };
+  /**
+   * The field names; empty for every translatable field of the record
+   */
+  fields?: Array<string> | null;
+  /**
+   * The language this acts on: a tag this tenant is served in, other than its own
+   */
+  lang: string;
 };
 
 export type UseRow = {
@@ -1486,6 +1935,17 @@ export type User = {
    */
   status?: "invited" | "pending" | "unverified" | "active" | "inactive";
   readonly updatedAt?: string;
+};
+
+export type UserPatch = {
+  /**
+   * Name to show
+   */
+  displayName?: string;
+  /**
+   * Address this person signs in with, unique within the tenant
+   */
+  email?: string;
 };
 
 export type VerifyEmailInputBody = {
@@ -1560,6 +2020,45 @@ export type ClearOutputBodyWritable = {
   signedOut: boolean;
 };
 
+export type ConnectionWritable = {
+  /**
+   * Brand accent, #rrggbb
+   */
+  accent: string;
+  /**
+   * How the accent reads against the light and dark canvases
+   */
+  accentRatio: AccentRatio;
+  /**
+   * Path of this workspace's mark, when it has one
+   */
+  logoUrl?: string;
+  /**
+   * Which sign-in methods this workspace accepts now
+   */
+  methods: SignInMethods;
+  /**
+   * What this workspace calls itself
+   */
+  name: string;
+  /**
+   * Whether a forgotten password can be recovered here
+   */
+  recovery: RecoveryAvailability;
+  /**
+   * This workspace's settings write count, from 1
+   */
+  revision: number;
+  /**
+   * The sign-in door this installation mounted
+   */
+  signIn: SignInDoor;
+  /**
+   * Colour scheme, or system to follow the visitor's
+   */
+  theme: "light" | "dark" | "system";
+};
+
 export type ContentWritable = {
   /**
    * The content itself, in Markdown
@@ -1583,6 +2082,21 @@ export type ContentWritable = {
   title: string;
 };
 
+export type CreateBodyWritable = {
+  /**
+   * The event types to deliver; each must be one this application emits
+   */
+  events: Array<string> | null;
+  /**
+   * What this endpoint is called
+   */
+  name: string;
+  /**
+   * The HTTPS address
+   */
+  url: string;
+};
+
 export type DeleteWritable = {
   /**
    * The tenant's slug, repeated
@@ -1592,6 +2106,21 @@ export type DeleteWritable = {
 
 export type DoneOutputBodyWritable = {
   done: boolean;
+};
+
+export type EndpointWritable = {
+  /**
+   * Event types delivered to this address
+   */
+  events: Array<string> | null;
+  /**
+   * What this endpoint is called
+   */
+  name: string;
+  /**
+   * HTTPS address events are POSTed to
+   */
+  url: string;
 };
 
 export type EraseBodyWritable = {
@@ -1619,6 +2148,10 @@ export type EventWritable = {
    */
   actor?: string;
   /**
+   * What kind of cause wrote this, when it was no session: user, system, seed or job
+   */
+  actorKind?: string;
+  /**
    * The address the call arrived from
    */
   clientIp?: string;
@@ -1630,6 +2163,10 @@ export type EventWritable = {
    * The trail row's own id
    */
   id: string;
+  /**
+   * The person the run served, who did not sign in
+   */
+  initiator?: string;
   /**
    * The event's name
    */
@@ -1646,6 +2183,14 @@ export type EventWritable = {
    * The call that caused this, as its caller was told it
    */
   requestId?: string;
+  /**
+   * The file that asked for the write, cited by the run that made it
+   */
+  sourceFile?: string;
+  /**
+   * The line of that file
+   */
+  sourceLine?: number;
   /**
    * The trace this event happened in, absent when nobody traced it
    */
@@ -1791,6 +2336,12 @@ export type IssueTokenInputBodyWritable = {
   scopes: Array<string> | null;
 };
 
+export type IssuedWritable = {
+  endpoint: EndpointWritable;
+  rotatedAt: string;
+  secret: string;
+};
+
 export type IssuedTokenWritable = {
   createdAt: string;
   createdBy: string;
@@ -1822,6 +2373,20 @@ export type LoginInputBodyWritable = {
   password: string;
 };
 
+export type MailDeliveryInputBodyWritable = {
+  /**
+   * The X-Request-ID of the call that asked for the mail
+   */
+  requestId: string;
+};
+
+export type MailDeliveryOutputBodyWritable = {
+  /**
+   * Whether the mail that call asked for was refused
+   */
+  state: "pending" | "failed";
+};
+
 export type NewProposalWritable = {
   diff: {
     [key: string]: unknown;
@@ -1836,6 +2401,7 @@ export type NewProposalWritable = {
 };
 
 export type NewTenantWritable = {
+  demo?: boolean;
   /**
    * The first host this tenant is served at, which is its primary one
    */
@@ -1909,6 +2475,20 @@ export type PageWritable = {
 
 export type PageContentBodyWritable = {
   items: Array<ContentWritable> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
+export type PageDeliveryBodyWritable = {
+  items: Array<unknown> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
+export type PageEndpointBodyWritable = {
+  items: Array<EndpointWritable> | null;
   limit: number;
   offset: number;
   total: number;
@@ -2310,6 +2890,17 @@ export type TotpEnrolmentWritable = {
   uri?: string;
 };
 
+export type TargetBodyWritable = {
+  /**
+   * The event types to deliver
+   */
+  events: Array<string> | null;
+  /**
+   * The HTTPS address
+   */
+  url: string;
+};
+
 export type TaskWritable = {
   /**
    * User responsible for the task
@@ -2360,6 +2951,7 @@ export type TaskWritable = {
 export type TenantWritable = {
   createdAt: string;
   defaultLocale: string;
+  demo: boolean;
   hosts: Array<string> | null;
   id: string;
   locales: Array<string> | null;
@@ -2373,6 +2965,42 @@ export type TenantWritable = {
 export type TokensOutputBodyWritable = {
   items: Array<ApiToken> | null;
   total: number;
+};
+
+export type TranslateBodyWritable = {
+  /**
+   * Each field's revision as read; 0 for a field with no translation yet
+   */
+  expected?: {
+    [key: string]: number;
+  };
+  /**
+   * The language being written: a tag this tenant is served in, other than its own
+   */
+  lang: string;
+  /**
+   * The text of each translatable field, keyed by field name
+   */
+  values: {
+    [key: string]: string;
+  };
+};
+
+export type TranslationFieldsBodyWritable = {
+  /**
+   * Each field's revision as read; 0 for a field with no translation yet
+   */
+  expected?: {
+    [key: string]: number;
+  };
+  /**
+   * The field names; empty for every translatable field of the record
+   */
+  fields?: Array<string> | null;
+  /**
+   * The language this acts on: a tag this tenant is served in, other than its own
+   */
+  lang: string;
 };
 
 export type UserWritable = {
@@ -2443,6 +3071,39 @@ export type AppAccessRequestResponses = {
    */
   202: unknown;
 };
+
+export type AppConnectionData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/app/connection";
+};
+
+export type AppConnectionErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AppConnectionError = AppConnectionErrors[keyof AppConnectionErrors];
+
+export type AppConnectionResponses = {
+  /**
+   * OK
+   */
+  200: Connection;
+};
+
+export type AppConnectionResponse = AppConnectionResponses[keyof AppConnectionResponses];
 
 export type AppResourcesData = {
   body?: never;
@@ -4256,6 +4917,10 @@ export type ContentContentListData = {
      * field:value, repeated
      */
     filter?: Array<string> | null;
+    /**
+     * Answer in this language: a translatable field with no row in it is served in the tenant's own, named in _i18n
+     */
+    lang?: string;
   };
   url: "/api/v1/content/contents";
 };
@@ -4340,6 +5005,12 @@ export type ContentContentCreateResponse =
 
 export type ContentContentDeleteData = {
   body?: never;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the delete with 412. A resource whose entity carries no write count has no tag to read and answers 422.
+     */
+    "If-Match"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -4394,7 +5065,12 @@ export type ContentContentReadData = {
      */
     id: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Answer in this language: a translatable field with no row in it is served in the tenant's own, named in _i18n
+     */
+    lang?: string;
+  };
   url: "/api/v1/content/contents/{id}";
 };
 
@@ -4434,11 +5110,12 @@ export type ContentContentReadResponse =
   ContentContentReadResponses[keyof ContentContentReadResponses];
 
 export type ContentContentUpdateData = {
-  /**
-   * The writable fields to change
-   */
-  body: {
-    [key: string]: unknown;
+  body: ContentPatch;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
+     */
+    "If-Match"?: string;
   };
   path: {
     /**
@@ -4446,7 +5123,12 @@ export type ContentContentUpdateData = {
      */
     id: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Write this language's translation of the body's fields instead of the record itself; the tenant's own language, or none, writes the record
+     */
+    lang?: string;
+  };
   url: "/api/v1/content/contents/{id}";
 };
 
@@ -4582,6 +5264,150 @@ export type ContentContentPublishResponses = {
 export type ContentContentPublishResponse =
   ContentContentPublishResponses[keyof ContentContentPublishResponses];
 
+export type ContentContentReviewTranslationData = {
+  body?: TranslationFieldsBodyWritable;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/content/contents/{id}/review-translation";
+};
+
+export type ContentContentReviewTranslationErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ContentContentReviewTranslationError =
+  ContentContentReviewTranslationErrors[keyof ContentContentReviewTranslationErrors];
+
+export type ContentContentReviewTranslationResponses = {
+  /**
+   * OK
+   */
+  200: Content;
+};
+
+export type ContentContentReviewTranslationResponse =
+  ContentContentReviewTranslationResponses[keyof ContentContentReviewTranslationResponses];
+
+export type ContentContentSuggestTranslationData = {
+  body?: TranslationFieldsBodyWritable;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/content/contents/{id}/suggest-translation";
+};
+
+export type ContentContentSuggestTranslationErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ContentContentSuggestTranslationError =
+  ContentContentSuggestTranslationErrors[keyof ContentContentSuggestTranslationErrors];
+
+export type ContentContentSuggestTranslationResponses = {
+  /**
+   * OK
+   */
+  200: Content;
+};
+
+export type ContentContentSuggestTranslationResponse =
+  ContentContentSuggestTranslationResponses[keyof ContentContentSuggestTranslationResponses];
+
+export type ContentContentTranslateData = {
+  body?: TranslateBodyWritable;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/content/contents/{id}/translate";
+};
+
+export type ContentContentTranslateErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ContentContentTranslateError =
+  ContentContentTranslateErrors[keyof ContentContentTranslateErrors];
+
+export type ContentContentTranslateResponses = {
+  /**
+   * OK
+   */
+  200: Content;
+};
+
+export type ContentContentTranslateResponse =
+  ContentContentTranslateResponses[keyof ContentContentTranslateResponses];
+
 export type ContentContentUnpublishData = {
   body?: CommandInputStructBody;
   path: {
@@ -4629,6 +5455,54 @@ export type ContentContentUnpublishResponses = {
 
 export type ContentContentUnpublishResponse =
   ContentContentUnpublishResponses[keyof ContentContentUnpublishResponses];
+
+export type ContentContentUntranslateData = {
+  body?: TranslationFieldsBodyWritable;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/content/contents/{id}/untranslate";
+};
+
+export type ContentContentUntranslateErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ContentContentUntranslateError =
+  ContentContentUntranslateErrors[keyof ContentContentUntranslateErrors];
+
+export type ContentContentUntranslateResponses = {
+  /**
+   * OK
+   */
+  200: Content;
+};
+
+export type ContentContentUntranslateResponse =
+  ContentContentUntranslateResponses[keyof ContentContentUntranslateResponses];
 
 export type FileFileListData = {
   body?: never;
@@ -4887,7 +5761,12 @@ export type FileFileContentData = {
      */
     id: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Serve this planned width rather than the stored frame
+     */
+    w?: number;
+  };
   url: "/api/v1/file/files/{id}/content";
 };
 
@@ -4931,7 +5810,12 @@ export type FileFileContentHeadData = {
      */
     id: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Serve this planned width rather than the stored frame
+     */
+    w?: number;
+  };
   url: "/api/v1/file/files/{id}/content";
 };
 
@@ -5300,6 +6184,12 @@ export type BillingPlanCreateResponse =
 
 export type BillingPlanDeleteData = {
   body?: never;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the delete with 412. A resource whose entity carries no write count has no tag to read and answers 422.
+     */
+    "If-Match"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5346,11 +6236,12 @@ export type BillingPlanDeleteResponse =
   BillingPlanDeleteResponses[keyof BillingPlanDeleteResponses];
 
 export type BillingPlanUpdateData = {
-  /**
-   * The writable fields to change
-   */
-  body: {
-    [key: string]: unknown;
+  body: PlanPatch;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
+     */
+    "If-Match"?: string;
   };
   path: {
     /**
@@ -6099,6 +6990,43 @@ export type TenantTenantSuspendResponses = {
 export type TenantTenantSuspendResponse =
   TenantTenantSuspendResponses[keyof TenantTenantSuspendResponses];
 
+export type AuthMailDeliveryData = {
+  body: MailDeliveryInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/public/auth/mail-delivery";
+};
+
+export type AuthMailDeliveryErrors = {
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+};
+
+export type AuthMailDeliveryError = AuthMailDeliveryErrors[keyof AuthMailDeliveryErrors];
+
+export type AuthMailDeliveryResponses = {
+  /**
+   * OK
+   */
+  200: MailDeliveryOutputBody;
+};
+
+export type AuthMailDeliveryResponse = AuthMailDeliveryResponses[keyof AuthMailDeliveryResponses];
+
 export type AuthPasswordForgotData = {
   body: ForgotInputBodyWritable;
   path?: never;
@@ -6320,7 +7248,12 @@ export type FileFilePublicData = {
      */
     id: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Serve this planned width rather than the stored frame
+     */
+    w?: number;
+  };
   url: "/api/v1/public/file/files/{id}";
 };
 
@@ -6360,7 +7293,12 @@ export type FileFilePublicHeadData = {
      */
     id: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Serve this planned width rather than the stored frame
+     */
+    w?: number;
+  };
   url: "/api/v1/public/file/files/{id}";
 };
 
@@ -6606,6 +7544,12 @@ export type TaskTaskCreateResponse = TaskTaskCreateResponses[keyof TaskTaskCreat
 
 export type TaskTaskDeleteData = {
   body?: never;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the delete with 412. A resource whose entity carries no write count has no tag to read and answers 422.
+     */
+    "If-Match"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -6697,11 +7641,12 @@ export type TaskTaskReadResponses = {
 export type TaskTaskReadResponse = TaskTaskReadResponses[keyof TaskTaskReadResponses];
 
 export type TaskTaskUpdateData = {
-  /**
-   * The writable fields to change
-   */
-  body: {
-    [key: string]: unknown;
+  body: TaskPatch;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
+     */
+    "If-Match"?: string;
   };
   path: {
     /**
@@ -7025,6 +7970,12 @@ export type UserUserCreateResponse = UserUserCreateResponses[keyof UserUserCreat
 
 export type UserUserDeleteData = {
   body?: never;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the delete with 412. A resource whose entity carries no write count has no tag to read and answers 422.
+     */
+    "If-Match"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -7116,11 +8067,12 @@ export type UserUserReadResponses = {
 export type UserUserReadResponse = UserUserReadResponses[keyof UserUserReadResponses];
 
 export type UserUserUpdateData = {
-  /**
-   * The writable fields to change
-   */
-  body: {
-    [key: string]: unknown;
+  body: UserPatch;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
+     */
+    "If-Match"?: string;
   };
   path: {
     /**
@@ -7399,3 +8351,606 @@ export type UserUserSetPasswordResponses = {
 
 export type UserUserSetPasswordResponse =
   UserUserSetPasswordResponses[keyof UserUserSetPasswordResponses];
+
+export type WebhookDeliveryListData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Rows per page
+     */
+    limit?: number;
+    /**
+     * Rows to skip
+     */
+    offset?: number;
+    /**
+     * A field name, or a field name prefixed with - for descending
+     */
+    sort?: string;
+    /**
+     * field:value, repeated
+     */
+    filter?: Array<string> | null;
+  };
+  url: "/api/v1/webhook/deliveries";
+};
+
+export type WebhookDeliveryListErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookDeliveryListError = WebhookDeliveryListErrors[keyof WebhookDeliveryListErrors];
+
+export type WebhookDeliveryListResponses = {
+  /**
+   * OK
+   */
+  200: PageDeliveryBody;
+};
+
+export type WebhookDeliveryListResponse =
+  WebhookDeliveryListResponses[keyof WebhookDeliveryListResponses];
+
+export type WebhookDeliveryReadData = {
+  body?: never;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/deliveries/{id}";
+};
+
+export type WebhookDeliveryReadErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookDeliveryReadError = WebhookDeliveryReadErrors[keyof WebhookDeliveryReadErrors];
+
+export type WebhookDeliveryReadResponses = {
+  /**
+   * OK
+   */
+  200: Delivery;
+};
+
+export type WebhookDeliveryReadResponse =
+  WebhookDeliveryReadResponses[keyof WebhookDeliveryReadResponses];
+
+export type WebhookDeliveryReplayData = {
+  body?: CommandInputStructBody;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/deliveries/{id}/replay";
+};
+
+export type WebhookDeliveryReplayErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookDeliveryReplayError =
+  WebhookDeliveryReplayErrors[keyof WebhookDeliveryReplayErrors];
+
+export type WebhookDeliveryReplayResponses = {
+  /**
+   * OK
+   */
+  200: Delivery;
+};
+
+export type WebhookDeliveryReplayResponse =
+  WebhookDeliveryReplayResponses[keyof WebhookDeliveryReplayResponses];
+
+export type WebhookEndpointListData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Rows per page
+     */
+    limit?: number;
+    /**
+     * Rows to skip
+     */
+    offset?: number;
+    /**
+     * A field name, or a field name prefixed with - for descending
+     */
+    sort?: string;
+    /**
+     * field:value, repeated
+     */
+    filter?: Array<string> | null;
+  };
+  url: "/api/v1/webhook/endpoints";
+};
+
+export type WebhookEndpointListErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointListError = WebhookEndpointListErrors[keyof WebhookEndpointListErrors];
+
+export type WebhookEndpointListResponses = {
+  /**
+   * OK
+   */
+  200: PageEndpointBody;
+};
+
+export type WebhookEndpointListResponse =
+  WebhookEndpointListResponses[keyof WebhookEndpointListResponses];
+
+export type WebhookEndpointCreateData = {
+  body?: CreateBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/webhook/endpoints";
+};
+
+export type WebhookEndpointCreateErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointCreateError =
+  WebhookEndpointCreateErrors[keyof WebhookEndpointCreateErrors];
+
+export type WebhookEndpointCreateResponses = {
+  /**
+   * Created
+   */
+  201: Issued;
+};
+
+export type WebhookEndpointCreateResponse =
+  WebhookEndpointCreateResponses[keyof WebhookEndpointCreateResponses];
+
+export type WebhookEndpointDeleteData = {
+  body?: never;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the delete with 412. A resource whose entity carries no write count has no tag to read and answers 422.
+     */
+    "If-Match"?: string;
+  };
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/endpoints/{id}";
+};
+
+export type WebhookEndpointDeleteErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointDeleteError =
+  WebhookEndpointDeleteErrors[keyof WebhookEndpointDeleteErrors];
+
+export type WebhookEndpointDeleteResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type WebhookEndpointDeleteResponse =
+  WebhookEndpointDeleteResponses[keyof WebhookEndpointDeleteResponses];
+
+export type WebhookEndpointReadData = {
+  body?: never;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/endpoints/{id}";
+};
+
+export type WebhookEndpointReadErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointReadError = WebhookEndpointReadErrors[keyof WebhookEndpointReadErrors];
+
+export type WebhookEndpointReadResponses = {
+  /**
+   * OK
+   */
+  200: Endpoint;
+};
+
+export type WebhookEndpointReadResponse =
+  WebhookEndpointReadResponses[keyof WebhookEndpointReadResponses];
+
+export type WebhookEndpointUpdateData = {
+  body: EndpointPatch;
+  headers?: {
+    /**
+     * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
+     */
+    "If-Match"?: string;
+  };
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/endpoints/{id}";
+};
+
+export type WebhookEndpointUpdateErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointUpdateError =
+  WebhookEndpointUpdateErrors[keyof WebhookEndpointUpdateErrors];
+
+export type WebhookEndpointUpdateResponses = {
+  /**
+   * OK
+   */
+  200: Endpoint;
+};
+
+export type WebhookEndpointUpdateResponse =
+  WebhookEndpointUpdateResponses[keyof WebhookEndpointUpdateResponses];
+
+export type WebhookEndpointDisableData = {
+  body?: CommandInputStructBody;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/endpoints/{id}/disable";
+};
+
+export type WebhookEndpointDisableErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointDisableError =
+  WebhookEndpointDisableErrors[keyof WebhookEndpointDisableErrors];
+
+export type WebhookEndpointDisableResponses = {
+  /**
+   * OK
+   */
+  200: Endpoint;
+};
+
+export type WebhookEndpointDisableResponse =
+  WebhookEndpointDisableResponses[keyof WebhookEndpointDisableResponses];
+
+export type WebhookEndpointEnableData = {
+  body?: CommandInputStructBody;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/endpoints/{id}/enable";
+};
+
+export type WebhookEndpointEnableErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointEnableError =
+  WebhookEndpointEnableErrors[keyof WebhookEndpointEnableErrors];
+
+export type WebhookEndpointEnableResponses = {
+  /**
+   * OK
+   */
+  200: Endpoint;
+};
+
+export type WebhookEndpointEnableResponse =
+  WebhookEndpointEnableResponses[keyof WebhookEndpointEnableResponses];
+
+export type WebhookEndpointRotateData = {
+  body?: never;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/endpoints/{id}/rotate";
+};
+
+export type WebhookEndpointRotateErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointRotateError =
+  WebhookEndpointRotateErrors[keyof WebhookEndpointRotateErrors];
+
+export type WebhookEndpointRotateResponses = {
+  /**
+   * OK
+   */
+  200: Issued;
+};
+
+export type WebhookEndpointRotateResponse =
+  WebhookEndpointRotateResponses[keyof WebhookEndpointRotateResponses];
+
+export type WebhookEndpointTargetData = {
+  body?: TargetBodyWritable;
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/webhook/endpoints/{id}/target";
+};
+
+export type WebhookEndpointTargetErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type WebhookEndpointTargetError =
+  WebhookEndpointTargetErrors[keyof WebhookEndpointTargetErrors];
+
+export type WebhookEndpointTargetResponses = {
+  /**
+   * OK
+   */
+  200: Endpoint;
+};
+
+export type WebhookEndpointTargetResponse =
+  WebhookEndpointTargetResponses[keyof WebhookEndpointTargetResponses];

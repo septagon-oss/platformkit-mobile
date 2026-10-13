@@ -2,20 +2,29 @@
 # The CI half of the device journey: a served kernel, a database of its own, one
 # tenant and one administrator, and this repository's flows at the end of them.
 #
-#   PK_KERNEL_IMAGE=ghcr.io/…@sha256:… scripts/e2e/mobile_ci.sh out/apk/release/app-debug-signed.apk
+#   PK_KERNEL_BIN=<built binary> scripts/e2e/mobile_ci.sh out/apk/release/app-debug-signed.apk
 #   scripts/e2e/mobile_ci.sh --probe        # what this host owes, and where it was found
+#   scripts/e2e/mobile_ci.sh --kernel-pin   # which kernel commit the fixtures agree on
 #
 # It is platformkit's scripts/mobile_e2e.sh:128-206 adapted, copied and cited:
 # the same database of its own created here and dropped in a trap that runs
 # whichever step failed, the same configuration keys, the same
 # `bootstrap --tenant e2e --host localhost --language pt-PT`, the same
-# serve-and-wait on /health with the log printed when the process died. What is
+# serve-and-wait on /health with the log printed when the process died — and, where
+# the copy had dropped it, the refusal that ends the run when the sixty turns are
+# spent and nothing was answered, so a server that never bound is never reported as
+# thirteen journeys that failed. What is
 # new here is where the binary comes from: this repository has no Go module and
-# no toolchain, so it cannot `go build ./apps/platformkit`. The kernel's image is
-# `gcr.io/distroless/static` with a `CGO_ENABLED=0` binary at /platformkit
-# (deploy/Dockerfile), so the build is pulled by digest and lifted out with
-# `docker cp` — a pinned download, not a container someone else publishes a port
-# for, and the same process-on-a-port the kernel harness serves.
+# no toolchain, so the job builds it — from the commit this repository's own
+# provenance records already name. testdata/catalog.source.json and
+# testdata/openapi.source.json each carry an upstream.commit, and those are the
+# bytes every screen here is derived from and every generated client is written
+# against, so building that object is what makes the server the flows write
+# through be the server the fixtures describe. No variable names that commit and
+# nothing is downloaded by a tag: --kernel-pin reads both records, refuses by
+# name when either is missing or does not hold forty hex characters, and refuses
+# naming both when they disagree, because then the fixtures are not one build's.
+# What the job hands back is the binary that build produced, in PK_KERNEL_BIN.
 #
 # The kernel's own README records the cost of this shape for its own copy
 # (e2e/maestro/README.md:104-118: 56 identical non-comment lines, neither script
@@ -23,10 +32,10 @@
 # cost is stated here rather than hidden: run.sh and this script are that copy,
 # and every line either prints names the repository's own script.
 #
-# Nothing here is quiet. A missing tool, a missing /dev/kvm or an image named by
-# nothing but a tag exits non-zero and names the missing piece; a journey that
-# silently skipped would leave the coverage the README quotes looking like a
-# number nobody earned.
+# Nothing here is quiet. A missing tool, a missing /dev/kvm or a kernel the
+# provenance records cannot name exits non-zero and names the missing piece; a
+# journey that silently skipped would leave the coverage the README quotes looking
+# like a number nobody earned.
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$root"
@@ -40,7 +49,7 @@ cd "$root"
 if [ "${1:-}" = "--probe" ]; then
   pk_tools mobile_ci adb emulator maestro docker psql python3 curl keytool ||
     {
-      echo "  Label: pkit-ci-linux-amd64. Either the runner image gains them or the" >&2
+      echo "  Label: pkit-ci-android. Either the runner image gains them or the" >&2
       echo "  journey moves to a runner that has them; it does not get skipped." >&2
       exit 1
     }
@@ -64,24 +73,80 @@ if [ "${1:-}" = "--probe" ]; then
   exit 0
 fi
 
+# pk_kernel_pin prints, alone on stdout, the kernel commit the two provenance
+# records agree on, and refuses by name what stops there being one: a record that
+# is not there, an upstream.commit that is not a full object id, or two records
+# that name different builds. The commit is forty hex characters because a commit,
+# unlike a branch or a tag, cannot move under the build made from it.
+pk_kernel_pin() {
+  pk_tools mobile_ci python3 >/dev/null || return 1
+  python3 - <<'PIN'
+import json
+import re
+import sys
+
+names = ["testdata/catalog.source.json", "testdata/openapi.source.json"]
+pins = {}
+for name in names:
+    try:
+        with open(name) as handle:
+            record = json.load(handle)
+    except OSError as error:
+        print(f"mobile_ci: {name} cannot be read: {error}", file=sys.stderr)
+        sys.exit(1)
+    except ValueError as error:
+        print(f"mobile_ci: {name} is not JSON: {error}", file=sys.stderr)
+        sys.exit(1)
+    upstream = record.get("upstream") if isinstance(record, dict) else None
+    commit = upstream.get("commit") if isinstance(upstream, dict) else None
+    if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{40}", commit):
+        print(
+            f"mobile_ci: {name} names no kernel to serve: upstream.commit is not a full "
+            "forty-character object id, and anything looser is a ref somebody can move.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    pins[name] = commit
+if len(set(pins.values())) > 1:
+    print(
+        "mobile_ci: the provenance records name different kernel builds: "
+        + ", ".join(f"{name} {commit[:12]}" for name, commit in pins.items())
+        + ". The journey serves one build; re-pin one fixture with its own refresh.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+sys.stdout.write(next(iter(pins.values())) + "\n")
+PIN
+}
+
+# --kernel-pin is the job's answer to "which commit, then": the checkout step that
+# follows it has nothing but a step output to work from, so this prints the object
+# id and nothing beside it.
+if [ "${1:-}" = "--kernel-pin" ]; then
+  pk_kernel_pin
+  exit 0
+fi
+
 apk="${1:?the verification APK to install (make apk ABIS=x86_64 PROFILE=ci && make apk-debug-sign)}"
 port="${PLATFORMKIT_MOBILE_PORT:-8098}"
 admin_url="${PLATFORMKIT_TEST_ADMIN_URL:?the owner connection; the job exports it}"
 app_url="${PLATFORMKIT_TEST_DATABASE_URL:?the application connection; the job exports it}"
-image="${PK_KERNEL_IMAGE:-}"
 export PK_MOBILE_REPORT="${PK_MOBILE_REPORT:-e2e/out/report.xml}"
 database="platformkit_mobile_$(date +%s)_${RANDOM}_$$"
 
-# The pin, before anything is pulled or started. This is the kernel's argument
-# (scripts/mobile_e2e.sh:31-41) with a different artifact at the end of it: a tag
-# is a pointer somebody can move, and this run holds a bootstrapped administrator
-# on a server the flows write through. `latest` would be somebody else's moment.
-if [ -z "$image" ]; then
-  echo "mobile_ci: PK_KERNEL_IMAGE names no kernel to serve. This repository cannot build the server; which build the journey runs against is the job's to name, and an unpinned download is not a test." >&2
+# The pin, before anything is copied, migrated or started. This is the kernel's
+# argument (scripts/mobile_e2e.sh:31-41) with a different artifact at the end of
+# it: what has to be fixed is the object the server was compiled from, and here it
+# is fixed by the same records that vouch for the fixtures — so a run cannot serve
+# a kernel newer than the catalog its screens were derived from.
+pin="$(pk_kernel_pin)" || exit 1
+kernel="${PK_KERNEL_BIN:-}"
+if [ -z "$kernel" ]; then
+  echo "mobile_ci: PK_KERNEL_BIN names no kernel binary to serve. The job builds ${pin} — this repository holds no Go toolchain — and exports the file that build wrote; serving something it cannot name is not a test." >&2
   exit 1
 fi
-if [[ ! "$image" =~ @sha256:[0-9a-fA-F]{64}$ ]]; then
-  echo "mobile_ci: PK_KERNEL_IMAGE has to end in @sha256:<64 hex>; $image is a tag somebody can move." >&2
+if [ ! -x "$kernel" ]; then
+  echo "mobile_ci: PK_KERNEL_BIN=$kernel is not an executable file; the job builds ${pin} and exports what go build wrote." >&2
   exit 1
 fi
 # The served kernel's vocabulary, named by the job and never guessed here: what a
@@ -93,7 +158,7 @@ for name in MODULE ENTITY KNOWN VERB VERB_FIELD VERB_TITLE DUE_FIELD STATUS_FIEL
     exit 1
   }
 done
-pk_tools mobile_ci docker psql python3 curl || exit 1
+pk_tools mobile_ci psql python3 curl || exit 1
 
 # A URL with the database swapped for this run's own: everything else — host,
 # port, credentials, parameters — is what the job already uses, so a deployment
@@ -118,7 +183,6 @@ psql_admin() { psql "$(swap "$admin_url" postgres)" -v ON_ERROR_STOP=1 -q "$@"; 
 
 work="$(mktemp -d)"
 app_pid=""
-leftover=""
 created=false
 cleanup() {
   status=$?
@@ -126,7 +190,6 @@ cleanup() {
     kill "$app_pid" 2>/dev/null || true
     wait "$app_pid" 2>/dev/null || true
   fi
-  if [ -n "$leftover" ]; then docker rm "$leftover" >/dev/null 2>&1 || true; fi
   if $created; then
     psql_admin -c "DROP DATABASE $database WITH (FORCE);" >/dev/null ||
       echo "mobile_ci: could not remove $database" >&2
@@ -136,15 +199,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "mobile_ci: the kernel the job named, by digest"
-if ! docker pull "$image" >/dev/null; then
-  echo "mobile_ci: the runner cannot pull $image. Either the registry needs credentials this job does not carry or the image has to be mirrored where the runner reaches it." >&2
-  exit 1
-fi
-leftover=$(docker create "$image")
-docker cp "$leftover:/platformkit" "$work/platformkit"
-docker rm "$leftover" >/dev/null
-leftover=""
+# The binary comes into this run's own directory rather than being exec'd where the
+# job left it: the journey then holds one copy of one build, and the `rm -rf` in the
+# trap is the only thing that can remove it.
+echo "mobile_ci: the kernel the job built from ${pin}"
+cp "$kernel" "$work/platformkit"
 chmod +x "$work/platformkit"
 
 echo "mobile_ci: a database of its own"
@@ -233,8 +292,12 @@ fi
 echo "mobile_ci: serving on $port"
 run_app run --config "$work/config.yaml" >"$work/app.log" 2>&1 &
 app_pid=$!
+served=false
 for _ in $(seq 1 60); do
-  if curl -fsS "http://localhost:$port/health" >/dev/null 2>&1; then break; fi
+  if curl -fsS "http://localhost:$port/health" >/dev/null 2>&1; then
+    served=true
+    break
+  fi
   if ! kill -0 "$app_pid" 2>/dev/null; then
     echo "mobile_ci: the server stopped before it served:" >&2
     cat "$work/app.log" >&2
@@ -242,6 +305,17 @@ for _ in $(seq 1 60); do
   fi
   sleep 1
 done
+# The bound itself needs a refusal: a process that is alive and silent has answered
+# nothing, and without this branch the loop simply ends, the journeys run against a
+# port that holds no server, and every flow's own timeout is reported as a device that
+# failed rather than a server that never came up. platformkit's harness refuses at this
+# same moment, and the log is the only place a configuration that would not bind — a
+# database it cannot reach, a NATS it cannot dial — is said at all.
+if ! $served; then
+  echo "mobile_ci: the kernel built from ${pin} stayed alive for 60 seconds and never answered /health on $port; its log:" >&2
+  cat "$work/app.log" >&2
+  exit 1
+fi
 
 # The second factor, enrolled over the door the phone will use. Everything below
 # is a request to the served kernel rather than a row written into its database:

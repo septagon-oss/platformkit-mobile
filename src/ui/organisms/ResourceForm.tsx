@@ -5,7 +5,7 @@
 // switch and a date row sit in the same column as a text box. Save and Cancel
 // live in the native header, which the screen composition sets from the same
 // phase this renders.
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { findNodeHandle, type ScrollView, type TextInput } from "react-native";
 import {
   type Feedback,
@@ -15,6 +15,15 @@ import {
   type Control,
   FormBlock,
 } from "../../core/derive";
+import {
+  figureLine,
+  insertLine,
+  lined,
+  marked,
+  NO_CARET,
+  type Caret,
+  type Draft,
+} from "../../core/richtext";
 import { ChoiceRow } from "../atoms/ChoiceRow";
 import { DateTimeRow } from "../atoms/DateTimeRow";
 import { Notice, retry } from "../atoms/Notice";
@@ -22,6 +31,7 @@ import { Skeleton } from "../atoms/Skeleton";
 import { SwitchRow } from "../atoms/SwitchRow";
 import { TextField, type FieldKind } from "../atoms/TextField";
 import { FormField } from "../molecules/FormField";
+import { RichTextToolbar } from "../molecules/RichTextToolbar";
 import { Section } from "../molecules/Section";
 import { TagsField } from "../molecules/TagsField";
 import { Text } from "../atoms/Text";
@@ -58,6 +68,16 @@ export interface Props {
    * nothing: a form that writes the record is not a command acting on it.
    */
   readonly acts?: { readonly on: string; readonly consequence: string };
+  /**
+   * onImage asks the surface for a file to put in a rich text body. It is given the field,
+   * and the `put` that answers with the file the person chose — the draft stays with this
+   * form, which is the one code that edits it. No surface, no control: a form that cannot
+   * reach the file module offers no picture to insert.
+   */
+  readonly onImage?: (
+    field: string,
+    put: (pick: { readonly name: string; readonly file: string }) => void,
+  ) => void;
   readonly onChange: (name: string, value: string) => void;
   readonly onRetry: () => void;
   /**
@@ -86,6 +106,7 @@ export function ResourceForm({
   phase,
   acts,
   onChange,
+  onImage,
   onRetry,
   onFieldRefused,
 }: Props) {
@@ -118,6 +139,39 @@ export function ResourceForm({
   // so a screen reader hears `Subject, Required` where a sighted person reads the
   // label above the box and, for an optional one, the word Optional.
   const current = (c: Control) => held[c.field.name] ?? c.value;
+  // Where the keyboard's caret last stood in each box, as that box reported it: a formatting
+  // control writes its marks where the person was typing, and a box that never reported one
+  // is edited at its end.
+  const [carets, setCarets] = useState<Record<string, Caret>>({});
+  // The body each box shows, and where its caret last stood, kept where an answer that
+  // arrives later can still read them: a formatting control writes where the person was
+  // typing, and a figure whose file list answered a second later belongs among whatever has
+  // been typed since it was asked for — a body read from the server has never been typed in
+  // and is still the body on the screen. `apply` runs from a press, outside any render, so
+  // this is refreshed after the render that committed the box, never during one.
+  const drafts = useRef(new Map<string, Draft>());
+  useEffect(() => {
+    drafts.current = new Map(
+      blocks.flatMap((block) =>
+        block.controls.map(
+          (c) =>
+            [c.field.name, { text: current(c), caret: carets[c.field.name] ?? NO_CARET }] as const,
+        ),
+      ),
+    );
+  });
+  const apply = (name: string, edit: (draft: Draft) => Draft) => {
+    const draft = drafts.current.get(name) ?? { text: held[name] ?? "", caret: NO_CARET };
+    const next = edit(draft);
+    if (next.text === draft.text) return;
+    onChange(name, next.text);
+    setCarets((at) => ({ ...at, [name]: next.caret }));
+  };
+  // A figure is a file the server holds: the surface asks where the picture comes from and
+  // answers with the file it ended up as, and the line that figure is gets written at the
+  // caret by the one code that edits a draft.
+  const placeFigure = (name: string, picked: { readonly name: string; readonly file: string }) =>
+    apply(name, (draft) => insertLine(draft, figureLine(picked.name, picked.file)));
   const named = (c: Control) => `${c.label}, ${c.required ? kit.required : kit.optional}`;
   // The author's line, then the one sentence the kit owes a person about the control
   // itself: a value greyed out says what changes it, a bare identifier box says that
@@ -198,14 +252,43 @@ export function ResourceForm({
             />
           </FormField>
         );
-      default:
+      default: {
+        // A rich text body is written with the marks this phone reads back, so the controls
+        // are offered over the box — and only over an editable one: a frozen value takes no
+        // marks. The Markdown stays visible: this is a text box with instruments above it,
+        // not a face that hides what the body is made of.
+        const rich = c.rich === true && !off;
         return (
           <FormField key={name} {...common}>
+            {rich ? (
+              <RichTextToolbar
+                copy={kit}
+                disabled={off}
+                testID={`toolbar-${name}`}
+                actions={{
+                  onBold: () => apply(name, (draft) => marked(draft, "**", "**")),
+                  onItalic: () => apply(name, (draft) => marked(draft, "_", "_")),
+                  onHeading: () => apply(name, (draft) => lined(draft, "## ")),
+                  onList: () => apply(name, (draft) => lined(draft, "- ")),
+                  ...(onImage === undefined
+                    ? {}
+                    : {
+                        onImage: () => onImage(name, (picked) => placeFigure(name, picked)),
+                      }),
+                }}
+              />
+            ) : null}
             <TextField
               ref={box(name)}
               kind={kinds[c.kind] ?? "text"}
               value={value}
               onChangeText={(v) => onChange(name, v)}
+              {...(rich
+                ? {
+                    onSelectionChange: (event: { nativeEvent: { selection: Caret } }) =>
+                      setCarets((at) => ({ ...at, [name]: event.nativeEvent.selection })),
+                  }
+                : {})}
               disabled={off}
               invalid={!!errors[name]}
               accessibilityLabel={named(c)}
@@ -213,6 +296,7 @@ export function ResourceForm({
             />
           </FormField>
         );
+      }
     }
   };
   return (

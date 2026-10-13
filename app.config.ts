@@ -38,6 +38,10 @@ const config: ExpoConfig = {
     "expo-sqlite",
     "expo-font",
     "expo-image",
+    // A body's figure may be a picture taken here: the module asks the platform for the
+    // camera and the photo library when the person reaches for one, and says so in the
+    // platform's own words rather than in a sentence this build invented.
+    "expo-image-picker",
     "@maplibre/maplibre-react-native",
     // A verification build talks plain HTTP to a server on the workstation
     // through adb reverse; a release never does.

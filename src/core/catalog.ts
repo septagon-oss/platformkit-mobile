@@ -6,6 +6,7 @@ import type {
   Entry as WireEntry,
   Field as WireField,
   Command as WireCommand,
+  MapKey as WireMapKey,
 } from "../generated/types.gen";
 import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
 import { issuePath } from "./responses";
@@ -32,10 +33,19 @@ export const FIELD_TYPES = [
 ] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
 
-export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentation">> & {
+/**
+ * MapKey is one key of a field whose value is a map: the word the person sees, and
+ * the member of the row it is read from when it is not typed in.
+ */
+export type MapKey = View<WireMapKey>;
+
+// `keys` names its own record, so its view is declared here: View maps one level,
+// and a parsed key carries `| undefined` on members the wire type leaves optional.
+export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentation" | "keys">> & {
   readonly type: FieldType;
   readonly elem?: FieldType;
   readonly enum?: readonly string[];
+  readonly keys?: readonly MapKey[] | null;
   readonly hints?: FieldHints;
 };
 
@@ -557,7 +567,7 @@ type ParsedEntry = NonNullable<z.output<typeof catalogSchema>["resources"]>[numb
 type ParsedField = z.output<typeof looseField>;
 
 function field(v: ParsedField, at: string, blocks: readonly string[], notice: HintNotice): Field {
-  const { type, elem, enum: values, presentation, ...rest } = v;
+  const { type, elem, enum: values, keys, presentation, ...rest } = v;
   const hints = hintField(presentation, `${at}.presentation`, values ?? [], blocks, notice);
   // The one place the reading axis and the writing axis genuinely collide. A
   // hidden field is plumbing and leaves the form; a *required* one is the
@@ -572,6 +582,7 @@ function field(v: ParsedField, at: string, blocks: readonly string[], notice: Hi
     ...rest,
     type: fieldType(type, `${at}.type`),
     ...(elem === undefined ? {} : { elem: fieldType(elem, `${at}.elem`) }),
+    ...(keys === undefined ? {} : { keys }),
     ...(values == null ? {} : { enum: values }),
     ...(hints === undefined ? {} : { hints }),
   };

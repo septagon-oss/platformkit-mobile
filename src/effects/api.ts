@@ -205,6 +205,31 @@ export function rowAddress(e: Entry, id: string): string {
 
 export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
+/** Served is one row and the language the response that carried it was written in. */
+export interface Served {
+  readonly row: Record<string, unknown>;
+  /** language is the tag `Content-Language` carried, or "" when the answer carried none. */
+  readonly language: string;
+}
+
+/**
+ * preparedForm says a body is already the document a transport sends rather than an object
+ * to be turned into one: a standard form, or React Native's, which names its parts to the
+ * stream instead of carrying Blobs. The generated serializer builds a form out of an
+ * object's entries; run over a form that already exists it turns the form's own internals
+ * into a text field, and the server is handed a field named `_parts` and no file.
+ */
+export function preparedForm(body: unknown): body is FormData {
+  if (body instanceof FormData) return true;
+  // A form built by another copy of the platform class is still a form: it says what it
+  // carries the way the transport reads it, which is the only thing that identifies it.
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    typeof (body as { getParts?: unknown }).getParts === "function"
+  );
+}
+
 export interface RequestOptions {
   readonly signal?: AbortSignal | undefined;
   /**
@@ -215,6 +240,14 @@ export interface RequestOptions {
    * the same write. A request no queue could ever replay carries none.
    */
   readonly idempotencyKey?: string | undefined;
+  /**
+   * lang names the language a write's body is written in. A translatable record is one the
+   * server holds in more than a language, and the same PATCH answers two different questions:
+   * without the parameter it writes the record, with it the body writes that language's
+   * translation and the record is untouched. A sheet therefore says which of the two it is
+   * doing rather than leaving the server to guess from the words in its body.
+   */
+  readonly lang?: string;
 }
 
 /**
@@ -224,8 +257,28 @@ export interface RequestOptions {
  * one made with an empty one — the write a phone cannot hold is left exactly the
  * call it was before the queue existed.
  */
-export function keyed(idempotencyKey: string | undefined): readonly [] | readonly [RequestOptions] {
-  return idempotencyKey === undefined ? [] : [{ idempotencyKey }];
+export function keyed(
+  idempotencyKey: string | undefined,
+  lang = "",
+): readonly [] | readonly [RequestOptions] {
+  if (idempotencyKey === undefined && lang === "") return [];
+  return [
+    {
+      ...(idempotencyKey === undefined ? {} : { idempotencyKey }),
+      ...(lang === "" ? {} : { lang }),
+    },
+  ];
+}
+
+/**
+ * langQuery is the language member of an address, or nothing at all for a write of the
+ * record's own copy. The tag goes on as the server printed it, percent-encoded: a language
+ * tag is the server's own string, not one this phone may spell.
+ */
+export function langQuery(options?: RequestOptions): string {
+  return options?.lang === undefined || options.lang === ""
+    ? ""
+    : `?lang=${encodeURIComponent(options.lang)}`;
 }
 
 export interface Api {
@@ -268,6 +321,15 @@ export interface Api {
   list(e: Entry, q?: Window): Promise<Page>;
   get(e: Entry, id: string): Promise<Record<string, unknown>>;
   /**
+   * served is a row together with the language the answer says it arrived in. A record with
+   * a translatable field is read through a door that names a language, and `Content-Language`
+   * is the tag the words on screen are written in: whoever later sends words back from that
+   * reading has to name the same tag, because a write that names no language writes the
+   * record rather than the language it was read in. A read that named none — a monolingual
+   * record, a response that said nothing — answers "", which is the record's own copy.
+   */
+  served(e: Entry, id: string): Promise<Served>;
+  /**
    * one is the row of a singleton, which lives at the entry's own path: a
    * tenant has one and it has no id to ask for. replace is how it is written,
    * because a singleton's write is a PUT of the whole of it.
@@ -304,6 +366,13 @@ export interface Api {
     values?: Record<string, unknown>,
     options?: RequestOptions,
   ): Promise<Record<string, unknown>>;
+  /**
+   * upload stores one file: a multipart POST at the entry's write address, answered with the
+   * row the server made for the bytes. No JSON call can carry it — the document gives a file's
+   * bytes one door, and it is a streamed form rather than a body — so the generated operation
+   * is walked directly and its answer is read as any other row.
+   */
+  upload(e: Entry, form: FormData, query?: string): Promise<Record<string, unknown>>;
   /** bearer is the key this connection signs with, or undefined when signed out. */
   readonly bearer: () => Bearer | undefined;
 }
@@ -315,6 +384,42 @@ export interface Api {
  * with nothing to say.
  */
 export const TIMEOUT = 15_000;
+
+/** TAG is a language tag a header can carry: characters a header allows, and nothing that could end the line. */
+const TAG = /^[A-Za-z0-9-]{1,35}$/;
+
+/**
+ * acceptLanguage is the phone saying which language its person reads in, in the order it
+ * will read it: the device's own tag, that language on its own behind it, and the kit's
+ * fallback last. Content negotiation is the transport's because every answer this phone
+ * reads — a row, a catalogue, a refusal — arrives in words, and a server can only honour a
+ * preference it is told. The device is asked per request, since a language can change
+ * while the app runs and a saved server must not go on answering in the words of a person
+ * who no longer reads them. A platform that names no tag, or names one no header could
+ * carry, says nothing: an invented preference would ask for words nobody chose.
+ */
+export function acceptLanguage(): string | undefined {
+  const device = Intl.DateTimeFormat().resolvedOptions().locale ?? "";
+  const language = device.split("-")[0]!.toLowerCase();
+  const wanted: string[] = [];
+  if (TAG.test(device)) wanted.push(device);
+  if (TAG.test(language) && language !== device.toLowerCase()) wanted.push(language);
+  if (wanted.length === 0) return undefined;
+  const list = wanted.map((tag, at) => (at === 0 ? tag : `${tag};q=0.9`));
+  if (!wanted.some((tag) => tag.toLowerCase().startsWith("en"))) list.push("en;q=0.5");
+  return list.join(", ");
+}
+
+/**
+ * contentLanguage is the tag a response said its body was written in, or "" for an answer
+ * that named none. Only the first tag of a list is read, and a tag this phone could not put
+ * back in an address counts as nothing said: such a row is the record's own copy and is
+ * written the way it always was — without a language.
+ */
+export function contentLanguage(headers: Headers): string {
+  const tag = (headers.get("Content-Language") ?? "").split(",")[0]!.trim();
+  return TAG.test(tag) ? tag : "";
+}
 
 /** TOKENS is where this phone mints its key and where it spends it. */
 const TOKENS = "/api/v1/auth/tokens";
@@ -434,6 +539,11 @@ export function createApi(
       ? Object.fromEntries(prepared.headers.entries())
       : {};
     headers.Accept = "application/json";
+    // Whose words to answer in. A translatable record the server holds in another
+    // language is served in the tenant's own and says so (`_i18n`); with no preference
+    // printed there is nothing for the server to have honoured.
+    const language = acceptLanguage();
+    if (language !== undefined) headers["Accept-Language"] = language;
     delete headers.cookie;
     delete headers.origin;
     delete headers["sec-fetch-site"];
@@ -631,7 +741,7 @@ export function createApi(
       // body through its request hook, including a native FormData upload.
       if (!bodies.has(request)) throw new TypeError("Expected a generated request.");
       const body = bodies.get(request) ?? null;
-      if (body instanceof FormData) request.headers.delete("Content-Type");
+      if (preparedForm(body)) request.headers.delete("Content-Type");
       const result = await call(
         method,
         path,
@@ -670,7 +780,15 @@ export function createApi(
       throwOnError: true,
     });
     client.interceptors.request.use((request, options) => {
-      bodies.set(request, (getValidRequestBody(options) as BodyInit | undefined) ?? null);
+      // A multipart form the caller built itself is sent as it was built: the operation's
+      // serializer knows how to make a form from an object and nothing else, and the bytes
+      // of a picture a phone took are already in the form this transport will stream.
+      bodies.set(
+        request,
+        preparedForm(options.body)
+          ? options.body
+          : ((getValidRequestBody(options) as BodyInit | undefined) ?? null),
+      );
       const route = documentedRoute(request.method, new URL(request.url).pathname);
       if (route?.json) options.parseAs = "json";
       return request;
@@ -698,7 +816,7 @@ export function createApi(
     body?: unknown,
     options: RequestOptions = {},
     carried: Carried = {},
-  ): Promise<{ value: unknown; status: number }> {
+  ): Promise<{ value: unknown; status: number; headers: Headers }> {
     const { signal, idempotencyKey } = options;
     const { session: frame, key } = carried;
     apiPath(path);
@@ -719,7 +837,11 @@ export function createApi(
         key,
         idempotencyKey,
       });
-      return { status: result.response.status, value: result.data };
+      return {
+        status: result.response.status,
+        value: result.data,
+        headers: result.response.headers,
+      };
     }
     // A route outside the document carries its credential the same way: whatever
     // this request was told to present goes on the wire in place of the held key.
@@ -727,9 +849,16 @@ export function createApi(
       frame === undefined && key === undefined
         ? undefined
         : { body: null, headers: new Headers(), cookie: frame?.cookie, key, frame };
-    const { text, status } = await call(method, path, body, signal, prepared, idempotencyKey);
+    const { text, status, headers } = await call(
+      method,
+      path,
+      body,
+      signal,
+      prepared,
+      idempotencyKey,
+    );
     try {
-      return { status, value: text === "" ? undefined : JSON.parse(text) };
+      return { status, value: text === "" ? undefined : JSON.parse(text), headers };
     } catch {
       throw new ResponseError(status, `Invalid response at ${path}: $ invalid JSON.`);
     }
@@ -784,6 +913,19 @@ export function createApi(
     );
     session = frame.cookie;
     return key;
+  }
+
+  async function served(e: Entry, id: string): Promise<Served> {
+    const path = rowAddress(e, id);
+    const { value, status, headers } = await read("GET", path);
+    try {
+      return { row: row.parse(value), language: contentLanguage(headers) };
+    } catch (error) {
+      throw new ResponseError(
+        status,
+        `Invalid response at ${path}: ${error instanceof CatalogError ? error.at : issuePath(error)} failed validation.`,
+      );
+    }
   }
 
   return {
@@ -953,8 +1095,9 @@ export function createApi(
       return { items: body.items ?? [], total: body.total ?? 0 };
     },
     async get(e, id) {
-      return json("GET", rowAddress(e, id), row.parse);
+      return (await served(e, id)).row;
     },
+    served,
     async one(e) {
       return json("GET", e.path, row.parse);
     },
@@ -968,7 +1111,15 @@ export function createApi(
       return json("POST", writePath(e), row.parse, values, options);
     },
     async update(e, id, values, options) {
-      return json("PATCH", `${writePath(e)}/${encodeURIComponent(id)}`, row.parse, values, options);
+      // The language belongs to the address, not the body: the kernel reads it as a parameter
+      // of the route, and a held write replays by the address it was filed under.
+      return json(
+        "PATCH",
+        `${writePath(e)}/${encodeURIComponent(id)}${langQuery(options)}`,
+        row.parse,
+        values,
+        options,
+      );
     },
     async remove(e, id, options) {
       const path = `${writePath(e)}/${encodeURIComponent(id)}`;
@@ -983,6 +1134,22 @@ export function createApi(
     },
     async command(e, id, verb, values, options) {
       return json("POST", commandPath(e, verb, id), row.parse, values, options);
+    },
+    async upload(e, form, query = "") {
+      const path = `${writePath(e)}${query}`;
+      apiPath(path);
+      const route = documentedRoute("POST", path);
+      if (route?.multipart !== true)
+        throw new TypeError(`No documented multipart upload at ${writePath(e)}.`);
+      const result = await documented((client) => route.run(client, path, form));
+      try {
+        return row.parse(result.data);
+      } catch (error) {
+        throw new ResponseError(
+          result.response.status,
+          `Invalid response at ${path}: ${error instanceof CatalogError ? error.at : issuePath(error)} failed validation.`,
+        );
+      }
     },
   };
 }

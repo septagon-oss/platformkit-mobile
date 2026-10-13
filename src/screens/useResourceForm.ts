@@ -22,19 +22,20 @@ import {
   formSections,
   noun,
   problems,
+  saveBody,
   screenPath,
   text,
-  values,
   verbRefusal,
+  writeLanguage,
   writePath,
   type Row,
 } from "../core/derive";
-import { keyed } from "../effects/api";
+import { keyed, langQuery } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import type { Phase } from "../ui/organisms/ResourceForm";
 import { useTheme } from "../ui/theme";
-import { refusalFields, refusalOf, screenCopy } from "./failure";
+import { refusalFields, refusalOf, screenCopy, screenLanguage } from "./failure";
 
 export function useResourceForm(entry: Entry, id: string | undefined) {
   const { api, wrote, typed, keep, say, outbox } = useShell();
@@ -46,6 +47,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // This sheet's own address, which is what the shell files what is typed under.
   const here = address("form", entry, id);
   const [row, setRow] = useState<Row | undefined>();
+  // The language this row was served in, kept beside it rather than inside it: the row stays
+  // the server's own document, and Save needs the tag to say which language its words are
+  // written in. "" is a read that named no language, which is the record's own copy.
+  const [servedIn, setServedIn] = useState("");
   const [phase, setPhase] = useState<Phase>(create ? "editing" : "loading");
   // A sheet that mounts while the server is refusing the session that would have
   // saved it starts from what was typed there, rather than from nothing.
@@ -93,9 +98,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     if (!id) return;
     const started = ++generation.current;
     try {
-      const got = await api.get(entry, id);
+      const got = await api.served(entry, id);
       if (generation.current !== started) return;
-      setRow(got);
+      setRow(got.row);
+      setServedIn(got.language);
       setPhase("editing");
     } catch (e) {
       if (generation.current !== started) return;
@@ -260,13 +266,31 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     setDetail("");
     setAwaiting("");
     try {
-      const body = values(controls, held);
+      // The read said which language the words this sheet shows arrived in; the write says
+      // the same thing back. A body of somebody's Portuguese sent without its language would
+      // be filed as the record's own copy, over the source that translation was made from,
+      // and no later read of the record would show that it had happened.
+      const speaking = screenLanguage();
+      const writing = writeLanguage(row, controls, held, speaking, servedIn);
+      if (writing !== undefined && writing.other.length > 0) {
+        // A translation and the record's own fields are two writes at two addresses; half of
+        // one is not a thing this sheet sends.
+        setDetail(copy.kit.mixedLanguageWrite);
+        setAwaiting(writing.other[0]!);
+        setRefusals((n) => n + 1);
+        setPhase("editing");
+        return;
+      }
+      // What the write carries follows from where it goes: a language write holds the fields
+      // that language owns, and the record's own copy holds none of the translations this
+      // person left alone.
+      const body = saveBody(controls, held, row, writing, speaking, servedIn);
       // `idem` is the write's idempotency key, minted by the queue before the
       // first attempt and named on the request: the attempt that may have landed
       // and the replay that follows a hold are then one write to a server that
       // honours the header.
       const live = (idem?: string) => {
-        const options = keyed(idem);
+        const options = keyed(idem, writing?.locale ?? "");
         return id ? api.update(entry, id, body, ...options) : api.create(entry, body, ...options);
       };
       // One write, one decision: it went, or this phone is holding it. A held
@@ -277,7 +301,14 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
             {
               kind: id ? "update" : "create",
               resourceKey: key(entry),
-              path: id ? `${writePath(entry)}/${encodeURIComponent(id)}` : writePath(entry),
+              // The language travels with the address rather than the body: a held write
+              // replays by the address it was filed under, and a replay that landed in the
+              // wrong language is the write this sheet was told not to make.
+              path: id
+                ? `${writePath(entry)}/${encodeURIComponent(id)}${langQuery(
+                    writing === undefined ? undefined : { lang: writing.locale },
+                  )}`
+                : writePath(entry),
               body,
             },
             live,
@@ -320,7 +351,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setRefusals((n) => n + 1);
       setPhase("editing");
     }
-  }, [phase, controls, held, id, api, entry, wrote, copy, create, say, outbox]);
+  }, [phase, controls, held, row, servedIn, id, api, entry, wrote, copy, create, say, outbox]);
 
   // Cancel is the third door out of a dirty sheet, and it asks the same question the
   // gesture and the system back are asked: an answer of "Keep editing" leaves the

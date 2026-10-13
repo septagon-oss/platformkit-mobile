@@ -276,77 +276,48 @@
  "totals": {
   "contract": {
    "files": 30,
-   "cases": 178,
-   "ms": 67677,
-   "testsMs": 46610.40000000001,
+   "cases": 182,
+   "ms": 64996,
+   "testsMs": 46918.00000000001,
    "runners": {
     "node": 30
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 203,
-   "cases": 941,
-   "ms": 1451292,
-   "testsMs": 43788.40000000003,
+   "files": 208,
+   "cases": 988,
+   "ms": 1505466,
+   "testsMs": 44140.800000000025,
    "runners": {
-    "jest": 68,
-    "node": 135
+    "jest": 71,
+    "node": 137
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 69,
-   "cases": 232,
-   "ms": 1440786,
-   "testsMs": 25005,
+   "files": 75,
+   "cases": 234,
+   "ms": 1614680,
+   "testsMs": 26638,
    "runners": {
-    "jest": 69
+    "jest": 75
    },
    "unreachable": 0
   },
   "journey": {
-   "files": 57,
-   "cases": 49,
+   "files": 56,
+   "cases": 48,
    "ms": 0,
    "testsMs": 0,
    "runners": {
     "browser": 43,
-    "maestro": 14
+    "maestro": 13
    },
    "unreachable": 43
   }
  },
  "rows": [
-  {
-   "file": "tests/administrator-signs-in.test.ts",
-   "runner": "node",
-   "layer": "contract",
-   "cases": 1,
-   "rule": "An administrator signs in on the phone and holds a key, as a member does.  The kernel's built-in admin role grants the wildcard (modules/auth/internal/ seed.go: `admin := []string{contracts.Wildcard}`), and login answers a role's permissions as the role stores them (modules/auth/internal/service.go, identify), so an administrator's Identity names \"*\". auth-token-issue refuses that scope by name \u2014 \"the wildcard answers for every permission in the tenant and for no operator permission at all\" (modules/auth/internal/tokens.go, IssueToken) \u2014 with a 422. All three are read at the commit testdata/openapi.source.json pins.  The fake below is that commit's kernel for the two operations this sign-in makes, with its rule for the mint. A sign-in that learns what to ask for from another documented operation answers that one here too; a re-pinned kernel whose mint rule changed changes the rule here with it.",
-   "ruleSource": "first comment",
-   "tier": "push",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 1893,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "an administrator signs in on the phone and holds a key"
-   ],
-   "tests": [
-    {
-     "title": "an administrator signs in on the phone and holds a key",
-     "ms": 37.195034,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14664,
-   "onlyProdLines": null,
-   "testsMs": 37.2
-  },
   {
    "file": "tests/advisories.test.ts",
    "runner": "node",
@@ -544,6 +515,35 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/advisory-record-covers-the-markdown-face.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 1,
+   "rule": "The Markdown face brings markdown-it and linkify-it into the lockfile, and both carry high advisories the registry has published with no release this face can take (react-native-markdown-display pins markdown-it ^10). The repository's rule (scripts/advisories.ts, run blocking in CI) is that a high filing is either fixed by the version held or reviewed by name and version in advisories.json. This case asks that question of the two packages this face alone adds, from the two files in the checkout and nothing on the network, so a lockfile that holds them unreviewed is refused here as CI refuses it.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 277,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "every package the Markdown face adds is fixed or reviewed by name and version"
+   ],
+   "tests": [
+    {
+     "title": "every package the Markdown face adds is fixed or reviewed by name and version",
+     "ms": 6.41705,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 6.4
   },
   {
    "file": "tests/android.test.ts",
@@ -784,47 +784,6 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/catalog-fallback-validation.test.ts",
-   "runner": "node",
-   "layer": "contract",
-   "cases": 3,
-   "rule": "Presentation fallback preserves the resource contract: a bad hint can cost its label, but never its fields, commands or validation of required members. The generated operation still owns its stricter published response contract.",
-   "ruleSource": "first comment",
-   "tier": "push",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 1373,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "malformed hints at every nesting level preserve the unhinted catalog",
-    "fallback leaves missing required resource and command members refused by path",
-    "the shell accepts a hint fallback while the generated catalog operation refuses it"
-   ],
-   "tests": [
-    {
-     "title": "malformed hints at every nesting level preserve the unhinted catalog",
-     "ms": 9.161188,
-     "measured": false
-    },
-    {
-     "title": "fallback leaves missing required resource and command members refused by path",
-     "ms": 2.58926,
-     "measured": false
-    },
-    {
-     "title": "the shell accepts a hint fallback while the generated catalog operation refuses it",
-     "ms": 32.217551,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14713,
-   "onlyProdLines": null,
-   "testsMs": 44
   },
   {
    "file": "tests/catalog-golden-contract.test.ts",
@@ -1338,35 +1297,6 @@
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
-   "file": "tests/factor-person-provisioning.test.ts",
-   "runner": "node",
-   "layer": "contract",
-   "cases": 1,
-   "rule": "The device harness creates the person who answers the second factor, and the kernel it serves accepts that person.  At the commit testdata/openapi.source.json pins, POST /api/v1/user/users refuses a body that names roles \u2014 \"crud: invalid: roles belongs to a route of its own, not to this one\" \u2014 and roles are given at user-user-roles, POST /api/v1/user/users/{id}/roles. The stub server below answers with that rule and nothing more; as in mobile-factor-config, exported functions replace docker, psql and curl, so no database, container, server or emulator starts. It stops the harness at the first request after the person has a password.",
-   "ruleSource": "first comment",
-   "tier": "push",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 518,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "the device harness creates its factor person in a shape the kernel accepts"
-   ],
-   "tests": [
-    {
-     "title": "the device harness creates its factor person in a shape the kernel accepts",
-     "ms": 234.521898,
-     "measured": false
-    }
-   ],
-   "loaded": 0,
-   "coveredProdLines": 0,
-   "onlyProdLines": null,
-   "testsMs": 234.5
-  },
-  {
    "file": "tests/fingerprint.test.ts",
    "runner": "node",
    "layer": "contract",
@@ -1425,6 +1355,59 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/journey-job-runs-on-the-runner-that-has-a-device.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 5,
+   "rule": "The device journey runs on `pkit-ci-android`, the runner whose image carries adb, the emulator, Maestro and /dev/kvm, and its probe step refuses by name on a host that does not. A label is one string in one workflow, so without this file nothing here holds it: one edit could move the job back to a plain Linux runner, where the probe is right to refuse and every push to main goes red having walked no flow. The same job builds the kernel it serves from the commit this repository's two provenance records agree on, so that pin \u2014 and whatever stops there being one \u2014 is held here too.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "nothing else in the suite reads jobs.journey at all: the label, the probe's place as the job's first command, the runner named inside the probe's refusal, the prefixes that search walks and the kernel commit the two provenance records agree on are held only here \u2014 the closest sibling, tests/journey-report-path.test.ts, reads one line of the same job and none of these. Its cases, titles and cost come from the one-file run named under measured.commands.node; the exclusive-line columns wait for the pass this row's exclusiveNotMeasured names (0088).",
+   "ms": 836,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the journey job asks for the runner whose image carries a device, and is the only job that does",
+    "the probe is the job's first command, and the only one that asks",
+    "the probe finds adb, the emulator and Maestro where the image and a workstation install them",
+    "the probe's refusal names the runner the job is on",
+    "the kernel the journeys serve is the commit the two provenance records agree on"
+   ],
+   "tests": [
+    {
+     "title": "the journey job asks for the runner whose image carries a device, and is the only job that does",
+     "ms": 40.298383,
+     "measured": false
+    },
+    {
+     "title": "the probe is the job's first command, and the only one that asks",
+     "ms": 4.848397,
+     "measured": false
+    },
+    {
+     "title": "the probe finds adb, the emulator and Maestro where the image and a workstation install them",
+     "ms": 170.025634,
+     "measured": false
+    },
+    {
+     "title": "the probe's refusal names the runner the job is on",
+     "ms": 0.509292,
+     "measured": false
+    },
+    {
+     "title": "the kernel the journeys serve is the commit the two provenance records agree on",
+     "ms": 209.513347,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 425.2
   },
   {
    "file": "tests/kernel-main-bound.test.ts",
@@ -1921,6 +1904,76 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/kernel-pin-step-publishes-nothing-without-provenance.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 1,
+   "rule": "A missing provenance record must end the pin step before it publishes anything: an empty ref would let the next checkout choose the kernel's default branch. Each record is removed in turn, with the other still naming a valid commit.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 415,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the pin step publishes nothing when either provenance record is missing"
+   ],
+   "tests": [
+    {
+     "title": "the pin step publishes nothing when either provenance record is missing",
+     "ms": 82.776424,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 82.8
+  },
+  {
+   "file": "tests/kernel-pin-step-refuses-what-the-records-cannot-name.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 3,
+   "rule": "The step that names the kernel to build is the job's refusal when the two provenance records cannot name one: a record missing, a commit that is not a full object id, or two records naming different builds. What the harness prints is only a refusal if the step that runs it ends there: a step that goes green with an empty commit hands the checkout no ref, and a checkout with no ref takes the repository's default branch \u2014 the one thing the journey must never build.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 546,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the pin step names the commit when the records agree",
+    "the pin step ends the job when the records name different builds",
+    "the pin step ends the job when a record is not a full object id"
+   ],
+   "tests": [
+    {
+     "title": "the pin step names the commit when the records agree",
+     "ms": 59.708149,
+     "measured": false
+    },
+    {
+     "title": "the pin step ends the job when the records name different builds",
+     "ms": 45.342833,
+     "measured": false
+    },
+    {
+     "title": "the pin step ends the job when a record is not a full object id",
+     "ms": 44.236747,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 149.3
   },
   {
    "file": "tests/layers.test.ts",
@@ -2623,35 +2676,6 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/sign-out-revokes-key.test.ts",
-   "runner": "node",
-   "layer": "contract",
-   "cases": 1,
-   "rule": "Signing out stops the key on the server, not only on the phone.  At the commit testdata/openapi.source.json pins, auth-token-revoke is declared httpx.SignedIn() (modules/auth/internal/token_routes.go), and a SignedIn operation refuses a credential that carries its own scopes with a 403 \u2014 \"this credential carries its own scope, and this operation answers only to its holder\" (kit/httpx/authorize.go). A key minted with scopes is such a credential. The fake below answers with those two rules: a scoped key is refused at every SignedIn door, the session a password opened is accepted there, and the revoke it accepts stops the key.",
-   "ruleSource": "first comment",
-   "tier": "push",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 971,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "signing out stops the key on the server"
-   ],
-   "tests": [
-    {
-     "title": "signing out stops the key on the server",
-     "ms": 40.374554,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14697,
-   "onlyProdLines": null,
-   "testsMs": 40.4
   },
   {
    "file": "tests/source.test.ts",
@@ -6783,6 +6807,153 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/prose-code-reads-in-the-dark.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The reader is styled only by the kit's tokens, in both modes (0069 \u00a78: prose, figures, tables and code are styled only by tokens; dark mode is checked). A code block sits on the palette's muted surface and a heading takes the type scale's size, so in dark mode the code is readable on its own surface and no default of the Markdown face shows through.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 16692,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a code block sits on the palette's muted surface in light mode",
+    "a code block sits on the palette's muted surface in dark mode",
+    "a heading and a paragraph take the type scale's size, not the face's default"
+   ],
+   "tests": [
+    {
+     "title": "a code block sits on the palette's muted surface in light mode",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a code block sits on the palette's muted surface in dark mode",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "a heading and a paragraph take the type scale's size, not the face's default",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 703,
+   "onlyProdLines": null,
+   "testsMs": 36
+  },
+  {
+   "file": "tests/ui/prose-draws-no-face-of-its-own.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The reader is drawn only from the kit's tokens, in both modes \u2014 no colour, face or size of the Markdown library ever reaches a screen. One element cannot answer that: a style written under a key the library never reads is invisible to a case that looks at one block, and the library's own default lands on the screen beside it. So this asks the question of every element of a whole body: each colour must be a role of the palette, each face one of the three the theme names, each size one of the scale's.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 17666,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "every colour, face and size of a whole body is the kit's in light mode",
+    "every colour, face and size of a whole body is the kit's in dark mode"
+   ],
+   "tests": [
+    {
+     "title": "every colour, face and size of a whole body is the kit's in light mode",
+     "ms": 36,
+     "measured": false
+    },
+    {
+     "title": "every colour, face and size of a whole body is the kit's in dark mode",
+     "ms": 22,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 703,
+   "onlyProdLines": null,
+   "testsMs": 58
+  },
+  {
+   "file": "tests/ui/prose-reader.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 8,
+   "rule": "A rich text body is read natively: every construct 0069 \u00a71 allows comes back as text a person can read, in both modes, with the figure's box reserved by the frame the server measured so a paragraph below it never moves. The figure that never arrived says so with the kit's own words, and nothing else about the body is lost.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18254,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "every construct of \u00a71 renders in light mode",
+    "every construct of \u00a71 renders in dark mode",
+    "a figure reserves the box its stored frame gives it, and says its caption once",
+    "a figure whose frame is not known yet is loading, and reserves nothing",
+    "a figure that cannot be opened says what it is instead of offering to open",
+    "a missing image says so and loses none of the text around it",
+    "a ready figure opens, and a decorative one is nothing a person is offered",
+    "a body the phone cannot draw is refused by the reader, not drawn as less"
+   ],
+   "tests": [
+    {
+     "title": "every construct of \u00a71 renders in light mode",
+     "ms": 44,
+     "measured": false
+    },
+    {
+     "title": "every construct of \u00a71 renders in dark mode",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a figure reserves the box its stored frame gives it, and says its caption once",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a figure whose frame is not known yet is loading, and reserves nothing",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a figure that cannot be opened says what it is instead of offering to open",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a missing image says so and loses none of the text around it",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a ready figure opens, and a decorative one is nothing a person is offered",
+     "ms": 16,
+     "measured": false
+    },
+    {
+     "title": "a body the phone cannot draw is refused by the reader, not drawn as less",
+     "ms": 1,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 750,
+   "onlyProdLines": null,
+   "testsMs": 103
+  },
+  {
    "file": "tests/ui/record-menu-opens-under-its-header.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -8237,6 +8408,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-file-upload-sends-the-form-its-caller-built.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A picture's bytes leave the phone as one multipart form, and the form its caller built is the document the transport sends. The generated serializer builds a form out of an object's entries and knows nothing of a form that already exists: run over one it prints that form's own internals into a text field, and the file module is left a field named after them and no file to store \u2014 which is a refusal it cannot trace back to the write that caused it. Two answers are owed here: the form that arrives at the server is the one that was handed over, part and all, at the address the document gives an upload; and an address the document holds no multipart route at is refused by name before a byte of anyone's picture is sent.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2592,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the form an upload was handed is the form the file module is asked to store",
+    "an address the document holds no upload route at is refused before a byte is sent"
+   ],
+   "tests": [
+    {
+     "title": "the form an upload was handed is the form the file module is asked to store",
+     "ms": 39.629166,
+     "measured": false
+    },
+    {
+     "title": "an address the document holds no upload route at is refused before a byte is sent",
+     "ms": 2.449211,
+     "measured": false
+    }
+   ],
+   "loaded": 46,
+   "coveredProdLines": 15863,
+   "onlyProdLines": null,
+   "testsMs": 42.1
+  },
+  {
    "file": "tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -9152,6 +9358,100 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are written in. The read keeps that tag beside the row rather than inside it: the row stays the server's own document, and a sheet that later sends words back has to name the language they are written in, because a write naming no language writes the record rather than the language it was read in. Three answers are owed here: the tag is kept exactly as it was printed, an answer that named no language leaves the row the record's own copy \u2014 which is what a row with no language has always been \u2014 and a tag no request this phone could build would carry counts as nothing said rather than as a guess.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1021,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a row read from an answer that names its language keeps the tag that answer printed",
+    "the language an answer was served in is the first tag it printed",
+    "an answer that names no language leaves the row the record's own copy",
+    "a language an answer named in a form no request could carry back is no language",
+    "the row a sheet reads is the same row whether or not it asks which language it came in"
+   ],
+   "tests": [
+    {
+     "title": "a row read from an answer that names its language keeps the tag that answer printed",
+     "ms": 31.321809,
+     "measured": false
+    },
+    {
+     "title": "the language an answer was served in is the first tag it printed",
+     "ms": 1.397435,
+     "measured": false
+    },
+    {
+     "title": "an answer that names no language leaves the row the record's own copy",
+     "ms": 0.740519,
+     "measured": false
+    },
+    {
+     "title": "a language an answer named in a form no request could carry back is no language",
+     "ms": 0.724531,
+     "measured": false
+    },
+    {
+     "title": "the row a sheet reads is the same row whether or not it asks which language it came in",
+     "ms": 1.953854,
+     "measured": false
+    }
+   ],
+   "loaded": 46,
+   "coveredProdLines": 15655,
+   "onlyProdLines": null,
+   "testsMs": 36.1
+  },
+  {
+   "file": "tests/a-save-carries-what-the-person-wrote.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading behind it, so every field it asks about is sent; an edit of the record's own copy sends a field nobody edited exactly as the read returned it, because the sheet shows the whole record; and a translatable field nobody edited on a read that arrived in a language is sent nowhere \u2014 its words are a translation's, and the record's own address files whatever reaches it as the record's own, over the source that translation was made from.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 947,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a create sends every field the sheet asks about",
+    "the record's own copy keeps a field nobody edited",
+    "an edited source field does not carry a translation nobody edited"
+   ],
+   "tests": [
+    {
+     "title": "a create sends every field the sheet asks about",
+     "ms": 12.014905,
+     "measured": false
+    },
+    {
+     "title": "the record's own copy keeps a field nobody edited",
+     "ms": 1.128557,
+     "measured": false
+    },
+    {
+     "title": "an edited source field does not carry a translation nobody edited",
+     "ms": 0.660081,
+     "measured": false
+    }
+   ],
+   "loaded": 31,
+   "coveredProdLines": 9992,
+   "onlyProdLines": null,
+   "testsMs": 13.8
   },
   {
    "file": "tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts",
@@ -11224,47 +11524,6 @@
    "runsNowhere": false
   },
   {
-   "file": "tests/factor-token-lifecycle.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 3,
-   "rule": "Who this is answers to the holder, not to a key narrowed to a list of permissions: auth-me is httpx.SignedIn(), and a scoped credential is refused at every one of those doors (kit/httpx/authorize.go). So the phone that wants an answer asks with the session its sign-in opened, and the alternative \u2014",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 1012,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "an accepted factor mints only the granted scopes with the server default lifetime",
-    "a factor refused with 401 mints nothing and leaves no bearer",
-    "a factor refused with 503 mints nothing and leaves no bearer"
-   ],
-   "tests": [
-    {
-     "title": "an accepted factor mints only the granted scopes with the server default lifetime",
-     "ms": 41.04808,
-     "measured": false
-    },
-    {
-     "title": "a factor refused with 401 mints nothing and leaves no bearer",
-     "ms": 1.830526,
-     "measured": false
-    },
-    {
-     "title": "a factor refused with 503 mints nothing and leaves no bearer",
-     "ms": 0.776706,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14720,
-   "onlyProdLines": null,
-   "testsMs": 43.7
-  },
-  {
    "file": "tests/failure.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -12705,35 +12964,6 @@
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
-   "file": "tests/flow-sign-in-factor.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 1,
-   "rule": "One journey Maestro plans (the set `check:flows` reads) signs in through the second-factor step: it claims the sign-in screen and answers the code step by the ids the screen sets, with the code from the environment the harness seeds \u2014 never a literal secret.",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 304,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "a planned journey signs in through the second-factor step"
-   ],
-   "tests": [
-    {
-     "title": "a planned journey signs in through the second-factor step",
-     "ms": 1.836026,
-     "measured": false
-    }
-   ],
-   "loaded": 1,
-   "coveredProdLines": 0,
-   "onlyProdLines": null,
-   "testsMs": 1.8
-  },
-  {
    "file": "tests/flow-workspace-key-spelling.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -13498,6 +13728,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/kernel-checkout-reads-with-the-repository-secret.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The device journey checks the kernel out of this forge's septagon-oss/platformkit at the commit the fixtures name. On this forge a job token reads the repository it was issued for and no other \u2014 kernel-main.yml says so where it reads the same repository, and the anonymous git read answers 401 \u2014 so a checkout of the kernel that carries no token of its own is a step no run gets past. The step reads with the same repository secret kernel-main reads with, and does not leave it in the checkout's own configuration afterwards.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 423,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the kernel checkout authorises with the secret kernel-main reads the kernel with"
+   ],
+   "tests": [
+    {
+     "title": "the kernel checkout authorises with the secret kernel-main reads the kernel with",
+     "ms": 20.327431,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 20.3
+  },
+  {
    "file": "tests/kit-quantity-states.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -14037,94 +14296,6 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/mint-scopes.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 6,
-   "rule": "What a phone may ask the mint for, and what it must not ask for.  A bearer key is narrowed, never escalated: modules/auth/internal/tokens.go's IssueToken refuses a scope with no permission behind it, refuses the wildcard by name, and refuses a scope the holder's own roles do not already grant \u2014 and modules/auth/internal/seed.go grants the built-in administrator role the wildcard alone, so an account that is granted everything is answered with the wildcard and no permission at all (modules/auth/internal/service.go's identify). The phone therefore cannot forward the list a sign-in answered with; it turns it into permissions, out of the declarations the pinned document prints for its own surface (x-platformkit-auth), which is what src/core/scopes.ts is for.  An operator grant is the other half: contracts.Grants answers for it only by naming it, and contracts.CheckedPermissions refuses it outside the operator's own tenant. This phone calls the app surface and no other, so it never asks.",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 1001,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "an account granted the wildcard is minted the permissions this phone can call",
-    "an account granted a role is minted the permissions that role names",
-    "a grant held only by the installation's operator stays out of a phone's key",
-    "the permissions a wildcard stands for are the ones the document declares, not a list written here",
-    "an account granted nothing is refused a key in the phone's own words",
-    "an app's own catalogue is the one its key is minted out of"
-   ],
-   "tests": [
-    {
-     "title": "an account granted the wildcard is minted the permissions this phone can call",
-     "ms": 39.059352,
-     "measured": false
-    },
-    {
-     "title": "an account granted a role is minted the permissions that role names",
-     "ms": 2.045102,
-     "measured": false
-    },
-    {
-     "title": "a grant held only by the installation's operator stays out of a phone's key",
-     "ms": 1.771036,
-     "measured": false
-    },
-    {
-     "title": "the permissions a wildcard stands for are the ones the document declares, not a list written here",
-     "ms": 0.216511,
-     "measured": false
-    },
-    {
-     "title": "an account granted nothing is refused a key in the phone's own words",
-     "ms": 1.598116,
-     "measured": false
-    },
-    {
-     "title": "an app's own catalogue is the one its key is minted out of",
-     "ms": 1.439522,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14665,
-   "onlyProdLines": null,
-   "testsMs": 46.1
-  },
-  {
-   "file": "tests/mobile-factor-config.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 1,
-   "rule": "As in maestro-device-selection, exported functions replace external tools. Stop at bootstrap after copying the actual config: no database, daemon, network, emulator, or application server is started by this case.",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 430,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "the device harness supplies a factor key before bootstrapping its server"
-   ],
-   "tests": [
-    {
-     "title": "the device harness supplies a factor key before bootstrapping its server",
-     "ms": 154.83853,
-     "measured": false
-    }
-   ],
-   "loaded": 0,
-   "coveredProdLines": 0,
-   "onlyProdLines": null,
-   "testsMs": 154.8
   },
   {
    "file": "tests/navigation.test.ts",
@@ -15205,6 +15376,367 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/prose-body-reads-as-blocks.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 26,
+   "rule": "A rich text body is the Markdown the server stored (0069 \u00a71), so reading it is a reading of that shape: a blank line between blocks, a figure a paragraph of its own, a fence that keeps its blank lines. These cases fix where the cuts fall, which width a frame gets in a slot, and which shapes the phone refuses to draw because the server would never have stored them.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 530,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "two headings, a paragraph and a list stay four runs in their own order",
+    "a figure is its own block between two paragraphs",
+    "a caption keeps the quote it escaped",
+    "an image with no alt and no title is a decorative figure",
+    "two figures keep their own ids in the order the body holds them",
+    "a body that is nothing but a figure is one block",
+    "a fenced block keeps its blank lines and its language header",
+    "a tilde fence closes on its own marker, not the first backtick",
+    "an unclosed fence is refused rather than drawn as an open paragraph",
+    "a table is one run, pipes and all",
+    "a nested list and a task list stay one run each",
+    "a blockquote and a thematic break are read as they were written",
+    "plain text with newlines is paragraphs, not a refusal",
+    "an image inside a sentence is refused: \u00a71 has no inline image",
+    "an image inside a list item is refused",
+    "a pk-file reference that is not a uuid is refused",
+    "an image addressed anywhere but pk-file is refused",
+    "a heading outside ## to #### is refused, and one inside is not",
+    "a link in any scheme the format allows is ordinary text to this reader",
+    "a frame wider than its slot gets the largest served width that fits the slot",
+    "a slot wider than the widest variant gets that variant, or the frame when it fits",
+    "a frame nobody measured plans nothing",
+    "a table is what the phone's rich editor cannot hold, and nothing else is",
+    "a span closed on the line below holds only its own words, and the prose after it is read",
+    "a table quoted into a blockquote is one the editor cannot hold either",
+    "a table drawn inside a code fence is not a table the editor would lose"
+   ],
+   "tests": [
+    {
+     "title": "two headings, a paragraph and a list stay four runs in their own order",
+     "ms": 3.033061,
+     "measured": false
+    },
+    {
+     "title": "a figure is its own block between two paragraphs",
+     "ms": 0.381887,
+     "measured": false
+    },
+    {
+     "title": "a caption keeps the quote it escaped",
+     "ms": 0.135711,
+     "measured": false
+    },
+    {
+     "title": "an image with no alt and no title is a decorative figure",
+     "ms": 0.083645,
+     "measured": false
+    },
+    {
+     "title": "two figures keep their own ids in the order the body holds them",
+     "ms": 0.169874,
+     "measured": false
+    },
+    {
+     "title": "a body that is nothing but a figure is one block",
+     "ms": 0.117357,
+     "measured": false
+    },
+    {
+     "title": "a fenced block keeps its blank lines and its language header",
+     "ms": 0.125843,
+     "measured": false
+    },
+    {
+     "title": "a tilde fence closes on its own marker, not the first backtick",
+     "ms": 0.171538,
+     "measured": false
+    },
+    {
+     "title": "an unclosed fence is refused rather than drawn as an open paragraph",
+     "ms": 0.10818,
+     "measured": false
+    },
+    {
+     "title": "a table is one run, pipes and all",
+     "ms": 0.080539,
+     "measured": false
+    },
+    {
+     "title": "a nested list and a task list stay one run each",
+     "ms": 0.098853,
+     "measured": false
+    },
+    {
+     "title": "a blockquote and a thematic break are read as they were written",
+     "ms": 0.09736,
+     "measured": false
+    },
+    {
+     "title": "plain text with newlines is paragraphs, not a refusal",
+     "ms": 0.108331,
+     "measured": false
+    },
+    {
+     "title": "an image inside a sentence is refused: \u00a71 has no inline image",
+     "ms": 0.101147,
+     "measured": false
+    },
+    {
+     "title": "an image inside a list item is refused",
+     "ms": 0.063888,
+     "measured": false
+    },
+    {
+     "title": "a pk-file reference that is not a uuid is refused",
+     "ms": 0.065531,
+     "measured": false
+    },
+    {
+     "title": "an image addressed anywhere but pk-file is refused",
+     "ms": 0.044893,
+     "measured": false
+    },
+    {
+     "title": "a heading outside ## to #### is refused, and one inside is not",
+     "ms": 0.074478,
+     "measured": false
+    },
+    {
+     "title": "a link in any scheme the format allows is ordinary text to this reader",
+     "ms": 0.042629,
+     "measured": false
+    },
+    {
+     "title": "a frame wider than its slot gets the largest served width that fits the slot",
+     "ms": 0.193829,
+     "measured": false
+    },
+    {
+     "title": "a slot wider than the widest variant gets that variant, or the frame when it fits",
+     "ms": 0.061654,
+     "measured": false
+    },
+    {
+     "title": "a frame nobody measured plans nothing",
+     "ms": 0.05408,
+     "measured": false
+    },
+    {
+     "title": "a table is what the phone's rich editor cannot hold, and nothing else is",
+     "ms": 0.392386,
+     "measured": false
+    },
+    {
+     "title": "a span closed on the line below holds only its own words, and the prose after it is read",
+     "ms": 0.21091,
+     "measured": false
+    },
+    {
+     "title": "a table quoted into a blockquote is one the editor cannot hold either",
+     "ms": 0.119001,
+     "measured": false
+    },
+    {
+     "title": "a table drawn inside a code fence is not a table the editor would lose",
+     "ms": 0.079848,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 854,
+   "onlyProdLines": null,
+   "testsMs": 6.2
+  },
+  {
+   "file": "tests/prose-body-says-its-words.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 8,
+   "rule": "A rich text body is drawn by `Prose` in the kit's type and said aloud by `proseSpoken`: the same words, at two speeds. These cases hold what a person hearing the record is told \u2014 the author's sentences, a code block read as written, a figure named \u2014 and what they are never told: the markup that only tells a screen how to draw, a link's address, a checked box read out as brackets, or a `##` where a heading stands.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 273,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a heading, its emphasis and a link are said as their own words",
+    "a fenced block is said as the code it holds, and its marker says nothing",
+    "a list says its items and not its marks, checked off or not",
+    "a quoted line is said as the sentence it quotes",
+    "a table is said cell by cell, and its separator row says nothing",
+    "a figure is named by its alt and its caption, and a decorative one says nothing",
+    "a mark that never pairs is a character of the sentence, not markup",
+    "a body the reader refuses is said exactly as it was stored"
+   ],
+   "tests": [
+    {
+     "title": "a heading, its emphasis and a link are said as their own words",
+     "ms": 2.263758,
+     "measured": false
+    },
+    {
+     "title": "a fenced block is said as the code it holds, and its marker says nothing",
+     "ms": 0.198216,
+     "measured": false
+    },
+    {
+     "title": "a list says its items and not its marks, checked off or not",
+     "ms": 0.201052,
+     "measured": false
+    },
+    {
+     "title": "a quoted line is said as the sentence it quotes",
+     "ms": 0.15685,
+     "measured": false
+    },
+    {
+     "title": "a table is said cell by cell, and its separator row says nothing",
+     "ms": 0.193017,
+     "measured": false
+    },
+    {
+     "title": "a figure is named by its alt and its caption, and a decorative one says nothing",
+     "ms": 0.3243,
+     "measured": false
+    },
+    {
+     "title": "a mark that never pairs is a character of the sentence, not markup",
+     "ms": 0.190001,
+     "measured": false
+    },
+    {
+     "title": "a body the reader refuses is said exactly as it was stored",
+     "ms": 0.165085,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 857,
+   "onlyProdLines": null,
+   "testsMs": 3.7
+  },
+  {
+   "file": "tests/prose-code-keeps-its-content.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "0069 \u00a71 allows fenced code with any content and inline code with any content, and the server stores both as written. The reader's refusals \u2014 an image outside a figure, a `pk-file:` that is not a uuid, a heading outside `##`\u2013`####` \u2014 are about the body's own constructs, so a line of code that merely looks like one of them is still code. A description that carries a shell snippet with a comment line is an ordinary body, and the phone draws it whole.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 327,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a comment line inside a fenced block is code, not a heading",
+    "image syntax quoted inside a fenced block is code, not an image",
+    "a pk-file: scheme named inside inline code is code, not a file reference",
+    "a heading-like line inside a fenced block in a list is still code"
+   ],
+   "tests": [
+    {
+     "title": "a comment line inside a fenced block is code, not a heading",
+     "ms": 3.387917,
+     "measured": false
+    },
+    {
+     "title": "image syntax quoted inside a fenced block is code, not an image",
+     "ms": 0.397254,
+     "measured": false
+    },
+    {
+     "title": "a pk-file: scheme named inside inline code is code, not a file reference",
+     "ms": 0.423604,
+     "measured": false
+    },
+    {
+     "title": "a heading-like line inside a fenced block in a list is still code",
+     "ms": 0.316846,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 838,
+   "onlyProdLines": null,
+   "testsMs": 4.5
+  },
+  {
+   "file": "tests/prose-fence-keeps-a-marker-with-trailing-text.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A fence-like line followed by words is literal code, not a closing delimiter. The reader preserves that valid fenced block instead of refusing the whole body.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 536,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a fence marker followed by text stays inside its code block"
+   ],
+   "tests": [
+    {
+     "title": "a fence marker followed by text stays inside its code block",
+     "ms": 7.647767,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 831,
+   "onlyProdLines": null,
+   "testsMs": 7.6
+  },
+  {
+   "file": "tests/prose-fence-keeps-shorter-markers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A fenced code block may quote a shorter fence. Its opening marker's whole width defines the closing marker, so the quoted heading and image remain code.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 351,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a shorter marker inside a fenced block does not end its literal content",
+    "a quoted heading and image inside a wide fence do not hold the editor"
+   ],
+   "tests": [
+    {
+     "title": "a shorter marker inside a fenced block does not end its literal content",
+     "ms": 2.507318,
+     "measured": false
+    },
+    {
+     "title": "a quoted heading and image inside a wide fence do not hold the editor",
+     "ms": 0.341392,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 837,
+   "onlyProdLines": null,
+   "testsMs": 2.8
+  },
+  {
    "file": "tests/range-clock-change.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -15900,41 +16432,6 @@
    "runsNowhere": false
   },
   {
-   "file": "tests/restored-token-revocation.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 2,
-   "rule": "What survives a restart on this phone is the key alone \u2014 the session that signed in is held in memory for as long as the key it minted is held and never written down \u2014 and `auth-token-revoke` answers to that session, not to the key. So a sign-out has two true answers, decided by what the run still holds. A key minted by this run stops on the server, and the same key must no longer read. A key read back out of storage brings nothing but itself, so the sign-out forgets it here and says that this device could not revoke it, naming where the account can; a phone that minted no key and holds no session has no door through which to claim that key dead. When a scoped credential is given such a door, the restored arm below starts answering `revoked: true`, and that is the point to move its assertion down to the read the minted arm makes of its own key.",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 1034,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "sign-out stops a key through the session that minted it",
-    "signing out of a key restored from storage forgets it here and says it was not revoked"
-   ],
-   "tests": [
-    {
-     "title": "sign-out stops a key through the session that minted it",
-     "ms": 43.035877,
-     "measured": false
-    },
-    {
-     "title": "signing out of a key restored from storage forgets it here and says it was not revoked",
-     "ms": 4.056923,
-     "measured": false
-    }
-   ],
-   "loaded": 49,
-   "coveredProdLines": 14801,
-   "onlyProdLines": null,
-   "testsMs": 47.1
-  },
-  {
    "file": "tests/richtext-field-is-prose.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -16145,6 +16642,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/served-kernel-that-never-answers-refuses-the-journey.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The harness waits for the kernel it served to answer /health, with a bound of sixty turns. What happens at the end of that bound is the whole difference between a red that names the server and a red that names thirteen flows: a loop that simply ends would hand `scripts/e2e/run.sh` a port that holds nothing, and every journey would then be refused by its own timeout while the log said nothing about the server that never bound. So the bound refuses, prints what the kernel logged, and the journeys are not reached. The cases below plant the tools the harness asks for, and a kernel of their own \u2014 one that stays alive and answers nothing, one that answers \u2014 so what is under test is the branch after the wait and not a device or a database.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 714,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a kernel alive and answering no /health ends the run naming the wait, the port and its own log",
+    "the same harness reaches the journeys when the served kernel answers /health"
+   ],
+   "tests": [
+    {
+     "title": "a kernel alive and answering no /health ends the run naming the wait, the port and its own log",
+     "ms": 305.932772,
+     "measured": false
+    },
+    {
+     "title": "the same harness reaches the journeys when the served kernel answers /health",
+     "ms": 126.802615,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 432.7
   },
   {
    "file": "tests/session-load-order.test.ts",
@@ -16505,176 +17037,6 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/sign-in-doors-carry-no-browser-origin.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 1,
-   "rule": "The two doors that mint a sign-in \u2014 the password at auth-login and the code at auth-challenge-verify \u2014 are refused by the kernel unless the request reads as same-site: kit/httpx's SameSite accepts a Sec-Fetch-Site of same-origin or none, or no Sec-Fetch-Site and either no Origin or one naming the request's own host, and modules/auth answers anything else with a 403 that tells the person to \"answer the second factor from the sign-in page itself\". A phone is the case that rule accepts by presenting nothing, so what src/effects/api.ts strips from a generated request before it leaves is the contract this file holds: no Origin, no Sec-Fetch-Site, and on these two public doors no credential of either kind, because a request that carried a cookie and a key together is answered as anonymous (kit/httpx/authenticate.go's ambiguousCredential).",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 986,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "the password and the code are offered with no Origin, no Sec-Fetch-Site and no credential"
-   ],
-   "tests": [
-    {
-     "title": "the password and the code are offered with no Origin, no Sec-Fetch-Site and no credential",
-     "ms": 39.560299,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14703,
-   "onlyProdLines": null,
-   "testsMs": 39.6
-  },
-  {
-   "file": "tests/sign-in-outcome.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 4,
-   "rule": "A 401 from the password leg means two different things and the phone has to tell them apart without a server that says which: an account that also answers with a second factor, and a password that is simply wrong. src/core/signInOutcome .ts decides that from the problem's type when the document names one, and from the kernel's exact sentence while it does not \u2014 this file is the gate under that fallback. It reads the pinned document rather than restating it: the day auth-login's 401 arrives with a type of its own, the sentence stops being a rule and becomes a liability, and the case that goes red says so by name.",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 297,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "the pinned document still says nothing about which type a refused sign-in carries",
-    "a factor challenge is told from a wrong password by what the answer carries",
-    "a dead key is an expired credential; a price and a permission are not",
-    "a caller the server does not know is told from one it refuses the asking"
-   ],
-   "tests": [
-    {
-     "title": "the pinned document still says nothing about which type a refused sign-in carries",
-     "ms": 2.691888,
-     "measured": false
-    },
-    {
-     "title": "a factor challenge is told from a wrong password by what the answer carries",
-     "ms": 0.240345,
-     "measured": false
-    },
-    {
-     "title": "a dead key is an expired credential; a price and a permission are not",
-     "ms": 0.165396,
-     "measured": false
-    },
-    {
-     "title": "a caller the server does not know is told from one it refuses the asking",
-     "ms": 0.134609,
-     "measured": false
-    }
-   ],
-   "loaded": 1,
-   "coveredProdLines": 79,
-   "onlyProdLines": null,
-   "testsMs": 3.2
-  },
-  {
-   "file": "tests/sign-out-answers-for-its-key-alone.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 4,
-   "rule": "A sign-out answers for the key it held, and for nothing else.  Its two asks go out with two different credentials: the revoke with the session that minted the key, or with the key itself where the phone holds no session, and the close with that session alone (kit/httpx.SignedIn() refuses a scoped key at the revoke, and auth-logout answers to the holder). One can therefore be answered while the other is not, and the one sentence a signed-out screen has is about the key. So the key's verdict is what comes back and stands: a session the server would not close says nothing about a key already stopped and nothing the person could reach (src/effects/api.ts's SignOut), while a revoke that never answered at all is the one failure this call throws \u2014 and it throws only after the session it holds has been asked, because a sign-out that leaves a session standing leaves the person signed in somewhere.",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 999,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "a session the server would not close leaves the key's confirmed stop alone",
-    "a revoke that never answered closes the session it went out with and stays uncertain",
-    "a session close the server refused keeps the verdict the key already has",
-    "a sign-out that closes both asks says nothing beyond the key it stopped"
-   ],
-   "tests": [
-    {
-     "title": "a session the server would not close leaves the key's confirmed stop alone",
-     "ms": 41.532607,
-     "measured": false
-    },
-    {
-     "title": "a revoke that never answered closes the session it went out with and stays uncertain",
-     "ms": 4.475839,
-     "measured": false
-    },
-    {
-     "title": "a session close the server refused keeps the verdict the key already has",
-     "ms": 2.718679,
-     "measured": false
-    },
-    {
-     "title": "a sign-out that closes both asks says nothing beyond the key it stopped",
-     "ms": 2.31914,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14715,
-   "onlyProdLines": null,
-   "testsMs": 51
-  },
-  {
-   "file": "tests/sign-out-names-the-key-it-leaves.test.ts",
-   "runner": "node",
-   "layer": "behaviour",
-   "cases": 4,
-   "rule": "Signing out answers one question with two facts: whether the server stopped the key, and whether the person still has a key to stop. Only a key the phone forgot and the server may still spend is a key somebody has to go and remove \u2014 a connection that held none leaves nothing, and a key the server refuses as a caller it does not recognise is dead wherever it is. The kernel refuses everything with a 403 and names the code first (kit/httpx/authorize.go: \"Every refusal is a 403, never a 401\"), so the two 403s below \u2014 the one that knows the caller and refuses the asking, the one that knows nobody \u2014 are the whole of the difference the screen draws its sentence from.",
-   "ruleSource": "first comment",
-   "tier": "push(scoped)+merge(full)",
-   "reach": "npm test (node half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 991,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
-   "titles": [
-    "a sign-out that holds no key asks nothing and leaves nothing to remove",
-    "a key refused at the door its holder alone answers is left for the person to stop",
-    "a key the server does not recognise leaves nothing live to remove",
-    "a sign-in whose own session the server no longer knows still leaves its key standing"
-   ],
-   "tests": [
-    {
-     "title": "a sign-out that holds no key asks nothing and leaves nothing to remove",
-     "ms": 2.948714,
-     "measured": false
-    },
-    {
-     "title": "a key refused at the door its holder alone answers is left for the person to stop",
-     "ms": 27.583276,
-     "measured": false
-    },
-    {
-     "title": "a key the server does not recognise leaves nothing live to remove",
-     "ms": 0.905836,
-     "measured": false
-    },
-    {
-     "title": "a sign-in whose own session the server no longer knows still leaves its key standing",
-     "ms": 8.631674,
-     "measured": false
-    }
-   ],
-   "loaded": 48,
-   "coveredProdLines": 14715,
-   "onlyProdLines": null,
-   "testsMs": 40.1
   },
   {
    "file": "tests/slot-availability-withdrawal.test.ts",
@@ -17227,6 +17589,65 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-language-a-sheet-writes-is-the-one-the-server-named.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 6,
+   "rule": "A record's words arrive in some language, and the server says which \u2014 in `_i18n`, naming the translatable fields it served and the language each one's words are in, and on the answer itself, with the tag the whole response was written in. What a sheet may write, and where, follows from those two alone \u2014 never from what the text looks like. Six answers are owed here: a changed field the server named in the language the sheet reads in is written *in that language* (a PATCH that names no language writes the record, so Portuguese words sent bare would be filed as the English they were translated from); a changed field named in a language the sheet does not read is the record's own copy and is written bare, as it always was; a field the server said nothing about is the record's own copy too; a translation changed beside a field that language cannot carry is two writes at two addresses, which is a refusal rather than half of one; and on a read the server answered *in a language*, every translatable field the person changed belongs to it \u2014 whether it carried no note because it is that language's own text, or carried another language's note because that other language is the fallback the translator was shown in order to write this one.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 902,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a body served in the language the sheet reads in is written in that language",
+    "a body served in a language nobody reads here is the record's own, and is written bare",
+    "a body the server said nothing about is written without a language",
+    "a translation changed beside a field that language cannot carry names what it cannot write",
+    "a complete translation the answer named no note for is written in the language the answer was served in",
+    "a translation written over the source a missing row fell back to is written in the language that was asked for"
+   ],
+   "tests": [
+    {
+     "title": "a body served in the language the sheet reads in is written in that language",
+     "ms": 10.264838,
+     "measured": false
+    },
+    {
+     "title": "a body served in a language nobody reads here is the record's own, and is written bare",
+     "ms": 0.84298,
+     "measured": false
+    },
+    {
+     "title": "a body the server said nothing about is written without a language",
+     "ms": 0.539278,
+     "measured": false
+    },
+    {
+     "title": "a translation changed beside a field that language cannot carry names what it cannot write",
+     "ms": 0.573621,
+     "measured": false
+    },
+    {
+     "title": "a complete translation the answer named no note for is written in the language the answer was served in",
+     "ms": 0.432861,
+     "measured": false
+    },
+    {
+     "title": "a translation written over the source a missing row fell back to is written in the language that was asked for",
+     "ms": 0.391434,
+     "measured": false
+    }
+   ],
+   "loaded": 31,
+   "coveredProdLines": 9969,
+   "onlyProdLines": null,
+   "testsMs": 13
+  },
+  {
    "file": "tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -17514,6 +17935,70 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/screens/a-complete-translation-save-keeps-the-source.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "Content-Language names the requested locale; _i18n may instead name the source of a fallback. A translator's edit in that locale must preserve the source in both cases.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20586,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "saving a complete Portuguese translation named by the response header preserves the English source",
+    "translating an English fallback in the requested Portuguese locale preserves the English source"
+   ],
+   "tests": [
+    {
+     "title": "saving a complete Portuguese translation named by the response header preserves the English source",
+     "ms": 145,
+     "measured": false
+    },
+    {
+     "title": "translating an English fallback in the requested Portuguese locale preserves the English source",
+     "ms": 43,
+     "measured": false
+    }
+   ],
+   "loaded": 141,
+   "coveredProdLines": 1784,
+   "onlyProdLines": null,
+   "testsMs": 188
+  },
+  {
+   "file": "tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 27490,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a default richtext record renders headings and emphasis without a preview override"
+   ],
+   "tests": [
+    {
+     "title": "a default richtext record renders headings and emphasis without a preview override",
+     "ms": 66,
+     "measured": false
+    }
+   ],
+   "loaded": 148,
+   "coveredProdLines": 1851,
+   "onlyProdLines": null,
+   "testsMs": 66
+  },
+  {
    "file": "tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -17582,6 +18067,268 @@
    "coveredProdLines": 1423,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation over its source.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26306,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a complete translated answer keeps both edits on refusal and saves a source edit after reversion",
+    "an answer naming a regional language keeps both edits on refusal and saves a source edit after reversion",
+    "an untagged answer with a field language keeps both edits on refusal and saves a source edit after reversion"
+   ],
+   "tests": [
+    {
+     "title": "a complete translated answer keeps both edits on refusal and saves a source edit after reversion",
+     "ms": 143,
+     "measured": false
+    },
+    {
+     "title": "an answer naming a regional language keeps both edits on refusal and saves a source edit after reversion",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "an untagged answer with a field language keeps both edits on refusal and saves a source edit after reversion",
+     "ms": 13,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 1711,
+   "onlyProdLines": null,
+   "testsMs": 168
+  },
+  {
+   "file": "tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A camera image must reach the real API transport as a native file part, retain its session, and enter the body only after the file endpoint accepts that part.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20976,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a camera file part survives generated serialization and is inserted after authenticated upload"
+   ],
+   "tests": [
+    {
+     "title": "a camera file part survives generated serialization and is inserted after authenticated upload",
+     "ms": 162,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1894,
+   "onlyProdLines": null,
+   "testsMs": 162
+  },
+  {
+   "file": "tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A picture taken on the phone is stored as a file before the body points at it: the body never learns an address that only this phone could read.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20228,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a picture taken here is stored as a file, and the body points at that file"
+   ],
+   "tests": [
+    {
+     "title": "a picture taken here is stored as a file, and the body points at that file",
+     "ms": 48,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1650,
+   "onlyProdLines": null,
+   "testsMs": 48
+  },
+  {
+   "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at the file's content address \u2014 at the width this device can paint, or as stored when the frame already fits \u2014 with the session this app holds. A file this phone cannot read is said where it sits: the body keeps reading natively and no byte of the refused file is asked for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22148,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a figure reads its own row for the frame and asks for its bytes at the file's address",
+    "a frame that already fits its slot is asked for as stored",
+    "a file this phone cannot read is said in its own frame and the body keeps reading"
+   ],
+   "tests": [
+    {
+     "title": "a figure reads its own row for the frame and asks for its bytes at the file's address",
+     "ms": 1168,
+     "measured": false
+    },
+    {
+     "title": "a frame that already fits its slot is asked for as stored",
+     "ms": 25,
+     "measured": false
+    },
+    {
+     "title": "a file this phone cannot read is said in its own frame and the body keeps reading",
+     "ms": 22,
+     "measured": false
+    }
+   ],
+   "loaded": 149,
+   "coveredProdLines": 1942,
+   "onlyProdLines": null,
+   "testsMs": 1215
+  },
+  {
+   "file": "tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21217,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "an editable richtext form exposes bold and image controls after reading the record"
+   ],
+   "tests": [
+    {
+     "title": "an editable richtext form exposes bold and image controls after reading the record",
+     "ms": 34,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1589,
+   "onlyProdLines": null,
+   "testsMs": 34
+  },
+  {
+   "file": "tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores the figure.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 23646,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a failed figure can retry and replace its loading placeholder with the recovered image"
+   ],
+   "tests": [
+    {
+     "title": "a failed figure can retry and replace its loading placeholder with the recovered image",
+     "ms": 85,
+     "measured": false
+    }
+   ],
+   "loaded": 135,
+   "coveredProdLines": 1548,
+   "onlyProdLines": null,
+   "testsMs": 85
+  },
+  {
+   "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 23943,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "renaming a source-only title on a Portuguese read saves the title and preserves both bodies"
+   ],
+   "tests": [
+    {
+     "title": "renaming a source-only title on a Portuguese read saves the title and preserves both bodies",
+     "ms": 104,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 1691,
+   "onlyProdLines": null,
+   "testsMs": 104
+  },
+  {
+   "file": "tests/screens/a-translatable-record-follows-the-device-language.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A translatable record is requested in the device language. A source-language fallback is identified in Portuguese rather than silently shown as translated content.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25311,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a Portuguese device asks for translatable content with Accept-Language",
+    "a missing Portuguese translation names the English fallback beside the body"
+   ],
+   "tests": [
+    {
+     "title": "a Portuguese device asks for translatable content with Accept-Language",
+     "ms": 582,
+     "measured": false
+    },
+    {
+     "title": "a missing Portuguese translation names the English fallback beside the body",
+     "ms": 29,
+     "measured": false
+    }
+   ],
+   "loaded": 152,
+   "coveredProdLines": 2224,
+   "onlyProdLines": null,
+   "testsMs": 611
   },
   {
    "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",
@@ -18437,6 +19184,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "Saving without a changed translation must never copy its loaded words over the source, including when typing and undoing leaves the body exactly as it arrived.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21679,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "saving an untouched Portuguese body preserves the English source",
+    "saving after reverting a Portuguese body preserves the English source"
+   ],
+   "tests": [
+    {
+     "title": "saving an untouched Portuguese body preserves the English source",
+     "ms": 118,
+     "measured": false
+    },
+    {
+     "title": "saving after reverting a Portuguese body preserves the English source",
+     "ms": 16,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 1686,
+   "onlyProdLines": null,
+   "testsMs": 134
+  },
+  {
    "file": "tests/screens/cancel-asks-once.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -18726,6 +19508,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/screens/editing-a-translation-keeps-the-source-language.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A translated read cannot be sent back as the source-language value on Save.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 24330,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "saving Portuguese content preserves the English source and writes the Portuguese locale"
+   ],
+   "tests": [
+    {
+     "title": "saving Portuguese content preserves the English source and writes the Portuguese locale",
+     "ms": 180,
+     "measured": false
+    }
+   ],
+   "loaded": 141,
+   "coveredProdLines": 1791,
+   "onlyProdLines": null,
+   "testsMs": 180
+  },
+  {
    "file": "tests/screens/example-task-detail.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -18815,6 +19626,47 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/generated-richtext-record-renders-natively.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A generated record reads a richtext declaration without a product renderer. Markdown headings become native text while a plain text field keeps its syntax.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25745,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a generated richtext record draws native Markdown in light mode",
+    "a generated richtext record draws native Markdown in dark mode",
+    "a plain text record keeps Markdown punctuation as text"
+   ],
+   "tests": [
+    {
+     "title": "a generated richtext record draws native Markdown in light mode",
+     "ms": 59,
+     "measured": false
+    },
+    {
+     "title": "a generated richtext record draws native Markdown in dark mode",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a plain text record keeps Markdown punctuation as text",
+     "ms": 13,
+     "measured": false
+    }
+   ],
+   "loaded": 148,
+   "coveredProdLines": 1847,
+   "onlyProdLines": null,
+   "testsMs": 90
   },
   {
    "file": "tests/screens/newer-shell-fallback.test.tsx",
@@ -19121,6 +19973,122 @@
    "testsMs": 30
   },
   {
+   "file": "tests/screens/refused-richtext-file-keeps-the-reader.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A tenant-scoped file read that answers 404 leaves a missing-image figure in the native body. The surrounding Markdown still renders, and no refused byte is asked for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 24221,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a second tenant's file refused with 404 keeps its missing figure and native prose"
+   ],
+   "tests": [
+    {
+     "title": "a second tenant's file refused with 404 keeps its missing figure and native prose",
+     "ms": 699,
+     "measured": false
+    }
+   ],
+   "loaded": 150,
+   "coveredProdLines": 2090,
+   "onlyProdLines": null,
+   "testsMs": 699
+  },
+  {
+   "file": "tests/screens/richtext-formatting-preserves-the-loaded-body.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Formatting a read value is an edit of that value, even before anyone types into it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20623,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "bold on a selected word keeps every other word from the loaded body through Save"
+   ],
+   "tests": [
+    {
+     "title": "bold on a selected word keeps every other word from the loaded body through Save",
+     "ms": 50,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1727,
+   "onlyProdLines": null,
+   "testsMs": 50
+  },
+  {
+   "file": "tests/screens/richtext-image-insertion-keeps-later-typing.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Choosing a file is asynchronous; typing while it loads must survive the insertion.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 27817,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "an image chosen after another edit preserves the latest draft"
+   ],
+   "tests": [
+    {
+     "title": "an image chosen after another edit preserves the latest draft",
+     "ms": 179,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1641,
+   "onlyProdLines": null,
+   "testsMs": 179
+  },
+  {
+   "file": "tests/screens/richtext-image-source-offers-camera-and-library.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Inserting a new phone photo starts by choosing the photo library or camera.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 28914,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "Image offers the photo library and camera even when the tenant has no uploaded files"
+   ],
+   "tests": [
+    {
+     "title": "Image offers the photo library and camera even when the tenant has no uploaded files",
+     "ms": 33,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1599,
+   "onlyProdLines": null,
+   "testsMs": 33
+  },
+  {
    "file": "tests/screens/sign-in-door-asks-before-held-writes-go.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -19148,82 +20116,6 @@
    "coveredProdLines": 1295,
    "onlyProdLines": null,
    "testsMs": 196
-  },
-  {
-   "file": "tests/screens/sign-in-factor-challenge.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 2,
-   "rule": "A person who has enrolled a second factor is answered \"that password is right; this account also answers with a second factor\" (auth-login, 401). The sign-in screen then asks for the code (testIDs `challenge`, `code`, `verify`) and sends it to auth-challenge-verify; a wrong code keeps the step open. Each case reaches its assertion through the challenge step itself, never through the 401 sentence the screen shows today.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 19883,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "a factor-required answer opens the code step instead of an error",
-    "a wrong code is sent to the verify operation and keeps the code step open"
-   ],
-   "tests": [
-    {
-     "title": "a factor-required answer opens the code step instead of an error",
-     "ms": 113,
-     "measured": false
-    },
-    {
-     "title": "a wrong code is sent to the verify operation and keeps the code step open",
-     "ms": 111,
-     "measured": false
-    }
-   ],
-   "loaded": 146,
-   "coveredProdLines": 1623,
-   "onlyProdLines": null,
-   "testsMs": 224
-  },
-  {
-   "file": "tests/screens/sign-in-prefilled-email.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 3,
-   "rule": "Returning to a refused session asks for the password, with the email already shown. Both submission controls must send that shown address even when the person never edits it; changing it must still submit the new address.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "Pins the prefilled email submitted through the composed SignIn screen, including both button and keyboard and the edited-address control. Cases, titles and durations come from the green Jest run this pin now answers; the exclusive-line columns wait for the coverage pass.",
-   "ms": 28658,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "tapping Sign in submits the prefilled email without editing it",
-    "the password keyboard submits the prefilled email without editing it",
-    "editing a prefilled email submits the replacement address"
-   ],
-   "tests": [
-    {
-     "title": "tapping Sign in submits the prefilled email without editing it",
-     "ms": 29,
-     "measured": false
-    },
-    {
-     "title": "the password keyboard submits the prefilled email without editing it",
-     "ms": 11,
-     "measured": false
-    },
-    {
-     "title": "editing a prefilled email submits the replacement address",
-     "ms": 13,
-     "measured": false
-    }
-   ],
-   "loaded": 137,
-   "coveredProdLines": 1311,
-   "onlyProdLines": null,
-   "testsMs": 53
   },
   {
    "file": "tests/screens/sign-out-asks-before-held-writes-go.test.tsx",
@@ -20174,41 +21066,6 @@
    "runsNowhere": false
   },
   {
-   "file": "tests/shell-bearer-credential.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 2,
-   "rule": "A phone is not a browser: after a sign-in it mints a scoped bearer token (auth-token-issue), keeps only that in secure storage and presents it as `Authorization: Bearer` on the work it does \u2014 never the session cookie the login answered with, which is not stored and not what a list or a read is answered with.  Signing out revokes that token on the server (auth-token-revoke) and forgets it locally, and the revoke is the one request that cannot present the key: at the commit testdata/openapi.source.json pins, auth-token-revoke and auth-me are httpx.SignedIn(), and kit/httpx/authorize.go refuses a credential carrying its own scopes at every such door. The server below enforces that rule, so a revoke presented as the key answers 403 here as it does on a served kernel, and the session the sign-in opened is what the door takes instead.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 17619,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "a signed-in phone presents the token it minted and never the session cookie",
-    "signing out revokes the token on the server and forgets it locally"
-   ],
-   "tests": [
-    {
-     "title": "a signed-in phone presents the token it minted and never the session cookie",
-     "ms": 99,
-     "measured": false
-    },
-    {
-     "title": "signing out revokes the token on the server and forgets it locally",
-     "ms": 13,
-     "measured": false
-    }
-   ],
-   "loaded": 140,
-   "coveredProdLines": 1629,
-   "onlyProdLines": null,
-   "testsMs": 112
-  },
-  {
    "file": "tests/shell-concurrent-sign-ins.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -20245,35 +21102,6 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/shell-dead-key-on-restore.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 1,
-   "rule": "A key the server no longer recognises \u2014 revoked from the account's devices, or past the lifetime the mint gave it \u2014 is answered the way the kernel answers everything it refuses: 403, never 401, with the code it names (kit/httpx/authorize.go: \"Every refusal is a 403, never a 401\"; a bearer that buys nobody goes on as anonymous and the door says AUTH_ANONYMOUS). A phone that restores such a key has one way out, and the shell owns it: forget the key, keep the server, and put the person on the sign-in form with the kit's expired words \u2014 not on the \"could not be opened\" screen whose Retry can never work.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 17860,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "a restored key the server no longer recognises puts the person on the sign-in form with the expired words"
-   ],
-   "tests": [
-    {
-     "title": "a restored key the server no longer recognises puts the person on the sign-in form with the expired words",
-     "ms": 97,
-     "measured": false
-    }
-   ],
-   "loaded": 146,
-   "coveredProdLines": 1564,
-   "onlyProdLines": null,
-   "testsMs": 97
   },
   {
    "file": "tests/shell-expired-session-another-identity-starts-at-home.test.tsx",
@@ -20546,135 +21374,6 @@
    "runsNowhere": false
   },
   {
-   "file": "tests/shell-factor-challenge-address.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 7,
-   "rule": "A second factor spends a window one server opened and no other can read. These cases hold that address: the code is answered at the origin that refused to finish, the key it mints is saved against that origin, and a code with no refusal behind it never leaves the phone. The password leg and the transport are the ones under test, so the network is a recorder and the store is memory.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 21519,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "a code that opens the session is answered at the origin that asked for it",
-    "the sign-in a code finishes is saved against the server that asked for the code",
-    "a newer sign-in owns the challenge the code will answer",
-    "a code with no refusal behind it is refused before any request leaves",
-    "signing out closes the challenge a later code cannot answer",
-    "a refused password leaves no challenge for the code step to answer",
-    "a refused code leaves the same challenge open on the same server"
-   ],
-   "tests": [
-    {
-     "title": "a code that opens the session is answered at the origin that asked for it",
-     "ms": 100,
-     "measured": false
-    },
-    {
-     "title": "the sign-in a code finishes is saved against the server that asked for the code",
-     "ms": 11,
-     "measured": false
-    },
-    {
-     "title": "a newer sign-in owns the challenge the code will answer",
-     "ms": 12,
-     "measured": false
-    },
-    {
-     "title": "a code with no refusal behind it is refused before any request leaves",
-     "ms": 327,
-     "measured": false
-    },
-    {
-     "title": "signing out closes the challenge a later code cannot answer",
-     "ms": 6,
-     "measured": false
-    },
-    {
-     "title": "a refused password leaves no challenge for the code step to answer",
-     "ms": 27,
-     "measured": false
-    },
-    {
-     "title": "a refused code leaves the same challenge open on the same server",
-     "ms": 8,
-     "measured": false
-    }
-   ],
-   "loaded": 140,
-   "coveredProdLines": 1672,
-   "onlyProdLines": null,
-   "testsMs": 491
-  },
-  {
-   "file": "tests/shell-factor-response-isolation.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 2,
-   "rule": "A factor response belongs to the attempt that sent it. A late refusal must leave the key, storage and catalog of a newer accepted answer intact.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 19009,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "a late refused factor leaves a newer accepted factor's key usable",
-    "the code field and verify control submit one factor while its answer is pending"
-   ],
-   "tests": [
-    {
-     "title": "a late refused factor leaves a newer accepted factor's key usable",
-     "ms": 380,
-     "measured": false
-    },
-    {
-     "title": "the code field and verify control submit one factor while its answer is pending",
-     "ms": 34,
-     "measured": false
-    }
-   ],
-   "loaded": 146,
-   "coveredProdLines": 1728,
-   "onlyProdLines": null,
-   "testsMs": 414
-  },
-  {
-   "file": "tests/shell-factor-server.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 1,
-   "rule": "(no first comment; first test title) the second factor is sent only to the server that accepted the password",
-   "ruleSource": "first test title",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 18710,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "the second factor is sent only to the server that accepted the password"
-   ],
-   "tests": [
-    {
-     "title": "the second factor is sent only to the server that accepted the password",
-     "ms": 88,
-     "measured": false
-    }
-   ],
-   "loaded": 140,
-   "coveredProdLines": 1513,
-   "onlyProdLines": null,
-   "testsMs": 88
-  },
-  {
    "file": "tests/shell-held-write-order.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -20778,35 +21477,6 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/shell-mints-out-of-the-apps-own-catalogue.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 1,
-   "rule": "An app's key is minted out of the permissions that app declares, not out of the kit's own list. A module outside this repository names permissions the pinned document has never heard of, and the mint checks a scope against the surface the caller actually calls \u2014 so the catalogue arrives through <Shell> beside the word that app calls its key, the same way tokenName does, and a wildcard holder is narrowed to the app's own surface rather than to the kit's.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 19900,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "an app that declares its own permissions mints a key that carries them"
-   ],
-   "tests": [
-    {
-     "title": "an app that declares its own permissions mints a key that carries them",
-     "ms": 100,
-     "measured": false
-    }
-   ],
-   "loaded": 141,
-   "coveredProdLines": 1588,
-   "onlyProdLines": null,
-   "testsMs": 100
   },
   {
    "file": "tests/shell-read-scope-shape.test.tsx",
@@ -20934,35 +21604,6 @@
    "runsNowhere": false
   },
   {
-   "file": "tests/shell-sign-out-after-key-death.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 1,
-   "rule": "A key the server refused on the way in is a key this phone no longer has \u2014 not in storage, and not on the connection that carried it either. The sign-out that follows a sign-in the person never made has nothing to stop and nobody to send to their account's device list: it clears what the phone holds and says nothing about a key, because the server had already said it knows no such caller (kit/httpx/authorize.go answers a dead bearer at every door as an anonymous one \u2014 a 403 naming AUTH_ANONYMOUS).",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 17535,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "signing out after the key died at restore asks the server nothing and says nothing about a key"
-   ],
-   "tests": [
-    {
-     "title": "signing out after the key died at restore asks the server nothing and says nothing about a key",
-     "ms": 346,
-     "measured": false
-    }
-   ],
-   "loaded": 146,
-   "coveredProdLines": 1592,
-   "onlyProdLines": null,
-   "testsMs": 346
-  },
-  {
    "file": "tests/shell-sign-out-during-sign-in.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -20999,111 +21640,6 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
-  },
-  {
-   "file": "tests/shell-sign-out-session-unavailable.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 1,
-   "rule": "Revoking a key and closing its minting session are distinct effects. A failed session close cannot make the screen say the confirmed key revoke failed.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 18261,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "a session-close failure does not report a confirmed key revoke as failed"
-   ],
-   "tests": [
-    {
-     "title": "a session-close failure does not report a confirmed key revoke as failed",
-     "ms": 101,
-     "measured": false
-    }
-   ],
-   "loaded": 140,
-   "coveredProdLines": 1620,
-   "onlyProdLines": null,
-   "testsMs": 101
-  },
-  {
-   "file": "tests/shell-sign-out-survivor.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 2,
-   "rule": "Signing out is two acts, and the screen has to tell them apart.  The phone always forgets its key. Whether the server stops it is a second question, and at the commit testdata/openapi.source.json pins it has two answers: auth-token-revoke is httpx.SignedIn(), and kit/httpx/authorize.go refuses a credential that carries its own scopes at every such door, so the key a sign-in minted can be spent by the session that opened it, while a key read back out of secure storage after a restart has no session left and cannot be. The fake below applies those two rules, so the notice is proved against the refusal rather than against a server that agrees to everything.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 22511,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "a phone that signed in here stops its key on the way out and says nothing else",
-    "a phone that restored its key says the server did not stop it"
-   ],
-   "tests": [
-    {
-     "title": "a phone that signed in here stops its key on the way out and says nothing else",
-     "ms": 144,
-     "measured": false
-    },
-    {
-     "title": "a phone that restored its key says the server did not stop it",
-     "ms": 31,
-     "measured": false
-    }
-   ],
-   "loaded": 146,
-   "coveredProdLines": 1747,
-   "onlyProdLines": null,
-   "testsMs": 175
-  },
-  {
-   "file": "tests/shell-sign-out-without-key.test.tsx",
-   "runner": "jest",
-   "layer": "composition",
-   "cases": 3,
-   "rule": "A sign-out has two halves, and the notice about the second one is owed only when there was a key to stop. A phone that holds no key \u2014 a saved record it could not read, cleared from the sign-in form's own \"Clear saved sign-in\" \u2014 sends no revoke and has nothing the server could have refused, so the screen it lands on says nothing about a key: there is no device for the person to go and remove from their account.",
-   "ruleSource": "first comment",
-   "tier": "merge",
-   "reach": "npm test (jest half)",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 31146,
-   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
-   "titles": [
-    "clearing a saved sign-in this phone could not read says nothing about a key",
-    "signing out while a sign-in is still pending says nothing about a key",
-    "signing out of a restored key the server already refused says nothing about a key"
-   ],
-   "tests": [
-    {
-     "title": "clearing a saved sign-in this phone could not read says nothing about a key",
-     "ms": 43,
-     "measured": false
-    },
-    {
-     "title": "signing out while a sign-in is still pending says nothing about a key",
-     "ms": 165,
-     "measured": false
-    },
-    {
-     "title": "signing out of a restored key the server already refused says nothing about a key",
-     "ms": 27,
-     "measured": false
-    }
-   ],
-   "loaded": 145,
-   "coveredProdLines": 1634,
-   "onlyProdLines": null,
-   "testsMs": 235
   },
   {
    "file": "tests/shell.test.tsx",
@@ -21233,6 +21769,41 @@
    "coveredProdLines": 1435,
    "onlyProdLines": null,
    "testsMs": 826
+  },
+  {
+   "file": "tests/ui/prose-code-reads-as-written.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "Code is drawn as the author wrote it: a fenced block and an inline code span are literal in 0069 \u00a71 and in CommonMark, so no character inside them is escaped on the way to the face. A shell line such as `make || echo failed` reads the same on the phone as on the web, and a person who copies it from the screen copies a command that runs.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21325,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a fenced block shows the bars it holds, with no escape added",
+    "an inline code span shows the bars it holds, with no escape added"
+   ],
+   "tests": [
+    {
+     "title": "a fenced block shows the bars it holds, with no escape added",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "an inline code span shows the bars it holds, with no escape added",
+     "ms": 6,
+     "measured": false
+    }
+   ],
+   "loaded": 110,
+   "coveredProdLines": 701,
+   "onlyProdLines": null,
+   "testsMs": 23
   },
   {
    "file": "tests/chart-axis-position.case.mjs",
@@ -22212,23 +22783,6 @@
    "tier": "nightly",
    "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
    "runsNowhere": false
-  },
-  {
-   "file": "e2e/flows/sign-in-factor.yaml",
-   "runner": "maestro",
-   "layer": "journey",
-   "cases": 1,
-   "rule": "The second factor. A person whose account answers with one signs in as that person \u2014 not the password-only account the other journeys reuse \u2014 and answers the code step. The values come from the environment the harness seeds (scripts/e2e/mobile_ci.sh exports them); nothing here names a tenant or a secret, and the code the phone types is the account's own recovery code, which is why this journey is not sign-in.yaml with two more taps.",
-   "ruleSource": "first comment",
-   "tier": "nightly",
-   "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
-   "runsNowhere": false,
-   "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.maestro",
-   "claims": [
-    "app/sign-in.tsx"
-   ],
-   "steps": 1
   },
   {
    "file": "e2e/flows/sign-in.yaml",

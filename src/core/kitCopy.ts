@@ -257,6 +257,34 @@ export const kitEnglish = {
   images: "Images",
   imageUnavailable: "Image unavailable",
   retryImage: "Reload image",
+  // Which language a record's words actually arrived in: `_i18n` names the language of a
+  // translatable field the reader's own had no words for, and the sentence says so rather
+  // than letting source-language prose pass for translated. The two languages this kit
+  // holds words in are the two it can name.
+  shownInLanguage: (language: string) => `Shown in ${language} — not translated yet`,
+  languageEnglish: "English",
+  languagePortuguese: "Portuguese",
+  // What an editing keyboard offers above a rich text body: the marks this phone's reader
+  // draws back, and the picture it may point at. Each label is the control's own name.
+  formatting: "Formatting",
+  bold: "Bold",
+  italic: "Italic",
+  heading: "Heading",
+  bulletList: "List",
+  image: "Image",
+  noFilesToInsert: "This workspace holds no file to put in the body yet.",
+  // Where a picture in a body comes from: the phone's own camera and photo library, or a
+  // file this workspace already holds. A picture taken here is stored as a file first, so
+  // the body points at a file the server has rather than at a path on this phone.
+  imageSource: "Add a picture to the body",
+  takePhoto: "Take photo",
+  photoLibrary: "Photo library",
+  photoNotStored: "This phone could not store the picture, so nothing was put in the body.",
+  // A body written in the reader's own language is a translation of the record, and the
+  // two are written at different addresses: a save that changed both at once would be half
+  // a translation and half an edit, which is why the sheet asks for one at a time.
+  mixedLanguageWrite:
+    "You changed a translated field and one the record holds in its own language. Save one, then the other.",
   table: "Data table",
   // What a plot says before its numbers: the one observation a person came to
   // read. The axis supplies the rest of the sentence.
@@ -516,6 +544,23 @@ export const kitPortuguese: KitWords = {
   images: "Imagens",
   imageUnavailable: "Imagem indisponível",
   retryImage: "Recarregar imagem",
+  shownInLanguage: (language: string) => `Mostrado em ${language} — ainda não traduzido`,
+  languageEnglish: "inglês",
+  languagePortuguese: "português",
+  formatting: "Formatação",
+  bold: "Negrito",
+  italic: "Itálico",
+  heading: "Título",
+  bulletList: "Lista",
+  image: "Imagem",
+  noFilesToInsert: "Este espaço ainda não tem ficheiro para colocar no texto.",
+  imageSource: "Adicionar uma imagem ao texto",
+  takePhoto: "Tirar foto",
+  photoLibrary: "Biblioteca de fotos",
+  photoNotStored:
+    "Este telefone não conseguiu guardar a imagem, por isso nada foi colocado no texto.",
+  mixedLanguageWrite:
+    "Alterou um campo traduzido e um que o registo guarda no seu próprio idioma. Guarde um e depois o outro.",
   table: "Tabela de dados",
   peak: "Pico",
   range: "Intervalo",
