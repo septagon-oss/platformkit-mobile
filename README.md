@@ -1491,6 +1491,34 @@ proves is these journeys; the kernel's `mobile_flow_pass_rate` is read from the
 kernel's own manifest, and stays where that manifest puts it until a kernel-side
 change reads this repository's report.
 
+A journey that fails says what the device saw. The step after the journeys runs
+`scripts/e2e/device_logs.sh`, which asks the emulator — still alive, still this
+job's own serial — for its crash buffer, its `am_crash`/`am_anr`/`am_proc_died`
+events and the app's own React Native lines, each read bounded by the `-t` the
+device itself honours. That is the difference between three owners of a fix: a
+`FATAL EXCEPTION` in the crash buffer is the app's, a JavaScript error that
+resolved no module before the first frame is the app's at another line, and a
+device that answers nothing is the runner's — and a flow that timed out at
+`id: home is visible` names none of them. The script exits 0 whichever read
+failed, because a diagnostics step that failed would report itself instead of the
+journey, which is the harm `continue-on-error` does and which this job refuses.
+What the run keeps is one artifact: `e2e/out/` and `emulator.log`, for the week
+its run is readable. In it are Maestro's per-flow debug bundle — its screenshots
+and view hierarchies, the only capture of the step that failed, since a screencap
+taken now photographs the last flow's screen — the device's log lines, the JUnit
+report, and the served kernel's own log, which `scripts/e2e/mobile_ci.sh` copies
+out of the work directory its trap deletes and which is the only record of a
+server that bound nothing. Maestro's bundle can hold what a journey typed, so
+those files stay in the artifact and never in the job log: every such value is
+generated for one run and dies with its database. Both directories are named once,
+in the job's `env:` as `PK_MOBILE_DEBUG_DIR` and `PK_MOBILE_DIAGNOSTICS`, and
+defaulted to those same strings by the two scripts that also run without a job —
+the convention `PK_MOBILE_REPORT` already holds, and the reason an artifact can
+never publish a directory nothing wrote to. A file missing from the artifact is a
+warning and not a refusal: a run that died before Maestro wrote anything is
+already refused twice over, and a third refusal naming no file would replace the
+cause with a complaint about the evidence.
+
 **Reused** — the four journeys that already existed (`sign-in.yaml` as a
 sub-flow every new one opens with, `gallery.yaml`'s deep-link and scroll
 vocabulary, `record.yaml`'s create-edit-delete spine), the testIDs and header
@@ -1502,17 +1530,26 @@ serve-and-wait fixture, its `.gitea/workflows/mobile.yml` step list, its
 `postgres-init.sql` role, and the tool search and refusal of its
 `e2e/maestro/README.md`; and, for the run that serves the kernel, that job's
 `pkit-ci-android` label and its `actions/setup-go` pin, and the `upstream.commit`
-the two provenance records already held. **Added** — `scripts/e2e/mobile_ci.sh`,
+the two provenance records already held; and, for the run that explains itself,
+that job's own serial from the boot step's output, the `if: always()` report step
+as the neighbour a new step is placed beside, `android.yml`'s
+`actions/upload-artifact` pin at the object this repository already runs, and
+`PK_MOBILE_REPORT`'s name-once-and-default-it convention. **Added** —
+`scripts/e2e/mobile_ci.sh`,
 because nothing in this repository has ever started a server (`android.sh`
 required one somebody else had started) and no existing unit could state the
 claim that a device which signed in can use what the served catalog published;
-and `.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all.
+and `.gitea/workflows/mobile-e2e.yml`, because no workflow named a flow at all;
+and `scripts/e2e/device_logs.sh`, because asking a device for its own log is a
+thing no unit here or in the pinned kernel has ever done.
 **Made reusable** — `scripts/e2e/run.sh`, one last mile (install, reverse, run
-the directory, write the JUnit) that any future runner calls instead of
+the directory, write the JUnit, and now Maestro's debug bundle in a directory the
+job names) that any future runner calls instead of
 repeating, `scripts/e2e/tools.sh`, the tool search and the refusal that says
 where it looked, `scripts/e2e/mobile_ci.sh --kernel-pin`, which answers the one
 question "which kernel commit do these fixtures describe" for anything that has
-to serve that build or fetch it, and `# screen:` as the way a journey says what
+to serve that build or fetch it, one directory (`e2e/out/`) that is what a run's
+evidence means and what the artifact publishes, and `# screen:` as the way a journey says what
 it proves — so
 the next screen added under `app/` arrives with a journey or with a failing
 check.

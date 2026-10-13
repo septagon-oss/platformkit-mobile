@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `b7c8477fc` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `1cc595f05` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 34 | 188 | 47.3 s | 70 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 218 | 1017 | 44.7 s | 1535 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 223 | 1028 | 45.0 s | 1538 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 87 | 260 | 30.1 s | 1873 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 396
+* keep: 401
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 396 — 180 `tests/*.test.ts` (node), 159 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1465; cases in files no runner reaches: 35
-* isolated wall time: contract 70 s, behaviour 1535 s, composition 1873 s, journey 0 s
+* files inventoried: 401 — 185 `tests/*.test.ts` (node), 159 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1476; cases in files no runner reaches: 35
+* isolated wall time: contract 70 s, behaviour 1538 s, composition 1873 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -239,6 +239,9 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/delete-selectors-match-the-dialog-answer.test.ts | node | behaviour | 6 | 440 | 36.9 | 0 | 0 of 6 | — | 0 | keep | Maestro text selectors are regex source, not JavaScript regex literals. Its YamlCommandReader preserves the scalar and StringUtils.toRegexSafe compiles it unch… |
 | tests/derive.test.ts | node | behaviour | 37 | 1286 | 48.6 | 14 | 6 of 37 | — | 0 | keep | (no first comment; first test title) humanize reads like the web shell |
 | tests/detail-visibility-stays-off-list-content.test.ts | node | behaviour | 3 | 1215 | 42.2 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a detail-only field stays off the list's default preview |
+| tests/device-logs-are-printed-and-the-step-still-fails.test.ts | node | behaviour | 2 | 455 | 77 |  | not measured | — | 0 | keep | A journey that fails on a device has to say why. The job's diagnostics step is the one place that asks the device for its own log, and two properties of it are… |
+| tests/device-logs-name-the-device-and-bound-the-buffer.test.ts | node | behaviour | 3 | 496 | 113.1 |  | not measured | — | 0 | keep | Every line the device diagnostics print is a claim about one device, so the script may read no other: each call below the listing names the serial the job boot… |
+| tests/diagnostics-are-kept-and-hide-nothing.test.ts | node | behaviour | 3 | 424 | 4 |  | not measured | — | 0 | keep | What a diagnostics step is worth is decided by where it sits: after the journey that failed, before the emulator is killed, and never in a position from which … |
 | tests/documented-list-query.test.ts | node | behaviour | 2 | 1324 | 51.3 | 0 | 0 of 2 | — | 0 | keep | A list at a documented path goes through its generated operation without losing what the screen asked for: the sort and every repeated filter reach the server … |
 | tests/emulator-boot-ownership.test.ts | node | behaviour | 1 | 325 | 9.1 | 0 | 0 of 1 | — | 0 | keep | An unrelated emulator is already booting (offline), then becomes ready while this job's requested AVD fails to start. These exported functions exercise the rea… |
 | tests/emulator-launch-ownership.test.ts | node | behaviour | 4 | 473 | 84.6 | 0 | 0 of 4 | — | 0 | keep | The device this job runs its journeys on has to be the emulator this job started. `tests/emulator-boot-ownership.test.ts` proves the host is refused while a fo… |
@@ -266,10 +269,12 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/journey-report-path.test.ts | node | behaviour | 1 | 318 | 2.1 | 0 | 0 of 1 | — | 0 | keep | The job's last word on a journey is the JUnit file its report step prints, and that step refuses when the file is absent. That refusal only means "the journeys… |
 | tests/journey-report-refusal.test.ts | node | behaviour | 1 | 320 | 16.4 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) the report step refuses absent or empty evidence and prints a completed report |
 | tests/kernel-checkout-reads-with-the-repository-secret.test.ts | node | behaviour | 1 | 423 | 20.3 |  | not measured | — | 0 | keep | The device journey checks the kernel out of this forge's septagon-oss/platformkit at the commit the fixtures name. On this forge a job token reads the reposito… |
+| tests/kernel-log-outlives-the-run.test.ts | node | behaviour | 1 | 407 | 17.9 |  | not measured | — | 0 | keep | The served kernel's log is the only record of a run whose server answered nothing, and the harness writes it inside a work directory its EXIT trap deletes — so… |
 | tests/kit-quantity-states.test.ts | node | behaviour | 2 | 933 | 120.4 | 0 | 0 of 2 | — | 0 | keep | A stepper that cannot move is a control drawn in the ink of a control that is out of reach. The kit demonstrates a step at its floor on the quantity specimens,… |
 | tests/kit-step-verbs-name-their-destination.test.ts | node | behaviour | 4 | 1204 | 406.6 | 0 | 0 of 4 | — | 0 | keep | A step the person can see the end of moves with a word for the step ("Next", "Back", "Skip": the stepper's family, whose stages are drawn above it). A step tha… |
 | tests/list-selection-withdrawal.test.ts | node | behaviour | 1 | 763 | 17.5 | 0 | 0 of 1 | — | 0 | keep | A bulk action runs against every id it is handed, so selection is derived rather than carried: ids arrive in any order and may repeat, a refresh that drops or … |
 | tests/list-state-summary-precedence.test.ts | node | behaviour | 1 | 948 | 16.2 | 0 | 0 of 1 | — | 0 | keep | A catalog can name any field as its state. Removing that field from the summary leaves two slots for other facts, in declared order, without removing an unrela… |
+| tests/maestro-debug-output-is-kept.test.ts | node | behaviour | 2 | 489 | 100.3 |  | not measured | — | 0 | keep | The device's own log says what happened before a screen existed; what happened at the assertion that failed is a screenshot and a view hierarchy, and the only … |
 | tests/maestro-device-selection.test.ts | node | behaviour | 1 | 294 | 49.9 | 0 | 0 of 1 | — | 0 | keep | Exported shell functions take precedence over the SDK discovery paths. No real adb daemon, device or Maestro process is used by this case. |
 | tests/map-provider-message.test.ts | node | behaviour | 1 | 670 | 4.2 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) map provider failures name their actual state in each language |
 | tests/map-withdrawal.test.ts | node | behaviour | 2 | 673 | 10.9 | 0 | 0 of 2 | — | 0 | keep | Losing the map is not losing the records. A provider failure keeps the authorized rows, the selectedId the caller handed the drawer and the row's own selected … |

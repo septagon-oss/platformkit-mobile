@@ -194,6 +194,17 @@ cleanup() {
     psql_admin -c "DROP DATABASE $database WITH (FORCE);" >/dev/null ||
       echo "mobile_ci: could not remove $database" >&2
   fi
+  # What the served kernel printed is the only record of a run whose server
+  # answered nothing, and $work dies here, so the log moves out to the directory
+  # the job already publishes — beside the report, under the name the artifact
+  # step's own path names. The config, the cookie jars and the recovery codes stay
+  # in $work and are removed by the line below: they hold this run's keys in live
+  # form and outliving the run is precisely what must not happen to them.
+  if [ -f "$work/app.log" ]; then
+    mkdir -p "$(dirname "$PK_MOBILE_REPORT")" 2>/dev/null || true
+    cp "$work/app.log" "$(dirname "$PK_MOBILE_REPORT")/kernel.log" ||
+      echo "mobile_ci: could not keep the served kernel's log beside the report" >&2
+  fi
   rm -rf "$work"
   return "$status"
 }

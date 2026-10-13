@@ -90,6 +90,14 @@ jobs:
       # Where the harness leaves the report so the step below can print it: the
       # work directory is removed whichever step failed, and the report outlives it.
       PK_MOBILE_REPORT: e2e/out/report.xml
+      # Maestro's per-flow debug bundle — the screenshot and the view hierarchy of
+      # the step that failed — and where the device's own log lines are kept. Both
+      # live under e2e/out/, which is the one directory the artifact step below
+      # publishes, so the evidence a run prints and the evidence it keeps cannot
+      # drift to two places; scripts/e2e/run.sh and scripts/e2e/device_logs.sh
+      # default to these same strings, and a test holds the two spellings equal.
+      PK_MOBILE_DEBUG_DIR: e2e/out/debug
+      PK_MOBILE_DIAGNOSTICS: e2e/out/device
       # The served kernel's vocabulary, named once, here: a writable resource and
       # its first writable string field (the one a row is recognised by), and a
       # lifecycle command, its one argument and the summary the API document
@@ -346,6 +354,42 @@ jobs:
         env:
           ANDROID_SERIAL: ${{ steps.emulator.outputs.serial }}
         run: scripts/e2e/mobile_ci.sh "$(ls out/apk/release/*-debug-signed.apk | head -1)"
+
+      - name: What the device saw
+        if: failure()
+        # Before the report and before teardown, while the device is still alive:
+        # after the emulator dies there is nothing left to ask. A flow that dies at
+        # its first `id: … is visible` says only that no screen appeared, and the
+        # job kept nothing that could say otherwise — no crash buffer, no React
+        # Native log, not one line from the device. This step prints those, bounded,
+        # and scripts/e2e/device_logs.sh exits 0 whichever read failed, so the
+        # journey's own status is still the job's verdict. On a green journey the
+        # step does not run: a crash buffer of unrelated noise is not evidence.
+        env:
+          ANDROID_SERIAL: ${{ steps.emulator.outputs.serial }}
+        run: scripts/e2e/device_logs.sh
+
+      - name: Keep what the device saw
+        if: always()
+        # Maestro's debug bundle (its own screenshots and hierarchies, per flow),
+        # the JUnit report, the device log lines above and the served kernel's log,
+        # which scripts/e2e/mobile_ci.sh copies out of its work directory before the
+        # trap deletes it. Retained for a week — the life of the run this answers a
+        # question about; the APK precedent of 14 days is for a binary nobody can
+        # rebuild cheaply. A missing file is a warning and not an error: a journey
+        # that died before Maestro wrote anything is already red twice over, and a
+        # third refusal naming no file would replace the cause with a complaint
+        # about the evidence. What the bundle holds is in the artifact and never in
+        # the job log, because Maestro's own logs can carry what a journey typed —
+        # every such value is generated for one run and dies with its database.
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mobile-e2e-diagnostics-${{ github.sha }}
+          path: |
+            e2e/out/
+            emulator.log
+          retention-days: 7
+          if-no-files-found: warn
 
       - name: The report, in the job's own log
         if: always()
