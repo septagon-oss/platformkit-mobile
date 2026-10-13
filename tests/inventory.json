@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 217,
-   "cases": 1014,
-   "ms": 1512376,
-   "testsMs": 44626.70000000002,
+   "files": 218,
+   "cases": 1017,
+   "ms": 1535432,
+   "testsMs": 44664.70000000002,
    "runners": {
-    "jest": 71,
+    "jest": 72,
     "node": 146
    },
    "unreachable": 0
@@ -7623,6 +7623,47 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/sign-in-form-submits-what-it-shows.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "What the sign-in form shows without being asked for is what it submits: a returning address resent from the refusal's Retry, a server address the caller supplies after the form is drawn, and a value typed and sent in one gesture, which a frame drawn from older state must not overwrite.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 23056,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the refusal's retry resends the returning address the form shows",
+    "a server address supplied after the form is drawn is the address submitted",
+    "a password typed and sent in one gesture keeps the shown address beside it"
+   ],
+   "tests": [
+    {
+     "title": "the refusal's retry resends the returning address the form shows",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "a server address supplied after the form is drawn is the address submitted",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a password typed and sent in one gesture keeps the shown address beside it",
+     "ms": 15,
+     "measured": false
+    }
+   ],
+   "loaded": 109,
+   "coveredProdLines": 628,
+   "onlyProdLines": null,
+   "testsMs": 38
   },
   {
    "file": "tests/ui/slot-withdrawal.test.tsx",
