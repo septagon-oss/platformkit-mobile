@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `44246ebb6` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `f58074e57` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 34 | 188 | 47.3 s | 70 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 226 | 1035 | 49.2 s | 1543 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 227 | 1036 | 49.2 s | 1543 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 87 | 260 | 30.1 s | 1873 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 404
+* keep: 405
 * merge: 0
 * delete: 0
 
@@ -46,8 +46,8 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 404 — 188 `tests/*.test.ts` (node), 159 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1483; cases in files no runner reaches: 35
+* files inventoried: 405 — 189 `tests/*.test.ts` (node), 159 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1484; cases in files no runner reaches: 35
 * isolated wall time: contract 70 s, behaviour 1543 s, composition 1873 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
@@ -240,6 +240,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/derive.test.ts | node | behaviour | 37 | 1286 | 48.6 | 14 | 6 of 37 | — | 0 | keep | (no first comment; first test title) humanize reads like the web shell |
 | tests/detail-visibility-stays-off-list-content.test.ts | node | behaviour | 3 | 1215 | 42.2 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a detail-only field stays off the list's default preview |
 | tests/device-logs-are-printed-and-the-step-still-fails.test.ts | node | behaviour | 2 | 455 | 77 |  | not measured | — | 0 | keep | A journey that fails on a device has to say why. The job's diagnostics step is the one place that asks the device for its own log, and two properties of it are… |
+| tests/device-logs-blame-a-dead-device-even-when-nothing-is-kept.test.ts | node | behaviour | 1 | 305 | 29.4 |  | not measured | — | 0 | keep | A directory that keeps no copy must not make a dead device look healthy: when nothing can be written and the device answers every read with a failure, the job … |
 | tests/device-logs-end-a-read-that-never-answers.test.ts | node | behaviour | 3 | 4385 | 4076.2 |  | not measured | — | 0 | keep | `-t` bounds how far back a device reads and `-d` makes the read finish once it answers; neither is a bound on waiting for a device that never answers. An adb c… |
 | tests/device-logs-list-the-bundle-and-never-print-it.test.ts | node | behaviour | 1 | 353 | 42.1 |  | not measured | — | 0 | keep | Maestro's debug bundle can hold what a journey typed — a password, a factor code — so the job keeps it as an artifact and the job log only says which files it … |
 | tests/device-logs-name-the-device-and-bound-the-buffer.test.ts | node | behaviour | 3 | 496 | 113.1 |  | not measured | — | 0 | keep | Every line the device diagnostics print is a claim about one device, so the script may read no other: each call below the listing names the serial the job boot… |

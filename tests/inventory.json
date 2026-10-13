@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 226,
-   "cases": 1035,
-   "ms": 1542782,
-   "testsMs": 49166.60000000001,
+   "files": 227,
+   "cases": 1036,
+   "ms": 1543087,
+   "testsMs": 49196.000000000015,
    "runners": {
     "jest": 72,
-    "node": 154
+    "node": 155
    },
    "unreachable": 0
   },
@@ -11572,6 +11572,35 @@
    "coveredProdLines": 0,
    "onlyProdLines": null,
    "testsMs": 77
+  },
+  {
+   "file": "tests/device-logs-blame-a-dead-device-even-when-nothing-is-kept.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A directory that keeps no copy must not make a dead device look healthy: when nothing can be written and the device answers every read with a failure, the job log still names each read that reached no answer, with adb's own status, beside the one sentence that says no copy is kept. The lost copy and the dead transport are two facts, and neither may stand in for the other.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 305,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a dead device is named per read even when the copy cannot be kept"
+   ],
+   "tests": [
+    {
+     "title": "a dead device is named per read even when the copy cannot be kept",
+     "ms": 29.390498,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 29.4
   },
   {
    "file": "tests/device-logs-end-a-read-that-never-answers.test.ts",
