@@ -70,6 +70,7 @@ apk="${1:?the verification APK to install (make apk ABIS=x86_64 PROFILE=ci && ma
 TITLE="${TITLE:-Journey $(date +%H%M%S)}"
 MAESTRO="${MAESTRO:-maestro}"
 report="${PK_MOBILE_REPORT:-e2e/out/report.xml}"
+debug="${PK_MOBILE_DEBUG_DIR:-e2e/out/debug}"
 
 pk_tools run.sh adb "$MAESTRO" || exit 1
 [ -f "$apk" ] || {
@@ -124,7 +125,17 @@ if [ -n "$port" ]; then "${adb_cmd[@]}" reverse "tcp:$port" "tcp:$port"; fi
 echo "run.sh: installed $apk, running e2e/flows against $SERVER"
 
 mkdir -p "$(dirname "$report")"
+# One run's bundle, never two runs': the job publishes this directory as one
+# artifact, so it is emptied here rather than keeping whatever an earlier journey
+# left in the same workspace. --flatten-debug-output writes every flow's files
+# into this path directly — no subfolders, no timestamp — which makes the
+# artifact's path a constant, and takes Maestro's own cleanup of the parent
+# directory out of the picture: without it, a long-lived runner would have Maestro
+# deleting the report directory beside this one.
+rm -rf "$debug"
+mkdir -p "$debug"
 "$MAESTRO" test e2e/flows "${maestro_device[@]}" \
+  --debug-output "$debug" --flatten-debug-output \
   -e SERVER="$SERVER" -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" \
   -e TOTP_EMAIL="$TOTP_EMAIL" -e TOTP_PASSWORD="$TOTP_PASSWORD" -e FACTOR_CODE="$FACTOR_CODE" \
   -e MODULE="$MODULE" -e ENTITY="$ENTITY" -e KNOWN="$KNOWN" \

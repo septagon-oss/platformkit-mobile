@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 218,
-   "cases": 1017,
-   "ms": 1535432,
-   "testsMs": 44664.70000000002,
+   "files": 227,
+   "cases": 1036,
+   "ms": 1543087,
+   "testsMs": 49196.000000000015,
    "runners": {
     "jest": 72,
-    "node": 146
+    "node": 155
    },
    "unreachable": 0
   },
@@ -11539,6 +11539,263 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/device-logs-are-printed-and-the-step-still-fails.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A journey that fails on a device has to say why. The job's diagnostics step is the one place that asks the device for its own log, and two properties of it are decided without a device: that what the device answers reaches the job log and the run's kept copy, and that whatever the device does, the step ends green \u2014 a diagnostics step that failed would report its own failure instead of the journey's, which is the same harm `continue-on-error` does from the other side. The step body is run as the runner runs it (`bash -e`), and adb is a shell function, so no adb server, emulator or device is involved.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 455,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a failed journey prints the crash, the death and the app's own error, and the step still ends green",
+    "a device that answers nothing is said, and the step ends green anyway"
+   ],
+   "tests": [
+    {
+     "title": "a failed journey prints the crash, the death and the app's own error, and the step still ends green",
+     "ms": 36.61928,
+     "measured": false
+    },
+    {
+     "title": "a device that answers nothing is said, and the step ends green anyway",
+     "ms": 40.389245,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 77
+  },
+  {
+   "file": "tests/device-logs-blame-a-dead-device-even-when-nothing-is-kept.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A directory that keeps no copy must not make a dead device look healthy: when nothing can be written and the device answers every read with a failure, the job log still names each read that reached no answer, with adb's own status, beside the one sentence that says no copy is kept. The lost copy and the dead transport are two facts, and neither may stand in for the other.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 305,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a dead device is named per read even when the copy cannot be kept"
+   ],
+   "tests": [
+    {
+     "title": "a dead device is named per read even when the copy cannot be kept",
+     "ms": 29.390498,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 29.4
+  },
+  {
+   "file": "tests/device-logs-end-a-read-that-never-answers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "`-t` bounds how far back a device reads and `-d` makes the read finish once it answers; neither is a bound on waiting for a device that never answers. An adb call against a wedged adbd simply does not return, and a diagnostics step that waits for one waits until the job's own ceiling \u2014 past the artifact step that keeps the evidence and past the teardown that frees the device for the next run. So every read this script sends carries a deadline of its own, and a read that meets it is named as one.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4385,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a device that never answers is ended read by read, and the listing is still reached",
+    "a read that answers inside its deadline is printed and never ended",
+    "the deadline a run defaults to leaves the artifact and the teardown their turn"
+   ],
+   "tests": [
+    {
+     "title": "a device that never answers is ended read by read, and the listing is still reached",
+     "ms": 4052.262126,
+     "measured": false
+    },
+    {
+     "title": "a read that answers inside its deadline is printed and never ended",
+     "ms": 23.388604,
+     "measured": false
+    },
+    {
+     "title": "the deadline a run defaults to leaves the artifact and the teardown their turn",
+     "ms": 0.590813,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 4076.2
+  },
+  {
+   "file": "tests/device-logs-list-the-bundle-and-never-print-it.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "Maestro's debug bundle can hold what a journey typed \u2014 a password, a factor code \u2014 so the job keeps it as an artifact and the job log only says which files it holds and how large each is. The diagnostics script is run as the step runs it, with adb a shell function, and a bundle file carrying a value that must not reach the job log.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 353,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the job log names each file of Maestro's bundle and its size, and never what it holds"
+   ],
+   "tests": [
+    {
+     "title": "the job log names each file of Maestro's bundle and its size, and never what it holds",
+     "ms": 42.149927,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 42.1
+  },
+  {
+   "file": "tests/device-logs-name-the-device-and-bound-the-buffer.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "Every line the device diagnostics print is a claim about one device, so the script may read no other: each call below the listing names the serial the job booted (an unqualified adb call is answered by whichever device the host holds, which in a journey queue is another run's crash buffer), and every logcat is bounded by the `-t` the device itself honours, because \"bounded\" has to be a property of the command sent and not a hope about what comes back.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 496,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "every read names the device the job booted and bounds the buffer on the device",
+    "two devices and no serial named is refused rather than guessed at",
+    "a buffer that will not read is named and the run keeps going to the next one"
+   ],
+   "tests": [
+    {
+     "title": "every read names the device the job booted and bounds the buffer on the device",
+     "ms": 46.324978,
+     "measured": false
+    },
+    {
+     "title": "two devices and no serial named is refused rather than guessed at",
+     "ms": 21.009104,
+     "measured": false
+    },
+    {
+     "title": "a buffer that will not read is named and the run keeps going to the next one",
+     "ms": 45.794397,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 113.1
+  },
+  {
+   "file": "tests/device-logs-print-when-nothing-can-be-kept.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The run's kept copy of the diagnostics lives in a directory the script writes to, and writing to it must never be what makes a read happen: a full disk or a workspace another job left unwritable would otherwise end every read before it started and say \"nothing readable in it from this device\" about a device that was never asked. The copy is a copy. What the job log prints is decided by the device, and what the filesystem answers is said once, as a lost copy.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 341,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a copy that fails halfway through is the copy's story and not the device's",
+    "a directory that cannot be written costs the kept copy and not the device's lines",
+    "a directory that can be written keeps what the job log printed, one file per section"
+   ],
+   "tests": [
+    {
+     "title": "a copy that fails halfway through is the copy's story and not the device's",
+     "ms": 26.372399,
+     "measured": false
+    },
+    {
+     "title": "a directory that cannot be written costs the kept copy and not the device's lines",
+     "ms": 23.335821,
+     "measured": false
+    },
+    {
+     "title": "a directory that can be written keeps what the job log printed, one file per section",
+     "ms": 21.552442,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 71.3
+  },
+  {
+   "file": "tests/diagnostics-are-kept-and-hide-nothing.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "What a diagnostics step is worth is decided by where it sits: after the journey that failed, before the emulator is killed, and never in a position from which it could overwrite that journey's verdict. None of that is visible in what a script prints, so the job's own file is the fixture here \u2014 the step order, the device it names, the directories it names once and the pin its artifact uses are read out of the YAML the runner executes. `continue-on-error` is refused of this file by tests/flow-coverage.test.ts, which owns that rule.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 424,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the device is asked while it is alive, and the job's verdict stays the journey's",
+    "the device's own reads are one script, and the directories it writes are the ones the job publishes",
+    "the artifact step uses the pin this repository already runs"
+   ],
+   "tests": [
+    {
+     "title": "the device is asked while it is alive, and the job's verdict stays the journey's",
+     "ms": 2.445945,
+     "measured": false
+    },
+    {
+     "title": "the device's own reads are one script, and the directories it writes are the ones the job publishes",
+     "ms": 1.155198,
+     "measured": false
+    },
+    {
+     "title": "the artifact step uses the pin this repository already runs",
+     "ms": 0.430898,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 4
+  },
+  {
    "file": "tests/documented-list-query.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -13996,6 +14253,35 @@
    "testsMs": 20.3
   },
   {
+   "file": "tests/kernel-log-outlives-the-run.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The served kernel's log is the only record of a run whose server answered nothing, and the harness writes it inside a work directory its EXIT trap deletes \u2014 so the one process that could explain a journey is gone before the job's next step can say anything about it. The trap keeps that log where the report already lives, for whichever exit status, and keeps nothing else from that directory: the config, the cookie jars and the recovery codes hold this run's keys in live form. The trap's own body is what runs here, extracted from the script, with a planted work directory: psql is stubbed and no server, device or database is started.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 407,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the served kernel's log outlives the run it served, and its keys do not"
+   ],
+   "tests": [
+    {
+     "title": "the served kernel's log outlives the run it served, and its keys do not",
+     "ms": 17.886798,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 17.9
+  },
+  {
    "file": "tests/kit-quantity-states.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -14186,6 +14472,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/maestro-debug-output-is-kept.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The device's own log says what happened before a screen existed; what happened at the assertion that failed is a screenshot and a view hierarchy, and the only honest capture of that moment is Maestro's, taken per step. The CLI keeps them under a directory it is told, so run.sh names that directory, cleans it of the previous run, and the job publishes it. Where it is named and where it is defaulted are two spellings of one value, and the artifact step reads the first.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 489,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "Maestro is told where its debug bundle goes, and starts with that directory its own",
+    "the debug directory the job names is the one run.sh defaults to"
+   ],
+   "tests": [
+    {
+     "title": "Maestro is told where its debug bundle goes, and starts with that directory its own",
+     "ms": 99.384628,
+     "measured": false
+    },
+    {
+     "title": "the debug directory the job names is the one run.sh defaults to",
+     "ms": 0.954897,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 100.3
   },
   {
    "file": "tests/maestro-device-selection.test.ts",
