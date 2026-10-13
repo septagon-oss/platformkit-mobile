@@ -5,7 +5,7 @@
 // the same frame: a saved sign-in being restored, and one that could not be
 // opened, so a product need not draw those screens itself.
 import type { Feedback } from "../../core/derive";
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../atoms/Button";
@@ -29,6 +29,19 @@ export interface Props {
   readonly error: string;
   readonly onSubmit: (baseURL: string, email: string, password: string) => void;
   readonly onClear: () => void;
+  /**
+   * step is where the person is: their password, or the code the server asked
+   * about. It is a step of this one form, not a state of the session — the
+   * window a challenge opens is the server's five minutes, and the phone keeps
+   * no copy of it.
+   */
+  readonly step?: "credentials" | "code";
+  /** code is what is typed now, held by the caller so a refusal can empty the field. */
+  readonly code?: string;
+  readonly onCodeChange?: (code: string) => void;
+  readonly onSubmitCode?: (code: string) => void;
+  /** onEditCredentials goes back to the password, the only way to open another challenge. */
+  readonly onEditCredentials?: () => void;
   /** title is the word over the form: the product's name, or "Sign in" when it has none to say. */
   readonly title?: string;
   /** booting says a saved sign-in is being restored: the form waits behind a spinner rather than asking again. */
@@ -58,34 +71,60 @@ export function SignInForm({
   expired = "",
   initialEmail = "",
   onRetry,
+  step = "credentials",
+  code = "",
+  onCodeChange,
+  onSubmitCode,
+  onEditCredentials,
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const insets = useSafeAreaInsets();
+  const kit = feedback.copy.kit;
   const [enteredURL, setURL] = useState<string>();
   const url = enteredURL ?? baseURL;
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
+  /**
+   * typed is what each field holds the moment a control is pressed. A pressed
+   * control is handed the callback from the render the person saw, so a value
+   * read from that closure is the value from before they typed: each field's own
+   * handler writes this object and each control reads it back, so a person who
+   * types and taps in one gesture submits what they typed. The frame a form draws
+   * writes this object too, so the values it shows without being asked for — a
+   * returning person's address, the server's own address — and a code the caller
+   * takes back (a refusal empties the field) are held the same way as a value
+   * that was typed: what a control sends is what the person saw. ActionControl
+   * keeps its current model the same way.
+   */
+  const typed = useRef({ url: "", email: "", password: "", code: "" });
+  useLayoutEffect(() => {
+    typed.current.url = url;
+    typed.current.email = email;
+    typed.current.password = password;
+    typed.current.code = code;
+  }, [url, email, password, code]);
   const submit = () => {
-    if (!busy) onSubmit(url.trim(), email.trim(), password);
+    if (!busy)
+      onSubmit(typed.current.url.trim(), typed.current.email.trim(), typed.current.password);
   };
-  const head = (text: string) => (
+  const head = (heading: string, text: string) => (
     <View style={[s.head, { paddingTop: insets.top + t.space.xl }]}>
-      <Text role="display">{title}</Text>
+      <Text role="display">{heading}</Text>
       <Text tone="muted">{text}</Text>
     </View>
   );
   if (booting)
     return (
       <Screen testID="sign-in-booting">
-        {head("Restoring your saved sign-in…")}
+        {head(title, "Restoring your saved sign-in…")}
         <Spinner label={feedback.loadingLabel} motion={feedback.motion} size="large" />
       </Screen>
     );
   if (failed)
     return (
       <Screen testID="sign-in-failed">
-        {head("Your saved sign-in could not be opened.")}
+        {head(title, "Your saved sign-in could not be opened.")}
         <Notice
           announcement="urgent"
           text={failed}
@@ -100,14 +139,71 @@ export function SignInForm({
         />
       </Screen>
     );
+  if (step === "code") {
+    const sendCode = () => {
+      if (!busy) onSubmitCode?.(typed.current.code);
+    };
+    return (
+      <Screen form testID="challenge">
+        {head(kit.confirmItIsYou, kit.codePrompt)}
+        {error ? (
+          <Notice
+            announcement="urgent"
+            text={error}
+            // Built here rather than by retry(feedback, sendCode): the control
+            // that re-sends must read the field as it is pressed, and a call
+            // during render may not hand a ref-reading callback to a helper.
+            action={{ label: feedback.retryLabel, onPress: () => sendCode() }}
+            testID="challenge-error"
+          />
+        ) : null}
+        <Section>
+          <FormField label={kit.code}>
+            <TextField
+              // A recovery code is not six digits, so the field stays text: a
+              // number pad would close the door a person whose authenticator is
+              // dead comes through. The only rules are the document's own
+              // maxLength and the server's trim.
+              kind="text"
+              value={code}
+              onChangeText={(v) => {
+                typed.current.code = v;
+                onCodeChange?.(v);
+              }}
+              maxLength={40}
+              autoComplete="one-time-code"
+              textContentType="oneTimeCode"
+              accessibilityLabel={kit.code}
+              disabled={busy}
+              onSubmitEditing={sendCode}
+              returnKeyType="go"
+              testID="code"
+            />
+          </FormField>
+        </Section>
+        <Button
+          label={busy ? kit.checking : kit.checkCode}
+          onPress={sendCode}
+          busy={busy}
+          testID="verify"
+        />
+        <Button
+          label={kit.backToPassword}
+          tone="secondary"
+          onPress={() => onEditCredentials?.()}
+          testID="back-to-password"
+        />
+      </Screen>
+    );
+  }
   return (
     <Screen form testID="sign-in">
-      {head(feedback.copy.kit.signInIntro)}
+      {head(title, feedback.copy.kit.signInIntro)}
       {error ? (
         <Notice
           announcement="urgent"
           text={error}
-          action={retry(feedback, submit)}
+          action={{ label: feedback.retryLabel, onPress: () => submit() }}
           testID="sign-in-error"
         />
       ) : null}
@@ -127,14 +223,20 @@ export function SignInForm({
         <ServerField
           caption={feedback.copy.kit.workspaceAddress}
           value={url}
-          onChange={setURL}
+          onChange={(v) => {
+            typed.current.url = v;
+            setURL(v);
+          }}
           disabled={busy}
         />
         <FormField label="Email">
           <TextField
             kind="email"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(v) => {
+              typed.current.email = v;
+              setEmail(v);
+            }}
             placeholder="you@example.com"
             autoComplete="username"
             textContentType="username"
@@ -148,7 +250,10 @@ export function SignInForm({
           <TextField
             kind="password"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(v) => {
+              typed.current.password = v;
+              setPassword(v);
+            }}
             autoComplete="current-password"
             textContentType="password"
             accessibilityLabel="Password"

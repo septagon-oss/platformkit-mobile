@@ -10,6 +10,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createApi } from "../src/effects/api";
 
+/** key is the credential this connection signs with: a phone presents a key, never a session. */
+const key = { token: "pk_live_tenant_one", id: "00000000-0000-4000-8000-000000000001" };
+
 const files = {
   module: "file",
   entity: "files",
@@ -40,7 +43,7 @@ function collecting() {
       { status: 201, headers: { "Content-Type": "application/json" } },
     );
   }) as unknown as typeof fetch;
-  return { api: createApi("https://tenant-one.example.test", fetchImpl, "pk=tenant-one"), calls };
+  return { api: createApi("https://tenant-one.example.test", fetchImpl, key), calls };
 }
 
 /** aPicture is one file described the way a phone describes the bytes it just wrote. */
@@ -68,7 +71,10 @@ test("the form an upload was handed is the form the file module is asked to stor
   // The boundary between parts belongs to whatever writes the form out, so a caller that named one
   // here would name a boundary the transport has not chosen.
   assert.equal(new Headers(calls[0]!.init.headers).get("Content-Type"), null);
-  assert.equal(new Headers(calls[0]!.init.headers).get("Cookie"), "pk=tenant-one");
+  assert.equal(
+    new Headers(calls[0]!.init.headers).get("Authorization"),
+    "Bearer pk_live_tenant_one",
+  );
   assert.equal(stored.id, "55555555-5555-4555-8555-555555555555");
 });
 

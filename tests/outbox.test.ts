@@ -15,7 +15,8 @@ const SERVER = "https://acme.test";
 const SCOPE: Scope = { server: SERVER, userId: "ada" };
 const OTHER: Scope = { server: SERVER, userId: "ada@other.test" };
 const PATH = "/api/v1/note/notes";
-const COOKIE = "pk_session=shown-on-the-wire-only";
+/** KEY is the credential this connection holds: what a held write leaves with. */
+const KEY = { token: "pk_live_shown-on-the-wire-only", id: "00000000-0000-4000-8000-000000000021" };
 const AT = "2026-10-06T10:00:00.000Z";
 
 interface Reply {
@@ -32,7 +33,7 @@ interface Sent {
   readonly path: string;
   readonly key: string | undefined;
   readonly body: string | undefined;
-  readonly cookie: string | undefined;
+  readonly credential: string | undefined;
 }
 
 /** wire answers each request from replies, in order, repeating the last one, and records what left the phone. */
@@ -47,7 +48,7 @@ function wire(replies: readonly Reply[]) {
       path: `${url.pathname}${url.search}`,
       key: headers["Idempotency-Key"],
       body: init?.body === undefined ? undefined : String(init.body),
-      cookie: headers.Cookie,
+      credential: headers.Authorization,
     });
     const reply = replies[Math.min(index, replies.length - 1)] ?? {};
     index += 1;
@@ -72,7 +73,7 @@ function kit(replies: readonly Reply[], reach?: boolean) {
     store: store.store,
     // The deadline is short so "it went and no answer came back" is a case a
     // suite can run; on a device it is src/effects/api.ts's TIMEOUT.
-    api: createApi(SERVER, network.fetchImpl, COOKIE, 40),
+    api: createApi(SERVER, network.fetchImpl, KEY, 40),
     clock: clock(),
     mint: mint(),
     scope: () => SCOPE,
@@ -497,11 +498,11 @@ test("nothing that signs in is written to the device store", async () => {
   });
   await outbox.drain();
   assert.ok(
-    network.sent.some((r) => r.cookie === COOKIE),
-    "the wire carries the session",
+    network.sent.some((r) => r.credential === `Bearer ${KEY.token}`),
+    "the wire carries the key this connection holds",
   );
-  assert.equal(JSON.stringify(store.rows).includes(COOKIE), false);
-  assert.equal(JSON.stringify(store.rows).toLowerCase().includes("cookie"), false);
+  assert.equal(JSON.stringify(store.rows).includes(KEY.token), false);
+  assert.equal(JSON.stringify(store.rows).toLowerCase().includes("pk_live"), false);
 });
 
 test("outcomeOf names the server being unhappy, the network, and a fate nobody knows", () => {

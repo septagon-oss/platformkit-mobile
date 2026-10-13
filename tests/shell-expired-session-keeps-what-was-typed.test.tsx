@@ -3,7 +3,7 @@
 // that was open comes back with its values, and the sheet is only finished with
 // when the write lands. The second case is the "asked once" half: two reads of
 // one dead session move the shell once, not twice.
-import { loginResponse } from "./fakes/wire";
+import { loginResponse, issuedToken, issuedTokenResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -25,17 +25,23 @@ jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactN
 
 const KEY = "platformkit.session";
 const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
-const saved = { version: 1, baseURL: "https://acme.test", cookie: "pk=stale" };
+const saved = {
+  version: 2,
+  baseURL: "https://acme.test",
+  token: issuedToken.token,
+  tokenId: issuedToken.id,
+};
 const person = {
   userId: "00000001-1111-4111-8111-111111111111",
   email: "a@acme.test",
   roles: [],
-  permissions: [],
+  permissions: ["task:read"],
 };
 const routes = {
   me: "GET /api/v1/auth/me",
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
+  tokens: "POST /api/v1/auth/tokens",
   list: "GET /api/v1/note/notes",
   row: "GET /api/v1/note/notes/1",
   save: "PATCH /api/v1/note/notes/1",
@@ -95,6 +101,7 @@ describe("an expired session with a sheet open", () => {
       [routes.resources]: () => json(catalogDoc),
       [routes.row]: () => json(row),
       [routes.login]: () => loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } }),
+      [routes.tokens]: () => issuedTokenResponse(),
       [routes.save]: () => (refusing ? unauthorized() : json({ ...row, title: "Buy twice" })),
     });
     const tree = (visit: number) => (

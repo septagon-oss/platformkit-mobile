@@ -35,7 +35,12 @@ function savedNote(value: unknown): {
 }
 
 test("a custom write with a lost response is recovered through its persisted read without replay", async (t) => {
-  const received: { method: string; path: string; cookie: string | undefined; body: string }[] = [];
+  const received: {
+    method: string;
+    path: string;
+    authorization: string | undefined;
+    body: string;
+  }[] = [];
   const saved = { note: { id: "7", status: "published" }, revisions: [{ number: 1 }] };
   let committed = false;
   const server = createServer((req, res) => {
@@ -45,7 +50,12 @@ test("a custom write with a lost response is recovered through its persisted rea
       body += chunk;
     });
     req.on("end", () => {
-      received.push({ method: req.method!, path: req.url!, cookie: req.headers.cookie, body });
+      received.push({
+        method: req.method!,
+        path: req.url!,
+        authorization: req.headers.authorization,
+        body,
+      });
       if (req.method === "POST") {
         committed = true;
         res.destroy();
@@ -63,7 +73,10 @@ test("a custom write with a lost response is recovered through its persisted rea
   await once(server, "listening");
   const address = server.address();
   assert.ok(address && typeof address !== "string");
-  const api = createApi(`http://127.0.0.1:${address.port}`, fetch, "platformkit_session=fixture");
+  const api = createApi(`http://127.0.0.1:${address.port}`, fetch, {
+    token: "pk_live_fixture",
+    id: "00000000-0000-4000-8000-000000000004",
+  });
   await assert.rejects(
     api.request("POST", "/api/v1/note/me/notes/7/publish", savedNote, { reason: "Ready" }),
   );
@@ -76,13 +89,13 @@ test("a custom write with a lost response is recovered through its persisted rea
     {
       method: "POST",
       path: "/api/v1/note/me/notes/7/publish",
-      cookie: "platformkit_session=fixture",
+      authorization: "Bearer pk_live_fixture",
       body: '{"reason":"Ready"}',
     },
     {
       method: "GET",
       path: "/api/v1/note/me/notes/7?revision=latest",
-      cookie: "platformkit_session=fixture",
+      authorization: "Bearer pk_live_fixture",
       body: "",
     },
   ]);
@@ -127,7 +140,7 @@ test("custom paths cannot replace the server or escape the API path", async () =
       called = true;
       return new Response("{}");
     }) as typeof fetch,
-    "platformkit_session=fixture",
+    { token: "pk_live_fixture", id: "00000000-0000-4000-8000-000000000004" },
   );
   for (const path of [
     "https://elsewhere.test/api/v1/notes",
@@ -222,18 +235,18 @@ test("custom requests retain the deadline and do not retry failures", async () =
   assert.equal(calls, 1);
 });
 
-test("a late custom response cannot restore a signed-out session", async () => {
+test("a late custom response cannot restore a credential the phone forgot", async () => {
   const response = Promise.withResolvers<Response>();
   const api = createApi(
     "https://example.test",
     (async (url) =>
-      String(url).endsWith("/logout")
-        ? new Response(JSON.stringify({ signedOut: true }), {
+      String(url).endsWith("/revoke")
+        ? new Response(JSON.stringify({ done: true }), {
             status: 200,
             headers: { "Content-Type": "application/json" },
           })
         : response.promise) as typeof fetch,
-    "platformkit_session=old",
+    { token: "pk_live_old", id: "00000000-0000-4000-8000-000000000009" },
   );
   const pending = api.request("GET", "/api/v1/note/me/notes", notes);
   await api.logout();
@@ -241,7 +254,7 @@ test("a late custom response cannot restore a signed-out session", async () => {
     new Response("[]", { headers: { "Set-Cookie": "platformkit_session=late; HttpOnly" } }),
   );
   assert.deepEqual(await pending, []);
-  assert.equal(api.cookie(), undefined);
+  assert.equal(api.bearer(), undefined);
 });
 
 test("a response refused by its validator names the endpoint without exposing values", async () => {

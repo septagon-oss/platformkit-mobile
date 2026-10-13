@@ -10,6 +10,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createApi } from "../src/effects/api";
 
+/** key is the credential this connection signs with: a phone presents a key, never a session. */
+const key = { token: "pk_live_tenant_one", id: "00000000-0000-4000-8000-000000000001" };
+
 const note = {
   module: "note",
   entity: "note",
@@ -28,7 +31,7 @@ function answering(headers: Record<string, string>) {
       status: 200,
       headers: { "Content-Type": "application/json", ...headers },
     })) as unknown as typeof fetch;
-  return createApi("https://tenant-one.example.test", fetchImpl, "pk=tenant-one");
+  return createApi("https://tenant-one.example.test", fetchImpl, key);
 }
 
 test("a row read from an answer that names its language keeps the tag that answer printed", async () => {

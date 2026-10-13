@@ -1,10 +1,11 @@
-import { loginResponse, logoutResponse } from "./fakes/wire";
+import { issuedTokenResponse, loginResponse, revokeResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
+import type { SignInStep } from "../src/effects/api";
 
 // The secure store, in memory: what a saved sign-in is restored from and
 // written to. The factory only closes over it; nothing reads it until a test
@@ -19,13 +20,25 @@ jest.mock("expo-secure-store", () => ({
 
 const KEY = "platformkit.session";
 const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
-const saved = { version: 1, baseURL: "https://saved.test", cookie: "pk=saved" };
-const identity = { userId: "00000001-1111-4111-8111-111111111111", email: "a@saved.test" };
+const saved = {
+  version: 2,
+  baseURL: "https://saved.test",
+  token: "pk_live_saved",
+  tokenId: "00000000-0000-4000-8000-000000000009",
+};
+const identity = {
+  userId: "00000001-1111-4111-8111-111111111111",
+  email: "a@saved.test",
+  permissions: [] as string[],
+};
 const routes = {
   me: "GET /api/v1/auth/me",
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
-  logout: "POST /api/v1/auth/logout",
+  tokens: "POST /api/v1/auth/tokens",
+  // The revoke addresses the id the saved record names, which is not the id a
+  // mint in this file answers with.
+  logout: `POST /api/v1/auth/tokens/${saved.tokenId}/revoke`,
 };
 
 type Route = () => Response | Promise<Response>;
@@ -85,7 +98,7 @@ afterEach(() => {
 });
 
 describe("Shell", () => {
-  test("a saved sign-in is restored: its server, its cookie, then the catalog and who it belongs to", async () => {
+  test("a saved sign-in is restored: its server, its key, then the catalog and who it belongs to", async () => {
     mockStore.set(KEY, JSON.stringify(saved));
     const calls = server({
       [routes.me]: () => json({ ...identity, roles: [], permissions: [] }),
@@ -103,7 +116,12 @@ describe("Shell", () => {
     expect(latest?.entry("note", "note")?.path).toBe("/api/v1/note/notes");
     expect(latest?.entry("note", "invoice")).toBeUndefined();
     expect(calls.map((c) => c.key).sort()).toEqual([routes.resources, routes.me]);
-    for (const call of calls) expect(call.headers.Cookie).toBe("pk=saved");
+    // Every request after the restore presents the saved key and no cookie: the
+    // record holds no cookie to present, and nothing read it if it did.
+    for (const call of calls) {
+      expect(call.headers.Authorization).toBe("Bearer pk_live_saved");
+      expect(call.headers.Cookie).toBeUndefined();
+    }
   });
 
   test("no saved sign-in is anonymous at the configured server; an unreadable one says so and asks nothing of the network", async () => {
@@ -126,7 +144,7 @@ describe("Shell", () => {
     const calls = server({
       [routes.me]: () => json({ ...identity, roles: [], permissions: [] }),
       [routes.resources]: () => gate.promise,
-      [routes.logout]: () => logoutResponse(),
+      [routes.logout]: () => revokeResponse(),
     });
     await mount();
     await phase("loading");
@@ -142,42 +160,61 @@ describe("Shell", () => {
     expect(screen.getByTestId("phase")).toHaveTextContent(/^anonymous$/);
     expect(latest?.state.catalog).toBeUndefined();
     expect(latest?.identity).toBeUndefined();
-    expect(latest?.api.cookie()).toBeUndefined();
-    // The revocation went out with the old cookie; the store keeps the server and nothing else.
-    expect(calls.find((c) => c.key === routes.logout)?.headers.Cookie).toBe("pk=saved");
-    expect(JSON.parse(mockStore.get(KEY)!)).toEqual({ version: 1, baseURL: "https://saved.test" });
+    expect(latest?.api.bearer()?.token).toBeUndefined();
+    // The revocation went out with the key it spends; the store keeps the server
+    // and nothing else.
+    expect(calls.find((c) => c.key === routes.logout)?.headers.Authorization).toBe(
+      "Bearer pk_live_saved",
+    );
+    expect(JSON.parse(mockStore.get(KEY)!)).toEqual({ version: 2, baseURL: "https://saved.test" });
   });
 
-  test("signing in keeps the cookie the server set, saves it with its server and loads the catalog", async () => {
+  test("signing in mints a key, saves it with its server and loads the catalog", async () => {
     const calls = server({
       [routes.login]: () =>
         loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/; HttpOnly" } }),
-      [routes.me]: () => json({ ...identity, roles: [], permissions: [] }),
+      [routes.tokens]: () => issuedTokenResponse(),
+      [routes.me]: () => json({ ...identity, roles: [] }),
       [routes.resources]: () => json(catalogDoc),
     });
     await mount();
     await phase("anonymous");
+    let step: SignInStep | undefined;
     await act(async () => {
-      await latest!.signIn("https://acme.test", "a@acme.test", "pw");
+      step = await latest!.signIn("https://acme.test", "a@acme.test", "pw");
     });
+    expect(step).toEqual({ kind: "signed-in" });
     await phase("ready");
     expect(latest?.baseURL).toBe("https://acme.test");
     expect(calls.find((c) => c.key === routes.login)?.body).toEqual({
       email: "a@acme.test",
       password: "pw",
     });
-    expect(calls.find((c) => c.key === routes.resources)?.headers.Cookie).toBe("pk=fresh");
+    // The mint is the one request that presents the session the login set; the
+    // catalog read after it presents the key alone.
+    expect(calls.find((c) => c.key === routes.tokens)?.headers.Cookie).toBe("pk=fresh");
+    expect(calls.find((c) => c.key === routes.resources)?.headers.Authorization).toBe(
+      "Bearer pk_live_this_phone",
+    );
+    expect(calls.find((c) => c.key === routes.resources)?.headers.Cookie).toBeUndefined();
     expect(JSON.parse(mockStore.get(KEY)!)).toEqual({
-      version: 1,
+      version: 2,
       baseURL: "https://acme.test",
-      cookie: "pk=fresh",
+      token: "pk_live_this_phone",
+      tokenId: "22222222-2222-4222-8222-222222222222",
     });
   });
 
-  test("a server that sets no session is refused, and nothing is saved or loaded", async () => {
+  test("a server that mints no key is refused, and nothing is saved or loaded", async () => {
     const calls = server({
-      [routes.login]: () => loginResponse(),
-      [routes.logout]: () => logoutResponse(),
+      [routes.login]: () =>
+        loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/; HttpOnly" } }),
+      [routes.tokens]: () =>
+        json(
+          { type: "about:blank", status: 503, detail: "the token door is shut" },
+          { status: 503, headers: { "Content-Type": "application/problem+json" } },
+        ),
+      [routes.logout]: () => revokeResponse(),
     });
     await mount();
     await phase("anonymous");
@@ -189,7 +226,7 @@ describe("Shell", () => {
         refused = e;
       }
     });
-    expect(String(refused)).toMatch(/did not return a session/);
+    expect(String(refused)).toMatch(/the token door is shut/);
     await phase("anonymous");
     expect(mockStore.size).toBe(0);
     expect(calls.map((c) => c.key)).not.toContain(routes.resources);

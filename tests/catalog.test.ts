@@ -546,8 +546,8 @@ test("operations holds the five words, and a sixth is refused by number and by n
 });
 
 test("a v2 document retains generated metadata without inventing controls", () => {
-  // Generated wire metadata is retained; only members absent from this pin
-  // remain outside the native view. The renderer still owns no metadata rules.
+  // Generated wire metadata is retained; only members this pin does not print
+  // stay outside the native view. The renderer still owns no metadata rules.
   const doc = fixture();
   doc.resources[0].screen = "/app/note/notes";
   doc.resources[0].fields[1].maxLength = 80;
@@ -569,6 +569,11 @@ test("a v2 document retains generated metadata without inventing controls", () =
     // A member no document declares stays outside the view: a screen is handed
     // what the document named, never whatever a stray JSON object happened to hold.
     assert.equal("precision" in f, false, "a member outside the document reached a field");
+    // Neither word appears in the pinned Field, so a field carrying one would
+    // be this build inventing a control the server never named.
+    for (const invented of ["options", "step"]) {
+      assert.equal(invented in f, false, `${invented} reached a field`);
+    }
     // A hint is the one declared member kept out on purpose: the core reads it
     // into `hints`, so raw hint bytes never reach a component.
     assert.equal("presentation" in f, false, "raw hint bytes reached a field");

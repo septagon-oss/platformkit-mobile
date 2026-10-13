@@ -9,7 +9,14 @@ import { loginIdentity, loginResponse } from "./fakes/wire";
 
 jest.mock("expo-secure-store", () => ({
   getItemAsync: async () =>
-    JSON.stringify({ version: 1, baseURL: "https://acme.test", cookie: "pk=fixture" }),
+    // The key tests/fakes/wire.ts issues, spelled out: a jest.mock factory may
+    // not reach an import, and this record is what a restored phone holds.
+    JSON.stringify({
+      version: 2,
+      baseURL: "https://acme.test",
+      token: "pk_live_this_phone",
+      tokenId: "22222222-2222-4222-8222-222222222222",
+    }),
   setItemAsync: async () => undefined,
 }));
 

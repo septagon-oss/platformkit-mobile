@@ -15,18 +15,26 @@ function memory() {
   return { values, storage };
 }
 
-const oldSession = { baseURL: "https://first.example.com", cookie: "test_session=first" };
-const nextSession = { baseURL: "https://second.example.com", cookie: "test_session=second" };
+const oldSession = {
+  baseURL: "https://first.example.com",
+  token: "pk_live_first",
+  tokenId: "00000000-0000-4000-8000-000000000001",
+};
+const nextSession = {
+  baseURL: "https://second.example.com",
+  token: "pk_live_second",
+  tokenId: "00000000-0000-4000-8000-000000000002",
+};
 
-test("one versioned secure record keeps origin and cookie together across launches", async () => {
+test("one versioned secure record keeps origin and key together across launches", async () => {
   const { values, storage } = memory();
   await createSessionStore(storage).save(nextSession);
   assert.deepEqual([...values.keys()], ["platformkit.session"]);
-  assert.deepEqual(JSON.parse(values.get("platformkit.session")!), { version: 1, ...nextSession });
+  assert.deepEqual(JSON.parse(values.get("platformkit.session")!), { version: 2, ...nextSession });
   assert.deepEqual(await createSessionStore(storage).load(), nextSession);
 });
 
-test("a failed replacement cannot combine one server with another server's cookie", async () => {
+test("a failed replacement cannot combine one server with another server's key", async () => {
   const { storage } = memory();
   const sessions = createSessionStore(storage);
   await sessions.save(oldSession);
@@ -96,13 +104,50 @@ test("malformed or unsupported records never become authenticated sessions", asy
   for (const record of [
     "not json",
     "null",
-    '{"version":2}',
-    '{"version":1,"cookie":"orphan"}',
-    '{"version":1,"baseURL":42}',
-    '{"version":1,"baseURL":"https://example.com","cookie":false}',
+    // A future version is not this one, whatever else it holds.
+    '{"version":3}',
+    '{"version":2,"baseURL":42}',
+    // Half a key is no key: one with no id cannot be revoked, an id with no key
+    // opens nothing, and neither is a state the app should try to be in.
+    '{"version":2,"baseURL":"https://example.com","token":"pk_live"}',
+    '{"version":2,"baseURL":"https://example.com","tokenId":"00000000-0000-4000-8000-000000000001"}',
+    '{"version":2,"baseURL":"https://example.com","token":"","tokenId":"00000000-0000-4000-8000-000000000001"}',
   ]) {
     const { values, storage } = memory();
     values.set("platformkit.session", record);
     await assert.rejects(createSessionStore(storage).load());
   }
+});
+
+test("the record a sign-out leaves keeps the server and holds no key", async () => {
+  const { values, storage } = memory();
+  values.set("platformkit.session", '{"version":2}');
+  assert.equal(await createSessionStore(storage).load(), undefined);
+});
+
+test("a saved cookie from the record format this client no longer sends is the server, not a fault", async () => {
+  // Version 1 held the auth module's session cookie. It parsed perfectly, the
+  // server is real, and nothing this client sends could present it: the person
+  // who upgrades is asked for their password, not shown a broken record.
+  for (const record of [
+    '{"version":1,"baseURL":"https://example.com","cookie":"platformkit_session=abc"}',
+    '{"version":1,"baseURL":"https://example.com"}',
+  ]) {
+    const { values, storage } = memory();
+    values.set("platformkit.session", record);
+    assert.deepEqual(await createSessionStore(storage).load(), { baseURL: "https://example.com" });
+  }
+});
+
+test("a cookie member in a version 2 record names nothing this client reads", async () => {
+  const { values, storage } = memory();
+  values.set(
+    "platformkit.session",
+    '{"version":2,"baseURL":"https://example.com","token":"pk_live","tokenId":"00000000-0000-4000-8000-000000000001","cookie":"platformkit_session=abc"}',
+  );
+  assert.deepEqual(await createSessionStore(storage).load(), {
+    baseURL: "https://example.com",
+    token: "pk_live",
+    tokenId: "00000000-0000-4000-8000-000000000001",
+  });
 });

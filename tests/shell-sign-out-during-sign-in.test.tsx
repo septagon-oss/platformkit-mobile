@@ -1,10 +1,11 @@
-import { loginResponse, logoutResponse } from "./fakes/wire";
+import { issuedTokenResponse, loginResponse, revokeResponse } from "./fakes/wire";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
+import type { SignInStep } from "../src/effects/api";
 
 const mockSaved = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -47,8 +48,10 @@ test("signing out while a login is pending keeps the app signed out", async () =
     switch (call) {
       case "pending.test POST /api/v1/auth/login":
         return login.promise;
-      case "pending.test POST /api/v1/auth/logout":
-        return logoutResponse();
+      case "pending.test POST /api/v1/auth/tokens":
+        return issuedTokenResponse();
+      case "pending.test POST /api/v1/auth/tokens/{id}/revoke":
+        return revokeResponse();
       case "pending.test GET /api/v1/auth/me":
         return json({
           userId: "00000005-1111-4111-8111-111111111111",
@@ -70,7 +73,7 @@ test("signing out while a login is pending keeps the app signed out", async () =
   );
   await waitFor(() => expect(screen.getByTestId("session-phase")).toHaveTextContent("anonymous"));
 
-  let pending!: Promise<void>;
+  let pending!: Promise<SignInStep | undefined>;
   await act(async () => {
     pending = latest!.signIn("https://pending.test", "pending@example.test", "password");
   });
@@ -86,12 +89,16 @@ test("signing out while a login is pending keeps the app signed out", async () =
     await pending;
   });
   expect(screen.getByTestId("session-phase")).toHaveTextContent("anonymous");
-  expect(latest?.api.cookie()).toBeUndefined();
+  expect(latest?.api.bearer()?.token).toBeUndefined();
   expect(latest?.identity).toBeUndefined();
   expect(latest?.state.catalog).toBeUndefined();
   expect(calls).not.toContain("pending.test GET /api/v1/app/resources");
   expect(calls).not.toContain("pending.test GET /api/v1/auth/me");
   // The login that lost ownership is revoked, and nothing saves its cookie.
-  await waitFor(() => expect(calls).toContain("pending.test POST /api/v1/auth/logout"));
+  await waitFor(() =>
+    expect(calls).toContain(
+      "pending.test POST /api/v1/auth/tokens/22222222-2222-4222-8222-222222222222/revoke",
+    ),
+  );
   expect(mockSaved.get("platformkit.session") ?? "").not.toContain("pk=pending");
 });

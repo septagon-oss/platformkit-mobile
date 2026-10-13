@@ -9,7 +9,7 @@ import React from "react";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 import { catalog } from "./fakes/shell";
 import { clock, fakeOutboxStore, fakeReadStore, mint } from "./fakes/store";
-import { loginIdentity } from "./fakes/wire";
+import { issuedTokenResponse, loginIdentity } from "./fakes/wire";
 
 /** login is the answer this test needs: the person, and the session cookie a real server sets with them. */
 const login = () =>
@@ -42,6 +42,7 @@ test("a server typed with a trailing slash is one scope for the queue and the ca
   globalThis.fetch = (async (input, init) => {
     const path = new URL(String(input)).pathname;
     if (path === "/api/v1/auth/login") return login();
+    if (path === "/api/v1/auth/tokens") return issuedTokenResponse();
     if (path === "/api/v1/auth/me") return login();
     if (path === "/api/v1/app/resources")
       return new Response(JSON.stringify(catalog), {

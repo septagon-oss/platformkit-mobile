@@ -30,22 +30,38 @@ must contain no secret.
 
 `npm start` starts Expo's development server. `npm run android` and
 `npm run ios` build and run native projects using the corresponding local
-platform toolchain. `npm run web` starts a browser preview, but the current
-session transport is native: it reads `Set-Cookie` and sends `Cookie`
-explicitly. Browser cookie restrictions make that preview unsuitable as proof
-that sign-in works on a device.
+platform toolchain. `npm run web` starts a browser preview, but the credential
+is a native one: a sign-in mints a scoped bearer key (`POST /auth/tokens`) and
+every request that does work presents `Authorization: Bearer` alone. The scopes
+are not the list the sign-in answered with: the mint refuses the wildcard by name,
+and the built-in administrator role grants nothing else
+(`modules/auth/internal/seed.go`), so `src/core/scopes.ts` turns what the account
+holds into the permissions the pinned document declares for this phone's own
+surface, and leaves out every grant the installation's operator holds alone. The other
+credential is the session the password leg or the challenge leg answers with. It
+is held in memory for as long as the key it minted is held, never written to
+storage, and sent at exactly the four doors that answer to the person rather than
+to a key: the mint, who-this-is (`GET /auth/me`), the key's own revoke
+(`POST /auth/tokens/{id}/revoke`) and the sign-out that closes it. Those four are
+`httpx.SignedIn()`, and a credential that carries its own scopes is refused at
+every one of them (kit/httpx/authorize.go), so a phone that kept only the key
+could neither ask who it is nor stop the key it is throwing away. No request ever
+presents both, because a request carrying both is answered as anonymous
+(kit/httpx/authenticate.go's ambiguousCredential). Browser cookie restrictions
+make that preview unsuitable as proof that sign-in works on a device.
 
 ## Find the owner of a change
 
 `app/_layout.tsx` supplies the server URL and renderer pack to `Shell`, wraps
 the screens in the theme that follows the device's appearance, and configures
 the native stack whose headers every screen uses.
-`src/shell.tsx` owns session restoration, sign-in, sign-out, catalog loading
-and a count of what this app wrote to each resource, so a list or a detail
-knows when what it shows is stale. It also owns the expired-session boundary: the
-transport reports that a server answered 401, and the shell alone decides that
-this session is over, what the person was doing when it ended, and who that
-belongs to (`src/core/reentry.ts` holds the rule; no screen is asked to notice).
+`src/shell.tsx` owns session restoration, sign-in, the answer to a second
+factor, sign-out, catalog loading and a count of what this app wrote to each
+resource, so a list or a detail knows when what it shows is stale. It also owns
+the expired-session boundary: the transport reports that a server answered 401,
+and the shell alone decides that this session is over, what the person was doing
+when it ended, and who that belongs to (`src/core/reentry.ts` holds the rule; no
+screen is asked to notice).
 The resource route files delegate to `src/route.tsx`, which finds the catalog
 entry and chooses a custom or generated screen.
 
@@ -55,9 +71,16 @@ server does) and the lifecycle reducer. These functions run in plain Node
 without React.
 `src/effects/api.ts` owns HTTP requests and API error decoding;
 `src/effects/session.ts` orders secure-storage operations and binds the server
-URL and session cookie in one versioned record. `src/effects/native-session.ts`
+URL, the bearer key and that key's id in one versioned record; a record from the
+format that held a session cookie loads as the server it names, so an upgrade
+signs in again rather than failing. `src/effects/native-session.ts`
 supplies Expo SecureStore. Each shell operation has a generation; the core
 rejects obsolete responses after sign-out, another sign-in or a newer refresh.
+An answer to a second factor is an operation of its own in that sense too: it
+makes its own connection to the server that refused the password, so the key it
+mints belongs to that answer alone, and an answer that lost the race — which the
+kernel expects, since it spends the proof of the first factor once — gives back its
+own key and never the one a newer answer earned.
 
 `src/ui/` is the component library, in one direction of imports that ESLint
 enforces (`eslint.config.mjs`): `atoms/` are single controls and words,
@@ -181,7 +204,8 @@ must explicitly accept it. Invalid JSON and validator exceptions become
 `ApiError` with the response status and request path, without copying response
 values or validator messages. A 2xx status on `ApiError` means the server answered
 but its success response was malformed. HTTP problems retain their existing decoding.
-The request uses the same cookie and deadline as resource operations.
+The request uses the same bearer key and deadline as resource operations; a
+sign-in's session cookie belongs to the mint alone and never reaches here.
 
 Pass `{ signal }` as the fifth argument to cancel a screen's obsolete request;
 cancellation rejects with `AbortError`. A timeout remains an `ApiError` with
@@ -870,7 +894,7 @@ first release that answers every filing the registry names against either packag
 A generated record reads its own rich text field: `derive.richBody` answers which field is
 one and `RichTextBody` supplies the reading — each figure's `file/files` row for the frame
 to reserve, and the bytes at the file's own content address, prepared by `fileResource`
-with the session's scope — and the reader is named after the field it reads
+with the key's scope — and the reader is named after the field it reads
 (`field-<name>-prose`), so two bodies on one screen stay two readers. Such a field is never
 the record's printed summary line (`listPreview` prints no body it cannot print without its
 syntax), which is what keeps the reader on the page for an entry that hints nothing.
@@ -968,7 +992,12 @@ name over the form, and draws the shell's phases itself: a spinner while a
 saved sign-in is restored, and, when a saved sign-in could not be opened, the
 reason with Retry and a way to another server. A product that composes its
 own sign-in screen gets the same from `SignInForm` through `title`, `booting`,
-`failed` and `onRetry`; without them it renders the form as before.
+`failed` and `onRetry`; without them it renders the form as before. When the
+server asks for a second factor, `signIn` answers
+`{ kind: "factor-required", email }` and the same form draws the code step
+through `step`, `code`, `onCodeChange`, `onSubmitCode` and `onEditCredentials`;
+`answerFactor` returns that code to the server that asked for it, because that
+server holds the window it spends, whatever the address field says by then.
 
 Pass `palette` to `ThemeProvider` to use the application's complete light and
 dark palettes. Pass `fonts` for native display, body and mono faces already
@@ -1378,6 +1407,14 @@ whose first writable string field is `KNOWN`, a lifecycle command `VERB` with
 its argument `VERB_FIELD` and the summary the API document gives it
 `VERB_TITLE`, and optionally `TITLE` (a per-run stamp by default). Nothing is
 committed, no flow names a tenant, and no journey runs against a mocked API.
+`sign-in-factor.yaml` reads three more — `TOTP_EMAIL`, `TOTP_PASSWORD` and
+`FACTOR_CODE` — for the account that answers with a second factor:
+`scripts/e2e/mobile_ci.sh` creates that person on the served kernel (the
+administrator stays password-only, so no other journey gains a step), enrols a
+factor over HTTP with `scripts/e2e/totp.py` printing the code for the current
+step, proves the challenge leg there while the code is fresh, and exports one of
+the account's recovery codes for the journey to spend, because Maestro starts
+once for every flow and a time-based code is right for thirty seconds.
 Both runners end at `scripts/e2e/run.sh` — the workstation's
 `scripts/e2e/android.sh` and the CI job's `scripts/e2e/mobile_ci.sh` — so
 neither keeps a flow list of its own: the spec list is the directory, and
@@ -1670,7 +1707,7 @@ The six generated ESLint array-style warnings remain accepted warnings; the lint
 rules and generated source have not been relaxed to hide them. Native Request,
 FormData and device journeys still need platform verification.
 
-**Reused** — the existing per-API cookie, deadline and cancellation transport,
+**Reused** — the existing per-API bearer, deadline and cancellation transport,
 core catalog compatibility rules, path derivations and shell generation guards
 carry the generated operations into the current screens.
 **Added** — the pinned public OpenAPI document, offline generation and drift check,
@@ -1679,6 +1716,58 @@ make response acceptance explicit before data reaches a screen.
 **Made reusable** — `@septagon-oss/platformkit-mobile/generated`, each shell API's bound
 `operations`, and `request(method, path, validate, body?)` let renderer packs consume
 the documented operations and validate their own JSON routes through that transport.
+
+A second factor, and the key a phone signs with, are this delivery's own, so
+they are named here rather than folded into the paragraph above. **Reused** —
+`documented()` and the generated operations for every request the handshake
+makes, `identity` and `issuedToken` as the two answers it validates,
+`factorRequired`'s reading of the server's own refusal rather than a status code,
+`SignInForm` (the code step is step props on the form that already existed, not a
+second form), `kitCopy` for every word the step speaks in both bundled languages,
+and `Session`'s versioned record, which gained the key's id and kept its
+shape. **Added** — `signIn`'s `SignInAnswer`, so a factor is an outcome a screen
+branches on rather than an exception each caller renames; `answerFactor`, which
+sends a code back to the server that refused; the mint of a scoped key at
+`auth-token-issue` and its spend at `auth-token-revoke`; `src/core/scopes.ts`,
+which decides what a key may be narrowed to out of the catalogue the pinned
+document prints; `grants.gen.ts`, that catalogue read out of the document by the
+generator that already reads everything else out of it; `scripts/e2e/totp.py` and
+the factor person `scripts/e2e/mobile_ci.sh` enrols; and `e2e/flows/sign-in-factor.yaml`.
+**Made reusable** — `delegableScopes(permissions, declared)` is a plain function
+over two arguments, so an app whose surface differs from this one passes its own
+catalogue to the same rule, and reaches it without forking anything: `<Shell>` takes
+that catalogue as `declaredGrants`, beside `KEY_NAME` and the `tokenName` that name
+its key, and passes it to `createApi`'s last argument, whose default is the
+catalogue the pinned document prints; and the sign-out answers `SignOut`, so a
+product's screen
+can tell apart the server having stopped the key, the person still having one to
+stop, and a connection that held none at all.
+
+Two limits belong with that. A key this phone _restored_ from secure storage
+carries no sign-in session with it — nothing here stores a session, and only the
+key is stored — and `auth-token-revoke` answers only to its holder, so signing out
+with a restored key forgets it here and cannot stop it there. That is the contract
+this phone builds to, and it is a refusal the screen says out loud — "This device's
+key could not be revoked from here; remove it from your account's devices." —
+rather than a signed-out screen letting the person believe the credential dead: the
+account's list of its devices is the door that remains to a phone holding a key it
+cannot spend. That sentence is owed to such a key, and to no other: a sign-out on a
+connection that holds no key, and one whose key the server refuses as a caller it
+does not know (the kernel answers a dead bearer at every door as an anonymous
+caller — a 403 naming `AUTH_ANONYMOUS`, never a 401), leaves nothing live to
+remove, and the screen says nothing about a key rather than sending the person to
+remove a device that is not there or already stopped. The sentence is about the key
+and nothing else: when the server stopped the key and then failed to close the
+sign-in that minted it, the phone says nothing, because that session sits in no
+store, is presented by no later request and left this phone's memory with the call,
+so there is no door left to walk to and no second ask to make — a notice spent on it
+would report a stopped key as live. Whether the kernel ever
+gives a scoped credential a door to retire its own key is the kernel's to decide;
+if it does, a restored key stops itself at sign-out, and this paragraph and the
+words above change with it. The
+device journey for the code step is a state behind a password, so
+`design gate` measures `/sign-in` and not the step, and no emulator ran on this
+delivery: SecureStore and native cookie behaviour remain unproven here.
 
 A write made where no network reaches is kept on the device and sent when one
 returns. `createOutbox` holds `{kind, resourceKey, path, body}` under the selected

@@ -353,6 +353,30 @@ export const kitEnglish = {
   unitYearly: "per year",
   sourceFloorPlan: "Gallery floor plan",
   audioTour: "Audio tour",
+  // The second factor. The step belongs to the person who enrolled one: the
+  // words say what is owed and what went wrong, and never the arithmetic of
+  // why the password was not enough. The server's own sentence about a refused
+  // code stays the server's and is quoted as it answers.
+  confirmItIsYou: "Confirm it is you",
+  codePrompt: "Enter the six-digit code from your authenticator, or one of your recovery codes.",
+  code: "Code",
+  checkCode: "Check code",
+  codeWrong: "That code is not right.",
+  checking: "Checking…",
+  backToPassword: "Back to the password",
+  sessionExpired: "Your sign-in has expired. Sign in again.",
+  noScopes: "This account grants nothing this app can open.",
+  // A code answers a refusal this phone was given. With no refusal open there is
+  // no window anywhere for it to spend, so the phone says so rather than send a
+  // code to whichever server the field names now.
+  noChallenge: "No code step is open on this phone. Sign in with the password again.",
+  // A sign-out always forgets the key here. This is the other half saying it did
+  // not happen there: the key still answers for its holder, and the only way out
+  // left to a phone that cannot spend it is to stop it where the account lists
+  // what holds its keys. It says "device" and not "phone" because the key this
+  // sentence is about was read back out of storage, by whichever device did.
+  keyNotStopped:
+    "This device's key could not be revoked from here; remove it from your account's devices.",
 } as const;
 // Each word keeps its own shape, widened from the literal it is written as: most
 // are strings, and the few that take a noun as data (`untitled`) are functions
@@ -592,4 +616,18 @@ export const kitPortuguese: KitWords = {
   unitYearly: "por ano",
   sourceFloorPlan: "Planta do piso da galeria",
   audioTour: "Audioguia",
+  confirmItIsYou: "Confirme que é você",
+  codePrompt:
+    "Introduza o código de seis dígitos da sua aplicação autenticadora, ou um dos seus códigos de recuperação.",
+  code: "Código",
+  checkCode: "Verificar código",
+  codeWrong: "Esse código não está certo.",
+  checking: "A verificar…",
+  backToPassword: "Voltar à palavra-passe",
+  sessionExpired: "O seu início de sessão expirou. Inicie sessão novamente.",
+  noScopes: "Esta conta não concede nada que esta aplicação possa abrir.",
+  noChallenge:
+    "Nenhuma etapa de código está aberta neste telemóvel. Inicie sessão novamente com a palavra-passe.",
+  keyNotStopped:
+    "A chave deste dispositivo não pôde ser revogada a partir daqui; remova-a nos dispositivos da sua conta.",
 };

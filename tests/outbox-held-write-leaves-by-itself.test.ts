@@ -41,7 +41,12 @@ function phone(answers: Answer[]) {
   }) as typeof fetch;
   const outbox = createOutbox({
     store: store.store,
-    api: createApi(SERVER, fetchImpl, "pk_session=1", 40),
+    api: createApi(
+      SERVER,
+      fetchImpl,
+      { token: "pk_live_1", id: "00000000-0000-4000-8000-000000000021" },
+      40,
+    ),
     clock: clock(),
     mint: mint(),
     scope: () => SCOPE,

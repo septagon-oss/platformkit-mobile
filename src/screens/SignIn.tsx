@@ -1,12 +1,17 @@
-// SignIn is the way in, composed: the shell's sign-in, clear and refresh, the
-// form that asks, and no header, because there is nothing to go back to. It
-// draws the shell's phases itself — restoring a saved sign-in, failing to
-// open one — so a product composes this screen rather than forking it.
+// SignIn is the way in, composed: the shell's sign-in, its answer to a second
+// factor, clear and refresh, the form that asks, and no header, because there
+// is nothing to go back to. It draws the shell's phases itself — restoring a
+// saved sign-in, failing to open one — so a product composes this screen rather
+// than forking it. Which step the person is on is this screen's own: the server
+// holds the five-minute window a challenge opens and the phone keeps no copy of
+// it, so "credentials" and "code" are how far one sign-in got, not a state of
+// the session.
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import { useSignOut } from "./useSignOut";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useShell } from "../shell";
+import { ApiError } from "../effects/api";
 import { SignInForm } from "../ui/organisms/SignInForm";
 
 // A constant, so the navigator is told the same thing rather than an equal one.
@@ -19,7 +24,7 @@ interface Props {
 
 export function SignIn({ title }: Props = {}) {
   const feedback = useFeedback();
-  const { state, baseURL, signIn, refresh, returning } = useShell();
+  const { state, baseURL, signIn, answerFactor, refresh, returning } = useShell();
   // Both ways off this screen — the failed phase's way to another server and the
   // anonymous phase's clearing of a saved sign-in — leave through the one door
   // that asks while this phone holds a write. Signing out clears what is held,
@@ -28,15 +33,65 @@ export function SignIn({ title }: Props = {}) {
   const leave = useSignOut();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  /**
+   * working is the screen's own answer to "is this screen already asking" held
+   * where a second activation can read it before anything is drawn. busy is that
+   * answer as this render received it, so a keyboard submit and a tap landing in
+   * one frame both find the screen idle and both send — two answers to one
+   * challenge, and the kernel spends the proof of the first factor once. One
+   * request leaves per activation, so the gate is set here synchronously and
+   * busy only carries the same answer to the screen.
+   */
+  const working = useRef(false);
+  const [step, setStep] = useState<"credentials" | "code">("credentials");
+  // challenged is the address the server refused to finish signing in. The code
+  // is offered about that address, not whatever is left in the field after a
+  // correction, and it is what the retry sends.
+  const [challenged, setChallenged] = useState("");
+  const [code, setCode] = useState("");
+  const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
   const submit = async (url: string, email: string, password: string) => {
-    if (busy) return;
+    if (working.current) return;
+    working.current = true;
     setBusy(true);
     setError("");
     try {
-      await signIn(url, email, password);
+      const answer = await signIn(url, email, password);
+      if (answer?.kind === "factor-required") {
+        setChallenged(answer.email);
+        setStep("code");
+        setCode("");
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Those credentials are not right.");
     } finally {
+      working.current = false;
+      setBusy(false);
+    }
+  };
+  const submitCode = async (typed: string) => {
+    if (working.current) return;
+    working.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      await answerFactor(challenged, typed);
+    } catch (e) {
+      // The server spends the proof of the first factor with a DELETE inside the
+      // sign-in's own transaction, so a code it refuses rolls that spend back and
+      // the window stays open for another try
+      // (modules/auth/internal/factors.go's RequireFirstFactorProof, at the commit
+      // this build's document came from). The field empties anyway rather than
+      // offer one text twice: a recovery code is spent by the answer that redeems
+      // it, and a wrong code and a spent code are one answer, so this screen has
+      // no way to say which is still good. The link under the field is the way
+      // back to the password, which is the only thing that opens a new window.
+      setCode("");
+      setError(
+        e instanceof ApiError && e.status === 401 ? feedback.copy.kit.codeWrong : message(e),
+      );
+    } finally {
+      working.current = false;
       setBusy(false);
     }
   };
@@ -60,6 +115,15 @@ export function SignIn({ title }: Props = {}) {
         error={error}
         onSubmit={(u, e, p) => void submit(u, e, p)}
         onClear={leave}
+        step={step}
+        code={code}
+        onCodeChange={setCode}
+        onSubmitCode={(value) => void submitCode(value)}
+        onEditCredentials={() => {
+          setStep("credentials");
+          setCode("");
+          setError("");
+        }}
         {...(title ? { title } : {})}
       />
     </>

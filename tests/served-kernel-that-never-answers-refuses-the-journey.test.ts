@@ -16,6 +16,53 @@ import test from "node:test";
 // so what is under test is the branch after the wait and not a device or a database.
 
 const checkout = path.join(import.meta.dirname, "..");
+
+/** refusingStub is a server that never answers: the state the bound exists for. */
+const refusingStub = "#!/bin/sh\nexit 22\n";
+
+/** answeringStub is /health and every route the harness asks on its way to run.sh. */
+const answeringStub = `#!/bin/sh
+out="" method=GET body="" url=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o) out="$2"; shift 2 ;;
+    -X) method="$2"; shift 2 ;;
+    -d) body="$2"; shift 2 ;;
+    -w|-H|-b|-c) shift 2 ;;
+    -*) shift ;;
+    *) url="$1"; shift ;;
+  esac
+done
+route="/\${url#http://localhost:*/}"
+[ "$route" = "/health" ] && exit 0
+user="44444444-4444-4444-8444-444444444444"
+status=599 answer='{"detail":"the stub server stops here"}'
+case "$method $route" in
+  "GET /api/v1/auth/factors") status=200 answer='{"items":[]}' ;;
+  "GET /api/v1/auth/me") status=200 answer='{"roles":["admin"]}' ;;
+  "POST /api/v1/user/users") status=201 answer='{"id":"'"$user"'"}' ;;
+  "POST /api/v1/user/users/$user/roles") status=200 answer='{}' ;;
+  "POST /api/v1/user/users/$user/set-password") status=200 answer='{}' ;;
+  "POST /api/v1/auth/factors/totp/begin") status=200 answer='{"secret":"JBSWY3DPEHPK3PXP"}' ;;
+  "POST /api/v1/auth/factors/totp/finish") status=201 answer='{"codes":["000000000001"]}' ;;
+  "POST /api/v1/auth/challenge/verify") status=200 answer='{}' ;;
+  "POST /api/v1/auth/login")
+    case "$body" in
+      *'"email":"factor@e2e.test"'*)
+        if [ -f "$FACTOR_SIGNED_IN" ]; then
+          detail=$(sed -n '/^export const FACTOR_REQUIRED_DETAIL =/{n;s/^[[:space:]]*"\\(.*\\)";$/\\1/;p}' src/core/signInOutcome.ts)
+          status=401 answer='{"detail":"'"$detail"'"}' 
+        else
+          touch "$FACTOR_SIGNED_IN"
+          status=200 answer='{"roles":["admin"]}'
+        fi ;;
+      *) status=200 answer='{"roles":["admin"]}' ;;
+    esac ;;
+esac
+[ -n "$out" ] && printf '%s' "$answer" > "$out"
+printf '%s' "$status"
+`;
+
 const port = "8734";
 const pin = "cbaa47b4825a90d95d61b55f39ffdf7051adf1ba";
 
@@ -27,7 +74,16 @@ function planted(
 ): { root: string; ran: string } {
   const root = mkdtempSync(path.join(os.tmpdir(), "pk-serve-bound-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  for (const at of ["scripts/e2e/mobile_ci.sh", "scripts/e2e/tools.sh"]) {
+  // The harness reads three things by path rather than carrying its own copy: the
+  // tools helper, the sentence a second factor is recognised by
+  // (src/core/signInOutcome.ts) and the prover that computes a code at this
+  // instant, so the planted root holds all three.
+  for (const at of [
+    "scripts/e2e/mobile_ci.sh",
+    "scripts/e2e/tools.sh",
+    "scripts/e2e/totp.py",
+    "src/core/signInOutcome.ts",
+  ]) {
     mkdirSync(path.join(root, path.dirname(at)), { recursive: true });
     writeFileSync(path.join(root, at), readFileSync(path.join(checkout, at)), { mode: 0o755 });
   }
@@ -49,8 +105,14 @@ function planted(
   const tools: Record<string, string> = {
     // psql answers, because the harness creates its database before it serves.
     psql: "#!/bin/sh\nexit 0\n",
-    // curl answers what the case says it should.
-    curl: answers ? "#!/bin/sh\nexit 0\n" : "#!/bin/sh\nexit 22\n",
+    // curl answers what the case says it should. The answering stub is a server for
+    // the routes the harness walks before it reaches the journeys — the administrator
+    // sign-in, the factor person's create/roles/set-password, the enrolment, and the
+    // prove leg — because reaching run.sh means passing every one of them. Its 401
+    // carries the sentence read out of the phone's own copy, which is the read
+    // mobile_ci.sh performs, so stub and harness cannot drift in what a second factor
+    // is said in.
+    curl: answers ? answeringStub : refusingStub,
     // sleep returns at once, so sixty turns of the wait are sixty turns, not sixty seconds.
     sleep: "#!/bin/sh\nexit 0\n",
   };
@@ -77,6 +139,7 @@ function serve(root: string): { status: number; out: string; err: string } {
       PLATFORMKIT_TEST_NATS_URL: "nats://nats:4222",
       PLATFORMKIT_MOBILE_PORT: port,
       PK_MOBILE_REPORT: path.join(root, "report.xml"),
+      FACTOR_SIGNED_IN: path.join(root, "factor-signed-in"),
       MODULE: "task",
       ENTITY: "task",
       KNOWN: "title",

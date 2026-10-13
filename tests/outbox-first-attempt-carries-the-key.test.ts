@@ -26,7 +26,10 @@ test("a write held after its first attempt failed is replayed with the key that 
   }) as typeof fetch;
   const outbox = createOutbox({
     store: fakeOutboxStore().store,
-    api: createApi(SERVER, fetchImpl, "pk_session=on-the-wire-only"),
+    api: createApi(SERVER, fetchImpl, {
+      token: "pk_live_on-the-wire-only",
+      id: "00000000-0000-4000-8000-000000000021",
+    }),
     clock: clock(),
     mint: mint(),
     scope: () => ({ server: SERVER, userId: "ada" }),

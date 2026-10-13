@@ -86,7 +86,9 @@ for (const mode of ["light", "dark"] as const) {
       api.events.mockImplementation(transport.events);
       api.list.mockImplementation(transport.list);
       api.get.mockResolvedValue({ id: record, title: "Note 217" });
-      const scope = shellValue(api, { identity: { userId: self, email: "self@example.test" } });
+      const scope = shellValue(api, {
+        identity: { userId: self, email: "self@example.test", permissions: [] },
+      });
       const ready = {
         ...scope,
         state: { ...scope.state, catalog: { ...scope.state.catalog!, resources: [note, users] } },

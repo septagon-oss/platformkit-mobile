@@ -11,6 +11,9 @@ import { reset } from "../fakes/router";
 import { note, shell, shellValue } from "../fakes/shell";
 import { pageResponse } from "../fakes/wire";
 
+/** key is the credential this connection signs with: a phone presents a key, never a session. */
+const key = { token: "pk_live_tenant_one", id: "00000000-0000-4000-8000-000000000001" };
+
 jest.mock(
   "expo-router",
   () => jest.requireActual<typeof import("../fakes/router")>("../fakes/router").expoRouter,
@@ -76,7 +79,7 @@ test("renaming a source-only title on a Portuguese read saves the title and pres
       }
       return pageResponse({ status: 405 }, 405);
     },
-    "pk=tenant-one",
+    key,
   );
   shell.value = shellValue(api, { entry: () => entry });
   const { result } = await renderHook(() => useResourceForm(entry, "note-96"), {

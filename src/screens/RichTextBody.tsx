@@ -198,7 +198,7 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
           version: rows[file]?.version ?? "",
           width: variantWidth(slotPx, rows[file]?.width ?? 0),
           attempt: attempts[file] ?? 0,
-          cookie: api.cookie(),
+          key: api.bearer(),
         });
         if (resource === undefined) return null;
         return <NativeImage model={slot} resource={resource} onState={report} />;

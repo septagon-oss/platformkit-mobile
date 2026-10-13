@@ -86,10 +86,8 @@ export type Entry = View<
   readonly immutable: readonly string[];
   readonly singleton: boolean;
   readonly writePath?: string;
-  // Catalog v2's operations postdates the pin this document was cut from, and the
-  // core re-spells the list as the five verbs the kernel counts, so the wire shape
-  // is omitted from the view rather than passed through: the value in the model is
-  // this build's reading, not the document's bytes.
+  // The document prints a list of words; this type holds only the verbs
+  // CRUD_VERBS names, because verbs() refuses every other word at parse.
   readonly operations?: readonly CrudVerb[];
   // The kernel owns whether an entry names a renderer; it is read as `unknown`
   // so that a malformed name costs a pack and not a screen.
@@ -267,7 +265,7 @@ const catalogSchema = zCatalog.extend({
   resources: z
     .array(
       zEntry.extend({
-        operations: z.array(z.string()).optional(),
+        operations: z.array(z.string()).nullish(),
         renderer: z.unknown().optional(),
         presentation: z.unknown().optional(),
         fields: z.array(looseField).nullable(),
@@ -661,6 +659,8 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
     fields: fieldsRead,
     ...(hints === undefined ? {} : { hints }),
     immutable: immutable ?? [],
+    // A nil operation set prints as null and is the absent set: kit/rest reads
+    // a nil slice and an empty one as all five, and so does `offers`.
     ...(operations == null ? {} : { operations: verbs(operations, `${at}.operations`) }),
     commands: (commands ?? []).map(({ fields, path, presentation: commandHint, ...command }, i) => {
       const hint = hintCommand(commandHint, `${at}.commands[${i}].presentation`, notice);

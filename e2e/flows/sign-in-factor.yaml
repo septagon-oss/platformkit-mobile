@@ -1,0 +1,42 @@
+# The second factor. A person whose account answers with one signs in as that
+# person — not the password-only account the other journeys reuse — and answers
+# the code step. The values come from the environment the harness seeds
+# (scripts/e2e/mobile_ci.sh exports them); nothing here names a tenant or a
+# secret, and the code the phone types is the account's own recovery code, which
+# is why this journey is not sign-in.yaml with two more taps.
+# screen: app/sign-in.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "sign-in"
+- tapOn:
+    id: "server"
+- eraseText
+- inputText: ${SERVER}
+- tapOn:
+    id: "email"
+- inputText: ${TOTP_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${TOTP_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "challenge"
+    timeout: 15000
+- tapOn:
+    id: "code"
+- inputText: ${FACTOR_CODE}
+- hideKeyboard
+- tapOn:
+    id: "verify"
+- extendedWaitUntil:
+    visible:
+      id: "home"
+    timeout: 15000

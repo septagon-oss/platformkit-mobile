@@ -2,7 +2,7 @@
 // attempt the server refuses leaves the person on sign-in (brief item 5), and the
 // attempt that succeeds as the same person still returns them to the sheet they
 // were on with what they typed (brief items 2 and 3).
-import { loginResponse } from "./fakes/wire";
+import { issuedToken, issuedTokenResponse, loginResponse } from "./fakes/wire";
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
@@ -24,17 +24,23 @@ jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactN
 
 const KEY = "platformkit.session";
 const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
-const saved = { version: 1, baseURL: "https://acme.test", cookie: "pk=stale" };
+const saved = {
+  version: 2,
+  baseURL: "https://acme.test",
+  token: issuedToken.token,
+  tokenId: issuedToken.id,
+};
 const person = {
   userId: "00000001-1111-4111-8111-111111111111",
   email: "a@acme.test",
   roles: [],
-  permissions: [],
+  permissions: ["task:read"],
 };
 const routes = {
   me: "GET /api/v1/auth/me",
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
+  tokens: "POST /api/v1/auth/tokens",
   list: "GET /api/v1/note/notes",
   row: "GET /api/v1/note/notes/1",
   save: "PATCH /api/v1/note/notes/1",
@@ -94,6 +100,7 @@ describe("an expired session, a mistyped password, then the right one", () => {
       [routes.me]: () => json(person),
       [routes.resources]: () => json(catalogDoc),
       [routes.row]: () => json(row),
+      [routes.tokens]: () => issuedTokenResponse(),
       [routes.login]: () =>
         password === "right"
           ? loginResponse({ headers: { "Set-Cookie": "pk=fresh; Path=/" } })

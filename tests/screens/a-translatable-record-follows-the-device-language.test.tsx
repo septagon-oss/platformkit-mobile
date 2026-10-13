@@ -22,9 +22,10 @@ jest.mock(
 jest.mock("expo-secure-store", () => ({
   getItemAsync: async () =>
     JSON.stringify({
-      version: 1,
+      version: 2,
       baseURL: "https://tenant-one.example.test",
-      cookie: "pk=tenant-one",
+      token: jest.requireActual<typeof import("../fakes/wire")>("../fakes/wire").issuedToken.token,
+      tokenId: jest.requireActual<typeof import("../fakes/wire")>("../fakes/wire").issuedToken.id,
     }),
   setItemAsync: async () => undefined,
 }));

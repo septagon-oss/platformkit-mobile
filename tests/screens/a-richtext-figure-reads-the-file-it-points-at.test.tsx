@@ -1,7 +1,7 @@
 // A rich text figure names a file, not a picture: the body points at `file/files`, that
 // row's own measurements reserve the box, and the bytes are asked for at the file's
 // content address — at the width this device can paint, or as stored when the frame
-// already fits — with the session this app holds. A file this phone cannot read is said
+// already fits — with the key this app holds. A file this phone cannot read is said
 // where it sits: the body keeps reading natively and no byte of the refused file is asked
 // for.
 import { beforeEach, expect, jest, test } from "@jest/globals";
@@ -89,13 +89,14 @@ test("a figure reads its own row for the frame and asks for its bytes at the fil
   // The row is read like every other row this screen reads.
   await waitFor(() => expect(api.get).toHaveBeenCalledWith(files, FILE));
   // The bytes come from the address the pinned document gives that file, with the
-  // session on them: a native image loader sends no cookie of its own. The frame is
+  // key spelled out on them: a native image loader presents no credential of its
+  // own. The frame is
   // 1440 wide and the slot 1170 device pixels, so the width asked for is the largest
   // the file module renders that fits — a phone never downloads a frame it cannot paint.
   await waitFor(() => expect(asked).toHaveLength(1));
   expect(asked[0]).toEqual({
     uri: `https://acme.test/api/v1/file/files/${FILE}/content?w=960`,
-    headers: { Cookie: "pk=1" },
+    headers: { Authorization: "Bearer pk_live_1" },
     label: "The bridge at dusk",
   });
   // The figure is on the screen while its byte is still in flight: the placeholder keeps

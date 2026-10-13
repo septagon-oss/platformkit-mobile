@@ -12,6 +12,9 @@ import { reset } from "../fakes/router";
 import { note, shell, shellValue } from "../fakes/shell";
 import { pageResponse } from "../fakes/wire";
 
+/** key is the credential this connection signs with: a phone presents a key, never a session. */
+const key = { token: "pk_live_tenant_one", id: "00000000-0000-4000-8000-000000000001" };
+
 jest.mock(
   "expo-router",
   () => jest.requireActual<typeof import("../fakes/router")>("../fakes/router").expoRouter,
@@ -61,7 +64,7 @@ test("a camera file part survives generated serialization and is inserted after 
   };
   const files: Entry = { ...note, module: "file", entity: "files", path: "/api/v1/file/files" };
   const fileID = "55555555-5555-4555-8555-555555555555";
-  const uploads: { parts: readonly NativePart[]; cookie: string | null; query: string }[] = [];
+  const uploads: { parts: readonly NativePart[]; credential: string | null; query: string }[] = [];
   let stored = 0;
   const api = createApi(
     "https://tenant-one.example.test",
@@ -79,7 +82,11 @@ test("a camera file part survives generated serialization and is inserted after 
       if (init?.method === "POST" && url.pathname === files.path) {
         const form = init.body as unknown as { getParts(): readonly NativePart[] };
         const parts = form.getParts();
-        uploads.push({ parts, cookie: new Headers(init.headers).get("Cookie"), query: url.search });
+        uploads.push({
+          parts,
+          credential: new Headers(init.headers).get("Authorization"),
+          query: url.search,
+        });
         if (
           !parts.some(
             (part) => part.uri && part.headers["content-disposition"]?.includes("filename="),
@@ -91,7 +98,7 @@ test("a camera file part survives generated serialization and is inserted after 
       }
       return pageResponse({ status: 404 }, 404);
     },
-    "pk=tenant-one",
+    key,
   );
   shell.value = shellValue(api, { entry: (module) => (module === "file" ? files : entry) });
   await render(
@@ -109,7 +116,7 @@ test("a camera file part survives generated serialization and is inserted after 
   expect(camera).toBeDefined();
   await act(async () => camera!.onPress());
   await waitFor(() => expect(uploads).toHaveLength(1));
-  expect(uploads[0]!.cookie).toBe("pk=tenant-one");
+  expect(uploads[0]!.credential).toBe("Bearer pk_live_tenant_one");
   expect(uploads[0]!.query).toBe("?image=true");
   expect(uploads[0]!.parts).toEqual([
     expect.objectContaining({

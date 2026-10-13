@@ -12,6 +12,9 @@ import { reset } from "../fakes/router";
 import { fakeApi, note, shell, shellValue } from "../fakes/shell";
 import { pageResponse } from "../fakes/wire";
 
+/** key is the credential this connection signs with: a phone presents a key, never a session. */
+const key = { token: "pk_live_tenant_one", id: "00000000-0000-4000-8000-000000000001" };
+
 jest.mock(
   "expo-router",
   () => jest.requireActual<typeof import("../fakes/router")>("../fakes/router").expoRouter,
@@ -49,10 +52,10 @@ test("a second tenant's file refused with 404 keeps its missing figure and nativ
       calls.push(request);
       return pageResponse({ status: 404, detail: "Not found" }, 404);
     },
-    "pk=tenant-one",
+    key,
   );
   const api = fakeApi();
-  api.cookie.mockImplementation(() => wire.cookie());
+  api.bearer.mockImplementation(() => wire.bearer());
   api.get.mockImplementation(async (e, id) =>
     e.module === "file"
       ? wire.get(e, id)
@@ -73,7 +76,7 @@ test("a second tenant's file refused with 404 keeps its missing figure and nativ
       `https://tenant-one.example.test${files.path}/${file}`,
     ]),
   );
-  expect(calls[0]!.headers.get("Cookie")).toBe("pk=tenant-one");
+  expect(calls[0]!.headers.get("Authorization")).toBe("Bearer pk_live_tenant_one");
   expect(asked).toEqual([]);
   expect(api.update).not.toHaveBeenCalled();
   await waitFor(() => expect(screen.getByText("Image unavailable")).toBeOnTheScreen());

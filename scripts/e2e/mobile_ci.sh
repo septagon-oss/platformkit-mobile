@@ -216,6 +216,16 @@ psql "$(swap "$admin_url" "$database")" -v ON_ERROR_STOP=1 -q \
   -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO platformkit_app;" \
   -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO platformkit_app;"
 
+# The key the served kernel seals its enrolled factors with, generated before the
+# config that names it: this script runs under `set -u`, so a value read at the
+# line where it is written would abort the whole harness at the config instead of
+# telling anyone why no factor route exists. Generated per run, written to the
+# config and nowhere else: it has no life beyond these minutes, which is why
+# generating it beats naming one. Without it the auth module mounts no factor
+# route at all, and the check after the server is up is what says so — before the
+# emulator boots, not forty minutes into a journey. python3 rather than openssl
+# because it is already a tool this script demands.
+factor_key="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
 app_dsn="$(swap "$app_url" "$database")"
 migrate_dsn="$(swap "$admin_url" "$database")"
 cat >"$work/config.yaml" <<YAML
@@ -232,11 +242,32 @@ log:
   level: "warn"
 audit:
   retention_days: 365
+auth:
+  factor_key: "$factor_key"
 files:
   dir: "$work/files"
 YAML
 
 password="mobile-$(date +%s)-password"
+factor_email="factor@e2e.test"
+factor_password="mobile-$(date +%s)-factor"
+# The sentence modules/auth answers a right password with when the account also
+# holds a factor. Read from the phone's own copy (src/core/signInOutcome.ts)
+# rather than typed again here: the phone's whole rule is this sentence, and a
+# harness that carried its own spelling would agree with itself while the two
+# drifted apart.
+factor_sentence="$(python3 - <<'SENTENCE'
+import pathlib
+import re
+import sys
+
+source = pathlib.Path("src/core/signInOutcome.ts").read_text()
+match = re.search(r'FACTOR_REQUIRED_DETAIL =\s*\n?\s*"((?:[^"\\]|\\.)*)"', source)
+if not match:
+    sys.exit("mobile_ci: src/core/signInOutcome.ts states no factor sentence to prove against")
+sys.stdout.write(match.group(1))
+SENTENCE
+)"
 # The device reaches the server through run.sh's `adb reverse` below, so the
 # address it is told to talk to is the device's own localhost. --language is the
 # tenant's own declaration, as the kernel harness writes it: a tenant created
@@ -286,10 +317,112 @@ if ! $served; then
   exit 1
 fi
 
+# The second factor, enrolled over the door the phone will use. Everything below
+# is a request to the served kernel rather than a row written into its database:
+# if the factor routes, the roles or the recovery codes do not behave, this
+# harness has to hear it the way a phone would. `api` answers with the status
+# code and leaves the body for the step that needs a value out of it.
+api() { # api <method> <path> <json or ''> <cookie jar>
+  local method="$1" path="$2" body="$3" jar="$4"
+  local args=(-sS -o "$work/body" -w '%{http_code}' -X "$method"
+    -H 'Content-Type: application/json' -b "$jar" -c "$jar")
+  if [ -n "$body" ]; then args+=(-d "$body"); fi
+  curl "${args[@]}" "http://localhost:$port$path"
+}
+refuse() {
+  echo "mobile_ci: $1" >&2
+  echo "  the server answered:" >&2
+  sed 's/^/  /' "$work/body" >&2
+  exit 1
+}
+# One value out of the last answer, as the text the next request sends back.
+api_field() {
+  python3 - "$work/body" "$1" <<'FIELD'
+import json
+import sys
+
+sys.stdout.write(str(json.load(open(sys.argv[1]))[sys.argv[2]]))
+FIELD
+}
+: >"$work/admin.jar"
+: >"$work/factor.jar"
+: >"$work/prove.jar"
+
+echo "mobile_ci: the served kernel mounts the factor routes"
+[ "$(api POST /api/v1/auth/login "{\"email\":\"admin@e2e.test\",\"password\":\"$password\"}" "$work/admin.jar")" = "200" ] ||
+  refuse "the administrator this script bootstrapped could not sign in"
+factors="$(api GET /api/v1/auth/factors '' "$work/admin.jar")"
+if [ "$factors" = "404" ]; then
+  echo "mobile_ci: the served kernel answers no GET /auth/factors, so it predates the factor migrations (modules/auth/migrations/000031_auth_factors, 000033_first_factor_proofs) and mounts no factor route at all. Point PK_KERNEL_IMAGE at a build that carries them; the journey does not get to skip the second factor." >&2
+  exit 1
+fi
+[ "$factors" = "200" ] || refuse "GET /auth/factors answered $factors rather than 200"
+
+# A second person, so no existing journey gains a step: a recovery code spends
+# once and ten journeys sign in as the administrator. The roles are read off the
+# administrator's own identity and handed on unchanged, so no role name is written
+# into this repository, and the new person is offered the home screen the journeys
+# already assert.
+#
+# Two requests, because the kernel refuses one: POST /user/users answers with a
+# User and refuses a body that names roles — "roles belongs to a route of its
+# own, not to this one" (kit/crud, at the commit testdata/openapi.json came from)
+# — and user-user-roles, POST /user/users/{id}/roles, is the route that owns them
+# ("Replaces the roles this person holds"). A person created without roles holds
+# none, so the roles step is not one the harness may skip to reach set-password.
+echo "mobile_ci: one more person on the same tenant"
+api GET /api/v1/auth/me '' "$work/admin.jar" >/dev/null
+roles="$(python3 -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1]))["roles"] or []))' "$work/body")"
+[ "$(api POST /api/v1/user/users "{\"email\":\"$factor_email\",\"displayName\":\"Factor E2E\"}" "$work/admin.jar")" = "201" ] ||
+  refuse "$factor_email could not be created"
+user_id="$(api_field id)"
+[ "$(api POST "/api/v1/user/users/$user_id/roles" "{\"roles\":$roles}" "$work/admin.jar")" = "200" ] ||
+  refuse "$factor_email could not be given the roles the journeys sign in with"
+[ "$(api POST "/api/v1/user/users/$user_id/set-password" "{\"password\":\"$factor_password\"}" "$work/admin.jar")" = "200" ] ||
+  refuse "$factor_email could not be given a password"
+
+echo "mobile_ci: enrolling the factor as $factor_email"
+[ "$(api POST /api/v1/auth/login "{\"email\":\"$factor_email\",\"password\":\"$factor_password\"}" "$work/factor.jar")" = "200" ] ||
+  refuse "$factor_email could not sign in with the password set a moment ago"
+[ "$(api POST /api/v1/auth/factors/totp/begin '' "$work/factor.jar")" = "200" ] ||
+  refuse "POST /auth/factors/totp/begin did not open an enrolment"
+secret="$(api_field secret)"
+[ "$(api POST /api/v1/auth/factors/totp/finish "{\"secret\":\"$secret\",\"code\":\"$(python3 scripts/e2e/totp.py "$secret")\"}" "$work/factor.jar")" = "201" ] ||
+  refuse "POST /auth/factors/totp/finish refused the code this repository's own prover computed"
+# The recovery codes are answered once, in this response and nowhere else.
+cp "$work/body" "$work/codes.json"
+factor_code="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["codes"][0])' "$work/codes.json")"
+[ -n "$factor_code" ] || refuse "the enrolled factor came back with no recovery code to spend"
+
+# Prove the time-based leg while its code is fresh, before Maestro starts: the
+# password must be answered by the challenge, and a code computed at this instant
+# must be accepted by the operation the phone's code step calls. This leg succeeds,
+# and a success commits the DELETE that spends the first-factor proof (modules/auth
+# /internal/factors.go's RequireFirstFactorProof), so the window is gone afterwards
+# — the device journey re-mints one by giving the password again, which is what the
+# journey is for. It spends no recovery code, so what the journey types is still
+# good.
+echo "mobile_ci: the second factor answers over HTTP"
+proof="$(api POST /api/v1/auth/login "{\"email\":\"$factor_email\",\"password\":\"$factor_password\"}" "$work/prove.jar")"
+[ "$proof" = "401" ] ||
+  refuse "signing in as $factor_email answered $proof, not the 401 that asks for the second factor"
+[ "$(api_field detail)" = "$factor_sentence" ] ||
+  refuse "the 401 that asked for the second factor did not say what src/core/signInOutcome.ts matches"
+[ "$(api POST /api/v1/auth/challenge/verify "{\"email\":\"$factor_email\",\"code\":\"$(python3 scripts/e2e/totp.py "$secret")\"}" "$work/prove.jar")" = "200" ] ||
+  refuse "POST /auth/challenge/verify refused a code computed at this instant"
+
 # One contract, both runners: what this script invents it exports, and what the
 # job names arrives in the environment it was named in. TITLE stays run.sh's to
 # default, so a re-run of one flow alone still lands on a stamped record name.
 export SERVER="http://localhost:$port" EMAIL="admin@e2e.test" PASSWORD="$password"
+# The three values the second-factor journey reads, named with the rest in
+# README's device section. FACTOR_CODE is one of the account's recovery codes rather than
+# a live TOTP: run.sh starts Maestro once for every journey and a code is right
+# for one 30-second step, so by the time the journey reaches the field it would be
+# minutes stale. A recovery code is static and is accepted at the same door by the
+# same rules; it is spent once, which is why it belongs to this one person and why
+# admin@e2e.test stays password-only for the ten journeys that sign in again.
+export TOTP_EMAIL="$factor_email" TOTP_PASSWORD="$factor_password" FACTOR_CODE="$factor_code"
 scripts/e2e/run.sh "$apk"
 
 echo "mobile_ci: the journeys ran; the report is at $PK_MOBILE_REPORT"
