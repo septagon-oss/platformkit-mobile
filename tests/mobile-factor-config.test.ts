@@ -56,4 +56,6 @@ bash scripts/e2e/mobile_ci.sh fixture.apk`,
   assert.equal(result.status, 73, result.stdout + result.stderr);
   const config = readFileSync(path.join(root, "config.yaml"), "utf8");
   assert.match(config, /factor_key: "[a-f0-9]{64}"/);
+  // The kernel refuses to start without the key that wraps a webhook endpoint's signing secret.
+  assert.match(config, /webhook:\n  secret_key: "[a-f0-9]{32}"/);
 });
