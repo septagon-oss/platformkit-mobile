@@ -9,6 +9,7 @@ import type {
   MapKey as WireMapKey,
 } from "../generated/types.gen";
 import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
+import { pictureDoor, resourceIcons, type Pictures } from "./pictures";
 import { issuePath } from "./responses";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
@@ -122,6 +123,8 @@ export interface EntryHints {
   readonly previewField?: string;
   readonly summaryFields?: readonly string[];
   readonly statusField?: string;
+  readonly coverField?: string;
+  readonly thumbnailField?: string;
   /**
    * sortable names the fields a list may be ordered by, in the order its sheet
    * lists them. It is the kernel's own member (`kit/entity`), read here so no
@@ -205,7 +208,8 @@ export const SUPPORTED_CATALOG_VERSION = 2;
  */
 export const SHELL_VERSION = 1;
 
-export type Catalog = View<Omit<WireCatalog, "catalogVersion" | "resources">> & {
+export type Catalog = View<Omit<WireCatalog, "catalogVersion" | "resources" | "pictures">> & {
+  readonly pictures?: Pictures;
   readonly version: number;
   readonly resources: readonly Entry[];
 };
@@ -262,6 +266,7 @@ const looseCommand = zCommand.extend({
 });
 
 const catalogSchema = zCatalog.extend({
+  pictures: z.unknown().optional(),
   resources: z
     .array(
       zEntry.extend({
@@ -342,7 +347,7 @@ function hintNames(
 function hintEntry(
   raw: unknown,
   at: string,
-  named: readonly string[],
+  fields: readonly Field[],
   sections: readonly Section[],
   notice: HintNotice,
 ): EntryHints | undefined {
@@ -351,6 +356,7 @@ function hintEntry(
     notice(at, "is not a hint object: no hints are read");
     return undefined;
   }
+  const named = fields.map((f) => f.name);
   const pointer = (member: string): string | undefined => {
     const word = hintWord(raw, member, at, "a field name", notice);
     if (word === undefined) return undefined;
@@ -377,7 +383,26 @@ function hintEntry(
   })();
   const singular = hintWord(raw, "singular", at, "a word", notice);
   const plural = hintWord(raw, "plural", at, "a word", notice);
-  const icon = hintWord(raw, "icon", at, "a word", notice);
+  const declaredIcon = hintWord(raw, "icon", at, "a word", notice);
+  const icon = resourceIcons.includes(declaredIcon as never) ? declaredIcon : undefined;
+  if (declaredIcon && !icon) notice(`${at}.icon`, "is not a supported icon: the default is used");
+  const picturePointer = (member: string, row: boolean): string | undefined => {
+    const name = pointer(member);
+    if (!name) return undefined;
+    const field = fields.find((f) => f.name === name)!;
+    const visible =
+      field.hints?.visibility !== "hidden" &&
+      (!row ||
+        (field.hints?.visibility !== "detail" &&
+          (field.hints?.visibility !== undefined || !field.hideList)));
+    if (field.present !== "image" || !["string", "uuid"].includes(field.type) || !visible) {
+      notice(`${at}.${member}`, "does not name a visible scalar picture: the default is used");
+      return undefined;
+    }
+    return name;
+  };
+  const coverField = picturePointer("coverField", false);
+  const thumbnailField = picturePointer("thumbnailField", true);
   const primaryField = pointer("primaryField");
   const previewField = pointer("previewField");
   const statusField = pointer("statusField");
@@ -402,6 +427,8 @@ function hintEntry(
     ...(singular === undefined ? {} : { singular }),
     ...(plural === undefined ? {} : { plural }),
     ...(icon === undefined ? {} : { icon }),
+    ...(coverField === undefined ? {} : { coverField }),
+    ...(thumbnailField === undefined ? {} : { thumbnailField }),
     ...(primaryField === undefined ? {} : { primaryField }),
     ...(previewField === undefined ? {} : { previewField }),
     ...(statusField === undefined ? {} : { statusField }),
@@ -642,13 +669,7 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       notice,
     ),
   );
-  const hints = hintEntry(
-    presentation,
-    `${at}.presentation`,
-    fieldsRead.map((f) => f.name),
-    blocks,
-    notice,
-  );
+  const hints = hintEntry(presentation, `${at}.presentation`, fieldsRead, blocks, notice);
   return {
     ...rest,
     path: absolute(v.path, `${at}.path`),
@@ -693,9 +714,11 @@ export function parseCatalog(input: unknown, notice: HintNotice = () => {}): Cat
           : "failed validation";
     throw new CatalogError(at, why);
   }
-  const { resources, catalogVersion: _stamp, ...metadata } = result.data;
+  const { resources, pictures: rawPictures, catalogVersion: _stamp, ...metadata } = result.data;
+  const pictures = pictureDoor(rawPictures, notice);
   return {
     ...metadata,
+    ...(pictures ? { pictures } : {}),
     version,
     resources: (resources ?? []).map((r, i) => entry(r, `resources[${i}]`, notice)),
   };

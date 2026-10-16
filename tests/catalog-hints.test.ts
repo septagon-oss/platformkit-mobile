@@ -480,14 +480,13 @@ test("a malformed hint never costs a screen, over the wire too", async () => {
   assert.equal(entry.fields.length, 9);
   assert.equal(entry.commands.length, 2);
   assert.equal(entry.path, "/api/v1/note/notes");
-  // The two defects named themselves; the glyph name is kept as the author wrote
-  // it, because which glyphs this build ships is `ui/atoms/Icon.tsx`'s to say and
-  // a name it does not hold draws the generic one.
-  assert.equal(iconName(entry), "rocket");
+  // Unknown glyphs are discarded alongside the other defective optional hints.
+  assert.equal(iconName(entry), undefined);
   // The transport validates the body and then reads it, so the parse runs twice
   // per served body: what "logged once" guarantees is the collector's own rule
   // (`warnOnce` keys on path and reason), and this says the rule holds.
   assert.deepEqual([...new Set(lines)].sort(), [
+    "resources[0].presentation.icon is not a supported icon: the default is used",
     "resources[0].presentation.singular is not a word: the default is used",
     "resources[0].presentation.summaryFields is not a list of field names: the default is used",
   ]);

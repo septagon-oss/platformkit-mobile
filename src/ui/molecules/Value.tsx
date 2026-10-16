@@ -12,6 +12,9 @@ import type { Field } from "../../core/catalog";
 import {
   type Formatting,
   type Names,
+  type People,
+  type PictureStates,
+  personValue,
   badgeTone,
   display,
   enumTone,
@@ -20,6 +23,8 @@ import {
   splitList,
   text,
 } from "../../core/derive";
+import { AvatarStack } from "./AvatarStack";
+import type { ImageRenderer } from "./MediaHero";
 import { Badge } from "../atoms/Badge";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
@@ -27,6 +32,11 @@ import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 
 interface Props {
+  readonly decorative?: boolean;
+  readonly instance?: string;
+  readonly people?: People | undefined;
+  readonly pictureStates?: PictureStates | undefined;
+  readonly renderImage?: ImageRenderer | undefined;
   readonly presentation: Formatting;
   readonly field: Field;
   readonly value: unknown;
@@ -42,11 +52,36 @@ interface Props {
   readonly testID?: string;
 }
 
-export function Value({ presentation, field, value, compact = false, names, testID }: Props) {
+export function Value({
+  presentation,
+  field,
+  value,
+  compact = false,
+  decorative = false,
+  instance,
+  names,
+  people,
+  pictureStates,
+  renderImage,
+  testID,
+}: Props) {
   const s = useStyles(styles);
   const shown = display(field, value, presentation, names);
   const raw = text(value);
   const id = testable(testID);
+
+  const person = personValue(
+    field,
+    value,
+    presentation,
+    names,
+    people,
+    pictureStates,
+    !!renderImage,
+    instance,
+  );
+  if (person?.people.length)
+    return <AvatarStack model={person} renderImage={renderImage} decorative={decorative} {...id} />;
 
   if (raw === "")
     return (
@@ -138,11 +173,19 @@ export function Labelled({
   field,
   value,
   names,
+  people,
+  pictureStates,
+  renderImage,
+  instance,
 }: {
   readonly presentation: Formatting;
   readonly field: Field;
   readonly value: unknown;
   readonly names?: Names | undefined;
+  readonly people?: People | undefined;
+  readonly pictureStates?: PictureStates | undefined;
+  readonly renderImage?: ImageRenderer | undefined;
+  readonly instance?: string;
 }) {
   const s = useStyles(styles);
   const speaks = (field.enum ?? []).length > 0;
@@ -153,7 +196,18 @@ export function Labelled({
           {fieldLabel(field)}
         </Text>
       )}
-      <Value presentation={presentation} field={field} value={value} names={names} compact />
+      <Value
+        presentation={presentation}
+        {...(instance ? { instance } : {})}
+        field={field}
+        value={value}
+        names={names}
+        people={people}
+        pictureStates={pictureStates}
+        renderImage={renderImage}
+        compact
+        decorative
+      />
     </View>
   );
 }

@@ -1,0 +1,26 @@
+{
+  "schema": "platformkit.catalog-capture.v1",
+  "fixture": "testdata/catalog.pictures.json",
+  "sha256": "1c20e3a0957a2d2fda917f6a9ed496009833443a964cc01b45f1d21ea5b51819",
+  "upstream": {
+    "repository": "https://github.com/septagon-oss/platformkit",
+    "commit": "42d4b8e8c21d4b7a512d2437c20ee5c729dbecc0",
+    "path": "apps/platformkit/served_picture_door_test.go",
+    "sha256": "319063be43746db57870f19fa2a1ba4132268d69c9c8fa7792798e06df0c7574",
+    "command": "go test -count=1 -run '^TestTheServedCatalogueNamesThePictureDoorAndTheCover$' ./apps/platformkit"
+  },
+  "capture": {
+    "method": "Extract the exact public commit into a temporary directory. In the named harness, after cookie sign-in, POST /api/v1/auth/tokens with name Read-only catalogue fixture and the listed scopes; replace the client with a cookie-free http.Client whose RoundTripper sets Authorization: Bearer from the issued token. Write the unchanged GET /api/v1/app/resources response body immediately before its existing JSON unmarshal with os.WriteFile(os.Getenv(\"MOBILE_CATALOG_CAPTURE\"), []byte(body), 0600). Retain all original assertions. Run the recorded test with that output path and isolated PLATFORMKIT_TEST_ADMIN_URL / PLATFORMKIT_TEST_DATABASE_URL. Copy only the catalogue response after the test succeeds; never record the issued credential.",
+    "result": "ok github.com/septagon-oss/platformkit/apps/platformkit 1.929s",
+    "scope": "The public reference composition at this commit as a read-only scoped key, not every actor or server. No person portrait field is adopted in this capture.",
+    "authorization": {
+      "kind": "scoped bearer",
+      "scopes": [
+        "user:read",
+        "task:read",
+        "file:read",
+        "content:read"
+      ]
+    }
+  }
+}

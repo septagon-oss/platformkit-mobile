@@ -23,6 +23,8 @@ import {
   type DetailItem,
   type DisclosureModel,
   type Names,
+  type People,
+  type PictureStates,
   type Feedback,
   type FailureVerdict,
   type Row as Item,
@@ -36,6 +38,7 @@ import { Activity, type Props as ActivityProps } from "./Activity";
 import { Skeleton } from "../atoms/Skeleton";
 import { DetailRow } from "../molecules/DetailRow";
 import { ModelState } from "../molecules/ModelState";
+import type { ImageRenderer } from "../molecules/MediaHero";
 import { Value } from "../molecules/Value";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
@@ -45,6 +48,9 @@ import { kitStyles } from "../layout";
 import { useStyles } from "../theme";
 
 export interface Props {
+  readonly people?: People | undefined;
+  readonly pictureStates?: PictureStates | undefined;
+  readonly renderImage?: ImageRenderer | undefined;
   readonly feedback: Feedback;
   readonly entry: Entry;
   readonly row: Item | undefined;
@@ -114,6 +120,9 @@ export function ResourceDetail({
   entry,
   row,
   names,
+  people,
+  pictureStates,
+  renderImage,
   error,
   saved = "",
   refusal,
@@ -203,6 +212,9 @@ export function ResourceDetail({
                   item={item}
                   row={row}
                   names={names}
+                  people={people}
+                  pictureStates={pictureStates}
+                  renderImage={renderImage}
                   {...(richText === undefined ? {} : { richText })}
                 />
               ))}
@@ -229,6 +241,9 @@ export function ResourceDetail({
               item={item}
               row={row}
               names={names}
+              people={people}
+              pictureStates={pictureStates}
+              renderImage={renderImage}
               {...(richText === undefined ? {} : { richText })}
             />
           ))}
@@ -252,16 +267,34 @@ function RecordFact({
   item,
   row,
   names,
+  people,
+  pictureStates,
+  renderImage,
   richText,
 }: {
   readonly feedback: Feedback;
   readonly item: DetailItem;
   readonly row: Item;
   readonly names?: Names | undefined;
+  readonly people?: People | undefined;
+  readonly pictureStates?: PictureStates | undefined;
+  readonly renderImage?: ImageRenderer | undefined;
   readonly richText?: Props["richText"] | undefined;
 }) {
   const stored = row[item.field.name];
-  const plain = <Value presentation={feedback} field={item.field} value={stored} names={names} />;
+  const plain = (
+    <Value
+      presentation={feedback}
+      decorative
+      instance={JSON.stringify([row.id, item.field.name])}
+      field={item.field}
+      value={stored}
+      names={names}
+      people={people}
+      pictureStates={pictureStates}
+      renderImage={renderImage}
+    />
+  );
   const body = richText === undefined ? undefined : richBody(item.field, stored);
   const shown =
     body === undefined || richText === undefined

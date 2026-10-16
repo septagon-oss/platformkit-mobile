@@ -3,7 +3,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { testable } from "../props";
-import { useStyles, useTheme, type Theme } from "../theme";
+import { statusPair, useStyles, useTheme, type Theme } from "../theme";
 import { Text } from "./Text";
 import { Icon } from "./Icon";
 
@@ -19,16 +19,7 @@ interface Props {
 export function Badge({ label, tone = "neutral", symbol = "none", testID }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
-  const [fg, bg] =
-    tone === "ok"
-      ? [t.color.statusOk, t.color.statusOkBg]
-      : tone === "warning"
-        ? [t.color.statusWarning, t.color.statusWarningBg]
-        : tone === "danger"
-          ? [t.color.statusDanger, t.color.statusDangerBg]
-          : tone === "info"
-            ? [t.color.statusInfo, t.color.statusInfoBg]
-            : [t.color.textMuted, t.color.surfaceMuted];
+  const [fg, bg] = statusPair(t, tone, "muted");
   return (
     <View
       style={[s.pill, { backgroundColor: bg }]}

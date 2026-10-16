@@ -892,7 +892,7 @@ is `markdown-it@14.3.1`, held by one `overrides` entry: the face asks for `^10`,
 `linkify-it` carries two high filings with no release inside its reach, and 14.3.1 is the
 first release that answers every filing the registry names against either package.
 A generated record reads its own rich text field: `derive.richBody` answers which field is
-one and `RichTextBody` supplies the reading — each figure's `file/files` row for the frame
+one and `RichTextBody` supplies the reading — each figure's `file/file` row for the frame
 to reserve, and the bytes at the file's own content address, prepared by `fileResource`
 with the key's scope — and the reader is named after the field it reads
 (`field-<name>-prose`), so two bodies on one screen stay two readers. Such a field is never
@@ -949,8 +949,8 @@ cuts across — stay on the web.
 `unsupported-format` issue code; `Text`, `Skeleton`, `Button`, `testable`, `theme`,
 `scale` and the generated token palette; `tests/fakes/presentation.ts`. **Added** —
 `src/core/prose.ts`, because the phone had never read a Markdown body and nothing here
-carried the file module's served-width set (which is why `variantWidth` lives beside the
-segmentation and not beside a loader); `src/ui/organisms/Prose.tsx`, because no Markdown reader
+carried a width planner (which now reads the catalogue's declared widths beside the
+segmentation, rather than remembering a server's width set); `src/ui/organisms/Prose.tsx`, because no Markdown reader
 existed; `src/screens/MarkdownProse.tsx`, because a third-party face enters through a
 screen and not through `src/ui/`. **Made reusable** — `deriveProse`'s figure view model
 (`slot`, `canOpen`, `canRetry`, `openLabel`, `retryLabel`), which is what
@@ -2057,3 +2057,68 @@ screen that shows two facts reads two records; the settled-map discipline in
 withdrawn session ends every name at once; and the `DUE_FIELD`/`STATUS_FIELD`/
 `STATUS_VALUE` the journeys now read from the environment, which is what lets a
 second client's flow exist without a word of its product in this repository.
+
+
+## People and row pictures
+
+**Reused** — the catalog parser, `derive.ts`, `Names` and its reference hooks,
+`Row`, `Value`, `DataList`, Home, Activity, theme/scale, `fileResource` and
+`NativeImage` compose the existing authorized read and presentation path.
+**Added** — pure person/media models and the native `Avatar`, `AvatarStack` and
+`RowMedia` molecules provide compact faces, overlapping groups and leading
+pictures because the existing full-frame media hero cannot carry those shapes.
+**Made reusable** — `People`, `Row.leading`, the declared picture-door/width
+planner, session-scoped image adapter and genuine read-scoped catalog fixture
+serve the next resource without another transport or design system.
+
+The HTTP fixtures and generated API now pin public kernel commit
+`42d4b8e8c21d4b7a512d2437c20ee5c729dbecc0`. Optional `pictures.source` and
+`pictures.widths` choose the byte door and variants; `thumbnailField` defaults
+to a valid `coverField`. The parser diagnoses defective optional declarations
+and keeps the resource. It accepts a restricted root-relative `/api/v1/`
+template with one `{id}` segment, never a remote URL. An explicitly selected
+thumbnail with an empty value uses the icon fallback, rather than another field.
+Home uses the declared icon tile or the generic grid. The sixteen resource
+icons share the existing Icon adapter.
+
+People come from declared person values, declared user references, activity
+actors and the authenticated account. Initials use Unicode code points; their
+stable ID hash selects info, ok, warning or neutral, never danger. Groups keep
+three discs and a localized remainder; their single spoken description includes
+the whole group. A portrait is the first visible declared `present: avatar`
+field, with no field-name inference. Existing reference reads produce names and
+portraits together: one record read per distinct pointer, or one page of at
+most 200 people per target and list visit. A refresh starts a new visit; loading
+more rows reuses that directory page. Account initials use `displayName`, then
+email. A declared account portrait permits one own-record read; the pinned
+reference user/identity contracts have no portrait, so they need no extra read.
+
+Compact pictures use the current session's bearer header, never a query token.
+The mounted `file/file` metadata read is coalesced per visible ID. A metadata
+403/404 blocks bytes for the visit; a transient failure permits only the
+uncached declared door. Fresh public metadata with a content version permits
+`expo-image` memory caching. Private, unknown and unversioned media uses
+`cachePolicy="none"`; no image bytes enter disk storage. Cache identities include
+server, person, key, session/visit, source, file, version and planned width.
+Each slot retains its own loading/failure state even when files are shared.
+Replacement and scope loss withdraw old resources immediately; memory purging
+is best effort. Loading uses canvas or initials, failures use the declared icon
+or initials, and transitions remain zero under both motion preferences.
+
+The [component and lifetime contract](docs/people-and-row-pictures.md) specifies
+fallbacks, visibility, validation and product-owned decisions. Gallery samples
+include initials, unknown names, loading/ready/failed portraits, groups and row
+media. `testdata/catalog.pictures.json` is a genuine authenticated response from
+the pinned public reference composition using the read scopes recorded in its
+source receipt. It establishes that fixture's cover, thumbnail, author and
+assignee contract. The pin's file icon is outside its frozen vocabulary and
+uses the documented fallback. The broader admin catalog includes translation
+map inputs this client's supported field kinds still refuse; this delivery does
+not add map editing or general catalog compatibility.
+
+Verification is recorded per delivery. Component and hook tests inspect names,
+loading/failure, scoped headers/cache keys and obsolete completions. They do not
+establish Android/iOS rendering, redirects, actual native cache reuse/eviction,
+revocation or TalkBack/VoiceOver output. The browser preview's design probe does
+not measure React Native Web's div-based text; its zero-refusal report is not a
+native visual or accessibility verdict.

@@ -10,10 +10,13 @@ import {
   deriveListToolbar,
   deriveSortSheet,
   type Names,
+  type People,
+  type PictureStates,
   type Presentation,
   type Order,
   type Row as Item,
 } from "../../core/derive";
+import type { ImageRenderer } from "../molecules/MediaHero";
 import { Notice } from "../atoms/Notice";
 import { ActionBar } from "../molecules/ActionBar";
 import { ChoiceRows } from "../molecules/ChoiceRows";
@@ -21,6 +24,9 @@ import { Actions, type Props as ActionsProps } from "./Actions";
 import { DataList } from "./DataList";
 import { DetailSheet } from "../templates/DetailSheet";
 export interface Props {
+  readonly people?: People | undefined;
+  readonly pictureStates?: PictureStates | undefined;
+  readonly renderImage?: ImageRenderer | undefined;
   readonly presentation: Presentation;
   readonly entry: Entry;
   readonly rows: readonly Item[];
@@ -53,6 +59,9 @@ export function ResourceList(props: Props) {
     presentation,
     entry,
     names,
+    people,
+    pictureStates,
+    renderImage,
     order,
     sheet = "none",
     onSheet,
@@ -65,7 +74,7 @@ export function ResourceList(props: Props) {
     ...input
   } = props;
   const result = deriveCatalogList(
-    { entry, order, names, ...input, canCreate: !!onNew },
+    { entry, order, names, ...input, images: !!renderImage, pictureStates, canCreate: !!onNew },
     presentation,
   );
   const toolbar = deriveListToolbar(
@@ -109,6 +118,9 @@ export function ResourceList(props: Props) {
       <DataList
         model={model}
         names={names}
+        people={people}
+        pictureStates={pictureStates}
+        renderImage={renderImage}
         onOpen={onOpen}
         onMore={onMore}
         onRefresh={onRefresh}

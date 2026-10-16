@@ -7,7 +7,8 @@ import { readFileSync } from "node:fs";
 import { act, renderHook } from "@testing-library/react-native";
 import { parseCatalog, type Catalog, type Entry } from "../../src/core/catalog";
 import { nameKey, type Names, type Pointer } from "../../src/core/derive";
-import { useDirectoryNames } from "../../src/screens/useReferenceNames";
+import { useDirectoryNames, useDirectoryPeople } from "../../src/screens/useReferenceNames";
+import { ApiError } from "../../src/effects/api";
 import { fakeApi, shell, shellValue, type FakeApi } from "../fakes/shell";
 
 jest.mock("../../src/shell", () => ({ useShell: () => require("../fakes/shell").shell.value }));
@@ -120,4 +121,45 @@ describe("useDirectoryNames", () => {
     expect(result.current[at(OTHER)]).toBe("Assigned");
     await leave(unmount);
   });
+});
+
+test("directory portraits share one bounded page and withdraw together on a refreshed refusal", async () => {
+  const portrait = "ced4977a-e66c-4968-8fc8-f826017602d9";
+  user = {
+    ...user,
+    fields: [...user.fields, { name: "portraitFile", type: "uuid", present: "avatar" }],
+  };
+  catalog = {
+    ...catalog,
+    resources: catalog.resources.map((e) => (e.module === "user" ? user : e)),
+  };
+  const api = fakeApi();
+  api.list.mockResolvedValue({
+    total: 2,
+    items: [
+      { id: ID, displayName: "Ana", portraitFile: portrait },
+      { id: OTHER, displayName: "Ben", portraitFile: portrait },
+    ],
+  });
+  installed(api);
+  const view = await renderHook(
+    ({ ids, visit }: { readonly ids: readonly Pointer[]; readonly visit: number }) =>
+      useDirectoryPeople(ids, visit),
+    {
+      initialProps: { ids: pointer(ID), visit: 0 },
+    },
+  );
+  await flush();
+  expect(view.result.current.people[at(ID)]?.portrait).toBe(portrait);
+  await view.rerender({ ids: [...pointer(ID), ...pointer(OTHER)], visit: 0 });
+  await flush();
+  expect(view.result.current.names[at(OTHER)]).toBe("Ben");
+  expect(api.list).toHaveBeenCalledTimes(1);
+  api.list.mockRejectedValue(new ApiError(403, "Refused"));
+  await view.rerender({ ids: [...pointer(ID), ...pointer(OTHER)], visit: 1 });
+  await flush();
+  expect(view.result.current.people).toEqual({});
+  expect(view.result.current.names[at(ID)]).toBe("Assigned");
+  expect(api.list).toHaveBeenCalledTimes(2);
+  await leave(view.unmount);
 });

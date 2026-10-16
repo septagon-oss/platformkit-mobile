@@ -4,6 +4,8 @@ export interface ImageResource {
   readonly id: string;
   readonly version: string;
   readonly uri: string;
+  readonly cachePolicy?: "none" | "memory";
+  readonly cacheKey?: string;
   readonly headers?: Readonly<Record<string, string>>;
 }
 export interface MapResource {

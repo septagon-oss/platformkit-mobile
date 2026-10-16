@@ -34,6 +34,8 @@ export interface MediaInput {
   readonly page: Page;
 }
 export interface ImageSlotProps {
+  /** instance distinguishes simultaneous uses of the same file; absent uses the file identity. */
+  readonly instance?: string;
   readonly id: string;
   readonly description: string;
   readonly decorative: boolean;

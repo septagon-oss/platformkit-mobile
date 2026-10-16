@@ -136,8 +136,9 @@ describe("useRecordNames", () => {
       id === ID ? { id: ID, displayName: "Ada Lovelace" } : Promise.reject(new ApiError(401, "")),
     );
     installed(api);
-    const { result, unmount } = await renderHook(() =>
-      useRecordNames([...pointer(ID), ...pointer(OTHER)]),
+    const { result, rerender, unmount } = await renderHook(
+      (pointers: readonly Pointer[]) => useRecordNames(pointers),
+      { initialProps: [...pointer(ID), ...pointer(OTHER)] },
     );
     for (let turn = 0; turn < 20 && api.get.mock.calls.length < 2; turn++) await flush();
     expect(api.get).toHaveBeenCalledTimes(2);
@@ -146,6 +147,10 @@ describe("useRecordNames", () => {
     // kept as the one name on a screen that can no longer be trusted.
     expect(result.current[at(ID)]).toBe("Assigned");
     expect(result.current[at(OTHER)]).toBe("Assigned");
+    await rerender(pointer(ID));
+    await flush();
+    expect(result.current[at(ID)]).toBe("Assigned");
+    expect(api.get).toHaveBeenCalledTimes(2);
     await leave(unmount);
   });
 

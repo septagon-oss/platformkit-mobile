@@ -1,9 +1,19 @@
+import { Avatar } from "../../src/ui/molecules/Avatar";
+import { AvatarStack } from "../../src/ui/molecules/AvatarStack";
+import { RowMedia } from "../../src/ui/molecules/RowMedia";
 import { feedback } from "../fakes/presentation";
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import React from "react";
-import { StyleSheet } from "react-native";
-import { deriveCopy, display, presentedInstant, timeValue } from "../../src/core/derive";
+import { StyleSheet, View as NativeView } from "react-native";
+import {
+  avatar,
+  avatarStack,
+  deriveCopy,
+  display,
+  presentedInstant,
+  timeValue,
+} from "../../src/core/derive";
 import { DetailRow } from "../../src/ui/molecules/DetailRow";
 import { FormField } from "../../src/ui/molecules/FormField";
 import { LoadMore } from "../../src/ui/molecules/LoadMore";
@@ -388,5 +398,123 @@ describe("testID", () => {
       </>,
     );
     for (const [id] of shapes) expect(screen.getByTestId(`t-${id}`)).toBeOnTheScreen();
+  });
+});
+
+describe("People and row pictures", () => {
+  test("a portrait keeps the person's name and initials while loading and after failure", async () => {
+    const person = {
+      id: "b",
+      label: "Ana María Silva",
+      name: "Ana María Silva",
+      portrait: "photo",
+    };
+    const renderImage = jest.fn(() => <NativeView testID="portrait-bytes" />);
+    const { rerender } = await inTheme(
+      <Avatar model={avatar(person, {}, true)} renderImage={renderImage} testID="person" />,
+    );
+    expect(screen.getByLabelText("Ana María Silva")).toBeOnTheScreen();
+    expect(screen.getByText("AS", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(renderImage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: "photo", decorative: true, fit: "cover" }),
+    );
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("portrait-bytes", { includeHiddenElements: true }).parent?.props.style,
+      ).opacity,
+    ).toBe(0);
+    await rerender(
+      <ThemeProvider mode="light">
+        <Avatar model={avatar(person, { photo: "ready" }, true)} renderImage={renderImage} />
+      </ThemeProvider>,
+    );
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId("portrait-bytes", { includeHiddenElements: true }).parent?.props.style,
+      ).opacity,
+    ).toBeUndefined();
+    await rerender(
+      <ThemeProvider mode="light">
+        <Avatar model={avatar(person, { photo: "error" }, true)} renderImage={renderImage} />
+      </ThemeProvider>,
+    );
+    expect(screen.queryByTestId("portrait-bytes", { includeHiddenElements: true })).toBeNull();
+    expect(screen.getByText("AS", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getByText("Ana María Silva")).toBeOnTheScreen();
+  });
+  test("five people show three discs, a remainder of two, and one localized group label", async () => {
+    const people = ["Ana", "Ben", "Cleo", "Davi", "Éva"].map((name, i) => ({
+      id: String(i),
+      name,
+      label: name,
+    }));
+    const model = avatarStack(people, { ...feedback, locale: "pt-PT", copy: deriveCopy("pt") });
+    await inTheme(<AvatarStack model={model} testID="group" />, "dark");
+    expect(screen.getByLabelText("Ana e mais 4 pessoas")).toBeOnTheScreen();
+    expect(screen.getByText("+2", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getAllByText(/^[ABC]$/, { includeHiddenElements: true })).toHaveLength(3);
+    expect(screen.queryByText("D", { includeHiddenElements: true })).toBeNull();
+  });
+  test("a failed row picture becomes its icon and remains inside the row's single target", async () => {
+    const onPress = jest.fn();
+    const slot = {
+      id: "file",
+      decorative: true,
+      description: "",
+      fit: "cover" as const,
+      aspectRatio: 1,
+    };
+    const renderImage = jest.fn(() => <NativeView testID="row-bytes" />);
+    const { rerender } = await inTheme(
+      <Row
+        title="A bridge"
+        leading={
+          <RowMedia
+            model={{ kind: "picture", image: { slot, state: "loading" }, fallback: "document" }}
+            renderImage={renderImage}
+            testID="row-media"
+          />
+        }
+        onPress={onPress}
+      />,
+    );
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(screen.getByTestId("row-bytes", { includeHiddenElements: true })).not.toBeVisible();
+    await fireEvent.press(screen.getByRole("button", { name: "A bridge" }));
+    expect(onPress).toHaveBeenCalledTimes(1);
+    await rerender(
+      <ThemeProvider mode="light">
+        <RowMedia
+          model={{ kind: "picture", image: { slot, state: "error" }, fallback: "document" }}
+          renderImage={renderImage}
+          testID="row-media"
+        />
+      </ThemeProvider>,
+    );
+    expect(screen.getByTestId("row-media", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.queryByTestId("row-bytes", { includeHiddenElements: true })).toBeNull();
+    await rerender(
+      <ThemeProvider mode="light">
+        <RowMedia model={{ kind: "picture", image: { slot, state: "error" } }} />
+      </ThemeProvider>,
+    );
+    expect(screen.toJSON()).toBeNull();
+  });
+  test("person references draw faces and names without turning unresolved IDs into initials", async () => {
+    await inTheme(
+      <Value
+        presentation={feedback}
+        field={{
+          name: "assigneeId",
+          type: "uuid",
+          hints: { reference: { resource: "user/user" } },
+        }}
+        value="person-a"
+        names={{ "user/user|person-a": "Ada Lovelace" }}
+      />,
+    );
+    expect(screen.getByText("Ada Lovelace")).toBeOnTheScreen();
+    expect(screen.getByText("AL", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.queryByText("person-a", { includeHiddenElements: true })).toBeNull();
   });
 });

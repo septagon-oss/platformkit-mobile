@@ -88,7 +88,9 @@ export class ResponseError extends ApiError {}
  * when their role grants it; src/core/scopes.ts turns that into the scopes the
  * mint is allowed to accept, and the kit itself names no permission of its own.
  */
-export type Identity = Readonly<Pick<WireIdentity, "userId" | "email" | "permissions">>;
+export type Identity = Readonly<
+  Pick<WireIdentity, "userId" | "email" | "permissions" | "displayName">
+>;
 
 /**
  * Bearer is the key this phone signs with: the secret to present and the id

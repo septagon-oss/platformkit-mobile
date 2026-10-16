@@ -4,13 +4,20 @@ import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import { doors, type Command } from "../core/catalog";
-import { collectionCommands, noun, pointerTargets, screenPath } from "../core/derive";
+import {
+  collectionCommands,
+  noun,
+  pointerTargets,
+  screenPath,
+  visiblePictures,
+} from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
 import { useCommandAsk } from "./useCommand";
 import { useResourceList } from "./useResourceList";
-import { useDirectoryNames } from "./useReferenceNames";
+import { usePictures } from "./usePictures";
+import { useDirectoryPeople } from "./useReferenceNames";
 export function ResourceList({ entry }: ScreenProps) {
   const feedback = useFeedback();
   const list = useResourceList(entry, feedback);
@@ -24,7 +31,8 @@ export function ResourceList({ entry }: ScreenProps) {
   // window points at, which is the same read the trail makes for its actors, and
   // a value outside the page keeps the word rather than quoting an identifier.
   const asked = useMemo(() => pointerTargets(entry, list.rows, "row"), [entry, list.rows]);
-  const names = useDirectoryNames(asked);
+  const { names, people } = useDirectoryPeople(asked, list.visit);
+  const media = usePictures(visiblePictures(entry, list.rows, people, "row", feedback), list.visit);
   // What the header's one door is called. A string in a frozen bundle, which is what
   // makes it a usable memo dependency below — the `feedback` object around it is
   // fresh every render because it reads the clock.
@@ -69,6 +77,9 @@ export function ResourceList({ entry }: ScreenProps) {
         entry={entry}
         rows={list.rows}
         names={names}
+        people={people}
+        pictureStates={media.states}
+        {...(media.enabled ? { renderImage: media.renderImage } : {})}
         total={list.total}
         loading={list.loading}
         refreshing={list.refreshing}

@@ -41,6 +41,25 @@ export type AccessBody = {
   permission: string;
 };
 
+export type AltBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * What the image says about itself; empty only when it is declared decorative
+   */
+  alt?: string;
+  /**
+   * True when the image carries no information a reader would want
+   */
+  decorative?: boolean;
+  /**
+   * The updatedAt the caller was shown
+   */
+  expectedUpdatedAt: string;
+};
+
 export type AssignBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -69,6 +88,7 @@ export type Catalog = {
    */
   readonly $schema?: string;
   catalogVersion: number;
+  pictures?: Pictures;
   resources: Array<Entry> | null;
 };
 
@@ -184,6 +204,10 @@ export type Content = {
    * The content itself, in Markdown
    */
   body?: string;
+  /**
+   * File id of the cover picture
+   */
+  coverImageId?: string;
   readonly createdAt?: string;
   readonly id?: string;
   /**
@@ -214,6 +238,7 @@ export type ContentPatch = {
    * The content itself, in Markdown
    */
   body?: string;
+  coverImageId?: string | null;
   /**
    * page or post
    */
@@ -394,6 +419,7 @@ export type Entry = {
 };
 
 export type EntryPresentation = {
+  coverField?: string;
   description?: string;
   emptyDescription?: string;
   group?: ResourceGroup;
@@ -401,12 +427,14 @@ export type EntryPresentation = {
   order?: number;
   plural?: string;
   previewField?: string;
+  primaryCommand?: string;
   primaryField?: string;
   sections?: Array<EntitySection>;
   singular?: string;
   sortable?: Array<string>;
   statusField?: string;
   summaryFields?: Array<string>;
+  thumbnailField?: string;
 };
 
 export type EraseBody = {
@@ -542,6 +570,7 @@ export type Field = {
 };
 
 export type FieldHints = {
+  doneValues?: Array<string> | null;
   enumLabels?: {
     [key: string]: string;
   };
@@ -572,10 +601,18 @@ export type File = {
    */
   readonly $schema?: string;
   /**
+   * What the image says about itself, empty until somebody captions it
+   */
+  alt: string;
+  /**
    * Media type, as the upload declared it
    */
   contentType?: string;
   readonly createdAt?: string;
+  /**
+   * True when the image carries no information a reader would want
+   */
+  decorative: boolean;
   /**
    * Pixels down, as stored
    */
@@ -1190,6 +1227,11 @@ export type PasswordRegistrationInputBody = {
   termsAccepted: boolean;
 };
 
+export type Pictures = {
+  source: string;
+  widths?: Array<number> | null;
+};
+
 export type Plan = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1339,6 +1381,29 @@ export type Proposal = {
    * The decision, empty until one is made
    */
   readonly verdict: "" | "approved" | "declined";
+};
+
+export type Quota = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Bytes allowed, when the deployment sets one
+   */
+  readonly quota: number;
+  /**
+   * True when this installation sets no ceiling
+   */
+  readonly unlimited: boolean;
+  /**
+   * Bytes this tenant is holding
+   */
+  readonly used: number;
+  /**
+   * Bytes of those bytes that are other widths of the same pictures
+   */
+  readonly variants: number;
 };
 
 export type RecoveryAvailability = {
@@ -1620,7 +1685,7 @@ export type SiteSettings = {
    */
   nav?: Array<NavItem> | null;
   /**
-   * Brand colour, #rrggbb
+   * Brand colour, #rrggbb. A site that names none is rendered in the installation's own accent; a read always answers #rrggbb
    */
   primaryColor?: string;
   /**
@@ -1985,6 +2050,21 @@ export type AccessBodyWritable = {
   permission: string;
 };
 
+export type AltBodyWritable = {
+  /**
+   * What the image says about itself; empty only when it is declared decorative
+   */
+  alt?: string;
+  /**
+   * True when the image carries no information a reader would want
+   */
+  decorative?: boolean;
+  /**
+   * The updatedAt the caller was shown
+   */
+  expectedUpdatedAt: string;
+};
+
 export type AssignBodyWritable = {
   /**
    * The user who becomes responsible
@@ -2001,6 +2081,7 @@ export type CancelBodyWritable = {
 
 export type CatalogWritable = {
   catalogVersion: number;
+  pictures?: Pictures;
   resources: Array<Entry> | null;
 };
 
@@ -2064,6 +2145,10 @@ export type ContentWritable = {
    * The content itself, in Markdown
    */
   body?: string;
+  /**
+   * File id of the cover picture
+   */
+  coverImageId?: string;
   /**
    * page or post
    */
@@ -2218,9 +2303,17 @@ export type FactorsOutputBodyWritable = {
 
 export type FileWritable = {
   /**
+   * What the image says about itself, empty until somebody captions it
+   */
+  alt: string;
+  /**
    * Media type, as the upload declared it
    */
   contentType?: string;
+  /**
+   * True when the image carries no information a reader would want
+   */
+  decorative: boolean;
   /**
    * Retention class, as the product names it
    */
@@ -2844,7 +2937,7 @@ export type SiteSettingsWritable = {
    */
   nav?: Array<NavItem> | null;
   /**
-   * Brand colour, #rrggbb
+   * Brand colour, #rrggbb. A site that names none is rendered in the installation's own accent; a read always answers #rrggbb
    */
   primaryColor?: string;
   /**
@@ -3039,6 +3132,12 @@ export type VerifyFactorInputBodyWritable = {
 
 export type AppAccessRequestData = {
   body: AccessBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/app/access-requests";
@@ -3248,6 +3347,12 @@ export type AuditEventReadResponse = AuditEventReadResponses[keyof AuditEventRea
 
 export type AuthChallengePasskeyBeginData = {
   body: PasskeyBeginAssertionInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/challenge/passkey/begin";
@@ -3283,6 +3388,12 @@ export type AuthChallengePasskeyBeginResponse =
 
 export type AuthChallengePasskeyVerifyData = {
   body: PasskeyVerifyInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/challenge/passkey/verify";
@@ -3397,6 +3508,12 @@ export type AuthFactorListResponse = AuthFactorListResponses[keyof AuthFactorLis
 
 export type AuthFactorPasskeyBeginData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/factors/passkey/begin";
@@ -3424,6 +3541,12 @@ export type AuthFactorPasskeyBeginResponse =
 
 export type AuthFactorPasskeyFinishData = {
   body: PasskeyFinishInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/factors/passkey/finish";
@@ -3463,6 +3586,12 @@ export type AuthFactorPasskeyFinishResponse =
 
 export type AuthRecoveryCodesRotateData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/factors/recovery/rotate";
@@ -3498,6 +3627,12 @@ export type AuthRecoveryCodesRotateResponse =
 
 export type AuthFactorTotpBeginData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/factors/totp/begin";
@@ -3528,6 +3663,12 @@ export type AuthFactorTotpBeginResponse =
 
 export type AuthFactorTotpFinishData = {
   body: FinishTotpInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/factors/totp/finish";
@@ -3659,6 +3800,12 @@ export type AuthLoginResponse = AuthLoginResponses[keyof AuthLoginResponses];
 
 export type AuthLoginPasskeyBeginData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/login/passkey/begin";
@@ -3694,6 +3841,12 @@ export type AuthLoginPasskeyBeginResponse =
 
 export type AuthLoginPasskeyVerifyData = {
   body: PasskeyVerifyInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/login/passkey/verify";
@@ -3737,6 +3890,12 @@ export type AuthLoginPasskeyVerifyResponse =
 
 export type AuthLogoutData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/logout";
@@ -3874,6 +4033,12 @@ export type AuthOidcStartResponse = AuthOidcStartResponses[keyof AuthOidcStartRe
 
 export type AuthPasswordChangeData = {
   body: ChangeInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/password";
@@ -4021,6 +4186,12 @@ export type AuthRoleSetResponse = AuthRoleSetResponses[keyof AuthRoleSetResponse
 
 export type AuthSamlCallbackData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/saml/callback";
@@ -4161,6 +4332,12 @@ export type AuthSessionListResponse = AuthSessionListResponses[keyof AuthSession
 
 export type AuthSessionRevokeAllData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/sessions/revoke-all";
@@ -4192,6 +4369,12 @@ export type AuthSessionRevokeAllResponse =
 
 export type AuthSessionRevokeData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The session's ref, as the list shows it. Not the session id, which is the cookie credential and never appears in a response.
@@ -4235,6 +4418,12 @@ export type AuthSessionRevokeResponse =
 
 export type AuthPasskeySignInSetData = {
   body: PasskeySignInSettingInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/settings/passkey-sign-in";
@@ -4291,6 +4480,12 @@ export type AuthTokenListResponse = AuthTokenListResponses[keyof AuthTokenListRe
 
 export type AuthTokenIssueData = {
   body: IssueTokenInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/auth/tokens";
@@ -4322,8 +4517,58 @@ export type AuthTokenIssueResponses = {
 
 export type AuthTokenIssueResponse = AuthTokenIssueResponses[keyof AuthTokenIssueResponses];
 
+export type AuthTokenRevokeSelfData = {
+  body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/v1/auth/tokens/revoke-self";
+};
+
+export type AuthTokenRevokeSelfErrors = {
+  /**
+   * Unauthorized
+   */
+  401: Problem;
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AuthTokenRevokeSelfError = AuthTokenRevokeSelfErrors[keyof AuthTokenRevokeSelfErrors];
+
+export type AuthTokenRevokeSelfResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type AuthTokenRevokeSelfResponse =
+  AuthTokenRevokeSelfResponses[keyof AuthTokenRevokeSelfResponses];
+
 export type AuthTokenRevokeData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The key to stop, as the list showed it
@@ -4513,6 +4758,12 @@ export type BillingSubscriptionReadResponse =
 
 export type BillingSubscriptionCancelData = {
   body?: CancelBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/billing/subscription/cancel";
@@ -4556,6 +4807,12 @@ export type BillingSubscriptionCancelResponse =
 
 export type BillingSubscriptionSubscribeData = {
   body?: SubscribeBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/billing/subscription/subscribe";
@@ -4666,6 +4923,12 @@ export type ChangeProposalListResponse =
 
 export type ChangeProposalProposeData = {
   body: NewProposalWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/change/proposals";
@@ -4756,6 +5019,12 @@ export type ChangeProposalReadResponse =
 
 export type ChangeProposalApplyData = {
   body: RevisionInputWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The proposal
@@ -4803,6 +5072,12 @@ export type ChangeProposalApplyResponse =
 
 export type ChangeProposalReviewData = {
   body: ReviewWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The proposal
@@ -4851,6 +5126,12 @@ export type ChangeProposalReviewResponse =
 
 export type ChangeProposalWithdrawData = {
   body: RevisionInputWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The proposal
@@ -4962,6 +5243,12 @@ export type ContentContentListResponse =
 
 export type ContentContentCreateData = {
   body: ContentWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/content/contents";
@@ -5116,6 +5403,10 @@ export type ContentContentUpdateData = {
      * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
      */
     "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
   };
   path: {
     /**
@@ -5170,6 +5461,12 @@ export type ContentContentUpdateResponse =
 
 export type ContentContentArchiveData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5218,6 +5515,12 @@ export type ContentContentArchiveResponse =
 
 export type ContentContentPublishData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5266,6 +5569,12 @@ export type ContentContentPublishResponse =
 
 export type ContentContentReviewTranslationData = {
   body?: TranslationFieldsBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5314,6 +5623,12 @@ export type ContentContentReviewTranslationResponse =
 
 export type ContentContentSuggestTranslationData = {
   body?: TranslationFieldsBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5362,6 +5677,12 @@ export type ContentContentSuggestTranslationResponse =
 
 export type ContentContentTranslateData = {
   body?: TranslateBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5410,6 +5731,12 @@ export type ContentContentTranslateResponse =
 
 export type ContentContentUnpublishData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5458,6 +5785,12 @@ export type ContentContentUnpublishResponse =
 
 export type ContentContentUntranslateData = {
   body?: TranslationFieldsBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -5517,9 +5850,21 @@ export type FileFileListData = {
      */
     offset?: number;
     /**
-     * A field name, or a field name prefixed with - for descending
+     * One of -createdAt, createdAt, name, -name, size, -size
      */
     sort?: string;
+    /**
+     * A name to look for, matched case-insensitively
+     */
+    q?: string;
+    /**
+     * all, image, document or video
+     */
+    type?: string;
+    /**
+     * Only the files nothing shows any more
+     */
+    unused?: boolean;
   };
   url: "/api/v1/file/files";
 };
@@ -5560,6 +5905,12 @@ export type FileFileListResponse = FileFileListResponses[keyof FileFileListRespo
 
 export type FileFileUploadData = {
   body: unknown;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: {
     /**
@@ -5614,6 +5965,12 @@ export type FileFileUploadResponse = FileFileUploadResponses[keyof FileFileUploa
 
 export type FileFileEraseData = {
   body?: EraseBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/file/files/erase";
@@ -5752,6 +6109,107 @@ export type FileFileReadResponses = {
 };
 
 export type FileFileReadResponse = FileFileReadResponses[keyof FileFileReadResponses];
+
+export type FileFileAltCommandData = {
+  body?: AltBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/file/files/{id}/alt";
+};
+
+export type FileFileAltCommandErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileFileAltCommandError = FileFileAltCommandErrors[keyof FileFileAltCommandErrors];
+
+export type FileFileAltCommandResponses = {
+  /**
+   * OK
+   */
+  200: File;
+};
+
+export type FileFileAltCommandResponse =
+  FileFileAltCommandResponses[keyof FileFileAltCommandResponses];
+
+export type FileFileAltData = {
+  body?: AltBodyWritable;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/file/files/{id}/alt";
+};
+
+export type FileFileAltErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileFileAltError = FileFileAltErrors[keyof FileFileAltErrors];
+
+export type FileFileAltResponses = {
+  /**
+   * OK
+   */
+  200: File;
+};
+
+export type FileFileAltResponse = FileFileAltResponses[keyof FileFileAltResponses];
 
 export type FileFileContentData = {
   body?: never;
@@ -5954,6 +6412,12 @@ export type FileFileReleaseResponse = FileFileReleaseResponses[keyof FileFileRel
 
 export type FileFileRetainData = {
   body?: RetainBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The file to hold
@@ -6044,6 +6508,47 @@ export type FileFileUsesResponses = {
 
 export type FileFileUsesResponse = FileFileUsesResponses[keyof FileFileUsesResponses];
 
+export type FileQuotaReadData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/file/quota";
+};
+
+export type FileQuotaReadErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Request Entity Too Large
+   */
+  413: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type FileQuotaReadError = FileQuotaReadErrors[keyof FileQuotaReadErrors];
+
+export type FileQuotaReadResponses = {
+  /**
+   * OK
+   */
+  200: Quota;
+};
+
+export type FileQuotaReadResponse = FileQuotaReadResponses[keyof FileQuotaReadResponses];
+
 export type NotificationNotificationListData = {
   body?: never;
   path?: never;
@@ -6098,6 +6603,12 @@ export type NotificationNotificationListResponse =
 
 export type NotificationNotificationReadData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The notification's id
@@ -6992,6 +7503,12 @@ export type TenantTenantSuspendResponse =
 
 export type AuthMailDeliveryData = {
   body: MailDeliveryInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/public/auth/mail-delivery";
@@ -7029,6 +7546,12 @@ export type AuthMailDeliveryResponse = AuthMailDeliveryResponses[keyof AuthMailD
 
 export type AuthPasswordForgotData = {
   body: ForgotInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/public/auth/password/forgot";
@@ -7067,6 +7590,12 @@ export type AuthPasswordForgotResponse =
 
 export type AuthRegisterData = {
   body: PasswordRegistrationInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/public/auth/register";
@@ -7108,6 +7637,12 @@ export type AuthRegisterResponse = AuthRegisterResponses[keyof AuthRegisterRespo
 
 export type AuthResendVerificationData = {
   body: ResendVerificationInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/public/auth/resend-verification";
@@ -7151,6 +7686,12 @@ export type AuthResendVerificationResponse =
 
 export type AuthVerifyEmailData = {
   body: VerifyEmailInputBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/public/auth/verify-email";
@@ -7503,6 +8044,12 @@ export type TaskTaskListResponse = TaskTaskListResponses[keyof TaskTaskListRespo
 
 export type TaskTaskCreateData = {
   body: TaskWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/task/tasks";
@@ -7647,6 +8194,10 @@ export type TaskTaskUpdateData = {
      * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
      */
     "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
   };
   path: {
     /**
@@ -7694,6 +8245,12 @@ export type TaskTaskUpdateResponse = TaskTaskUpdateResponses[keyof TaskTaskUpdat
 
 export type TaskTaskAssignData = {
   body?: AssignBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -7740,6 +8297,12 @@ export type TaskTaskAssignResponse = TaskTaskAssignResponses[keyof TaskTaskAssig
 
 export type TaskTaskCheckSlaData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -7786,6 +8349,12 @@ export type TaskTaskCheckSlaResponse = TaskTaskCheckSlaResponses[keyof TaskTaskC
 
 export type TaskTaskResolveData = {
   body?: ResolveBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -7832,6 +8401,12 @@ export type TaskTaskResolveResponse = TaskTaskResolveResponses[keyof TaskTaskRes
 
 export type UserInvitationCreateData = {
   body: InvitationWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/user/invitations";
@@ -7929,6 +8504,12 @@ export type UserUserListResponse = UserUserListResponses[keyof UserUserListRespo
 
 export type UserUserCreateData = {
   body: UserWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/user/users";
@@ -8073,6 +8654,10 @@ export type UserUserUpdateData = {
      * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
      */
     "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
   };
   path: {
     /**
@@ -8120,6 +8705,12 @@ export type UserUserUpdateResponse = UserUserUpdateResponses[keyof UserUserUpdat
 
 export type UserUserApproveRegistrationData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8168,6 +8759,12 @@ export type UserUserApproveRegistrationResponse =
 
 export type UserUserDeactivateData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8215,6 +8812,12 @@ export type UserUserDeactivateResponse =
 
 export type UserUserHandleData = {
   body?: HandleBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8261,6 +8864,12 @@ export type UserUserHandleResponse = UserUserHandleResponses[keyof UserUserHandl
 
 export type UserUserRolesData = {
   body?: RolesBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8307,6 +8916,12 @@ export type UserUserRolesResponse = UserUserRolesResponses[keyof UserUserRolesRe
 
 export type UserUserSetPasswordData = {
   body?: PasswordBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8460,6 +9075,12 @@ export type WebhookDeliveryReadResponse =
 
 export type WebhookDeliveryReplayData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8567,6 +9188,12 @@ export type WebhookEndpointListResponse =
 
 export type WebhookEndpointCreateData = {
   body?: CreateBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/v1/webhook/endpoints";
@@ -8716,6 +9343,10 @@ export type WebhookEndpointUpdateData = {
      * The row's ETag, as read; a tag the row has passed refuses the write with 412. A resource whose entity carries no write count answers 422.
      */
     "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
   };
   path: {
     /**
@@ -8765,6 +9396,12 @@ export type WebhookEndpointUpdateResponse =
 
 export type WebhookEndpointDisableData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8813,6 +9450,12 @@ export type WebhookEndpointDisableResponse =
 
 export type WebhookEndpointEnableData = {
   body?: CommandInputStructBody;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8861,6 +9504,12 @@ export type WebhookEndpointEnableResponse =
 
 export type WebhookEndpointRotateData = {
   body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id
@@ -8909,6 +9558,12 @@ export type WebhookEndpointRotateResponse =
 
 export type WebhookEndpointTargetData = {
   body?: TargetBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
   path: {
     /**
      * The row's id

@@ -13,6 +13,7 @@ export const asked: Asked[] = [];
 
 export function resetAsked(): void {
   asked.length = 0;
+  nativeRequests.length = 0;
 }
 
 /** ExpoImage stands in for the native view: it records the prepared resource and renders nothing. */
@@ -22,6 +23,7 @@ export function ExpoImage(props: {
   readonly accessibilityLabel?: string;
   readonly [key: string]: unknown;
 }) {
+  nativeRequests.push(props as unknown as NativeRequest);
   asked.push({
     uri: props.source.uri,
     headers: props.source.headers,
@@ -29,3 +31,18 @@ export function ExpoImage(props: {
   });
   return null;
 }
+
+export interface NativeRequest {
+  readonly source: {
+    readonly uri: string;
+    readonly cacheKey?: string;
+    readonly headers?: Readonly<Record<string, string>>;
+  };
+  readonly cachePolicy: unknown;
+  readonly recyclingKey: unknown;
+  readonly transition: unknown;
+  readonly onLoadStart: () => void;
+  readonly onLoad: () => void;
+  readonly onError: () => void;
+}
+export const nativeRequests: NativeRequest[] = [];

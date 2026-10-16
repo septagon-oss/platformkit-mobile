@@ -83,7 +83,7 @@ function frameOf(row: Row): Frame | null {
  * file cannot be read is said where it sits, not substituted or hidden.
  */
 export function RichTextBody({ presentation, source, testID, fallback }: Props) {
-  const { api, entry, reads, baseURL, identity } = useShell();
+  const { api, entry, reads, baseURL, identity, state } = useShell();
   const viewport = useWindowDimensions();
   // A figure in a body is painted no wider than the screen it is on, so the width to ask
   // the file module for is planned against the screen's own pixels: the widest variant
@@ -93,7 +93,7 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
   const wanted = useMemo(() => figures.map((figure) => figure.file).join(","), [figures]);
   // The file module as this server's catalogue names it. Absent means there is nothing
   // to ask, which is said as an unavailable figure rather than a wait that never ends.
-  const files = entry("file", "files");
+  const files = entry("file", "file");
   // Each file's row: undefined while it is arriving, null when it cannot be read.
   const [rows, setRows] = useState<Record<string, Frame | null>>({});
   // Which figures have had their bytes painted, straight from the loader.
@@ -191,12 +191,13 @@ export function RichTextBody({ presentation, source, testID, fallback }: Props) 
         const slot = figure.slot;
         if (file === undefined || slot === undefined) return null;
         const resource = fileResource({
+          pictures: state.catalog?.pictures,
           server: baseURL,
           userId: identity?.userId,
           entry: files,
           id: file,
           version: rows[file]?.version ?? "",
-          width: variantWidth(slotPx, rows[file]?.width ?? 0),
+          width: variantWidth(slotPx, rows[file]?.width ?? 0, state.catalog?.pictures?.widths),
           attempt: attempts[file] ?? 0,
           key: api.bearer(),
         });

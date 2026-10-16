@@ -20,6 +20,10 @@ export type IconSize = keyof typeof icon;
 const pageColumn = 420;
 /** extent is the few fixed lengths that are neither a gap nor a corner: how tall a paragraph field opens, how thick a skeleton line is. */
 export const extent = {
+  avatarSmall: 24,
+  avatar: 32,
+  rowMedia: 40,
+  avatarOverlap: 8,
   textarea: 120,
   skeleton: 14,
   skeletonMedia: 180,

@@ -9,43 +9,20 @@
 // draws the body as prose instead of drawing less of it.
 //
 // The width plan is here too rather than beside an image loader, because it is the
-// file module's decision read from the outside: the widths it renders, never
-// upscaled. One rule, one owner, and the loader stays a loader.
+// catalogue's declared widths read from the outside. One rule, one owner, and
+// the loader stays a loader.
 import type { ImageSlotProps, MediaItem } from "./media";
 import { build, type Validation } from "./shared";
 
-/**
- * SERVED_WIDTHS are the variant widths the file module renders, widest last. It is a
- * closed set restated from the server's plan rather than derived: a request for any
- * other width is answered 422, and a variant is never upscaled, so a frame narrower
- * than a width never receives it.
- */
-export const SERVED_WIDTHS = [480, 960, 1440, 1920] as const;
-export type ServedWidth = (typeof SERVED_WIDTHS)[number];
-
-/**
- * variantWidth is the plan for one frame in one slot: which width of the file to ask
- * the server for, or 0 to ask for the frame as stored.
- *
- * The frame itself is the best fit as soon as it is no wider than the slot, so it is
- * what gets asked for: a smaller variant painted into a wider box is the phone throwing
- * away pixels it was offered, and a variant is never upscaled, so no wider one exists.
- * Only a frame wider than the slot is scaled down, and then to the largest served width
- * that fits it. `slotPx` is the slot in device pixels (dp × pixelRatio), because a
- * loader decodes at the pixels it paints; a slot wider than the widest variant still
- * gets that widest variant. An unknown frame answers 0: nothing is planned without a
- * number, and the bare address always answers.
- */
-export function variantWidth(slotPx: number, frameWidth: number): ServedWidth | 0 {
-  if (!Number.isFinite(slotPx) || slotPx <= 0) return 0;
-  if (!Number.isSafeInteger(frameWidth) || frameWidth <= 0) return 0;
-  if (frameWidth <= slotPx) return 0;
-  let plan: ServedWidth | 0 = 0;
-  for (const width of SERVED_WIDTHS) {
-    if (width > slotPx) break;
-    plan = width;
-  }
-  return plan;
+/** variantWidth chooses the smallest declared width covering a slot; zero requests the original. */
+export function variantWidth(
+  slotPx: number,
+  frameWidth: number,
+  widths: readonly number[] = [],
+): number {
+  if (!Number.isFinite(slotPx) || slotPx <= 0 || widths.length === 0) return 0;
+  if (Number.isSafeInteger(frameWidth) && frameWidth > 0 && frameWidth <= slotPx) return 0;
+  return widths.find((width) => width >= slotPx) ?? widths[widths.length - 1]!;
 }
 
 /** A figure is 0069 §1's block image: one image, its own paragraph, its title as the caption. */

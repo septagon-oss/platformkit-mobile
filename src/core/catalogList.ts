@@ -1,3 +1,4 @@
+import type { PictureStates } from "./pictures";
 import type { Entry } from "./catalog";
 import {
   activeFilters,
@@ -28,6 +29,8 @@ import type { Presentation } from "./presentation";
 import { build, countText, type Content, type Validation } from "./shared";
 
 export interface CatalogListInput {
+  readonly images?: boolean;
+  readonly pictureStates?: PictureStates | undefined;
   readonly entry: Entry;
   readonly rows: readonly Row[];
   readonly total: number;
@@ -100,7 +103,15 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
         id: "records",
         title: noun(entry).plural,
         rows: input.rows.map((row) => ({
-          ...listRow(entry, row, p, p.copy.kit.untitled, input.names),
+          ...listRow(
+            entry,
+            row,
+            p,
+            p.copy.kit.untitled,
+            input.names,
+            input.images,
+            input.pictureStates,
+          ),
           id: text(row.id),
           selectable: false,
           actions: [],

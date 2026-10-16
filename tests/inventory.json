@@ -275,20 +275,20 @@
  },
  "totals": {
   "contract": {
-   "files": 34,
-   "cases": 188,
-   "ms": 69773,
-   "testsMs": 47330.200000000004,
+   "files": 35,
+   "cases": 200,
+   "ms": 74239,
+   "testsMs": 47452.4,
    "runners": {
-    "node": 34
+    "node": 35
    },
    "unreachable": 0
   },
   "behaviour": {
    "files": 227,
-   "cases": 1036,
-   "ms": 1543087,
-   "testsMs": 49196.000000000015,
+   "cases": 1040,
+   "ms": 1541632,
+   "testsMs": 49207.30000000002,
    "runners": {
     "jest": 72,
     "node": 155
@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 87,
-   "cases": 260,
-   "ms": 1873227,
-   "testsMs": 30150,
+   "files": 88,
+   "cases": 273,
+   "ms": 1912627,
+   "testsMs": 31297,
    "runners": {
-    "jest": 87
+    "jest": 88
    },
    "unreachable": 0
   },
@@ -2259,6 +2259,101 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/pictures.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 12,
+   "rule": "(no first comment; first test title) person tones have independent stable vectors and never use danger",
+   "ruleSource": "first test title",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4466,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "person tones have independent stable vectors and never use danger",
+    "initials use Unicode code points and never manufacture a name",
+    "groups deduplicate IDs in order and distinguish visible remainder from spoken others",
+    "picture templates refuse external origins, encodings and ambiguous substitutions",
+    "defective widths keep the valid original door and never remember a server's width set",
+    "thumbnail selection falls back from a bad field but never from its empty value",
+    "portraits follow presentation and visibility rather than a field's name",
+    "compact bytes require a bearer, stay on the selected server and scope only public versioned caching",
+    "the public served capture retains the picture door, cover, assignee and author contracts",
+    "failed or unsupported memory purges do not reject session cleanup",
+    "a directory row carries its own stable avatar while ordinary resources keep media tiles",
+    "image reads exclude hidden group discs, collapsed facts and unrelated activity people"
+   ],
+   "tests": [
+    {
+     "title": "person tones have independent stable vectors and never use danger",
+     "ms": 6.493312,
+     "measured": false
+    },
+    {
+     "title": "initials use Unicode code points and never manufacture a name",
+     "ms": 0.731794,
+     "measured": false
+    },
+    {
+     "title": "groups deduplicate IDs in order and distinguish visible remainder from spoken others",
+     "ms": 4.193127,
+     "measured": false
+    },
+    {
+     "title": "picture templates refuse external origins, encodings and ambiguous substitutions",
+     "ms": 10.997154,
+     "measured": false
+    },
+    {
+     "title": "defective widths keep the valid original door and never remember a server's width set",
+     "ms": 1.739037,
+     "measured": false
+    },
+    {
+     "title": "thumbnail selection falls back from a bad field but never from its empty value",
+     "ms": 1.355568,
+     "measured": false
+    },
+    {
+     "title": "portraits follow presentation and visibility rather than a field's name",
+     "ms": 2.748484,
+     "measured": false
+    },
+    {
+     "title": "compact bytes require a bearer, stay on the selected server and scope only public versioned caching",
+     "ms": 1.785512,
+     "measured": false
+    },
+    {
+     "title": "the public served capture retains the picture door, cover, assignee and author contracts",
+     "ms": 49.881947,
+     "measured": false
+    },
+    {
+     "title": "failed or unsupported memory purges do not reject session cleanup",
+     "ms": 18.171215,
+     "measured": false
+    },
+    {
+     "title": "a directory row carries its own stable avatar while ordinary resources keep media tiles",
+     "ms": 21.673144,
+     "measured": false
+    },
+    {
+     "title": "image reads exclude hidden group discs, collapsed facts and unrelated activity people",
+     "ms": 2.404639,
+     "measured": false
+    }
+   ],
+   "loaded": 52,
+   "coveredProdLines": 17495,
+   "onlyProdLines": null,
+   "testsMs": 122.2
   },
   {
    "file": "tests/publish-registry-credential.test.ts",
@@ -5877,11 +5972,11 @@
    "file": "tests/ui/molecules.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": 23,
-   "ms": 19473,
-   "testsMs": 99,
-   "loaded": 106,
-   "coveredProdLines": 4333,
+   "cases": 27,
+   "ms": 18124,
+   "testsMs": 107,
+   "loaded": 112,
+   "coveredProdLines": 751,
    "onlyProdLines": 11,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -5913,215 +6008,147 @@
     "a list that cannot act shows its chips, and no control that would change them",
     "every word the box says is the table's, in both languages",
     "every molecule takes a testID a device flow can look up",
-    "a value carries its testID whatever shape its type gives it"
+    "a value carries its testID whatever shape its type gives it",
+    "a portrait keeps the person's name and initials while loading and after failure",
+    "five people show three discs, a remainder of two, and one localized group label",
+    "a failed row picture becomes its icon and remains inside the row's single target",
+    "person references draw faces and names without turning unresolved IDs into initials"
    ],
    "tests": [
     {
-     "title": "FormField the refusal sits under the field it is about, and no asterisk stands in for a word",
-     "ranAsOne": true,
-     "isolatedMs": 63911.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "the refusal sits under the field it is about, and no asterisk stands in for a word",
+     "ms": 6,
+     "measured": false
     },
     {
-     "title": "FormField an optional field is marked with the reader's own word",
-     "ranAsOne": true,
-     "isolatedMs": 59926.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "an optional field is marked with the reader's own word",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "FormField a control that is nobody's form field marks nothing",
-     "ranAsOne": true,
-     "isolatedMs": 59495.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a control that is nobody's form field marks nothing",
+     "ms": 1,
+     "measured": false
     },
     {
-     "title": "FormField the word is the bundle's, so a Portuguese phone reads Portuguese",
-     "ranAsOne": true,
-     "isolatedMs": 63119.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "the word is the bundle's, so a Portuguese phone reads Portuguese",
+     "ms": 1,
+     "measured": false
     },
     {
-     "title": "Row a list row is announced with its cells and opens on press",
-     "ranAsOne": true,
-     "isolatedMs": 62334.2,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a list row is announced with its cells and opens on press",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "Row a row's time cell is announced as the instant it stands for",
-     "ranAsOne": true,
-     "isolatedMs": 55191.9,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a row's time cell is announced as the instant it stands for",
+     "ms": 3,
+     "measured": false
     },
     {
-     "title": "Row a row draws no separator; the section it sits in separates its rows once",
-     "ranAsOne": true,
-     "isolatedMs": 54436.8,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a row draws no separator; the section it sits in separates its rows once",
+     "ms": 3,
+     "measured": false
     },
     {
-     "title": "Value a value of a closed set is a neutral pill: position in the list picks no colour",
-     "ranAsOne": true,
-     "isolatedMs": 54822.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a value of a closed set is a neutral pill: position in the list picks no colour",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "Value a switch with no answer says there is none; one answered off says No",
-     "ranAsOne": true,
-     "isolatedMs": 57213.6,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a switch with no answer says there is none; one answered off says No",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "Value an instant is shown as a distance and announced as the whole date-time",
-     "ranAsOne": true,
-     "isolatedMs": 52042.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "an instant is shown as a distance and announced as the whole date-time",
+     "ms": 5,
+     "measured": false
     },
     {
-     "title": "TagsField a return key commits the word, and so does the Add control",
-     "ranAsOne": true,
-     "isolatedMs": 54619.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a return key commits the word, and so does the Add control",
+     "ms": 10,
+     "measured": false
     },
     {
-     "title": "TagsField a box with nothing in it commits nothing at all",
-     "ranAsOne": true,
-     "isolatedMs": 53711.1,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a box with nothing in it commits nothing at all",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "TagsField a word already on the sheet is ignored, however it is spelt",
-     "ranAsOne": true,
-     "isolatedMs": 50006.4,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a word already on the sheet is ignored, however it is spelt",
+     "ms": 6,
+     "measured": false
     },
     {
-     "title": "TagsField a word holding the comma is refused as it is typed, and the text stays put",
-     "ranAsOne": true,
-     "isolatedMs": 52098.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a word holding the comma is refused as it is typed, and the text stays put",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField removing a chip while a refused word stands in the box writes no part of that word",
-     "ranAsOne": true,
-     "isolatedMs": 48067.2,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "removing a chip while a refused word stands in the box writes no part of that word",
+     "ms": 11,
+     "measured": false
     },
     {
-     "title": "TagsField the box tells the sheet what it will not write, and tells it again when it can",
-     "ranAsOne": true,
-     "isolatedMs": 48287.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "the box tells the sheet what it will not write, and tells it again when it can",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField a keystroke after the refusal clears it, because the person is fixing it",
-     "ranAsOne": true,
-     "isolatedMs": 48883.3,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a keystroke after the refusal clears it, because the person is fixing it",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField a record's own list is all chips, none of it half-typed",
-     "ranAsOne": true,
-     "isolatedMs": 50864.2,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a record's own list is all chips, none of it half-typed",
+     "ms": 3,
+     "measured": false
     },
     {
-     "title": "TagsField what is typed is part of the value, so a save that never blurred it carries it",
-     "ranAsOne": true,
-     "isolatedMs": 49921.9,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "what is typed is part of the value, so a save that never blurred it carries it",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField a list that cannot act shows its chips, and no control that would change them",
-     "ranAsOne": true,
-     "isolatedMs": 47476.4,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a list that cannot act shows its chips, and no control that would change them",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "TagsField every word the box says is the table's, in both languages",
-     "ranAsOne": true,
-     "isolatedMs": 47770.3,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "every word the box says is the table's, in both languages",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "testID every molecule takes a testID a device flow can look up",
-     "ranAsOne": true,
-     "isolatedMs": 50690.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "every molecule takes a testID a device flow can look up",
+     "ms": 5,
+     "measured": false
     },
     {
-     "title": "testID a value carries its testID whatever shape its type gives it",
-     "ranAsOne": true,
-     "isolatedMs": 48739.2,
-     "onlyProdLines": 11,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a value carries its testID whatever shape its type gives it",
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "a portrait keeps the person's name and initials while loading and after failure",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "five people show three discs, a remainder of two, and one localized group label",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a failed row picture becomes its icon and remains inside the row's single target",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "person references draw faces and names without turning unresolved IDs into initials",
+     "ms": 2,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -6131,7 +6158,8 @@
    "testsTotal": 23,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest"
   },
   {
    "file": "tests/ui/order-sheets.test.tsx",
@@ -16035,7 +16063,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 530,
+   "ms": 424,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "two headings, a paragraph and a list stay four runs in their own order",
@@ -16057,7 +16085,7 @@
     "an image addressed anywhere but pk-file is refused",
     "a heading outside ## to #### is refused, and one inside is not",
     "a link in any scheme the format allows is ordinary text to this reader",
-    "a frame wider than its slot gets the largest served width that fits the slot",
+    "a frame wider than its slot gets the smallest declared width covering the slot",
     "a slot wider than the widest variant gets that variant, or the frame when it fits",
     "a frame nobody measured plans nothing",
     "a table is what the phone's rich editor cannot hold, and nothing else is",
@@ -16068,139 +16096,139 @@
    "tests": [
     {
      "title": "two headings, a paragraph and a list stay four runs in their own order",
-     "ms": 3.033061,
+     "ms": 4.168692,
      "measured": false
     },
     {
      "title": "a figure is its own block between two paragraphs",
-     "ms": 0.381887,
+     "ms": 0.678305,
      "measured": false
     },
     {
      "title": "a caption keeps the quote it escaped",
-     "ms": 0.135711,
+     "ms": 0.268347,
      "measured": false
     },
     {
      "title": "an image with no alt and no title is a decorative figure",
-     "ms": 0.083645,
+     "ms": 0.179872,
      "measured": false
     },
     {
      "title": "two figures keep their own ids in the order the body holds them",
-     "ms": 0.169874,
+     "ms": 0.299404,
      "measured": false
     },
     {
      "title": "a body that is nothing but a figure is one block",
-     "ms": 0.117357,
+     "ms": 0.220779,
      "measured": false
     },
     {
      "title": "a fenced block keeps its blank lines and its language header",
-     "ms": 0.125843,
+     "ms": 0.228753,
      "measured": false
     },
     {
      "title": "a tilde fence closes on its own marker, not the first backtick",
-     "ms": 0.171538,
+     "ms": 0.255883,
      "measured": false
     },
     {
      "title": "an unclosed fence is refused rather than drawn as an open paragraph",
-     "ms": 0.10818,
+     "ms": 0.132556,
      "measured": false
     },
     {
      "title": "a table is one run, pipes and all",
-     "ms": 0.080539,
+     "ms": 0.092671,
      "measured": false
     },
     {
      "title": "a nested list and a task list stay one run each",
-     "ms": 0.098853,
+     "ms": 0.098012,
      "measured": false
     },
     {
      "title": "a blockquote and a thematic break are read as they were written",
-     "ms": 0.09736,
+     "ms": 0.128267,
      "measured": false
     },
     {
      "title": "plain text with newlines is paragraphs, not a refusal",
-     "ms": 0.108331,
+     "ms": 0.149276,
      "measured": false
     },
     {
      "title": "an image inside a sentence is refused: \u00a71 has no inline image",
-     "ms": 0.101147,
+     "ms": 0.173972,
      "measured": false
     },
     {
      "title": "an image inside a list item is refused",
-     "ms": 0.063888,
+     "ms": 0.140771,
      "measured": false
     },
     {
      "title": "a pk-file reference that is not a uuid is refused",
-     "ms": 0.065531,
+     "ms": 0.11308,
      "measured": false
     },
     {
      "title": "an image addressed anywhere but pk-file is refused",
-     "ms": 0.044893,
+     "ms": 0.096047,
      "measured": false
     },
     {
      "title": "a heading outside ## to #### is refused, and one inside is not",
-     "ms": 0.074478,
+     "ms": 0.207544,
      "measured": false
     },
     {
      "title": "a link in any scheme the format allows is ordinary text to this reader",
-     "ms": 0.042629,
+     "ms": 0.115293,
      "measured": false
     },
     {
-     "title": "a frame wider than its slot gets the largest served width that fits the slot",
-     "ms": 0.193829,
+     "title": "a frame wider than its slot gets the smallest declared width covering the slot",
+     "ms": 0.296037,
      "measured": false
     },
     {
      "title": "a slot wider than the widest variant gets that variant, or the frame when it fits",
-     "ms": 0.061654,
+     "ms": 0.122637,
      "measured": false
     },
     {
      "title": "a frame nobody measured plans nothing",
-     "ms": 0.05408,
+     "ms": 0.197595,
      "measured": false
     },
     {
      "title": "a table is what the phone's rich editor cannot hold, and nothing else is",
-     "ms": 0.392386,
+     "ms": 0.64343,
      "measured": false
     },
     {
      "title": "a span closed on the line below holds only its own words, and the prose after it is read",
-     "ms": 0.21091,
+     "ms": 0.276923,
      "measured": false
     },
     {
      "title": "a table quoted into a blockquote is one the editor cannot hold either",
-     "ms": 0.119001,
+     "ms": 0.114292,
      "measured": false
     },
     {
      "title": "a table drawn inside a code fence is not a table the editor would lose",
-     "ms": 0.079848,
+     "ms": 0.091238,
      "measured": false
     }
    ],
    "loaded": 4,
-   "coveredProdLines": 854,
+   "coveredProdLines": 837,
    "onlyProdLines": null,
-   "testsMs": 6.2
+   "testsMs": 9.5
   },
   {
    "file": "tests/prose-body-says-its-words.test.ts",
@@ -19187,7 +19215,7 @@
    "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 2,
+   "cases": 3,
    "rule": "A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answers. A value the page does not reach keeps the word the kit says, which is what a page is \u2014 the identifier the row carries is never what a person reads.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -19195,28 +19223,34 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 17918,
+   "ms": 25064,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a window reads each pointed-at resource once and names every value that page holds",
-    "a value outside the page keeps its word, which is what a page is"
+    "a value outside the page keeps its word, which is what a page is",
+    "directory portraits share one bounded page and withdraw together on a refreshed refusal"
    ],
    "tests": [
     {
      "title": "a window reads each pointed-at resource once and names every value that page holds",
-     "ms": 9,
+     "ms": 11,
      "measured": false
     },
     {
      "title": "a value outside the page keeps its word, which is what a page is",
-     "ms": 2,
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "directory portraits share one bounded page and withdraw together on a refreshed refusal",
+     "ms": 7,
      "measured": false
     }
    ],
-   "loaded": 128,
-   "coveredProdLines": 1322,
+   "loaded": 136,
+   "coveredProdLines": 1636,
    "onlyProdLines": null,
-   "testsMs": 11
+   "testsMs": 21
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",
@@ -19318,11 +19352,11 @@
    "file": "tests/screens/activity-directory-denial.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 5,
-   "ms": 23634,
-   "testsMs": 769,
-   "loaded": 136,
-   "coveredProdLines": 11611,
+   "cases": 6,
+   "ms": 25736,
+   "testsMs": 401,
+   "loaded": 158,
+   "coveredProdLines": 2253,
    "onlyProdLines": 0,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -19334,7 +19368,8 @@
     "light activity removes cached actor details after directory HTTP 404",
     "dark activity removes cached actor details after directory HTTP 403",
     "dark activity removes cached actor details after directory HTTP 404",
-    "an obsolete actor response cannot revive a session-denied trail"
+    "an obsolete actor response cannot revive a session-denied trail",
+    "new-session events cannot publish the previous session's directory enrichment"
    ],
    "tests": [
     {
@@ -19344,7 +19379,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 225,
+     "measured": false
     },
     {
      "title": "light activity removes cached actor details after directory HTTP 404",
@@ -19353,7 +19389,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 50,
+     "measured": false
     },
     {
      "title": "dark activity removes cached actor details after directory HTTP 403",
@@ -19362,7 +19399,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 51,
+     "measured": false
     },
     {
      "title": "dark activity removes cached actor details after directory HTTP 404",
@@ -19371,7 +19409,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 51,
+     "measured": false
     },
     {
      "title": "an obsolete actor response cannot revive a session-denied trail",
@@ -19380,7 +19419,13 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "new-session events cannot publish the previous session's directory enrichment",
+     "ms": 5,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -19390,7 +19435,8 @@
    "testsTotal": 5,
    "tier": "merge",
    "reach": "npm test (jest half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest"
   },
   {
    "file": "tests/screens/activity-directory-pagination.test.tsx",
@@ -20263,6 +20309,95 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/compact-pictures.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 11,
+   "rule": "(no first comment; first test title) one metadata read prepares header-authorized private bytes without a native cache",
+   "ruleSource": "first test title",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30152,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "one metadata read prepares header-authorized private bytes without a native cache",
+    "fresh public versioned metadata earns memory caching and a new visit changes its identity",
+    "metadata HTTP 403 prevents a byte request and preserves the initials",
+    "metadata HTTP 404 prevents a byte request and preserves the initials",
+    "a transient metadata error uses only the uncached declared door",
+    "missing identity or bearer prepares no metadata or byte read",
+    "an obsolete file load cannot replace the current picture's state",
+    "an account change withdraws old resources before new metadata arrives",
+    "the same file in two rows keeps independent loading and failure states",
+    "the generated list composes its thumbnail and named assignee from the same authorized file read",
+    "the authenticated account uses its declared display name without a speculative portrait read"
+   ],
+   "tests": [
+    {
+     "title": "one metadata read prepares header-authorized private bytes without a native cache",
+     "ms": 33,
+     "measured": false
+    },
+    {
+     "title": "fresh public versioned metadata earns memory caching and a new visit changes its identity",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "metadata HTTP 403 prevents a byte request and preserves the initials",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "metadata HTTP 404 prevents a byte request and preserves the initials",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a transient metadata error uses only the uncached declared door",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "missing identity or bearer prepares no metadata or byte read",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "an obsolete file load cannot replace the current picture's state",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "an account change withdraws old resources before new metadata arrives",
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "the same file in two rows keeps independent loading and failure states",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "the generated list composes its thumbnail and named assignee from the same authorized file read",
+     "ms": 1410,
+     "measured": false
+    },
+    {
+     "title": "the authenticated account uses its declared display name without a speculative portrait read",
+     "ms": 10,
+     "measured": false
+    }
+   ],
+   "loaded": 157,
+   "coveredProdLines": 2203,
+   "onlyProdLines": null,
+   "testsMs": 1505
   },
   {
    "file": "tests/screens/custom-renderer-catalog-withdrawal.test.tsx",

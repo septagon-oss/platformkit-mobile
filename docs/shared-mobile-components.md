@@ -1262,3 +1262,15 @@ commit explanation. Do not copy screenshot pixels, product palettes or native
 build outputs into this specification delivery. No implementation evidence,
 device pass, all-product theme pass or post-implementation metric is claimed by
 the specify phase.
+
+
+## Compact people and row media
+
+`Avatar`, `AvatarStack` and `RowMedia` consume the pure models exported through
+`core/derive`, plus the existing `ImageRenderer` slot. `Row.leading` holds their
+decorative leading element inside the existing row press target. Selection,
+initials, tones, visible/spoken group counts, thumbnail/cover precedence and
+fallbacks belong to core; requests and native loader state belong to screens.
+The [people and row picture contract](people-and-row-pictures.md) is the canonical
+contract for their inputs, states, authorization, cache policy and lifetime.
+The existing gallery's atoms-and-molecules specimen includes each new molecule.

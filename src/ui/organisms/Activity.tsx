@@ -6,19 +6,22 @@ import { Button } from "../atoms/Button";
 import { Notice } from "../atoms/Notice";
 import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
+import { Avatar } from "../molecules/Avatar";
+import type { ImageRenderer } from "../molecules/MediaHero";
 import { DetailRow } from "../molecules/DetailRow";
 import { ModelState } from "../molecules/ModelState";
 import { Section } from "../molecules/Section";
 import { kitStyles } from "../layout";
 import { useStyles } from "../theme";
 export interface Props {
+  readonly renderImage?: ImageRenderer | undefined;
   readonly model: ActivityModel;
   readonly onExpand?: (ids: readonly string[]) => void;
   readonly onOpen?: (id: string) => void;
   readonly onMore?: () => void;
   readonly onRetry?: () => void;
 }
-export function Activity({ model, onExpand, onOpen, onMore, onRetry }: Props) {
+export function Activity({ model, renderImage, onExpand, onOpen, onMore, onRetry }: Props) {
   const s = useStyles(kitStyles);
   // A trail this person's plan does not include is no section at all: a record is
   // not told about what its tenant is not subscribed to, and the one quiet line
@@ -31,7 +34,11 @@ export function Activity({ model, onExpand, onOpen, onMore, onRetry }: Props) {
         <View key={row.id} style={s.stack}>
           <View accessible accessibilityLabel={row.accessibleLabel} accessibilityHint={row.time}>
             <Text weight="semibold">{row.verb}</Text>
-            <Text>{row.actor}</Text>
+            {row.avatar ? (
+              <Avatar model={row.avatar} renderImage={renderImage} decorative />
+            ) : (
+              <Text>{row.actor}</Text>
+            )}
             <Text>{row.relative}</Text>
           </View>
           {onExpand && (row.changes.length || row.details) ? (

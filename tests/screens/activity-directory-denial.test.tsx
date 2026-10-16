@@ -174,3 +174,38 @@ test("an obsolete actor response cannot revive a session-denied trail", async ()
   expect(api.remove).not.toHaveBeenCalled();
   expect(api.command).not.toHaveBeenCalled();
 });
+
+test("new-session events cannot publish the previous session's directory enrichment", async () => {
+  const portrait = "cf667bd2-3760-43df-a51c-fb388446d5fe";
+  const directory = {
+    ...users,
+    fields: [...users.fields, { name: "portraitFile", type: "uuid" as const, present: "avatar" }],
+  };
+  const first = fakeApi();
+  first.events.mockResolvedValue(trail("first-event"));
+  first.list.mockResolvedValue({
+    items: [{ id: actor, displayName: "Previous actor", portraitFile: portrait }],
+    total: 1,
+  });
+  const catalog = { ...shellValue(first).state.catalog!, resources: [note, directory] };
+  shell.value = shellValue(first, { state: { phase: "ready", generation: 1, catalog } });
+  const { result, rerender } = await renderHook(() => useActivity(note, "note-91"));
+  await waitFor(() => expect(result.current.names[actor]).toBe("Previous actor"));
+  expect(result.current.people?.[actor]?.portrait).toBe(portrait);
+  const next = fakeApi();
+  next.events.mockResolvedValue(trail("next-event"));
+  const directoryRead = Promise.withResolvers<{
+    items: Record<string, unknown>[];
+    total: number;
+  }>();
+  next.list.mockReturnValue(directoryRead.promise);
+  shell.value = shellValue(next, { state: { phase: "ready", generation: 2, catalog } });
+  await rerender(undefined);
+  await waitFor(() => expect(next.list).toHaveBeenCalledTimes(1));
+  expect(result.current.names[actor]).toBeUndefined();
+  expect(result.current.people?.[actor]).toBeUndefined();
+  await act(async () =>
+    directoryRead.resolve({ items: [{ id: actor, displayName: "Current actor" }], total: 1 }),
+  );
+  await waitFor(() => expect(result.current.names[actor]).toBe("Current actor"));
+});

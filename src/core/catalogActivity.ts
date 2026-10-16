@@ -1,9 +1,13 @@
+import type { People, PictureStates } from "./pictures";
 import { subject, verb, type Event } from "./activity";
 import { deriveActivity, type ActivityItem } from "./audit";
 import { deriveState } from "./feedback";
 import type { Presentation } from "./presentation";
 import { build, type Validation, type Content } from "./shared";
 export interface EventTrail {
+  readonly people?: People;
+  readonly images?: boolean;
+  readonly pictureStates?: PictureStates | undefined;
   readonly events: readonly Event[];
   readonly names: Readonly<Record<string, string>>;
   readonly loading: boolean;
@@ -26,6 +30,7 @@ export function deriveEventActivity(input: EventTrail, p: Presentation) {
         ? {
             kind: "person",
             id: e.actor,
+            ...(input.people?.[e.actor] ? { person: input.people[e.actor] } : {}),
             ...(input.names[e.actor] ? { name: input.names[e.actor] } : {}),
           }
         : { kind: "system" },
@@ -62,6 +67,8 @@ export function deriveEventActivity(input: EventTrail, p: Presentation) {
       deriveActivity(
         {
           content,
+          images: input.images ?? false,
+          pictureStates: input.pictureStates,
           page: {
             more: !input.denied && input.more,
             loading: !input.denied && (input.loading || input.loadingMore),
@@ -74,4 +81,17 @@ export function deriveEventActivity(input: EventTrail, p: Presentation) {
       ),
     );
   });
+}
+
+/** eventPictures selects portraits of displayed person actors, excluding unused directory entries. */
+export function eventPictures(input: EventTrail): readonly string[] {
+  if (input.denied || input.excluded) return [];
+  return [
+    ...new Set(
+      input.events.flatMap((event) => {
+        const portrait = event.actor ? input.people?.[event.actor]?.portrait : undefined;
+        return portrait ? [portrait] : [];
+      }),
+    ),
+  ];
 }

@@ -1,3 +1,15 @@
+import {
+  avatar,
+  avatarStack,
+  type AvatarModel,
+  compactPicture,
+  pictureId,
+  resourceIcons,
+  type People,
+  type Person,
+  type PictureStates,
+  type RowMediaModel,
+} from "./pictures";
 // derive.ts is ADR 0007 on a phone: what a list, a detail and a form are, given
 // only an entry's schema. The rules are the web generator's (ui/screens in the
 // public repository), restated in one place so the two shells agree — a status
@@ -10,6 +22,7 @@ import type { DataCell } from "./collections";
 import type { Status } from "./shared";
 import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
+export * from "./pictures";
 export { copyForLocale, copyLanguage, deriveCopy, type Copy, type Language } from "./copy";
 export { stateExamples, type StateExample } from "./stateGallery";
 export {
@@ -271,6 +284,8 @@ function referenceWord(f: Field, format: Formatting): string {
 
 /** display is a value as a person reads it; nothing at all is a dash. */
 export function display(f: Field, v: unknown, format: Formatting, names?: Names): string {
+  const person = personValue(f, v, format, names);
+  if (person) return person.description || "—";
   if (f.type === "bool")
     return v === true
       ? format.copy.value.yes
@@ -610,11 +625,13 @@ export function saidValue(
  * photographs exactly that line.
  */
 export interface ListRow {
+  readonly avatar?: AvatarModel;
   readonly title: string;
   /** absent, never a dash, when the preview field holds nothing. */
   readonly summary?: string;
   /** absent when the entry declares no state: a row never guesses one. */
   readonly status?: Status;
+  readonly media?: RowMediaModel;
   readonly cells: readonly DataCell[];
 }
 
@@ -631,11 +648,19 @@ export function listRow(
   format: Formatting,
   untitled: Copy["kit"]["untitled"],
   names?: Names,
+  images = false,
+  states: PictureStates = {},
 ): ListRow {
   const preview = listPreview(e, "row");
   const pill = statusPill(e, row, format);
+  const media = rowMedia(e, row, images, states);
   return {
     title: label(e, row, untitled, "row", names),
+    ...(`${e.module}/${e.entity}` === directory
+      ? { avatar: avatar(personRecord(e, row, "row"), states, images) }
+      : media.kind === "none"
+        ? {}
+        : { media }),
     ...(preview && hasValue(preview, row[preview.name])
       ? { summary: display(preview, row[preview.name], format, names) }
       : {}),
@@ -915,10 +940,18 @@ export function pointerTargets(
   for (const row of rows) {
     for (const f of drawn(row)) {
       const resource = points(f) ? pointedAt(f) : undefined;
-      const id = resource === undefined ? "" : text(row[f.name]);
-      if (resource === undefined || id === "" || seen.has(nameKey(resource, id))) continue;
-      seen.add(nameKey(resource, id));
-      out.push({ resource, id });
+      if (resource === undefined) continue;
+      const ids =
+        f.type === "list"
+          ? Array.isArray(row[f.name])
+            ? (row[f.name] as unknown[]).map(text)
+            : splitList(text(row[f.name]))
+          : [text(row[f.name])];
+      for (const id of ids) {
+        if (!id || seen.has(nameKey(resource, id))) continue;
+        seen.add(nameKey(resource, id));
+        out.push({ resource, id });
+      }
     }
   }
   return out;
@@ -1851,3 +1884,145 @@ export * from "./catalogList";
 export * from "./failure";
 export { kitExamples, kitCaseIds, type KitExamples, type GallerySelection } from "./kitGallery";
 export { sceneFor, sceneNames, type Scene } from "./kitScenes";
+
+/** personRecord retains only the authorized name and first visible declared portrait. */
+export function personRecord(entry: Entry, row: Row, where: "row" | "detail"): Person {
+  const name = referencedName(entry, row);
+  const portrait = entry.fields.find(
+    (f) =>
+      f.present === "avatar" &&
+      (f.type === "uuid" || f.type === "string") &&
+      (where === "row" ? onList(f) : !neverShown(f)) &&
+      pictureId(row[f.name]),
+  );
+  return {
+    id: text(row.id),
+    resource: `${entry.module}/${entry.entity}`,
+    label: name,
+    ...(name ? { name } : {}),
+    ...(portrait ? { portrait: row[portrait.name] as string } : {}),
+  };
+}
+export function personValue(
+  field: Field,
+  value: unknown,
+  format: Formatting,
+  names?: Names,
+  people?: People,
+  states: PictureStates = {},
+  images = false,
+  instance = field.name,
+) {
+  if (pointedAt(field) !== directory && field.present !== "person") return undefined;
+  const values =
+    field.type === "list"
+      ? Array.isArray(value)
+        ? value.map(text)
+        : splitList(text(value))
+      : [text(value)];
+  const persons: Person[] = values
+    .filter((v) => v.trim())
+    .map((v) => {
+      if (!points(field)) return { label: v, name: v };
+      const at = nameKey(pointedAt(field) ?? "", v);
+      const resolved = people?.[at];
+      if (resolved) return { ...resolved, label: resolved.label || referenceWord(field, format) };
+      return {
+        id: v,
+        resource: pointedAt(field) ?? "",
+        label: names?.[at] ?? referenceWord(field, format),
+        ...(names?.[at] && names[at] !== referenceWord(field, format) ? { name: names[at] } : {}),
+      };
+    });
+  return avatarStack(persons, format, states, images, instance);
+}
+export function thumbnailField(entry: Entry): Field | undefined {
+  const eligible = (name?: string) =>
+    entry.fields.find(
+      (f) =>
+        f.name === name &&
+        f.present === "image" &&
+        (f.type === "uuid" || f.type === "string") &&
+        onList(f),
+    );
+  return eligible(entry.hints?.thumbnailField) ?? eligible(entry.hints?.coverField);
+}
+export function rowMedia(
+  entry: Entry,
+  row: Row,
+  images = false,
+  states: PictureStates = {},
+): RowMediaModel {
+  const declared = entry.hints?.icon;
+  const icon = resourceIcons.includes(declared as never)
+    ? (declared as (typeof resourceIcons)[number])
+    : undefined;
+  const field = thumbnailField(entry);
+  const id = field ? row[field.name] : undefined;
+  if (images && pictureId(id)) {
+    const image = compactPicture(
+      id,
+      states,
+      JSON.stringify(["row", `${entry.module}/${entry.entity}`, row.id]),
+    );
+    if (image.state === "error" && !icon) return { kind: "none" };
+    return { kind: "picture", image, ...(icon ? { fallback: icon } : {}) };
+  }
+  return icon ? { kind: "icon", icon } : { kind: "none" };
+}
+export function homeMedia(entry: Entry): RowMediaModel {
+  const media = rowMedia(entry, {});
+  return media.kind === "none" ? { kind: "icon", icon: "grid" } : media;
+}
+
+/** visiblePictures selects bytes only for rendered media and the visible discs of each person group. */
+export function visiblePictures(
+  entry: Entry,
+  rows: readonly Row[],
+  people: People,
+  where: "row" | "detail",
+  format: Formatting,
+  informationOpen = false,
+): readonly string[] {
+  const ids: string[] = [];
+  for (const row of rows) {
+    if (where === "row") {
+      const leading = listRow(entry, row, format, format.copy.kit.untitled, undefined, true);
+      if (leading.avatar?.image) ids.push(leading.avatar.image.slot.id);
+      if (leading.media?.kind === "picture") ids.push(leading.media.image.slot.id);
+    }
+    const fields =
+      where === "row"
+        ? listCells(entry)
+        : [
+            ...shownFields(entry, row, (f) => f.hints?.visibility !== "detail"),
+            ...(informationOpen ? informationHeld(entry, row) : []),
+          ];
+    for (const field of fields) {
+      const group = personValue(field, row[field.name], format, undefined, people, {}, true);
+      for (const person of group?.people ?? []) if (person.image) ids.push(person.image.slot.id);
+    }
+  }
+  return [...new Set(ids)];
+}
+
+export function accountPerson(
+  identity: {
+    readonly userId: string;
+    readonly email: string;
+    readonly displayName?: string | null;
+  },
+  resolved?: Person,
+): Person {
+  const name = identity.displayName?.trim() || identity.email;
+  return { ...resolved, id: identity.userId, resource: directory, name, label: name };
+}
+export function accountPointers(entries: readonly Entry[], userId?: string): readonly Pointer[] {
+  const user = entries.find((e) => `${e.module}/${e.entity}` === directory);
+  return userId &&
+    user &&
+    user.operations?.includes("read") !== false &&
+    user.fields.some((f) => f.present === "avatar" && !neverShown(f))
+    ? [{ resource: directory, id: userId }]
+    : [];
+}

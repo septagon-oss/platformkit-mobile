@@ -1,3 +1,4 @@
+import { clearImageMemory } from "../effects/native-images";
 import React, { useLayoutEffect, useMemo, useRef } from "react";
 import { Image } from "expo-image";
 import type { ImageSlotProps } from "../core/derive";
@@ -17,6 +18,7 @@ export function NativeImage({
       resource.version,
       resource.uri,
       model.id,
+      model.instance,
     ]),
     request = useMemo(() => ({ identity }), [identity]),
     current = useRef<typeof request | undefined>(request);
@@ -35,10 +37,11 @@ export function NativeImage({
       key={identity}
       source={{
         uri: resource.uri,
+        ...(resource.cacheKey ? { cacheKey: resource.cacheKey } : {}),
         ...(resource.headers ? { headers: { ...resource.headers } } : {}),
       }}
       recyclingKey={identity}
-      cachePolicy="none"
+      cachePolicy={resource.cachePolicy ?? "none"}
       transition={0}
       contentFit={model.fit}
       accessible={!model.decorative}
@@ -50,3 +53,5 @@ export function NativeImage({
     />
   );
 }
+
+export const clearNativeImageMemory = () => clearImageMemory(() => Image.clearMemoryCache());

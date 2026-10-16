@@ -55,7 +55,7 @@ async function read(answers: (files: Entry) => Record<string, unknown>) {
   const files: Entry = {
     ...note,
     module: "file",
-    entity: "files",
+    entity: "file",
     path: "/api/v1/file/files",
   };
   const api: FakeApi = fakeApi();
@@ -66,7 +66,7 @@ async function read(answers: (files: Entry) => Record<string, unknown>) {
   );
   shell.value = shellValue(api, {
     entry: (module: string, entity: string) =>
-      module === "file" && entity === "files" ? files : entry,
+      module === "file" && entity === "file" ? files : entry,
   });
   await render(
     <ThemeProvider mode="light">
@@ -95,7 +95,7 @@ test("a figure reads its own row for the frame and asks for its bytes at the fil
   // the file module renders that fits — a phone never downloads a frame it cannot paint.
   await waitFor(() => expect(asked).toHaveLength(1));
   expect(asked[0]).toEqual({
-    uri: `https://acme.test/api/v1/file/files/${FILE}/content?w=960`,
+    uri: `https://acme.test/api/v1/file/files/${FILE}/content`,
     headers: { Authorization: "Bearer pk_live_1" },
     label: "The bridge at dusk",
   });

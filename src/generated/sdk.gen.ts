@@ -129,6 +129,9 @@ import type {
   AuthTokenRevokeData,
   AuthTokenRevokeErrors,
   AuthTokenRevokeResponses,
+  AuthTokenRevokeSelfData,
+  AuthTokenRevokeSelfErrors,
+  AuthTokenRevokeSelfResponses,
   AuthVerifyEmailData,
   AuthVerifyEmailErrors,
   AuthVerifyEmailResponses,
@@ -213,6 +216,12 @@ import type {
   ContentContentUpdateData,
   ContentContentUpdateErrors,
   ContentContentUpdateResponses,
+  FileFileAltCommandData,
+  FileFileAltCommandErrors,
+  FileFileAltCommandResponses,
+  FileFileAltData,
+  FileFileAltErrors,
+  FileFileAltResponses,
   FileFileContentData,
   FileFileContentErrors,
   FileFileContentHeadData,
@@ -252,6 +261,9 @@ import type {
   FileFileUsesData,
   FileFileUsesErrors,
   FileFileUsesResponses,
+  FileQuotaReadData,
+  FileQuotaReadErrors,
+  FileQuotaReadResponses,
   NotificationNotificationListData,
   NotificationNotificationListErrors,
   NotificationNotificationListResponses,
@@ -446,6 +458,7 @@ import {
   zAuthTokenIssueResponse,
   zAuthTokenListResponse,
   zAuthTokenRevokeResponse,
+  zAuthTokenRevokeSelfResponse,
   zAuthVerifyEmailResponse,
   zBillingPlanCreateResponse,
   zBillingPlanDeleteResponse,
@@ -474,6 +487,8 @@ import {
   zContentContentUnpublishResponse,
   zContentContentUntranslateResponse,
   zContentContentUpdateResponse,
+  zFileFileAltCommandResponse,
+  zFileFileAltResponse,
   zFileFileDeleteResponse,
   zFileFileEraseResponse,
   zFileFileGrantResponse,
@@ -483,6 +498,7 @@ import {
   zFileFileRetainResponse,
   zFileFileUploadResponse,
   zFileFileUsesResponse,
+  zFileQuotaReadResponse,
   zNotificationNotificationListResponse,
   zNotificationNotificationReadResponse,
   zSiteSettingsReadResponse,
@@ -679,7 +695,7 @@ export const authChallengePasskeyVerify = <ThrowOnError extends boolean = false>
 /**
  * Answer a second factor
  *
- * The second half of a sign-in, and only ever of one. The caller is somebody /login or the provider leg just refused to finish without a code, and that refusal is what makes this answer spendable; a code presented by itself - a recovery code from a leaked file, a TOTP read out to whoever phished it - is refused as one answer and at one cost with a wrong code, and spends nothing. For an address that was just refused, this takes the address and the code, or the address and a recovery code, and opens the session the first half had already earned. A wrong code, a replayed step, a spent recovery code, an address with no factor and an address nobody has are one answer at one cost.
+ * The second half of a sign-in, and only ever of one — an answer that never reached the caller spends the step again rather than replaying the session it opened. The caller is somebody /login or the provider leg just refused to finish without a code, and that refusal is what makes this answer spendable; a code presented by itself - a recovery code from a leaked file, a TOTP read out to whoever phished it - is refused as one answer and at one cost with a wrong code, and spends nothing. For an address that was just refused, this takes the address and the code, or the address and a recovery code, and opens the session the first half had already earned. A wrong code, a replayed step, a spent recovery code, an address with no factor and an address nobody has are one answer at one cost.
  */
 export const authChallengeVerify = <ThrowOnError extends boolean = false>(
   options: Options<AuthChallengeVerifyData, ThrowOnError>,
@@ -811,7 +827,7 @@ export const authFactorWithdraw = <ThrowOnError extends boolean = false>(
 /**
  * Sign in with a password
  *
- * Opens a session and sets the platformkit_session cookie. A wrong password and an address nobody has answer identically, and cost the same.
+ * Opens a session and sets the platformkit_session cookie. A wrong password and an address nobody has answer identically, and cost the same. A sign-in that never got its answer is signed in again rather than replayed: the session is minted as this route answers, and a key could only keep either the cookie, which is a credential nobody should have to leave in a row, or a body that names the caller and signs nobody in.
  */
 export const authLogin = <ThrowOnError extends boolean = false>(
   options: Options<AuthLoginData, ThrowOnError>,
@@ -935,7 +951,7 @@ export const authPasswordChange = <ThrowOnError extends boolean = false>(
 /**
  * Set a password with a link
  *
- * Consumes the token the link carried and sets the password. Every session this person had ends, including any the caller holds, and this browser is signed in — an invitation that left the invited person back at the sign-in form was half a door. The one account left signed out is a person who enrolled a second factor: their password changes and their other sessions end, and the sign-in finishes with the code. A token that is unknown, spent or expired is one answer.
+ * Consumes the token the link carried and sets the password. Every session this person had ends, including any the caller holds, and this browser is signed in — an invitation that left the invited person back at the sign-in form was half a door. The one account left signed out is a person who enrolled a second factor: their password changes and their other sessions end, and the sign-in finishes with the code. A token that is unknown, spent or expired is one answer. The link is spent by the first attempt whatever that answer was, so a retry of one that got no answer is refused as a spent token is refused, and the way back is the sign-in form with the new password.
  */
 export const authPasswordReset = <ThrowOnError extends boolean = false>(
   options: Options<AuthPasswordResetData, ThrowOnError>,
@@ -1114,6 +1130,20 @@ export const authTokenIssue = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * Revoke the key that signed this request in
+ *
+ * Ends the key that authenticated this request, and no other: there is no id to name, and no management grant is needed, so a key too narrow for anything else can still retire itself. 204 with no body, because the credential it would describe no longer exists. A session is refused with 403, since it carries no key; a revoked, expired or unknown key is not recognised and is answered 401 with a Bearer challenge before this operation runs. X-Expected-Principal is honoured if sent and never required.
+ */
+export const authTokenRevokeSelf = <ThrowOnError extends boolean = false>(
+  options: Options<AuthTokenRevokeSelfData, ThrowOnError>,
+): RequestResult<AuthTokenRevokeSelfResponses, AuthTokenRevokeSelfErrors, ThrowOnError> =>
+  options.client.post<AuthTokenRevokeSelfResponses, AuthTokenRevokeSelfErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAuthTokenRevokeSelfResponse.parseAsync(data),
+    url: "/api/v1/auth/tokens/revoke-self",
+    ...options,
   });
 
 /**
@@ -1323,7 +1353,7 @@ export const changeProposalWithdraw = <ThrowOnError extends boolean = false>(
 /**
  * List contents
  *
- * Sortable and filterable by: id, createdAt, updatedAt, slug, title, body, kind, status, publishedAt, author
+ * Sortable and filterable by: id, createdAt, updatedAt, slug, title, body, coverImageId, kind, status, publishedAt, author
  */
 export const contentContentList = <ThrowOnError extends boolean = false>(
   options: Options<ContentContentListData, ThrowOnError>,
@@ -1557,7 +1587,7 @@ export const contentContentUntranslate = <ThrowOnError extends boolean = false>(
 /**
  * List files
  *
- * The tenant's files, newest first. The bytes are at /{id}/content.
+ * The tenant's files, newest first, filtered by name, media family and whether anything still shows them. The bytes are at /{id}/content.
  */
 export const fileFileList = <ThrowOnError extends boolean = false>(
   options: Options<FileFileListData, ThrowOnError>,
@@ -1631,6 +1661,42 @@ export const fileFileRead = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => await zFileFileReadResponse.parseAsync(data),
     url: "/api/v1/file/files/{id}",
     ...options,
+  });
+
+/**
+ * Write what a file says about itself
+ *
+ * Alt text, or the claim that the image is decorative and says nothing. A file that is empty and not decorative is refused with 422, and one whose updatedAt has moved past expectedUpdatedAt is refused with 409 and stays exactly as it was. PUT is the whole claim written at once; POST is the same write at the address the catalog's caption command names.
+ */
+export const fileFileAltCommand = <ThrowOnError extends boolean = false>(
+  options: Options<FileFileAltCommandData, ThrowOnError>,
+): RequestResult<FileFileAltCommandResponses, FileFileAltCommandErrors, ThrowOnError> =>
+  options.client.post<FileFileAltCommandResponses, FileFileAltCommandErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileFileAltCommandResponse.parseAsync(data),
+    url: "/api/v1/file/files/{id}/alt",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Write what a file says about itself
+ *
+ * Alt text, or the claim that the image is decorative and says nothing. A file that is empty and not decorative is refused with 422, and one whose updatedAt has moved past expectedUpdatedAt is refused with 409 and stays exactly as it was. PUT is the whole claim written at once; POST is the same write at the address the catalog's caption command names.
+ */
+export const fileFileAlt = <ThrowOnError extends boolean = false>(
+  options: Options<FileFileAltData, ThrowOnError>,
+): RequestResult<FileFileAltResponses, FileFileAltErrors, ThrowOnError> =>
+  options.client.put<FileFileAltResponses, FileFileAltErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileFileAltResponse.parseAsync(data),
+    url: "/api/v1/file/files/{id}/alt",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -1716,6 +1782,20 @@ export const fileFileUses = <ThrowOnError extends boolean = false>(
   options.client.get<FileFileUsesResponses, FileFileUsesErrors, ThrowOnError>({
     responseValidator: async (data) => await zFileFileUsesResponse.parseAsync(data),
     url: "/api/v1/file/files/{id}/uses",
+    ...options,
+  });
+
+/**
+ * Read this tenant's storage meter
+ *
+ * What the tenant is holding, what it was given, and what is left — the same sum an upload is refused against, taken without the upload lock, so it is the number as of this request and not a promise about the next one. An installation with no ceiling answers unlimited.
+ */
+export const fileQuotaRead = <ThrowOnError extends boolean = false>(
+  options: Options<FileQuotaReadData, ThrowOnError>,
+): RequestResult<FileQuotaReadResponses, FileQuotaReadErrors, ThrowOnError> =>
+  options.client.get<FileQuotaReadResponses, FileQuotaReadErrors, ThrowOnError>({
+    responseValidator: async (data) => await zFileQuotaReadResponse.parseAsync(data),
+    url: "/api/v1/file/quota",
     ...options,
   });
 

@@ -11,10 +11,11 @@ export const page = zPageTaskBody
     items: z.array(row).nullable(),
   })
   .transform((value) => ({ items: value.items ?? [], total: value.total }));
-export const identity = zIdentity.transform(({ userId, email, permissions }) => ({
+export const identity = zIdentity.transform(({ userId, email, permissions, displayName }) => ({
   userId,
   email,
   permissions,
+  ...(displayName ? { displayName } : {}),
 }));
 // The mint's answer carries the key once, beside the id its own revoke takes.
 // Nothing else of it is kept: expiresAt is the server's, not a countdown.
