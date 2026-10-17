@@ -3,15 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { key, type Entry } from "../core/catalog";
 import {
   nameKey,
+  enrichmentFailure,
   personRecord,
   referenceWordFor,
   type Names,
   type People,
   type Pointer,
 } from "../core/derive";
-import { ApiError, type Api } from "../effects/api";
+import type { Api } from "../effects/api";
 import { useShell } from "../shell";
-import { screenCopy } from "./failure";
+import { failureFacts, screenCopy } from "./failure";
 
 const DIRECTORY = 200;
 interface Read {
@@ -29,11 +30,17 @@ export function useRecordNames(pointers: readonly Pointer[]): Names {
 export function useDirectoryNames(pointers: readonly Pointer[]): Names {
   return useDirectoryPeople(pointers).names;
 }
-/** useRecordPeople adds visible portraits to the same distinct record reads; a changed visit renews them. */
+/**
+ * useRecordPeople resolves each distinct pointer once per visit (0 by default).
+ * Refresh retains the session's authorized name/portrait until replaced or explicitly refused.
+ */
 export function useRecordPeople(pointers: readonly Pointer[], visit: unknown = 0) {
   return useNames(pointers, false, visit);
 }
-/** useDirectoryPeople shares one bounded name/portrait page per target and visit, including later list pages. */
+/**
+ * useDirectoryPeople shares one bounded name/portrait page per target and visit (0 by default).
+ * Later list pages reuse it; refresh failures retain the same session's authorized projection.
+ */
 export function useDirectoryPeople(pointers: readonly Pointer[], visit: unknown = 0) {
   return useNames(pointers, true, visit);
 }
@@ -41,6 +48,7 @@ export function useDirectoryPeople(pointers: readonly Pointer[], visit: unknown 
 function useNames(pointers: readonly Pointer[], window: boolean, visit: unknown) {
   const { api, state, baseURL, identity } = useShell();
   const copy = screenCopy();
+  const keyId = api.bearer()?.id;
   const scope = useMemo(
     () => ({
       api,
@@ -48,66 +56,68 @@ function useNames(pointers: readonly Pointer[], window: boolean, visit: unknown)
       generation: state.generation,
       baseURL,
       user: identity?.userId,
-      visit,
-      records: new Map<string, Promise<Read>>(),
-      directories: new Map<string, Promise<Read>>(),
+      keyId,
     }),
-    [api, state.catalog, state.generation, baseURL, identity?.userId, visit],
+    [api, state.catalog, state.generation, baseURL, identity?.userId, keyId],
+  );
+  const request = useMemo(
+    () => ({ scope, visit, cache: new Map<string, Promise<Read | undefined>>() }),
+    [scope, visit],
   );
   const target = JSON.stringify(pointers);
   const wanted = useMemo(() => JSON.parse(target) as readonly Pointer[], [target]);
-  const [resolved, setResolved] = useState<{ scope: typeof scope; read: Read }>();
-  const held = resolved?.scope === scope ? resolved.read : empty;
+  const [resolved, setResolved] = useState<{
+    scope: typeof scope;
+    reads: ReadonlyMap<string, Read>;
+    signedOut: boolean;
+  }>();
+  const held = resolved?.scope === scope ? resolved : undefined;
 
   useEffect(() => {
     let active = true;
     void (async () => {
       const mounted = new Map((scope.catalog?.resources ?? []).map((e) => [key(e), e]));
-      const reads = wanted.map((pointer) => {
+      const reads = wanted.map(async (pointer) => {
         const entry = mounted.get(pointer.resource);
-        if (!entry) return Promise.resolve(empty);
         const at = window ? pointer.resource : nameKey(pointer.resource, pointer.id);
-        const cache = window ? scope.directories : scope.records;
+        if (!entry) return [at, empty] as const;
+        const cache = request.cache;
         let read = cache.get(at);
         if (!read) {
           read = window ? byDirectory(scope.api, entry) : byRecord(scope.api, entry, pointer.id);
           cache.set(at, read);
         }
-        return read;
+        return [at, await read] as const;
       });
       const parts = await Promise.all(reads);
       if (!active) return;
       setResolved((was) => {
-        const signedOut =
-          parts.some((p) => p.signedOut) || (was?.scope === scope && was.read.signedOut);
-        return {
-          scope,
-          read: signedOut
-            ? { ...empty, signedOut }
-            : {
-                names: Object.assign({}, ...parts.map((p) => p.names)),
-                people: Object.assign({}, ...parts.map((p) => p.people)),
-                signedOut,
-              },
-        };
+        const previous = was?.scope === scope ? was : undefined;
+        const signedOut = parts.some(([, p]) => p?.signedOut) || !!previous?.signedOut;
+        const reads = new Map<string, Read>();
+        if (!signedOut)
+          for (const [at, answer] of parts)
+            reads.set(at, answer ?? previous?.reads.get(at) ?? empty);
+        return { scope, reads, signedOut };
       });
     })();
     return () => {
       active = false;
     };
-  }, [scope, wanted, window]);
+  }, [scope, request, wanted, window]);
 
   return useMemo(() => {
     const names: Record<string, string> = {},
       people: Record<string, People[string]> = {};
     for (const pointer of wanted) {
       const at = nameKey(pointer.resource, pointer.id);
-      names[at] = held.names[at] ?? referenceWordFor(pointer.resource, copy);
-      const person = held.people[at];
+      const read = held?.reads.get(window ? pointer.resource : at) ?? empty;
+      names[at] = read.names[at] ?? referenceWordFor(pointer.resource, copy);
+      const person = read.people[at];
       if (person) people[at] = { ...person, label: person.label || names[at] };
     }
     return { names, people };
-  }, [wanted, held, copy]);
+  }, [wanted, held, copy, window]);
 }
 
 function projection(
@@ -127,17 +137,18 @@ function projection(
   }
   return { names, people, signedOut: false };
 }
-function refused(error: unknown): Read {
-  return { ...empty, signedOut: error instanceof ApiError && error.status === 401 };
+function refused(error: unknown): Read | undefined {
+  const verdict = enrichmentFailure(failureFacts(error));
+  return verdict === "retain" ? undefined : { ...empty, signedOut: verdict === "signed-out" };
 }
-async function byRecord(api: Api, entry: Entry, id: string): Promise<Read> {
+async function byRecord(api: Api, entry: Entry, id: string): Promise<Read | undefined> {
   try {
     return projection(entry, [{ ...(await api.get(entry, id)), id }], "detail");
   } catch (error) {
     return refused(error);
   }
 }
-async function byDirectory(api: Api, entry: Entry): Promise<Read> {
+async function byDirectory(api: Api, entry: Entry): Promise<Read | undefined> {
   try {
     return projection(entry, (await api.list(entry, { limit: DIRECTORY })).items, "row");
   } catch (error) {

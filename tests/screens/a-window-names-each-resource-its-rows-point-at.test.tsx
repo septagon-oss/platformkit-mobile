@@ -163,3 +163,38 @@ test("directory portraits share one bounded page and withdraw together on a refr
   expect(api.list).toHaveBeenCalledTimes(2);
   await leave(view.unmount);
 });
+
+test("each directory refresh replaces only the target that answered", async () => {
+  const api = fakeApi();
+  const sites: Entry = { ...user, module: "site", entity: "site", path: "/api/v1/site/sites" };
+  catalog = { ...catalog, resources: [...catalog.resources, sites] };
+  installed(api);
+  const sitePointer: Pointer = { resource: "site/site", id: OTHER };
+  const siteAt = nameKey(sitePointer.resource, sitePointer.id);
+  api.list.mockImplementation(async (entry) => ({
+    total: 1,
+    items: [
+      entry.module === "user"
+        ? { id: ID, displayName: "Leila Kumar" }
+        : { id: OTHER, displayName: "Western depot" },
+    ],
+  }));
+  const view = await renderHook(
+    (visit: number) => useDirectoryPeople([...pointer(ID), sitePointer], visit),
+    { initialProps: 0 },
+  );
+  await flush();
+  expect(view.result.current.names[at(ID)]).toBe("Leila Kumar");
+  expect(view.result.current.names[siteAt]).toBe("Western depot");
+  api.list.mockImplementation(async (entry) => {
+    if (entry.module === "user") throw new ApiError(503, "Unavailable");
+    return { total: 0, items: [] };
+  });
+  await view.rerender(1);
+  await flush();
+  expect(api.list).toHaveBeenCalledTimes(4);
+  expect(view.result.current.names[at(ID)]).toBe("Leila Kumar");
+  expect(view.result.current.names[siteAt]).toBe("Linked");
+  expect(view.result.current.people[siteAt]).toBeUndefined();
+  await leave(view.unmount);
+});

@@ -241,8 +241,9 @@ compute a hash by fetching an image just for its placeholder.
    and visibility. Do not read full file listings. A metadata 403/404 stops that
    image for the visit. A missing metadata resource is not permission to guess
    it: the declared source may be loaded with original-size/uncached defaults.
-   A transient metadata failure may also use that uncached declared source;
-   it cannot earn public caching. Cached/offline metadata cannot earn caching
+   A transient metadata failure retains a displayed resource in the same session;
+   on a first read it may use that uncached declared source. It never revives a
+   refused resource or earns public caching. Cached/offline metadata cannot earn caching
    either. A native byte request remains independently authorized by the server.
 5. Generalize the existing pure width planner to accept the catalogue widths.
    For positive measured physical slot pixels, choose the smallest declared
@@ -310,7 +311,7 @@ are local presentation decisions; they never rewrite a server refusal.
 | Directory/file metadata 403 | **Immutable** for this actor/catalogue visit; withdraw enrichment, settle that read, no retry or retained unauthorized name/portrait. Base authorized content remains. |
 | Directory/file metadata 404 | **Immutable** for this record/visit; same fallback and no stale enrichment. Refusing enrichment does not refuse the base record. |
 | Metadata refusal recognized by the existing API as session expiry | **Correctable** by reauthentication; shell invalidates the session. Never show an old decoded picture through reentry. |
-| Directory transport/5xx/timeout | **Correctable** by explicit refresh; unavailable-name/glyph, no background retries. File metadata transient failure uses only the uncached declared door as above. |
+| Directory transport/5xx/timeout | **Correctable** by explicit refresh; retain the previous authorized name/portrait in the same session, otherwise unavailable-name/glyph. No background retries. File metadata retains the displayed resource, or uses the uncached declared door on a first read, as above. |
 | Native load/network/decode error (status unavailable) | **Correctable** by explicit refresh/remount; portrait → initials/glyph, thumbnail → declared icon or none. No raw error text or auth guess. |
 | Unsupported catalogue version or invalid required response | Existing **immutable** compatibility refusal; existing update-app/response handling remains in charge. No media-specific bypass. |
 | Attempt to cache private/unknown/unversioned/stale-authorized bytes | **Immutable** for that resource version/policy; force `none`, never retry with a less restrictive policy. |
@@ -471,9 +472,12 @@ The unrestricted administrator response also exposes unrelated translation map
 inputs beyond this client's supported field kinds, which remain refused. The
 read-scoped fixture proves only the public shape and actor scope it records.
 
-Explicit list/detail visits reset enrichment and image attempts on refresh;
-adding another page retains the bounded directory page and per-file metadata
-promises. Image slot identities distinguish simultaneous uses of the same file.
+Explicit list/detail visits renew enrichment and image attempts on refresh,
+retaining the prior answer while reading and on transport/5xx failure within
+the same session and catalog. Successful reads replace prior projections; explicit
+401/403/404 refusals withdraw them. Session/catalog changes immediately withdraw
+prior resources. Adding another page retains the bounded directory page and
+per-file metadata promises. Image slot identities distinguish simultaneous uses of the same file.
 The native cache-clear call enters through `NativeImage`; the effects helper
 receives it as an explicit function because effects import no Expo image module.
 The theme's status-pair helper is shared by badges and avatars.

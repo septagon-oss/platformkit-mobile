@@ -2088,15 +2088,21 @@ three discs and a localized remainder; their single spoken description includes
 the whole group. A portrait is the first visible declared `present: avatar`
 field, with no field-name inference. Existing reference reads produce names and
 portraits together: one record read per distinct pointer, or one page of at
-most 200 people per target and list visit. A refresh starts a new visit; loading
-more rows reuses that directory page. Account initials use `displayName`, then
+most 200 people per target and list visit. A refresh starts a new visit and keeps
+the previous names and portraits while reading; transport and server failures
+keep that answer. A successful answer replaces it, including removed people or
+portraits; a 401/403/404 withdraws it. Loading more rows reuses that directory page.
+Account initials use `displayName`, then
 email. A declared account portrait permits one own-record read; the pinned
 reference user/identity contracts have no portrait, so they need no extra read.
 
 Compact pictures use the current session's bearer header, never a query token.
 The mounted `file/file` metadata read is coalesced per visible ID. A metadata
-403/404 blocks bytes for the visit; a transient failure permits only the
-uncached declared door. Fresh public metadata with a content version permits
+403/404 blocks bytes for the visit. Refresh keeps the displayed resource and its
+slot states while metadata is pending or fails transiently, only within the same
+session and catalog scope. A first transient metadata failure permits only the
+uncached declared door; it never restores a resource a refusal withdrew.
+Fresh public metadata with a content version permits
 `expo-image` memory caching. Private, unknown and unversioned media uses
 `cachePolicy="none"`; no image bytes enter disk storage. Cache identities include
 server, person, key, session/visit, source, file, version and planned width.

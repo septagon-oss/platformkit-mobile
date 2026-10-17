@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 227,
-   "cases": 1040,
-   "ms": 1541632,
-   "testsMs": 49207.30000000002,
+   "files": 228,
+   "cases": 1043,
+   "ms": 1542594,
+   "testsMs": 49259.80000000002,
    "runners": {
     "jest": 72,
-    "node": 155
+    "node": 156
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 88,
-   "cases": 273,
-   "ms": 1912627,
-   "testsMs": 31297,
+   "files": 89,
+   "cases": 290,
+   "ms": 1917738,
+   "testsMs": 31874,
    "runners": {
-    "jest": 88
+    "jest": 89
    },
    "unreachable": 0
   },
@@ -9360,6 +9360,47 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-person-reads-one-colour-wherever-they-appear.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "A person's disc colour is a function of their id alone: the same id reads the same tone in a directory row, in a field that points at them, as an activity actor and as the signed-in account, and no id ever reads the danger tone. The vectors below were computed outside this repository (FNV-1a, 32-bit, over UTF-16 code units, modulo the four safe tones in the order info, ok, warning, neutral), so a change to the hash is a diff somebody reads rather than a colour every person silently loses.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins independently calculated ID tone vectors, forbidden danger and cross-surface identity; tests/pictures.test.ts covers the wider picture models. Cost comes from measured.commands.node for this file; exclusive coverage was not measured.",
+   "ms": 962,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a person's tone is the independently computed vector for their id",
+    "no identifier reads the danger tone, and each reads the same tone every time",
+    "the same person reads one tone in a row, a reference, the trail and the account"
+   ],
+   "tests": [
+    {
+     "title": "a person's tone is the independently computed vector for their id",
+     "ms": 1.017694,
+     "measured": false
+    },
+    {
+     "title": "no identifier reads the danger tone, and each reads the same tone every time",
+     "ms": 35.450978,
+     "measured": false
+    },
+    {
+     "title": "the same person reads one tone in a row, a reference, the trail and the account",
+     "ms": 15.99628,
+     "measured": false
+    }
+   ],
+   "loaded": 32,
+   "coveredProdLines": 10918,
+   "onlyProdLines": null,
+   "testsMs": 52.5
   },
   {
    "file": "tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts",
@@ -19049,6 +19090,41 @@
    "testsMs": 48
   },
   {
+   "file": "tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A refresh never blanks what the list already says (0085): a row's assignee keeps the name the directory answered while a refresh asks again, and keeps it when the refresh cannot reach the directory at all \u2014 a failed request is not a withdrawn grant, so the person in a tunnel still reads who a task belongs to. A refusal is a different answer and withdraws the name; that rule has its own cases beside the reference hooks.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Drives the generated list refresh and retains the visible assignee under a pending or unreachable directory; tests/screens/reference-name-resolves-or-says-linked.test.tsx covers record reads. Cost comes from measured.commands.jest for this file; exclusive coverage was not measured.",
+   "ms": 19848,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a refresh that cannot reach the directory keeps the assignee's name",
+    "a refresh keeps the assignee's name while the directory is read again"
+   ],
+   "tests": [
+    {
+     "title": "a refresh that cannot reach the directory keeps the assignee's name",
+     "ms": 828,
+     "measured": false
+    },
+    {
+     "title": "a refresh keeps the assignee's name while the directory is read again",
+     "ms": 44,
+     "measured": false
+    }
+   ],
+   "loaded": 153,
+   "coveredProdLines": 2190,
+   "onlyProdLines": null,
+   "testsMs": 872
+  },
+  {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -19215,7 +19291,7 @@
    "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 3,
+   "cases": 4,
    "rule": "A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answers. A value the page does not reach keeps the word the kit says, which is what a page is \u2014 the identifier the row carries is never what a person reads.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -19223,17 +19299,18 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 25064,
+   "ms": 18089,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a window reads each pointed-at resource once and names every value that page holds",
     "a value outside the page keeps its word, which is what a page is",
-    "directory portraits share one bounded page and withdraw together on a refreshed refusal"
+    "directory portraits share one bounded page and withdraw together on a refreshed refusal",
+    "each directory refresh replaces only the target that answered"
    ],
    "tests": [
     {
      "title": "a window reads each pointed-at resource once and names every value that page holds",
-     "ms": 11,
+     "ms": 10,
      "measured": false
     },
     {
@@ -19243,14 +19320,19 @@
     },
     {
      "title": "directory portraits share one bounded page and withdraw together on a refreshed refusal",
-     "ms": 7,
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "each directory refresh replaces only the target that answered",
+     "ms": 4,
      "measured": false
     }
    ],
    "loaded": 136,
-   "coveredProdLines": 1636,
+   "coveredProdLines": 1666,
    "onlyProdLines": null,
-   "testsMs": 21
+   "testsMs": 23
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",
@@ -20314,7 +20396,7 @@
    "file": "tests/screens/compact-pictures.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 11,
+   "cases": 18,
    "rule": "(no first comment; first test title) one metadata read prepares header-authorized private bytes without a native cache",
    "ruleSource": "first test title",
    "tier": "merge",
@@ -20322,11 +20404,17 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 30152,
+   "ms": 21013,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "one metadata read prepares header-authorized private bytes without a native cache",
     "fresh public versioned metadata earns memory caching and a new visit changes its identity",
+    "a compact picture keeps its ready resource while a refresh waits and after TypeError: Offline\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
+    "a compact picture keeps its ready resource while a refresh waits and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:38)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+    "a picture refresh answered HTTP 401 withdraws a previously ready resource",
+    "a picture refresh answered HTTP 403 withdraws a previously ready resource",
+    "a picture refresh answered HTTP 404 withdraws a previously ready resource",
+    "a pending picture can finish loading during a metadata refresh",
     "metadata HTTP 403 prevents a byte request and preserves the initials",
     "metadata HTTP 404 prevents a byte request and preserves the initials",
     "a transient metadata error uses only the uncached declared door",
@@ -20335,69 +20423,105 @@
     "an account change withdraws old resources before new metadata arrives",
     "the same file in two rows keeps independent loading and failure states",
     "the generated list composes its thumbnail and named assignee from the same authorized file read",
+    "a generated detail keeps its assignee while a write invalidation renews the person read",
     "the authenticated account uses its declared display name without a speculative portrait read"
    ],
    "tests": [
     {
      "title": "one metadata read prepares header-authorized private bytes without a native cache",
-     "ms": 33,
+     "ms": 19,
      "measured": false
     },
     {
      "title": "fresh public versioned metadata earns memory caching and a new visit changes its identity",
-     "ms": 7,
+     "ms": 5,
      "measured": false
     },
     {
-     "title": "metadata HTTP 403 prevents a byte request and preserves the initials",
-     "ms": 8,
-     "measured": false
-    },
-    {
-     "title": "metadata HTTP 404 prevents a byte request and preserves the initials",
-     "ms": 8,
-     "measured": false
-    },
-    {
-     "title": "a transient metadata error uses only the uncached declared door",
+     "title": "a compact picture keeps its ready resource while a refresh waits and after TypeError: Offline\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
      "ms": 4,
      "measured": false
     },
     {
-     "title": "missing identity or bearer prepares no metadata or byte read",
+     "title": "a compact picture keeps its ready resource while a refresh waits and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:38)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a picture refresh answered HTTP 401 withdraws a previously ready resource",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a picture refresh answered HTTP 403 withdraws a previously ready resource",
      "ms": 3,
      "measured": false
     },
     {
+     "title": "a picture refresh answered HTTP 404 withdraws a previously ready resource",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a pending picture can finish loading during a metadata refresh",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "metadata HTTP 403 prevents a byte request and preserves the initials",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "metadata HTTP 404 prevents a byte request and preserves the initials",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a transient metadata error uses only the uncached declared door",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "missing identity or bearer prepares no metadata or byte read",
+     "ms": 1,
+     "measured": false
+    },
+    {
      "title": "an obsolete file load cannot replace the current picture's state",
-     "ms": 7,
+     "ms": 5,
      "measured": false
     },
     {
      "title": "an account change withdraws old resources before new metadata arrives",
-     "ms": 6,
+     "ms": 3,
      "measured": false
     },
     {
      "title": "the same file in two rows keeps independent loading and failure states",
-     "ms": 9,
+     "ms": 6,
      "measured": false
     },
     {
      "title": "the generated list composes its thumbnail and named assignee from the same authorized file read",
-     "ms": 1410,
+     "ms": 717,
+     "measured": false
+    },
+    {
+     "title": "a generated detail keeps its assignee while a write invalidation renews the person read",
+     "ms": 378,
      "measured": false
     },
     {
      "title": "the authenticated account uses its declared display name without a speculative portrait read",
-     "ms": 10,
+     "ms": 9,
      "measured": false
     }
    ],
-   "loaded": 157,
-   "coveredProdLines": 2203,
+   "loaded": 164,
+   "coveredProdLines": 2513,
    "onlyProdLines": null,
-   "testsMs": 1505
+   "testsMs": 1177
   },
   {
    "file": "tests/screens/custom-renderer-catalog-withdrawal.test.tsx",
@@ -20899,7 +21023,7 @@
    "file": "tests/screens/reference-name-resolves-or-says-linked.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 7,
+   "cases": 14,
    "rule": "A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the identifier in between. A refusal settles that pointer for the visit rather than retrying it, and a session the server withdrew withdraws every name the screen holds.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -20907,9 +21031,16 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 16461,
+   "ms": 17838,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
+    "a record refresh retains its name and portrait during and after TypeError: Network request failed\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
+    "a record refresh retains its name and portrait during and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:53)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+    "a record refresh answered HTTP 401 withdraws its previous name and portrait",
+    "a record refresh answered HTTP 403 withdraws its previous name and portrait",
+    "a record refresh answered HTTP 404 withdraws its previous name and portrait",
+    "a changed session withdraws names and portraits before the replacement read answers",
+    "a changed key withdraws names and portraits before the replacement read answers",
     "a record's screen asks once per pointed-at record, and the answer is the name",
     "a person with nothing to read as a name stays the word, and the identifier is never in the map",
     "a refused record leaves the word in place, asks once, and reports no failure",
@@ -20920,8 +21051,43 @@
    ],
    "tests": [
     {
+     "title": "a record refresh retains its name and portrait during and after TypeError: Network request failed\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a record refresh retains its name and portrait during and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:53)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a record refresh answered HTTP 401 withdraws its previous name and portrait",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a record refresh answered HTTP 403 withdraws its previous name and portrait",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a record refresh answered HTTP 404 withdraws its previous name and portrait",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a changed session withdraws names and portraits before the replacement read answers",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a changed key withdraws names and portraits before the replacement read answers",
+     "ms": 3,
+     "measured": false
+    },
+    {
      "title": "a record's screen asks once per pointed-at record, and the answer is the name",
-     "ms": 9,
+     "ms": 2,
      "measured": false
     },
     {
@@ -20936,7 +21102,7 @@
     },
     {
      "title": "a refused session withdraws every name, and the words stand",
-     "ms": 2,
+     "ms": 3,
      "measured": false
     },
     {
@@ -20946,7 +21112,7 @@
     },
     {
      "title": "a pointer moved on is asked for, and a pointer settled is never asked again",
-     "ms": 9,
+     "ms": 3,
      "measured": false
     },
     {
@@ -20955,10 +21121,10 @@
      "measured": false
     }
    ],
-   "loaded": 128,
-   "coveredProdLines": 1324,
+   "loaded": 136,
+   "coveredProdLines": 1679,
    "onlyProdLines": null,
-   "testsMs": 30
+   "testsMs": 61
   },
   {
    "file": "tests/screens/refused-richtext-file-keeps-the-reader.test.tsx",

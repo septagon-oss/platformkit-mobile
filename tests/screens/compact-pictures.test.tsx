@@ -2,10 +2,11 @@ import { afterEach, beforeEach, expect, jest, test } from "@jest/globals";
 import { Home } from "../../src/screens/Home";
 import { Text as NativeText } from "react-native";
 import { ResourceList } from "../../src/screens/ResourceList";
+import { ResourceDetail } from "../../src/screens/ResourceDetail";
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react-native";
+import { act, render, renderHook, screen, waitFor } from "@testing-library/react-native";
 import type { Catalog, Entry } from "../../src/core/catalog";
-import { avatar, rowMedia } from "../../src/core/derive";
+import { avatar, rowMedia, type ImageSlotProps } from "../../src/core/derive";
 import { ApiError } from "../../src/effects/api";
 import { usePictures } from "../../src/screens/usePictures";
 import { Avatar } from "../../src/ui/molecules/Avatar";
@@ -30,6 +31,13 @@ jest.mock("expo-image", () => ({
 }));
 const FILE = "73f9dbb7-ddf0-43f1-a680-d935cbd96bf0";
 const OTHER = "e18ea2af-7c22-4130-95ae-690efcc5ac0f";
+const SLOT: ImageSlotProps = {
+  id: FILE,
+  description: "",
+  decorative: true,
+  fit: "cover",
+  aspectRatio: 1,
+};
 const entry: Entry = {
   ...note,
   hints: { icon: "document", thumbnailField: "photo" },
@@ -116,6 +124,69 @@ test("fresh public versioned metadata earns memory caching and a new visit chang
   await waitFor(() =>
     expect(nativeRequests.at(-1)?.source.cacheKey).not.toBe(first.source.cacheKey),
   );
+});
+
+test.each([new TypeError("Offline"), new ApiError(503, "Unavailable")])(
+  "a compact picture keeps its ready resource while a refresh waits and after %s",
+  async (error) => {
+    const api = installed("public");
+    const view = await renderHook((visit: number) => usePictures([FILE], visit), {
+      initialProps: 0,
+    });
+    await waitFor(() => expect(view.result.current.renderImage(SLOT)).not.toBeNull());
+    const first = view.result.current.renderImage(SLOT)!;
+    await act(async () => first.props.onState(FILE, "ready"));
+    const reading = Promise.withResolvers<Record<string, unknown>>();
+    api.get.mockReturnValue(reading.promise);
+    await view.rerender(1);
+    expect(api.get).toHaveBeenCalledTimes(2);
+    expect(view.result.current.renderImage(SLOT)?.props.resource).toBe(first.props.resource);
+    expect(view.result.current.states[FILE]).toBe("ready");
+    await act(async () => reading.reject(error));
+    expect(view.result.current.renderImage(SLOT)?.props.resource).toBe(first.props.resource);
+    expect(view.result.current.states[FILE]).toBe("ready");
+    await view.unmount();
+  },
+);
+
+test.each([401, 403, 404])(
+  "a picture refresh answered HTTP %s withdraws a previously ready resource",
+  async (status) => {
+    const api = installed();
+    const view = await renderHook((visit: number) => usePictures([FILE], visit), {
+      initialProps: 0,
+    });
+    await waitFor(() => expect(view.result.current.renderImage(SLOT)).not.toBeNull());
+    const previous = view.result.current.renderImage(SLOT)!;
+    await act(async () => previous.props.onState(FILE, "ready"));
+    api.get.mockRejectedValue(new ApiError(status, "Refused"));
+    await view.rerender(1);
+    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2));
+    await act(async () => previous.props.onState(FILE, "ready"));
+    expect(view.result.current.renderImage(SLOT)).toBeNull();
+    api.get.mockRejectedValue(new ApiError(503, "Unavailable"));
+    await view.rerender(2);
+    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(3));
+    expect(view.result.current.renderImage(SLOT)).toBeNull();
+    await view.unmount();
+  },
+);
+
+test("a pending picture can finish loading during a metadata refresh", async () => {
+  const api = installed();
+  const view = await renderHook((visit: number) => usePictures([FILE], visit), {
+    initialProps: 0,
+  });
+  await waitFor(() => expect(view.result.current.renderImage(SLOT)).not.toBeNull());
+  const original = view.result.current.renderImage(SLOT)!;
+  const metadata = Promise.withResolvers<Record<string, unknown>>();
+  api.get.mockReturnValue(metadata.promise);
+  await view.rerender(1);
+  await act(async () => original.props.onState(FILE, "ready"));
+  expect(view.result.current.states[FILE]).toBe("ready");
+  await act(async () => metadata.reject(new ApiError(502, "Unavailable")));
+  expect(view.result.current.states[FILE]).toBe("ready");
+  await view.unmount();
 });
 test.each([403, 404])(
   "metadata HTTP %s prevents a byte request and preserves the initials",
@@ -268,6 +339,48 @@ test("the generated list composes its thumbnail and named assignee from the same
   expect(api.get).toHaveBeenCalledTimes(1);
   expect(api.get).toHaveBeenCalledWith(files, FILE);
   expect(asked.every((request) => !request.uri.includes("pk_live_1"))).toBe(true);
+});
+
+test("a generated detail keeps its assignee while a write invalidation renews the person read", async () => {
+  const api = installed();
+  const users: Entry = {
+    ...note,
+    module: "user",
+    entity: "user",
+    path: "/api/v1/user/users",
+    fields: [{ name: "displayName", type: "string" }],
+  };
+  const tasks: Entry = {
+    ...note,
+    fields: [
+      ...note.fields,
+      { name: "assigneeId", type: "uuid", hints: { reference: { resource: "user/user" } } },
+    ],
+  };
+  const served = { ...catalog, resources: [tasks, files, users] };
+  shell.value = { ...shell.value!, state: { phase: "ready", generation: 1, catalog: served } };
+  const reading = Promise.withResolvers<Record<string, unknown>>();
+  let directoryReads = 0;
+  api.get.mockImplementation(async (target) =>
+    target.module === "user"
+      ? ++directoryReads === 1
+        ? { id: "person-a", displayName: "Amal Ghani" }
+        : reading.promise
+      : { id: "bridge", title: "Bridgework", assigneeId: "person-a" },
+  );
+  const detail = () => (
+    <ThemeProvider mode="light">
+      <ResourceDetail entry={tasks} id="bridge" />
+    </ThemeProvider>
+  );
+  const view = await render(detail());
+  await waitFor(() => expect(screen.getByText("Amal Ghani")).toBeOnTheScreen());
+  shell.value = { ...shell.value!, writes: { "note/note": 1 } };
+  await view.rerender(detail());
+  await waitFor(() => expect(directoryReads).toBe(2));
+  expect(screen.getByText("Amal Ghani")).toBeOnTheScreen();
+  await act(async () => reading.reject(new ApiError(503, "Unavailable")));
+  expect(screen.getByText("Amal Ghani")).toBeOnTheScreen();
 });
 
 test("the authenticated account uses its declared display name without a speculative portrait read", async () => {

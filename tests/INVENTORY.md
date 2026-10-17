@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `bba1bba57` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `d824089cd` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 200 | 47.5 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 227 | 1040 | 49.2 s | 1542 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 88 | 273 | 31.3 s | 1913 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 228 | 1043 | 49.3 s | 1543 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 89 | 290 | 31.9 s | 1918 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 407
+* keep: 409
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 407 — 190 `tests/*.test.ts` (node), 160 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1513; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 1542 s, composition 1913 s, journey 0 s
+* files inventoried: 409 — 191 `tests/*.test.ts` (node), 161 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1533; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 1543 s, composition 1918 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -214,6 +214,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-keep-reason-names-siblings-the-table-holds.test.ts | node | behaviour | 2 | 304 | 3.7 |  | not measured | — | 0 | keep | A keep reason is what root reads before a prune (0088), so what it points at has to be there to read: every tests/ or e2e/ test path a verdictReason names is a… |
 | tests/a-list-orders-itself-and-narrows-itself.test.ts | node | behaviour | 13 | 1269 | 69.4 | 61 | 5 of 13 | — | 0 | keep | How a list is being read is two questions, and the kit asks them separately: in what order, and narrowed how. A sheet of orders words each one for the type of … |
 | tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts | node | behaviour | 13 | 1214 | 43.4 | 0 | 0 of 13 | — | 0 | keep | A list row says which record it is, what state that record is in, and what sets it apart — and nothing else. The four answers come from four declarations (the … |
+| tests/a-person-reads-one-colour-wherever-they-appear.test.ts | node | behaviour | 3 | 962 | 52.5 |  | not measured | — | 0 | keep | A person's disc colour is a function of their id alone: the same id reads the same tone in a directory row, in a field that points at them, as an activity acto… |
 | tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts | node | behaviour | 7 | 868 | 15.9 |  | not measured | — | 0 | keep | A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one … |
 | tests/a-record-opens-on-what-it-is.test.ts | node | behaviour | 10 | 1225 | 51.7 | 2 | 0 of 10 | — | 0 | keep | A record opens on what it is, not on how it is stored (0085). The whole of the hierarchy is one pure function of the entry and the row — `recordHeader`, `recor… |
 | tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts | node | behaviour | 5 | 1021 | 36.1 |  | not measured | — | 0 | keep | A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are writ… |
@@ -369,12 +370,13 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx | jest | composition | 3 | 26306 | 168 |  | not measured | — | 0 | keep | A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation… |
 | tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx | jest | composition | 1 | 20976 | 162 |  | not measured | — | 0 | keep | A camera image must reach the real API transport as a native file part, retain its session, and enter the body only after the file endpoint accepts that part. |
 | tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx | jest | composition | 1 | 20228 | 48 |  | not measured | — | 0 | keep | A picture taken on the phone is stored as a file before the body points at it: the body never learns an address that only this phone could read. |
+| tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx | jest | composition | 2 | 19848 | 872 |  | not measured | — | 0 | keep | A refresh never blanks what the list already says (0085): a row's assignee keeps the name the directory answered while a refresh asks again, and keeps it when … |
 | tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx | jest | composition | 3 | 22148 | 1215 |  | not measured | — | 0 | keep | A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at th… |
 | tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx | jest | composition | 1 | 21217 | 34 |  | not measured | — | 0 | keep | An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload. |
 | tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx | jest | composition | 1 | 23646 | 85 |  | not measured | — | 0 | keep | A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores … |
 | tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx | jest | composition | 1 | 23943 | 104 |  | not measured | — | 0 | keep | A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write. |
 | tests/screens/a-translatable-record-follows-the-device-language.test.tsx | jest | composition | 2 | 25311 | 611 |  | not measured | — | 0 | keep | A translatable record is requested in the device language. A source-language fallback is identified in Portuguese rather than silently shown as translated cont… |
-| tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx | jest | composition | 3 | 25064 | 21 |  | not measured | — | 0 | keep | A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answe… |
+| tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx | jest | composition | 4 | 18089 | 23 |  | not measured | — | 0 | keep | A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answe… |
 | tests/screens/activity-catalog-withdrawal-inflight.test.tsx | jest | composition | 2 | 23253 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a late actor lookup cannot restore identity after catalog withdrawal |
 | tests/screens/activity-directory-catalog-withdrawal.test.tsx | jest | composition | 2 | 23238 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light catalog withdrawal removes cached actor details while retaining readable history |
 | tests/screens/activity-directory-denial.test.tsx | jest | composition | 6 | 25736 | 401 | 0 | 0 of 5 | — | 0 | keep | A directory refusal empties the actor names a trail shows, and a response to a request the screen no longer wants cannot put them back: the detail keeps its ow… |
@@ -391,7 +393,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/catalog-operation-refresh.test.tsx | jest | composition | 3 | 19415 | 1279 | 0 | 0 of 3 | — | 0 | keep | The list itself stayed: what went is the doors, not the screen behind them. |
 | tests/screens/collection-command-at-record-address.test.tsx | jest | composition | 3 | 18061 | 17 | 0 | 0 of 3 | — | 0 | keep | The two refusals are one rule read from each side. The record-address test shows a command about one record refused at the collection's address; this one shows… |
 | tests/screens/command-refusal-exit.test.tsx | jest | composition | 2 | 18424 | 21 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) closing a command refusal returns to the preceding screen when there is one |
-| tests/screens/compact-pictures.test.tsx | jest | composition | 11 | 30152 | 1505 |  | not measured | — | 0 | keep | (no first comment; first test title) one metadata read prepares header-authorized private bytes without a native cache |
+| tests/screens/compact-pictures.test.tsx | jest | composition | 18 | 21013 | 1177 |  | not measured | — | 0 | keep | (no first comment; first test title) one metadata read prepares header-authorized private bytes without a native cache |
 | tests/screens/custom-renderer-catalog-withdrawal.test.tsx | jest | composition | 2 | 18420 | 59 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom detail renderer is unreachable after its catalog entry is withdrawn |
 | tests/screens/custom-renderer-session-isolation.test.tsx | jest | composition | 2 | 19295 | 438 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom renderer follows only the current session catalog |
 | tests/screens/editing-a-translation-keeps-the-source-language.test.tsx | jest | composition | 1 | 24330 | 180 |  | not measured | — | 0 | keep | A translated read cannot be sent back as the source-language value on Save. |
@@ -402,7 +404,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/offline-list-says-when-it-was-saved.test.tsx | jest | composition | 1 | 26758 | 1127 |  | not measured | — | 0 | keep | A page answered from the phone rather than the server is drawn with a quiet line that says so and when it was saved: a person in a tunnel must be able to tell … |
 | tests/screens/offline-resource-reads.test.tsx | jest | composition | 2 | 22079 | 87 |  | not measured | — | 0 | keep | (no first comment; first test title) a resource list reopened offline shows its last successful page |
 | tests/screens/record-command-at-collection-address.test.tsx | jest | composition | 3 | 23933 | 64 | 0 | 0 of 3 | — | 0 | keep | A command is about one record or about the collection (src/core/catalog.ts: "{entry.path}/{id}/{verb}, or {entry.path}/{verb} when collection"). The collection… |
-| tests/screens/reference-name-resolves-or-says-linked.test.tsx | jest | composition | 7 | 16461 | 30 |  | not measured | — | 0 | keep | A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the i… |
+| tests/screens/reference-name-resolves-or-says-linked.test.tsx | jest | composition | 14 | 17838 | 61 |  | not measured | — | 0 | keep | A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the i… |
 | tests/screens/refused-richtext-file-keeps-the-reader.test.tsx | jest | composition | 1 | 24221 | 699 |  | not measured | — | 0 | keep | A tenant-scoped file read that answers 404 leaves a missing-image figure in the native body. The surrounding Markdown still renders, and no refused byte is ask… |
 | tests/screens/richtext-formatting-preserves-the-loaded-body.test.tsx | jest | composition | 1 | 20623 | 50 |  | not measured | — | 0 | keep | Formatting a read value is an edit of that value, even before anyone types into it. |
 | tests/screens/richtext-image-insertion-keeps-later-typing.test.tsx | jest | composition | 1 | 27817 | 179 |  | not measured | — | 0 | keep | Choosing a file is asynchronous; typing while it loads must survive the insertion. |

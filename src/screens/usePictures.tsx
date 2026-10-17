@@ -9,16 +9,36 @@ import React, {
 } from "react";
 import { useWindowDimensions } from "react-native";
 import { offers } from "../core/catalog";
-import { pictureId, type ImageSlotProps, type PictureStates, type Row } from "../core/derive";
+import {
+  enrichmentFailure,
+  pictureId,
+  type ImageSlotProps,
+  type PictureStates,
+  type Row,
+} from "../core/derive";
 import { variantWidth } from "../core/prose";
-import { ApiError } from "../effects/api";
 import { fileResource } from "../effects/files";
 import type { ImageResource } from "../effects/media";
 import { useShell } from "../shell";
 import { extent } from "../ui/scale";
 import { NativeImage } from "./NativeImage";
+import { failureFacts } from "./failure";
 
-/** usePictures reads metadata once per visible file and binds session-owned bytes to decorative slots. */
+interface FileRead {
+  readonly resource?: ImageResource | undefined;
+  readonly retain?: boolean;
+  readonly signedOut?: boolean;
+}
+interface Picture {
+  readonly resource: ImageResource | undefined;
+  readonly states: PictureStates;
+}
+
+/**
+ * usePictures binds session-owned bytes to decorative slots, coalescing metadata per file and attempt.
+ * A changed attempt (0 by default) refreshes metadata while retaining the same session's resources;
+ * transient failures retain them, explicit refusals withdraw them, and scope changes discard them.
+ */
 export function usePictures(ids: readonly string[], attempt: unknown = 0) {
   const { api, baseURL, identity, state, entry } = useShell();
   const mount = useId();
@@ -44,15 +64,15 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
       scope,
       attempt,
       pixels: extent.rowMedia * viewport.scale,
-      pending: new Map<string, Promise<ImageResource | undefined>>(),
+      pending: new Map<string, Promise<FileRead>>(),
     }),
     [scope, attempt, viewport.scale],
   );
   const current = useRef<typeof request | undefined>(request);
   const [loaded, setLoaded] = useState<{
     request: typeof request;
-    resources: Readonly<Record<string, ImageResource>>;
-    states: PictureStates;
+    files: Readonly<Record<string, Picture>>;
+    signedOut: boolean;
   }>();
   useLayoutEffect(() => {
     current.current = request;
@@ -66,13 +86,17 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
     let active = true;
     const generation = JSON.stringify([scope.namespace, ++sequence.current]);
     void (async () => {
-      const read = async (id: string): Promise<ImageResource | undefined> => {
+      const read = async (id: string): Promise<FileRead> => {
         let row: Row | undefined;
+        let retain = false;
         if (files && offers(files, "read")) {
           try {
             row = await api.get(files, id);
           } catch (e) {
-            if (e instanceof ApiError && [401, 403, 404].includes(e.status)) return undefined;
+            const verdict = enrichmentFailure(failureFacts(e));
+            if (verdict === "signed-out") return { signedOut: true };
+            if (verdict === "withdraw") return {};
+            retain = true;
           }
         }
         const resource = fileResource({
@@ -92,7 +116,7 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
           ),
           attempt: 0,
         });
-        return resource;
+        return { resource, retain };
       };
       const results = await Promise.all(
         wanted
@@ -108,47 +132,69 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
           }),
       );
       if (!active || current.current !== request) return;
-      const resources: Record<string, ImageResource> = {},
-        states: Record<string, "loading" | "error"> = {};
-      for (const [id, resource] of results) {
-        if (resource) resources[id] = resource;
-        states[id] = resource ? "loading" : "error";
-      }
-      setLoaded((was) => ({
-        request,
-        resources,
-        states: { ...states, ...(was?.request === request ? was.states : {}) },
-      }));
+      setLoaded((was) => {
+        const previous = was?.request.scope === scope ? was : undefined;
+        const signedOut = results.some(([, result]) => result.signedOut) || !!previous?.signedOut;
+        const files: Record<string, Picture> = {};
+        if (!signedOut)
+          for (const [id, result] of results) {
+            const held = previous?.files[id];
+            files[id] =
+              held && (result.retain || was?.request === request)
+                ? held
+                : {
+                    resource: result.resource,
+                    states: { [id]: result.resource ? "loading" : "error" },
+                  };
+          }
+        return { request, files, signedOut };
+      });
     })();
     return () => {
       active = false;
     };
-  }, [request, enabled, api, baseURL, identity?.userId, files, pictures, scope.namespace, wanted]);
-  const held = loaded?.request === request && enabled ? loaded : undefined;
+  }, [request, enabled, api, baseURL, identity?.userId, files, pictures, scope, wanted]);
+  const held = loaded?.request.scope === scope && enabled ? loaded : undefined;
   const onState = useCallback(
-    (id: string, value: "loading" | "ready" | "error") => {
-      if (current.current !== request) return;
-      setLoaded((was) =>
-        !was || was.request !== request || was.states[id] === value
-          ? was
-          : { ...was, states: { ...was.states, [id]: value } },
-      );
+    (
+      id: string,
+      instance: string,
+      resource: ImageResource,
+      value: "loading" | "ready" | "error",
+    ) => {
+      if (current.current?.scope !== scope) return;
+      setLoaded((was) => {
+        const file = was?.request.scope === scope ? was.files[id] : undefined;
+        if (!was || !file || file.resource !== resource || file.states[instance] === value)
+          return was;
+        return {
+          ...was,
+          files: {
+            ...was.files,
+            [id]: { ...file, states: { ...file.states, [instance]: value } },
+          },
+        };
+      });
     },
-    [request],
+    [scope],
   );
   const renderImage = useCallback(
     (model: ImageSlotProps) => {
-      const resource = held?.resources[model.id];
+      const resource = held?.files[model.id]?.resource;
       return resource ? (
         <NativeImage
           key={JSON.stringify([resource.cacheKey, model.instance])}
           model={model}
           resource={resource}
-          onState={(_id, state) => onState(model.instance ?? model.id, state)}
+          onState={(_id, state) => onState(model.id, model.instance ?? model.id, resource, state)}
         />
       ) : null;
     },
     [held, onState],
   );
-  return { enabled, states: held?.states ?? {}, renderImage };
+  const states: PictureStates = Object.assign(
+    {},
+    ...wanted.split(",").map((id) => held?.files[id]?.states),
+  );
+  return { enabled, states, renderImage };
 }
