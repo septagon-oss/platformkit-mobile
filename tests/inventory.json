@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 95,
-   "cases": 308,
-   "ms": 2034525,
-   "testsMs": 33417,
+   "files": 96,
+   "cases": 310,
+   "ms": 2057112,
+   "testsMs": 33895,
    "runners": {
-    "jest": 95
+    "jest": 96
    },
    "unreachable": 0
   },
@@ -19630,6 +19630,41 @@
    "coveredProdLines": 2190,
    "onlyProdLines": null,
    "testsMs": 872
+  },
+  {
+   "file": "tests/screens/a-refused-cover-still-names-its-record.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A record whose cover file the server refuses to describe still opens on its cover: the picture door is composed and the session can read with it, so the native header goes transparent \u2014 and the cover then owes the record its name, standing in the frame beside the sentence that says the picture will not come. The name is drawn once, on the cover.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22587,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a record whose cover file is refused (403) keeps its name on the cover under a transparent header",
+    "a record whose cover file is refused (404) keeps its name on the cover under a transparent header"
+   ],
+   "tests": [
+    {
+     "title": "a record whose cover file is refused (403) keeps its name on the cover under a transparent header",
+     "ms": 455,
+     "measured": false
+    },
+    {
+     "title": "a record whose cover file is refused (404) keeps its name on the cover under a transparent header",
+     "ms": 23,
+     "measured": false
+    }
+   ],
+   "loaded": 162,
+   "coveredProdLines": 2235,
+   "onlyProdLines": null,
+   "testsMs": 478
   },
   {
    "file": "tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx",
