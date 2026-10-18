@@ -441,20 +441,25 @@ needs and no rule of its own; `usePictures`'s third argument (how wide a slot dr
 `files` answer; `PhotoViewer`'s optional `renderZoom`, so a picture may open without the
 gesture surface a product has not chosen. `expo-linear-gradient` and `expo-blur` were
 refused: either changes `fingerprint.json` and therefore the binary, and `svg` already
-draws the one overlay this page needs. **Made reusable** — `recordSections`'s optional
+draws the one overlay this page needs. `media`, so a picture may open without the gesture surface a product has not chosen, and its
+modal opens with a cross-fade. **Made reusable** — `recordSections`'s optional
 `media` argument, which is how any block answers the galleries filed in it without a second
 block-order rule in a component; `filePicture`, the file-row→picture step for any surface
 that draws a file by identifier; `usePictures(ids, attempt, width)` answering pixels per
 caller; `PhotoStrip` and `RecordCover` as the two surfaces a client's renderer pack can mount
 on its own record screen; and `record-cover`, `record-title`, `photo-strip`, `photo-<n>` and
-`record-title-bar` as the ids a journey finds them by.
-
-What this delivery does *not* ship is the parallax: `react-native-reanimated` cannot be
-imported anywhere the jest suite reaches (importing it throws inside `react-native-worklets`
-at module evaluation, measured), and every surface above is inside that graph, so the motion
-layer needs a composition door of its own — one optional prop on `Shell` — and a device to
-judge the numbers on. That, the strip's own tile width at the door, and the swipe gestures
-on `PhotoViewer` are the product's share, recorded in the task's Limits.
+`record-title-bar` as the ids a journey finds them by; and `MediaRenderers` in
+`src/renderers.ts` — the pinch surface a picture opens into and the cover's motion, named once
+on `<Shell>` by the composition root — with `src/screens/CoverMotion.tsx` as the one file in
+the app that names `react-native-reanimated`, and this app supplying it and `NativeZoom` in
+`app/_layout.tsx`. Those two had to arrive as props rather than imports for a fact about the
+environment: importing reanimated evaluates `react-native-worklets`, which throws where no
+native runtime is loaded, and zoom-toolkit imports reanimated in 45 of its files, while every
+screen is loaded by the suite that checks it. A product that supplies neither gets the still
+record — the photo holds still, the picture opens at the page's own size, and the buttons page
+between them — which is a complete record, not a broken one. `extent.coverParallax`,
+`coverShrink` and `coverFoot` are the numbers a device will judge, owned by `src/ui/scale.ts`
+and by no component.
 
 ### How a form asks
 

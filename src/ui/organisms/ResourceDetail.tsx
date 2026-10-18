@@ -38,7 +38,7 @@ import { Badge } from "../atoms/Badge";
 import { Text } from "../atoms/Text";
 import { Actions, type Props as ActionsProps } from "./Actions";
 import { Activity, type Props as ActivityProps } from "./Activity";
-import { RecordCover } from "./RecordCover";
+import { RecordCover, type CoverMotion } from "./RecordCover";
 import { Skeleton } from "../atoms/Skeleton";
 import { DetailRow } from "../molecules/DetailRow";
 import { ModelState } from "../molecules/ModelState";
@@ -126,6 +126,11 @@ export interface Props {
   readonly files?: Readonly<Record<string, FileMeta>> | undefined;
   /** onOpenPhoto opens one of the record's own pictures full size, by its file identifier. */
   readonly onOpenPhoto?: (field: string, id: string) => void;
+  /**
+   * coverMotion is the motion a product chose for a cover being scrolled away, supplied once
+   * at composition. Absent means the photo holds still and scrolls with the page.
+   */
+  readonly coverMotion?: CoverMotion | undefined;
 }
 
 export function ResourceDetail({
@@ -151,6 +156,7 @@ export function ResourceDetail({
   richText,
   files,
   onOpenPhoto,
+  coverMotion,
 }: Props) {
   const s = useStyles(kitStyles),
     t = useTheme(),
@@ -195,7 +201,8 @@ export function ResourceDetail({
     row === undefined || media === undefined
       ? undefined
       : recordCover(entry, row, media.pictures, frame);
-  const collapsed = cover !== undefined && offset >= t.extent.cover - t.extent.headerBar;
+  const collapseAt = t.extent.cover - t.extent.headerBar;
+  const collapsed = cover !== undefined && offset >= collapseAt;
   return (
     <View style={chrome.page}>
       <Screen testID="resource-detail" {...(cover === undefined ? {} : { onOffset: setOffset })}>
@@ -224,7 +231,10 @@ export function ResourceDetail({
                 cover={cover}
                 header={header}
                 feedback={feedback}
+                offset={offset}
+                collapseAt={collapseAt}
                 {...(renderImage === undefined ? {} : { renderImage })}
+                {...(coverMotion === undefined ? {} : { coverMotion })}
               />
             ) : null}
             {cover === undefined && (header?.status || header?.summary) ? (
