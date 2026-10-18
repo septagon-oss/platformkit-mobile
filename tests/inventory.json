@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 232,
-   "cases": 1063,
-   "ms": 1621173,
-   "testsMs": 49543.80000000002,
+   "files": 234,
+   "cases": 1067,
+   "ms": 1645916,
+   "testsMs": 49589.900000000016,
    "runners": {
-    "jest": 74,
-    "node": 158
+    "jest": 75,
+    "node": 159
    },
    "unreachable": 0
   },
@@ -3705,6 +3705,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The entrance of an empty screen's picture is the model's to ask for, not the atom's to guess: a state derived on a device that asks for motion rises once, for 300 ms, when the state view draws it, and a state derived on a device that asks for none is drawn still and starts nothing \u2014 through StateView, the one path a list's empty page reaches the picture by.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 24193,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a model derived for motion rises its picture once, for 300 ms, on the native driver",
+    "a model derived for reduced motion draws its picture still and starts nothing"
+   ],
+   "tests": [
+    {
+     "title": "a model derived for motion rises its picture once, for 300 ms, on the native driver",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "a model derived for reduced motion draws its picture still and starts nothing",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 114,
+   "coveredProdLines": 739,
+   "onlyProdLines": null,
+   "testsMs": 18
   },
   {
    "file": "tests/ui/agenda-appointment-lines.test.tsx",
@@ -12178,6 +12213,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/every-drawn-arc-stays-inside-the-safe-area.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A drawing's ink stays inside the safe area, not only the numbers it writes. An arc's end and radius can sit inside the box while the curve between them bulges out of it, and an arc whose chord is longer than its diameter is silently drawn with a larger radius than the one written. So every part is walked as it is drawn \u2014 lines at their ends, cubics along their length, arcs from their own centre \u2014 and the farthest point the stroke reaches is held to the safe area of the shared canvas.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 550,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "every stroke of every drawing reaches no farther than the safe area",
+    "an arc that bulges past the safe area is caught although its numbers sit inside it"
+   ],
+   "tests": [
+    {
+     "title": "every stroke of every drawing reaches no farther than the safe area",
+     "ms": 23.095896,
+     "measured": false
+    },
+    {
+     "title": "an arc that bulges past the safe area is caught although its numbers sit inside it",
+     "ms": 5.000331,
+     "measured": false
+    }
+   ],
+   "loaded": 2,
+   "coveredProdLines": 514,
+   "onlyProdLines": null,
+   "testsMs": 28.1
   },
   {
    "file": "tests/factor-token-lifecycle.test.ts",
