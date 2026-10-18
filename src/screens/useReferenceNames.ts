@@ -75,32 +75,41 @@ function useNames(pointers: readonly Pointer[], window: boolean, visit: unknown)
 
   useEffect(() => {
     let active = true;
-    void (async () => {
-      const mounted = new Map((scope.catalog?.resources ?? []).map((e) => [key(e), e]));
-      const reads = wanted.map(async (pointer) => {
-        const entry = mounted.get(pointer.resource);
-        const at = window ? pointer.resource : nameKey(pointer.resource, pointer.id);
-        if (!entry) return [at, empty] as const;
-        const cache = request.cache;
-        let read = cache.get(at);
-        if (!read) {
-          read = window ? byDirectory(scope.api, entry) : byRecord(scope.api, entry, pointer.id);
-          cache.set(at, read);
-        }
-        return [at, await read] as const;
+    const mounted = new Map((scope.catalog?.resources ?? []).map((e) => [key(e), e]));
+    const targets = new Map(
+      wanted.map((pointer) => [
+        window ? pointer.resource : nameKey(pointer.resource, pointer.id),
+        pointer,
+      ]),
+    );
+    for (const [at, pointer] of targets) {
+      const entry = mounted.get(pointer.resource);
+      let read = request.cache.get(at);
+      if (!read) {
+        read = !entry
+          ? Promise.resolve(empty)
+          : window
+            ? byDirectory(scope.api, entry)
+            : byRecord(scope.api, entry, pointer.id);
+        request.cache.set(at, read);
+      }
+      void read.then((answer) => {
+        if (!active) return;
+        setResolved((was) => {
+          const previous = was?.scope === scope ? was : undefined;
+          const signedOut = !!answer?.signedOut || !!previous?.signedOut;
+          const reads = new Map<string, Read>();
+          if (!signedOut) {
+            for (const target of targets.keys()) {
+              const held = previous?.reads.get(target);
+              if (held) reads.set(target, held);
+            }
+            reads.set(at, answer ?? reads.get(at) ?? empty);
+          }
+          return { scope, reads, signedOut };
+        });
       });
-      const parts = await Promise.all(reads);
-      if (!active) return;
-      setResolved((was) => {
-        const previous = was?.scope === scope ? was : undefined;
-        const signedOut = parts.some(([, p]) => p?.signedOut) || !!previous?.signedOut;
-        const reads = new Map<string, Read>();
-        if (!signedOut)
-          for (const [at, answer] of parts)
-            reads.set(at, answer ?? previous?.reads.get(at) ?? empty);
-        return { scope, reads, signedOut };
-      });
-    })();
+    }
     return () => {
       active = false;
     };

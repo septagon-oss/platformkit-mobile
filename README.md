@@ -2091,12 +2091,18 @@ portraits together: one record read per distinct pointer, or one page of at
 most 200 people per target and list visit. A refresh starts a new visit and keeps
 the previous names and portraits while reading; transport and server failures
 keep that answer. A successful answer replaces it, including removed people or
-portraits; a 401/403/404 withdraws it. Loading more rows reuses that directory page.
+portraits; a 401/403/404 withdraws it. Each record or directory answer applies
+as it settles, so a pending peer cannot delay a refusal and a later transient
+refresh cannot restore the withdrawn projection. Loading more rows reuses that
+directory page.
 Account initials use `displayName`, then
 email. A declared account portrait permits one own-record read; the pinned
 reference user/identity contracts have no portrait, so they need no extra read.
 
 Compact pictures use the current session's bearer header, never a query token.
+The shared compact-picture/prose width planner uses the stored original when
+the selected declared width exceeds the known frame; small originals never
+request a larger variant that the server cannot build.
 The mounted `file/file` metadata read is coalesced per visible ID. A metadata
 403/404 immediately withdraws that file's bytes without waiting for other metadata
 reads; a superseding refresh cannot erase a settled refusal. Refresh keeps the

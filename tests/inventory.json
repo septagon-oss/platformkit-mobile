@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 228,
-   "cases": 1043,
-   "ms": 1542594,
-   "testsMs": 49259.80000000002,
+   "files": 229,
+   "cases": 1046,
+   "ms": 1544429,
+   "testsMs": 49260.500000000015,
    "runners": {
     "jest": 72,
-    "node": 156
+    "node": 157
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 91,
-   "cases": 297,
-   "ms": 1952303,
-   "testsMs": 32093,
+   "files": 92,
+   "cases": 304,
+   "ms": 1975612,
+   "testsMs": 32130,
    "runners": {
-    "jest": 91
+    "jest": 92
    },
    "unreachable": 0
   },
@@ -9692,6 +9692,41 @@
    "testsMs": 13.8
   },
   {
+   "file": "tests/a-small-picture-uses-its-stored-frame.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "(no first comment; first test title) a 256px picture uses the original when no smaller declared variant exists",
+   "ruleSource": "first test title",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins original-file URLs for 256px and 400px frames using the served catalog. The closest sibling tests/prose-body-reads-as-blocks.test.ts covers width arithmetic without the served fixture and file URL. Measured by npm run inventory -- --measure tests/a-small-picture-uses-its-stored-frame.test.ts using measured.commands.node; exclusive-line attribution remains unmeasured.",
+   "ms": 1918,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a 256px picture uses the original when no smaller declared variant exists",
+    "a 400px picture uses the original when no smaller declared variant exists"
+   ],
+   "tests": [
+    {
+     "title": "a 256px picture uses the original when no smaller declared variant exists",
+     "ms": 2.608756,
+     "measured": false
+    },
+    {
+     "title": "a 400px picture uses the original when no smaller declared variant exists",
+     "ms": 0.23762,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 16774,
+   "onlyProdLines": null,
+   "testsMs": 2.8
+  },
+  {
    "file": "tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -16096,15 +16131,15 @@
    "file": "tests/prose-body-reads-as-blocks.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 26,
+   "cases": 27,
    "rule": "A rich text body is the Markdown the server stored (0069 \u00a71), so reading it is a reading of that shape: a blank line between blocks, a figure a paragraph of its own, a fence that keeps its blank lines. These cases fix where the cuts fall, which width a frame gets in a slot, and which shapes the phone refuses to draw because the server would never have stored them.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 424,
+   "verdictReason": "Pins Markdown block reading and the shared width planner, including known-frame limits and equal-original widths. The closest sibling tests/a-small-picture-uses-its-stored-frame.test.ts checks small-frame URLs through the served catalog. Measured by npm run inventory -- --measure tests/prose-body-reads-as-blocks.test.ts using measured.commands.node; exclusive-line attribution remains unmeasured.",
+   "ms": 341,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "two headings, a paragraph and a list stay four runs in their own order",
@@ -16128,6 +16163,7 @@
     "a link in any scheme the format allows is ordinary text to this reader",
     "a frame wider than its slot gets the smallest declared width covering the slot",
     "a slot wider than the widest variant gets that variant, or the frame when it fits",
+    "a declared width never asks a measured frame to grow",
     "a frame nobody measured plans nothing",
     "a table is what the phone's rich editor cannot hold, and nothing else is",
     "a span closed on the line below holds only its own words, and the prose after it is read",
@@ -16137,139 +16173,144 @@
    "tests": [
     {
      "title": "two headings, a paragraph and a list stay four runs in their own order",
-     "ms": 4.168692,
+     "ms": 3.045373,
      "measured": false
     },
     {
      "title": "a figure is its own block between two paragraphs",
-     "ms": 0.678305,
+     "ms": 0.498071,
      "measured": false
     },
     {
      "title": "a caption keeps the quote it escaped",
-     "ms": 0.268347,
+     "ms": 0.201142,
      "measured": false
     },
     {
      "title": "an image with no alt and no title is a decorative figure",
-     "ms": 0.179872,
+     "ms": 0.090418,
      "measured": false
     },
     {
      "title": "two figures keep their own ids in the order the body holds them",
-     "ms": 0.299404,
+     "ms": 0.209618,
      "measured": false
     },
     {
      "title": "a body that is nothing but a figure is one block",
-     "ms": 0.220779,
+     "ms": 0.117567,
      "measured": false
     },
     {
      "title": "a fenced block keeps its blank lines and its language header",
-     "ms": 0.228753,
+     "ms": 0.15178,
      "measured": false
     },
     {
      "title": "a tilde fence closes on its own marker, not the first backtick",
-     "ms": 0.255883,
+     "ms": 0.180444,
      "measured": false
     },
     {
      "title": "an unclosed fence is refused rather than drawn as an open paragraph",
-     "ms": 0.132556,
+     "ms": 0.113149,
      "measured": false
     },
     {
      "title": "a table is one run, pipes and all",
-     "ms": 0.092671,
+     "ms": 0.090027,
      "measured": false
     },
     {
      "title": "a nested list and a task list stay one run each",
-     "ms": 0.098012,
+     "ms": 0.071462,
      "measured": false
     },
     {
      "title": "a blockquote and a thematic break are read as they were written",
-     "ms": 0.128267,
+     "ms": 0.225758,
      "measured": false
     },
     {
      "title": "plain text with newlines is paragraphs, not a refusal",
-     "ms": 0.149276,
+     "ms": 0.191895,
      "measured": false
     },
     {
      "title": "an image inside a sentence is refused: \u00a71 has no inline image",
-     "ms": 0.173972,
+     "ms": 0.162681,
      "measured": false
     },
     {
      "title": "an image inside a list item is refused",
-     "ms": 0.140771,
+     "ms": 0.098683,
      "measured": false
     },
     {
      "title": "a pk-file reference that is not a uuid is refused",
-     "ms": 0.11308,
+     "ms": 0.089987,
      "measured": false
     },
     {
      "title": "an image addressed anywhere but pk-file is refused",
-     "ms": 0.096047,
+     "ms": 0.094334,
      "measured": false
     },
     {
      "title": "a heading outside ## to #### is refused, and one inside is not",
-     "ms": 0.207544,
+     "ms": 0.110254,
      "measured": false
     },
     {
      "title": "a link in any scheme the format allows is ordinary text to this reader",
-     "ms": 0.115293,
+     "ms": 0.056685,
      "measured": false
     },
     {
      "title": "a frame wider than its slot gets the smallest declared width covering the slot",
-     "ms": 0.296037,
+     "ms": 0.200301,
      "measured": false
     },
     {
      "title": "a slot wider than the widest variant gets that variant, or the frame when it fits",
-     "ms": 0.122637,
+     "ms": 0.087442,
+     "measured": false
+    },
+    {
+     "title": "a declared width never asks a measured frame to grow",
+     "ms": 0.195602,
      "measured": false
     },
     {
      "title": "a frame nobody measured plans nothing",
-     "ms": 0.197595,
+     "ms": 0.09223,
      "measured": false
     },
     {
      "title": "a table is what the phone's rich editor cannot hold, and nothing else is",
-     "ms": 0.64343,
+     "ms": 0.564434,
      "measured": false
     },
     {
      "title": "a span closed on the line below holds only its own words, and the prose after it is read",
-     "ms": 0.276923,
+     "ms": 0.275019,
      "measured": false
     },
     {
      "title": "a table quoted into a blockquote is one the editor cannot hold either",
-     "ms": 0.114292,
+     "ms": 0.12458,
      "measured": false
     },
     {
      "title": "a table drawn inside a code fence is not a table the editor would lose",
-     "ms": 0.091238,
+     "ms": 0.102669,
      "measured": false
     }
    ],
    "loaded": 4,
-   "coveredProdLines": 837,
+   "coveredProdLines": 839,
    "onlyProdLines": null,
-   "testsMs": 9.5
+   "testsMs": 7.4
   },
   {
    "file": "tests/prose-body-says-its-words.test.ts",
@@ -19125,6 +19166,53 @@
    "testsMs": 872
   },
   {
+   "file": "tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "(no first comment; first test title) HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+   "ruleSource": "first test title",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins immediate per-person name and portrait withdrawal while a peer waits, including a superseding transient refresh. The closest sibling tests/screens/reference-name-resolves-or-says-linked.test.tsx covers isolated record refusals and session changes. Measured by npm run inventory -- --measure tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx using measured.commands.jest; exclusive-line attribution remains unmeasured.",
+   "ms": 20219,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+    "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+    "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: true",
+    "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: true"
+   ],
+   "tests": [
+    {
+     "title": "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: true",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: true",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 136,
+   "coveredProdLines": 1641,
+   "onlyProdLines": null,
+   "testsMs": 22
+  },
+  {
    "file": "tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -19367,26 +19455,29 @@
    "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 4,
+   "cases": 7,
    "rule": "A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answers. A value the page does not reach keeps the word the kit says, which is what a page is \u2014 the identifier the row carries is never what a person reads.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 18089,
+   "verdictReason": "Pins one bounded directory page per target and independent replacement/refusal while a peer waits, including session expiry and obsolete completions. The closest sibling tests/screens/reference-name-resolves-or-says-linked.test.tsx resolves individual records rather than directory pages. Measured by npm run inventory -- --measure tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx using measured.commands.jest; exclusive-line attribution remains unmeasured.",
+   "ms": 21179,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a window reads each pointed-at resource once and names every value that page holds",
     "a value outside the page keeps its word, which is what a page is",
     "directory portraits share one bounded page and withdraw together on a refreshed refusal",
-    "each directory refresh replaces only the target that answered"
+    "each directory refresh replaces only the target that answered",
+    "HTTP 401 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+    "HTTP 403 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+    "HTTP 404 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh"
    ],
    "tests": [
     {
      "title": "a window reads each pointed-at resource once and names every value that page holds",
-     "ms": 10,
+     "ms": 9,
      "measured": false
     },
     {
@@ -19396,19 +19487,34 @@
     },
     {
      "title": "directory portraits share one bounded page and withdraw together on a refreshed refusal",
-     "ms": 6,
+     "ms": 11,
      "measured": false
     },
     {
      "title": "each directory refresh replaces only the target that answered",
      "ms": 4,
      "measured": false
+    },
+    {
+     "title": "HTTP 401 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "HTTP 403 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+     "ms": 4,
+     "measured": false
     }
    ],
    "loaded": 136,
-   "coveredProdLines": 1666,
+   "coveredProdLines": 1669,
    "onlyProdLines": null,
-   "testsMs": 23
+   "testsMs": 38
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",

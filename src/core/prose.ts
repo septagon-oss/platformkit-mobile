@@ -14,15 +14,21 @@
 import type { ImageSlotProps, MediaItem } from "./media";
 import { build, type Validation } from "./shared";
 
-/** variantWidth chooses the smallest declared width covering a slot; zero requests the original. */
+/**
+ * variantWidth chooses the smallest declared width covering a slot, or the widest declared width.
+ * A known frame bounds that choice; zero requests the original when the slot or variant exceeds it.
+ * Invalid slots and absent widths also request the original; an unknown frame leaves widths unbounded.
+ */
 export function variantWidth(
   slotPx: number,
   frameWidth: number,
   widths: readonly number[] = [],
 ): number {
   if (!Number.isFinite(slotPx) || slotPx <= 0 || widths.length === 0) return 0;
-  if (Number.isSafeInteger(frameWidth) && frameWidth > 0 && frameWidth <= slotPx) return 0;
-  return widths.find((width) => width >= slotPx) ?? widths[widths.length - 1]!;
+  const measured = Number.isSafeInteger(frameWidth) && frameWidth > 0;
+  if (measured && frameWidth <= slotPx) return 0;
+  const width = widths.find((width) => width >= slotPx) ?? widths[widths.length - 1]!;
+  return measured && width > frameWidth ? 0 : width;
 }
 
 /** A figure is 0069 §1's block image: one image, its own paragraph, its title as the caption. */

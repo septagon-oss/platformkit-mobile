@@ -248,10 +248,12 @@ compute a hash by fetching an image just for its placeholder.
 5. Generalize the existing pure width planner to accept the catalogue widths.
    For positive measured physical slot pixels, choose the smallest declared
    width >= the slot, or the largest declared width when all are smaller. If
-   measured original width is <= the slot, request the original (0). Unknown or
-   invalid slot width, or no declared widths, also returns 0. With unknown frame
-   width a valid declared variant may still be requested; the server returns
-   the original if it did not plan that variant. Migrate the existing prose
+   measured original width is <= the slot, or the chosen declared width is larger
+   than that original, request the original (0). A width equal to the original
+   uses the server's stored-frame path. Unknown or invalid slot width, or no
+   declared widths, also returns 0. With unknown frame width a valid declared
+   variant may still be requested; an unbuilt variant returns not found and
+   uses the image failure fallback. Migrate the existing prose
    consumer to this planner rather than keep two decisions. Its older-catalogue
    path may request the original; remove the remembered fixed width set.
 6. The native adapter uses the installed `expo-image`, `contentFit: cover` for
@@ -475,7 +477,9 @@ read-scoped fixture proves only the public shape and actor scope it records.
 Explicit list/detail visits renew enrichment and image attempts on refresh,
 retaining the prior answer while reading and on transport/5xx failure within
 the same session and catalog. Successful reads replace prior projections; explicit
-401/403/404 refusals withdraw them. Session/catalog changes immediately withdraw
+401/403/404 refusals withdraw them. Record and directory answers apply independently,
+including refusals while a peer remains pending; later transient reads retain the
+withdrawal. Session/catalog changes immediately withdraw
 prior resources. Adding another page retains the bounded directory page and
 per-file metadata promises. Each metadata answer applies independently; an explicit
 refusal withdraws its file even while another read remains pending, and a later

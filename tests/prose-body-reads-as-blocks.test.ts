@@ -182,6 +182,14 @@ test("a slot wider than the widest variant gets that variant, or the frame when 
   assert.equal(variantWidth(500, 4000, [480, 960, 1440, 1920]), 960);
 });
 
+test("a declared width never asks a measured frame to grow", () => {
+  const widths = [480, 960, 1440, 1920];
+  assert.equal(variantWidth(120, 480, widths), 480);
+  assert.equal(variantWidth(300, 700, widths), 480);
+  assert.equal(variantWidth(500, 700, widths), 0);
+  assert.equal(variantWidth(1000, 1300, widths), 0);
+});
+
 test("a frame nobody measured plans nothing", () => {
   assert.equal(variantWidth(1170, 0), 0);
   assert.equal(variantWidth(0, 2400), 0);
