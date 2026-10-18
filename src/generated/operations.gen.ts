@@ -102,6 +102,9 @@ export function bindOperations(
       invoke((client) => sdk.authTokenList({ ...options, client, throwOnError: true })),
     authTokenIssue: (options: Omit<types.AuthTokenIssueData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.authTokenIssue({ ...options, client, throwOnError: true })),
+    authTokenRevokeSelf: (
+      options: Omit<types.AuthTokenRevokeSelfData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.authTokenRevokeSelf({ ...options, client, throwOnError: true })),
     authTokenRevoke: (options: Omit<types.AuthTokenRevokeData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.authTokenRevoke({ ...options, client, throwOnError: true })),
     billingPlanList: (options: Omit<types.BillingPlanListData, "url"> & { signal?: AbortSignal }) =>
@@ -195,6 +198,11 @@ export function bindOperations(
       invoke((client) => sdk.fileFileDelete({ ...options, client, throwOnError: true })),
     fileFileRead: (options: Omit<types.FileFileReadData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.fileFileRead({ ...options, client, throwOnError: true })),
+    fileFileAltCommand: (
+      options: Omit<types.FileFileAltCommandData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.fileFileAltCommand({ ...options, client, throwOnError: true })),
+    fileFileAlt: (options: Omit<types.FileFileAltData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.fileFileAlt({ ...options, client, throwOnError: true })),
     fileFileContent: (options: Omit<types.FileFileContentData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.fileFileContent({ ...options, client, throwOnError: true })),
     fileFileContentHead: (
@@ -208,6 +216,8 @@ export function bindOperations(
       invoke((client) => sdk.fileFileRetain({ ...options, client, throwOnError: true })),
     fileFileUses: (options: Omit<types.FileFileUsesData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.fileFileUses({ ...options, client, throwOnError: true })),
+    fileQuotaRead: (options: Omit<types.FileQuotaReadData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.fileQuotaRead({ ...options, client, throwOnError: true })),
     notificationNotificationList: (
       options: Omit<types.NotificationNotificationListData, "url"> & { signal?: AbortSignal },
     ) =>

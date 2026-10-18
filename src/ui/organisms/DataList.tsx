@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { DataListModel, Names, Order } from "../../core/derive";
+import type { DataListModel, Names, People, PictureStates, Order } from "../../core/derive";
 import { ActionControl } from "../atoms/ActionControl";
 import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";
@@ -10,11 +10,17 @@ import { Text } from "../atoms/Text";
 import { ActionBar } from "../molecules/ActionBar";
 import { Labelled } from "../molecules/Value";
 import { ModelState } from "../molecules/ModelState";
+import { Avatar } from "../molecules/Avatar";
+import { RowMedia } from "../molecules/RowMedia";
+import type { ImageRenderer } from "../molecules/MediaHero";
 import { Row } from "../molecules/Row";
 import { GroupedListScreen } from "../templates/ListScreen";
 import { kitStyles } from "../layout";
 import { useStyles } from "../theme";
 export interface Props {
+  readonly people?: People | undefined;
+  readonly pictureStates?: PictureStates | undefined;
+  readonly renderImage?: ImageRenderer | undefined;
   readonly model: DataListModel;
   /** names resolves the records a cell points at, so a row reads a name where the row holds an identifier. */
   readonly names?: Names | undefined;
@@ -35,6 +41,9 @@ export interface Props {
 }
 export function DataList({
   names,
+  people,
+  pictureStates,
+  renderImage,
   model,
   onOpen,
   onRowAction,
@@ -137,6 +146,15 @@ export function DataList({
         <View style={s.panel}>
           <Row
             title={row.title}
+            {...(row.avatar
+              ? {
+                  leading: (
+                    <Avatar model={row.avatar} renderImage={renderImage} discOnly decorative />
+                  ),
+                }
+              : row.media
+                ? { leading: <RowMedia model={row.media} renderImage={renderImage} /> }
+                : {})}
             cells={row.cells}
             {...(row.summary ? { summary: row.summary } : {})}
             {...(row.cells.some((cell) => cell.field)
@@ -153,10 +171,14 @@ export function DataList({
                         .map((cell) => (
                           <Labelled
                             key={cell.id}
+                            instance={JSON.stringify([row.id, cell.id])}
                             presentation={model.feedback}
                             field={cell.field!}
                             value={cell.raw}
                             names={names}
+                            people={people}
+                            pictureStates={pictureStates}
+                            renderImage={renderImage}
                           />
                         ))}
                     </>

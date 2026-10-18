@@ -15,7 +15,7 @@ const key = { token: "pk_live_tenant_one", id: "00000000-0000-4000-8000-00000000
 
 const files = {
   module: "file",
-  entity: "files",
+  entity: "file",
   path: "/api/v1/file/files",
   fields: [],
   immutable: [],
@@ -39,6 +39,8 @@ function collecting() {
         id: "55555555-5555-4555-8555-555555555555",
         name: "herbs.jpg",
         contentType: "image/jpeg",
+        alt: "Herbs in a pot",
+        decorative: false,
       }),
       { status: 201, headers: { "Content-Type": "application/json" } },
     );

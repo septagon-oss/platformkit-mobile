@@ -64,6 +64,7 @@ export function useResourceDetail(
   // open would leave the person answering two things at once.
   const [menu, setMenu] = useState(false);
   const generation = useRef(0);
+  const [visit, setVisit] = useState(0);
   const seen = useRef(writes[k] ?? 0);
   // The instant of the last read that answered. A refresh names it, and while it
   // is empty there is nothing to name — which is why an unread refresh is a read.
@@ -78,6 +79,7 @@ export function useResourceDetail(
     async (why: FailureContext = "read") => {
       if (!id) return;
       const started = ++generation.current;
+      setVisit(started);
       try {
         // The row comes from the cache when the server cannot be reached, so a
         // record a person read on the train is still on the screen in the tunnel.
@@ -202,6 +204,7 @@ export function useResourceDetail(
   const toggleMenu = useCallback(() => setMenu((open) => !open), []);
 
   return {
+    visit,
     row,
     savedAt,
     error,

@@ -94,7 +94,16 @@ test("a camera file part survives generated serialization and is inserted after 
         )
           return pageResponse({ status: 422, detail: "This form carries no file." }, 422);
         stored++;
-        return pageResponse({ id: fileID, name: "herbs.jpg", contentType: "image/jpeg" }, 201);
+        return pageResponse(
+          {
+            id: fileID,
+            name: "herbs.jpg",
+            contentType: "image/jpeg",
+            alt: "Herbs in a pot",
+            decorative: false,
+          },
+          201,
+        );
       }
       return pageResponse({ status: 404 }, 404);
     },

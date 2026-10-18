@@ -43,7 +43,7 @@ test("a second tenant's file refused with 404 keeps its missing figure and nativ
     hints: { ...note.hints, previewField: "status" },
     fields: note.fields.map((f) => (f.name === "body" ? { ...f, widget: "richtext" } : f)),
   };
-  const files: Entry = { ...note, module: "file", entity: "files", path: "/api/v1/file/files" };
+  const files: Entry = { ...note, module: "file", entity: "file", path: "/api/v1/file/files" };
   const calls: Request[] = [];
   const wire = createApi(
     "https://tenant-one.example.test",
@@ -63,7 +63,7 @@ test("a second tenant's file refused with 404 keeps its missing figure and nativ
   );
   shell.value = shellValue(api, {
     baseURL: "https://tenant-one.example.test",
-    entry: (module, entity) => (module === "file" && entity === "files" ? files : entry),
+    entry: (module, entity) => (module === "file" && entity === "file" ? files : entry),
   });
   await render(
     <ThemeProvider mode="light">

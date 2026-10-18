@@ -42,6 +42,7 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
   // `format` object itself is new every render, and a load keyed by it would
   // re-read the window forever.
   const { copy, locale, timeZone, ownZone } = format;
+  const [visit, setVisit] = useState(0);
   const [rows, setRows] = useState<readonly Row[]>([]);
   const [total, setTotal] = useState(0);
   // When this phone last received the rows on screen, and nothing when the
@@ -66,6 +67,7 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
     async (why: Why) => {
       const started = ++generation.current;
       const more = why === "more";
+      if (!more) setVisit(started);
       const offset = more ? shown.current : 0;
       const limit =
         why === "stale" ? Math.min(MAX_ROWS, Math.max(PER_PAGE, shown.current)) : PER_PAGE;
@@ -161,6 +163,7 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
   }, [busy, load]);
 
   return {
+    visit,
     rows,
     total,
     savedAt,

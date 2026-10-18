@@ -145,6 +145,7 @@ export function statusInk(t: Theme, tone: Status["tone"]): string {
  * interaction state cannot be added faster than it is measured.
  */
 export const contrastPairs: readonly [string, string, AAKind][] = [
+  ["color.textPrimary", "color.surfaceMuted", "text"],
   ["color.textPrimary", "color.surfacePrimary", "text"],
   ["color.textPrimary", "color.surfaceCanvas", "text"],
   ["color.textPrimary", "color.surfaceMuted", "text"],
@@ -259,3 +260,23 @@ export function useStyles<T extends StyleSheet.NamedStyles<T>>(make: (t: Theme) 
  */
 export const controlInk = (color: string): ViewStyle =>
   (Platform.select({ web: { color }, default: undefined }) ?? {}) as ViewStyle;
+
+/** statusPair supplies the semantic foreground and surface used by compact identity media. */
+export function statusPair(
+  t: Theme,
+  tone: Status["tone"],
+  neutral: "primary" | "muted" = "primary",
+): readonly [string, string] {
+  switch (tone) {
+    case "info":
+      return [t.color.statusInfo, t.color.statusInfoBg];
+    case "ok":
+      return [t.color.statusOk, t.color.statusOkBg];
+    case "warning":
+      return [t.color.statusWarning, t.color.statusWarningBg];
+    case "danger":
+      return [t.color.statusDanger, t.color.statusDangerBg];
+    default:
+      return [neutral === "muted" ? t.color.textMuted : t.color.textPrimary, t.color.surfaceMuted];
+  }
+}

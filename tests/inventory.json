@@ -275,33 +275,33 @@
  },
  "totals": {
   "contract": {
-   "files": 34,
-   "cases": 188,
-   "ms": 69773,
-   "testsMs": 47330.200000000004,
+   "files": 35,
+   "cases": 200,
+   "ms": 74239,
+   "testsMs": 47452.4,
    "runners": {
-    "node": 34
+    "node": 35
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 227,
-   "cases": 1036,
-   "ms": 1543087,
-   "testsMs": 49196.000000000015,
+   "files": 229,
+   "cases": 1046,
+   "ms": 1544429,
+   "testsMs": 49260.500000000015,
    "runners": {
     "jest": 72,
-    "node": 155
+    "node": 157
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 87,
-   "cases": 260,
-   "ms": 1873227,
-   "testsMs": 30150,
+   "files": 93,
+   "cases": 306,
+   "ms": 1996761,
+   "testsMs": 32148,
    "runners": {
-    "jest": 87
+    "jest": 93
    },
    "unreachable": 0
   },
@@ -2259,6 +2259,101 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/pictures.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 12,
+   "rule": "(no first comment; first test title) person tones have independent stable vectors and never use danger",
+   "ruleSource": "first test title",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4466,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "person tones have independent stable vectors and never use danger",
+    "initials use Unicode code points and never manufacture a name",
+    "groups deduplicate IDs in order and distinguish visible remainder from spoken others",
+    "picture templates refuse external origins, encodings and ambiguous substitutions",
+    "defective widths keep the valid original door and never remember a server's width set",
+    "thumbnail selection falls back from a bad field but never from its empty value",
+    "portraits follow presentation and visibility rather than a field's name",
+    "compact bytes require a bearer, stay on the selected server and scope only public versioned caching",
+    "the public served capture retains the picture door, cover, assignee and author contracts",
+    "failed or unsupported memory purges do not reject session cleanup",
+    "a directory row carries its own stable avatar while ordinary resources keep media tiles",
+    "image reads exclude hidden group discs, collapsed facts and unrelated activity people"
+   ],
+   "tests": [
+    {
+     "title": "person tones have independent stable vectors and never use danger",
+     "ms": 6.493312,
+     "measured": false
+    },
+    {
+     "title": "initials use Unicode code points and never manufacture a name",
+     "ms": 0.731794,
+     "measured": false
+    },
+    {
+     "title": "groups deduplicate IDs in order and distinguish visible remainder from spoken others",
+     "ms": 4.193127,
+     "measured": false
+    },
+    {
+     "title": "picture templates refuse external origins, encodings and ambiguous substitutions",
+     "ms": 10.997154,
+     "measured": false
+    },
+    {
+     "title": "defective widths keep the valid original door and never remember a server's width set",
+     "ms": 1.739037,
+     "measured": false
+    },
+    {
+     "title": "thumbnail selection falls back from a bad field but never from its empty value",
+     "ms": 1.355568,
+     "measured": false
+    },
+    {
+     "title": "portraits follow presentation and visibility rather than a field's name",
+     "ms": 2.748484,
+     "measured": false
+    },
+    {
+     "title": "compact bytes require a bearer, stay on the selected server and scope only public versioned caching",
+     "ms": 1.785512,
+     "measured": false
+    },
+    {
+     "title": "the public served capture retains the picture door, cover, assignee and author contracts",
+     "ms": 49.881947,
+     "measured": false
+    },
+    {
+     "title": "failed or unsupported memory purges do not reject session cleanup",
+     "ms": 18.171215,
+     "measured": false
+    },
+    {
+     "title": "a directory row carries its own stable avatar while ordinary resources keep media tiles",
+     "ms": 21.673144,
+     "measured": false
+    },
+    {
+     "title": "image reads exclude hidden group discs, collapsed facts and unrelated activity people",
+     "ms": 2.404639,
+     "measured": false
+    }
+   ],
+   "loaded": 52,
+   "coveredProdLines": 17495,
+   "onlyProdLines": null,
+   "testsMs": 122.2
   },
   {
    "file": "tests/publish-registry-credential.test.ts",
@@ -5877,11 +5972,11 @@
    "file": "tests/ui/molecules.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": 23,
-   "ms": 19473,
-   "testsMs": 99,
-   "loaded": 106,
-   "coveredProdLines": 4333,
+   "cases": 27,
+   "ms": 18124,
+   "testsMs": 107,
+   "loaded": 112,
+   "coveredProdLines": 751,
    "onlyProdLines": 11,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -5913,215 +6008,147 @@
     "a list that cannot act shows its chips, and no control that would change them",
     "every word the box says is the table's, in both languages",
     "every molecule takes a testID a device flow can look up",
-    "a value carries its testID whatever shape its type gives it"
+    "a value carries its testID whatever shape its type gives it",
+    "a portrait keeps the person's name and initials while loading and after failure",
+    "five people show three discs, a remainder of two, and one localized group label",
+    "a failed row picture becomes its icon and remains inside the row's single target",
+    "person references draw faces and names without turning unresolved IDs into initials"
    ],
    "tests": [
     {
-     "title": "FormField the refusal sits under the field it is about, and no asterisk stands in for a word",
-     "ranAsOne": true,
-     "isolatedMs": 63911.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "the refusal sits under the field it is about, and no asterisk stands in for a word",
+     "ms": 6,
+     "measured": false
     },
     {
-     "title": "FormField an optional field is marked with the reader's own word",
-     "ranAsOne": true,
-     "isolatedMs": 59926.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "an optional field is marked with the reader's own word",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "FormField a control that is nobody's form field marks nothing",
-     "ranAsOne": true,
-     "isolatedMs": 59495.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a control that is nobody's form field marks nothing",
+     "ms": 1,
+     "measured": false
     },
     {
-     "title": "FormField the word is the bundle's, so a Portuguese phone reads Portuguese",
-     "ranAsOne": true,
-     "isolatedMs": 63119.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "the word is the bundle's, so a Portuguese phone reads Portuguese",
+     "ms": 1,
+     "measured": false
     },
     {
-     "title": "Row a list row is announced with its cells and opens on press",
-     "ranAsOne": true,
-     "isolatedMs": 62334.2,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a list row is announced with its cells and opens on press",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "Row a row's time cell is announced as the instant it stands for",
-     "ranAsOne": true,
-     "isolatedMs": 55191.9,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a row's time cell is announced as the instant it stands for",
+     "ms": 3,
+     "measured": false
     },
     {
-     "title": "Row a row draws no separator; the section it sits in separates its rows once",
-     "ranAsOne": true,
-     "isolatedMs": 54436.8,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a row draws no separator; the section it sits in separates its rows once",
+     "ms": 3,
+     "measured": false
     },
     {
-     "title": "Value a value of a closed set is a neutral pill: position in the list picks no colour",
-     "ranAsOne": true,
-     "isolatedMs": 54822.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a value of a closed set is a neutral pill: position in the list picks no colour",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "Value a switch with no answer says there is none; one answered off says No",
-     "ranAsOne": true,
-     "isolatedMs": 57213.6,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a switch with no answer says there is none; one answered off says No",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "Value an instant is shown as a distance and announced as the whole date-time",
-     "ranAsOne": true,
-     "isolatedMs": 52042.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "an instant is shown as a distance and announced as the whole date-time",
+     "ms": 5,
+     "measured": false
     },
     {
-     "title": "TagsField a return key commits the word, and so does the Add control",
-     "ranAsOne": true,
-     "isolatedMs": 54619.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a return key commits the word, and so does the Add control",
+     "ms": 10,
+     "measured": false
     },
     {
-     "title": "TagsField a box with nothing in it commits nothing at all",
-     "ranAsOne": true,
-     "isolatedMs": 53711.1,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a box with nothing in it commits nothing at all",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "TagsField a word already on the sheet is ignored, however it is spelt",
-     "ranAsOne": true,
-     "isolatedMs": 50006.4,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a word already on the sheet is ignored, however it is spelt",
+     "ms": 6,
+     "measured": false
     },
     {
-     "title": "TagsField a word holding the comma is refused as it is typed, and the text stays put",
-     "ranAsOne": true,
-     "isolatedMs": 52098.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a word holding the comma is refused as it is typed, and the text stays put",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField removing a chip while a refused word stands in the box writes no part of that word",
-     "ranAsOne": true,
-     "isolatedMs": 48067.2,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "removing a chip while a refused word stands in the box writes no part of that word",
+     "ms": 11,
+     "measured": false
     },
     {
-     "title": "TagsField the box tells the sheet what it will not write, and tells it again when it can",
-     "ranAsOne": true,
-     "isolatedMs": 48287.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "the box tells the sheet what it will not write, and tells it again when it can",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField a keystroke after the refusal clears it, because the person is fixing it",
-     "ranAsOne": true,
-     "isolatedMs": 48883.3,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a keystroke after the refusal clears it, because the person is fixing it",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField a record's own list is all chips, none of it half-typed",
-     "ranAsOne": true,
-     "isolatedMs": 50864.2,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a record's own list is all chips, none of it half-typed",
+     "ms": 3,
+     "measured": false
     },
     {
-     "title": "TagsField what is typed is part of the value, so a save that never blurred it carries it",
-     "ranAsOne": true,
-     "isolatedMs": 49921.9,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "what is typed is part of the value, so a save that never blurred it carries it",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "TagsField a list that cannot act shows its chips, and no control that would change them",
-     "ranAsOne": true,
-     "isolatedMs": 47476.4,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a list that cannot act shows its chips, and no control that would change them",
+     "ms": 2,
+     "measured": false
     },
     {
-     "title": "TagsField every word the box says is the table's, in both languages",
-     "ranAsOne": true,
-     "isolatedMs": 47770.3,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "every word the box says is the table's, in both languages",
+     "ms": 4,
+     "measured": false
     },
     {
-     "title": "testID every molecule takes a testID a device flow can look up",
-     "ranAsOne": true,
-     "isolatedMs": 50690.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "every molecule takes a testID a device flow can look up",
+     "ms": 5,
+     "measured": false
     },
     {
-     "title": "testID a value carries its testID whatever shape its type gives it",
-     "ranAsOne": true,
-     "isolatedMs": 48739.2,
-     "onlyProdLines": 11,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "a value carries its testID whatever shape its type gives it",
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "a portrait keeps the person's name and initials while loading and after failure",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "five people show three discs, a remainder of two, and one localized group label",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a failed row picture becomes its icon and remains inside the row's single target",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "person references draw faces and names without turning unresolved IDs into initials",
+     "ms": 2,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -6131,7 +6158,8 @@
    "testsTotal": 23,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest"
   },
   {
    "file": "tests/ui/order-sheets.test.tsx",
@@ -9334,6 +9362,47 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-person-reads-one-colour-wherever-they-appear.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "A person's disc colour is a function of their id alone: the same id reads the same tone in a directory row, in a field that points at them, as an activity actor and as the signed-in account, and no id ever reads the danger tone. The vectors below were computed outside this repository (FNV-1a, 32-bit, over UTF-16 code units, modulo the four safe tones in the order info, ok, warning, neutral), so a change to the hash is a diff somebody reads rather than a colour every person silently loses.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins independently calculated ID tone vectors, forbidden danger and cross-surface identity; tests/pictures.test.ts covers the wider picture models. Cost comes from measured.commands.node for this file; exclusive coverage was not measured.",
+   "ms": 962,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a person's tone is the independently computed vector for their id",
+    "no identifier reads the danger tone, and each reads the same tone every time",
+    "the same person reads one tone in a row, a reference, the trail and the account"
+   ],
+   "tests": [
+    {
+     "title": "a person's tone is the independently computed vector for their id",
+     "ms": 1.017694,
+     "measured": false
+    },
+    {
+     "title": "no identifier reads the danger tone, and each reads the same tone every time",
+     "ms": 35.450978,
+     "measured": false
+    },
+    {
+     "title": "the same person reads one tone in a row, a reference, the trail and the account",
+     "ms": 15.99628,
+     "measured": false
+    }
+   ],
+   "loaded": 32,
+   "coveredProdLines": 10918,
+   "onlyProdLines": null,
+   "testsMs": 52.5
+  },
+  {
    "file": "tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -9621,6 +9690,41 @@
    "coveredProdLines": 9992,
    "onlyProdLines": null,
    "testsMs": 13.8
+  },
+  {
+   "file": "tests/a-small-picture-uses-its-stored-frame.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "(no first comment; first test title) a 256px picture uses the original when no smaller declared variant exists",
+   "ruleSource": "first test title",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins original-file URLs for 256px and 400px frames using the served catalog. The closest sibling tests/prose-body-reads-as-blocks.test.ts covers width arithmetic without the served fixture and file URL. Measured by npm run inventory -- --measure tests/a-small-picture-uses-its-stored-frame.test.ts using measured.commands.node; exclusive-line attribution remains unmeasured.",
+   "ms": 1918,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a 256px picture uses the original when no smaller declared variant exists",
+    "a 400px picture uses the original when no smaller declared variant exists"
+   ],
+   "tests": [
+    {
+     "title": "a 256px picture uses the original when no smaller declared variant exists",
+     "ms": 2.608756,
+     "measured": false
+    },
+    {
+     "title": "a 400px picture uses the original when no smaller declared variant exists",
+     "ms": 0.23762,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 16774,
+   "onlyProdLines": null,
+   "testsMs": 2.8
   },
   {
    "file": "tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts",
@@ -16027,15 +16131,15 @@
    "file": "tests/prose-body-reads-as-blocks.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 26,
+   "cases": 27,
    "rule": "A rich text body is the Markdown the server stored (0069 \u00a71), so reading it is a reading of that shape: a blank line between blocks, a figure a paragraph of its own, a fence that keeps its blank lines. These cases fix where the cuts fall, which width a frame gets in a slot, and which shapes the phone refuses to draw because the server would never have stored them.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 530,
+   "verdictReason": "Pins Markdown block reading and the shared width planner, including known-frame limits and equal-original widths. The closest sibling tests/a-small-picture-uses-its-stored-frame.test.ts checks small-frame URLs through the served catalog. Measured by npm run inventory -- --measure tests/prose-body-reads-as-blocks.test.ts using measured.commands.node; exclusive-line attribution remains unmeasured.",
+   "ms": 341,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "two headings, a paragraph and a list stay four runs in their own order",
@@ -16057,8 +16161,9 @@
     "an image addressed anywhere but pk-file is refused",
     "a heading outside ## to #### is refused, and one inside is not",
     "a link in any scheme the format allows is ordinary text to this reader",
-    "a frame wider than its slot gets the largest served width that fits the slot",
+    "a frame wider than its slot gets the smallest declared width covering the slot",
     "a slot wider than the widest variant gets that variant, or the frame when it fits",
+    "a declared width never asks a measured frame to grow",
     "a frame nobody measured plans nothing",
     "a table is what the phone's rich editor cannot hold, and nothing else is",
     "a span closed on the line below holds only its own words, and the prose after it is read",
@@ -16068,139 +16173,144 @@
    "tests": [
     {
      "title": "two headings, a paragraph and a list stay four runs in their own order",
-     "ms": 3.033061,
+     "ms": 3.045373,
      "measured": false
     },
     {
      "title": "a figure is its own block between two paragraphs",
-     "ms": 0.381887,
+     "ms": 0.498071,
      "measured": false
     },
     {
      "title": "a caption keeps the quote it escaped",
-     "ms": 0.135711,
+     "ms": 0.201142,
      "measured": false
     },
     {
      "title": "an image with no alt and no title is a decorative figure",
-     "ms": 0.083645,
+     "ms": 0.090418,
      "measured": false
     },
     {
      "title": "two figures keep their own ids in the order the body holds them",
-     "ms": 0.169874,
+     "ms": 0.209618,
      "measured": false
     },
     {
      "title": "a body that is nothing but a figure is one block",
-     "ms": 0.117357,
+     "ms": 0.117567,
      "measured": false
     },
     {
      "title": "a fenced block keeps its blank lines and its language header",
-     "ms": 0.125843,
+     "ms": 0.15178,
      "measured": false
     },
     {
      "title": "a tilde fence closes on its own marker, not the first backtick",
-     "ms": 0.171538,
+     "ms": 0.180444,
      "measured": false
     },
     {
      "title": "an unclosed fence is refused rather than drawn as an open paragraph",
-     "ms": 0.10818,
+     "ms": 0.113149,
      "measured": false
     },
     {
      "title": "a table is one run, pipes and all",
-     "ms": 0.080539,
+     "ms": 0.090027,
      "measured": false
     },
     {
      "title": "a nested list and a task list stay one run each",
-     "ms": 0.098853,
+     "ms": 0.071462,
      "measured": false
     },
     {
      "title": "a blockquote and a thematic break are read as they were written",
-     "ms": 0.09736,
+     "ms": 0.225758,
      "measured": false
     },
     {
      "title": "plain text with newlines is paragraphs, not a refusal",
-     "ms": 0.108331,
+     "ms": 0.191895,
      "measured": false
     },
     {
      "title": "an image inside a sentence is refused: \u00a71 has no inline image",
-     "ms": 0.101147,
+     "ms": 0.162681,
      "measured": false
     },
     {
      "title": "an image inside a list item is refused",
-     "ms": 0.063888,
+     "ms": 0.098683,
      "measured": false
     },
     {
      "title": "a pk-file reference that is not a uuid is refused",
-     "ms": 0.065531,
+     "ms": 0.089987,
      "measured": false
     },
     {
      "title": "an image addressed anywhere but pk-file is refused",
-     "ms": 0.044893,
+     "ms": 0.094334,
      "measured": false
     },
     {
      "title": "a heading outside ## to #### is refused, and one inside is not",
-     "ms": 0.074478,
+     "ms": 0.110254,
      "measured": false
     },
     {
      "title": "a link in any scheme the format allows is ordinary text to this reader",
-     "ms": 0.042629,
+     "ms": 0.056685,
      "measured": false
     },
     {
-     "title": "a frame wider than its slot gets the largest served width that fits the slot",
-     "ms": 0.193829,
+     "title": "a frame wider than its slot gets the smallest declared width covering the slot",
+     "ms": 0.200301,
      "measured": false
     },
     {
      "title": "a slot wider than the widest variant gets that variant, or the frame when it fits",
-     "ms": 0.061654,
+     "ms": 0.087442,
+     "measured": false
+    },
+    {
+     "title": "a declared width never asks a measured frame to grow",
+     "ms": 0.195602,
      "measured": false
     },
     {
      "title": "a frame nobody measured plans nothing",
-     "ms": 0.05408,
+     "ms": 0.09223,
      "measured": false
     },
     {
      "title": "a table is what the phone's rich editor cannot hold, and nothing else is",
-     "ms": 0.392386,
+     "ms": 0.564434,
      "measured": false
     },
     {
      "title": "a span closed on the line below holds only its own words, and the prose after it is read",
-     "ms": 0.21091,
+     "ms": 0.275019,
      "measured": false
     },
     {
      "title": "a table quoted into a blockquote is one the editor cannot hold either",
-     "ms": 0.119001,
+     "ms": 0.12458,
      "measured": false
     },
     {
      "title": "a table drawn inside a code fence is not a table the editor would lose",
-     "ms": 0.079848,
+     "ms": 0.102669,
      "measured": false
     }
    ],
    "loaded": 4,
-   "coveredProdLines": 854,
+   "coveredProdLines": 839,
    "onlyProdLines": null,
-   "testsMs": 6.2
+   "testsMs": 7.4
   },
   {
    "file": "tests/prose-body-says-its-words.test.ts",
@@ -19021,6 +19131,164 @@
    "testsMs": 48
   },
   {
+   "file": "tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A refresh never blanks what the list already says (0085): a row's assignee keeps the name the directory answered while a refresh asks again, and keeps it when the refresh cannot reach the directory at all \u2014 a failed request is not a withdrawn grant, so the person in a tunnel still reads who a task belongs to. A refusal is a different answer and withdraws the name; that rule has its own cases beside the reference hooks.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Drives the generated list refresh and retains the visible assignee under a pending or unreachable directory; tests/screens/reference-name-resolves-or-says-linked.test.tsx covers record reads. Cost comes from measured.commands.jest for this file; exclusive coverage was not measured.",
+   "ms": 19848,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a refresh that cannot reach the directory keeps the assignee's name",
+    "a refresh keeps the assignee's name while the directory is read again"
+   ],
+   "tests": [
+    {
+     "title": "a refresh that cannot reach the directory keeps the assignee's name",
+     "ms": 828,
+     "measured": false
+    },
+    {
+     "title": "a refresh keeps the assignee's name while the directory is read again",
+     "ms": 44,
+     "measured": false
+    }
+   ],
+   "loaded": 153,
+   "coveredProdLines": 2190,
+   "onlyProdLines": null,
+   "testsMs": 872
+  },
+  {
+   "file": "tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "(no first comment; first test title) HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+   "ruleSource": "first test title",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins immediate per-person name and portrait withdrawal while a peer waits, including a superseding transient refresh. The closest sibling tests/screens/reference-name-resolves-or-says-linked.test.tsx covers isolated record refusals and session changes. Measured by npm run inventory -- --measure tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx using measured.commands.jest; exclusive-line attribution remains unmeasured.",
+   "ms": 20219,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+    "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+    "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: true",
+    "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: true"
+   ],
+   "tests": [
+    {
+     "title": "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: false",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: true",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws a person's name and portrait despite a pending peer and superseding refresh: true",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 136,
+   "coveredProdLines": 1641,
+   "onlyProdLines": null,
+   "testsMs": 22
+  },
+  {
+   "file": "tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "An explicit refusal settles its picture independently of unrelated pending metadata reads.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Keep beside tests/screens/compact-pictures.test.tsx: interleaves explicit 403/404 metadata refusals with a pending peer and superseding transient refresh, which the single-file refusal cases do not exercise. npm run inventory -- --measure tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx measured 4 passing cases; exclusive-line attribution remains unmeasured.",
+   "ms": 17242,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: false",
+    "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: false",
+    "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: true",
+    "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: true"
+   ],
+   "tests": [
+    {
+     "title": "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: false",
+     "ms": 30,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: false",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: true",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: true",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1642,
+   "onlyProdLines": null,
+   "testsMs": 39
+  },
+  {
+   "file": "tests/screens/a-replaced-row-picture-starts-with-its-own-state.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Replacing one row's picture starts a new load even while another row keeps the old file.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Keep beside tests/screens/compact-pictures.test.tsx: exercises replacing a failed row slot while a second slot still holds the original file. npm run inventory -- --measure tests/screens/a-replaced-row-picture-starts-with-its-own-state.test.tsx measured 1 passing case; exclusive-line attribution remains unmeasured.",
+   "ms": 18050,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a replacement picture loads after the row's previous file failed in one shared slot"
+   ],
+   "tests": [
+    {
+     "title": "a replacement picture loads after the row's previous file failed in one shared slot",
+     "ms": 27,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1631,
+   "onlyProdLines": null,
+   "testsMs": 27
+  },
+  {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -19187,19 +19455,24 @@
    "file": "tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 2,
+   "cases": 7,
    "rule": "A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answers. A value the page does not reach keeps the word the kit says, which is what a page is \u2014 the identifier the row carries is never what a person reads.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 17918,
+   "verdictReason": "Pins one bounded directory page per target and independent replacement/refusal while a peer waits, including session expiry and obsolete completions. The closest sibling tests/screens/reference-name-resolves-or-says-linked.test.tsx resolves individual records rather than directory pages. Measured by npm run inventory -- --measure tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx using measured.commands.jest; exclusive-line attribution remains unmeasured.",
+   "ms": 21179,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a window reads each pointed-at resource once and names every value that page holds",
-    "a value outside the page keeps its word, which is what a page is"
+    "a value outside the page keeps its word, which is what a page is",
+    "directory portraits share one bounded page and withdraw together on a refreshed refusal",
+    "each directory refresh replaces only the target that answered",
+    "HTTP 401 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+    "HTTP 403 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+    "HTTP 404 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh"
    ],
    "tests": [
     {
@@ -19209,14 +19482,39 @@
     },
     {
      "title": "a value outside the page keeps its word, which is what a page is",
-     "ms": 2,
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "directory portraits share one bounded page and withdraw together on a refreshed refusal",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "each directory refresh replaces only the target that answered",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "HTTP 401 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "HTTP 403 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+     "ms": 4,
      "measured": false
     }
    ],
-   "loaded": 128,
-   "coveredProdLines": 1322,
+   "loaded": 136,
+   "coveredProdLines": 1669,
    "onlyProdLines": null,
-   "testsMs": 11
+   "testsMs": 38
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",
@@ -19318,11 +19616,11 @@
    "file": "tests/screens/activity-directory-denial.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 5,
-   "ms": 23634,
-   "testsMs": 769,
-   "loaded": 136,
-   "coveredProdLines": 11611,
+   "cases": 6,
+   "ms": 25736,
+   "testsMs": 401,
+   "loaded": 158,
+   "coveredProdLines": 2253,
    "onlyProdLines": 0,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -19334,7 +19632,8 @@
     "light activity removes cached actor details after directory HTTP 404",
     "dark activity removes cached actor details after directory HTTP 403",
     "dark activity removes cached actor details after directory HTTP 404",
-    "an obsolete actor response cannot revive a session-denied trail"
+    "an obsolete actor response cannot revive a session-denied trail",
+    "new-session events cannot publish the previous session's directory enrichment"
    ],
    "tests": [
     {
@@ -19344,7 +19643,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 225,
+     "measured": false
     },
     {
      "title": "light activity removes cached actor details after directory HTTP 404",
@@ -19353,7 +19653,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 50,
+     "measured": false
     },
     {
      "title": "dark activity removes cached actor details after directory HTTP 403",
@@ -19362,7 +19663,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 51,
+     "measured": false
     },
     {
      "title": "dark activity removes cached actor details after directory HTTP 404",
@@ -19371,7 +19673,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 51,
+     "measured": false
     },
     {
      "title": "an obsolete actor response cannot revive a session-denied trail",
@@ -19380,7 +19683,13 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "new-session events cannot publish the previous session's directory enrichment",
+     "ms": 5,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -19390,7 +19699,8 @@
    "testsTotal": 5,
    "tier": "merge",
    "reach": "npm test (jest half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest"
   },
   {
    "file": "tests/screens/activity-directory-pagination.test.tsx",
@@ -20265,6 +20575,149 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/screens/compact-pictures.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 20,
+   "rule": "(no first comment; first test title) one metadata read prepares header-authorized private bytes without a native cache",
+   "ruleSource": "first test title",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20286,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "one metadata read prepares header-authorized private bytes without a native cache",
+    "fresh public versioned metadata earns memory caching and a new visit changes its identity",
+    "a compact picture keeps its ready resource while a refresh waits and after TypeError: Offline\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
+    "a compact picture keeps its ready resource while a refresh waits and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:38)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+    "a picture refresh answered HTTP 401 withdraws a previously ready resource",
+    "a picture refresh answered HTTP 403 withdraws a previously ready resource",
+    "a picture refresh answered HTTP 404 withdraws a previously ready resource",
+    "a pending picture can finish loading during a metadata refresh",
+    "each refreshed picture replaces only its own resource when 73f9dbb7-ddf0-43f1-a680-d935cbd96bf0 answers first",
+    "each refreshed picture replaces only its own resource when e18ea2af-7c22-4130-95ae-690efcc5ac0f answers first",
+    "metadata HTTP 403 prevents a byte request and preserves the initials",
+    "metadata HTTP 404 prevents a byte request and preserves the initials",
+    "a transient metadata error uses only the uncached declared door",
+    "missing identity or bearer prepares no metadata or byte read",
+    "an obsolete file load cannot replace the current picture's state",
+    "an account change withdraws old resources before new metadata arrives",
+    "the same file in two rows keeps independent loading and failure states",
+    "the generated list composes its thumbnail and named assignee from the same authorized file read",
+    "a generated detail keeps its assignee while a write invalidation renews the person read",
+    "the authenticated account uses its declared display name without a speculative portrait read"
+   ],
+   "tests": [
+    {
+     "title": "one metadata read prepares header-authorized private bytes without a native cache",
+     "ms": 21,
+     "measured": false
+    },
+    {
+     "title": "fresh public versioned metadata earns memory caching and a new visit changes its identity",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a compact picture keeps its ready resource while a refresh waits and after TypeError: Offline\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a compact picture keeps its ready resource while a refresh waits and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:38)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a picture refresh answered HTTP 401 withdraws a previously ready resource",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a picture refresh answered HTTP 403 withdraws a previously ready resource",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a picture refresh answered HTTP 404 withdraws a previously ready resource",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a pending picture can finish loading during a metadata refresh",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "each refreshed picture replaces only its own resource when 73f9dbb7-ddf0-43f1-a680-d935cbd96bf0 answers first",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "each refreshed picture replaces only its own resource when e18ea2af-7c22-4130-95ae-690efcc5ac0f answers first",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "metadata HTTP 403 prevents a byte request and preserves the initials",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "metadata HTTP 404 prevents a byte request and preserves the initials",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a transient metadata error uses only the uncached declared door",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "missing identity or bearer prepares no metadata or byte read",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "an obsolete file load cannot replace the current picture's state",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "an account change withdraws old resources before new metadata arrives",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "the same file in two rows keeps independent loading and failure states",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "the generated list composes its thumbnail and named assignee from the same authorized file read",
+     "ms": 793,
+     "measured": false
+    },
+    {
+     "title": "a generated detail keeps its assignee while a write invalidation renews the person read",
+     "ms": 452,
+     "measured": false
+    },
+    {
+     "title": "the authenticated account uses its declared display name without a speculative portrait read",
+     "ms": 11,
+     "measured": false
+    }
+   ],
+   "loaded": 164,
+   "coveredProdLines": 2514,
+   "onlyProdLines": null,
+   "testsMs": 1330
+  },
+  {
    "file": "tests/screens/custom-renderer-catalog-withdrawal.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -20479,6 +20932,41 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/expired-people-stay-withdrawn-until-the-session-changes.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A session refusal withdraws every retained person before peers finish. Later successes cannot revive that session, and a replacement workspace accepts only its own answers.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "The measured.commands.jest one-file run via npm run inventory -- --measure passed both cases: session-wide 401 withdrawal survives same-visit and later successful reads, and matching IDs from a former workspace cannot repopulate a replacement workspace. tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx covers per-record 403/404 withdrawal while a peer waits; these cases keep the session-wide and cross-workspace boundaries explicit. Exclusive-line attribution remains unmeasured.",
+   "ms": 21149,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a 401 withdraws both portraits and later successful reads cannot revive the expired session",
+    "a replacement workspace never paints a former workspace's late people for matching row ids"
+   ],
+   "tests": [
+    {
+     "title": "a 401 withdraws both portraits and later successful reads cannot revive the expired session",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "a replacement workspace never paints a former workspace's late people for matching row ids",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 136,
+   "coveredProdLines": 1633,
+   "onlyProdLines": null,
+   "testsMs": 18
   },
   {
    "file": "tests/screens/generated-richtext-record-renders-natively.test.tsx",
@@ -20764,7 +21252,7 @@
    "file": "tests/screens/reference-name-resolves-or-says-linked.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 7,
+   "cases": 14,
    "rule": "A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the identifier in between. A refusal settles that pointer for the visit rather than retrying it, and a session the server withdrew withdraws every name the screen holds.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -20772,9 +21260,16 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 16461,
+   "ms": 17838,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
+    "a record refresh retains its name and portrait during and after TypeError: Network request failed\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
+    "a record refresh retains its name and portrait during and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:53)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+    "a record refresh answered HTTP 401 withdraws its previous name and portrait",
+    "a record refresh answered HTTP 403 withdraws its previous name and portrait",
+    "a record refresh answered HTTP 404 withdraws its previous name and portrait",
+    "a changed session withdraws names and portraits before the replacement read answers",
+    "a changed key withdraws names and portraits before the replacement read answers",
     "a record's screen asks once per pointed-at record, and the answer is the name",
     "a person with nothing to read as a name stays the word, and the identifier is never in the map",
     "a refused record leaves the word in place, asks once, and reports no failure",
@@ -20785,8 +21280,43 @@
    ],
    "tests": [
     {
+     "title": "a record refresh retains its name and portrait during and after TypeError: Network request failed\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a record refresh retains its name and portrait during and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/reference-name-resolves-or-says-linked.test.tsx:77:53)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a record refresh answered HTTP 401 withdraws its previous name and portrait",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a record refresh answered HTTP 403 withdraws its previous name and portrait",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a record refresh answered HTTP 404 withdraws its previous name and portrait",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a changed session withdraws names and portraits before the replacement read answers",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a changed key withdraws names and portraits before the replacement read answers",
+     "ms": 3,
+     "measured": false
+    },
+    {
      "title": "a record's screen asks once per pointed-at record, and the answer is the name",
-     "ms": 9,
+     "ms": 2,
      "measured": false
     },
     {
@@ -20801,7 +21331,7 @@
     },
     {
      "title": "a refused session withdraws every name, and the words stand",
-     "ms": 2,
+     "ms": 3,
      "measured": false
     },
     {
@@ -20811,7 +21341,7 @@
     },
     {
      "title": "a pointer moved on is asked for, and a pointer settled is never asked again",
-     "ms": 9,
+     "ms": 3,
      "measured": false
     },
     {
@@ -20820,10 +21350,10 @@
      "measured": false
     }
    ],
-   "loaded": 128,
-   "coveredProdLines": 1324,
+   "loaded": 136,
+   "coveredProdLines": 1679,
    "onlyProdLines": null,
-   "testsMs": 30
+   "testsMs": 61
   },
   {
    "file": "tests/screens/refused-richtext-file-keeps-the-reader.test.tsx",

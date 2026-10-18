@@ -286,6 +286,16 @@ export function failureKind(facts: FailureFacts): FailureKind {
 }
 
 /**
+ * enrichmentFailure decides whether an optional name or picture read withdraws its last answer.
+ * Only explicit session, access or missing-record refusals withdraw; failed refreshes retain it.
+ */
+export function enrichmentFailure(facts: FailureFacts): "signed-out" | "withdraw" | "retain" {
+  const kind = failureKind(facts);
+  if (kind === "signed-out") return "signed-out";
+  return kind === "access" || kind === "missing" ? "withdraw" : "retain";
+}
+
+/**
  * The verdict for one refusal. `copy` is the phone's own bundle, so the sentence
  * is the one that table holds and nowhere else; the nouns and the quoted instant
  * arrive from `subject`, which is content, never a word written here.

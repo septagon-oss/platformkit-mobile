@@ -7,7 +7,8 @@ import { readFileSync } from "node:fs";
 import { act, renderHook } from "@testing-library/react-native";
 import { parseCatalog, type Catalog, type Entry } from "../../src/core/catalog";
 import { nameKey, type Names, type Pointer } from "../../src/core/derive";
-import { useDirectoryNames } from "../../src/screens/useReferenceNames";
+import { useDirectoryNames, useDirectoryPeople } from "../../src/screens/useReferenceNames";
+import { ApiError } from "../../src/effects/api";
 import { fakeApi, shell, shellValue, type FakeApi } from "../fakes/shell";
 
 jest.mock("../../src/shell", () => ({ useShell: () => require("../fakes/shell").shell.value }));
@@ -121,3 +122,138 @@ describe("useDirectoryNames", () => {
     await leave(unmount);
   });
 });
+
+test("directory portraits share one bounded page and withdraw together on a refreshed refusal", async () => {
+  const portrait = "ced4977a-e66c-4968-8fc8-f826017602d9";
+  user = {
+    ...user,
+    fields: [...user.fields, { name: "portraitFile", type: "uuid", present: "avatar" }],
+  };
+  catalog = {
+    ...catalog,
+    resources: catalog.resources.map((e) => (e.module === "user" ? user : e)),
+  };
+  const api = fakeApi();
+  api.list.mockResolvedValue({
+    total: 2,
+    items: [
+      { id: ID, displayName: "Ana", portraitFile: portrait },
+      { id: OTHER, displayName: "Ben", portraitFile: portrait },
+    ],
+  });
+  installed(api);
+  const view = await renderHook(
+    ({ ids, visit }: { readonly ids: readonly Pointer[]; readonly visit: number }) =>
+      useDirectoryPeople(ids, visit),
+    {
+      initialProps: { ids: pointer(ID), visit: 0 },
+    },
+  );
+  await flush();
+  expect(view.result.current.people[at(ID)]?.portrait).toBe(portrait);
+  await view.rerender({ ids: [...pointer(ID), ...pointer(OTHER)], visit: 0 });
+  await flush();
+  expect(view.result.current.names[at(OTHER)]).toBe("Ben");
+  expect(api.list).toHaveBeenCalledTimes(1);
+  api.list.mockRejectedValue(new ApiError(403, "Refused"));
+  await view.rerender({ ids: [...pointer(ID), ...pointer(OTHER)], visit: 1 });
+  await flush();
+  expect(view.result.current.people).toEqual({});
+  expect(view.result.current.names[at(ID)]).toBe("Assigned");
+  expect(api.list).toHaveBeenCalledTimes(2);
+  await leave(view.unmount);
+});
+
+test("each directory refresh replaces only the target that answered", async () => {
+  const api = fakeApi();
+  const sites: Entry = { ...user, module: "site", entity: "site", path: "/api/v1/site/sites" };
+  catalog = { ...catalog, resources: [...catalog.resources, sites] };
+  installed(api);
+  const sitePointer: Pointer = { resource: "site/site", id: OTHER };
+  const siteAt = nameKey(sitePointer.resource, sitePointer.id);
+  api.list.mockImplementation(async (entry) => ({
+    total: 1,
+    items: [
+      entry.module === "user"
+        ? { id: ID, displayName: "Leila Kumar" }
+        : { id: OTHER, displayName: "Western depot" },
+    ],
+  }));
+  const view = await renderHook(
+    (visit: number) => useDirectoryPeople([...pointer(ID), sitePointer], visit),
+    { initialProps: 0 },
+  );
+  await flush();
+  expect(view.result.current.names[at(ID)]).toBe("Leila Kumar");
+  expect(view.result.current.names[siteAt]).toBe("Western depot");
+  api.list.mockImplementation(async (entry) => {
+    if (entry.module === "user") throw new ApiError(503, "Unavailable");
+    return { total: 0, items: [] };
+  });
+  await view.rerender(1);
+  await flush();
+  expect(api.list).toHaveBeenCalledTimes(4);
+  expect(view.result.current.names[at(ID)]).toBe("Leila Kumar");
+  expect(view.result.current.names[siteAt]).toBe("Linked");
+  expect(view.result.current.people[siteAt]).toBeUndefined();
+  await leave(view.unmount);
+});
+
+test.each([401, 403, 404])(
+  "HTTP %s withdraws a directory while a peer is pending and stays withdrawn after a transient refresh",
+  async (status) => {
+    const api = fakeApi();
+    const portrait = "b492b773-1a41-43ec-8da1-cf273ec6d874";
+    user = {
+      ...user,
+      fields: [...user.fields, { name: "photo", type: "uuid", present: "avatar" }],
+    };
+    const sites: Entry = { ...user, module: "site", entity: "site", path: "/api/v1/site/sites" };
+    catalog = { ...catalog, resources: [user, sites] };
+    installed(api);
+    const site = { resource: "site/site", id: OTHER };
+    const siteAt = nameKey(site.resource, site.id);
+    api.list.mockImplementation(async (entry) => ({
+      total: 1,
+      items: [
+        entry.module === "user"
+          ? { id: ID, displayName: "Ravi Desai", photo: portrait }
+          : { id: OTHER, displayName: "Northern depot" },
+      ],
+    }));
+    const view = await renderHook(
+      (visit: number) => useDirectoryPeople([...pointer(ID), site], visit),
+      { initialProps: 0 },
+    );
+    await flush();
+    expect(view.result.current.people[at(ID)]?.portrait).toBe(portrait);
+    expect(view.result.current.names[siteAt]).toBe("Northern depot");
+
+    const refused = Promise.withResolvers<{ total: number; items: Record<string, unknown>[] }>();
+    const pending = Promise.withResolvers<{ total: number; items: Record<string, unknown>[] }>();
+    api.list.mockImplementation((entry) =>
+      entry.module === "user" ? refused.promise : pending.promise,
+    );
+    await view.rerender(1);
+    expect(api.list).toHaveBeenCalledTimes(4);
+    await act(async () => refused.reject(new ApiError(status, "Refused")));
+    expect(view.result.current.names[at(ID)]).toBe("Assigned");
+    expect(view.result.current.people[at(ID)]).toBeUndefined();
+    expect(view.result.current.names[siteAt]).toBe(status === 401 ? "Linked" : "Northern depot");
+
+    api.list.mockRejectedValue(new ApiError(503, "Unavailable"));
+    await view.rerender(2);
+    await flush();
+    expect(api.list).toHaveBeenCalledTimes(6);
+    await act(async () =>
+      pending.resolve({
+        total: 1,
+        items: [{ id: OTHER, displayName: "Obsolete depot" }],
+      }),
+    );
+    expect(view.result.current.names[at(ID)]).toBe("Assigned");
+    expect(view.result.current.people[at(ID)]).toBeUndefined();
+    expect(view.result.current.names[siteAt]).toBe(status === 401 ? "Linked" : "Northern depot");
+    await leave(view.unmount);
+  },
+);

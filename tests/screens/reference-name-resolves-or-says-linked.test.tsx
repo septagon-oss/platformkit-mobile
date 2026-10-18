@@ -5,11 +5,11 @@
 // name the screen holds.
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { readFileSync } from "node:fs";
-import { act, renderHook } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { key, parseCatalog, type Catalog, type Entry } from "../../src/core/catalog";
 import { nameKey, type Names, type Pointer } from "../../src/core/derive";
 import { ApiError } from "../../src/effects/api";
-import { useRecordNames } from "../../src/screens/useReferenceNames";
+import { useRecordNames, useRecordPeople } from "../../src/screens/useReferenceNames";
 import { fakeApi, shell, shellValue, type FakeApi } from "../fakes/shell";
 
 jest.mock("../../src/shell", () => ({ useShell: () => require("../fakes/shell").shell.value }));
@@ -61,6 +61,99 @@ beforeEach(() => {
   user = servedKernel.user;
   expect(key(user)).toBe("user/user");
 });
+
+const PORTRAIT = "4b06ce6d-5734-44a2-8187-e3989c24b36a";
+
+function portraits(api: FakeApi) {
+  user = {
+    ...user,
+    fields: [...user.fields, { name: "portrait", type: "uuid", present: "avatar" }],
+  };
+  catalog = { ...catalog, resources: [catalog.resources[0]!, user] };
+  installed(api);
+  api.get.mockResolvedValue({ id: ID, displayName: "Nadia Flores", portrait: PORTRAIT });
+}
+
+test.each([new TypeError("Network request failed"), new ApiError(503, "Unavailable")])(
+  "a record refresh retains its name and portrait during and after %s",
+  async (error) => {
+    const api = fakeApi();
+    portraits(api);
+    const view = await renderHook((visit: number) => useRecordPeople(pointer(ID), visit), {
+      initialProps: 0,
+    });
+    await waitFor(() => expect(view.result.current.people[at(ID)]?.portrait).toBe(PORTRAIT));
+    const reading = Promise.withResolvers<Record<string, unknown>>();
+    api.get.mockReturnValue(reading.promise);
+    await view.rerender(1);
+    expect(api.get).toHaveBeenCalledTimes(2);
+    expect(view.result.current.names[at(ID)]).toBe("Nadia Flores");
+    expect(view.result.current.people[at(ID)]?.portrait).toBe(PORTRAIT);
+    await act(async () => reading.reject(error));
+    expect(view.result.current.names[at(ID)]).toBe("Nadia Flores");
+    expect(view.result.current.people[at(ID)]?.portrait).toBe(PORTRAIT);
+
+    api.get.mockResolvedValue({ id: ID, displayName: "Nadia Costa" });
+    await view.rerender(2);
+    await waitFor(() => expect(view.result.current.names[at(ID)]).toBe("Nadia Costa"));
+    expect(view.result.current.people[at(ID)]?.portrait).toBeUndefined();
+    await leave(view.unmount);
+  },
+);
+
+test.each([401, 403, 404])(
+  "a record refresh answered HTTP %s withdraws its previous name and portrait",
+  async (status) => {
+    const api = fakeApi();
+    portraits(api);
+    const view = await renderHook((visit: number) => useRecordPeople(pointer(ID), visit), {
+      initialProps: 0,
+    });
+    await waitFor(() => expect(view.result.current.names[at(ID)]).toBe("Nadia Flores"));
+    api.get.mockRejectedValue(new ApiError(status, "Refused"));
+    await view.rerender(1);
+    await waitFor(() => expect(view.result.current.people).toEqual({}));
+    expect(view.result.current.names[at(ID)]).toBe("Assigned");
+    api.get.mockRejectedValue(new ApiError(502, "Unavailable"));
+    await view.rerender(2);
+    await flush();
+    expect(view.result.current.people).toEqual({});
+    expect(view.result.current.names[at(ID)]).toBe("Assigned");
+    await leave(view.unmount);
+  },
+);
+
+test.each(["session", "key"])(
+  "a changed %s withdraws names and portraits before the replacement read answers",
+  async (change) => {
+    const api = fakeApi();
+    portraits(api);
+    const view = await renderHook((visit: number) => useRecordPeople(pointer(ID), visit), {
+      initialProps: 0,
+    });
+    await waitFor(() => expect(view.result.current.names[at(ID)]).toBe("Nadia Flores"));
+    const obsolete = Promise.withResolvers<Record<string, unknown>>();
+    api.get.mockReturnValue(obsolete.promise);
+    await view.rerender(1);
+    const current = Promise.withResolvers<Record<string, unknown>>();
+    api.get.mockReturnValue(current.promise);
+    if (change === "session")
+      shell.value = { ...shell.value!, state: { phase: "ready", generation: 2, catalog } };
+    else api.bearer.mockReturnValue({ token: "new-key", id: "new-key-id" });
+    await view.rerender(1);
+    expect(api.get).toHaveBeenCalledTimes(3);
+    expect(view.result.current.names[at(ID)]).toBe("Assigned");
+    expect(view.result.current.people).toEqual({});
+    await act(async () =>
+      obsolete.resolve({ id: ID, displayName: "Obsolete name", portrait: PORTRAIT }),
+    );
+    expect(view.result.current.names[at(ID)]).toBe("Assigned");
+    expect(view.result.current.people).toEqual({});
+    await act(async () => current.resolve({ id: ID, displayName: "Current name" }));
+    await waitFor(() => expect(view.result.current.names[at(ID)]).toBe("Current name"));
+    await leave(view.unmount);
+  },
+);
 afterEach(() => {
   shell.value = undefined;
 });
@@ -136,8 +229,9 @@ describe("useRecordNames", () => {
       id === ID ? { id: ID, displayName: "Ada Lovelace" } : Promise.reject(new ApiError(401, "")),
     );
     installed(api);
-    const { result, unmount } = await renderHook(() =>
-      useRecordNames([...pointer(ID), ...pointer(OTHER)]),
+    const { result, rerender, unmount } = await renderHook(
+      (pointers: readonly Pointer[]) => useRecordNames(pointers),
+      { initialProps: [...pointer(ID), ...pointer(OTHER)] },
     );
     for (let turn = 0; turn < 20 && api.get.mock.calls.length < 2; turn++) await flush();
     expect(api.get).toHaveBeenCalledTimes(2);
@@ -146,6 +240,10 @@ describe("useRecordNames", () => {
     // kept as the one name on a screen that can no longer be trusted.
     expect(result.current[at(ID)]).toBe("Assigned");
     expect(result.current[at(OTHER)]).toBe("Assigned");
+    await rerender(pointer(ID));
+    await flush();
+    expect(result.current[at(ID)]).toBe("Assigned");
+    expect(api.get).toHaveBeenCalledTimes(2);
     await leave(unmount);
   });
 

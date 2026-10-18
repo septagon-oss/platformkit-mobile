@@ -24,6 +24,13 @@ export const zAccessBody = z.object({
   permission: z.string().max(64),
 });
 
+export const zAltBody = z.object({
+  $schema: z.url().readonly().optional(),
+  alt: z.string().max(1000).optional(),
+  decorative: z.boolean().optional(),
+  expectedUpdatedAt: z.iso.datetime({ offset: true }),
+});
+
 export const zAssignBody = z.object({
   $schema: z.url().readonly().optional(),
   assigneeId: z.uuid(),
@@ -69,6 +76,7 @@ export const zContent = z.object({
   $schema: z.url().readonly().optional(),
   author: z.uuid().readonly().optional(),
   body: z.string().max(262144).optional(),
+  coverImageId: z.uuid().optional(),
   createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
   id: z.string().readonly().optional(),
   kind: z.enum(["page", "post"]).optional().default("post"),
@@ -81,6 +89,7 @@ export const zContent = z.object({
 
 export const zContentPatch = z.object({
   body: z.string().max(262144).optional(),
+  coverImageId: z.uuid().nullish(),
   kind: z.enum(["page", "post"]).optional(),
   slug: z.string().min(1).max(200).optional(),
   title: z.string().min(1).max(200).optional(),
@@ -203,6 +212,7 @@ export const zFieldReference = z.object({
 });
 
 export const zFieldHints = z.object({
+  doneValues: z.array(z.string()).nullish(),
   enumLabels: z.record(z.string(), z.string()).optional(),
   enumTones: z.record(z.string(), z.string()).optional(),
   format: z.string().optional(),
@@ -216,8 +226,10 @@ export const zFieldHints = z.object({
 
 export const zFile = z.object({
   $schema: z.url().readonly().optional(),
+  alt: z.string().max(1000),
   contentType: z.string().max(120).optional(),
   createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  decorative: z.boolean(),
   height: z.number().int().readonly().optional(),
   id: z.string().readonly().optional(),
   kind: z.string().max(32).optional(),
@@ -518,6 +530,11 @@ export const zPasswordRegistrationInputBody = z.object({
   termsAccepted: z.boolean(),
 });
 
+export const zPictures = z.object({
+  source: z.string(),
+  widths: z.array(z.number().int()).nullish(),
+});
+
 export const zPlan = z.object({
   $schema: z.url().readonly().optional(),
   active: z.boolean(),
@@ -590,6 +607,14 @@ export const zPageProposalBody = z.object({
   total: z.number().int(),
 });
 
+export const zQuota = z.object({
+  $schema: z.url().readonly().optional(),
+  quota: z.number().int().readonly(),
+  unlimited: z.boolean().readonly(),
+  used: z.number().int().readonly(),
+  variants: z.number().int().readonly(),
+});
+
 export const zRecoveryAvailability = z.object({
   available: z.boolean(),
 });
@@ -632,6 +657,7 @@ export const zResourceGroup = z.object({
 });
 
 export const zEntryPresentation = z.object({
+  coverField: z.string().optional(),
   description: z.string().optional(),
   emptyDescription: z.string().optional(),
   group: zResourceGroup.optional(),
@@ -639,12 +665,14 @@ export const zEntryPresentation = z.object({
   order: z.number().int().optional(),
   plural: z.string().optional(),
   previewField: z.string().optional(),
+  primaryCommand: z.string().optional(),
   primaryField: z.string().optional(),
   sections: z.array(zEntitySection).optional(),
   singular: z.string().optional(),
   sortable: z.array(z.string()).optional(),
   statusField: z.string().optional(),
   summaryFields: z.array(z.string()).optional(),
+  thumbnailField: z.string().optional(),
 });
 
 export const zEntry = z.object({
@@ -665,6 +693,7 @@ export const zEntry = z.object({
 export const zCatalog = z.object({
   $schema: z.url().readonly().optional(),
   catalogVersion: z.number().int(),
+  pictures: zPictures.optional(),
   resources: z.array(zEntry).nullable(),
 });
 
@@ -777,8 +806,7 @@ export const zSiteSettings = z.object({
   primaryColor: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
-    .optional()
-    .default("#2563eb"),
+    .optional(),
   revision: z.number().int().readonly().optional(),
   tagline: z.string().max(200).optional(),
   theme: z.enum(["light", "dark", "system"]).optional().default("system"),
@@ -959,6 +987,12 @@ export const zAccessBodyWritable = z.object({
   permission: z.string().max(64),
 });
 
+export const zAltBodyWritable = z.object({
+  alt: z.string().max(1000).optional(),
+  decorative: z.boolean().optional(),
+  expectedUpdatedAt: z.iso.datetime({ offset: true }),
+});
+
 export const zAssignBodyWritable = z.object({
   assigneeId: z.uuid(),
 });
@@ -969,6 +1003,7 @@ export const zCancelBodyWritable = z.object({
 
 export const zCatalogWritable = z.object({
   catalogVersion: z.number().int(),
+  pictures: zPictures.optional(),
   resources: z.array(zEntry).nullable(),
 });
 
@@ -996,6 +1031,7 @@ export const zConnectionWritable = z.object({
 
 export const zContentWritable = z.object({
   body: z.string().max(262144).optional(),
+  coverImageId: z.uuid().optional(),
   kind: z.enum(["page", "post"]).optional().default("post"),
   slug: z.string().min(1).max(200),
   status: z.enum(["draft", "published", "archived"]).optional().default("draft"),
@@ -1065,7 +1101,9 @@ export const zFactorsOutputBodyWritable = z.object({
 });
 
 export const zFileWritable = z.object({
+  alt: z.string().max(1000),
   contentType: z.string().max(120).optional(),
+  decorative: z.boolean(),
   kind: z.string().max(32).optional(),
   name: z.string().min(1).max(255),
   visibility: z.enum(["private", "public"]).optional().default("private"),
@@ -1401,8 +1439,7 @@ export const zSiteSettingsWritable = z.object({
   primaryColor: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
-    .optional()
-    .default("#2563eb"),
+    .optional(),
   tagline: z.string().max(200).optional(),
   theme: z.enum(["light", "dark", "system"]).optional().default("system"),
   title: z.string().max(120).optional(),
@@ -1515,6 +1552,10 @@ export const zVerifyFactorInputBodyWritable = z.object({
 
 export const zAppAccessRequestBody = zAccessBodyWritable;
 
+export const zAppAccessRequestHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
@@ -1553,12 +1594,20 @@ export const zAuditEventReadResponse = zEvent;
 
 export const zAuthChallengePasskeyBeginBody = zPasskeyBeginAssertionInputBodyWritable;
 
+export const zAuthChallengePasskeyBeginHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
 export const zAuthChallengePasskeyBeginResponse = zPasskeyChallenge;
 
 export const zAuthChallengePasskeyVerifyBody = zPasskeyVerifyInputBodyWritable;
+
+export const zAuthChallengePasskeyVerifyHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -1577,6 +1626,10 @@ export const zAuthChallengeVerifyResponse = zIdentity;
  */
 export const zAuthFactorListResponse = zFactorsOutputBody;
 
+export const zAuthFactorPasskeyBeginHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
@@ -1584,15 +1637,27 @@ export const zAuthFactorPasskeyBeginResponse = zPasskeyChallenge;
 
 export const zAuthFactorPasskeyFinishBody = zPasskeyFinishInputBodyWritable;
 
+export const zAuthFactorPasskeyFinishHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * Created
  */
 export const zAuthFactorPasskeyFinishResponse = zFactor;
 
+export const zAuthRecoveryCodesRotateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * Created
  */
 export const zAuthRecoveryCodesRotateResponse = zRecoveryCodesOutputBody;
+
+export const zAuthFactorTotpBeginHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -1600,6 +1665,10 @@ export const zAuthRecoveryCodesRotateResponse = zRecoveryCodesOutputBody;
 export const zAuthFactorTotpBeginResponse = zTotpEnrolment;
 
 export const zAuthFactorTotpFinishBody = zFinishTotpInputBodyWritable;
+
+export const zAuthFactorTotpFinishHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * Created
@@ -1622,6 +1691,10 @@ export const zAuthLoginBody = zLoginInputBodyWritable;
  */
 export const zAuthLoginResponse = zIdentity;
 
+export const zAuthLoginPasskeyBeginHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
@@ -1629,10 +1702,18 @@ export const zAuthLoginPasskeyBeginResponse = zPasskeyChallenge;
 
 export const zAuthLoginPasskeyVerifyBody = zPasskeyVerifyInputBodyWritable;
 
+export const zAuthLoginPasskeyVerifyHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
 export const zAuthLoginPasskeyVerifyResponse = zIdentity;
+
+export const zAuthLogoutHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -1660,6 +1741,10 @@ export const zAuthOidcCallbackResponse = z.void();
 export const zAuthOidcStartResponse = z.void();
 
 export const zAuthPasswordChangeBody = zChangeInputBodyWritable;
+
+export const zAuthPasswordChangeHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -1689,6 +1774,10 @@ export const zAuthRoleSetPath = z.object({
  */
 export const zAuthRoleSetResponse = zRole;
 
+export const zAuthSamlCallbackHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * No Content
  */
@@ -1709,10 +1798,18 @@ export const zAuthSamlStartResponse = z.void();
  */
 export const zAuthSessionListResponse = zSessionsOutputBody;
 
+export const zAuthSessionRevokeAllHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
 export const zAuthSessionRevokeAllResponse = zClearOutputBody;
+
+export const zAuthSessionRevokeHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zAuthSessionRevokePath = z.object({
   ref: z.string().length(64),
@@ -1724,6 +1821,10 @@ export const zAuthSessionRevokePath = z.object({
 export const zAuthSessionRevokeResponse = zDoneOutputBody;
 
 export const zAuthPasskeySignInSetBody = zPasskeySignInSettingInputBodyWritable;
+
+export const zAuthPasskeySignInSetHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -1737,10 +1838,27 @@ export const zAuthTokenListResponse = zTokensOutputBody;
 
 export const zAuthTokenIssueBody = zIssueTokenInputBodyWritable;
 
+export const zAuthTokenIssueHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * Created
  */
 export const zAuthTokenIssueResponse = zIssuedToken;
+
+export const zAuthTokenRevokeSelfHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+/**
+ * No Content
+ */
+export const zAuthTokenRevokeSelfResponse = z.void();
+
+export const zAuthTokenRevokeHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zAuthTokenRevokePath = z.object({
   id: z.uuid(),
@@ -1779,12 +1897,20 @@ export const zBillingSubscriptionReadResponse = zSubscription;
 
 export const zBillingSubscriptionCancelBody = zCancelBodyWritable;
 
+export const zBillingSubscriptionCancelHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
 export const zBillingSubscriptionCancelResponse = zSubscription;
 
 export const zBillingSubscriptionSubscribeBody = zSubscribeBodyWritable;
+
+export const zBillingSubscriptionSubscribeHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -1807,6 +1933,10 @@ export const zChangeProposalListResponse = zPageProposalBody;
 
 export const zChangeProposalProposeBody = zNewProposalWritable;
 
+export const zChangeProposalProposeHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
@@ -1823,6 +1953,10 @@ export const zChangeProposalReadResponse = zProposal;
 
 export const zChangeProposalApplyBody = zRevisionInputWritable;
 
+export const zChangeProposalApplyHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zChangeProposalApplyPath = z.object({
   id: z.uuid(),
 });
@@ -1834,6 +1968,10 @@ export const zChangeProposalApplyResponse = zProposal;
 
 export const zChangeProposalReviewBody = zReviewWritable;
 
+export const zChangeProposalReviewHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zChangeProposalReviewPath = z.object({
   id: z.uuid(),
 });
@@ -1844,6 +1982,10 @@ export const zChangeProposalReviewPath = z.object({
 export const zChangeProposalReviewResponse = zProposal;
 
 export const zChangeProposalWithdrawBody = zRevisionInputWritable;
+
+export const zChangeProposalWithdrawHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zChangeProposalWithdrawPath = z.object({
   id: z.uuid(),
@@ -1868,6 +2010,10 @@ export const zContentContentListQuery = z.object({
 export const zContentContentListResponse = zPageContentBody;
 
 export const zContentContentCreateBody = zContentWritable;
+
+export const zContentContentCreateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * Created
@@ -1904,6 +2050,7 @@ export const zContentContentUpdateBody = zContentPatch;
 
 export const zContentContentUpdateHeaders = z.object({
   "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
 });
 
 export const zContentContentUpdatePath = z.object({
@@ -1921,6 +2068,10 @@ export const zContentContentUpdateResponse = zContent;
 
 export const zContentContentArchiveBody = zCommandInputStructBody;
 
+export const zContentContentArchiveHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zContentContentArchivePath = z.object({
   id: z.uuid(),
 });
@@ -1931,6 +2082,10 @@ export const zContentContentArchivePath = z.object({
 export const zContentContentArchiveResponse = zContent;
 
 export const zContentContentPublishBody = zCommandInputStructBody;
+
+export const zContentContentPublishHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zContentContentPublishPath = z.object({
   id: z.uuid(),
@@ -1943,6 +2098,10 @@ export const zContentContentPublishResponse = zContent;
 
 export const zContentContentReviewTranslationBody = zTranslationFieldsBodyWritable;
 
+export const zContentContentReviewTranslationHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zContentContentReviewTranslationPath = z.object({
   id: z.uuid(),
 });
@@ -1953,6 +2112,10 @@ export const zContentContentReviewTranslationPath = z.object({
 export const zContentContentReviewTranslationResponse = zContent;
 
 export const zContentContentSuggestTranslationBody = zTranslationFieldsBodyWritable;
+
+export const zContentContentSuggestTranslationHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zContentContentSuggestTranslationPath = z.object({
   id: z.uuid(),
@@ -1965,6 +2128,10 @@ export const zContentContentSuggestTranslationResponse = zContent;
 
 export const zContentContentTranslateBody = zTranslateBodyWritable;
 
+export const zContentContentTranslateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zContentContentTranslatePath = z.object({
   id: z.uuid(),
 });
@@ -1976,6 +2143,10 @@ export const zContentContentTranslateResponse = zContent;
 
 export const zContentContentUnpublishBody = zCommandInputStructBody;
 
+export const zContentContentUnpublishHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zContentContentUnpublishPath = z.object({
   id: z.uuid(),
 });
@@ -1986,6 +2157,10 @@ export const zContentContentUnpublishPath = z.object({
 export const zContentContentUnpublishResponse = zContent;
 
 export const zContentContentUntranslateBody = zTranslationFieldsBodyWritable;
+
+export const zContentContentUntranslateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zContentContentUntranslatePath = z.object({
   id: z.uuid(),
@@ -2000,6 +2175,9 @@ export const zFileFileListQuery = z.object({
   limit: z.number().int().min(1).max(200).optional().default(50),
   offset: z.number().int().min(0).optional(),
   sort: z.string().optional(),
+  q: z.string().max(64).optional(),
+  type: z.string().optional().default("all"),
+  unused: z.boolean().optional().default(false),
 });
 
 /**
@@ -2008,6 +2186,10 @@ export const zFileFileListQuery = z.object({
 export const zFileFileListResponse = zPageFileBody;
 
 export const zFileFileUploadBody = z.unknown();
+
+export const zFileFileUploadHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zFileFileUploadQuery = z.object({
   visibility: z.enum(["private", "public"]).optional().default("private"),
@@ -2021,6 +2203,10 @@ export const zFileFileUploadQuery = z.object({
 export const zFileFileUploadResponse = zFile;
 
 export const zFileFileEraseBody = zEraseBodyWritable;
+
+export const zFileFileEraseHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -2044,6 +2230,32 @@ export const zFileFileReadPath = z.object({
  * OK
  */
 export const zFileFileReadResponse = zFile;
+
+export const zFileFileAltCommandBody = zAltBodyWritable;
+
+export const zFileFileAltCommandHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+export const zFileFileAltCommandPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zFileFileAltCommandResponse = zFile;
+
+export const zFileFileAltBody = zAltBodyWritable;
+
+export const zFileFileAltPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zFileFileAltResponse = zFile;
 
 export const zFileFileContentPath = z.object({
   id: z.uuid(),
@@ -2085,6 +2297,10 @@ export const zFileFileReleaseResponse = z.void();
 
 export const zFileFileRetainBody = zRetainBodyWritable;
 
+export const zFileFileRetainHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zFileFileRetainPath = z.object({
   id: z.uuid(),
 });
@@ -2103,6 +2319,11 @@ export const zFileFileUsesPath = z.object({
  */
 export const zFileFileUsesResponse = z.array(zUseRow).nullable();
 
+/**
+ * OK
+ */
+export const zFileQuotaReadResponse = zQuota;
+
 export const zNotificationNotificationListQuery = z.object({
   limit: z.number().int().min(1).max(200).optional().default(50),
   offset: z.number().int().min(0).optional(),
@@ -2113,6 +2334,10 @@ export const zNotificationNotificationListQuery = z.object({
  * OK
  */
 export const zNotificationNotificationListResponse = zPageNotificationBody;
+
+export const zNotificationNotificationReadHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zNotificationNotificationReadPath = z.object({
   id: z.uuid(),
@@ -2304,12 +2529,20 @@ export const zTenantTenantSuspendResponse = zTenant;
 
 export const zAuthMailDeliveryBody = zMailDeliveryInputBodyWritable;
 
+export const zAuthMailDeliveryHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * OK
  */
 export const zAuthMailDeliveryResponse = zMailDeliveryOutputBody;
 
 export const zAuthPasswordForgotBody = zForgotInputBodyWritable;
+
+export const zAuthPasswordForgotHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -2318,6 +2551,10 @@ export const zAuthPasswordForgotResponse = zDoneOutputBody;
 
 export const zAuthRegisterBody = zPasswordRegistrationInputBodyWritable;
 
+export const zAuthRegisterHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * Accepted
  */
@@ -2325,12 +2562,20 @@ export const zAuthRegisterResponse = zDoneOutputBody;
 
 export const zAuthResendVerificationBody = zResendVerificationInputBodyWritable;
 
+export const zAuthResendVerificationHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * Accepted
  */
 export const zAuthResendVerificationResponse = zDoneOutputBody;
 
 export const zAuthVerifyEmailBody = zVerifyEmailInputBody;
+
+export const zAuthVerifyEmailHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * OK
@@ -2395,6 +2640,10 @@ export const zTaskTaskListResponse = zPageTaskBody;
 
 export const zTaskTaskCreateBody = zTaskWritable;
 
+export const zTaskTaskCreateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 /**
  * Created
  */
@@ -2426,6 +2675,7 @@ export const zTaskTaskUpdateBody = zTaskPatch;
 
 export const zTaskTaskUpdateHeaders = z.object({
   "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
 });
 
 export const zTaskTaskUpdatePath = z.object({
@@ -2439,6 +2689,10 @@ export const zTaskTaskUpdateResponse = zTask;
 
 export const zTaskTaskAssignBody = zAssignBodyWritable;
 
+export const zTaskTaskAssignHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zTaskTaskAssignPath = z.object({
   id: z.uuid(),
 });
@@ -2449,6 +2703,10 @@ export const zTaskTaskAssignPath = z.object({
 export const zTaskTaskAssignResponse = zTask;
 
 export const zTaskTaskCheckSlaBody = zCommandInputStructBody;
+
+export const zTaskTaskCheckSlaHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zTaskTaskCheckSlaPath = z.object({
   id: z.uuid(),
@@ -2461,6 +2719,10 @@ export const zTaskTaskCheckSlaResponse = zTask;
 
 export const zTaskTaskResolveBody = zResolveBodyWritable;
 
+export const zTaskTaskResolveHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zTaskTaskResolvePath = z.object({
   id: z.uuid(),
 });
@@ -2471,6 +2733,10 @@ export const zTaskTaskResolvePath = z.object({
 export const zTaskTaskResolveResponse = zTask;
 
 export const zUserInvitationCreateBody = zInvitationWritable;
+
+export const zUserInvitationCreateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * Created
@@ -2490,6 +2756,10 @@ export const zUserUserListQuery = z.object({
 export const zUserUserListResponse = zPageUserBody;
 
 export const zUserUserCreateBody = zUserWritable;
+
+export const zUserUserCreateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * Created
@@ -2522,6 +2792,7 @@ export const zUserUserUpdateBody = zUserPatch;
 
 export const zUserUserUpdateHeaders = z.object({
   "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
 });
 
 export const zUserUserUpdatePath = z.object({
@@ -2535,6 +2806,10 @@ export const zUserUserUpdateResponse = zUser;
 
 export const zUserUserApproveRegistrationBody = zCommandInputStructBody;
 
+export const zUserUserApproveRegistrationHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zUserUserApproveRegistrationPath = z.object({
   id: z.uuid(),
 });
@@ -2545,6 +2820,10 @@ export const zUserUserApproveRegistrationPath = z.object({
 export const zUserUserApproveRegistrationResponse = zUser;
 
 export const zUserUserDeactivateBody = zCommandInputStructBody;
+
+export const zUserUserDeactivateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zUserUserDeactivatePath = z.object({
   id: z.uuid(),
@@ -2557,6 +2836,10 @@ export const zUserUserDeactivateResponse = zUser;
 
 export const zUserUserHandleBody = zHandleBodyWritable;
 
+export const zUserUserHandleHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zUserUserHandlePath = z.object({
   id: z.uuid(),
 });
@@ -2568,6 +2851,10 @@ export const zUserUserHandleResponse = zUser;
 
 export const zUserUserRolesBody = zRolesBodyWritable;
 
+export const zUserUserRolesHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zUserUserRolesPath = z.object({
   id: z.uuid(),
 });
@@ -2578,6 +2865,10 @@ export const zUserUserRolesPath = z.object({
 export const zUserUserRolesResponse = zUser;
 
 export const zUserUserSetPasswordBody = zPasswordBodyWritable;
+
+export const zUserUserSetPasswordHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zUserUserSetPasswordPath = z.object({
   id: z.uuid(),
@@ -2611,6 +2902,10 @@ export const zWebhookDeliveryReadResponse = zDelivery;
 
 export const zWebhookDeliveryReplayBody = zCommandInputStructBody;
 
+export const zWebhookDeliveryReplayHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zWebhookDeliveryReplayPath = z.object({
   id: z.uuid(),
 });
@@ -2633,6 +2928,10 @@ export const zWebhookEndpointListQuery = z.object({
 export const zWebhookEndpointListResponse = zPageEndpointBody;
 
 export const zWebhookEndpointCreateBody = zCreateBodyWritable;
+
+export const zWebhookEndpointCreateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 /**
  * Created
@@ -2665,6 +2964,7 @@ export const zWebhookEndpointUpdateBody = zEndpointPatch;
 
 export const zWebhookEndpointUpdateHeaders = z.object({
   "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
 });
 
 export const zWebhookEndpointUpdatePath = z.object({
@@ -2678,6 +2978,10 @@ export const zWebhookEndpointUpdateResponse = zEndpoint;
 
 export const zWebhookEndpointDisableBody = zCommandInputStructBody;
 
+export const zWebhookEndpointDisableHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zWebhookEndpointDisablePath = z.object({
   id: z.uuid(),
 });
@@ -2689,6 +2993,10 @@ export const zWebhookEndpointDisableResponse = zEndpoint;
 
 export const zWebhookEndpointEnableBody = zCommandInputStructBody;
 
+export const zWebhookEndpointEnableHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
 export const zWebhookEndpointEnablePath = z.object({
   id: z.uuid(),
 });
@@ -2697,6 +3005,10 @@ export const zWebhookEndpointEnablePath = z.object({
  * OK
  */
 export const zWebhookEndpointEnableResponse = zEndpoint;
+
+export const zWebhookEndpointRotateHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zWebhookEndpointRotatePath = z.object({
   id: z.uuid(),
@@ -2708,6 +3020,10 @@ export const zWebhookEndpointRotatePath = z.object({
 export const zWebhookEndpointRotateResponse = zIssued;
 
 export const zWebhookEndpointTargetBody = zTargetBodyWritable;
+
+export const zWebhookEndpointTargetHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
 
 export const zWebhookEndpointTargetPath = z.object({
   id: z.uuid(),

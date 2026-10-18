@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { clearNativeImageMemory } from "./screens/NativeImage";
 import type { Entry } from "./core/catalog";
 import { initial, reduce, type State } from "./core/state";
 import type { Remembered, Who } from "./core/reentry";
@@ -218,6 +219,7 @@ export function Shell({
   const expected = useRef<Who | undefined>(undefined);
   const remembered = useRef<Remembered | undefined>(undefined);
   const generation = useRef(0);
+
   /**
    * challenge is the address that accepted a password and answered that it needs a
    * second factor. The window that refusal opened lives on that server's clock and in
@@ -340,6 +342,12 @@ export function Shell({
   }));
   const active = useRef(connection);
   const { api, baseURL } = connection;
+  useEffect(
+    () => () => {
+      void clearNativeImageMemory();
+    },
+    [api, state.generation, state.catalog],
+  );
 
   // The queue belongs to the person the server named and the origin the Api
   // talks to: an unsigned phone holds nothing for whoever signs in next.

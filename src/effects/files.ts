@@ -1,9 +1,5 @@
-// The read side of the file module: where one file's bytes are, which key a read of them
-// is made with, and what a byte loader needs to ask for them. The pinned route table owns
-// the paths — a file's row sits at its entry's own path, and `/content` is the only
-// member the document gives a file's bytes — so this file invents no address and keeps no
-// credential: the key stays in src/effects/api.ts, and what is handed over is one request
-// a loader can make.
+// Session-bound picture addresses and loader resources. UI models carry only file IDs.
+import { pictureId, type Pictures } from "../core/pictures";
 import type { Entry } from "../core/catalog";
 import { heldScope } from "../core/outbox";
 import { rowAddress, type Bearer } from "./api";
@@ -24,18 +20,14 @@ export function contentAddress(e: Entry, id: string, width = 0): string {
 }
 
 /**
- * fileResource prepares one file's bytes for whoever will paint them: the address of the
- * content member, the key this app holds spelled out as a header (a native image loader is
- * no browser and presents no credential of its own), and the identity a loader caches on —
- * the file's own content hash, with the width this phone planned and its retry count after
- * it, so the attempt that asks again, or asks at another width, is not mistaken for the
- * attempt that was refused.
- *
- * Nothing is prepared for a read this phone cannot authorise: no file module in this
- * server's catalogue, no server or key to name means no address is asked at all, and the
- * figure says the picture is unavailable rather than asking anonymously.
+ * fileResource prepares authenticated bytes from a validated picture door, or a legacy file entry.
+ * Missing authorization returns nothing. Only freshly authorized public, versioned media may use
+ * memory caching; callers omit `public` for unknown or cached metadata. Disk caching is never used.
  */
 export function fileResource(input: {
+  readonly pictures?: Pictures | undefined;
+  readonly generation?: string | undefined;
+  readonly public?: boolean;
   readonly server: string;
   readonly userId: string | undefined;
   readonly entry: Entry | undefined;
@@ -54,16 +46,38 @@ export function fileResource(input: {
   // credential. Either way a picture decoded under one key is never painted under
   // another, and a read with neither is a read not made.
   const scope = heldScope(input.server, input.userId ?? input.key?.id ?? "");
-  if (scope === undefined || input.entry === undefined) return undefined;
+  if (scope === undefined || (!input.entry && !input.pictures) || !input.key) return undefined;
+  if (input.pictures && (!input.userId || !pictureId(input.id))) return undefined;
+  const width = input.pictures
+    ? input.pictures.widths?.includes(input.width)
+      ? input.width
+      : 0
+    : input.width;
+  const path = input.pictures
+    ? input.pictures.source.replace("{id}", input.id) + (width ? `?w=${width}` : "")
+    : contentAddress(input.entry!, input.id, width);
+  const namespace = JSON.stringify([
+    scope.server,
+    scope.userId,
+    input.key.id,
+    input.generation ?? "",
+    input.pictures?.source ?? input.entry?.path,
+  ]);
+  const cacheKey = JSON.stringify([namespace, input.id, input.version, width, input.attempt]);
   return {
-    scope: JSON.stringify([scope.server, scope.userId]),
+    scope: namespace,
     id: input.id,
     // The width the phone asked for belongs to the identity it caches on: the same
     // picture re-planned into a wider slot is a different set of bytes.
-    version: `${input.version}#${input.width}#${input.attempt}`,
-    uri: `${scope.server}${contentAddress(input.entry, input.id, input.width)}`,
+    version: `${input.version}#${width}#${input.attempt}`,
+    uri: `${scope.server}${path}`,
+    cacheKey,
+    cachePolicy:
+      input.public && input.version && input.generation && input.pictures && input.userId
+        ? "memory"
+        : "none",
     // One credential per request, spelled out because the loader is not this transport:
     // the key this connection signs with is what the bytes are asked with.
-    ...(input.key === undefined ? {} : { headers: { Authorization: `Bearer ${input.key.token}` } }),
+    headers: { Authorization: `Bearer ${input.key.token}` },
   };
 }

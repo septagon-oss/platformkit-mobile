@@ -11,6 +11,7 @@ import { chosenState, testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 
 interface Props {
+  readonly leading?: ReactNode;
   readonly title: string;
   /** eyebrow is the category the row sits in, above its name. */
   readonly eyebrow?: string;
@@ -60,6 +61,7 @@ const said = (cell: RowCell, aloud: boolean): string =>
 
 export function Row({
   title,
+  leading,
   eyebrow,
   cells = [],
   summary,
@@ -99,6 +101,11 @@ export function Row({
       android_ripple={{ color: t.color.borderDefault }}
       {...testable(testID)}
     >
+      {leading ? (
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          {leading}
+        </View>
+      ) : null}
       {selected !== undefined ? (
         <Icon name={selected ? "check" : "circle"} size="sm" tone={selected ? "accent" : "muted"} />
       ) : null}

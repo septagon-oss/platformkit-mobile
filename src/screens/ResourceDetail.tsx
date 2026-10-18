@@ -23,14 +23,16 @@ import { useActivity } from "./useActivity";
 import { RichTextBody } from "./RichTextBody";
 import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
-import { useRecordNames } from "./useReferenceNames";
+import { visiblePictures, eventPictures } from "../core/derive";
+import { usePictures } from "./usePictures";
+import { useRecordPeople } from "./useReferenceNames";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
   const feedback = useFeedback();
   const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
   const detail = useResourceDetail(entry, id, feedback);
   const activity = useActivity(entry, id);
-  const activityModel = deriveEventActivity(activity, presentation);
+
   // A row this phone answered rather than the server says so, in the same words a
   // list uses: deriveOffline is that sentence's only owner.
   const offline =
@@ -61,7 +63,26 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     () => pointerTargets(entry, detail.row === undefined ? [] : [detail.row], "record"),
     [entry, detail.row],
   );
-  const names = useRecordNames(asked);
+  const { names, people } = useRecordPeople(asked, detail.visit);
+  const [informationOpen, setInformationOpen] = useState(false);
+  const media = usePictures(
+    [
+      ...visiblePictures(
+        entry,
+        detail.row ? [detail.row] : [],
+        people,
+        "detail",
+        feedback,
+        informationOpen,
+      ),
+      ...(detail.row ? eventPictures(activity) : []),
+    ],
+    detail.visit,
+  );
+  const activityModel = deriveEventActivity(
+    { ...activity, images: media.enabled, pictureStates: media.states },
+    presentation,
+  );
   const header = detail.row
     ? recordHeader(entry, detail.row, feedback, feedback.copy.kit.untitled, names)
     : undefined;
@@ -69,7 +90,6 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   // The collapsed Record information block is a disclosure, and a disclosure's open
   // state is the screen's. Its words come from the reader's bundle; what it holds is
   // the section model's.
-  const [informationOpen, setInformationOpen] = useState(false);
   const information = useMemo(
     () =>
       deriveDisclosure(
@@ -133,6 +153,9 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         entry={entry}
         row={detail.row}
         names={names}
+        people={people}
+        pictureStates={media.states}
+        {...(media.enabled ? { renderImage: media.renderImage } : {})}
         error={detail.error}
         saved={detail.saved}
         {...(detail.refusal ? { refusal: detail.refusal } : {})}
@@ -148,6 +171,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
           ? {
               activity: {
                 model: activityModel.value,
+                ...(media.enabled ? { renderImage: media.renderImage } : {}),
                 onMore: activity.loadMore,
                 onRetry: activity.reload,
               },

@@ -164,20 +164,30 @@ test("a link in any scheme the format allows is ordinary text to this reader", (
   );
 });
 
-test("a frame wider than its slot gets the largest served width that fits the slot", () => {
+test("a frame wider than its slot gets the smallest declared width covering the slot", () => {
   // A 390 dp phone at 3×: the slot is 1170 device pixels. A frame no wider than the
   // slot is asked for as stored (0): painting a smaller variant into a wider box is the
   // phone throwing away pixels it was handed, and no wider variant exists to ask for.
   assert.deepEqual(
-    [2400, 1920, 1440, 960, 800, 400].map((frame) => variantWidth(1170, frame)),
-    [960, 960, 960, 0, 0, 0],
+    [2400, 1920, 1440, 960, 800, 400].map((frame) =>
+      variantWidth(1170, frame, [480, 960, 1440, 1920]),
+    ),
+    [1440, 1440, 1440, 0, 0, 0],
   );
 });
 
 test("a slot wider than the widest variant gets that variant, or the frame when it fits", () => {
-  assert.equal(variantWidth(3000, 4000), 1920);
-  assert.equal(variantWidth(3000, 1920), 0);
-  assert.equal(variantWidth(500, 4000), 480);
+  assert.equal(variantWidth(3000, 4000, [480, 960, 1440, 1920]), 1920);
+  assert.equal(variantWidth(3000, 1920, [480, 960, 1440, 1920]), 0);
+  assert.equal(variantWidth(500, 4000, [480, 960, 1440, 1920]), 960);
+});
+
+test("a declared width never asks a measured frame to grow", () => {
+  const widths = [480, 960, 1440, 1920];
+  assert.equal(variantWidth(120, 480, widths), 480);
+  assert.equal(variantWidth(300, 700, widths), 480);
+  assert.equal(variantWidth(500, 700, widths), 0);
+  assert.equal(variantWidth(1000, 1300, widths), 0);
 });
 
 test("a frame nobody measured plans nothing", () => {

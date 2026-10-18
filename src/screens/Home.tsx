@@ -1,11 +1,20 @@
 // Home is the catalog as rows, with the account in the native header: the
 // platform's own menu offers Refresh and Sign out.
 import { Stack, useRouter } from "expo-router";
+import { useRecordPeople } from "./useReferenceNames";
+import { usePictures } from "./usePictures";
 import { useFeedback } from "./useFeedback";
 import { useSignOut } from "./useSignOut";
 import React, { useCallback, useMemo, useState } from "react";
 import type { Entry } from "../core/catalog";
-import { hostLabel, screenPath } from "../core/derive";
+import {
+  hostLabel,
+  screenPath,
+  accountPerson,
+  accountPointers,
+  avatar,
+  nameKey,
+} from "../core/derive";
 import { heldWriteView } from "../core/outbox";
 import { useShell } from "../shell";
 import { Button } from "../ui/atoms/Button";
@@ -19,7 +28,16 @@ interface Props {
 
 export function Home({ entries }: Props) {
   const feedback = useFeedback();
-  const { refresh, baseURL, identity, outbox } = useShell();
+  const { refresh, baseURL, identity, outbox, state } = useShell();
+  const pointers = useMemo(
+    () => accountPointers(state.catalog?.resources ?? [], identity?.userId),
+    [state.catalog, identity?.userId],
+  );
+  const { people } = useRecordPeople(pointers);
+  const person = identity
+    ? accountPerson(identity, people[nameKey("user/user", identity.userId)])
+    : undefined;
+  const media = usePictures(person?.portrait ? [person.portrait] : []);
   const leave = useSignOut();
   const { mode } = useTheme();
   const router = useRouter();
@@ -44,16 +62,16 @@ export function Home({ entries }: Props) {
   const account = useCallback(
     () =>
       choose(
-        "Account",
+        identity?.email || feedback.copy.kit.account,
         [
-          { label: "Refresh", onPress: () => void reload() },
+          { label: feedback.copy.kit.refresh, onPress: () => void reload() },
           // The door itself belongs to useSignOut, which asks while this phone
           // holds work: the count, the words and the yes are one rule, kept once.
-          { label: "Sign out", onPress: leave, destructive: true },
+          { label: feedback.copy.kit.signOut, onPress: leave, destructive: true },
         ],
         mode,
       ),
-    [reload, leave, mode],
+    [reload, leave, mode, identity?.email, feedback.copy.kit],
   );
   // The options are memoised because the navigator is told them on every
   // render: a fresh object, with fresh callbacks in it, is a new instruction
@@ -68,14 +86,14 @@ export function Home({ entries }: Props) {
       headerRight: () => (
         <Button
           placement="header"
-          label="Account"
+          label={feedback.copy.kit.account}
           icon="person"
           onPress={account}
           testID="account"
         />
       ),
     }),
-    [account, baseURL, feedback.copy.kit.workspace],
+    [account, baseURL, feedback.copy.kit.workspace, feedback.copy.kit.account],
   );
   return (
     <>
@@ -85,6 +103,8 @@ export function Home({ entries }: Props) {
         entries={entries}
         refreshing={refreshing}
         account={identity?.email}
+        person={person ? avatar(person, media.states, media.enabled) : undefined}
+        {...(media.enabled ? { renderImage: media.renderImage } : {})}
         held={held}
         onRetryHeld={retryHeld}
         onDiscardHeld={discardHeld}

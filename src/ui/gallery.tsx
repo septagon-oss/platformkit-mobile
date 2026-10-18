@@ -1,3 +1,7 @@
+import { avatar, avatarStack, rowMedia } from "../core/derive";
+import { Avatar } from "./molecules/Avatar";
+import { AvatarStack } from "./molecules/AvatarStack";
+import { RowMedia } from "./molecules/RowMedia";
 // Gallery is the kit looked at rather than used: the index screen audits every
 // case of every atom, molecule, organism and template in both modes, and a page
 // id draws one screen-shaped composition of them. It ships only in builds that
@@ -633,6 +637,71 @@ function Samples({
           }}
           onRetry={none}
           onDiscard={none}
+        />
+      </Section>
+
+      <Section title="People and row pictures">
+        <Avatar model={avatar({ id: "a", label: "Ana María Silva", name: "Ana María Silva" })} />
+        <Avatar model={avatar({ id: "c", label: feedback.copy.kit.nameUnavailable })} />
+        <Avatar
+          model={avatar(
+            { id: "b", label: "Éva Stone", name: "Éva Stone", portrait: "portrait" },
+            { portrait: "ready" },
+            true,
+          )}
+          renderImage={SpecimenPoster}
+        />
+        <Avatar
+          model={avatar(
+            {
+              id: "d",
+              label: "A very long person name that remains readable as text grows",
+              name: "A very long person name that remains readable as text grows",
+              portrait: "portrait",
+            },
+            { portrait: "loading" },
+            true,
+          )}
+          renderImage={SpecimenPoster}
+        />
+        <Avatar
+          model={avatar(
+            { id: "a", label: "李", name: "李", portrait: "portrait" },
+            { portrait: "error" },
+            true,
+          )}
+          renderImage={SpecimenPoster}
+        />
+        <AvatarStack
+          model={avatarStack(
+            ["Ana", "Ben", "Cleo", "Davi", "Éva"].map((name, i) => ({
+              id: String(i),
+              label: name,
+              name,
+            })),
+            feedback,
+          )}
+        />
+        <RowMedia model={{ kind: "icon", icon: "document" }} />
+        <RowMedia model={{ kind: "none" }} />
+        <RowMedia
+          model={rowMedia(
+            {
+              module: "sample",
+              entity: "sample",
+              path: "/api/v1/sample",
+              screen: "/sample",
+              writable: false,
+              immutable: [],
+              singleton: false,
+              commands: [],
+              hints: { icon: "document", thumbnailField: "picture" },
+              fields: [{ name: "picture", type: "uuid", present: "image" }],
+            },
+            { picture: "11111111-1111-4111-8111-111111111111" },
+            true,
+          )}
+          renderImage={SpecimenPoster}
         />
       </Section>
 

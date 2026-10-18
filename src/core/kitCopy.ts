@@ -19,6 +19,12 @@ const englishArticle = (field: string): string => {
 const lowerFirst = (field: string): string => field.charAt(0).toLowerCase() + field.slice(1);
 
 export const kitEnglish = {
+  account: "Account",
+  signOut: "Sign out",
+  you: "You",
+  peopleRemainder: (count: string) => `+${count}`,
+  peopleDescription: (name: string, count: string, total: number) =>
+    `${name} and ${count} ${total === 1 ? "other" : "others"}`,
   by: "by",
   activityEmpty: "Nothing has happened to this record yet.",
   actions: "Actions",
@@ -385,6 +391,12 @@ export const kitEnglish = {
 type KitWord<T> = T extends string ? string : T;
 export type KitWords = { readonly [K in keyof typeof kitEnglish]: KitWord<(typeof kitEnglish)[K]> };
 export const kitPortuguese: KitWords = {
+  account: "Conta",
+  signOut: "Terminar sessão",
+  you: "Você",
+  peopleRemainder: (count: string) => `+${count}`,
+  peopleDescription: (name: string, count: string, total: number) =>
+    `${name} e mais ${count} ${total === 1 ? "pessoa" : "pessoas"}`,
   by: "por",
   activityEmpty: "Ainda nada aconteceu a este registo.",
   actions: "Ações",

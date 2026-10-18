@@ -5,10 +5,25 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import type { IconSize } from "../scale";
 import { testable } from "../props";
-import { useTheme } from "../theme";
+import type { Status } from "../../core/derive";
+import { statusInk, useTheme } from "../theme";
 import { toneColor, type Tone } from "./Text";
 
 const glyphs = {
+  task: "checkbox-outline",
+  people: "people-outline",
+  document: "document-text-outline",
+  settings: "settings-outline",
+  plan: "map-outline",
+  folder: "folder-outline",
+  chart: "bar-chart-outline",
+  message: "chatbubble-outline",
+  money: "cash-outline",
+  box: "cube-outline",
+  tag: "pricetag-outline",
+  building: "business-outline",
+  location: "location-outline",
+  link: "link-outline",
   add: "add",
   // The stepper's two halves: one glyph adds, the other takes one away.
   less: "remove-outline",
@@ -52,18 +67,19 @@ interface Props {
   readonly name: IconName;
   readonly size?: IconSize;
   readonly tone?: Tone;
+  readonly status?: Status["tone"];
   /** label makes the icon announce itself; without one it is decoration and hidden from readers. */
   readonly label?: string;
   readonly testID?: string;
 }
 
-export function Icon({ name, size = "md", tone = "primary", label, testID }: Props) {
+export function Icon({ name, size = "md", tone = "primary", status, label, testID }: Props) {
   const t = useTheme();
   return (
     <Ionicons
       name={glyphs[name]}
       size={t.icon[size]}
-      color={toneColor(t, tone)}
+      color={status ? statusInk(t, status) : toneColor(t, tone)}
       accessibilityElementsHidden={!label}
       importantForAccessibility={label ? "yes" : "no-hide-descendants"}
       {...(label ? { accessibilityLabel: label } : {})}

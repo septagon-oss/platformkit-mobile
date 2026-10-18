@@ -1,3 +1,4 @@
+import type { AvatarModel, RowMediaModel } from "./pictures";
 import type { Order } from "./derive";
 import type { Field } from "./catalog";
 import type { Action } from "./feedback";
@@ -91,6 +92,8 @@ export function deriveActions(
 }
 export type ActionBarModel = Extract<ReturnType<typeof deriveActions>, { ok: true }>["value"];
 export interface DataRow {
+  readonly avatar?: AvatarModel;
+  readonly media?: RowMediaModel;
   readonly id: string;
   readonly title: string;
   readonly summary?: string;

@@ -599,6 +599,23 @@ const routes = [
   },
   {
     method: "POST",
+    pattern: new RegExp("^/api/v1/auth/tokens/revoke-self$"),
+    statuses: [204],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.authTokenRevokeSelf({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.authTokenRevokeSelf<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
     pattern: new RegExp("^/api/v1/auth/tokens/[^/]+/revoke$"),
     statuses: [200],
     json: true,
@@ -1091,6 +1108,40 @@ const routes = [
     },
   },
   {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/file/files/[^/]+/alt$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.fileFileAltCommand({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.fileFileAltCommand<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "PUT",
+    pattern: new RegExp("^/api/v1/file/files/[^/]+/alt$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.fileFileAlt({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.fileFileAlt<true>>[0]);
+      return result;
+    },
+  },
+  {
     method: "GET",
     pattern: new RegExp("^/api/v1/file/files/[^/]+/content$"),
     statuses: [200],
@@ -1189,6 +1240,23 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.fileFileUses<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/file/quota$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.fileQuotaRead({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.fileQuotaRead<true>>[0]);
       return result;
     },
   },

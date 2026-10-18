@@ -1,3 +1,4 @@
+import { avatar, type PictureStates, type Person } from "./pictures";
 import type { Action } from "./feedback";
 import { instantValue, presentedInstant, type Presentation } from "./presentation";
 import {
@@ -24,7 +25,12 @@ export interface ActivityItem {
   readonly verb: string;
   readonly eventCode?: string;
   readonly actor:
-    | { readonly kind: "person"; readonly id: string; readonly name?: string }
+    | {
+        readonly kind: "person";
+        readonly id: string;
+        readonly name?: string;
+        readonly person?: Person;
+      }
     | { readonly kind: "system" | "unknown" };
   readonly subject?: string;
   readonly changes: readonly Change[];
@@ -32,6 +38,8 @@ export interface ActivityItem {
   readonly open?: Action;
 }
 export interface ActivityInput {
+  readonly images?: boolean;
+  readonly pictureStates?: PictureStates | undefined;
   readonly content: Content<readonly ActivityItem[]>;
   readonly page: Page;
   readonly expandedIds: readonly string[];
@@ -75,6 +83,19 @@ export function deriveActivity(input: ActivityInput, p: Presentation) {
           occurredAt: at.toISOString(),
           time: instant.exact,
           actor,
+          avatar:
+            item.actor.kind === "person"
+              ? avatar(
+                  item.actor.person ?? {
+                    id: item.actor.id,
+                    label: actor,
+                    ...(item.actor.name ? { name: item.actor.name } : {}),
+                  },
+                  input.pictureStates,
+                  input.images,
+                  `activity:${item.id}`,
+                )
+              : undefined,
           relative: instant.shown,
           accessibleLabel: `${item.verb} ${p.copy.kit.by} ${actor}, ${instant.exact}`,
           open: item.open ? action(item.open, v, `events.${i}.open`) : undefined,
