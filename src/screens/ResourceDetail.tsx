@@ -105,9 +105,12 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   const title = header?.title ?? "";
   // A record that opens on its picture carries its name on the photo, so the native header
   // goes transparent and keeps only its two buttons; one that has no picture keeps the
-  // header exactly as it was, title included. Which of the two this is answers from the
-  // entry and the row alone, so the options cannot flicker between them as bytes arrive.
-  const cover = detail.row !== undefined && headerCover(entry, detail.row);
+  // header exactly as it was, title included. The organism draws the cover only when it
+  // was given the file read (`files`), which is this same `media.enabled`: a record whose
+  // bytes this phone cannot read is a record with no picture, and a transparent header is
+  // the promise that a cover stands under it. The row's own name is then drawn once — in
+  // the native header — and the options settle as soon as the door's state is known.
+  const cover = media.enabled && detail.row !== undefined && headerCover(entry, detail.row);
   // The collapsed Record information block is a disclosure, and a disclosure's open
   // state is the screen's. Its words come from the reader's bundle; what it holds is
   // the section model's.
