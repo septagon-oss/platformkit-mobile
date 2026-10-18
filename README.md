@@ -401,9 +401,11 @@ title is measured on the pair `contrastPairs` already answers for and the first 
 below starts where the photo ends. Scrolled past `extent.cover - extent.headerBar`, a band
 pinned under the native bar names the record; it is a cut in both motion modes, because a
 band that fades in over a scroll-driven transform re-renders vibrancy every frame. A record
-with no cover field, or with one its row leaves empty, draws the header block it always
-drew and keeps its native title: the same `recordHeader`, two drawings, chosen by whether a
-cover exists.
+with no cover field, with one its row leaves empty, or whose pictures this phone cannot read
+at all — no picture door in the catalogue, or no session ready to read one with — draws the
+header block it always drew and keeps its native title: the same `recordHeader`, two drawings,
+chosen by whether a cover can be drawn, which is the same answer the organism is given in
+`files`.
 
 A field declared `present: "images"` is a gallery: a horizontal strip of `extent.strip`
 tiles in the block the document filed its field in, after that block's facts, each tile
@@ -424,9 +426,9 @@ validation of `coverField` at parse time; `pictureId` and `compactPicture`'s
 `MediaHero`'s `ImageRenderer` slot, `Badge`, `Text`, `Notice`, `Skeleton`, `radius.lg`,
 `space.*`, `type.title` and `theme.tsx`'s roles (no new colour, no hex); `react-native-svg`,
 already drawn on by `Sparkline` and `AreaChart`, for the one overlay; `kitCopy`'s `images`,
-`open`, `imageUnavailable` and loading line; `PhotoViewer`, `deriveViewer` and `deriveMedia`
-untouched as the full-screen surface, `pageControl`'s existing answer to a page with no
-more. **Added** — in the core, `coverPicture`, `galleryFields`, `headerCover`,
+`open`, `imageUnavailable` and loading line; `PhotoViewer` reused as the full-screen surface,
+grown only by the two props named below, with `deriveViewer` and `deriveMedia` untouched and
+`pageControl`'s answer to a page with no more unchanged. **Added** — in the core, `coverPicture`, `galleryFields`, `headerCover`,
 `recordCover`, `recordMedia`, `recordPictureIds` and `RecordBlock.strips`, because the
 inventory held the record's three places and the row media but no answer to "which files
 does this record draw, and in which block"; in `pictures.ts`, `fileMeta`, `filePicture` and
@@ -438,11 +440,11 @@ the frame and an Open button under that, where the record must put its name *on*
 and offer no open affordance of its own); `kit.photoCount` in both languages; `extent.cover`,
 `strip`, `coverFoot` and `headerBar`; `Screen`'s optional `onOffset`, the handle a cover
 needs and no rule of its own; `usePictures`'s third argument (how wide a slot draws) and its
-`files` answer; `PhotoViewer`'s optional `renderZoom`, so a picture may open without the
-gesture surface a product has not chosen. `expo-linear-gradient` and `expo-blur` were
+`files` answer; `PhotoViewer`'s optional `renderZoom` and its
+`animationType="fade"`, so a picture may open without the gesture surface a product has not
+chosen and its modal opens with a cross-fade. `expo-linear-gradient` and `expo-blur` were
 refused: either changes `fingerprint.json` and therefore the binary, and `svg` already
-draws the one overlay this page needs. `media`, so a picture may open without the gesture surface a product has not chosen, and its
-modal opens with a cross-fade. **Made reusable** — `recordSections`'s optional
+draws the one overlay this page needs. **Made reusable** — `recordSections`'s optional
 `media` argument, which is how any block answers the galleries filed in it without a second
 block-order rule in a component; `filePicture`, the file-row→picture step for any surface
 that draws a file by identifier; `usePictures(ids, attempt, width)` answering pixels per
