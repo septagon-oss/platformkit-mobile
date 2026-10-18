@@ -10,7 +10,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
-import type { Feedback, RecordCover as CoverModel, RecordHeader } from "../../core/derive";
+import type { Feedback, Motion, RecordCover as CoverModel, RecordHeader } from "../../core/derive";
 import { Badge } from "../atoms/Badge";
 import { Notice } from "../atoms/Notice";
 import { Skeleton } from "../atoms/Skeleton";
@@ -25,17 +25,49 @@ export interface Props {
   readonly header: RecordHeader;
   readonly feedback: Feedback;
   readonly renderImage?: ImageRenderer | undefined;
+  /**
+   * offset is how far the page has scrolled and collapseAt how far it scrolls before the
+   * photo is gone — asked for only because a motion renderer may do something with them.
+   * With none supplied the cover is drawn where it stands and scrolls with the page, which is
+   * the still state and the one a reduced-motion preference always gets.
+   */
+  readonly offset?: number;
+  readonly collapseAt?: number;
+  readonly coverMotion?: CoverMotion | undefined;
   readonly testID?: string;
 }
 
-export function RecordCover({ cover, header, feedback, renderImage, testID }: Props) {
+/**
+ * CoverMotionProps is what a record's cover hands the motion layer: how far the page has
+ * scrolled, how far before the photo is gone, what the person's motion preference is, and the
+ * surface to move. A renderer must draw `photo` whether or not it animates it and says nothing
+ * of its own — the words are drawn here — so a product that supplies none gets this tree.
+ */
+export interface CoverMotionProps {
+  readonly offset: number;
+  readonly collapseAt: number;
+  readonly motion: Motion;
+  readonly photo: React.ReactNode;
+}
+export type CoverMotion = (props: CoverMotionProps) => React.ReactNode;
+
+export function RecordCover({
+  cover,
+  header,
+  feedback,
+  renderImage,
+  offset = 0,
+  collapseAt = 0,
+  coverMotion,
+  testID,
+}: Props) {
   const s = useStyles(styles),
     t = useTheme();
   const item = cover.picture.item;
   // A picture that is coming still holds its space; a picture that will not come says so
   // in the space it would have taken. Either way the record keeps its name.
   const drawn = item.state === "ready" || item.state === "loading";
-  return (
+  const surface = (
     <View style={s.cover} {...testable(testID ?? "record-cover")}>
       {drawn && renderImage ? (
         <View style={[s.photo, item.state === "loading" && s.concealed]}>
@@ -70,6 +102,9 @@ export function RecordCover({ cover, header, feedback, renderImage, testID }: Pr
       </View>
     </View>
   );
+  return coverMotion
+    ? coverMotion({ offset, collapseAt, motion: feedback.motion, photo: surface })
+    : surface;
 }
 
 const styles = (t: Theme) =>

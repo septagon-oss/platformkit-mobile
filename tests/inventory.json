@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 236,
-   "cases": 1080,
-   "ms": 1681078,
-   "testsMs": 49693.20000000002,
+   "cases": 1082,
+   "ms": 1670999,
+   "testsMs": 49721.20000000002,
    "runners": {
     "jest": 76,
     "node": 160
@@ -7292,7 +7292,7 @@
    "file": "tests/ui/record-opens-on-its-photo.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": 5,
+   "cases": 7,
    "rule": "A record's picture is drawn where the record begins, and the facts it draws there are not drawn again below it. These are the record screen's two picture surfaces read off the rendered tree: the cover carries the record's name and no row prints its identifier, and the gallery offers a press only on a picture this phone can name.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -7300,24 +7300,26 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 30734,
+   "ms": 20655,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "the photo carries the record's name and no row prints its identifier",
     "the gallery holds one tile per picture and opens only the ones it can name",
     "the record's own information asks for no row the header or a gallery drew",
     "the band that names the record waits until the photo is scrolled away",
+    "a supplied motion renderer is given the photo, the scroll and the preference",
+    "the band names the record once the photo is scrolled away, without fading in",
     "the header block stays exactly the block it was"
    ],
    "tests": [
     {
      "title": "the photo carries the record's name and no row prints its identifier",
-     "ms": 34,
+     "ms": 31,
      "measured": false
     },
     {
      "title": "the gallery holds one tile per picture and opens only the ones it can name",
-     "ms": 16,
+     "ms": 18,
      "measured": false
     },
     {
@@ -7327,19 +7329,29 @@
     },
     {
      "title": "the band that names the record waits until the photo is scrolled away",
-     "ms": 8,
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "a supplied motion renderer is given the photo, the scroll and the preference",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "the band names the record once the photo is scrolled away, without fading in",
+     "ms": 12,
      "measured": false
     },
     {
      "title": "the header block stays exactly the block it was",
-     "ms": 5,
+     "ms": 3,
      "measured": false
     }
    ],
    "loaded": 119,
-   "coveredProdLines": 1698,
+   "coveredProdLines": 1701,
    "onlyProdLines": null,
-   "testsMs": 73
+   "testsMs": 101
   },
   {
    "file": "tests/ui/refused-field-asks-for-its-box.test.tsx",

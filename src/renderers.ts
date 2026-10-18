@@ -4,6 +4,8 @@
 import type { ComponentType } from "react";
 import type { Entry } from "./core/catalog";
 import type { Operations } from "./generated/operations.gen";
+import type { CoverMotionProps } from "./ui/organisms/RecordCover";
+import type { ZoomSlotProps } from "./ui/organisms/PhotoViewer";
 
 export interface ScreenProps {
   readonly entry: Entry;
@@ -20,6 +22,19 @@ export interface Renderer {
 }
 
 export type Renderers = Readonly<Record<string, Renderer>>;
+
+/**
+ * MediaRenderers is the native media a product supplies once to `<Shell>`: the gesture surface
+ * a picture opens into, and the motion a record's cover collapses with. Both name a surface a
+ * screen may not import itself — react-native-reanimated, and zoom-toolkit through it, cannot
+ * be evaluated in the environment every screen is tested in — so they are declared here and
+ * arrived at by composition. A product that supplies neither gets the still record: the photo
+ * holds still, the picture opens at the page's own size, and the buttons page between them.
+ */
+export interface MediaRenderers {
+  readonly zoom?: ComponentType<ZoomSlotProps>;
+  readonly coverMotion?: ComponentType<CoverMotionProps>;
+}
 
 export const defaultRenderers: Renderers = {};
 

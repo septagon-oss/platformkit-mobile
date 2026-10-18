@@ -63,6 +63,13 @@ export const extent = {
    * a surface, not a length, and the only place it is written.
    */
   coverFoot: 0.55,
+  /**
+   * coverParallax and coverShrink are how a cover photo gives way: how far it lags behind the
+   * page scrolling it away, as a fraction of that scroll, and how small it ends up by. Both
+   * are fractions of a scroll, not lengths, and the only place either is written.
+   */
+  coverParallax: 0.4,
+  coverShrink: 0.86,
   /** headerBar is the transparent bar the navigator keeps above a cover, so the page knows where to pin its own. */
   headerBar: Platform.select({ android: 56, default: 44 }),
   /**

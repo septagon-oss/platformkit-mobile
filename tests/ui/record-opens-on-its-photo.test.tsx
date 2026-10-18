@@ -4,7 +4,7 @@
 // gallery offers a press only on a picture this phone can name.
 import React from "react";
 import { describe, expect, jest, test } from "@jest/globals";
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import { View } from "react-native";
 import { parseCatalog, type Entry } from "../../src/core/catalog";
@@ -67,6 +67,20 @@ const information = (open: boolean) => {
 };
 
 const view = (node: React.ReactNode) => <ThemeProvider mode="light">{node}</ThemeProvider>;
+/**
+ * scrollAway is the page being scrolled: the scroll view's own `onScroll`, at the offset the
+ * platform would report. A record asks for that stream only when it has a cover to collapse,
+ * so the prop being there is part of what this checks.
+ */
+async function scrollAway(y: number): Promise<void> {
+  const page = screen.getByTestId("resource-detail") as unknown as {
+    props: { onScroll?: (event: { nativeEvent: { contentOffset: { y: number } } }) => void };
+  };
+  expect(typeof page.props.onScroll).toBe("function");
+  await act(async () => {
+    page.props.onScroll?.({ nativeEvent: { contentOffset: { y } } });
+  });
+}
 const none = () => undefined;
 
 describe("a record that opens on its picture", () => {
@@ -120,6 +134,42 @@ describe("a record that opens on its picture", () => {
   test("the band that names the record waits until the photo is scrolled away", async () => {
     await shown();
     expect(screen.queryByTestId("record-title-bar")).toBeNull();
+    await scrollAway(40);
+    expect(screen.queryByTestId("record-title-bar")).toBeNull();
+  });
+
+  // The motion layer is a renderer a product supplies once at composition, because the
+  // animation library it would use cannot be evaluated here. What the kit owes it is these
+  // three: the photo handed over intact, the scroll and the preference named, and the same
+  // page underneath. A product that supplies none gets the tree the case above reads.
+  test("a supplied motion renderer is given the photo, the scroll and the preference", async () => {
+    const seen: { offset: number; collapseAt: number; motion: string }[] = [];
+    await shown({
+      coverMotion: (props) => {
+        seen.push({
+          offset: props.offset,
+          collapseAt: props.collapseAt,
+          motion: props.motion,
+        });
+        return <>{props.photo}</>;
+      },
+    });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]!.offset).toBe(0);
+    expect(seen[0]!.motion).toBe(feedback.motion);
+    expect(seen[0]!.collapseAt).toBeGreaterThan(0);
+    await scrollAway(60);
+    expect(seen[1]!.offset).toBe(60);
+    expect(seen[1]!.collapseAt).toBe(seen[0]!.collapseAt);
+    // The cover is drawn once, through the renderer, and the record is still the record.
+    expect(screen.getAllByTestId("record-cover").length).toBe(1);
+    expect(screen.getByTestId("resource-detail")).toBeTruthy();
+  });
+
+  test("the band names the record once the photo is scrolled away, without fading in", async () => {
+    await shown();
+    await scrollAway(400);
+    expect(JSON.stringify(screen.getByTestId("record-title-bar"))).toContain("Field notes");
   });
 });
 

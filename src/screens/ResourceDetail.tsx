@@ -21,8 +21,10 @@ import {
 } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
-import { PhotoViewer } from "../ui/organisms/PhotoViewer";
+import { PhotoViewer, type ZoomSlotProps } from "../ui/organisms/PhotoViewer";
+import type { CoverMotionProps } from "../ui/organisms/RecordCover";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
+import { useShell } from "../shell";
 import { useActivity } from "./useActivity";
 import { RichTextBody } from "./RichTextBody";
 import { useCommandRun } from "./useCommand";
@@ -34,6 +36,11 @@ import { useRecordPeople } from "./useReferenceNames";
 
 export function ResourceDetail({ entry, id }: ScreenProps) {
   const feedback = useFeedback();
+  // The pinch surface and the cover's motion are what the product shipped at composition; a
+  // product that shipped neither gets the still record, which is a complete record.
+  const { media: native } = useShell();
+  const CoverMotion = native?.coverMotion;
+  const Zoom = native?.zoom;
   const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
   const detail = useResourceDetail(entry, id, feedback);
   const activity = useActivity(entry, id);
@@ -229,6 +236,9 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         {...(canDelete ? { onDelete: detail.remove } : {})}
         {...(media.enabled ? { files: media.files } : {})}
         {...(onOpenPhoto === undefined ? {} : { onOpenPhoto })}
+        {...(CoverMotion === undefined
+          ? {}
+          : { coverMotion: (props: CoverMotionProps) => <CoverMotion {...props} /> })}
         // A rich text body is read, not printed: the reader is supplied here because it is
         // this screen that can ask for a figure's file, and the organism that decides
         // which field is one (derive.richBody).
@@ -245,6 +255,9 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         <PhotoViewer
           model={viewer.value}
           renderImage={media.renderImage}
+          {...(Zoom === undefined
+            ? {}
+            : { renderZoom: (props: ZoomSlotProps) => <Zoom {...props} /> })}
           onSelect={(id) => setOpening((was) => (was ? { ...was, id } : was))}
           onClose={() => setOpening(undefined)}
           onRetry={detail.reload}
