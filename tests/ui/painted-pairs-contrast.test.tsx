@@ -37,6 +37,11 @@ const painted: readonly [string, Role, Role, AAKind][] = [
   // A control drawn chosen (a marked checkbox, a chosen chip or slot): its accent edge
   // over the selection tint it is filled with. Button.tsx paints the pair.
   ["chosen control's edge", (t) => t.color.accentDefault, (t) => t.state.selected, "graphic"],
+  // The picture above an empty screen: its outline and its accent stroke, each at
+  // 1.5 units of a 48-unit canvas, over the page it is drawn on. Illustration.tsx
+  // paints both, and a thin stroke is a graphical object, not text.
+  ["empty picture's outline", (t) => t.color.textPrimary, (t) => t.color.surfaceCanvas, "graphic"],
+  ["empty picture's accent", (t) => t.color.accentDefault, (t) => t.color.surfaceCanvas, "graphic"],
 ];
 
 describe("pairs the shared components paint reach AA", () => {

@@ -1,4 +1,4 @@
-import type { HintNotice } from "./catalog";
+import type { Entry, HintNotice } from "./catalog";
 import type { Formatting } from "./presentation";
 import type { ImageSlotProps } from "./media";
 import type { Status } from "./shared";
@@ -26,6 +26,30 @@ export const resourceIcons = [
   "link",
 ] as const;
 export type ResourceIcon = (typeof resourceIcons)[number];
+
+/**
+ * iconName is the word an entry asks for its glyph. It answers the word and draws
+ * nothing: which glyphs this build ships belongs to `ui/atoms/Icon.tsx`, and a
+ * name it does not hold draws the generic one.
+ */
+export const iconName = (entry: Entry): string | undefined => entry.hints?.icon;
+
+/**
+ * drawnIcon answers "which icon may this build draw?" for a declared hint word:
+ * the icon itself when the closed set holds it, nothing for any other word. The
+ * catalogue's notice, a row's tile and an entry's picture all ask this one
+ * question, so an unsupported word is unsupported the same way in all three.
+ */
+export function drawnIcon(declared: unknown): ResourceIcon | undefined {
+  const word = declared as ResourceIcon;
+  return resourceIcons.includes(word) ? word : undefined;
+}
+
+/** entryIcon is the picture an entry's own declared icon asks for, or nothing when it declared none this build draws. */
+export function entryIcon(entry: Entry): ResourceIcon | undefined {
+  return drawnIcon(iconName(entry));
+}
+
 export const pictureId = (value: unknown): value is string =>
   typeof value === "string" &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value);

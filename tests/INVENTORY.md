@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `b6266f8e5` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `43279f424` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 200 | 47.5 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 229 | 1046 | 49.3 s | 1544 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 201 | 47.5 s | 73 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 234 | 1067 | 49.6 s | 1646 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 93 | 306 | 32.1 s | 1997 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 414
+* keep: 419
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 414 — 192 `tests/*.test.ts` (node), 165 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1552; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 1544 s, composition 1997 s, journey 0 s
+* files inventoried: 419 — 194 `tests/*.test.ts` (node), 168 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1574; cases in files no runner reaches: 35
+* isolated wall time: contract 73 s, behaviour 1646 s, composition 1997 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -114,7 +114,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/kernel-pin-step-refuses-what-the-records-cannot-name.test.ts | node | contract | 3 | 546 | 149.3 |  | not measured | — | 0 | keep | The step that names the kernel to build is the job's refusal when the two provenance records cannot name one: a record missing, a commit that is not a full obj… |
 | tests/layers.test.ts | node | contract | 12 | 4120 | 3005.2 | 0 | 0 of 12 | — | 0 | keep | (no first comment; first test title) atoms and molecules cannot depend on an organism or a screen layout |
 | tests/package.test.ts | node | contract | 1 | 4334 | 2654.6 | 0 | 0 of 1 | — | 0 | keep | npm 12 keys the pack report by package name; earlier versions return an array. The name is read from the manifest rather than written here, so the pack, the in… |
-| tests/pictures.test.ts | node | contract | 12 | 4466 | 122.2 |  | not measured | — | 0 | keep | (no first comment; first test title) person tones have independent stable vectors and never use danger |
+| tests/pictures.test.ts | node | contract | 13 | 3713 | 193.4 |  | not measured | — | 0 | keep | (no first comment; first test title) person tones have independent stable vectors and never use danger |
 | tests/publish-registry-credential.test.ts | node | contract | 2 | 2789 | 2394.8 | 0 | 0 of 2 | — | 0 | keep | The publish step's credential, as the real npm reads it. The workflow writes the token into a userconfig keyed by the registry's address, and npm sends it only… |
 | tests/publish-version-suffix.test.ts | node | contract | 1 | 561 | 3.1 | 0 | 0 of 1 | — | 0 | keep | The release channel accepts plain versions and refuses both prerelease and build suffixes before a registry is involved. The refusal names the supplied version… |
 | tests/publish-workflow.test.ts | node | contract | 13 | 2171 | 1509.9 | 0 | 1 of 13 | — | 0 | keep | The publish contract, in five refusals. One scoped name and one version — a released one — in a manifest that can travel; the changelog entry that version's re… |
@@ -136,6 +136,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/viewer-denial-abandons-loader.test.tsx | jest | behaviour | 4 | 19683 | 1112 | 0 | 0 of 4 | — | 0 | keep | Once the media read is denied, the viewer stops showing the item it covered: no progress bar, no retry, no caption. A later authorized response carrying the sa… |
 | tests/screens/viewer-recovery-retains-loader.test.tsx | jest | behaviour | 1 | 20708 | 737 | 0 | 0 of 1 | — | 0 | keep | Recovery keeps what is already true: the loader stays while it is genuinely loading, and a selection the viewer abandoned stays abandoned until its own read su… |
 | tests/screens/viewer-revoked-selection.test.tsx | jest | behaviour | 4 | 19774 | 756 | 0 | 0 of 4 | — | 0 | keep | Losing the selected image loses it: the viewer shows its unavailable state rather than the next item, and an id that becomes authorized again is shown only thr… |
+| tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx | jest | behaviour | 2 | 24193 | 18 |  | not measured | — | 0 | keep | The entrance of an empty screen's picture is the model's to ask for, not the atom's to guess: a state derived on a device that asks for motion rises once, for … |
 | tests/ui/agenda-appointment-lines.test.tsx | jest | behaviour | 3 | 19211 | 106 | 0 | 0 of 3 | — | 0 | keep | An appointment is its name and, beneath it, when it is. Welding the two into one control label gave every entry the same long centred line of text, and a headi… |
 | tests/ui/atoms.test.tsx | jest | behaviour | 11 | 18901 | 51 | 0 | 0 of 11 | — | 0 | keep | (no first comment; first test title) a busy button is a button that cannot be pressed and says so |
 | tests/ui/calendar-withdrawal.test.tsx | jest | behaviour | 12 | 20965 | 1566 | 180 | 0 of 12 | — | 0 | keep | Denied calendar content removes what the person could act on in every view — day, week and agenda — and asks for an explicit recovery intent instead of silentl… |
@@ -153,6 +154,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/day-strip-chosen-stands.test.tsx | jest | behaviour | 2 | 19405 | 27 | 0 | 0 of 2 | — | 0 | keep | "A state is visible or it is not a state" cuts both ways: making the chosen day's ink legible may not be done by erasing what sets it apart. The strip draws th… |
 | tests/ui/dialog-busy-backdrop.test.tsx | jest | behaviour | 1 | 19747 | 867 | 0 | 0 of 1 | — | 0 | keep | While the confirmed write is under way the dialog's cancel is off (Button busy). The backdrop and the platform's back gesture are the same cancel by another ro… |
 | tests/ui/dialog-idle-backdrop.test.tsx | jest | behaviour | 1 | 19912 | 833 | 0 | 0 of 1 | — | 0 | keep | The busy dialog keeps every cancel route off (dialog-busy-backdrop.test.tsx). An idle one owes the opposite: the backdrop, the platform's back gesture and the … |
+| tests/ui/empty-state-illustration.test.tsx | jest | behaviour | 6 | 35718 | 45 |  | not measured | — | 0 | keep | An empty screen is drawn: the picture a model names arrives above the model's own words, in the model's own order, and adds nothing to what the screen says out… |
 | tests/ui/feedback.test.tsx | jest | behaviour | 17 | 20929 | 1311 | 0 | 0 of 17 | — | 0 | keep | A state view shows the phase it is handed: failed, empty and pending reads render distinct bodies whose retries are the caller's own intents, a success keeps t… |
 | tests/ui/gallery-family-heading.test.tsx | jest | behaviour | 1 | 20011 | 442 | 0 | 0 of 1 | — | 0 | keep | The activity trail is titled by its own model, in the kit's own word for it, because a real screen needs that heading and nothing above it. The gallery page al… |
 | tests/ui/gallery-lead-filled-verb.test.tsx | jest | behaviour | 16 | 22332 | 2005 | 133 | 3 of 16 | — | 0 | keep | how many strips the fold holds, how many of them are filled, and whether the first — the page's own screen — is the filled one |
@@ -160,6 +162,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/grouped-controls-reachable.test.tsx | jest | behaviour | 2 | 20096 | 16 | 0 | 0 of 2 | — | 0 | keep | A container marked `accessible` becomes one accessibility element: on iOS its child buttons are no longer reachable one by one. A tab bar whose tabs a screen-r… |
 | tests/ui/held-write-row.test.tsx | jest | behaviour | 3 | 15243 | 25 |  | not measured | — | 0 | keep | A write this phone is holding is shown as what it is: not saved, not lost, and with the two acts that belong to the person. The sentence comes from src/core/ou… |
 | tests/ui/home-held-writes.test.tsx | jest | behaviour | 1 | 16223 | 21 |  | not measured | — | 0 | keep | What this phone is holding is on the home screen, above the resources, with the two acts that belong to the person. A write that left the sheet and never reach… |
+| tests/ui/illustration-drawing.test.tsx | jest | behaviour | 3 | 37413 | 242 |  | not measured | — | 0 | keep | The two inks of a drawing are the theme's: every stroke a picture paints is a palette colour of the mode it is drawn in, at the side and stroke the kit names, … |
 | tests/ui/interaction.test.tsx | jest | behaviour | 15 | 21059 | 939 | 4 | 1 of 15 | — | 0 | keep | The five molecules the reference bar asked for, and the states the theme hands them. Each one is asked the question a person looks at it to answer: how far thr… |
 | tests/ui/list-count-announcement.test.tsx | jest | behaviour | 2 | 20702 | 189 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) en announces a lone group's count once and withdraws it while loading |
 | tests/ui/list-withdrawal.test.tsx | jest | behaviour | 4 | 20424 | 230 | 0 | 0 of 4 | — | 0 | keep | A withdrawn list does not keep the controls of the list it replaced: selection and bulk actions go with it, and coming back needs an explicit selection rather … |
@@ -212,7 +215,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-form-keeps-what-the-person-typed.test.ts | node | behaviour | 12 | 1833 | 22.2 |  | not measured | — | 0 | keep | A form keeps what the person typed, and says exactly what to fix (0085). Four rules decide that, and all four are answers of the core: what the sheet may refus… |
 | tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts | node | behaviour | 3 | 856 | 13.9 |  | not measured | — | 0 | keep | A box nobody can type into that points at another record draws that record's name — or the word for a pointer with no name — and the whole-row replace still se… |
 | tests/a-keep-reason-names-siblings-the-table-holds.test.ts | node | behaviour | 2 | 304 | 3.7 |  | not measured | — | 0 | keep | A keep reason is what root reads before a prune (0088), so what it points at has to be there to read: every tests/ or e2e/ test path a verdictReason names is a… |
-| tests/a-list-orders-itself-and-narrows-itself.test.ts | node | behaviour | 13 | 1269 | 69.4 | 61 | 5 of 13 | — | 0 | keep | How a list is being read is two questions, and the kit asks them separately: in what order, and narrowed how. A sheet of orders words each one for the type of … |
+| tests/a-list-orders-itself-and-narrows-itself.test.ts | node | behaviour | 14 | 1574 | 50 | 61 | 5 of 13 | — | 0 | keep | How a list is being read is two questions, and the kit asks them separately: in what order, and narrowed how. A sheet of orders words each one for the type of … |
 | tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts | node | behaviour | 13 | 1214 | 43.4 | 0 | 0 of 13 | — | 0 | keep | A list row says which record it is, what state that record is in, and what sets it apart — and nothing else. The four answers come from four declarations (the … |
 | tests/a-person-reads-one-colour-wherever-they-appear.test.ts | node | behaviour | 3 | 962 | 52.5 |  | not measured | — | 0 | keep | A person's disc colour is a function of their id alone: the same id reads the same tone in a directory row, in a field that points at them, as an activity acto… |
 | tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts | node | behaviour | 7 | 868 | 15.9 |  | not measured | — | 0 | keep | A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one … |
@@ -252,9 +255,10 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/documented-list-query.test.ts | node | behaviour | 2 | 1324 | 51.3 | 0 | 0 of 2 | — | 0 | keep | A list at a documented path goes through its generated operation without losing what the screen asked for: the sort and every repeated filter reach the server … |
 | tests/emulator-boot-ownership.test.ts | node | behaviour | 1 | 325 | 9.1 | 0 | 0 of 1 | — | 0 | keep | An unrelated emulator is already booting (offline), then becomes ready while this job's requested AVD fails to start. These exported functions exercise the rea… |
 | tests/emulator-launch-ownership.test.ts | node | behaviour | 4 | 473 | 84.6 | 0 | 0 of 4 | — | 0 | keep | The device this job runs its journeys on has to be the emulator this job started. `tests/emulator-boot-ownership.test.ts` proves the host is refused while a fo… |
+| tests/every-drawn-arc-stays-inside-the-safe-area.test.ts | node | behaviour | 2 | 550 | 28.1 |  | not measured | — | 0 | keep | A drawing's ink stays inside the safe area, not only the numbers it writes. An arc's end and radius can sit inside the box while the curve between them bulges … |
 | tests/factor-token-lifecycle.test.ts | node | behaviour | 3 | 1018 | 58.2 |  | not measured | — | 0 | keep | Who this is answers to the holder, not to a key narrowed to a list of permissions: auth-me is httpx.SignedIn(), and a scoped credential is refused at every one… |
 | tests/failure.test.ts | node | behaviour | 103 | 918 | 30.2 | 16 | 2 of 103 | — | 0 | keep | The classification table is the specification: every kind, in every context, answers with one copy key, one IssueCode, one action and one answer about whether … |
-| tests/feedback.test.ts | node | behaviour | 10 | 962 | 34.6 | 10 | 3 of 10 | — | 0 | keep | A rich state says what happened and what a person may do next, from the caller's own copy, locale and zone: an unknown or immutable write never offers a retry,… |
+| tests/feedback.test.ts | node | behaviour | 13 | 3718 | 41 | 10 | 3 of 10 | — | 0 | keep | A rich state says what happened and what a person may do next, from the caller's own copy, locale and zone: an unknown or immutable write never offers a retry,… |
 | tests/flow-claim-header.test.ts | node | behaviour | 1 | 320 | 7.3 | 0 | 0 of 1 | — | 0 | keep | A flow says which screen it proves in its header comment, above the configuration and the `---` that starts its steps. A `# screen:` line among the steps is a … |
 | tests/flow-coverage.test.ts | node | behaviour | 10 | 373 | 52.7 | 0 | 0 of 10 | — | 0 | keep | A journey earns its place by naming the screen it proves, and the rule that keeps the set complete is scripts/check_flows.ts — the gate `npm run check` already… |
 | tests/flow-folder-coverage.test.ts | node | behaviour | 1 | 297 | 7.2 | 0 | 0 of 1 | — | 0 | keep | `maestro test e2e/flows` with no workspace config plans the flows matching its default glob `*`, which does not cross a folder: a journey one folder down never… |
@@ -270,6 +274,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/gallery-lead-companion.test.ts | node | behaviour | 3 | 798 | 8.6 | 0 | 0 of 3 | — | 0 | keep | A page's lead is a screen, and a control on a screen is drawn with the thing it controls: a search field whose results are held behind a disclosure is a promis… |
 | tests/gallery-pages.test.ts | node | behaviour | 6 | 1020 | 138.9 | 0 | 0 of 6 | — | 0 | keep | The fifteen gallery pages are the unit the design bar is reviewed in: a reviewer opens /gallery/<id> and sees a screen. Every case id a page names has to exist… |
 | tests/hermes-intl.test.ts | node | behaviour | 1 | 298 | 19.6 | 0 | 0 of 1 | — | 0 | keep | Hermes, the engine the Android app runs, implements Intl.Collator, DateTimeFormat and NumberFormat only. A screen that constructs any other Intl class crashes … |
+| tests/illustrations.test.ts | node | behaviour | 4 | 552 | 9.3 |  | not measured | — | 0 | keep | An illustration exists for every icon a catalogue may declare: one canvas, one safe area, one stroke, and two inks that name no colour. The vocabulary, the geo… |
 | tests/instant-calendar-days.test.ts | node | behaviour | 3 | 825 | 7.4 | 0 | 0 of 3 | — | 0 | keep | A past instant read as a distance names the calendar day it fell on, not the number of whole 24-hour spans since it: a record written late on Monday is not "ye… |
 | tests/instant-without-relative-format.test.ts | node | behaviour | 2 | 826 | 19.7 | 9 | 0 of 2 | — | 0 | keep | Hermes on Android has no Intl.RelativeTimeFormat, and `new` on it crashed every record screen that read a recent time (2026-10-09, phone 47ab484, "app crashed … |
 | tests/jest-worker-pool.test.ts | node | behaviour | 1 | 372 | 63 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) the component suites run in a worker pool the repository fixes, not one the machine sizes |

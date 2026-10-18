@@ -320,3 +320,22 @@ test("the list keeps the sort and filter it was asked with while it loads more",
     "a filter chosen after a sort leaves the sort where it was",
   );
 });
+
+test("an empty list draws a picture: the entry's own icon, the magnifier when a filter emptied it", () => {
+  const declared = plainEntry({ icon: "document" });
+  assert.equal(model(declared, noOrder, 0).state?.illustration, "document");
+  assert.equal(
+    model(declared, { sort: "", filters: { status: "done" } }, 0).state?.illustration,
+    "filtered",
+  );
+  // The words do not move with the picture: which empty this is stays the copy table's answer.
+  assert.equal(model(declared, noOrder, 0).state?.title, "No notes yet");
+  assert.equal(
+    model(declared, { sort: "", filters: { status: "done" } }, 0).state?.title,
+    "No matching notes",
+  );
+  // An entry that declared a word this build draws no picture for keeps the generic
+  // drawing, the screen it had, and the notice the catalogue already gives.
+  assert.equal(model(plainEntry({ icon: "rocket" }), noOrder, 0).state?.illustration, "empty");
+  assert.equal(model(plainEntry(), noOrder, 0).state?.illustration, "empty");
+});

@@ -3,6 +3,7 @@
 // is in density-independent points; tests/scale.test.ts refuses a length
 // written anywhere else in the presentation layers.
 import { Platform } from "react-native";
+import { illustrationStroke } from "../core/illustrations";
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 } as const;
 /** radius rounds a corner; full is a pill, whatever its height; xl is a surface that floats above the page. */
@@ -48,6 +49,16 @@ export const extent = {
   playerCover: 132,
   /** hero is the one photographic surface a screen leads with. */
   hero: 220,
+  /**
+   * illustration is the side of the line picture an empty screen is drawn with: a
+   * quarter of the column it sits in, so the picture is the headline of the screen
+   * rather than a caption under it, and far from a row's tile (rowMedia) beside it.
+   * It is a fixed length, not a text-scaled one: Dynamic Type scales the words
+   * under it, and a picture that grew with them would collide with its own title.
+   */
+  illustration: pageColumn / 4,
+  /** illustrationStroke is that picture's stroke width, in the drawing's own units. */
+  illustrationStroke,
   /** pageColumn, above, is the width one phone composition is shown at. */
   pageColumn,
   /**
