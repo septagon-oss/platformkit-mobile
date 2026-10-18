@@ -1,17 +1,20 @@
 // EmptyState is a list with nothing in it, said plainly, with the one thing
-// a person can do about it when there is one.
+// a person can do about it when there is one. It is drawn, not blank: the
+// picture above the words is the entry's own icon, or the magnifier when a
+// filter is what left the list empty.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { Announcement } from "../../core/derive";
+import type { Announcement, IllustrationName, Motion } from "../../core/derive";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 import { Button } from "./Button";
-import { Icon, type IconName } from "./Icon";
+import { Illustration } from "./Illustration";
 import type { Action } from "./Notice";
 import { Text } from "./Text";
 
 interface Props {
-  readonly icon?: IconName;
+  readonly illustration?: IllustrationName;
+  readonly motion?: Motion;
   readonly title: string;
   readonly text?: string;
   readonly action?: Action;
@@ -23,7 +26,8 @@ interface Props {
 }
 
 export function EmptyState({
-  icon = "empty",
+  illustration = "empty",
+  motion = "reduced",
   title,
   text,
   action,
@@ -44,7 +48,7 @@ export function EmptyState({
         accessibilityLiveRegion={announcement === "urgent" ? "assertive" : announcement}
         {...(language ? { accessibilityLanguage: language } : {})}
       >
-        <Icon name={icon} size="lg" tone="muted" />
+        <Illustration name={illustration} motion={motion} />
         <Text role="title" weight="semibold" align="center" maxFontSizeMultiplier={0}>
           {title}
         </Text>

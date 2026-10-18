@@ -1,0 +1,7 @@
+<!-- Generated from src/core/illustrations.ts by npm run illustrations. Do not edit. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+<path d="M8 17 L40 17" stroke="currentColor"/>
+<path d="M8 31 L40 31" stroke="currentColor"/>
+<path d="M13 17 A5 5 0 0 1 23 17 A5 5 0 0 1 13 17 Z" style="stroke:var(--pk-color-accent-default,currentColor)"/>
+<path d="M26 31 A5 5 0 0 1 36 31 A5 5 0 0 1 26 31 Z" style="stroke:var(--pk-color-accent-default,currentColor)"/>
+</svg>

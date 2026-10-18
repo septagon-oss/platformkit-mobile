@@ -9,7 +9,7 @@ import type {
   MapKey as WireMapKey,
 } from "../generated/types.gen";
 import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
-import { pictureDoor, resourceIcons, type Pictures } from "./pictures";
+import { drawnIcon, pictureDoor, type Pictures } from "./pictures";
 import { issuePath } from "./responses";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
@@ -384,7 +384,7 @@ function hintEntry(
   const singular = hintWord(raw, "singular", at, "a word", notice);
   const plural = hintWord(raw, "plural", at, "a word", notice);
   const declaredIcon = hintWord(raw, "icon", at, "a word", notice);
-  const icon = resourceIcons.includes(declaredIcon as never) ? declaredIcon : undefined;
+  const icon = drawnIcon(declaredIcon);
   if (declaredIcon && !icon) notice(`${at}.icon`, "is not a supported icon: the default is used");
   const picturePointer = (member: string, row: boolean): string | undefined => {
     const name = pointer(member);

@@ -37,6 +37,7 @@
     "./generated": "./src/generated/index.ts"
   },
   "files": [
+    "assets",
     "src",
     "scripts/tokens.ts",
     "scripts/android",
@@ -66,6 +67,7 @@
     "check:fingerprint": "node --import tsx scripts/fingerprint.ts --check",
     "export:check": "expo export --platform android --platform ios --output-dir \"${RUNNER_TEMP:-/tmp}/platformkit-mobile-export\"",
     "tokens": "node --import tsx scripts/tokens.ts",
+    "illustrations": "node --import tsx scripts/illustrations.ts",
     "test:ui": "jest",
     "check:flows": "node --import tsx scripts/check_flows.ts",
     "check:inventory": "node --import tsx scripts/inventory.ts --check",

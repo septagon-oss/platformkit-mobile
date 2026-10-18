@@ -6,6 +6,7 @@ import {
   avatar,
   avatarStack,
   avatarTone,
+  entryIcon,
   initials,
   listRow,
   personRecord,
@@ -345,4 +346,17 @@ test("image reads exclude hidden group discs, collapsed facts and unrelated acti
   };
   assert.deepEqual(eventPictures(trail), [FILE]);
   assert.deepEqual(eventPictures({ ...trail, excluded: true }), []);
+});
+
+test("the icon an entry declared is answered once, whichever surface asks", () => {
+  const entry = parseCatalog(pictured()).resources[0]!;
+  assert.equal(entryIcon(entry), "document");
+  assert.deepEqual(rowMedia(entry, {}, false), { kind: "icon", icon: "document" });
+  const doc = pictured();
+  doc.resources[0].presentation = { icon: "rocket", coverField: "poster" };
+  const notices: string[] = [];
+  const odd = parseCatalog(doc, (at) => notices.push(at)).resources[0]!;
+  assert.equal(entryIcon(odd), undefined, "a word outside the set draws nothing, here or on a row");
+  assert.ok(notices.includes("resources[0].presentation.icon"));
+  assert.equal(rowMedia(odd, {}, false).kind, "none");
 });

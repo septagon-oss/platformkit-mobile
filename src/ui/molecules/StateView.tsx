@@ -39,16 +39,16 @@ export function StateView({ model, onAction, testID }: Props) {
     announcement: model.announcement,
     language: model.language,
     accessibilityLabel: model.announcementText,
-    icon: model.icon,
     ...(actions[0] ? { action: actions[0] } : {}),
     ...(actions[1] ? { secondary: actions[1] } : {}),
     ...testable(testID),
   };
   return model.component === "empty" ? (
-    <EmptyState {...props} />
+    <EmptyState {...props} illustration={model.illustration ?? "empty"} motion={model.motion} />
   ) : (
     <Notice
       {...props}
+      icon={model.icon}
       tone={model.tone}
       {...(model.updatedAt ? { updatedAt: model.updatedAt } : {})}
     />

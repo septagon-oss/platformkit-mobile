@@ -2138,3 +2138,49 @@ establish Android/iOS rendering, redirects, actual native cache reuse/eviction,
 revocation or TalkBack/VoiceOver output. The browser preview's design probe does
 not measure React Native Web's div-based text; its zero-refusal report is not a
 native visual or accessibility verdict.
+
+## An empty list is drawn
+
+**Reused** — `resourceIcons`, the catalogue's own icon refusal, `deriveState`'s
+rule that a refused input yields no partial model, `StateInput`/`StateModel`,
+`StateView`, `EmptyState`, `Skeleton`'s motion-prop precedent, `Sparkline`'s
+labelled-`View`-carries-the-words pattern, `useTheme`/`useStyles` and
+`src/ui/scale.ts`'s `extent` compose the empty screen this delivery draws.
+**Added** — `src/core/illustrations.ts` (the drawing table, one 48-unit canvas,
+one safe area, the `card`/`ring`/`poly` builders), the `Illustration` atom,
+`StateModel.illustration`, `entryIcon` and `scripts/illustrations.ts`, because the
+kit held no drawing at all — its only two `react-native-svg` units plot a
+responsive chart — and the model that fills the empty state could not name one:
+its `icon` is a four-word glyph union every empty kind shared, so a list of
+people, a list of invoices and a list a filter had just emptied all drew the same
+generic folder. **Made reusable** — the table is keyed by the icon word a catalogue
+declares and is emitted byte-for-byte to `assets/illustrations/<name>.svg` by
+`npm run illustrations`, so the web workspace embeds the identical set instead of
+redrawing it; `extent.illustration`, the three builders and
+`tests/illustrations.test.ts`'s geometry reading are the block the next picture,
+tile or empty screen is drawn from.
+
+Eighteen drawings: one per icon the catalogue may declare, the generic one an
+entry that declared none gets, and a magnifier for the empty a filter caused.
+Every one is authored on `illustrationCanvas` (48 units) with every coordinate
+inside `illustrationSafeArea`, in absolute `M`/`L`/`C`/`A`/`Z` commands only, at
+most eight parts, and drawn in two inks — `line` for the outline, `detail` for the
+one or two parts that say what the object is. A part names an ink and never a
+colour: the atom answers `line` with `textPrimary` and `detail` with
+`accentDefault`, so the set follows the theme, and an emitted file answers them
+with `currentColor` and the kernel web stylesheet's own
+`--pk-color-accent-default`, falling back to `currentColor` where that property is
+undefined. `tests/illustrations.test.ts` reads the vocabulary, the geometry and the
+bytes on disk off the one table; a missing drawing also fails `npm run typecheck`,
+because the table is a `Record` over the same closed set.
+
+The picture arrives as part of the state model, not as a screen's decision:
+`deriveCatalogList` passes `illustration` — the magnifier when a filter is what
+left the list empty, `entryIcon(entry)` otherwise, the generic one when the entry
+declared nothing this build draws — and `StateView` hands it to `EmptyState`, which
+draws it above the title it was already given. No string moved, so no device
+journey changed. A state whose picture is named by a kind that draws none, or by a
+word outside the set, or by the empty string, is refused whole, as every other
+invalid state input is. The entrance is a 300 ms fade-and-rise on first appearance
+and nothing at all under reduced motion, and it is a prop like every other motion
+in the kit: `useFeedback` remains the only place the device is asked.

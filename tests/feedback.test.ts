@@ -255,3 +255,68 @@ test("the literal gallery derives every example in EN/PT and all required format
       assert.ok(result.value.every((example) => example.model.language === language));
     }
 });
+
+test("an empty state names the picture above its words, and the generic one is the default", () => {
+  const plain = deriveState({ kind: "empty" }, p);
+  assert.ok(plain.ok, JSON.stringify(plain));
+  assert.equal(plain.value.illustration, "empty");
+  const named = deriveState({ kind: "empty", illustration: "money" }, p);
+  assert.ok(named.ok, JSON.stringify(named));
+  assert.equal(named.value.illustration, "money");
+  assert.equal(
+    named.value.title,
+    p.copy.state.empty.title,
+    "the picture changes, the sentence does not",
+  );
+  // A model no picture serves carries no illustration at all: a field nothing
+  // draws is a field nothing writes.
+  for (const input of [
+    { kind: "success" } as StateInput,
+    { kind: "offline" } as StateInput,
+    { kind: "loading", skeleton: "lines" } as StateInput,
+  ]) {
+    const result = deriveState(input, p);
+    assert.ok(result.ok, JSON.stringify(result));
+    assert.equal("illustration" in result.value, false, `${input.kind}: draws no picture`);
+  }
+});
+
+test("a picture the drawing table does not hold refuses the whole state, whoever asked", () => {
+  const issue = {
+    code: "read-failed" as const,
+    path: "records",
+    recovery: "correctable" as const,
+    message: "Nothing arrived.",
+  };
+  for (const [input, why] of [
+    [{ kind: "empty", illustration: "rocket" }, "a name outside the closed set"],
+    [{ kind: "empty", illustration: "" }, "silence is not a name"],
+    [{ kind: "error", issue, illustration: "task" }, "a notice keeps its glyph"],
+  ] as const) {
+    const result = deriveState(input as unknown as StateInput, p);
+    assert.equal(result.ok, false, `${why}: the state was accepted`);
+    if (result.ok) continue;
+    assert.deepEqual(
+      result.issues,
+      [
+        {
+          code: "invalid-input",
+          path: "illustration",
+          recovery: "immutable",
+          message: "This information is not valid.",
+        },
+      ],
+      why,
+    );
+  }
+});
+
+test("the gallery draws the empty it names: a task picture on a list, a magnifier on a filter", () => {
+  const result = stateExamples(p);
+  assert.ok(result.ok, JSON.stringify(result));
+  const drawn = new Map(result.value.map((example) => [example.id, example.model]));
+  assert.equal(drawn.get("empty-state/with-action")?.illustration, "task");
+  assert.equal(drawn.get("empty-state/filtered")?.illustration, "filtered");
+  assert.equal(drawn.get("empty-state/default")?.illustration, "empty");
+  assert.equal(drawn.get("notice/offline")?.illustration, undefined);
+});

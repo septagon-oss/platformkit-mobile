@@ -11,6 +11,7 @@ import {
   type Presentation,
   type Result,
 } from "./presentation";
+import { isIllustrationName, type IllustrationName } from "./illustrations";
 
 export type Announcement = "none" | "polite" | "urgent";
 export type SkeletonVariant = "lines" | "rows" | "detail" | "media";
@@ -38,8 +39,18 @@ interface StateActions {
   readonly secondary?: StateAction;
 }
 export type StateInput =
-  | (StateText & { readonly kind: "loading"; readonly skeleton: SkeletonVariant })
-  | (StateText & StateActions & { readonly kind: "empty" | "success" })
+  | (StateText & StateActions & { readonly kind: "loading"; readonly skeleton: SkeletonVariant })
+  /**
+   * An empty screen is drawn, not blank: `illustration` names the picture above
+   * the words, and defaults to the generic one. Only this kind draws a picture —
+   * a notice keeps its glyph.
+   */
+  | (StateText &
+      StateActions & {
+        readonly kind: "empty";
+        readonly illustration?: IllustrationName;
+      })
+  | (StateText & StateActions & { readonly kind: "success" })
   | (StateText & StateActions & { readonly kind: "offline"; readonly updatedAt?: Instant })
   | (StateText &
       StateActions & {
@@ -64,6 +75,8 @@ export interface StateModel {
   readonly title: string;
   readonly body: string;
   readonly updatedAt?: string;
+  /** illustration is the picture above the title, present exactly when the model is an empty state. */
+  readonly illustration?: IllustrationName;
   readonly announcement: Announcement;
   readonly announcementText: string;
   readonly language: string;
@@ -88,6 +101,12 @@ export function deriveState(input: StateInput, p: Presentation): Result<StateMod
     if (input[key] !== undefined && !hasText(input[key])) invalid(key);
   if (input.kind === "loading" && !["lines", "rows", "detail", "media"].includes(input.skeleton))
     invalid("skeleton");
+  // A picture is named or it is not: an unknown name, an empty string and a
+  // picture asked for by a kind that draws none are all refused here, so no
+  // model is ever handed a name the drawing table does not hold.
+  const drawn = (input as { readonly illustration?: unknown }).illustration;
+  if (drawn !== undefined && (input.kind !== "empty" || !isIllustrationName(drawn)))
+    invalid("illustration");
   const actions: StateControl[] = [];
   const ids = new Set<string>();
   let primary = 0;
@@ -194,6 +213,7 @@ export function deriveState(input: StateInput, p: Presentation): Result<StateMod
       title,
       body,
       ...(updatedAt ? { updatedAt } : {}),
+      ...(input.kind === "empty" ? { illustration: input.illustration ?? "empty" } : {}),
       announcement:
         input.kind === "loading" ? "none" : input.kind === "error" ? "urgent" : "polite",
       announcementText: [title, body, updatedAt].filter(Boolean).join(". "),

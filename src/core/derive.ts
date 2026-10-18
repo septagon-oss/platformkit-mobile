@@ -3,8 +3,8 @@ import {
   avatarStack,
   type AvatarModel,
   compactPicture,
+  entryIcon,
   pictureId,
-  resourceIcons,
   type People,
   type Person,
   type PictureStates,
@@ -23,6 +23,7 @@ import type { Status } from "./shared";
 import { presentedInstant, presentedTime, type Formatting } from "./presentation";
 
 export * from "./pictures";
+export * from "./illustrations";
 export { copyForLocale, copyLanguage, deriveCopy, type Copy, type Language } from "./copy";
 export { stateExamples, type StateExample } from "./stateGallery";
 export {
@@ -431,13 +432,6 @@ export const statusField = (e: Entry): Field | undefined =>
   e.hints?.statusField === undefined
     ? undefined
     : e.fields.find((f) => f.name === e.hints?.statusField && !neverShown(f));
-
-/**
- * iconName is the word an entry asks for its glyph. It answers the word and draws
- * nothing: which glyphs this build ships belongs to `ui/atoms/Icon.tsx`, and a
- * name it does not hold draws the generic one.
- */
-export const iconName = (e: Entry): string | undefined => e.hints?.icon;
 
 /**
  * rowContent is a field's own answer about what a row may *say*: silence about its
@@ -1953,10 +1947,7 @@ export function rowMedia(
   images = false,
   states: PictureStates = {},
 ): RowMediaModel {
-  const declared = entry.hints?.icon;
-  const icon = resourceIcons.includes(declared as never)
-    ? (declared as (typeof resourceIcons)[number])
-    : undefined;
+  const icon = entryIcon(entry);
   const field = thumbnailField(entry);
   const id = field ? row[field.name] : undefined;
   if (images && pictureId(id)) {

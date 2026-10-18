@@ -22,7 +22,7 @@ export function stateExamples(p: Presentation): Result<readonly StateExample[]> 
     intent: "dismiss",
     control: { id: "dismiss", label: state.dismiss, tone: "plain", state: "ready" },
   };
-  const empty: StateInput = { kind: "empty", action: add };
+  const empty: Extract<StateInput, { kind: "empty" }> = { kind: "empty", action: add };
   const read: StateInput = {
     kind: "error",
     issue: {
@@ -35,12 +35,17 @@ export function stateExamples(p: Presentation): Result<readonly StateExample[]> 
   };
   const success: StateInput = { kind: "success", action: dismiss };
   const cases: readonly (readonly [string, StateInput])[] = [
-    ["empty-state/with-action", empty],
+    ["empty-state/with-action", { ...empty, illustration: "task" }],
     ["empty-state/default", empty],
     ["empty-state/read-only", { kind: "empty" }],
     [
       "empty-state/filtered",
-      { kind: "empty", title: gallery.filteredTitle, body: gallery.filteredBody },
+      {
+        kind: "empty",
+        illustration: "filtered",
+        title: gallery.filteredTitle,
+        body: gallery.filteredBody,
+      },
     ],
     ["empty-state/long-copy", { ...empty, title: gallery.longTitle, body: gallery.longBody }],
     ["empty-state/large-text", { ...empty, title: gallery.longTitle, body: gallery.longBody }],

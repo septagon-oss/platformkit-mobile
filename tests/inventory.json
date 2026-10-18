@@ -276,22 +276,22 @@
  "totals": {
   "contract": {
    "files": 35,
-   "cases": 200,
-   "ms": 74239,
-   "testsMs": 47452.4,
+   "cases": 201,
+   "ms": 73486,
+   "testsMs": 47523.600000000006,
    "runners": {
     "node": 35
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 229,
-   "cases": 1046,
-   "ms": 1544429,
-   "testsMs": 49260.500000000015,
+   "files": 232,
+   "cases": 1063,
+   "ms": 1621173,
+   "testsMs": 49543.80000000002,
    "runners": {
-    "jest": 72,
-    "node": 157
+    "jest": 74,
+    "node": 158
    },
    "unreachable": 0
   },
@@ -2264,7 +2264,7 @@
    "file": "tests/pictures.test.ts",
    "runner": "node",
    "layer": "contract",
-   "cases": 12,
+   "cases": 13,
    "rule": "(no first comment; first test title) person tones have independent stable vectors and never use danger",
    "ruleSource": "first test title",
    "tier": "push",
@@ -2272,7 +2272,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 4466,
+   "ms": 3713,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "person tones have independent stable vectors and never use danger",
@@ -2286,74 +2286,80 @@
     "the public served capture retains the picture door, cover, assignee and author contracts",
     "failed or unsupported memory purges do not reject session cleanup",
     "a directory row carries its own stable avatar while ordinary resources keep media tiles",
-    "image reads exclude hidden group discs, collapsed facts and unrelated activity people"
+    "image reads exclude hidden group discs, collapsed facts and unrelated activity people",
+    "the icon an entry declared is answered once, whichever surface asks"
    ],
    "tests": [
     {
      "title": "person tones have independent stable vectors and never use danger",
-     "ms": 6.493312,
+     "ms": 5.307257,
      "measured": false
     },
     {
      "title": "initials use Unicode code points and never manufacture a name",
-     "ms": 0.731794,
+     "ms": 0.56163,
      "measured": false
     },
     {
      "title": "groups deduplicate IDs in order and distinguish visible remainder from spoken others",
-     "ms": 4.193127,
+     "ms": 3.742821,
      "measured": false
     },
     {
      "title": "picture templates refuse external origins, encodings and ambiguous substitutions",
-     "ms": 10.997154,
+     "ms": 10.121311,
      "measured": false
     },
     {
      "title": "defective widths keep the valid original door and never remember a server's width set",
-     "ms": 1.739037,
+     "ms": 1.804171,
      "measured": false
     },
     {
      "title": "thumbnail selection falls back from a bad field but never from its empty value",
-     "ms": 1.355568,
+     "ms": 2.212667,
      "measured": false
     },
     {
      "title": "portraits follow presentation and visibility rather than a field's name",
-     "ms": 2.748484,
+     "ms": 1.444445,
      "measured": false
     },
     {
      "title": "compact bytes require a bearer, stay on the selected server and scope only public versioned caching",
-     "ms": 1.785512,
+     "ms": 1.283026,
      "measured": false
     },
     {
      "title": "the public served capture retains the picture door, cover, assignee and author contracts",
-     "ms": 49.881947,
+     "ms": 139.025869,
      "measured": false
     },
     {
      "title": "failed or unsupported memory purges do not reject session cleanup",
-     "ms": 18.171215,
+     "ms": 8.644517,
      "measured": false
     },
     {
      "title": "a directory row carries its own stable avatar while ordinary resources keep media tiles",
-     "ms": 21.673144,
+     "ms": 1.875693,
      "measured": false
     },
     {
      "title": "image reads exclude hidden group discs, collapsed facts and unrelated activity people",
-     "ms": 2.404639,
+     "ms": 16.470669,
+     "measured": false
+    },
+    {
+     "title": "the icon an entry declared is answered once, whichever surface asks",
+     "ms": 0.952363,
      "measured": false
     }
    ],
-   "loaded": 52,
-   "coveredProdLines": 17495,
+   "loaded": 53,
+   "coveredProdLines": 17910,
    "onlyProdLines": null,
-   "testsMs": 122.2
+   "testsMs": 193.4
   },
   {
    "file": "tests/publish-registry-credential.test.ts",
@@ -4877,6 +4883,65 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/empty-state-illustration.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 6,
+   "rule": "An empty screen is drawn: the picture a model names arrives above the model's own words, in the model's own order, and adds nothing to what the screen says out loud. The rise that greets a person on a device that asks for motion happens once per appearance; a device that asks for none is handed a still picture.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 35718,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the picture the model names is the picture on the screen, above the model's words",
+    "a list a filter emptied draws the magnifier, whatever the entry asked for",
+    "a model that names no picture is drawn with the generic one",
+    "the picture says nothing of its own: the screen is still titled and bodied, once",
+    "reduced motion never starts a rise and is drawn still",
+    "a device that asks for motion gets one rise of 300 ms, and no second one for a re-render"
+   ],
+   "tests": [
+    {
+     "title": "the picture the model names is the picture on the screen, above the model's words",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "a list a filter emptied draws the magnifier, whatever the entry asked for",
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "a model that names no picture is drawn with the generic one",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "the picture says nothing of its own: the screen is still titled and bodied, once",
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "reduced motion never starts a rise and is drawn still",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a device that asks for motion gets one rise of 300 ms, and no second one for a re-render",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 114,
+   "coveredProdLines": 739,
+   "onlyProdLines": null,
+   "testsMs": 45
+  },
+  {
    "file": "tests/ui/feedback.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -5459,6 +5524,47 @@
    "coveredProdLines": 1075,
    "onlyProdLines": null,
    "testsMs": 21
+  },
+  {
+   "file": "tests/ui/illustration-drawing.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The two inks of a drawing are the theme's: every stroke a picture paints is a palette colour of the mode it is drawn in, at the side and stroke the kit names, and the parts on screen are the parts the drawing table holds \u2014 in both themes.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 37413,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a drawing paints only the light theme's two inks, at the kit's own side and stroke",
+    "a drawing paints only the dark theme's two inks, at the kit's own side and stroke",
+    "the picture is a picture: twice a row's tile and no bigger than its own column"
+   ],
+   "tests": [
+    {
+     "title": "a drawing paints only the light theme's two inks, at the kit's own side and stroke",
+     "ms": 130,
+     "measured": false
+    },
+    {
+     "title": "a drawing paints only the dark theme's two inks, at the kit's own side and stroke",
+     "ms": 110,
+     "measured": false
+    },
+    {
+     "title": "the picture is a picture: twice a row's tile and no bigger than its own column",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 114,
+   "coveredProdLines": 726,
+   "onlyProdLines": null,
+   "testsMs": 242
   },
   {
    "file": "tests/ui/interaction.test.tsx",
@@ -9044,11 +9150,11 @@
    "file": "tests/a-list-orders-itself-and-narrows-itself.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 13,
-   "ms": 1269,
-   "testsMs": 69.4,
-   "loaded": 30,
-   "coveredProdLines": 8916,
+   "cases": 14,
+   "ms": 1574,
+   "testsMs": 50,
+   "loaded": 33,
+   "coveredProdLines": 11487,
    "onlyProdLines": 61,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -9073,7 +9179,8 @@
     "a list with nothing on it and nothing filtered offers neither control",
     "sorting an empty list says it is empty, not that something filtered it",
     "a filtered-empty list is said in the table's words and holds its own way back",
-    "the list keeps the sort and filter it was asked with while it loads more"
+    "the list keeps the sort and filter it was asked with while it loads more",
+    "an empty list draws a picture: the entry's own icon, the magnifier when a filter emptied it"
    ],
    "tests": [
     {
@@ -9083,7 +9190,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 12.118159,
+     "measured": false
     },
     {
      "title": "a sort row is offered for no field that has no direction, or that no screen shows",
@@ -9092,7 +9200,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.46899,
+     "measured": false
     },
     {
      "title": "a sort name that matches no field costs one row and one line to a developer",
@@ -9101,7 +9210,8 @@
      "onlyProdLines": 2,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.53471,
+     "measured": false
     },
     {
      "title": "the sort sheet is the list's own sort group, and pressing a row is the whole answer",
@@ -9110,7 +9220,8 @@
      "onlyProdLines": 2,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 10.318637,
+     "measured": false
     },
     {
      "title": "every filter group answers All, and the word Clear says nothing else",
@@ -9119,7 +9230,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 4.863726,
+     "measured": false
     },
     {
      "title": "Clear filters is offered only where it has something to do, and keeps the sort",
@@ -9128,7 +9240,8 @@
      "onlyProdLines": 1,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.020812,
+     "measured": false
     },
     {
      "title": "the filters control counts what it can clear, and an order is never counted",
@@ -9137,7 +9250,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.788492,
+     "measured": false
     },
     {
      "title": "the bar that holds both doors is named for the bar and not for one door",
@@ -9146,7 +9260,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.166831,
+     "measured": false
     },
     {
      "title": "an entry with nothing to narrow by is offered no filters control at all",
@@ -9155,7 +9270,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.417184,
+     "measured": false
     },
     {
      "title": "a list with nothing on it and nothing filtered offers neither control",
@@ -9164,7 +9280,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.113972,
+     "measured": false
     },
     {
      "title": "sorting an empty list says it is empty, not that something filtered it",
@@ -9173,7 +9290,8 @@
      "onlyProdLines": 9,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 3.239308,
+     "measured": false
     },
     {
      "title": "a filtered-empty list is said in the table's words and holds its own way back",
@@ -9182,7 +9300,8 @@
      "onlyProdLines": 12,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.679541,
+     "measured": false
     },
     {
      "title": "the list keeps the sort and filter it was asked with while it loads more",
@@ -9191,7 +9310,13 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.478318,
+     "measured": false
+    },
+    {
+     "title": "an empty list draws a picture: the entry's own icon, the magnifier when a filter emptied it",
+     "ms": 5.787517,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -9201,7 +9326,8 @@
    "testsTotal": 13,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts",
@@ -13159,11 +13285,11 @@
    "file": "tests/feedback.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 10,
-   "ms": 962,
-   "testsMs": 34.6,
-   "loaded": 27,
-   "coveredProdLines": 5846,
+   "cases": 13,
+   "ms": 3718,
+   "testsMs": 41,
+   "loaded": 30,
+   "coveredProdLines": 7551,
    "onlyProdLines": 10,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -13185,7 +13311,10 @@
     "stale timestamps require real UTC/offset instants with millisecond precision",
     "a forbidden record cannot be described as stale readable content",
     "C03: a failed first read is not an empty result; refresh retains rows",
-    "the literal gallery derives every example in EN/PT and all required formatting locales"
+    "the literal gallery derives every example in EN/PT and all required formatting locales",
+    "an empty state names the picture above its words, and the generic one is the default",
+    "a picture the drawing table does not hold refuses the whole state, whoever asked",
+    "the gallery draws the empty it names: a task picture on a list, a magnifier on a filter"
    ],
    "tests": [
     {
@@ -13195,7 +13324,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 6.77735,
+     "measured": false
     },
     {
      "title": "state derivation rejects contradictory controls without changing caller data",
@@ -13204,7 +13334,8 @@
      "onlyProdLines": 2,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.792928,
+     "measured": false
     },
     {
      "title": "C03: busy keeps the action label; an absent action stays absent",
@@ -13213,7 +13344,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.611142,
+     "measured": false
     },
     {
      "title": "C01: copy, locale and zone are explicit and independent between callers",
@@ -13222,7 +13354,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 5.235444,
+     "measured": false
     },
     {
      "title": "unsupported formatting refuses instead of falling back to the device",
@@ -13231,7 +13364,8 @@
      "onlyProdLines": 2,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.940612,
+     "measured": false
     },
     {
      "title": "value formatting shares the explicit locale and copy with state messages",
@@ -13240,7 +13374,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 4.756658,
+     "measured": false
     },
     {
      "title": "stale timestamps require real UTC/offset instants with millisecond precision",
@@ -13249,7 +13384,8 @@
      "onlyProdLines": 4,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.83155,
+     "measured": false
     },
     {
      "title": "a forbidden record cannot be described as stale readable content",
@@ -13258,7 +13394,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.347924,
+     "measured": false
     },
     {
      "title": "C03: a failed first read is not an empty result; refresh retains rows",
@@ -13267,7 +13404,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.252467,
+     "measured": false
     },
     {
      "title": "the literal gallery derives every example in EN/PT and all required formatting locales",
@@ -13276,7 +13414,23 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 16.844281,
+     "measured": false
+    },
+    {
+     "title": "an empty state names the picture above its words, and the generic one is the default",
+     "ms": 0.86394,
+     "measured": false
+    },
+    {
+     "title": "a picture the drawing table does not hold refuses the whole state, whoever asked",
+     "ms": 0.600793,
+     "measured": false
+    },
+    {
+     "title": "the gallery draws the empty it names: a task picture on a list, a magnifier on a filter",
+     "ms": 2.164047,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -13286,7 +13440,8 @@
    "testsTotal": 10,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/flow-claim-header.test.ts",
@@ -14104,6 +14259,53 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/illustrations.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "An illustration exists for every icon a catalogue may declare: one canvas, one safe area, one stroke, and two inks that name no colour. The vocabulary, the geometry and the emitted assets/illustrations/<name>.svg are all read back off one table, so a drawing that is missing, that leaves its box, or that differs from what the table renders is a failing test rather than a screen that quietly draws nothing.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 552,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "every icon a catalogue may declare has a drawing, and the vocabulary is those plus two",
+    "every drawing lies inside the safe area on the shared canvas, in absolute commands",
+    "a drawing is a handful of stroked parts, outlined in one ink and accented in the other",
+    "the emitted files are the table's own bytes, one per name, and name no colour"
+   ],
+   "tests": [
+    {
+     "title": "every icon a catalogue may declare has a drawing, and the vocabulary is those plus two",
+     "ms": 3.969761,
+     "measured": false
+    },
+    {
+     "title": "every drawing lies inside the safe area on the shared canvas, in absolute commands",
+     "ms": 3.038587,
+     "measured": false
+    },
+    {
+     "title": "a drawing is a handful of stroked parts, outlined in one ink and accented in the other",
+     "ms": 0.693815,
+     "measured": false
+    },
+    {
+     "title": "the emitted files are the table's own bytes, one per name, and name no colour",
+     "ms": 1.599892,
+     "measured": false
+    }
+   ],
+   "loaded": 3,
+   "coveredProdLines": 492,
+   "onlyProdLines": null,
+   "testsMs": 9.3
   },
   {
    "file": "tests/instant-calendar-days.test.ts",

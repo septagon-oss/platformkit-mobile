@@ -1,4 +1,5 @@
-import type { PictureStates } from "./pictures";
+import { entryIcon, type PictureStates } from "./pictures";
+import type { IllustrationName } from "./illustrations";
 import type { Entry } from "./catalog";
 import {
   activeFilters,
@@ -98,6 +99,9 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
     // sentence that says so, with the moment the rows last arrived.
     const offline =
       input.savedAt === undefined ? undefined : v.take(deriveOffline(input.savedAt, p));
+    // Which picture an empty page draws: the entry's own declared icon, or the
+    // magnifier when the emptiness belongs to a filter rather than to the entry.
+    const drawn: IllustrationName = isFiltered ? "filtered" : (entryIcon(entry) ?? "empty");
     const sections: readonly DataSection[] = [
       {
         id: "records",
@@ -151,6 +155,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
                       isFiltered
                         ? {
                             kind: "empty",
+                            illustration: drawn,
                             title: p.copy.kit.noMatching(named.plural),
                             body: p.copy.kit.filteredBody,
                             ...(input.canCreate
@@ -178,6 +183,7 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
                           }
                         : {
                             kind: "empty",
+                            illustration: drawn,
                             title: p.copy.kit.emptyNone(named.plural),
                             body: input.canCreate
                               ? p.copy.kit.emptyCreate(named.singular)
