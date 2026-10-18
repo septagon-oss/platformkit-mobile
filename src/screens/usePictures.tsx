@@ -30,6 +30,8 @@ interface FileRead {
   readonly signedOut?: boolean;
 }
 interface Picture {
+  /** metadata identifies the applied answer so reusing its promise does not reset loaded slots. */
+  readonly metadata: FileRead;
   readonly resource: ImageResource | undefined;
   readonly states: PictureStates;
 }
@@ -46,6 +48,7 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
   const key = api.bearer();
   const pictures = state.catalog?.pictures;
   const wanted = [...new Set(ids.filter(pictureId))].sort().join(",");
+  const selected = useMemo(() => wanted.split(",").filter(Boolean), [wanted]);
   const files = entry("file", "file");
   const scope = useMemo(
     () => ({
@@ -70,7 +73,7 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
   );
   const current = useRef<typeof request | undefined>(request);
   const [loaded, setLoaded] = useState<{
-    request: typeof request;
+    scope: typeof scope;
     files: Readonly<Record<string, Picture>>;
     signedOut: boolean;
   }>();
@@ -85,76 +88,73 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
     if (!enabled || !pictures) return;
     let active = true;
     const generation = JSON.stringify([scope.namespace, ++sequence.current]);
-    void (async () => {
-      const read = async (id: string): Promise<FileRead> => {
-        let row: Row | undefined;
-        let retain = false;
-        if (files && offers(files, "read")) {
-          try {
-            row = await api.get(files, id);
-          } catch (e) {
-            const verdict = enrichmentFailure(failureFacts(e));
-            if (verdict === "signed-out") return { signedOut: true };
-            if (verdict === "withdraw") return {};
-            retain = true;
-          }
+    const read = async (id: string): Promise<FileRead> => {
+      let row: Row | undefined;
+      let retain = false;
+      if (files && offers(files, "read")) {
+        try {
+          row = await api.get(files, id);
+        } catch (e) {
+          const verdict = enrichmentFailure(failureFacts(e));
+          if (verdict === "signed-out") return { signedOut: true };
+          if (verdict === "withdraw") return {};
+          retain = true;
         }
-        const resource = fileResource({
-          server: baseURL,
-          userId: identity?.userId,
-          key: api.bearer(),
-          entry: files,
-          pictures,
-          id,
-          version: typeof row?.sha256 === "string" && row.sha256.trim() ? row.sha256 : "",
-          public: row?.visibility === "public",
-          generation,
-          width: variantWidth(
-            request.pixels,
-            typeof row?.width === "number" ? row.width : 0,
-            pictures.widths,
-          ),
-          attempt: 0,
-        });
-        return { resource, retain };
-      };
-      const results = await Promise.all(
-        wanted
-          .split(",")
-          .filter(Boolean)
-          .map(async (id) => {
-            let pending = request.pending.get(id);
-            if (!pending) {
-              pending = read(id);
-              request.pending.set(id, pending);
-            }
-            return [id, await pending] as const;
-          }),
-      );
-      if (!active || current.current !== request) return;
-      setLoaded((was) => {
-        const previous = was?.request.scope === scope ? was : undefined;
-        const signedOut = results.some(([, result]) => result.signedOut) || !!previous?.signedOut;
-        const files: Record<string, Picture> = {};
-        if (!signedOut)
-          for (const [id, result] of results) {
-            const held = previous?.files[id];
-            files[id] =
-              held && (result.retain || was?.request === request)
+      }
+      const resource = fileResource({
+        server: baseURL,
+        userId: identity?.userId,
+        key: api.bearer(),
+        entry: files,
+        pictures,
+        id,
+        version: typeof row?.sha256 === "string" && row.sha256.trim() ? row.sha256 : "",
+        public: row?.visibility === "public",
+        generation,
+        width: variantWidth(
+          request.pixels,
+          typeof row?.width === "number" ? row.width : 0,
+          pictures.widths,
+        ),
+        attempt: 0,
+      });
+      return { resource, retain };
+    };
+    for (const id of selected) {
+      let pending = request.pending.get(id);
+      if (!pending) {
+        pending = read(id);
+        request.pending.set(id, pending);
+      }
+      void pending.then((result) => {
+        if (!active || current.current !== request) return;
+        setLoaded((was) => {
+          const previous = was?.scope === scope ? was : undefined;
+          const signedOut = !!result.signedOut || !!previous?.signedOut;
+          const files: Record<string, Picture> = {};
+          if (!signedOut) {
+            for (const file of selected)
+              if (previous?.files[file]) files[file] = previous.files[file];
+            const held = files[id];
+            files[id] = {
+              ...(held && (result.retain || held.metadata === result)
                 ? held
                 : {
                     resource: result.resource,
                     states: { [id]: result.resource ? "loading" : "error" },
-                  };
+                  }),
+              metadata: result,
+            };
           }
-        return { request, files, signedOut };
+          return { scope, files, signedOut };
+        });
       });
-    })();
+    }
     return () => {
       active = false;
     };
-  }, [request, enabled, api, baseURL, identity?.userId, files, pictures, scope, wanted]);
-  const held = loaded?.request.scope === scope && enabled ? loaded : undefined;
+  }, [request, enabled, api, baseURL, identity?.userId, files, pictures, scope, selected]);
+  const held = loaded?.scope === scope && enabled ? loaded : undefined;
   const onState = useCallback(
     (
       id: string,
@@ -162,9 +162,9 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
       resource: ImageResource,
       value: "loading" | "ready" | "error",
     ) => {
-      if (current.current?.scope !== scope) return;
+      if (current.current?.scope !== scope || !selected.includes(id)) return;
       setLoaded((was) => {
-        const file = was?.request.scope === scope ? was.files[id] : undefined;
+        const file = was?.scope === scope ? was.files[id] : undefined;
         if (!was || !file || file.resource !== resource || file.states[instance] === value)
           return was;
         return {
@@ -176,11 +176,11 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
         };
       });
     },
-    [scope],
+    [scope, selected],
   );
   const renderImage = useCallback(
     (model: ImageSlotProps) => {
-      const resource = held?.files[model.id]?.resource;
+      const resource = selected.includes(model.id) ? held?.files[model.id]?.resource : undefined;
       return resource ? (
         <NativeImage
           key={JSON.stringify([resource.cacheKey, model.instance])}
@@ -190,11 +190,8 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
         />
       ) : null;
     },
-    [held, onState],
+    [held, onState, selected],
   );
-  const states: PictureStates = Object.assign(
-    {},
-    ...wanted.split(",").map((id) => held?.files[id]?.states),
-  );
+  const states: PictureStates = Object.assign({}, ...selected.map((id) => held?.files[id]?.states));
   return { enabled, states, renderImage };
 }

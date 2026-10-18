@@ -477,7 +477,11 @@ retaining the prior answer while reading and on transport/5xx failure within
 the same session and catalog. Successful reads replace prior projections; explicit
 401/403/404 refusals withdraw them. Session/catalog changes immediately withdraw
 prior resources. Adding another page retains the bounded directory page and
-per-file metadata promises. Image slot identities distinguish simultaneous uses of the same file.
+per-file metadata promises. Each metadata answer applies independently; an explicit
+refusal withdraws its file even while another read remains pending, and a later
+transient refresh cannot restore it. A successful answer renews only its own file.
+Image slot identities include the file as well as the visual instance, distinguishing
+simultaneous uses of one file and replacements within the same row or avatar.
 The native cache-clear call enters through `NativeImage`; the effects helper
 receives it as an explicit function because effects import no Expo image module.
 The theme's status-pair helper is shared by badges and avatars.

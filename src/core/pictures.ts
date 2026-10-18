@@ -104,22 +104,22 @@ export function initials(name = ""): string {
     Array.from(first)[0]! + (words.length > 1 ? Array.from(words[words.length - 1]!)[0]! : "")
   ).toUpperCase();
 }
-export const compactPicture = (
-  id: string,
-  states: PictureStates,
-  instance = id,
-): CompactPicture => ({
-  slot: {
-    id,
-    instance,
-    description: "",
-    decorative: true,
-    fit: "cover",
-    aspectRatio: 1,
-    caption: false,
-  },
-  state: states[instance] ?? states[id] ?? "loading",
-});
+/** compactPicture scopes slot state to its file, falling back to that file's metadata state. */
+export function compactPicture(id: string, states: PictureStates, instance = id): CompactPicture {
+  const identity = JSON.stringify([id, instance]);
+  return {
+    slot: {
+      id,
+      instance: identity,
+      description: "",
+      decorative: true,
+      fit: "cover",
+      aspectRatio: 1,
+      caption: false,
+    },
+    state: states[identity] ?? states[id] ?? "loading",
+  };
+}
 export function avatar(
   person: Person,
   states: PictureStates = {},

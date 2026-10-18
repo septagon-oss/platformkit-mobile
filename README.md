@@ -2098,15 +2098,19 @@ reference user/identity contracts have no portrait, so they need no extra read.
 
 Compact pictures use the current session's bearer header, never a query token.
 The mounted `file/file` metadata read is coalesced per visible ID. A metadata
-403/404 blocks bytes for the visit. Refresh keeps the displayed resource and its
-slot states while metadata is pending or fails transiently, only within the same
-session and catalog scope. A first transient metadata failure permits only the
+403/404 immediately withdraws that file's bytes without waiting for other metadata
+reads; a superseding refresh cannot erase a settled refusal. Refresh keeps the
+displayed resource and its slot states while metadata is pending or fails
+transiently, only within the same session and catalog scope. A first transient
+metadata failure permits only the
 uncached declared door; it never restores a resource a refusal withdrew.
 Fresh public metadata with a content version permits
 `expo-image` memory caching. Private, unknown and unversioned media uses
 `cachePolicy="none"`; no image bytes enter disk storage. Cache identities include
 server, person, key, session/visit, source, file, version and planned width.
 Each slot retains its own loading/failure state even when files are shared.
+That state also names the file, so a replacement starts loading independently
+of the old file's slots. Each successful metadata answer renews only its own file.
 Replacement and scope loss withdraw old resources immediately; memory purging
 is best effort. Loading uses canvas or initials, failures use the declared icon
 or initials, and transitions remain zero under both motion preferences.

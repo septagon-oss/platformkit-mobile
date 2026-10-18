@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 89,
-   "cases": 290,
-   "ms": 1917738,
-   "testsMs": 31874,
+   "files": 91,
+   "cases": 297,
+   "ms": 1952303,
+   "testsMs": 32093,
    "runners": {
-    "jest": 89
+    "jest": 91
    },
    "unreachable": 0
   },
@@ -19125,6 +19125,82 @@
    "testsMs": 872
   },
   {
+   "file": "tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "An explicit refusal settles its picture independently of unrelated pending metadata reads.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Keep beside tests/screens/compact-pictures.test.tsx: interleaves explicit 403/404 metadata refusals with a pending peer and superseding transient refresh, which the single-file refusal cases do not exercise. npm run inventory -- --measure tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx measured 4 passing cases; exclusive-line attribution remains unmeasured.",
+   "ms": 17242,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: false",
+    "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: false",
+    "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: true",
+    "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: true"
+   ],
+   "tests": [
+    {
+     "title": "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: false",
+     "ms": 30,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: false",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "HTTP 403 withdraws its picture despite a pending peer and a superseding refresh: true",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "HTTP 404 withdraws its picture despite a pending peer and a superseding refresh: true",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 139,
+   "coveredProdLines": 1642,
+   "onlyProdLines": null,
+   "testsMs": 39
+  },
+  {
+   "file": "tests/screens/a-replaced-row-picture-starts-with-its-own-state.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Replacing one row's picture starts a new load even while another row keeps the old file.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Keep beside tests/screens/compact-pictures.test.tsx: exercises replacing a failed row slot while a second slot still holds the original file. npm run inventory -- --measure tests/screens/a-replaced-row-picture-starts-with-its-own-state.test.tsx measured 1 passing case; exclusive-line attribution remains unmeasured.",
+   "ms": 18050,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a replacement picture loads after the row's previous file failed in one shared slot"
+   ],
+   "tests": [
+    {
+     "title": "a replacement picture loads after the row's previous file failed in one shared slot",
+     "ms": 27,
+     "measured": false
+    }
+   ],
+   "loaded": 140,
+   "coveredProdLines": 1631,
+   "onlyProdLines": null,
+   "testsMs": 27
+  },
+  {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -20396,7 +20472,7 @@
    "file": "tests/screens/compact-pictures.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 18,
+   "cases": 20,
    "rule": "(no first comment; first test title) one metadata read prepares header-authorized private bytes without a native cache",
    "ruleSource": "first test title",
    "tier": "merge",
@@ -20404,7 +20480,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 21013,
+   "ms": 20286,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "one metadata read prepares header-authorized private bytes without a native cache",
@@ -20415,6 +20491,8 @@
     "a picture refresh answered HTTP 403 withdraws a previously ready resource",
     "a picture refresh answered HTTP 404 withdraws a previously ready resource",
     "a pending picture can finish loading during a metadata refresh",
+    "each refreshed picture replaces only its own resource when 73f9dbb7-ddf0-43f1-a680-d935cbd96bf0 answers first",
+    "each refreshed picture replaces only its own resource when e18ea2af-7c22-4130-95ae-690efcc5ac0f answers first",
     "metadata HTTP 403 prevents a byte request and preserves the initials",
     "metadata HTTP 404 prevents a byte request and preserves the initials",
     "a transient metadata error uses only the uncached declared door",
@@ -20429,7 +20507,7 @@
    "tests": [
     {
      "title": "one metadata read prepares header-authorized private bytes without a native cache",
-     "ms": 19,
+     "ms": 21,
      "measured": false
     },
     {
@@ -20439,22 +20517,22 @@
     },
     {
      "title": "a compact picture keeps its ready resource while a refresh waits and after TypeError: Offline\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:12)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34)",
-     "ms": 4,
+     "ms": 3,
      "measured": false
     },
     {
      "title": "a compact picture keeps its ready resource while a refresh waits and after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/tests/screens/compact-pictures.test.tsx:129:38)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0332-people-have-faces-and-rows-have-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n}",
-     "ms": 8,
+     "ms": 2,
      "measured": false
     },
     {
      "title": "a picture refresh answered HTTP 401 withdraws a previously ready resource",
-     "ms": 4,
+     "ms": 3,
      "measured": false
     },
     {
      "title": "a picture refresh answered HTTP 403 withdraws a previously ready resource",
-     "ms": 3,
+     "ms": 2,
      "measured": false
     },
     {
@@ -20464,6 +20542,16 @@
     },
     {
      "title": "a pending picture can finish loading during a metadata refresh",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "each refreshed picture replaces only its own resource when 73f9dbb7-ddf0-43f1-a680-d935cbd96bf0 answers first",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "each refreshed picture replaces only its own resource when e18ea2af-7c22-4130-95ae-690efcc5ac0f answers first",
      "ms": 3,
      "measured": false
     },
@@ -20479,17 +20567,17 @@
     },
     {
      "title": "a transient metadata error uses only the uncached declared door",
-     "ms": 3,
+     "ms": 2,
      "measured": false
     },
     {
      "title": "missing identity or bearer prepares no metadata or byte read",
-     "ms": 1,
+     "ms": 2,
      "measured": false
     },
     {
      "title": "an obsolete file load cannot replace the current picture's state",
-     "ms": 5,
+     "ms": 4,
      "measured": false
     },
     {
@@ -20499,29 +20587,29 @@
     },
     {
      "title": "the same file in two rows keeps independent loading and failure states",
-     "ms": 6,
+     "ms": 10,
      "measured": false
     },
     {
      "title": "the generated list composes its thumbnail and named assignee from the same authorized file read",
-     "ms": 717,
+     "ms": 793,
      "measured": false
     },
     {
      "title": "a generated detail keeps its assignee while a write invalidation renews the person read",
-     "ms": 378,
+     "ms": 452,
      "measured": false
     },
     {
      "title": "the authenticated account uses its declared display name without a speculative portrait read",
-     "ms": 9,
+     "ms": 11,
      "measured": false
     }
    ],
    "loaded": 164,
-   "coveredProdLines": 2513,
+   "coveredProdLines": 2514,
    "onlyProdLines": null,
-   "testsMs": 1177
+   "testsMs": 1330
   },
   {
    "file": "tests/screens/custom-renderer-catalog-withdrawal.test.tsx",

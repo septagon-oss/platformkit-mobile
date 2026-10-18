@@ -188,6 +188,55 @@ test("a pending picture can finish loading during a metadata refresh", async () 
   expect(view.result.current.states[FILE]).toBe("ready");
   await view.unmount();
 });
+test.each([FILE, OTHER])(
+  "each refreshed picture replaces only its own resource when %s answers first",
+  async (first) => {
+    const api = installed();
+    const second = first === FILE ? OTHER : FILE;
+    const slot = (id: string) => ({ ...SLOT, id });
+    const view = await renderHook((visit: number) => usePictures([FILE, OTHER], visit), {
+      initialProps: 0,
+    });
+    await waitFor(() => expect(view.result.current.renderImage(slot(second))).not.toBeNull());
+    const originalFirst = view.result.current.renderImage(slot(first))!;
+    const originalSecond = view.result.current.renderImage(slot(second))!;
+    await act(async () => {
+      originalFirst.props.onState(first, "ready");
+      originalSecond.props.onState(second, "ready");
+    });
+
+    const firstRead = Promise.withResolvers<Record<string, unknown>>();
+    const secondRead = Promise.withResolvers<Record<string, unknown>>();
+    api.get.mockImplementation((_entry, id) =>
+      id === first ? firstRead.promise : secondRead.promise,
+    );
+    await view.rerender(1);
+    expect(api.get).toHaveBeenCalledTimes(4);
+    await act(async () => firstRead.resolve({ id: first, sha256: "new-first" }));
+    const refreshedFirst = view.result.current.renderImage(slot(first))!;
+    expect(refreshedFirst.props.resource).not.toBe(originalFirst.props.resource);
+    expect(view.result.current.states[first]).toBe("loading");
+    expect(view.result.current.renderImage(slot(second))!.props.resource).toBe(
+      originalSecond.props.resource,
+    );
+    expect(view.result.current.states[second]).toBe("ready");
+    await act(async () => {
+      refreshedFirst.props.onState(first, "ready");
+      originalFirst.props.onState(first, "error");
+      secondRead.resolve({ id: second, sha256: "new-second" });
+    });
+    const refreshedSecond = view.result.current.renderImage(slot(second))!;
+    expect(refreshedSecond.props.resource).not.toBe(originalSecond.props.resource);
+    expect(view.result.current.states[second]).toBe("loading");
+    expect(view.result.current.renderImage(slot(first))!.props.resource).toBe(
+      refreshedFirst.props.resource,
+    );
+    expect(view.result.current.states[first]).toBe("ready");
+    await act(async () => refreshedSecond.props.onState(second, "ready"));
+    expect(view.result.current.states[second]).toBe("ready");
+    await view.unmount();
+  },
+);
 test.each([403, 404])(
   "metadata HTTP %s prevents a byte request and preserves the initials",
   async (status) => {
