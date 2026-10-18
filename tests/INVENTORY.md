@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `c3d4f563f` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `b6266f8e5` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 200 | 47.5 s | 74 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 229 | 1046 | 49.3 s | 1544 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 92 | 304 | 32.1 s | 1976 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 93 | 306 | 32.1 s | 1997 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 413
+* keep: 414
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 413 — 192 `tests/*.test.ts` (node), 164 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1550; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 1544 s, composition 1976 s, journey 0 s
+* files inventoried: 414 — 192 `tests/*.test.ts` (node), 165 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1552; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 1544 s, composition 1997 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -402,6 +402,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/custom-renderer-session-isolation.test.tsx | jest | composition | 2 | 19295 | 438 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom renderer follows only the current session catalog |
 | tests/screens/editing-a-translation-keeps-the-source-language.test.tsx | jest | composition | 1 | 24330 | 180 |  | not measured | — | 0 | keep | A translated read cannot be sent back as the source-language value on Save. |
 | tests/screens/example-task-detail.test.tsx | jest | composition | 6 | 18703 | 189 | 20 | 1 of 6 | — | 0 | keep | The example pack is the pattern a product copies, so what is proved here is the pattern's two halves: a screen whose data arrives as the operation's own respon… |
+| tests/screens/expired-people-stay-withdrawn-until-the-session-changes.test.tsx | jest | composition | 2 | 21149 | 18 |  | not measured | — | 0 | keep | A session refusal withdraws every retained person before peers finish. Later successes cannot revive that session, and a replacement workspace accepts only its… |
 | tests/screens/generated-richtext-record-renders-natively.test.tsx | jest | composition | 3 | 25745 | 90 |  | not measured | — | 0 | keep | A generated record reads a richtext declaration without a product renderer. Markdown headings become native text while a plain text field keeps its syntax. |
 | tests/screens/newer-shell-fallback.test.tsx | jest | composition | 6 | 23705 | 570 | 0 | 0 of 6 | — | 0 | keep | A catalogue document, as the server prints it, that names a pack this build carries but cannot draw yet: the record is still read and drawn by the generated de… |
 | tests/screens/offline-detail-says-when-it-was-saved.test.tsx | jest | composition | 1 | 29273 | 44 |  | not measured | — | 0 | keep | A record the phone answered rather than the server is drawn with the same quiet line a list carries: what it is, and when this device last received it. One der… |

@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 92,
-   "cases": 304,
-   "ms": 1975612,
-   "testsMs": 32130,
+   "files": 93,
+   "cases": 306,
+   "ms": 1996761,
+   "testsMs": 32148,
    "runners": {
-    "jest": 92
+    "jest": 93
    },
    "unreachable": 0
   },
@@ -20932,6 +20932,41 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/expired-people-stay-withdrawn-until-the-session-changes.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A session refusal withdraws every retained person before peers finish. Later successes cannot revive that session, and a replacement workspace accepts only its own answers.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "The measured.commands.jest one-file run via npm run inventory -- --measure passed both cases: session-wide 401 withdrawal survives same-visit and later successful reads, and matching IDs from a former workspace cannot repopulate a replacement workspace. tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx covers per-record 403/404 withdrawal while a peer waits; these cases keep the session-wide and cross-workspace boundaries explicit. Exclusive-line attribution remains unmeasured.",
+   "ms": 21149,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a 401 withdraws both portraits and later successful reads cannot revive the expired session",
+    "a replacement workspace never paints a former workspace's late people for matching row ids"
+   ],
+   "tests": [
+    {
+     "title": "a 401 withdraws both portraits and later successful reads cannot revive the expired session",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "a replacement workspace never paints a former workspace's late people for matching row ids",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 136,
+   "coveredProdLines": 1633,
+   "onlyProdLines": null,
+   "testsMs": 18
   },
   {
    "file": "tests/screens/generated-richtext-record-renders-natively.test.tsx",
