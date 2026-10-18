@@ -50,6 +50,22 @@ export const extent = {
   /** hero is the one photographic surface a screen leads with. */
   hero: 220,
   /**
+   * cover is how tall the picture a record opens on stands: a phone's first screen,
+   * the transparent header inside it, so the name of the record is on the photo and
+   * the first fact is one thumb's reach below it.
+   */
+  cover: 300,
+  /** strip is one tile of a record's own photo strip: a picture you can pick out, not one you read. */
+  strip: 96,
+  /**
+   * coverFoot is how far up the record's own ink climbs over its cover photo before it
+   * turns solid: the fraction of the caption band the name is read against. A fraction of
+   * a surface, not a length, and the only place it is written.
+   */
+  coverFoot: 0.55,
+  /** headerBar is the transparent bar the navigator keeps above a cover, so the page knows where to pin its own. */
+  headerBar: Platform.select({ android: 56, default: 44 }),
+  /**
    * illustration is the side of the line picture an empty screen is drawn with: a
    * quarter of the column it sits in, so the picture is the headline of the screen
    * rather than a caption under it, and far from a row's tile (rowMedia) beside it.

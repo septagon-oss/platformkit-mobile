@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 234,
-   "cases": 1067,
-   "ms": 1645916,
-   "testsMs": 49589.900000000016,
+   "files": 236,
+   "cases": 1080,
+   "ms": 1681078,
+   "testsMs": 49693.20000000002,
    "runners": {
-    "jest": 75,
-    "node": 159
+    "jest": 76,
+    "node": 160
    },
    "unreachable": 0
   },
@@ -7289,6 +7289,59 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/record-opens-on-its-photo.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "A record's picture is drawn where the record begins, and the facts it draws there are not drawn again below it. These are the record screen's two picture surfaces read off the rendered tree: the cover carries the record's name and no row prints its identifier, and the gallery offers a press only on a picture this phone can name.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30734,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the photo carries the record's name and no row prints its identifier",
+    "the gallery holds one tile per picture and opens only the ones it can name",
+    "the record's own information asks for no row the header or a gallery drew",
+    "the band that names the record waits until the photo is scrolled away",
+    "the header block stays exactly the block it was"
+   ],
+   "tests": [
+    {
+     "title": "the photo carries the record's name and no row prints its identifier",
+     "ms": 34,
+     "measured": false
+    },
+    {
+     "title": "the gallery holds one tile per picture and opens only the ones it can name",
+     "ms": 16,
+     "measured": false
+    },
+    {
+     "title": "the record's own information asks for no row the header or a gallery drew",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "the band that names the record waits until the photo is scrolled away",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "the header block stays exactly the block it was",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 119,
+   "coveredProdLines": 1698,
+   "onlyProdLines": null,
+   "testsMs": 73
+  },
+  {
    "file": "tests/ui/refused-field-asks-for-its-box.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -9627,6 +9680,77 @@
    "coveredProdLines": 9101,
    "onlyProdLines": null,
    "testsMs": 15.9
+  },
+  {
+   "file": "tests/a-record-opens-on-its-picture.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 8,
+   "rule": "A record with a picture opens on it: the field `coverField` names is the picture, and a field declared `present: \"images\"` is a gallery of them. Three rules decide what the rest of the page may draw \u2014 the picture is drawn at the highest place that draws it and nowhere below, the record asks for exactly the bytes it draws, and a file this phone holds no words for is drawn but never opened.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4428,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a record whose cover field holds a file opens on that file",
+    "a record with no cover picture answers none, and its header stays as it was",
+    "a file the server carried no frame for is drawn in the frame the phone declared",
+    "a decorative file is drawn and never opened, and one with no caption is too",
+    "a gallery draws its pictures in the order the row holds them, in the block the document filed",
+    "a gallery declared over something that is no list of files keeps its ordinary row",
+    "the cover and every gallery are drawn once: no row below repeats them, valued or not",
+    "a record asks for the bytes it draws, and nothing held behind a disclosure"
+   ],
+   "tests": [
+    {
+     "title": "a record whose cover field holds a file opens on that file",
+     "ms": 2.495947,
+     "measured": false
+    },
+    {
+     "title": "a record with no cover picture answers none, and its header stays as it was",
+     "ms": 0.324309,
+     "measured": false
+    },
+    {
+     "title": "a file the server carried no frame for is drawn in the frame the phone declared",
+     "ms": 0.331162,
+     "measured": false
+    },
+    {
+     "title": "a decorative file is drawn and never opened, and one with no caption is too",
+     "ms": 0.296989,
+     "measured": false
+    },
+    {
+     "title": "a gallery draws its pictures in the order the row holds them, in the block the document filed",
+     "ms": 16.616181,
+     "measured": false
+    },
+    {
+     "title": "a gallery declared over something that is no list of files keeps its ordinary row",
+     "ms": 2.397403,
+     "measured": false
+    },
+    {
+     "title": "the cover and every gallery are drawn once: no row below repeats them, valued or not",
+     "ms": 5.481147,
+     "measured": false
+    },
+    {
+     "title": "a record asks for the bytes it draws, and nothing held behind a disclosure",
+     "ms": 2.336531,
+     "measured": false
+    }
+   ],
+   "loaded": 32,
+   "coveredProdLines": 10917,
+   "onlyProdLines": null,
+   "testsMs": 30.3
   },
   {
    "file": "tests/a-record-opens-on-what-it-is.test.ts",

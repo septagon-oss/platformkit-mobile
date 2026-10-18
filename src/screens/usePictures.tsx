@@ -11,7 +11,10 @@ import { useWindowDimensions } from "react-native";
 import { offers } from "../core/catalog";
 import {
   enrichmentFailure,
+  fileMeta,
+  noMeta,
   pictureId,
+  type FileMeta,
   type ImageSlotProps,
   type PictureStates,
   type Row,
@@ -25,13 +28,16 @@ import { NativeImage } from "./NativeImage";
 import { failureFacts } from "./failure";
 
 interface FileRead {
+  /** metadata identifies the applied answer so reusing its promise does not reset loaded slots. */
   readonly resource?: ImageResource | undefined;
   readonly retain?: boolean;
   readonly signedOut?: boolean;
+  /** meta is what the read answered of the file itself: the frame it probed and the caption it holds. */
+  readonly meta?: FileMeta | undefined;
 }
 interface Picture {
-  /** metadata identifies the applied answer so reusing its promise does not reset loaded slots. */
   readonly metadata: FileRead;
+  readonly meta: FileMeta;
   readonly resource: ImageResource | undefined;
   readonly states: PictureStates;
 }
@@ -40,8 +46,15 @@ interface Picture {
  * usePictures binds session-owned bytes to decorative slots, coalescing metadata per file and attempt.
  * A changed attempt (0 by default) refreshes metadata while retaining the same session's resources;
  * transient failures retain them, explicit refusals withdraw them, and scope changes discard them.
+ * `width` is how wide a slot draws the file in points (a row's picture by default), so the door asks
+ * for the variant that fits; `files` answers the metadata read for each id, which is what a surface
+ * needs to draw a picture in its own shape and to name it.
  */
-export function usePictures(ids: readonly string[], attempt: unknown = 0) {
+export function usePictures(
+  ids: readonly string[],
+  attempt: unknown = 0,
+  width: number = extent.rowMedia,
+) {
   const { api, baseURL, identity, state, entry } = useShell();
   const mount = useId();
   const viewport = useWindowDimensions();
@@ -66,10 +79,10 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
     () => ({
       scope,
       attempt,
-      pixels: extent.rowMedia * viewport.scale,
+      pixels: width * viewport.scale,
       pending: new Map<string, Promise<FileRead>>(),
     }),
-    [scope, attempt, viewport.scale],
+    [scope, attempt, viewport.scale, width],
   );
   const current = useRef<typeof request | undefined>(request);
   const [loaded, setLoaded] = useState<{
@@ -101,6 +114,7 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
           retain = true;
         }
       }
+      const meta = fileMeta(row);
       const resource = fileResource({
         server: baseURL,
         userId: identity?.userId,
@@ -111,14 +125,10 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
         version: typeof row?.sha256 === "string" && row.sha256.trim() ? row.sha256 : "",
         public: row?.visibility === "public",
         generation,
-        width: variantWidth(
-          request.pixels,
-          typeof row?.width === "number" ? row.width : 0,
-          pictures.widths,
-        ),
+        width: variantWidth(request.pixels, meta.width, pictures.widths),
         attempt: 0,
       });
-      return { resource, retain };
+      return { resource, retain, meta };
     };
     for (const id of selected) {
       let pending = request.pending.get(id);
@@ -141,6 +151,7 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
                 ? held
                 : {
                     resource: result.resource,
+                    meta: result.meta ?? noMeta,
                     states: { [id]: result.resource ? "loading" : "error" },
                   }),
               metadata: result,
@@ -193,5 +204,8 @@ export function usePictures(ids: readonly string[], attempt: unknown = 0) {
     [held, onState, selected],
   );
   const states: PictureStates = Object.assign({}, ...selected.map((id) => held?.files[id]?.states));
-  return { enabled, states, renderImage };
+  const metas: Readonly<Record<string, FileMeta>> = Object.fromEntries(
+    selected.map((id) => [id, held?.files[id]?.meta ?? noMeta]),
+  );
+  return { enabled, states, files: metas, renderImage };
 }

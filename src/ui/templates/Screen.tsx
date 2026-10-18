@@ -20,6 +20,13 @@ interface Props {
    * the measuring.
    */
   readonly scrollViewRef?: React.Ref<ScrollView>;
+  /**
+   * onOffset is how far the page has scrolled, in points, handed to the one surface that
+   * can do something with it: a record's cover. A page with no such surface asks for
+   * nothing, which is why it is a prop and not always-on: scroll events are the one event
+   * stream a page should not pay for by default.
+   */
+  readonly onOffset?: (offset: number) => void;
   readonly testID?: string;
 }
 
@@ -28,6 +35,7 @@ export function Screen({
   form = false,
   scroll: scrolling = true,
   scrollViewRef,
+  onOffset,
   testID,
 }: Props) {
   const canvas = useCanvas();
@@ -48,6 +56,13 @@ export function Screen({
       automaticallyAdjustKeyboardInsets={form && Platform.OS === "ios"}
       keyboardShouldPersistTaps={form ? "handled" : "never"}
       keyboardDismissMode={form ? "interactive" : "none"}
+      {...(onOffset === undefined
+        ? {}
+        : {
+            onScroll: (event: { nativeEvent: { contentOffset: { y: number } } }) =>
+              onOffset(event.nativeEvent.contentOffset.y),
+            scrollEventThrottle: 16,
+          })}
       {...testable(testID)}
     >
       {children}

@@ -7,13 +7,15 @@
 // Edit and the `…` that holds Delete live in the native header, which the screen
 // composition sets; the menu itself opens here, under the header, because that is
 // where the person looked when they pressed it.
-import React, { type ReactNode } from "react";
-import { View } from "react-native";
+import React, { type ReactNode, useState } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Entry } from "../../core/catalog";
 import {
   failureSubject,
   failureTone,
   nounPhrase,
+  recordCover,
   recordHeader,
   recordInformation,
   recordSections,
@@ -22,6 +24,7 @@ import {
   translationNote,
   type DetailItem,
   type DisclosureModel,
+  type FileMeta,
   type Names,
   type People,
   type PictureStates,
@@ -35,17 +38,19 @@ import { Badge } from "../atoms/Badge";
 import { Text } from "../atoms/Text";
 import { Actions, type Props as ActionsProps } from "./Actions";
 import { Activity, type Props as ActivityProps } from "./Activity";
+import { RecordCover } from "./RecordCover";
 import { Skeleton } from "../atoms/Skeleton";
 import { DetailRow } from "../molecules/DetailRow";
 import { ModelState } from "../molecules/ModelState";
 import type { ImageRenderer } from "../molecules/MediaHero";
+import { PhotoStrip } from "../molecules/PhotoStrip";
 import { Value } from "../molecules/Value";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 import { SummaryDetail } from "../templates/SummaryDetail";
 import { Screen } from "../templates/Screen";
 import { kitStyles } from "../layout";
-import { useStyles } from "../theme";
+import { useStyles, useTheme, type Theme } from "../theme";
 
 export interface Props {
   readonly people?: People | undefined;
@@ -113,6 +118,14 @@ export interface Props {
    * Absent means this surface has no reader at all.
    */
   readonly richText?: (body: string, testID: string, fallback: ReactNode) => ReactNode;
+  /**
+   * files is what this phone read of each file the row points at — the frame the server
+   * probed, the caption, whether the picture carries information. Absent, or no entry for
+   * an id, means the record draws its facts and no pictures: the header block stays.
+   */
+  readonly files?: Readonly<Record<string, FileMeta>> | undefined;
+  /** onOpenPhoto opens one of the record's own pictures full size, by its file identifier. */
+  readonly onOpenPhoto?: (field: string, id: string) => void;
 }
 
 export function ResourceDetail({
@@ -136,8 +149,16 @@ export function ResourceDetail({
   activity,
   actions,
   richText,
+  files,
+  onOpenPhoto,
 }: Props) {
-  const s = useStyles(kitStyles);
+  const s = useStyles(kitStyles),
+    t = useTheme(),
+    insets = useSafeAreaInsets();
+  const viewport = useWindowDimensions();
+  // How far this page has scrolled is asked for only when there is a cover to collapse.
+  const [offset, setOffset] = useState(0);
+  const chrome = useStyles(styles);
   // Which button a refusal offers is the classifier's answer, not this
   // component's: a forbidden record is left, an unanswered write is checked
   // rather than sent again, and a sentence with no way out is only a sentence.
@@ -159,100 +180,166 @@ export function ResourceDetail({
   const header = row
     ? recordHeader(entry, row, feedback, feedback.copy.kit.untitled, names)
     : undefined;
-  const blocks = row ? recordSections(entry, row, feedback, names) : [];
+  // One frame answers both surfaces a picture of this record is drawn in: the cover is as
+  // wide as the page and as tall as `extent.cover`; a gallery's tile is square.
+  const frame = { width: Math.round(viewport.width), height: t.extent.cover };
+  // The metadata the picture door read is the difference between a record that can show
+  // its pictures and one that cannot: with no read there were no ids to ask for, so a
+  // block draws its facts and no empty tiles.
+  const media =
+    files === undefined ? undefined : { pictures: { states: pictureStates ?? {}, files }, frame };
+  const blocks = row ? recordSections(entry, row, feedback, names, media) : [];
   const details = row ? recordInformation(entry, row, feedback, names) : [];
+  // The picture the record opens on, with the record's own name standing on it.
+  const cover =
+    row === undefined || media === undefined
+      ? undefined
+      : recordCover(entry, row, media.pictures, frame);
+  const collapsed = cover !== undefined && offset >= t.extent.cover - t.extent.headerBar;
   return (
-    <Screen testID="resource-detail">
-      {saved ? <Notice testID="record-saved" tone="ok" announcement="polite" text={saved} /> : null}
-      {error ? (
-        <Notice
-          testID="refusal"
-          tone={failureTone(refusal)}
-          announcement="urgent"
-          text={error}
-          {...(notice ? { action: notice } : {})}
-        />
-      ) : null}
-      {offline ? (
-        <ModelState
-          model={{ notice: offline, refreshing: false, writable: false }}
-          onRetry={onRetry}
-        />
-      ) : null}
-      {row ? (
-        <>
-          {header?.status || header?.summary ? (
-            <View style={s.stack}>
-              {header.status ? (
-                <Badge label={header.status.label} tone={header.status.tone} />
-              ) : null}
-              {header.summary ? <Text>{header.summary}</Text> : null}
-            </View>
-          ) : null}
-          {/* What the `…` in the native header opened, drawn directly under the header
+    <View style={chrome.page}>
+      <Screen testID="resource-detail" {...(cover === undefined ? {} : { onOffset: setOffset })}>
+        {saved ? (
+          <Notice testID="record-saved" tone="ok" announcement="polite" text={saved} />
+        ) : null}
+        {error ? (
+          <Notice
+            testID="refusal"
+            tone={failureTone(refusal)}
+            announcement="urgent"
+            text={error}
+            {...(notice ? { action: notice } : {})}
+          />
+        ) : null}
+        {offline ? (
+          <ModelState
+            model={{ notice: offline, refreshing: false, writable: false }}
+            onRetry={onRetry}
+          />
+        ) : null}
+        {row ? (
+          <>
+            {cover !== undefined && header ? (
+              <RecordCover
+                cover={cover}
+                header={header}
+                feedback={feedback}
+                {...(renderImage === undefined ? {} : { renderImage })}
+              />
+            ) : null}
+            {cover === undefined && (header?.status || header?.summary) ? (
+              <View style={s.stack}>
+                {header.status ? (
+                  <Badge label={header.status.label} tone={header.status.tone} />
+                ) : null}
+                {header.summary ? <Text>{header.summary}</Text> : null}
+              </View>
+            ) : null}
+            {/* What the `…` in the native header opened, drawn directly under the header
               it belongs to and above every row of the record: a person pressed a button
               at the top of the screen, so the answer appears where they were looking —
               not at the foot of a scroll view they have to hunt down. */}
-          {onDelete && menuOpen ? (
-            <Section>
-              <Row
-                title={feedback.copy.kit.deleteAction(nounPhrase(entry).singular)}
-                tone="destructive"
-                onPress={onDelete}
-                testID="delete"
-              />
-            </Section>
-          ) : null}
-          {blocks.map((block) => (
-            <Section key={block.key || "overview"} title={block.label}>
-              {block.items.map((item) => (
-                <RecordFact
-                  key={item.field.name}
-                  feedback={feedback}
-                  item={item}
-                  row={row}
-                  names={names}
-                  people={people}
-                  pictureStates={pictureStates}
-                  renderImage={renderImage}
-                  {...(richText === undefined ? {} : { richText })}
+            {onDelete && menuOpen ? (
+              <Section>
+                <Row
+                  title={feedback.copy.kit.deleteAction(nounPhrase(entry).singular)}
+                  tone="destructive"
+                  onPress={onDelete}
+                  testID="delete"
                 />
-              ))}
-            </Section>
-          ))}
-        </>
-      ) : error ? null : (
-        <Section>
-          <Skeleton label={feedback.loadingLabel} motion={feedback.motion} lines={5} />
-        </Section>
-      )}
-      {row && actions ? <Actions {...actions} /> : null}
-      {row && activity ? <Activity {...activity} /> : null}
-      {row && information && details.length > 0 ? (
-        <SummaryDetail
-          testID="record-information"
-          model={information.model}
-          onExpanded={information.onExpanded}
+              </Section>
+            ) : null}
+            {blocks.map((block) => (
+              <Section key={block.key || "overview"} title={block.label}>
+                {block.items.map((item) => (
+                  <RecordFact
+                    key={item.field.name}
+                    feedback={feedback}
+                    item={item}
+                    row={row}
+                    names={names}
+                    people={people}
+                    pictureStates={pictureStates}
+                    renderImage={renderImage}
+                    {...(richText === undefined ? {} : { richText })}
+                  />
+                ))}
+                {block.strips.map((strip) => (
+                  <PhotoStrip
+                    key={strip.field.name}
+                    strip={strip}
+                    feedback={feedback}
+                    {...(renderImage === undefined ? {} : { renderImage })}
+                    {...(onOpenPhoto === undefined
+                      ? {}
+                      : { onOpen: (id: string) => onOpenPhoto(strip.field.name, id) })}
+                  />
+                ))}
+              </Section>
+            ))}
+          </>
+        ) : error ? null : (
+          <Section>
+            <Skeleton label={feedback.loadingLabel} motion={feedback.motion} lines={5} />
+          </Section>
+        )}
+        {row && actions ? <Actions {...actions} /> : null}
+        {row && activity ? <Activity {...activity} /> : null}
+        {row && information && details.length > 0 ? (
+          <SummaryDetail
+            testID="record-information"
+            model={information.model}
+            onExpanded={information.onExpanded}
+          >
+            {details.map((item) => (
+              <RecordFact
+                key={item.field.name}
+                feedback={feedback}
+                item={item}
+                row={row}
+                names={names}
+                people={people}
+                pictureStates={pictureStates}
+                renderImage={renderImage}
+                {...(richText === undefined ? {} : { richText })}
+              />
+            ))}
+          </SummaryDetail>
+        ) : null}
+      </Screen>
+      {/* Once the photo is scrolled away the page names the record itself, in the band the
+          transparent native header left above the content: the two buttons the flows tap
+          stayed in that header, so this is the page's half of the bar, drawn as a cut — a
+          band that fades in over a scroll-driven transform is a re-render every frame. */}
+      {collapsed && header ? (
+        <View
+          style={[chrome.bar, { top: insets.top + t.extent.headerBar }]}
+          testID="record-title-bar"
+          accessibilityLiveRegion="none"
         >
-          {details.map((item) => (
-            <RecordFact
-              key={item.field.name}
-              feedback={feedback}
-              item={item}
-              row={row}
-              names={names}
-              people={people}
-              pictureStates={pictureStates}
-              renderImage={renderImage}
-              {...(richText === undefined ? {} : { richText })}
-            />
-          ))}
-        </SummaryDetail>
+          <Text role="label" numberOfLines={1}>
+            {header.title}
+          </Text>
+        </View>
       ) : null}
-    </Screen>
+    </View>
   );
 }
 
+const styles = (t: Theme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.color.surfaceCanvas },
+    bar: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      paddingHorizontal: t.space.lg,
+      paddingVertical: t.space.sm,
+      backgroundColor: t.color.surfacePrimary,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderColor: t.color.borderDefault,
+    },
+  });
 /**
  * RecordFact is one fact about a record: the label the author gave the field, the
  * value in the shape its type deserves, and the row named after the field, so a

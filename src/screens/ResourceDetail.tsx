@@ -10,20 +10,25 @@ import {
   deriveDisclosure,
   deriveEventActivity,
   deriveOffline,
+  deriveViewer,
+  headerCover,
   pointerTargets,
   recordHeader,
+  recordMedia,
   rowCommands,
   screenPath,
   type Presentation,
 } from "../core/derive";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
+import { PhotoViewer } from "../ui/organisms/PhotoViewer";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
 import { useActivity } from "./useActivity";
 import { RichTextBody } from "./RichTextBody";
 import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
 import { visiblePictures, eventPictures } from "../core/derive";
+import { extent } from "../ui/scale";
 import { usePictures } from "./usePictures";
 import { useRecordPeople } from "./useReferenceNames";
 
@@ -65,6 +70,9 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   );
   const { names, people } = useRecordPeople(asked, detail.visit);
   const [informationOpen, setInformationOpen] = useState(false);
+  // The cover and the galleries are this record's own pictures, so they are asked for as
+  // soon as the record is drawn — never behind the Record information disclosure, which is
+  // lazy. One read of the metadata per file, at the width the cover is drawn in.
   const media = usePictures(
     [
       ...visiblePictures(
@@ -78,6 +86,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
       ...(detail.row ? eventPictures(activity) : []),
     ],
     detail.visit,
+    extent.cover,
   );
   const activityModel = deriveEventActivity(
     { ...activity, images: media.enabled, pictureStates: media.states },
@@ -87,6 +96,11 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
     ? recordHeader(entry, detail.row, feedback, feedback.copy.kit.untitled, names)
     : undefined;
   const title = header?.title ?? "";
+  // A record that opens on its picture carries its name on the photo, so the native header
+  // goes transparent and keeps only its two buttons; one that has no picture keeps the
+  // header exactly as it was, title included. Which of the two this is answers from the
+  // entry and the row alone, so the options cannot flicker between them as bytes arrive.
+  const cover = detail.row !== undefined && headerCover(entry, detail.row);
   // The collapsed Record information block is a disclosure, and a disclosure's open
   // state is the screen's. Its words come from the reader's bundle; what it holds is
   // the section model's.
@@ -114,8 +128,9 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   const moreOptions = feedback.copy.kit.moreOptions;
   const options = useMemo(
     () => ({
-      title,
+      title: cover ? "" : title,
       headerLargeTitleEnabled: false,
+      ...(cover ? { headerTransparent: true, headerShadowVisible: false } : {}),
       // Both sides of the door are spelled out, as Singleton does: a native
       // stack keeps the option it was last given, so *omitting* headerRight is
       // how an Edit that no longer belongs — a withdrawn write, a re-read
@@ -143,8 +158,41 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
             )
           : () => null,
     }),
-    [title, canEdit, canDelete, edit, moreOptions, detail.menu, detail.toggleMenu],
+    [title, cover, canEdit, canDelete, edit, moreOptions, detail.menu, detail.toggleMenu],
   );
+  // The galleries this record holds, and the one picture of them a person is looking at.
+  // The selection is a file identifier and the gallery it belongs to, never a position: a
+  // refresh that removes that file leaves the viewer with nothing to show, not with a
+  // neighbour's picture.
+  const [opening, setOpening] = useState<{ field: string; id: string } | undefined>();
+  const onOpenPhoto = (field: string, id: string) => setOpening({ field, id });
+  const strips =
+    detail.row === undefined
+      ? []
+      : recordMedia(
+          entry,
+          detail.row,
+          { states: media.states, files: media.files },
+          { width: extent.strip, height: extent.strip },
+          feedback,
+        );
+  const gallery = strips.find((strip) => strip.field.name === opening?.field);
+  const viewer =
+    gallery === undefined || opening === undefined
+      ? undefined
+      : deriveViewer(
+          {
+            content: {
+              phase: "ready",
+              value: gallery.pictures.map((picture) => picture.item),
+              refresh: "idle",
+            },
+            page: { more: false, loading: false },
+            selectedId: opening.id,
+            open: true,
+          },
+          presentation,
+        );
   return (
     <>
       <Stack.Screen options={options} />
@@ -179,6 +227,8 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
           : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}
         {...(canDelete ? { onDelete: detail.remove } : {})}
+        {...(media.enabled ? { files: media.files } : {})}
+        {...(onOpenPhoto === undefined ? {} : { onOpenPhoto })}
         // A rich text body is read, not printed: the reader is supplied here because it is
         // this screen that can ask for a figure's file, and the organism that decides
         // which field is one (derive.richBody).
@@ -191,6 +241,15 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
           />
         )}
       />
+      {viewer?.ok && media.enabled ? (
+        <PhotoViewer
+          model={viewer.value}
+          renderImage={media.renderImage}
+          onSelect={(id) => setOpening((was) => (was ? { ...was, id } : was))}
+          onClose={() => setOpening(undefined)}
+          onRetry={detail.reload}
+        />
+      ) : null}
     </>
   );
 }
