@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 93,
-   "cases": 306,
-   "ms": 1996761,
-   "testsMs": 32148,
+   "files": 94,
+   "cases": 307,
+   "ms": 2015179,
+   "testsMs": 32191,
    "runners": {
-    "jest": 93
+    "jest": 94
    },
    "unreachable": 0
   },
@@ -19537,6 +19537,35 @@
    "coveredProdLines": 1650,
    "onlyProdLines": null,
    "testsMs": 48
+  },
+  {
+   "file": "tests/screens/a-record-keeps-its-name-without-a-picture-door.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A record whose entry names a cover field, served by a catalogue that offers no picture door, cannot draw its cover: the phone has no way to read the bytes. It is then a record with no picture, and it keeps the header a record with no picture has always had \u2014 its name in the native header, which is not made transparent over a photo that is not there.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18418,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a record with a cover field keeps its name when the server offers no picture door"
+   ],
+   "tests": [
+    {
+     "title": "a record with a cover field keeps its name when the server offers no picture door",
+     "ms": 43,
+     "measured": false
+    }
+   ],
+   "loaded": 160,
+   "coveredProdLines": 2117,
+   "onlyProdLines": null,
+   "testsMs": 43
   },
   {
    "file": "tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx",
