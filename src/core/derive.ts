@@ -1,7 +1,13 @@
 import {
   avatar,
   avatarStack,
+  filePicture,
+  noMeta,
+  pictureState,
   type AvatarModel,
+  type FileMeta,
+  type FramedPicture,
+  type PictureFrame,
   compactPicture,
   entryIcon,
   pictureId,
@@ -783,6 +789,167 @@ export interface RecordBlock {
   readonly key: string;
   readonly label: string;
   readonly items: readonly DetailItem[];
+  /** strips are the picture galleries this block holds, drawn after its facts, in schema order. */
+  readonly strips: readonly RecordStrip[];
+}
+
+/**
+ * coverPicture is the field a record opens on, which `entry.hints.coverField` names.
+ *
+ * The catalogue's own parser already refused a name that is no visible scalar picture
+ * (`picturePointer`), and `hidden` beats even this: plumbing is not a cover.
+ */
+export function coverPicture(e: Entry): Field | undefined {
+  const name = e.hints?.coverField;
+  return name === undefined ? undefined : e.fields.find((f) => f.name === name && !neverShown(f));
+}
+
+/**
+ * galleryFields are the fields a record shows as pictures: a `list` of file identifiers
+ * its author declared `present: "images"`. A field so declared over anything else is an
+ * author's slip and keeps its ordinary row, because a defect must not delete data.
+ */
+export function galleryFields(e: Entry): readonly Field[] {
+  return e.fields.filter(
+    (f) =>
+      f.present === "images" &&
+      !neverShown(f) &&
+      f.type === "list" &&
+      (f.elem === "uuid" || f.elem === "string"),
+  );
+}
+
+/** RecordPictures is what this phone holds of the files a record points at: each slot's load state, and the metadata read for each file. */
+export interface RecordPictures {
+  readonly states: PictureStates;
+  readonly files: Readonly<Record<string, FileMeta>>;
+}
+
+/**
+ * headerCover says whether a record opens on a picture: the entry declares a cover field
+ * and this row holds a file identifier in it. It answers from the entry and the row alone,
+ * so a screen can settle its header before a single byte is read.
+ */
+export const headerCover = (e: Entry, row: Row): boolean => {
+  const field = coverPicture(e);
+  return field !== undefined && pictureId(text(row[field.name]));
+};
+
+/** RecordCover is the picture a record opens on, and the field that points at it. */
+export interface RecordCover {
+  readonly field: Field;
+  readonly id: string;
+  readonly picture: FramedPicture;
+}
+
+/** RecordStrip is one gallery a record holds: its field, the block it was filed in ("" for the overview), and its pictures in declaration order. */
+export interface RecordStrip {
+  readonly field: Field;
+  readonly block: string;
+  /** count is how many pictures this gallery holds, in the reader's own digits. */
+  readonly count: string;
+  readonly pictures: readonly FramedPicture[];
+}
+
+/** rowId is the record's own identifier as a slot's instance needs it: "" for a row not yet stored. */
+const rowId = (row: Row): string => text(row.id);
+
+/**
+ * recordCover is the picture the record opens on, or nothing at all.
+ *
+ * Nothing is the answer whenever the entry names no cover field, this row holds no file
+ * identifier in it, or that identifier is no file: an absent picture is not a failure and
+ * the header draws as it always did. Each slot's load state is keyed to this record and
+ * this field, so a row shown in a list and as a record never shares one picture's state.
+ */
+export function recordCover(
+  e: Entry,
+  row: Row,
+  pictures: RecordPictures,
+  frame: PictureFrame,
+): RecordCover | undefined {
+  const field = coverPicture(e);
+  const id = field === undefined ? "" : text(row[field.name]);
+  if (field === undefined || !pictureId(id)) return undefined;
+  const instance = JSON.stringify(["cover", `${e.module}/${e.entity}`, rowId(row), field.name]);
+  return {
+    field,
+    id,
+    picture: filePicture(
+      id,
+      instance,
+      pictures.files[id] ?? noMeta,
+      pictureState(id, instance, pictures.states),
+      frame,
+    ),
+  };
+}
+
+/** galleryIds are the file identifiers one gallery field's row holds, in the order it holds them. */
+const galleryIds = (field: Field, row: Row): readonly string[] => {
+  const value = row[field.name];
+  return (Array.isArray(value) ? (value as unknown[]).map(text) : splitList(text(value))).filter(
+    pictureId,
+  );
+};
+
+/**
+ * recordPictureIds names the files a record draws: its cover and every picture its
+ * galleries hold. It is what a record asks bytes for — nothing it does not draw is asked
+ * for, and nothing it draws behind a disclosure is asked for early.
+ */
+export function recordPictureIds(e: Entry, row: Row): readonly string[] {
+  const field = coverPicture(e);
+  const cover = field === undefined ? "" : text(row[field.name]);
+  return [
+    ...(pictureId(cover) ? [cover] : []),
+    ...galleryFields(e).flatMap((f) => galleryIds(f, row)),
+  ];
+}
+
+/**
+ * recordMedia is the galleries a record holds, each filed where the document filed its
+ * field and in the order the document declared them.
+ *
+ * A field whose row holds no file identifier answers no strip: an empty gallery is not a
+ * hole in the page. Each tile is its own slot, so two galleries on one row, or the same
+ * file in a gallery and on the cover, never share a load state.
+ */
+export function recordMedia(
+  e: Entry,
+  row: Row,
+  pictures: RecordPictures,
+  frame: PictureFrame,
+  format: Formatting,
+): readonly RecordStrip[] {
+  const declared = e.hints?.sections ?? [];
+  return galleryFields(e).flatMap((field) => {
+    const ids = galleryIds(field, row);
+    if (ids.length === 0) return [];
+    const slot = (index: number) =>
+      JSON.stringify(["strip", `${e.module}/${e.entity}`, rowId(row), field.name, index]);
+    return [
+      {
+        field,
+        block: declared.some((section) => section.key === field.hints?.section)
+          ? (field.hints?.section ?? "")
+          : "",
+        count: format.copy.kit.photoCount(
+          new Intl.NumberFormat(format.locale).format(ids.length),
+          ids.length,
+        ),
+        pictures: ids.map((id, index) =>
+          filePicture(
+            id,
+            slot(index),
+            pictures.files[id] ?? noMeta,
+            pictureState(id, slot(index), pictures.states),
+            frame,
+          ),
+        ),
+      },
+    ];
+  });
 }
 
 /**
@@ -795,24 +962,36 @@ export interface RecordBlock {
 export const informationFields: readonly string[] = ["id", "createdAt", "updatedAt"];
 
 /**
- * headerDrawn names the fields the record's header draws: the one that calls the
- * record, the one that fills its pill, the one that gives its summary line.
+ * headerDrawn names the fields a higher place draws than any block below: the ones that
+ * call the record, fill its pill and give its summary line, the one its cover picture
+ * points at, and every gallery of pictures it holds.
  *
  * Asking the header is the only way to get this right, because a field's own
  * visibility does not decide who draws it: `primary` reads a `detail` field (the
  * record answers a detail field and a row has no room for it) and `statusField`
  * takes any visibility but `hidden`. So the header's facts are settled here, from
- * the three declarations, and every place below asks this one answer.
+ * the declarations, and every place below asks this one answer.
  */
 const headerDrawn = (e: Entry): ReadonlySet<string> =>
   new Set(headerDrawnList(e).map((f) => f.name));
 
 /**
- * headerDrawnList is the same answer as a list of fields: the three declarations
- * that fill a record's header, whoever asks them.
+ * headerDrawnList is the same answer as a list of fields: the declarations that fill a
+ * record's header and its picture surfaces, whoever asks them.
+ *
+ * The cover and a gallery are here for the reason the title is: they draw their field,
+ * so no block below may draw it again. A row with no cover picture is withdrawn too — a
+ * file identifier printed as a row says the same fact worse (0085 principle 1), and
+ * there is no other place that would draw it.
  */
 const headerDrawnList = (e: Entry): readonly Field[] =>
-  [primary(e), statusField(e), listPreview(e, "record")].filter((f): f is Field => f !== undefined);
+  [
+    primary(e),
+    statusField(e),
+    listPreview(e, "record"),
+    coverPicture(e),
+    ...galleryFields(e),
+  ].filter((f): f is Field => f !== undefined);
 
 /**
  * shownFields are the fields a record may draw at all: no `hidden` anywhere, and no
@@ -848,27 +1027,39 @@ function shownFields(e: Entry, row: Row, keep: (f: Field) => boolean): readonly 
  * A record with nothing to say answers no blocks at all: no dash, no placeholder
  * sentence, because an empty field is not information (0085's principle 3) and the
  * "Add {field}" affordance is deferred until it has an interaction contract.
+ *
+ * `media` is what this phone holds of the files the record points at, and the frame a
+ * picture with no stored one is drawn in. Given it, each block also answers the galleries
+ * filed in it, after its facts; a block that holds nothing but a gallery is a block. With
+ * no `media` the record draws facts only, which is what a screen without a picture door
+ * has always drawn.
  */
 export function recordSections(
   e: Entry,
   row: Row,
   format: Formatting,
   names?: Names,
+  media?: { readonly pictures: RecordPictures; readonly frame: PictureFrame },
 ): readonly RecordBlock[] {
   const shown = shownFields(e, row, (f) => f.hints?.visibility !== "detail");
   const declared = e.hints?.sections ?? [];
+  const strips = media ? recordMedia(e, row, media.pictures, media.frame, format) : [];
   const blocks: RecordBlock[] = declared.flatMap((section) => {
     const items = shown
       .filter((f) => f.hints?.section === section.key)
       .map((f) => recordField(f, row[f.name], format, names));
-    return items.length === 0 ? [] : [{ key: section.key, label: section.label, items }];
+    const own = strips.filter((strip) => strip.block === section.key);
+    return items.length === 0 && own.length === 0
+      ? []
+      : [{ key: section.key, label: section.label, items, strips: own }];
   });
   const rest = shown
     .filter((f) => !declared.some((section) => section.key === f.hints?.section))
     .map((f) => recordField(f, row[f.name], format, names));
-  return rest.length === 0
+  const overview = strips.filter((strip) => strip.block === "");
+  return rest.length === 0 && overview.length === 0
     ? blocks
-    : [...blocks, { key: "", label: format.copy.kit.overview, items: rest }];
+    : [...blocks, { key: "", label: format.copy.kit.overview, items: rest, strips: overview }];
 }
 
 /**
@@ -1966,7 +2157,7 @@ export function homeMedia(entry: Entry): RowMediaModel {
   return media.kind === "none" ? { kind: "icon", icon: "grid" } : media;
 }
 
-/** visiblePictures selects bytes only for rendered media and the visible discs of each person group. */
+/** visiblePictures selects bytes only for rendered media, a record's own galleries included, and the visible discs of each person group. */
 export function visiblePictures(
   entry: Entry,
   rows: readonly Row[],
@@ -1982,6 +2173,7 @@ export function visiblePictures(
       if (leading.avatar?.image) ids.push(leading.avatar.image.slot.id);
       if (leading.media?.kind === "picture") ids.push(leading.media.image.slot.id);
     }
+    if (where === "detail") ids.push(...recordPictureIds(entry, row));
     const fields =
       where === "row"
         ? listCells(entry)

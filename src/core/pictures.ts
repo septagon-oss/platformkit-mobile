@@ -1,6 +1,6 @@
 import type { Entry, HintNotice } from "./catalog";
 import type { Formatting } from "./presentation";
-import type { ImageSlotProps } from "./media";
+import type { ImageSlotProps, MediaItem } from "./media";
 import type { Status } from "./shared";
 
 export interface Pictures {
@@ -128,6 +128,90 @@ export function initials(name = ""): string {
     Array.from(first)[0]! + (words.length > 1 ? Array.from(words[words.length - 1]!)[0]! : "")
   ).toUpperCase();
 }
+/** pictureState reads one slot's load state: its own first, then the file's, then still loading. */
+export const pictureState = (
+  id: string,
+  instance: string,
+  states: PictureStates,
+): "loading" | "ready" | "error" =>
+  states[JSON.stringify([id, instance])] ?? states[id] ?? "loading";
+
+/**
+ * FileMeta is what a phone keeps of one `file` row for the sake of drawing it: the frame
+ * the server probed (a side of 0 says it never did), the caption, and whether the image
+ * carries information at all. Nothing else a file row holds is a picture's business.
+ */
+export interface FileMeta {
+  readonly width: number;
+  readonly height: number;
+  readonly alt: string;
+  readonly decorative: boolean;
+}
+
+/** fileMeta reads those four out of a row as it arrived, refusing a side that is not a count of pixels. */
+export function fileMeta(row: Readonly<Record<string, unknown>> | undefined): FileMeta {
+  const side = (v: unknown) => (Number.isSafeInteger(v) && (v as number) > 0 ? (v as number) : 0);
+  return {
+    width: side(row?.width),
+    height: side(row?.height),
+    alt: typeof row?.alt === "string" ? row.alt : "",
+    decorative: row?.decorative === true,
+  };
+}
+/** noMeta is a file this phone has read nothing about yet: the picture is still drawn. */
+export const noMeta: FileMeta = { width: 0, height: 0, alt: "", decorative: false };
+/** PictureFrame is the geometry a slot stands in, which is the frame a picture with no stored one is drawn in. */
+export interface PictureFrame {
+  readonly width: number;
+  readonly height: number;
+}
+/** FramedPicture is one file as a surface draws it: the item a model validates, and the slot a renderer is handed. */
+export interface FramedPicture {
+  readonly item: MediaItem;
+  readonly slot: ImageSlotProps;
+}
+
+/**
+ * filePicture is one file a record draws, from the metadata the picture door read for it.
+ *
+ * A file the server never probed carries no frame, so the picture is drawn in the frame this
+ * slot declared and cropped to it (`fit: "cover"`): the phone chooses the crop rather than
+ * guessing an aspect from a name or a content type, and the viewer letterboxes what it opens.
+ * A picture nobody captioned is drawn and not opened — this phone holds no words for it, so a
+ * reader is not asked to press it and no name is invented for it.
+ */
+export function filePicture(
+  id: string,
+  instance: string,
+  meta: FileMeta,
+  state: "loading" | "ready" | "error",
+  frame: PictureFrame,
+): FramedPicture {
+  const width = Math.round(meta.width || frame.width);
+  const height = Math.round(meta.height || frame.height);
+  const caption = meta.alt.trim();
+  const decorative = meta.decorative || caption === "";
+  return {
+    item: {
+      id,
+      width,
+      height,
+      description: caption,
+      decorative,
+      state,
+    },
+    slot: {
+      id,
+      instance: JSON.stringify([id, instance]),
+      description: caption,
+      decorative,
+      fit: "cover",
+      aspectRatio: width / height,
+      caption: false,
+    },
+  };
+}
+
 /** compactPicture scopes slot state to its file, falling back to that file's metadata state. */
 export function compactPicture(id: string, states: PictureStates, instance = id): CompactPicture {
   const identity = JSON.stringify([id, instance]);
@@ -141,7 +225,7 @@ export function compactPicture(id: string, states: PictureStates, instance = id)
       aspectRatio: 1,
       caption: false,
     },
-    state: states[identity] ?? states[id] ?? "loading",
+    state: pictureState(id, instance, states),
   };
 }
 export function avatar(

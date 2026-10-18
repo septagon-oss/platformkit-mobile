@@ -18,7 +18,12 @@ export interface ZoomSlotProps {
 export interface Props {
   readonly model: ViewerModel;
   readonly renderImage: ImageRenderer;
-  readonly renderZoom: (props: ZoomSlotProps) => React.ReactNode;
+  /**
+   * renderZoom is the pinch-and-pan surface a picture opens into. A product supplies the
+   * gesture surface it ships with; without one the picture opens at the size the page has
+   * for it and the buttons below still move between pictures.
+   */
+  readonly renderZoom?: ((props: ZoomSlotProps) => React.ReactNode) | undefined;
   readonly onSelect: (id: string) => void;
   readonly onClose: () => void;
   readonly onRetry: (id: string) => void;
@@ -41,7 +46,10 @@ export function PhotoViewer({
   return (
     <Modal
       visible={model.open}
-      animationType="none"
+      // A cross-fade and nothing else: no translation, no scale, no parallax. It is the one
+      // motion a person who asked for less is still given, because opening a full-screen
+      // window with a hard cut leaves them no idea where the picture came from.
+      animationType="fade"
       onShow={onPresented}
       onDismiss={onClosed}
       onRequestClose={onClose}
@@ -65,15 +73,18 @@ export function PhotoViewer({
               renderImage={renderImage}
               fit="contain"
               onRetry={onRetry}
-              renderFrame={(children) =>
-                renderZoom({
-                  id: selected.id,
-                  aspectRatio: selected.aspectRatio,
-                  motion: model.motion,
-                  labels: model.labels,
-                  children,
-                })
-              }
+              {...(renderZoom === undefined
+                ? {}
+                : {
+                    renderFrame: (children: React.ReactNode) =>
+                      renderZoom({
+                        id: selected.id,
+                        aspectRatio: selected.aspectRatio,
+                        motion: model.motion,
+                        labels: model.labels,
+                        children,
+                      }),
+                  })}
             />
           </View>
         ) : null}
