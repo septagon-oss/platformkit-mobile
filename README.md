@@ -2234,6 +2234,48 @@ cookie that is already dead keeps today's path: the sign-in's own notice about
 the saved sign-in, not this one. A cookie expiring on a handset is not proven
 here; the cases run against the real `<Shell>` over a recorded fetch.
 
+## Each workspace's face
+
+The phone asks a workspace what it is before it asks who you are. `GET
+/api/v1/app/connection` is read at the address a person is connecting to, and again at the
+one a session opens at, and its answer — the name that place uses for itself, the colour it
+wears and the path of its mark — becomes `./core/workspace`'s `Workspace`. The name reaches
+the header, Home's band and the line over the password through `workspaceName`, which reads
+the answered word first, the typed address second and the copy table's word last, so the
+three can never call one place two things. The colour is worn by `accentPalette`: it copies
+the generated palette and replaces its accent roles with the nearest shade of that colour
+that keeps every pair `contrastPairs` measures, in both modes at once, and returns the kit's
+own pair by identity when no shade does — a workspace is never legible by day and refused by
+night. `src/ui/tokens.ts` remains the only writer of colour and `npm run tokens` the only way
+into it. What this device has been pointed at is remembered as a name, a host, a mark and a
+moment in the `workspace_seen` table: never a credential, so a remembered workspace can fill
+an address and cannot sign anybody in. An address that answers nothing wears today's look
+and asks for a password as it always did.
+
+**Reused** — `ThemeProvider`'s existing `palette` prop and `themeFor` (a palette in, one
+theme out), `contrastPairs` as the measure the worn shade is chosen against, `core/color`'s
+`mix`/`contrastRatio`/`AA`, `Api.operations.appConnection` bound through `documented` (the
+deadline, the origin check and the pinned `zAppConnectionResponse` stay in the path), the
+`recents` optional-slot shape for `store.workspaces`, the `recent_open` migration shape,
+`Row`/`Section`/`ServerField`/`Button`/`Screen`, `NativeImage` as the app's own image view,
+and the copy table for every new word in `en` and `pt`.
+
+**Added** — `accentPalette`, because the theme offered a palette in and `core/color` only
+arithmetic, and nothing turned one incoming colour into a pair of accent roles that keeps a
+measured registry (one colour cannot reach body-text contrast against both canvases, so a
+raw fill would be illegible in one mode or refused by the suite); `./core/workspace` and
+`./effects/workspaces`, because `workspaceName` was the naming rule and `session.ts` is one
+record under one key, so a list of visited servers was new state on the recents pattern;
+`WorkspaceTheme`, because `Shell` and `ThemeProvider` were rendered adjacent with nothing
+between them and `src/ui` may not read the shell; the address step, because the form asked
+for an address and then a password with nothing read in between.
+
+**Made reusable** — `Workspace` as the one shape a workspace's face takes (so an Account
+surface or a switching menu reads a value rather than a document), `rememberedStamp` with
+`createWorkspaces` as a device table a product can supply its own copy of, and
+`./screens/WorkspaceMark` — a mark built from the address that named it and drawn by
+whatever renderer the app ships, which is what any other workspace-owned picture needs.
+
 ## Read the first journey end to end
 
 A tenant's first screenful is a list of records, one record, and the command
