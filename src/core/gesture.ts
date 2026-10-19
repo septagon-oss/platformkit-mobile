@@ -23,8 +23,16 @@ export interface SwipeRead {
  * A drag that was never measured is a surface that shows nothing: a non-finite
  * `travel`, or a `reveal` that is not a positive length, answers closed and unarmed
  * rather than arming on a missing measurement.
+ *
+ * The answer is read where the finger is: a native gesture calls this from the UI
+ * runtime, and a shared function that carries no worklet marker arrives there as a
+ * remote function, which refuses a synchronous call — so the directive below is
+ * what lets the drag, the drawn surface and the suite that drives a fake surface
+ * all ask one function. A worklet body may name no import and no outer binding, so
+ * this one names its two numbers and nothing else.
  */
 export function readSwipe(travel: number, reveal: number): SwipeRead {
+  "worklet";
   if (!Number.isFinite(travel) || !Number.isFinite(reveal) || reveal <= 0)
     return { open: 0, armed: false };
   return { open: Math.min(Math.max(travel, 0), reveal), armed: travel >= reveal };

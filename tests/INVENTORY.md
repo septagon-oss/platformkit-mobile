@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `c88e4a568` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `607f2bd37` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 224 | 47.6 s | 77 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 255 | 1197 | 63.4 s | 2086 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 256 | 1198 | 65.0 s | 2090 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 117 | 368 | 43.7 s | 2705 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 466
+* keep: 467
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 466 — 203 `tests/*.test.ts` (node), 206 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1789; cases in files no runner reaches: 35
-* isolated wall time: contract 77 s, behaviour 2086 s, composition 2705 s, journey 0 s
+* files inventoried: 467 — 204 `tests/*.test.ts` (node), 206 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1790; cases in files no runner reaches: 35
+* isolated wall time: contract 77 s, behaviour 2090 s, composition 2705 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -374,6 +374,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/state.test.ts | node | behaviour | 5 | 277 | 2.8 | 60 | 2 of 5 | src/core/state.ts | 0 | keep | A Catalog is only ever what parseCatalog returned, so the reducer's fixture says the stamp too rather than pretending a document has no shape. |
 | tests/stepper-pending-write.test.ts | node | behaviour | 3 | 699 | 13.4 | 0 | 0 of 3 | — | 0 | keep | A step write whose outcome is unknown is neither done nor undone. The wizard refuses every transition, leaves the draft byte-identical, advances exactly one st… |
 | tests/stepper-stage-words.test.ts | node | behaviour | 4 | 709 | 6.5 | 0 | 0 of 4 | — | 0 | keep | The word under a stage of a staged task is the stage's own. "Required" is about what a person owes; a stage that can be skipped owes nothing, and a screen that… |
+| tests/swipe-reading-runs-on-the-ui-thread.test.ts | node | behaviour | 1 | 4212 | 1636.5 |  | not measured | — | 0 | keep | A native gesture calls the shared swipe reading synchronously on the UI runtime. Compile it with the app's native Babel preset, then use the installed Worklets… |
 | tests/table-figures.test.ts | node | behaviour | 4 | 728 | 17.3 | 0 | 0 of 4 | — | 0 | keep | A table is what a list cannot be: the same figure in every row sitting in one column, under a header that names it. These cases pin where a value goes, that an… |
 | tests/test-comment-provenance.test.ts | node | behaviour | 1 | 290 | 2.2 | 0 | 0 of 1 | — | 0 | keep | A test says what behaviour it holds. Who asked for it — a review, a round — belongs to the commit that added it, not to the file a reader maintains. |
 | tests/test-file-first-comment.test.ts | node | behaviour | 1 | 290 | 2.9 | 0 | 0 of 1 | — | 0 | keep | A reader learns what a test file protects from its name and its first comment: these files hold the shared-kit, state and activity rules other files were folde… |

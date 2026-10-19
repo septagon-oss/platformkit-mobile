@@ -427,7 +427,9 @@ the person uncovered, the phone runs it — and a drag the system or a second fi
 from the row is not a release and runs nothing. What the surface is worth is the width it stands
 open at, so a command that will run and a row that looks ready are one sight, read by one function
 (`readSwipe`) that the reanimated surface, the component fake and the threshold's own suite all
-consult. What hurts, or what the author declared a consequence for, is asked about first, in the
+consult — a function marked `"worklet"`, because a drag is read on the UI runtime, where a plain
+shared function arrives as one that may not be called from the finger at all. What hurts, or what
+the author declared a consequence for, is asked about first, in the
 same question the record asks; the verb resolves through the same lookup a typed address uses, so
 the two doors cannot disagree about which command a name means; and nothing is swipe-only — `Row`
 still offers the same command as a named action a reader can speak. A list whose app supplies no

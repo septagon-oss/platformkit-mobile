@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 255,
-   "cases": 1197,
-   "ms": 2085715,
-   "testsMs": 63370.60000000002,
+   "files": 256,
+   "cases": 1198,
+   "ms": 2089927,
+   "testsMs": 65007.10000000002,
    "runners": {
     "jest": 89,
-    "node": 166
+    "node": 167
    },
    "unreachable": 0
   },
@@ -19973,6 +19973,35 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/swipe-reading-runs-on-the-ui-thread.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A native gesture calls the shared swipe reading synchronously on the UI runtime. Compile it with the app's native Babel preset, then use the installed Worklets serializer and unpackers; the JS gesture double cannot expose a function that cannot cross that runtime boundary.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4212,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the shared swipe reading stays synchronous after native worklet serialization"
+   ],
+   "tests": [
+    {
+     "title": "the shared swipe reading stays synchronous after native worklet serialization",
+     "ms": 1636.499435,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 1636.5
   },
   {
    "file": "tests/table-figures.test.ts",
