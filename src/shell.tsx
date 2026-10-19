@@ -97,7 +97,8 @@ export interface ShellValue {
   /** what a sheet holds right now; an empty record means this sheet is finished with. */
   readonly keep: (href: string, values: Readonly<Record<string, string>>) => void;
   /** say files the sentence a write said for the address the person lands on: the sheet
-   * that wrote is leaving, so it cannot draw the sentence itself. */
+   * that wrote is leaving, so it cannot draw the sentence itself. A sentence whose session
+   * ended while the write was out files nothing — nobody coming back is owed nothing. */
   readonly say: (href: string, sentence: string) => void;
   /** heard reads that sentence once, and it is gone: a record says what its write did
    * once, not on every visit afterwards. */
@@ -106,7 +107,9 @@ export interface ShellValue {
    * report files what a write just did for the person standing where they are: the receipt of an
    * act that opened nothing, and so left no sheet to say it. A filing before the bar is spent
    * replaces the sentence — the newest act is what they need to read, and a queue would deliver a
-   * receipt for something that already left the screen.
+   * receipt for something that already left the screen. A receipt whose own session ended before
+   * the answer arrived files nothing: the person standing here did not do that act and does not
+   * read words earned in somebody else's workspace.
    */
   readonly report: (sentence: string) => void;
   /** reporting reads the sentence still owed and the token that spends it. It reads, it does not clear. */
@@ -119,6 +122,8 @@ export interface ShellValue {
    * actually crossed into one the entry calls finished. A filing says only that this phone wrote;
    * it files no row and no value, so it can carry nothing the person was not shown. Filing twice
    * for one address is filing once, and an address that has played its moment files nothing more.
+   * A filing whose session ended before the write answered files nothing, for the same reason the
+   * receipt does: the moment would play over a record this person never changed.
    */
   readonly celebrate: (href: string) => void;
   /** celebrating says whether this address is the one due its moment. It reads, it does not clear. */
@@ -331,6 +336,14 @@ export function Shell({
   const expected = useRef<Who | undefined>(undefined);
   const remembered = useRef<Remembered | undefined>(undefined);
   const generation = useRef(0);
+  // How many sessions this shell has ended, which is what `forget` moves. Three filings below
+  // carry the number they were earned under: a write answers when it answers, and the words it
+  // answers with belong to the person who did the write and to the origin they did it at. A
+  // filing whose number is not this one describes a session that is gone, so it files nothing —
+  // the alternative is a sentence earned in one workspace arriving over the screen of whoever
+  // signs in next. The write count needs no such binding: `load` clears what this app counted
+  // the moment a completed sign-in turns out to name a different person.
+  const ended = useRef(0);
 
   /**
    * challenge is the address that accepted a password and answered that it needs a
@@ -374,8 +387,11 @@ export function Shell({
   // Three things call it — a refusal of a session the server never identified, a
   // sign-in that turns out to be somebody else, and a sign-out, which is the
   // person saying nobody is coming back to that address. Nothing else may drop
-  // what a person was in the middle of doing.
+  // what a person was in the middle of doing. Moving `ended` is the other half of
+  // the same act: the sessions before this number are gone, and an answer that is
+  // still in the air from one of them has no screen left to arrive on.
   const forget = useCallback(() => {
+    ended.current += 1;
     expected.current = undefined;
     sheet.current = undefined;
     sentence.current = undefined;
@@ -388,27 +404,42 @@ export function Shell({
   const saw = useCallback((href: string) => {
     where.current = href;
   }, []);
-  const say = useCallback((href: string, text: string) => {
-    sentence.current = { href, text };
-  }, []);
+  // Read once per render: the three filings below are built under this number, so a callback a
+  // write holds says which session it was earned in without being told it now.
+  const earned = ended.current;
+  const say = useCallback(
+    (href: string, text: string) => {
+      if (ended.current !== earned) return;
+      sentence.current = { href, text };
+    },
+    [earned],
+  );
   const heard = useCallback((href: string) => {
     if (sentence.current?.href !== href) return "";
     const said = sentence.current.text;
     sentence.current = undefined;
     return said;
   }, []);
-  const report = useCallback((sentence: string) => {
-    receipts.current += 1;
-    setReceipt({ sentence, token: receipts.current });
-  }, []);
+  const report = useCallback(
+    (sentence: string) => {
+      if (ended.current !== earned) return;
+      receipts.current += 1;
+      setReceipt({ sentence, token: receipts.current });
+    },
+    [earned],
+  );
   const reporting = useCallback(() => receipt, [receipt]);
   const spent = useCallback((token: number) => {
     setReceipt((now) => (now?.token === token ? undefined : now));
   }, []);
-  const celebrate = useCallback((href: string) => {
-    if (played.current.has(href)) return;
-    due.current = href;
-  }, []);
+  const celebrate = useCallback(
+    (href: string) => {
+      if (ended.current !== earned) return;
+      if (played.current.has(href)) return;
+      due.current = href;
+    },
+    [earned],
+  );
   const celebrating = useCallback((href: string) => due.current === href, []);
   const celebrated = useCallback((href: string) => {
     if (due.current === href) due.current = undefined;

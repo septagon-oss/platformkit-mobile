@@ -435,7 +435,8 @@ the two doors cannot disagree about which command a name means; and nothing is s
 still offers the same command as a named action a reader can speak. A list whose app supplies no
 surface draws its rows exactly as it did. A write that opened no page leaves its receipt at the
 foot of wherever the person is standing (`Snackbar` over the navigator, filed by the shell), for
-as long as it takes to read once.
+as long as it takes to read once — and only for that person: a write that answers after its own
+session signed out files no receipt, no sentence and no moment for whoever signs in next.
 
 **Reused** — `commandOf`, `commandAt`, `offered` and `commandWording` for which verb a row runs and
 in whose words, `entryIcon` for the picture it wears, `Row`'s existing action title for the door

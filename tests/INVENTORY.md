@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `607f2bd37` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `dd0c80536` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 224 | 47.6 s | 77 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 256 | 1198 | 65.0 s | 2090 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 117 | 368 | 43.7 s | 2705 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 119 | 371 | 43.8 s | 2762 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 467
+* keep: 469
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 467 — 204 `tests/*.test.ts` (node), 206 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1790; cases in files no runner reaches: 35
-* isolated wall time: contract 77 s, behaviour 2090 s, composition 2705 s, journey 0 s
+* files inventoried: 469 — 204 `tests/*.test.ts` (node), 208 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1793; cases in files no runner reaches: 35
+* isolated wall time: contract 77 s, behaviour 2090 s, composition 2762 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -392,6 +392,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 
 | test file | runner | layer | cases | wall ms | tests ms | only-it-covers (prod lines) | tests with a line no other test covers | production files only it loads | flaky / reach | verdict | the rule it proves |
 |---|---|---|---|---|---|---|---|---|---|---|---|
+| tests/a-command-receipt-stays-with-the-session-that-started-it.test.tsx | jest | composition | 1 | 25348 | 167 |  | not measured | — | 0 | keep | A command may finish after its list unmounts and another tenant signs in. Its receipt belongs to the session that sent it; a late response must not file that t… |
 | tests/a-connection-document-outside-its-schema-is-refused-like-a-refusal.test.tsx | jest | composition | 1 | 31373 | 174 |  | not measured | — | 0 | keep | The generated validator is the phone's own boundary: a document that names a name and nothing else is not a workspace description, and it is refused the way a … |
 | tests/a-lookup-that-never-answers-asks-for-the-password-at-the-address-it-was-typed.test.tsx | jest | composition | 1 | 29759 | 172 |  | not measured | — | 0 | keep | A lookup the network never answers is one of the ways a workspace says nothing: the phone wears its own look, names the place by the host the person typed, and… |
 | tests/an-address-with-no-connection-document-still-asks-for-a-password.test.tsx | jest | composition | 2 | 27059 | 482 |  | not measured | — | 0 | keep | A workspace that answers no connection document is still a place a person can sign in at: the phone wears its own look, names the place by its host, and asks f… |
@@ -499,6 +500,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/shell-sign-out-session-unavailable.test.tsx | jest | composition | 1 | 25099 | 95 |  | not measured | — | 0 | keep | Revoking a key and closing its minting session are distinct effects. A failed session close cannot make the screen say the confirmed key revoke failed. |
 | tests/shell-sign-out-survivor.test.tsx | jest | composition | 2 | 20661 | 380 |  | not measured | — | 0 | keep | Signing out is two acts, and the screen has to tell them apart.  The phone always forgets its key. Whether the server stops it is a second question, and at the… |
 | tests/shell-sign-out-without-key.test.tsx | jest | composition | 3 | 22023 | 692 |  | not measured | — | 0 | keep | A sign-out has two halves, and the notice about the second one is owed only when there was a key to stop. A phone that holds no key — a saved record it could n… |
+| tests/shell-what-one-session-earned-stays-with-that-session.test.tsx | jest | composition | 2 | 30884 | 19 |  | not measured | — | 0 | keep | Three of the shell's filings carry words or a moment a person was owed: the sentence a write said for the record its person lands on, the receipt of an act tha… |
 | tests/shell.test.tsx | jest | composition | 6 | 22252 | 151 | 0 | 0 of 6 | — | 0 | keep | The secure store, in memory: what a saved sign-in is restored from and written to. The factory only closes over it; nothing reads it until a test does. |
 | tests/the-app-hands-the-shell-its-workspaces-table.test.tsx | jest | composition | 1 | 21476 | 2 |  | not measured | — | 0 | keep | What the reference app keeps on the phone is one list in src/screens/device.ts, and the shell only remembers the workspaces a person has connected to when that… |
 | tests/the-connect-step-asks-a-workspace-what-it-is-before-it-asks-who-you-are.test.tsx | jest | composition | 2 | 31669 | 193 |  | not measured | — | 0 | keep | The connect step, end to end: the person types an address, the phone asks that address what it is, and the answer — name, host, colour, mark — is on screen bef… |

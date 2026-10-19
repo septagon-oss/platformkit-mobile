@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 117,
-   "cases": 368,
-   "ms": 2705273,
-   "testsMs": 43655,
+   "files": 119,
+   "cases": 371,
+   "ms": 2761505,
+   "testsMs": 43841,
    "runners": {
-    "jest": 117
+    "jest": 119
    },
    "unreachable": 0
   },
@@ -20518,6 +20518,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-command-receipt-stays-with-the-session-that-started-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A command may finish after its list unmounts and another tenant signs in. Its receipt belongs to the session that sent it; a late response must not file that tenant's words over the next person's screen. Keep the real shell, hook and transport in this race.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25348,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "another tenant never receives the receipt of a command still finishing at sign-out"
+   ],
+   "tests": [
+    {
+     "title": "another tenant never receives the receipt of a command still finishing at sign-out",
+     "ms": 167,
+     "measured": false
+    }
+   ],
+   "loaded": 158,
+   "coveredProdLines": 2567,
+   "onlyProdLines": null,
+   "testsMs": 167
+  },
+  {
    "file": "tests/a-connection-document-outside-its-schema-is-refused-like-a-refusal.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25864,6 +25893,41 @@
    "coveredProdLines": 1780,
    "onlyProdLines": null,
    "testsMs": 692
+  },
+  {
+   "file": "tests/shell-what-one-session-earned-stays-with-that-session.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "Three of the shell's filings carry words or a moment a person was owed: the sentence a write said for the record its person lands on, the receipt of an act that opened nothing, and the moment a record plays over its own change. A write answers when it answers, so an answer can arrive after the session that earned it has gone \u2014 and then it belongs to nobody standing here. Held against the shell itself, because it is the shell that decides whether a filing reaches a screen: the channel a write files through is one the caller holds, so a caller that is gone holds a filing that is gone with it. Filing from the session that *is* standing here still lands all three.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30884,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sentence, a receipt and a moment earned by a session that has ended reach nobody",
+    "the session standing here is owed all three of its own filings"
+   ],
+   "tests": [
+    {
+     "title": "a sentence, a receipt and a moment earned by a session that has ended reach nobody",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "the session standing here is owed all three of its own filings",
+     "ms": 10,
+     "measured": false
+    }
+   ],
+   "loaded": 154,
+   "coveredProdLines": 2154,
+   "onlyProdLines": null,
+   "testsMs": 19
   },
   {
    "file": "tests/shell.test.tsx",
