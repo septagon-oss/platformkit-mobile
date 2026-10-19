@@ -12,19 +12,29 @@ import {
   visiblePictures,
 } from "../core/derive";
 import type { ScreenProps } from "../renderers";
+import type { LayoutRectangle } from "react-native";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
 import { useCommandAsk } from "./useCommand";
 import { useResourceList } from "./useResourceList";
 import { usePictures } from "./usePictures";
 import { useDirectoryPeople } from "./useReferenceNames";
+import { useShell } from "../shell";
 export function ResourceList({ entry }: ScreenProps) {
   const feedback = useFeedback();
   const list = useResourceList(entry, feedback);
   const { ask, busy } = useCommandAsk(entry, undefined);
   const router = useRouter();
   const at = screenPath(entry);
-  const open = (id: string) => router.push(`${at}/${encodeURIComponent(id)}`);
+  // Where the person pressed is filed under the record it opens: that record is the only place
+  // the flight can be drawn, and the list is leaving the screen by then. A press this phone never
+  // measured files nothing, which is the ordinary push.
+  const { travelTo } = useShell();
+  const open = (id: string, frame?: LayoutRectangle) => {
+    const href = `${at}/${encodeURIComponent(id)}`;
+    if (frame) travelTo(href, frame);
+    router.push(href);
+  };
   const add = useCallback(() => router.push(`${at}/new`), [router, at]);
   const { sheet, setSheet } = list;
   // A row that points at another record names it: one page of each resource this

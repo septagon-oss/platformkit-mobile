@@ -3,6 +3,7 @@
 // the entry and the order, so the count on a button, the rows in the sheet it opens
 // and the empty state a filter leaves behind cannot disagree.
 import React from "react";
+import type { LayoutRectangle } from "react-native";
 import type { Entry } from "../../core/catalog";
 import {
   deriveCatalogList,
@@ -46,7 +47,9 @@ export interface Props {
    * control is drawn, because a control that opens nothing is a lie about the screen. */
   readonly onSheet?: (sheet: "none" | "sort" | "filters") => void;
   readonly onOrder: (order: Order) => void;
-  readonly onOpen: (id: string) => void;
+  /** onOpen opens one row's record and says where that row's picture stood when it was pressed;
+   * absent means the record opens the way it always did. DataList's `onOpen` says who measures. */
+  readonly onOpen: (id: string, frame?: LayoutRectangle) => void;
   readonly onMore: () => void;
   readonly onRefresh: () => void;
   readonly onNew?: () => void;

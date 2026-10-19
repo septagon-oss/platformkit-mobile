@@ -18,6 +18,13 @@ const englishArticle = (field: string): string => {
 /** lowerFirst keeps a word's own letters but not its own capital: an English sentence names the field mid-sentence. */
 const lowerFirst = (field: string): string => field.charAt(0).toLowerCase() + field.slice(1);
 
+/**
+ * upperFirst keeps a word's own letters and gives it the capital a sentence begins with. The two
+ * sentences that use it are made of words somebody else wrote — a noun the catalogue declares, a
+ * state word the author chose — so this kit may re-case them and may not translate them.
+ */
+const upperFirst = (word: string): string => word.charAt(0).toUpperCase() + word.slice(1);
+
 export const kitEnglish = {
   account: "Account",
   signOut: "Sign out",
@@ -207,6 +214,10 @@ export const kitEnglish = {
   discard: "Discard",
   created: (singular: string) => `${singular} created`,
   changesSaved: "Changes saved",
+  // What a record says the moment its own state crosses into one the entry calls finished, made of
+  // the two words that are not this kit's: the entry's singular noun and the author's word for the
+  // state it reached. It says nothing about which value that was, because the pill already does.
+  finished: (singular: string, state: string) => `${upperFirst(singular)} ${lowerFirst(state)}`,
   available: "Available",
   soldOut: "Sold out",
   full: "Not enough places",
@@ -505,6 +516,10 @@ export const kitPortuguese: KitWords = {
   discard: "Descartar",
   created: (singular: string) => `Registo criado: ${singular}`,
   changesSaved: "Alterações guardadas",
+  // The colon frame is the one this bundle already uses above: naming the record, then naming the
+  // state it reached. A noun-then-participle frame would put grammatical agreement between two
+  // served words into this kit's hands, and this kit owns neither word.
+  finished: (singular: string, state: string) => `${upperFirst(singular)}: ${lowerFirst(state)}`,
   available: "Disponível",
   soldOut: "Esgotado",
   full: "Lugares insuficientes",
