@@ -52,6 +52,27 @@ const BEA: Scope = { server: "https://acme.test", userId: "bea" };
 const AT = "2026-10-06T10:00:00.000Z";
 
 describe("the device store", () => {
+  test("another server cannot read, replace or forget this server's recent open", async () => {
+    const { recents } = createNativeStore();
+    await recents.open();
+    const first = { server: "https://tenant-a.example.test", userId: "same-person" };
+    const second = { server: "https://tenant-b.example.test", userId: "same-person" };
+    const ref = { resourceKey: "note/note", recordId: "shared-id" };
+    const opened = recentFrom({ ...ref, title: "First workspace", openedAt: AT });
+    await recents.save(first, opened);
+
+    expect(await recents.recent(second, 5)).toEqual([]);
+    await recents.forget(second, ref);
+    expect(await recents.recent(first, 5)).toEqual([opened]);
+
+    await recents.save(second, { ...opened, title: "Second workspace" });
+    expect(await recents.recent(first, 5)).toEqual([opened]);
+    expect((await recents.recent(second, 5)).map((row) => row.title)).toEqual(["Second workspace"]);
+    await recents.forget(second, ref);
+    expect(await recents.recent(second, 5)).toEqual([]);
+    expect(await recents.recent(first, 5)).toEqual([opened]);
+  });
+
   test("one sign-in cannot claim or discard another sign-in's held write", async () => {
     const { outbox } = createNativeStore();
     await outbox.open();

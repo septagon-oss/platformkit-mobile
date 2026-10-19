@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 244,
-   "cases": 1127,
-   "ms": 1847451,
-   "testsMs": 50557.20000000002,
+   "cases": 1128,
+   "ms": 1845120,
+   "testsMs": 50545.20000000002,
    "runners": {
     "jest": 82,
     "node": 162
@@ -3228,7 +3228,7 @@
    "file": "tests/native-store-scope.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": 3,
+   "cases": 4,
    "rule": "The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a settle and a drop name the server and the person as well as the id. The adapter runs here over node:sqlite through an expo-sqlite stand-in that binds positional parameters the way expo-sqlite does on a device \u2014 parameter i at index i + 1, and a parameter with no placeholder dropped without a word, because neither platform checks the bind's return code (node_modules/expo-sqlite/ios/SQLiteModule.swift getBindParamIndex and bindStatementParam; android/.../SQLiteModule.kt `statement.ref.bindStatementParam`). It is a .tsx file only so Jest, which can mock expo-sqlite, discovers it; it needs a Node that ships node:sqlite.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -3236,34 +3236,40 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 32438,
+   "ms": 30107,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
+    "another server cannot read, replace or forget this server's recent open",
     "one sign-in cannot claim or discard another sign-in's held write",
     "one sign-in reads their own opens, and an open is one row",
     "a withdrawn open takes its one row and nobody else's"
    ],
    "tests": [
     {
+     "title": "another server cannot read, replace or forget this server's recent open",
+     "ms": 5,
+     "measured": false
+    },
+    {
      "title": "one sign-in cannot claim or discard another sign-in's held write",
-     "ms": 10,
+     "ms": 3,
      "measured": false
     },
     {
      "title": "one sign-in reads their own opens, and an open is one row",
-     "ms": 13,
+     "ms": 5,
      "measured": false
     },
     {
      "title": "a withdrawn open takes its one row and nobody else's",
-     "ms": 3,
+     "ms": 1,
      "measured": false
     }
    ],
    "loaded": 129,
    "coveredProdLines": 1926,
    "onlyProdLines": null,
-   "testsMs": 26
+   "testsMs": 14
   },
   {
    "file": "tests/screens/nativeImage.test.tsx",
