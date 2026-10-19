@@ -22,29 +22,34 @@ import { useTheme } from "../src/ui/theme";
 
 export default function Layout() {
   return (
-    // What this app keeps is said here and nowhere else: the one device store,
-    // the one maker of idempotency keys and the one network listener. Without a
-    // store the kit holds nothing and every write behaves as it did before.
-    <Shell
-      baseURL={process.env.EXPO_PUBLIC_API_URL ?? ""}
-      renderers={defaultRenderers}
-      store={device.store}
-      mint={device.mint}
-      reach={device.reach}
-      media={{
-        zoom: NativeZoom,
-        coverMotion: CoverMotion,
-        finishing: FinishingMotion,
-        rowAction: RowSwipe,
-      }}
-    >
-      {/* The workspace's own colour, worn over the generated palette, is what the whole app
-          is painted with; it is read between the shell and the theme because that is the one
-          place both are known. */}
-      <WorkspaceTheme>
-        <Root />
-      </WorkspaceTheme>
-    </Shell>
+    // react-native-gesture-handler recognizes a gesture only inside a view it owns the touch
+    // stream of, and the native stack supplies none: without this root every swipeable row is
+    // dead in a release build and refuses to render in a development one.
+    <GestureHandlerRootView style={root}>
+      {/* What this app keeps is said here and nowhere else: the one device store,
+          the one maker of idempotency keys and the one network listener. Without a
+          store the kit holds nothing and every write behaves as it did before. */}
+      <Shell
+        baseURL={process.env.EXPO_PUBLIC_API_URL ?? ""}
+        renderers={defaultRenderers}
+        store={device.store}
+        mint={device.mint}
+        reach={device.reach}
+        media={{
+          zoom: NativeZoom,
+          coverMotion: CoverMotion,
+          finishing: FinishingMotion,
+          rowAction: RowSwipe,
+        }}
+      >
+        {/* The workspace's own colour, worn over the generated palette, is what the whole app
+            is painted with; it is read between the shell and the theme because that is the one
+            place both are known. */}
+        <WorkspaceTheme>
+          <Root />
+        </WorkspaceTheme>
+      </Shell>
+    </GestureHandlerRootView>
   );
 }
 
