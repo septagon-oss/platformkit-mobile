@@ -25,11 +25,12 @@ export interface WorkspaceStore {
 
 export interface Workspaces {
   /**
-   * remember keeps what one server answered of itself. `server` is the address the answer
-   * arrived from — the typed one on the connect step, the session's once there is one — and
-   * a workspace with no address or no name writes nothing.
+   * remember keeps what one server answered of itself, filed under the origin that face was
+   * read from — the typed address on the connect step, the session's once there is one. A
+   * workspace with no address or no name writes nothing, so a phone points at a stranger's
+   * address only by pointing at it.
    */
-  readonly remember: (workspace: Workspace, server: string) => Promise<void>;
+  readonly remember: (workspace: Workspace) => Promise<void>;
   readonly list: () => Promise<readonly Remembered[]>;
 }
 
@@ -49,8 +50,8 @@ export interface WorkspacesDeps {
  */
 export function createWorkspaces(deps: WorkspacesDeps): Workspaces {
   return {
-    async remember(workspace, server) {
-      const entry = rememberedStamp(workspace, server, deps.clock.now());
+    async remember(workspace) {
+      const entry = rememberedStamp(workspace, deps.clock.now());
       if (entry === undefined) return;
       await deps.store.save(entry);
     },

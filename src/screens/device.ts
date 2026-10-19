@@ -10,12 +10,14 @@ import { createReach, type Reach } from "../effects/native-reach";
 import type { OutboxStore } from "../effects/outbox";
 import type { RecentsStore } from "../effects/recents";
 import type { ReadStore } from "../effects/read-cache";
+import type { WorkspaceStore } from "../effects/workspaces";
 
 export interface Device {
   readonly store: {
     readonly outbox: OutboxStore;
     readonly reads: ReadStore;
     readonly recents: RecentsStore;
+    readonly workspaces: WorkspaceStore;
   };
   readonly mint: () => string;
   readonly reach: Reach;
@@ -31,6 +33,7 @@ export const device: Device = Object.freeze({
     outbox: deviceStore.outbox,
     reads: deviceStore.reads,
     recents: deviceStore.recents,
+    workspaces: deviceStore.workspaces,
   }),
   mint: randomUUID,
   reach: createReach(),

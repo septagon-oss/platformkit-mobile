@@ -1,8 +1,8 @@
 // One connection document is read as three things: what the place is called, what colour it
 // wears and what mark it hands out. The name a person may paint comes only in the one
 // spelling the workspace's own document names for it, and a mark only as a path on the host
-// that named it — the phone never follows a URL a server points it at, and never paints a
-// colour it cannot read.
+// that named it — the phone never follows a URL a server points it at, never asks a second
+// server for the first one's path, and never paints a colour it cannot read.
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { Connection } from "../src/generated/types.gen";
@@ -38,6 +38,7 @@ const MARK = "/api/v1/public/file/files/0199mark";
 
 test("an answered document becomes one workspace: name trimmed, colour lower-cased, mark kept", () => {
   assert.deepEqual(workspaceOf(marked, "https://acme.test"), {
+    server: "https://acme.test",
     host: "acme.test",
     name: "Acme Works",
     accent: "#2563eb",
@@ -69,8 +70,16 @@ test("an accent in any other spelling is refused by name and never guessed at", 
 
 test("a workspace whose name is only spaces has no name, which is what sends a screen to the host", () => {
   assert.equal(workspaceOf({ ...answer, name: "   " }, "https://acme.test").name, "");
-  assert.deepEqual(unknownWorkspace("https://acme.test"), { host: "acme.test", name: "" });
-  assert.deepEqual(unknownWorkspace("not an address"), { host: "", name: "" });
+  assert.deepEqual(unknownWorkspace("https://acme.test"), {
+    server: "https://acme.test",
+    host: "acme.test",
+    name: "",
+  });
+  assert.deepEqual(unknownWorkspace("not an address"), {
+    server: "not an address",
+    host: "",
+    name: "",
+  });
 });
 
 test("a mark is a path on the host that named it, and nothing else", () => {
@@ -87,19 +96,27 @@ test("a mark is a path on the host that named it, and nothing else", () => {
     );
   }
   assert.equal(workspaceOf(answer, "https://acme.test").logoPath, undefined);
+  // The origin the mark is asked of travels with the face, so the only address a caller can
+  // name is the one that answered — including when that answer came from `Change`.
   assert.equal(
-    workspaceMarkURI("https://acme.test", "/api/v1/mark"),
-    "https://acme.test/api/v1/mark",
+    workspaceMarkURI(workspaceOf(marked, "https://acme.test")),
+    "https://acme.test" + MARK,
   );
-  assert.equal(workspaceMarkURI("https://acme.test", undefined), "");
+  assert.equal(
+    workspaceMarkURI(workspaceOf(marked, "https://acme.test///")),
+    "https://acme.test" + MARK,
+  );
+  assert.equal(
+    workspaceMarkURI(workspaceOf(marked, "https://second.test")),
+    "https://second.test" + MARK,
+  );
+  assert.equal(workspaceMarkURI(workspaceOf(answer, "https://acme.test")), "");
+  // An address with no readable host is nowhere to ask, so no bytes are fetched for it.
+  assert.equal(workspaceMarkURI(workspaceOf(marked, "not an address")), "");
 });
 
 test("a remembered row names the server, its own name and the moment; a credential has nowhere to go", () => {
-  const row = rememberedStamp(
-    workspaceOf(marked, "https://acme.test/"),
-    "https://acme.test/",
-    "2026-10-19T12:00:00Z",
-  );
+  const row = rememberedStamp(workspaceOf(marked, "https://acme.test/"), "2026-10-19T12:00:00Z");
   assert.deepEqual(row, {
     host: "https://acme.test",
     name: "Acme Works",
@@ -110,13 +127,10 @@ test("a remembered row names the server, its own name and the moment; a credenti
 });
 
 test("an address that answered nothing, and a name nobody can read, are never remembered", () => {
+  assert.equal(rememberedStamp(unknownWorkspace("https://acme.test"), "t"), undefined);
+  assert.equal(rememberedStamp(workspaceOf(answer, ""), "t"), undefined);
   assert.equal(
-    rememberedStamp(unknownWorkspace("https://acme.test"), "https://acme.test", "t"),
-    undefined,
-  );
-  assert.equal(rememberedStamp(workspaceOf(answer, "https://acme.test"), "", "t"), undefined);
-  assert.equal(
-    rememberedStamp({ host: "acme.test", name: "  " }, "https://acme.test", "t"),
+    rememberedStamp({ server: "https://acme.test", host: "acme.test", name: "  " }, "t"),
     undefined,
   );
 });

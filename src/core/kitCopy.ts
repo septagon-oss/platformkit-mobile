@@ -104,7 +104,9 @@ export const kitEnglish = {
   twoDaysAgo: "2 days ago",
   daysAgo: "{n} days ago",
   tomorrow: "tomorrow",
-  signInIntro: "Enter your workspace address and the email you use there.",
+  // The credentials step asks for two things and no longer for a third: the address is its own
+  // step now, so this sentence names the email and the password the workspace is signed in with.
+  signInIntro: "Enter the email and password you use at this workspace.",
   workspaceAddress: "Workspace address",
   // The step before a password: the phone reads what the workspace says of itself and puts
   // that on screen, so a person aims at a place they recognise rather than an address. The
@@ -482,7 +484,7 @@ export const kitPortuguese: KitWords = {
   twoDaysAgo: "anteontem",
   daysAgo: "há {n} dias",
   tomorrow: "amanhã",
-  signInIntro: "Indique o endereço do espaço de trabalho e o email que usa nele.",
+  signInIntro: "Introduza o email e a palavra-passe que usa neste espaço de trabalho.",
   workspaceAddress: "Endereço do espaço de trabalho",
   connectTitle: "Ligue-se ao seu espaço de trabalho",
   connectIntro: "Introduza o endereço do seu espaço de trabalho.",

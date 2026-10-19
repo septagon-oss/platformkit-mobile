@@ -14,6 +14,7 @@ import { useTheme } from "../src/ui/theme";
 import { palette } from "../src/ui/tokens";
 import { reset } from "./fakes/router";
 
+jest.mock("expo-image", () => ({ Image: "NativeImageDouble" }));
 jest.mock("expo-router", () => require("./fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactNavigation);
 
@@ -88,10 +89,12 @@ function phone(over: { workspaces?: ReturnType<typeof fakeWorkspaceStore> } = {}
       }}
       clock={clock("2026-10-19T12:00:00.000Z")}
     >
+      {/* The app wears the workspace's colour over the whole tree, sign-in form included, so a
+          case that stops at the form can still read the colour it was drawn in. */}
       <WorkspaceTheme>
         <Probe />
+        <SignIn />
       </WorkspaceTheme>
-      <SignIn />
     </Shell>
   );
   return { remembered, shell };
@@ -126,6 +129,7 @@ test("what this device remembers is listed as places, and a press fills the addr
   await remembered.store.save({
     host: "https://acme.test",
     name: "Acme Works",
+    logoPath: "/api/v1/public/file/files/0199mark",
     seenAt: "2026-10-18T09:00:00.000Z",
   });
   const wire = asking(() => json(body));
@@ -133,6 +137,12 @@ test("what this device remembers is listed as places, and a press fills the addr
   const { shell } = phone({ workspaces: remembered });
   const view = await render(shell);
   expect(view.getByTestId("workspace-remembered-acme-test")).toBeTruthy();
+  // The row carries the mark that place answered with, asked of the place itself: this phone
+  // is connected to nothing yet, so the only origin the mark could be asked of is its own.
+  expect(
+    view.getByLabelText(kitEnglish.workspaceMark("Acme Works"), { includeHiddenElements: true })
+      .props.source.uri,
+  ).toBe("https://acme.test/api/v1/public/file/files/0199mark");
   fireEvent.press(view.getByTestId("workspace-remembered-acme-test"));
   await waitFor(() => expect(screen.getByTestId("workspace-name")).toHaveTextContent("Acme Works"));
   // The person retyped nothing: the address came from the row, and one question was asked.

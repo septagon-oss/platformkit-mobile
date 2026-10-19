@@ -136,7 +136,7 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     // which is what a device without a database is.
     workspaces: undefined,
     // Nothing answered this address, so the phone knows its host and nothing else.
-    workspace: { host: "acme.test", name: "" },
+    workspace: { server: "https://acme.test", host: "acme.test", name: "" },
     lookUp: jest.fn<ShellValue["lookUp"]>(async () => undefined),
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),

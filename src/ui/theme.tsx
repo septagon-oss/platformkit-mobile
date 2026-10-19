@@ -256,7 +256,7 @@ const failures = (theme: Theme): readonly string[] =>
 
 /**
  * ACCENT_STEPS is how far a workspace's colour may be pulled toward a mode's own ink:
- * twenty-five hundredths of a shade at a time, up to half. Past half the painted colour
+ * five hundredths of a shade at a time, up to half. Past half the painted colour
  * no longer claims to be the colour that workspace chose, so the search stops there and
  * the kit's own palette is kept.
  */

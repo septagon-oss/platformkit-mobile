@@ -699,9 +699,11 @@ describe("SignInForm", () => {
     expect(screen.queryByText(/tenant/i)).toBeNull();
     await screen.unmount();
     // The password step says the same thing about the same place, in the same words.
+    // The password step asks for the two things it actually holds, in the same words a reader
+    // of the other language gets.
     await inTheme(<SignInForm {...base} workspace={{ name: "acme.test", host: "acme.test" }} />);
     expect(
-      screen.getByText("Enter your workspace address and the email you use there."),
+      screen.getByText("Enter the email and password you use at this workspace."),
     ).toBeOnTheScreen();
     expect(screen.queryByText(/tenant/i)).toBeNull();
   });

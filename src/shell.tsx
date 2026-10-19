@@ -638,7 +638,7 @@ export function Shell({
         if (looked.current !== asked) return undefined;
         const face = workspaceOf(answer.data, url);
         setWorkspace(face);
-        void workspaces?.remember(face, url);
+        void workspaces?.remember(face);
         return face;
       } catch {
         // Nothing was answered, so nothing is known about the place: the address the person
@@ -681,7 +681,7 @@ export function Shell({
           if (answer !== undefined) {
             const face = workspaceOf(answer, server);
             setWorkspace(face);
-            void workspaces?.remember(face, server);
+            void workspaces?.remember(face);
           }
           // Between the identity arriving and this catalogue becoming ready sits the
           // one comparison: what the last person left behind — where they stood, what

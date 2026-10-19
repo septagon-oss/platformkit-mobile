@@ -21,15 +21,20 @@ export const ACCENT = /^#[0-9a-fA-F]{6}$/;
 /**
  * Workspace is one workspace as a phone can see it, with nothing about a person in it.
  *
- * `host` is the address reduced to what a person typed (`hostLabel`), `name` the word
- * the workspace used for itself already trimmed — empty when it was told nothing, which
- * is what sends a screen to the address and then to the copy table's own word through
- * `workspaceName` — `accent` the lower-cased colour a person may paint, and `logoPath`
- * the mark's path *on that host*. A workspace is identified by its server origin and
- * nothing else: a re-read replaces every field, so a colour and a name never outlive the
- * answer that carried them.
+ * `server` is the origin the answer arrived from, normalised to the one spelling a held
+ * write's scope uses (`workspaceServer`), and `host` that origin reduced to what a person
+ * typed (`hostLabel`) — the two are not one field wearing two names: one is where the
+ * bytes are and the other is what a screen says out loud, and an address whose host cannot
+ * be read still names where the answer came from. `name` is the word the workspace used for
+ * itself already trimmed — empty when it was told nothing, which is what sends a screen to
+ * the address and then to the copy table's own word through `workspaceName` — `accent` the
+ * lower-cased colour a person may paint, and `logoPath` the mark's path *on that host*.
+ * A workspace is identified by its server origin and nothing else: a re-read replaces every
+ * field, so a colour, a name and a mark never outlive the answer that carried them, and a
+ * mark can never be asked of a server other than the one that named it.
  */
 export interface Workspace {
+  readonly server: string;
   readonly host: string;
   readonly name: string;
   readonly accent?: string | undefined;
@@ -58,12 +63,13 @@ const markPath = (logoUrl: string | undefined): string | undefined => {
  * answers a workspace whose `name` is empty — today's look, not a failure.
  */
 export const workspaceOf = (answer: Connection, baseURL: string): Workspace => {
-  const host = hostLabel(baseURL);
+  const server = workspaceServer(baseURL);
   const name = answer.name.trim();
   const accent = answer.accent.trim();
   const path = markPath(answer.logoUrl);
   return Object.freeze({
-    host,
+    server,
+    host: hostLabel(server),
     name,
     ...(ACCENT.test(accent) ? { accent: accent.toLowerCase() } : {}),
     ...(path === undefined ? {} : { logoPath: path }),
@@ -79,12 +85,18 @@ export const workspaceOf = (answer: Connection, baseURL: string): Workspace => {
 export const workspaceServer = (server: string): string => server.trim().replace(/\/+$/, "");
 
 /**
- * workspaceMarkURI is where a phone asks for the mark the document named: that server's
- * origin and the path it named, joined and nothing else. Empty means there is no mark to
- * ask for, which draws no image rather than a broken one.
+ * workspaceMarkURI is where a phone asks for the mark a workspace named: that workspace's
+ * own origin joined to the path it named, and nothing else.
+ *
+ * The face carries the origin precisely so the address a screen asks cannot be chosen at the
+ * call site: a phone that changed the address, or that was built against another server, has
+ * no way to send a stranger's file path to a stranger's host. Empty — no mark named, or an
+ * origin that is no http(s) address — draws no image rather than a broken one.
  */
-export const workspaceMarkURI = (baseURL: string, logoPath: string | undefined): string =>
-  logoPath === undefined ? "" : workspaceServer(baseURL) + logoPath;
+export const workspaceMarkURI = (workspace: Workspace): string =>
+  workspace.logoPath === undefined || workspace.host === ""
+    ? ""
+    : workspace.server + workspace.logoPath;
 
 /**
  * WORKSPACES_KEEP is how many workspaces one phone may remember. Eight is a person's
@@ -119,18 +131,17 @@ export function rememberedFrom(value: unknown): Remembered {
 
 /**
  * rememberedStamp files what a workspace answered as a row this device may keep, with the
- * moment from the caller's clock. The row is filed under the origin the answer came from,
- * the same normalisation a held write's scope uses, so a trailing slash is one workspace
- * and not two. An entry with no address has nowhere to go back to and one with no name has
+ * moment from the caller's clock.
+ *
+ * The row is filed under the origin the face was read from — the same normalisation a held
+ * write's scope uses, so a trailing slash is one workspace and not two — which is the only
+ * origin a caller can name here: a row cannot be filed under an address other than the one
+ * that answered. An entry with no address has nowhere to go back to and one with no name has
  * nothing to show, so both answer undefined rather than a row: an unanswered address is a
  * typo, not a workspace, and is never remembered.
  */
-export const rememberedStamp = (
-  workspace: Workspace,
-  server: string,
-  seenAt: string,
-): Remembered | undefined => {
-  const host = workspaceServer(server);
+export const rememberedStamp = (workspace: Workspace, seenAt: string): Remembered | undefined => {
+  const host = workspace.server;
   const name = workspace.name.trim();
   if (host === "" || name === "") return undefined;
   return rememberedRecord.parse({
@@ -142,9 +153,27 @@ export const rememberedStamp = (
 };
 
 /**
- * unknownWorkspace is what a phone knows of a place before anything answered: its host,
- * and nothing else. Screens read a Workspace whatever its state, so "no document" is a
+ * rememberedFace reads a kept row back as the face it was stamped from: the origin it was
+ * answered at, the name and the mark that answer carried.
+ *
+ * A remembered row carries no accent, and that is the shape of what is kept rather than an
+ * omission: a colour is worn by the app a person is signing in to, and one kept from a place
+ * they are not standing at would be a palette for nobody. The mark is kept because the row
+ * draws it — a list of workspaces this phone has been at is read by their marks, the same way
+ * the connect step itself is.
+ */
+export const rememberedFace = (entry: Remembered): Workspace =>
+  Object.freeze({
+    server: entry.host,
+    host: hostLabel(entry.host),
+    name: entry.name,
+    ...(entry.logoPath === undefined ? {} : { logoPath: entry.logoPath }),
+  });
+
+/**
+ * unknownWorkspace is what a phone knows of a place before anything answered: where it was
+ * asked, and nothing else. Screens read a Workspace whatever its state, so "no document" is a
  * value here rather than a branch every screen would have to carry.
  */
 export const unknownWorkspace = (baseURL: string): Workspace =>
-  Object.freeze({ host: hostLabel(baseURL), name: "" });
+  Object.freeze({ server: workspaceServer(baseURL), host: hostLabel(baseURL), name: "" });

@@ -76,6 +76,13 @@ export interface Props {
    * a build with no table for them; an empty list is a person who has connected nowhere.
    */
   readonly remembered?: readonly Remembered[] | undefined;
+  /**
+   * markFor builds one remembered workspace's mark, the same way `mark` is built for the place
+   * being connected to: the composition that owns an image view makes it, and this frame only
+   * says where it sits. It is asked of a row whose own record holds a mark; absent, it is a
+   * build with no image view and no row is given a tile.
+   */
+  readonly markFor?: ((workspace: Remembered) => ReactNode) | undefined;
   /** connecting says the address the person typed is being asked what it is. */
   readonly connecting?: boolean;
   /**
@@ -120,6 +127,7 @@ export function SignInForm({
   workspace,
   mark,
   remembered,
+  markFor,
   connecting = false,
   onContinue,
   onEditAddress,
@@ -198,11 +206,28 @@ export function SignInForm({
     return (
       <Screen form testID="sign-in">
         {head(kit.connectTitle, kit.connectIntro)}
+        {/* The notice the credentials step draws, in the same words: a saved sign-in this phone
+            could not read, or could not clear, is about the address being typed here, and an
+            address step that drew it nowhere would keep a failure it has to itself. */}
+        {notice ? (
+          <Notice
+            announcement="polite"
+            tone="warning"
+            text={notice}
+            action={{ label: "Clear saved sign-in", onPress: onClear }}
+            testID="sign-in-notice"
+          />
+        ) : null}
         {remembered === undefined || remembered.length === 0 ? null : (
           <Section title={kit.rememberedWorkspaces} testID="sign-in-remembered">
             {remembered.map((entry) => (
               <Row
                 key={entry.host}
+                // A row that remembers no mark reserves no tile beside it: the name keeps the
+                // whole line, as it does on a build that ships no image view at all.
+                {...(markFor === undefined || entry.logoPath === undefined
+                  ? {}
+                  : { leading: <View style={s.rowMark}>{markFor(entry)}</View> })}
                 title={entry.name}
                 summary={entry.host}
                 opens
@@ -398,6 +423,14 @@ const styles = (t: Theme) =>
     mark: {
       width: t.extent.avatar,
       height: t.extent.avatar,
+      borderRadius: t.radius.md,
+      overflow: "hidden",
+    },
+    // The remembered row's own tile: a list of places this phone has been at is read by
+    // their marks, the same way the step itself is.
+    rowMark: {
+      width: t.extent.rowMedia,
+      height: t.extent.rowMedia,
       borderRadius: t.radius.md,
       overflow: "hidden",
     },

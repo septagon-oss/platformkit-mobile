@@ -8,7 +8,7 @@ import { clock, fakeOutboxStore, fakeReadStore, fakeWorkspaceStore } from "./fak
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import React from "react";
-import { Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { kitEnglish } from "../src/core/kitCopy";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 import { SignIn } from "../src/screens/SignIn";
@@ -91,10 +91,12 @@ function phone(over: { workspaces?: ReturnType<typeof fakeWorkspaceStore> } = {}
       }}
       clock={clock("2026-10-19T12:00:00.000Z")}
     >
+      {/* The app wears the workspace's colour over the whole tree, sign-in form included, so a
+          case that stops at the form can still read the colour it was drawn in. */}
       <WorkspaceTheme>
         <Probe />
+        <SignIn />
       </WorkspaceTheme>
-      <SignIn />
     </Shell>
   );
   return { remembered, shell };
@@ -130,9 +132,13 @@ test("the address step asks for a place before anything asks who you are", async
   expect(view.getByTestId("sign-in")).toBeTruthy();
   expect(view.getByTestId("server")).toBeTruthy();
   expect(view.getByTestId("continue")).toBeTruthy();
-  // No password is on this screen, and no accent has been worn yet.
+  // No password is on this screen, and no accent has been worn yet — not in the theme and
+  // not in the fill of the one verb this screen offers.
   expect(view.queryByTestId("email")).toBeNull();
   expect(view.getByTestId("accent")).toHaveTextContent(palette.light.accentDefault);
+  expect(StyleSheet.flatten(view.getByTestId("continue").props.style).backgroundColor).toBe(
+    palette.light.accentDefault,
+  );
   await settle();
   await view.unmount();
 });
@@ -150,6 +156,10 @@ test("Continue asks once, and the workspace it answered for is on screen before 
   // The kit's accent is gone from the tree and the workspace's nearest legible shade is
   // painted with it; the password step is where the person now stands.
   expect(screen.getByTestId("accent")).toHaveTextContent("#2461e6");
+  // and the form the person is standing on was drawn with it, not only the theme below it.
+  expect(StyleSheet.flatten(screen.getByTestId("submit").props.style).backgroundColor).toBe(
+    "#2461e6",
+  );
   expect(screen.getByTestId("email")).toBeTruthy();
   expect(screen.getByTestId("change-workspace")).toBeTruthy();
   expect(screen.queryByTestId("server")).toBeNull();

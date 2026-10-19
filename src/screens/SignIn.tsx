@@ -12,7 +12,7 @@ import { useSignOut } from "./useSignOut";
 import { WorkspaceMark } from "./WorkspaceMark";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { workspaceName } from "../core/derive";
-import type { Remembered } from "../core/workspace";
+import { rememberedFace, type Remembered } from "../core/workspace";
 import { useShell } from "../shell";
 import { ApiError } from "../effects/api";
 import { SignInForm } from "../ui/organisms/SignInForm";
@@ -90,20 +90,29 @@ export function SignIn({ title }: Props = {}) {
     setConnecting(true);
     setError("");
     try {
-      // An address that answered nothing stays on this step and says nothing extra: the
-      // person is about to find out at the password, which is what they do today, and a
-      // phone cannot tell "no workspace here" from "this network is lying".
-      if (await lookUp(url)) setStep("credentials");
+      // Whatever the answer, the person stands at the password for the address they named:
+      // a workspace older than the connection document, one whose document is briefly
+      // unavailable and a network that never answers are all still places a person can sign
+      // in at, and a phone that cannot read one has no warrant to close the door for not
+      // knowing which of the three it met. An unanswered address wears today's look and is
+      // named by its host, which is what the phone can honestly say about it.
+      await lookUp(url);
+      setStep("credentials");
     } finally {
       asking.current = false;
       setConnecting(false);
     }
   };
   // The name over the fields, by the one rule the header and Home's band read too, so the
-  // three cannot call the same place two things.
+  // three cannot call the same place two things. The address behind it is the one the face
+  // was read from — the place being connected to, which is not always the one this build was
+  // configured with.
   const place = useMemo(
-    () => ({ name: workspaceName(baseURL, feedback.copy, workspace.name), host: workspace.host }),
-    [baseURL, feedback.copy, workspace.host, workspace.name],
+    () => ({
+      name: workspaceName(workspace.server, feedback.copy, workspace.name),
+      host: workspace.host,
+    }),
+    [feedback.copy, workspace],
   );
   // challenged is the address the server refused to finish signing in. The code
   // is offered about that address, not whatever is left in the field after a
@@ -177,6 +186,12 @@ export function SignIn({ title }: Props = {}) {
           )
         }
         remembered={remembered}
+        markFor={(place) => (
+          <WorkspaceMark
+            description={feedback.copy.kit.workspaceMark(place.name)}
+            face={rememberedFace(place)}
+          />
+        )}
         connecting={connecting}
         onContinue={(url) => void connect(url)}
         onEditAddress={() => {

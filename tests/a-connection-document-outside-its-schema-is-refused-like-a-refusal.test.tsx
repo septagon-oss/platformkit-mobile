@@ -1,7 +1,7 @@
 // The generated validator is the phone's own boundary: a document that names a name and
-// nothing else is not a workspace description, and it is refused the way a 404 is — the
-// address step stays, the kit's accent stays, and no remembered row is written for a host
-// whose answer this phone could not read.
+// nothing else is not a workspace description, and it is refused the way a 404 is — nothing
+// is worn, no remembered row is written for a host whose answer this phone could not read,
+// and the person is still asked for their password at the address they typed, under its host.
 import { clock, fakeOutboxStore, fakeReadStore, fakeWorkspaceStore } from "./fakes/store";
 import { afterEach, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
@@ -88,10 +88,12 @@ function phone(over: { workspaces?: ReturnType<typeof fakeWorkspaceStore> } = {}
       }}
       clock={clock("2026-10-19T12:00:00.000Z")}
     >
+      {/* The app wears the workspace's colour over the whole tree, sign-in form included, so a
+          case that stops at the form can still read the colour it was drawn in. */}
       <WorkspaceTheme>
         <Probe />
+        <SignIn />
       </WorkspaceTheme>
-      <SignIn />
     </Shell>
   );
   return { remembered, shell };
@@ -126,9 +128,15 @@ test("a body outside the pinned schema is answered the same way a refusal is", a
   const { remembered, shell } = phone();
   const view = await render(shell);
   await connectTo("https://half.test");
-  await waitFor(() => expect(screen.getByTestId("server")).toBeTruthy());
-  expect(screen.queryByTestId("email")).toBeNull();
+  // Nothing was read, so nothing is worn and nothing is kept — the kit's accent, no mark, no
+  // row for a half answer. What the person is offered is the same way forward a refusal
+  // leaves them with: the password, asked at the address they typed and named by its host.
+  await waitFor(() => expect(screen.getByTestId("email")).toBeTruthy());
+  expect(screen.getByTestId("password")).toBeTruthy();
+  expect(screen.getByTestId("workspace-name")).toHaveTextContent("half.test");
   expect(screen.getByTestId("accent")).toHaveTextContent(palette.light.accentDefault);
+  expect(screen.getByTestId("phase")).toHaveTextContent("anonymous");
+  expect(screen.queryByTestId("workspace-mark")).toBeNull();
   expect(remembered.rows).toEqual([]);
   await settle();
   await view.unmount();

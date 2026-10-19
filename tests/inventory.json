@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 109,
-   "cases": 341,
-   "ms": 2480079,
-   "testsMs": 41939,
+   "files": 112,
+   "cases": 346,
+   "ms": 2549166,
+   "testsMs": 42523,
    "runners": {
-    "jest": 109
+    "jest": 112
    },
    "unreachable": 0
   },
@@ -3118,7 +3118,7 @@
    "runner": "node",
    "layer": "contract",
    "cases": 9,
-   "rule": "One connection document is read as three things: what the place is called, what colour it wears and what mark it hands out. The name a person may paint comes only in the one spelling the workspace's own document names for it, and a mark only as a path on the host that named it \u2014 the phone never follows a URL a server points it at, and never paints a colour it cannot read.",
+   "rule": "One connection document is read as three things: what the place is called, what colour it wears and what mark it hands out. The name a person may paint comes only in the one spelling the workspace's own document names for it, and a mark only as a path on the host that named it \u2014 the phone never follows a URL a server points it at, never asks a second server for the first one's path, and never paints a colour it cannot read.",
    "ruleSource": "first comment",
    "tier": "push",
    "reach": "npm test (node half)",
@@ -20098,7 +20098,7 @@
    "runner": "jest",
    "layer": "composition",
    "cases": 1,
-   "rule": "The generated validator is the phone's own boundary: a document that names a name and nothing else is not a workspace description, and it is refused the way a 404 is \u2014 the address step stays, the kit's accent stays, and no remembered row is written for a host whose answer this phone could not read.",
+   "rule": "The generated validator is the phone's own boundary: a document that names a name and nothing else is not a workspace description, and it is refused the way a 404 is \u2014 nothing is worn, no remembered row is written for a host whose answer this phone could not read, and the person is still asked for their password at the address they typed, under its host.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
@@ -20123,33 +20123,68 @@
    "testsMs": 174
   },
   {
-   "file": "tests/an-address-that-answers-nothing-asks-for-the-address-as-it-always-did.test.tsx",
+   "file": "tests/a-lookup-that-never-answers-asks-for-the-password-at-the-address-it-was-typed.test.tsx",
    "runner": "jest",
    "layer": "composition",
    "cases": 1,
-   "rule": "An address that answers nothing is not a workspace and not a failure: the phone stays on the address, wears its own colours and remembers nothing. The person finds out at the password, which is what they do today \u2014 a 404, a refusal and a body outside the pinned schema are one answer here, and none of them is allowed to strand the screen.",
+   "rule": "A lookup the network never answers is one of the ways a workspace says nothing: the phone wears its own look, names the place by the host the person typed, and asks for the email and the password there. Two things are pinned here that no other case reaches: the request went to the address that was typed and to no other, and a wire that dies mid-flight strands nobody \u2014 no remembered row, no half-worn colour, no screen without a way forward.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 31259,
+   "ms": 29759,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
-    "an address that answers nothing keeps the address step and the kit's own look"
+    "an address the network never answers is still asked for a password, at its own host"
    ],
    "tests": [
     {
-     "title": "an address that answers nothing keeps the address step and the kit's own look",
-     "ms": 190,
+     "title": "an address the network never answers is still asked for a password, at its own host",
+     "ms": 172,
      "measured": false
     }
    ],
    "loaded": 168,
-   "coveredProdLines": 2539,
+   "coveredProdLines": 2520,
    "onlyProdLines": null,
-   "testsMs": 190
+   "testsMs": 172
+  },
+  {
+   "file": "tests/an-address-with-no-connection-document-still-asks-for-a-password.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A workspace that answers no connection document is still a place a person can sign in at: the phone wears its own look, names the place by its host, and asks for the email and the password there. A server that predates the document, or one whose document is briefly unavailable, must not leave a fresh install with no way past the address.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 27059,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a absent connection document still reaches the password with the host as the name",
+    "a failing connection document still reaches the password with the host as the name"
+   ],
+   "tests": [
+    {
+     "title": "a absent connection document still reaches the password with the host as the name",
+     "ms": 467,
+     "measured": false
+    },
+    {
+     "title": "a failing connection document still reaches the password with the host as the name",
+     "ms": 15,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2544,
+   "onlyProdLines": null,
+   "testsMs": 482
   },
   {
    "file": "tests/route.test.tsx",
@@ -25383,6 +25418,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-app-hands-the-shell-its-workspaces-table.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "What the reference app keeps on the phone is one list in src/screens/device.ts, and the shell only remembers the workspaces a person has connected to when that list hands it the table for them. A store the device creates and never passes on is a list no person sees.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21476,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the device hands the shell the table of workspaces this phone has connected to"
+   ],
+   "tests": [
+    {
+     "title": "the device hands the shell the table of workspaces this phone has connected to",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 133,
+   "coveredProdLines": 1920,
+   "onlyProdLines": null,
+   "testsMs": 2
+  },
+  {
    "file": "tests/the-connect-step-asks-a-workspace-what-it-is-before-it-asks-who-you-are.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25416,6 +25480,41 @@
    "coveredProdLines": 2603,
    "onlyProdLines": null,
    "testsMs": 193
+  },
+  {
+   "file": "tests/the-mark-is-asked-of-the-address-that-named-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A workspace's mark is a path on the host that answered the document naming it, so the phone asks that host for it: on a blank phone, and on a phone that was pointed somewhere else before the person changed the address. The mark is on the connect step's credentials before the password is asked for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22052,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a blank phone asks the address it connected to for the mark",
+    "a changed address asks the new host for the mark, never the one before it"
+   ],
+   "tests": [
+    {
+     "title": "a blank phone asks the address it connected to for the mark",
+     "ms": 99,
+     "measured": false
+    },
+    {
+     "title": "a changed address asks the new host for the mark, never the one before it",
+     "ms": 19,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2610,
+   "onlyProdLines": null,
+   "testsMs": 118
   },
   {
    "file": "tests/ui/list-from-the-phone-says-so.test.tsx",
