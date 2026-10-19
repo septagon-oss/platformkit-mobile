@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `6bc50fcd9` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `c88e4a568` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 224 | 47.6 s | 77 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 255 | 1197 | 63.4 s | 2086 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 116 | 367 | 43.6 s | 2679 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 117 | 368 | 43.7 s | 2705 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 465
+* keep: 466
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 465 — 203 `tests/*.test.ts` (node), 205 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1788; cases in files no runner reaches: 35
-* isolated wall time: contract 77 s, behaviour 2086 s, composition 2679 s, journey 0 s
+* files inventoried: 466 — 203 `tests/*.test.ts` (node), 206 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1789; cases in files no runner reaches: 35
+* isolated wall time: contract 77 s, behaviour 2086 s, composition 2705 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -505,6 +505,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/a-receipt-says-what-the-write-just-did.test.tsx | jest | composition | 7 | 28786 | 746 |  | not measured | — | 0 | keep | The life of the bar: filed, drawn, read as what a write just did, and spent — by its own clock, and by the filing that replaced it. The words are the command's… |
 | tests/ui/list-from-the-phone-says-so.test.tsx | jest | composition | 3 | 18949 | 826 |  | not measured | — | 0 | keep | An empty page this phone answered is not "nothing exists": it is "nothing was there the last time this device heard". The list says which of the two it is, and… |
 | tests/ui/prose-code-reads-as-written.test.tsx | jest | composition | 2 | 21325 | 23 |  | not measured | — | 0 | keep | Code is drawn as the author wrote it: a fenced block and an inline code span are literal in 0069 §1 and in CommonMark, so no character inside them is escaped o… |
+| tests/ui/two-acts-that-read-alike-are-told-twice.test.tsx | jest | composition | 1 | 25808 | 19 |  | not measured | — | 0 | keep | Two acts that read alike are two facts. The bar keeps its sentence when the next command's answer happens to be the sentence the first one said — two rows of o… |
 | tests/what-this-device-remembers-is-listed-as-places-and-fills-the-address.test.tsx | jest | composition | 1 | 26444 | 665 |  | not measured | — | 0 | keep | A remembered workspace is an address with a name on it: listed as a place, pressed without a field being touched, and asked about once. It never signs anybody … |
 | tests/workspace-sign-in-keeps-its-address-through-refusals.test.tsx | jest | composition | 3 | 41927 | 246 |  | not measured | — | 0 | keep | A connection document describes a place without deciding whether anyone can sign in: a refused read still signs in at the address shown, a superseded read cann… |
 

@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 116,
-   "cases": 367,
-   "ms": 2679465,
-   "testsMs": 43636,
+   "files": 117,
+   "cases": 368,
+   "ms": 2705273,
+   "testsMs": 43655,
    "runners": {
-    "jest": 116
+    "jest": 117
    },
    "unreachable": 0
   },
@@ -26163,6 +26163,35 @@
    "coveredProdLines": 701,
    "onlyProdLines": null,
    "testsMs": 23
+  },
+  {
+   "file": "tests/ui/two-acts-that-read-alike-are-told-twice.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Two acts that read alike are two facts. The bar keeps its sentence when the next command's answer happens to be the sentence the first one said \u2014 two rows of one list resolved back to back both say \"Task resolved\" \u2014 so a surface that re-tells only what changed in its text leaves the second act unheard by the reader who cannot see the bar change. What is told is keyed on the filing, not on its wording, and this is the one suite that can see the difference: iOS announcements are an effect of a mounted surface, so a bar that never remounts never speaks again.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25808,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a person who acted twice is told twice when both acts read alike"
+   ],
+   "tests": [
+    {
+     "title": "a person who acted twice is told twice when both acts read alike",
+     "ms": 19,
+     "measured": false
+    }
+   ],
+   "loaded": 145,
+   "coveredProdLines": 2025,
+   "onlyProdLines": null,
+   "testsMs": 19
   },
   {
    "file": "tests/what-this-device-remembers-is-listed-as-places-and-fills-the-address.test.tsx",
