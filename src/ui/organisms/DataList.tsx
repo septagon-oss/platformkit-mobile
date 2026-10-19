@@ -225,16 +225,23 @@ export function DataList({
             {...(row.open?.enabled && onOpen
               ? {
                   onPress: () => {
-                    // The record opens whether or not the platform answers where the row's picture
-                    // stood: a measurement that never answers costs the flight, never the tap. It
-                    // is asked for at press and at no other moment, because a list that remembered
-                    // one would scroll away from it.
+                    // One press opens one record, however the platform answers where the row's
+                    // picture stood. A surface that answers as it is asked (the Fabric native views
+                    // do) opens from its answer, which is the only way the frame can be filed before
+                    // the record mounts to read it; a surface that answers late, or never, opens from
+                    // here and the flight is simply not drawn. The guard is what makes a measurement
+                    // that costs the flight never cost the tap, nor a second copy of the record.
                     const tile = tiles.current[row.id];
+                    let opened = false;
+                    const open = (frame?: LayoutRectangle) => {
+                      if (opened) return;
+                      opened = true;
+                      if (frame === undefined) onOpen(row.id);
+                      else onOpen(row.id, frame);
+                    };
                     if (typeof tile?.measureInWindow === "function")
-                      tile.measureInWindow((x, y, width, height) =>
-                        onOpen(row.id, { x, y, width, height }),
-                      );
-                    onOpen(row.id);
+                      tile.measureInWindow((x, y, width, height) => open({ x, y, width, height }));
+                    open();
                   },
                 }
               : {})}

@@ -103,7 +103,7 @@ for the version being released.
 
 - Two words the kit was missing, and an id. `kit.listControls` names the toolbar row a
   list's two doors sit in: the bar's accessible name was `kit.sort`, which told a reader the
-  bar *is* its Sort button and left the filters door beside it under the wrong name. A
+  bar _is_ its Sort button and left the filters door beside it under the wrong name. A
   supplied `testID` now names the `ActionBar` itself as well as every control inside it, so
   the bar a reader hears the name of is a bar a journey can look up. Additive.
 - Each group of a filters sheet keys its choices with the group's own name
@@ -142,7 +142,7 @@ for the version being released.
   `addTagTo`, `removeTag`, `commaInValue` — and `tags-<label>`, `add-<label>`,
   `tags-fault-<label>` and `field-<name>` are the ids a device journey works through.
 - The refusal a person can correct now survives the correction. `TagsField` draws its
-  chips from the value beyond the word the box last *wrote*, not beyond whatever stands
+  chips from the value beyond the word the box last _wrote_, not beyond whatever stands
   in the box, so a word typed, refused and mended lands alone instead of beside its own
   accepted prefix, and a chip's remove button keeps that word out of the value. In
   `./core/derive`, `entryHoldsSeparator` asks the text for a comma rather than asking
@@ -176,7 +176,7 @@ for the version being released.
   the same address it was filed under.
 - Additive to `./effects/api`: `served(e, id)`, which is `get(e, id)`'s read keeping the tag that
   read's `Content-Language` printed beside the row rather than dropping it (`Api.get` answers the
-  row alone, unchanged). A record with a translatable field is answered *in a language*, and a
+  row alone, unchanged). A record with a translatable field is answered _in a language_, and a
   write naming none is filed as the record's own copy, so the tag a person read their words in is
   the tag their Save names: `writeLanguage` takes it as a fifth, optional argument, and a sheet
   that read a record in Portuguese now writes every translatable field it changed in Portuguese —
@@ -198,6 +198,33 @@ for the version being released.
   no file part, no filename and no bytes, and the file module refused it. A body that is already a
   multipart form now reaches `fetch` unchanged, which is what lets a picture taken on the phone
   enter a body as the row the server made for it.
+- A record now says when it finished, in the words its author served. `./core/catalog` reads one
+  more hint, `doneValues`, on the field's `presentation` and refuses to remember a value the field's
+  own enum does not hold; `./core/derive` gains `finishedValues` (the subset the entry's
+  `statusField` declared), `isFinished` (this row's state against that subset, never against a tone
+  or a label), `finishedWord` (the entry's noun and the author's word for the state, in one sentence)
+  and `statusTone` (that colour asked without its words, for a mark drawn in it). Additive.
+  `enumTones` answers none of these: which values finish and which colour finished wears are the
+  kernel's orthogonal pair, and a document that declares nothing finishes nothing.
+- `ShellValue` gains three one-shot channels beside `say`/`heard`. `celebrate(href)`,
+  `celebrating(href)` and `celebrated(href)` carry the fact that a write this phone made reached a
+  record, so the screen holding that record's row can decide whether its state actually crossed into
+  one its entry calls finished — a filing says only that this phone wrote, and files no row and no
+  value. `surprised(href)` retires the record's one moment per session, and retires it when the
+  moment plays: a write that finished nothing leaves the record its moment for the write that does.
+  `travelTo(href, frame)` and `travelled(href)` carry the frame of the row a person pressed to the
+  record it opens, once, and carry nothing else. Additive.
+- New in `./ui/atoms`, and exported: `RolledValue`, a number that changed while the person was
+  reading it — a count, a price, a stat — which rolls to its new value inside the line it stood on.
+  It draws a string somebody else derived and derives none of its own, rolls only between two strings
+  whose changed positions all hold a digit, and reads no rendered value back into a number.
+  `Badge` gained the optional `motion`, which changes a pill in place when the state it carries
+  moves; absent it swaps at once, so every call site is undisturbed. `ResourceDetail` (organisms)
+  gained the optional `finishing` — the sentence, the tone the arrived state wears, the burst to draw
+  over the record and the one call that says it is over — absent meaning the record reached nothing
+  and is drawn exactly as it was. `MediaRenderers` gained `finishing`, the third renderer a product
+  may ship beside `zoom` and `coverMotion`. `kit.finished` joined the copy table in English and
+  Portuguese, and `record-finished` is the id a journey and a screen reader both find the line by.
 
 ## 0.2.0
 

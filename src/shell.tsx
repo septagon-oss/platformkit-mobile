@@ -78,13 +78,20 @@ export interface ShellValue {
    * record's own screen — the one holding the row to compare — can decide whether its state
    * actually crossed into one the entry calls finished. A filing says only that this phone wrote;
    * it files no row and no value, so it can carry nothing the person was not shown. Filing twice
-   * for one address is filing once: a record surprises a person once per session.
+   * for one address is filing once, and an address that has played its moment files nothing more.
    */
   readonly celebrate: (href: string) => void;
   /** celebrating says whether this address is the one due its moment. It reads, it does not clear. */
   readonly celebrating: (href: string) => boolean;
   /** celebrated says the record looked: the filing is spent, whether or not anything crossed. */
   readonly celebrated: (href: string) => void;
+  /**
+   * surprised says the moment played over the record at this address, which is the only thing that
+   * spends the record's one surprise per session. A filing whose read crossed nothing — a command
+   * that left the state where it was, an edit to a field the entry does not read as finished —
+   * leaves the record eligible for the write that does finish it.
+   */
+  readonly surprised: (href: string) => void;
   /**
    * travelTo files the frame of the thumbnail a person pressed, for the record address it opens
    * into, so the record can begin where the finger was. Only the frame travels, never a row.
@@ -243,13 +250,13 @@ export function Shell({
   // The one sentence a write said, filed by the address it was said for. One slot,
   // because one write lands on one record, and the writer names where the person goes.
   const sentence = useRef<{ href: string; text: string } | undefined>(undefined);
-  // The one record due its moment, and the records this session already surprised. One slot, as
-  // with the sentence, because one person looks at one record: a filing for a second replaces the
-  // pending first rather than queueing it, since a burst nobody ever saw is better than a burst
-  // drawn over the wrong record. The address joins the set when it is filed, not when it is
-  // played, so a second write to a record whose burst is still waiting cannot surprise twice.
+  // The one record due its moment, and the records whose moment this session already played. One
+  // slot, as with the sentence, because one person looks at one record: a filing for a second
+  // replaces the pending first rather than queueing it, since a burst nobody ever saw is better than
+  // a burst drawn over the wrong record. The address joins the set when its moment is played, not
+  // when a write files it, because most writes to a record finish nothing.
   const due = useRef<string | undefined>(undefined);
-  const surprised = useRef<Set<string>>(new Set());
+  const played = useRef<Set<string>>(new Set());
   // Where the person came from, filed by the row they pressed under the address it opens. One
   // slot, because one navigation is under way at a time.
   const journey = useRef<{ href: string; frame: LayoutRectangle } | undefined>(undefined);
@@ -298,7 +305,7 @@ export function Shell({
     sheet.current = undefined;
     sentence.current = undefined;
     due.current = undefined;
-    surprised.current = new Set();
+    played.current = new Set();
     journey.current = undefined;
     remember(undefined);
   }, [remember]);
@@ -315,13 +322,15 @@ export function Shell({
     return said;
   }, []);
   const celebrate = useCallback((href: string) => {
-    if (surprised.current.has(href)) return;
-    surprised.current.add(href);
+    if (played.current.has(href)) return;
     due.current = href;
   }, []);
   const celebrating = useCallback((href: string) => due.current === href, []);
   const celebrated = useCallback((href: string) => {
     if (due.current === href) due.current = undefined;
+  }, []);
+  const surprised = useCallback((href: string) => {
+    played.current.add(href);
   }, []);
   const travelTo = useCallback((href: string, frame: LayoutRectangle) => {
     journey.current = { href, frame };
@@ -630,6 +639,7 @@ export function Shell({
       celebrate,
       celebrating,
       celebrated,
+      surprised,
       travelTo,
       travelled,
       returning,
@@ -829,6 +839,7 @@ export function Shell({
       celebrate,
       celebrating,
       celebrated,
+      surprised,
       travelTo,
       travelled,
       returning,

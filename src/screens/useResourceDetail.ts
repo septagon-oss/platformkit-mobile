@@ -41,7 +41,8 @@ export function useResourceDetail(
   format: Formatting,
   clock: Clock = systemClock,
 ) {
-  const { api, writes, wrote, heard, celebrating, celebrated, outbox, reads } = useShell();
+  const { api, writes, wrote, heard, celebrating, celebrated, surprised, outbox, reads } =
+    useShell();
   const { mode } = useTheme();
   const router = useRouter();
   // The three format fields this hook reads are strings and a frozen bundle, so
@@ -87,6 +88,13 @@ export function useResourceDetail(
   // looking at. The words a moment speaks are made in `format`, which is rebuilt on every render
   // and so is read through a ref rather than becoming a dependency of the read below.
   const filing = useRef(false);
+  // The one call that spends the record's surprise travels by ref, the way a question travels in
+  // useOperation: whoever composes the shell may hand out a new function on every rebuild, and a
+  // read keyed by it would re-read the row each time the shell's value is made anew.
+  const spend = useRef(surprised);
+  useEffect(() => {
+    spend.current = surprised;
+  });
   // The instant of the last read that answered. A refresh names it, and while it
   // is empty there is nothing to name — which is why an unread refresh is a read.
   const read = useRef("");
@@ -117,10 +125,11 @@ export function useResourceDetail(
         // already celebrated are both answered with silence.
         const caused = filing.current;
         filing.current = false;
+        const live = got.source !== "device";
         const crossed =
           caused &&
           drawn.current !== undefined &&
-          got.source !== "device" &&
+          live &&
           isFinished(entry, got.value) &&
           !isFinished(entry, drawn.current);
         drawn.current = got.value;
@@ -130,11 +139,23 @@ export function useResourceDetail(
         setRefusal(undefined);
         read.current = clock.now();
         if (crossed) {
+          // The moment plays here, so this is where the record spends its one surprise per session:
+          // a write that finished nothing files the moment and leaves it owing, never spends it.
+          spend.current(address("detail", entry, id));
           setReached(got.value);
           setBursting(true);
+        } else if (live && !isFinished(entry, got.value)) {
+          // What the line says is about a state the record no longer holds: what this phone wrote
+          // went back to open, so the sentence about finishing goes back with it.
+          setReached(undefined);
+          setBursting(false);
         }
       } catch (e) {
         if (generation.current !== started) return;
+        // A refused read spent the filing as an answered one does: the moment belongs to the write
+        // this phone made, and a later Retry that finally answers shows a state this person may
+        // well have had nothing to do with.
+        filing.current = false;
         const at = instantValue(read.current);
         const said = at ? presentedTime(at, { locale, timeZone, ownZone }) : "";
         const verdict = refusalOf(e, why, failureSubject(entry, "", said), copy);
