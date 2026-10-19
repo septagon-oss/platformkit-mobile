@@ -249,7 +249,7 @@ for the version being released.
 
 - The app wears each workspace's own face. `GET /api/v1/app/connection` is read at the
   address a person is connecting to and at the one a session opens at, and what it answers
-  becomes `./core/workspace`'s `Workspace` (`host`/`name`/`accent`/`logoPath`) — the name goes
+  becomes `./core/workspace`'s `Workspace` (`server`/`host`/`name`/`accent`/`logoPath`) — the name goes
   to `workspaceName`, which now takes the answered word before the address and the copy
   table's word, and the colour goes through the new `accentPalette` in `./ui/theme`, which
   copies the generated palette and wears that colour in its accent roles at the nearest
@@ -257,7 +257,8 @@ for the version being released.
   palette by identity when none does. `src/ui/tokens.ts` is still the only writer of colour.
   `./effects/workspaces` is new — `createWorkspaces` over a `workspace_seen` device table
   (five shown, eight kept, one row per server, `seen_at` from the injected clock), holding a
-  server's name and mark and no credential of any kind. New on `ShellValue`: `workspace`,
+  server's name and mark and no credential of any kind, and drawn as a row on the address step.
+  A face carries the origin it was read from, so its mark is only ever asked of that origin: New on `ShellValue`: `workspace`,
   `lookUp` and the optional `workspaces`, and `ShellProps.store` takes the fourth table
   beside `outbox`, `reads` and `recents` — all three additive, and all three below 1.0.0.
   Sign-in grows an address step before the password asks for one; `./screens/WorkspaceTheme`

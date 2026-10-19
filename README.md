@@ -2248,9 +2248,14 @@ that keeps every pair `contrastPairs` measures, in both modes at once, and retur
 own pair by identity when no shade does — a workspace is never legible by day and refused by
 night. `src/ui/tokens.ts` remains the only writer of colour and `npm run tokens` the only way
 into it. What this device has been pointed at is remembered as a name, a host, a mark and a
-moment in the `workspace_seen` table: never a credential, so a remembered workspace can fill
-an address and cannot sign anybody in. An address that answers nothing wears today's look
-and asks for a password as it always did.
+moment in the `workspace_seen` table, which reaches `Shell` as the device's fourth table
+through `./screens/device`: never a credential, so a remembered workspace can fill an address
+and cannot sign anybody in, and never a colour, because a colour belongs to the place a person
+is standing at. A face carries the origin it was read from, which is why its mark is asked of
+that origin and of no other — on a phone built against one server whose person typed another,
+and on a phone that pressed Change. An address that answers nothing — a refusal, a dead
+network, a body outside the document — is named by its host and asked for a password like any
+other, because a phone that could not read a workspace has not proved there is nothing there.
 
 **Reused** — `ThemeProvider`'s existing `palette` prop and `themeFor` (a palette in, one
 theme out), `contrastPairs` as the measure the worn shade is chosen against, `core/color`'s
@@ -2258,6 +2263,7 @@ theme out), `contrastPairs` as the measure the worn shade is chosen against, `co
 deadline, the origin check and the pinned `zAppConnectionResponse` stay in the path), the
 `recents` optional-slot shape for `store.workspaces`, the `recent_open` migration shape,
 `Row`/`Section`/`ServerField`/`Button`/`Screen`, `NativeImage` as the app's own image view,
+`extent.rowMedia` for the tile a remembered row's mark sits in,
 and the copy table for every new word in `en` and `pt`.
 
 **Added** — `accentPalette`, because the theme offered a palette in and `core/color` only
@@ -2271,10 +2277,27 @@ between them and `src/ui` may not read the shell; the address step, because the 
 for an address and then a password with nothing read in between.
 
 **Made reusable** — `Workspace` as the one shape a workspace's face takes (so an Account
-surface or a switching menu reads a value rather than a document), `rememberedStamp` with
+surface or a switching menu reads a value rather than a document, and `rememberedFace` reads a
+kept row back as one), `rememberedStamp` with
 `createWorkspaces` as a device table a product can supply its own copy of, and
 `./screens/WorkspaceMark` — a mark built from the address that named it and drawn by
 whatever renderer the app ships, which is what any other workspace-owned picture needs.
+
+**Limits** — The accent is worn from the connect step's lookup, not from after the sign-in: a
+workspace's colour is what its own document says, and waiting for a session to paint the screen
+that reads that document would paint nothing while the person is still choosing the place.
+`Account` carries no mark, because there is no Account screen to carry one: Account is the
+header's action sheet, which names the person rather than the place, and the mark sits on the
+two surfaces that identify the place — the connect step and Home's band. After a sign-out or an
+expired session the credentials step names the host and draws no mark until the next document is
+read, because dropping the key is what drops the face worn with it. A remembered row is a name,
+a host, a mark and a moment, five of at most eight listed, and no phone reads a colour from it.
+A lookup that answered nothing is said by the host standing where the answered word would have
+been and by no sentence: the phone cannot tell "no workspace here" from "this network is
+lying", and an address that is a typo is refused at the password, where the server can say so.
+The `workspace_seen` statements run on a device only — every suite over the list answers from
+the in-memory table in `tests/fakes/store.ts`, so the SQL is read here rather than executed — and
+the two changed flows are proven on an emulator with `make e2e-android`, not in this suite.
 
 ## Read the first journey end to end
 
