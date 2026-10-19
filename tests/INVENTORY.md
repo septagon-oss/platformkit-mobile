@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `7cf0d2509` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `6399946af` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 201 | 47.5 s | 73 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 236 | 1082 | 49.7 s | 1671 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 237 | 1083 | 49.7 s | 1701 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 96 | 310 | 33.9 s | 2057 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 424
+* keep: 425
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 424 — 195 `tests/*.test.ts` (node), 172 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1593; cases in files no runner reaches: 35
-* isolated wall time: contract 73 s, behaviour 1671 s, composition 2057 s, journey 0 s
+* files inventoried: 425 — 195 `tests/*.test.ts` (node), 173 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1594; cases in files no runner reaches: 35
+* isolated wall time: contract 73 s, behaviour 1701 s, composition 2057 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -137,6 +137,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/viewer-recovery-retains-loader.test.tsx | jest | behaviour | 1 | 20708 | 737 | 0 | 0 of 1 | — | 0 | keep | Recovery keeps what is already true: the loader stays while it is genuinely loading, and a selection the viewer abandoned stays abandoned until its own read su… |
 | tests/screens/viewer-revoked-selection.test.tsx | jest | behaviour | 4 | 19774 | 756 | 0 | 0 of 4 | — | 0 | keep | Losing the selected image loses it: the viewer shows its unavailable state rather than the next item, and an id that becomes authorized again is shown only thr… |
 | tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx | jest | behaviour | 2 | 24193 | 18 |  | not measured | — | 0 | keep | The entrance of an empty screen's picture is the model's to ask for, not the atom's to guess: a state derived on a device that asks for motion rises once, for … |
+| tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx | jest | behaviour | 1 | 30398 | 7 |  | not measured | — | 0 | keep | A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared compo… |
 | tests/ui/agenda-appointment-lines.test.tsx | jest | behaviour | 3 | 19211 | 106 | 0 | 0 of 3 | — | 0 | keep | An appointment is its name and, beneath it, when it is. Welding the two into one control label gave every entry the same long centred line of text, and a headi… |
 | tests/ui/atoms.test.tsx | jest | behaviour | 11 | 18901 | 51 | 0 | 0 of 11 | — | 0 | keep | (no first comment; first test title) a busy button is a button that cannot be pressed and says so |
 | tests/ui/calendar-withdrawal.test.tsx | jest | behaviour | 12 | 20965 | 1566 | 180 | 0 of 12 | — | 0 | keep | Denied calendar content removes what the person could act on in every view — day, week and agenda — and asks for an explicit recovery intent instead of silentl… |

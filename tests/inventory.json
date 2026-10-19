@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 236,
-   "cases": 1082,
-   "ms": 1670999,
-   "testsMs": 49721.20000000002,
+   "files": 237,
+   "cases": 1083,
+   "ms": 1701397,
+   "testsMs": 49728.20000000002,
    "runners": {
-    "jest": 76,
+    "jest": 77,
     "node": 160
    },
    "unreachable": 0
@@ -3740,6 +3740,35 @@
    "coveredProdLines": 739,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared component setup mounts the reference catalogue's note in exactly this shape before every suite, so this also holds the precondition that hook leans on: the note is a resource the reference catalogue declares.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30398,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a record page given no picture door draws its header block and no cover"
+   ],
+   "tests": [
+    {
+     "title": "a record page given no picture door draws its header block and no cover",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 122,
+   "coveredProdLines": 1730,
+   "onlyProdLines": null,
+   "testsMs": 7
   },
   {
    "file": "tests/ui/agenda-appointment-lines.test.tsx",
