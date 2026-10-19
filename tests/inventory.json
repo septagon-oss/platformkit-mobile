@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 239,
-   "cases": 1101,
-   "ms": 1732161,
-   "testsMs": 50399.10000000002,
+   "files": 240,
+   "cases": 1104,
+   "ms": 1747306,
+   "testsMs": 50417.10000000002,
    "runners": {
-    "jest": 78,
+    "jest": 79,
     "node": 161
    },
    "unreachable": 0
@@ -3738,6 +3738,47 @@
    ],
    "loaded": 114,
    "coveredProdLines": 739,
+   "onlyProdLines": null,
+   "testsMs": 18
+  },
+  {
+   "file": "tests/ui/a-pill-crosses-from-the-colour-it-wore.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "A pill whose state moved while it was on screen crosses from the pair it wore to the pair it reached: the pair it left is laid over the pill, fully on, hidden from a reader and answering no press, and it is gone once the crossing ends \u2014 leaving the tree a pill that drew the reached state from the start draws. The word is never doubled at any point of the crossing. A reader who asked for less motion, and a pill re-drawn in the state it already wore, start no crossing at all. Jest's Animated finishes every timing at once, so each case holds the crossing open by answering `Animated.timing` itself and ends it by hand; every colour is read off a pill in the same tree.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 15145,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a moved pill wears the pair it left over the pair it reached until its crossing ends",
+    "a pill whose reader asked for less motion starts no crossing and lays nothing over itself",
+    "a pill re-drawn in the state it already wore starts no crossing"
+   ],
+   "tests": [
+    {
+     "title": "a moved pill wears the pair it left over the pair it reached until its crossing ends",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a pill whose reader asked for less motion starts no crossing and lays nothing over itself",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a pill re-drawn in the state it already wore starts no crossing",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 123,
+   "coveredProdLines": 1772,
    "onlyProdLines": null,
    "testsMs": 18
   },
