@@ -142,3 +142,45 @@ test("a remembered open leads to the record itself, at the address the router kn
     "/note/note/n%207",
   );
 });
+
+test("a withdrawn open leaves this person's other opens, and every other person's", async () => {
+  const store = fakeRecentsStore();
+  const ada = recentsFor(store);
+  await ada.opened({ resourceKey: "note/note", recordId: "n-1", title: "Ada's" });
+  await ada.opened({ resourceKey: "note/note", recordId: "n-2", title: "Retro" });
+  const bea = createRecents({
+    store: store.store,
+    clock: clock("2026-10-06T11:00:00.000Z"),
+    scope: () => BEA,
+  });
+  await bea.opened({ resourceKey: "note/note", recordId: "n-1", title: "Bea's" });
+  await ada.forgot({ resourceKey: "note/note", recordId: "n-1" });
+  assert.deepEqual(
+    (await ada.list()).map((row) => row.recordId),
+    ["n-2"],
+    "the record this phone deleted is the only row that went",
+  );
+  // Same resource and same record id under another sign-in: a door of theirs, untouched.
+  assert.deepEqual(
+    (await bea.list()).map((row) => row.recordId),
+    ["n-1"],
+  );
+  // Withdrawing an open the list never held changes no row.
+  await ada.forgot({ resourceKey: "note/note", recordId: "never-opened" });
+  assert.equal(store.rows.length, 2, "one row per person's open, and nothing lost");
+});
+
+test("a withdrawal with no owner stores nothing and asks the table for nothing", async () => {
+  const store = fakeRecentsStore();
+  const orphan = createRecents({
+    store: store.store,
+    clock: clock("2026-10-06T10:00:00.000Z"),
+    scope: () => undefined,
+  });
+  await store.store.save(ADA, opened("2026-10-06T10:00:00.000Z", "n-1", "Standup"));
+  await orphan.forgot({ resourceKey: "note/note", recordId: "n-1" });
+  // A statement that names no server and no sign-in deletes nobody's row: the row stays,
+  // and the table was never asked.
+  assert.equal(store.rows.length, 1);
+  assert.deepEqual(store.calls, ["save"]);
+});

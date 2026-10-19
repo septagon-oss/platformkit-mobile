@@ -43,6 +43,16 @@ export function recentFrom(value: unknown): Recent {
 export const recentKey = (recent: Recent): string => `${recent.resourceKey}/${recent.recordId}`;
 
 /**
+ * RecentRef names one remembered open without its words or its moment, which is all a
+ * withdrawal needs: the record a person just deleted is known by its resource and its id,
+ * and the door drawn from it is looked up by nothing else.
+ */
+export interface RecentRef {
+  readonly resourceKey: string;
+  readonly recordId: string;
+}
+
+/**
  * RecentDoor is one remembered open together with the resource it belongs to — the row the
  * section draws. The resource comes from the catalogue the app already holds: the remembered
  * key is looked up in the caller's own catalogue, so an entry the person can no longer be

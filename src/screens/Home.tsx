@@ -5,7 +5,7 @@ import { useRecordPeople } from "./useReferenceNames";
 import { usePictures } from "./usePictures";
 import { useFeedback } from "./useFeedback";
 import { useSignOut } from "./useSignOut";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { key, type Entry } from "../core/catalog";
 import {
   screenPath,
@@ -33,7 +33,7 @@ interface Props {
 
 export function Home({ entries }: Props) {
   const feedback = useFeedback();
-  const { refresh, baseURL, identity, outbox, state, recents } = useShell();
+  const { refresh, baseURL, identity, outbox, state, recents, writes } = useShell();
   const pointers = useMemo(
     () => accountPointers(state.catalog?.resources ?? [], identity?.userId),
     [state.catalog, identity?.userId],
@@ -64,6 +64,25 @@ export function Home({ entries }: Props) {
     useCallback(() => {
       void rereadRecents();
     }, [rereadRecents]),
+  );
+  // How many writes this app made to the resources these counts count. The body is the
+  // workspace's *now*, so a save made behind Home — a record created, a row deleted — is
+  // what makes the number on screen a claim about a moment that has passed: coming back
+  // asks the one question again. `countedBefore` is the total the numbers on screen were
+  // read against, and a write always happens on the screen that made it, so the total can
+  // only ever have moved by the time this screen is in front of the person again — which
+  // is why a pull, needing no such permission, never reads twice.
+  const written = useMemo(
+    () => entries.reduce((sum, entry) => sum + (writes[key(entry)] ?? 0), 0),
+    [entries, writes],
+  );
+  const countedBefore = useRef(written);
+  useFocusEffect(
+    useCallback(() => {
+      if (written === countedBefore.current) return;
+      countedBefore.current = written;
+      void rereadCounts();
+    }, [written, rereadCounts]),
   );
   const reload = useCallback(async () => {
     setRefreshing(true);

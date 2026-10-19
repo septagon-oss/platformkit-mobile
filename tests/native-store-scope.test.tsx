@@ -108,4 +108,30 @@ describe("the device store", () => {
     expect(shown.map((row) => row.recordId)).toEqual(["x-29", "x-28", "x-27", "x-26", "x-25"]);
     expect(await recents.recent(ADA, RECENT_KEEP + 10)).toHaveLength(RECENT_KEEP);
   });
+
+  // A record deleted on this phone loses its door. The withdrawal is one statement on the
+  // table's own key and names both scope columns, so it cannot reach across to another
+  // sign-in's list or take a second row with it.
+  test("a withdrawn open takes its one row and nobody else's", async () => {
+    const { recents } = createNativeStore();
+    await recents.open();
+    // Two sign-ins nobody else's case has written as, so what their lists answer are the
+    // rows this case wrote and nothing the file already held.
+    const CLEO = { server: "https://acme.test", userId: "cleo" };
+    const DAN = { server: "https://acme.test", userId: "dan" };
+    const open = (at: string, id: string, title: string) =>
+      recentFrom({ resourceKey: "note/note", recordId: id, title, openedAt: at });
+
+    await recents.save(CLEO, open("2026-10-06T10:00:00.000Z", "n-1", "Cleo's standup"));
+    await recents.save(CLEO, open("2026-10-06T11:00:00.000Z", "n-2", "Cleo's retro"));
+    await recents.save(DAN, open("2026-10-06T10:30:00.000Z", "n-1", "Dan's standup"));
+
+    await recents.forget(CLEO, { resourceKey: "note/note", recordId: "n-1" });
+    expect((await recents.recent(CLEO, 5)).map((row) => row.recordId)).toEqual(["n-2"]);
+    // Same resource, same record id, another sign-in: the row is theirs and stays.
+    expect((await recents.recent(DAN, 5)).map((row) => row.title)).toEqual(["Dan's standup"]);
+    // Withdrawing an open the list never held changes no row.
+    await recents.forget(CLEO, { resourceKey: "note/note", recordId: "gone" });
+    expect(await recents.recent(CLEO, 5)).toHaveLength(1);
+  });
 });

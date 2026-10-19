@@ -10,7 +10,7 @@
 import { openDatabaseAsync, type SQLiteDatabase, type SQLiteBindValue } from "expo-sqlite";
 import { heldFrom, WRITE_METHOD, type PendingWrite, type Scope } from "../core/outbox";
 import { cachedFrom, CACHE_KEEP, type CachedAnswer } from "../core/read-cache";
-import { RECENT_KEEP, recentFrom, type Recent } from "../core/recents";
+import { RECENT_KEEP, recentFrom, type Recent, type RecentRef } from "../core/recents";
 import type { OutboxStore } from "./outbox";
 import type { ReadStore } from "./read-cache";
 import type { RecentsStore } from "./recents";
@@ -398,6 +398,17 @@ export function createNativeStore(): {
           [scope.server, scope.userId, scope.server, scope.userId, RECENT_KEEP],
         );
       });
+    },
+
+    forget: async (scope, ref) => {
+      const db = await database();
+      // One statement on the table's own key, naming both scope columns: the row goes,
+      // and every other open this person made stays where it was.
+      await db.runAsync(
+        `DELETE FROM recent_open
+         WHERE server = ? AND user_id = ? AND resource_key = ? AND record_id = ?`,
+        [scope.server, scope.userId, ref.resourceKey, ref.recordId],
+      );
     },
 
     recent: async (scope, limit) => {

@@ -273,6 +273,14 @@ export function fakeRecentsStore() {
         rows.splice(rows.indexOf(oldest), 1);
       }
     },
+    forget: async (scope, ref) => {
+      guard("forget", scope);
+      calls.push("forget");
+      const gone = inScope(scope).find(
+        (row) => row.item.resourceKey === ref.resourceKey && row.item.recordId === ref.recordId,
+      );
+      if (gone) rows.splice(rows.indexOf(gone), 1);
+    },
     recent: async (scope, limit) => {
       guard("recent", scope);
       calls.push("recent");
