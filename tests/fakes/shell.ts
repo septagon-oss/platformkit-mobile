@@ -122,6 +122,7 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     celebrate: jest.fn<ShellValue["celebrate"]>(),
     celebrating: jest.fn<ShellValue["celebrating"]>(() => false),
     celebrated: jest.fn<ShellValue["celebrated"]>(),
+    surprised: jest.fn<ShellValue["surprised"]>(),
     travelTo: jest.fn<ShellValue["travelTo"]>(),
     travelled: jest.fn<ShellValue["travelled"]>(() => undefined),
     returning: undefined,
