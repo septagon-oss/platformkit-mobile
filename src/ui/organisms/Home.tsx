@@ -160,18 +160,6 @@ export function Home({
           ))}
         </Section>
       )}
-      {entries.length === 0 ? null : (
-        <Text
-          role="caption"
-          tone="muted"
-          uppercase
-          style={s.title}
-          accessibilityRole="header"
-          testID="home-section-resources"
-        >
-          {feedback.copy.kit.allResources}
-        </Text>
-      )}
     </>
   );
   return (
@@ -183,6 +171,8 @@ export function Home({
       refreshing={refreshing}
       onRefresh={onRefresh}
       grouped
+      groupTitle={feedback.copy.kit.allResources}
+      groupTestID="home-section-resources"
       header={header}
       testID="home"
       render={(e) => {
@@ -230,6 +220,11 @@ const styles = (t: Theme) =>
       minHeight: t.extent.statBand,
       justifyContent: "flex-end",
     },
-    cards: { flexDirection: "row", gap: t.space.sm },
-    title: { paddingHorizontal: t.space.lg },
+    // Three cards need three widths and two gaps: 3·`extent.statCard` + 2·`space.sm` is 412,
+    // wider than the canvas leaves on any phone (a 390-dp screen gives 358, and the kit's
+    // widest page column 388). So the row wraps: two cards share the first line and a third
+    // stands on the next one, each grown to its line. Narrowing `extent.statCard` until the
+    // three fitted would trade a readable number for arithmetic, and a sideways scroll would
+    // hide a count behind a gesture nobody offers on a page that already scrolls down.
+    cards: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm },
   });

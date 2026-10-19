@@ -48,8 +48,10 @@ export function StatCard({ stat, secondary, spark, aloud, onPress, testID }: Pro
 
 const styles = (t: Theme) =>
   StyleSheet.create({
-    // The two extents are the card's own: three of them share a phone column, and a
-    // number that wrapped to two lines would stop being the thing you came for.
+    // The two extents are the card's own: `statCard` is the narrowest a card may be
+    // squeezed to, which is what makes a row of them wrap onto a second line rather than
+    // crush a number, and `statBand` the least it stands tall. A number that wrapped to
+    // two lines would stop being the thing you came for.
     card: {
       flex: 1,
       minWidth: t.extent.statCard,

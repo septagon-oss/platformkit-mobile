@@ -42,7 +42,10 @@ export const extent = {
   sparkline: 40,
   /** statBand is how tall a stat card stands: the number, its word and its shape. */
   statBand: 96,
-  /** statCard is how wide one stands: two fit the column, a third never squeezes a number. */
+  /**
+   * statCard is how narrow one may be squeezed: two fit a phone column, and a third
+   * stands on the line under them rather than crushing its own number.
+   */
   statCard: 132,
   calendarDay: 240,
   calendarHeight: 960,
