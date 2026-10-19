@@ -7,7 +7,7 @@
 // A mark that never arrives is no image and nothing else is said: the name and the colour
 // came from a different answer, and a broken picture on the first screen is not a fact
 // about the workspace.
-import React, { useLayoutEffect, useState } from "react";
+import React, { useState } from "react";
 import { workspaceMarkURI } from "../core/workspace";
 import type { ImageSlotProps } from "../core/derive";
 import type { ImageResource } from "../effects/media";
@@ -22,12 +22,13 @@ interface Props {
 export function WorkspaceMark({ description }: Props) {
   const { baseURL, workspace } = useShell();
   const uri = workspaceMarkURI(baseURL, workspace.logoPath);
-  // One identity per mark: a mark that failed at one address says nothing about the next,
-  // so the failure is spent when the answer changes rather than kept for the app.
+  // One identity per mark, and the failure is filed against the mark that met it: a new
+  // answer is a new question, and a mark that never arrived at one address says nothing
+  // about the next. The image's own report is the only writer, so nothing is set while
+  // this renders and no effect is needed to forget the last mark's failure.
   const identity = `${workspace.host}${uri}`;
-  const [failed, setFailed] = useState(false);
-  useLayoutEffect(() => setFailed(false), [identity]);
-  if (uri === "" || failed) return null;
+  const [broken, setBroken] = useState("");
+  if (uri === "" || broken === identity) return null;
   const model: ImageSlotProps = {
     id: "mark",
     instance: identity,
@@ -46,7 +47,7 @@ export function WorkspaceMark({ description }: Props) {
     <NativeImage
       model={model}
       resource={resource}
-      onState={(_id, state) => setFailed(state === "error")}
+      onState={(_id, state) => setBroken(state === "error" ? identity : "")}
     />
   );
 }
