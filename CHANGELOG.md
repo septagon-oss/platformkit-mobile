@@ -36,11 +36,17 @@ for the version being released.
   `EntryHints.highlight`, the declared word a sub-count needs. `./ui/molecules/StatCard` is
   new; `StatTile` gains `framed` and `Sparkline` gains `height`/`decorative`, each optional
   and each defaulting to the bytes every existing caller already passed; `theme.tsx` gains
-  `surface.band` and its two contrast pairs. Home also remembers: `./core/recents.ts` and
-  `./effects/recents.ts` are added, `createRecents` over a `recent_open` table keyed by
-  server and sign-in (five shown, twenty kept, pruned in the insert), and `ShellValue.recents`
-  carries it, absent where no store was supplied — a breaking change only to a host that
-  implements `ShellValue` itself, which below 1.0.0 the minor carries.
+  `surface.band` and its two contrast pairs. Home also remembers: `./core/recents` and
+  `./effects/recents` are new subpaths — `Recent`/`RecentRef`/`RecentDoor`/`recentHref`/
+  `RECENT_SHOWN`/`RECENT_KEEP` and `createRecents` over a `recent_open` table keyed by
+  server and sign-in (five shown, twenty kept, pruned in the insert, and a record this phone
+  deleted withdrawing its row), beside the outbox and read-cache subpaths they are modelled
+  on. Two breaking changes, both below 1.0.0 and both carried by the minor: `ShellValue.recents`
+  is a member a host reading it must handle, and `ShellProps.store` now takes a `recents`
+  table beside `outbox` and `reads`, so a host that supplies its own store object supplies the
+  third table too — absent, as before, where no store is supplied at all. `ListScreen`
+  gains the optional `groupTitle`/`groupTestID`, so a grouped page names its one card
+  through the group instead of drawing a second heading beside it.
 - New in the same subpath, additive: `hasValue` (the one emptiness rule a record reads
   a row with), `informationFields` (the identifier and the two stamps, named once) and
   the section model itself; `record-menu` and `record-information` are the two ids a

@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 243,
-   "cases": 1123,
-   "ms": 1807185,
-   "testsMs": 50519.90000000002,
+   "files": 244,
+   "cases": 1127,
+   "ms": 1847451,
+   "testsMs": 50557.20000000002,
    "runners": {
-    "jest": 81,
+    "jest": 82,
     "node": 162
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 102,
-   "cases": 328,
-   "ms": 2262789,
-   "testsMs": 40356,
+   "files": 104,
+   "cases": 333,
+   "ms": 2331445,
+   "testsMs": 40694,
    "runners": {
-    "jest": 102
+    "jest": 104
    },
    "unreachable": 0
   },
@@ -3228,7 +3228,7 @@
    "file": "tests/native-store-scope.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": 2,
+   "cases": 3,
    "rule": "The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a settle and a drop name the server and the person as well as the id. The adapter runs here over node:sqlite through an expo-sqlite stand-in that binds positional parameters the way expo-sqlite does on a device \u2014 parameter i at index i + 1, and a parameter with no placeholder dropped without a word, because neither platform checks the bind's return code (node_modules/expo-sqlite/ios/SQLiteModule.swift getBindParamIndex and bindStatementParam; android/.../SQLiteModule.kt `statement.ref.bindStatementParam`). It is a .tsx file only so Jest, which can mock expo-sqlite, discovers it; it needs a Node that ships node:sqlite.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -3236,28 +3236,34 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 24678,
+   "ms": 32438,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "one sign-in cannot claim or discard another sign-in's held write",
-    "one sign-in reads their own opens, and an open is one row"
+    "one sign-in reads their own opens, and an open is one row",
+    "a withdrawn open takes its one row and nobody else's"
    ],
    "tests": [
     {
      "title": "one sign-in cannot claim or discard another sign-in's held write",
-     "ms": 6,
+     "ms": 10,
      "measured": false
     },
     {
      "title": "one sign-in reads their own opens, and an open is one row",
-     "ms": 6,
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "a withdrawn open takes its one row and nobody else's",
+     "ms": 3,
      "measured": false
     }
    ],
    "loaded": 129,
-   "coveredProdLines": 1924,
+   "coveredProdLines": 1926,
    "onlyProdLines": null,
-   "testsMs": 12
+   "testsMs": 26
   },
   {
    "file": "tests/screens/nativeImage.test.tsx",
@@ -5925,6 +5931,35 @@
    "coveredProdLines": 1868,
    "onlyProdLines": null,
    "testsMs": 32
+  },
+  {
+   "file": "tests/ui/home-stat-cards-fit-the-phone-column.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "Home's stat cards stand side by side in the page's one column. Whatever the cards are laid out in must hold every card it draws at the width the design floor measures a phone at: a card that runs past the screen's edge is a card the person cannot read. The layout engine does not run under Jest, so the row is measured from the styles the organism really renders: a row that wraps, scrolls sideways or stacks holds any number of cards; a row that does none of those must fit their minimum widths and its gaps.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 32695,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "every card Home draws fits the phone column it is drawn in"
+   ],
+   "tests": [
+    {
+     "title": "every card Home draws fits the phone column it is drawn in",
+     "ms": 23,
+     "measured": false
+    }
+   ],
+   "loaded": 127,
+   "coveredProdLines": 1894,
+   "onlyProdLines": null,
+   "testsMs": 23
   },
   {
    "file": "tests/ui/illustration-drawing.test.tsx",
@@ -17628,7 +17663,7 @@
    "file": "tests/recents-are-this-phones-own-list.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 7,
+   "cases": 9,
    "rule": "\"Recently opened\" is this phone's own list: it belongs to one server and one sign-in, it replaces a record's row when it is opened again, it is bounded, and it is read newest first through the cap Home draws. None of it is a fact about the server \u2014 nothing is sent anywhere \u2014 so every case here is answered by the double that holds the same columns and the same scope rule the device's table has.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -17636,7 +17671,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 2043,
+   "ms": 1854,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "an open is stamped by the clock this unit was given, in UTC",
@@ -17645,49 +17680,61 @@
     "an open replaces the same record's row, so reopening is not two rows",
     "the device keeps twenty, Home is shown five, and the oldest opens go first",
     "an open of a record this row no longer names is refused as a row",
-    "a remembered open leads to the record itself, at the address the router knows"
+    "a remembered open leads to the record itself, at the address the router knows",
+    "a withdrawn open leaves this person's other opens, and every other person's",
+    "a withdrawal with no owner stores nothing and asks the table for nothing"
    ],
    "tests": [
     {
      "title": "an open is stamped by the clock this unit was given, in UTC",
-     "ms": 4.19161,
+     "ms": 3.628522,
      "measured": false
     },
     {
      "title": "an open with no owner stores nothing and reads nothing",
-     "ms": 0.372638,
+     "ms": 0.2539,
      "measured": false
     },
     {
      "title": "one sign-in reads their own opens, never another's, at the same phone",
-     "ms": 0.475889,
+     "ms": 0.442849,
      "measured": false
     },
     {
      "title": "an open replaces the same record's row, so reopening is not two rows",
-     "ms": 0.28691,
+     "ms": 0.373561,
      "measured": false
     },
     {
      "title": "the device keeps twenty, Home is shown five, and the oldest opens go first",
-     "ms": 1.350657,
+     "ms": 1.328448,
      "measured": false
     },
     {
      "title": "an open of a record this row no longer names is refused as a row",
-     "ms": 1.764262,
+     "ms": 1.820397,
      "measured": false
     },
     {
      "title": "a remembered open leads to the record itself, at the address the router knows",
-     "ms": 0.312798,
+     "ms": 0.328778,
+     "measured": false
+    },
+    {
+     "title": "a withdrawn open leaves this person's other opens, and every other person's",
+     "ms": 0.626599,
+     "measured": false
+    },
+    {
+     "title": "a withdrawal with no owner stores nothing and asks the table for nothing",
+     "ms": 0.327886,
      "measured": false
     }
    ],
    "loaded": 39,
-   "coveredProdLines": 12365,
+   "coveredProdLines": 12388,
    "onlyProdLines": null,
-   "testsMs": 8.8
+   "testsMs": 9.1
   },
   {
    "file": "tests/reentry.test.ts",
@@ -19882,6 +19929,41 @@
    "coveredProdLines": 1851,
    "onlyProdLines": null,
    "testsMs": 66
+  },
+  {
+   "file": "tests/screens/a-delete-that-left-this-phone-takes-its-door-with-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "\"Recently opened\" is a door onto a record, so a record this phone deleted leaves the list: a section that kept its row would draw a door onto a 404. The delete is asked and sent where the record screen is, and the door belongs to this device, so the withdrawal is the delete's own and nothing else is forgotten. What the outbox still holds keeps its door \u2014 the record is still there, and so is the reason to come back to it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 33376,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the record that went is gone from what this phone remembers opening",
+    "a delete this phone still holds keeps its door"
+   ],
+   "tests": [
+    {
+     "title": "the record that went is gone from what this phone remembers opening",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "a delete this phone still holds keeps its door",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 154,
+   "coveredProdLines": 2172,
+   "onlyProdLines": null,
+   "testsMs": 14
   },
   {
    "file": "tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx",
@@ -22216,6 +22298,47 @@
    "coveredProdLines": 1847,
    "onlyProdLines": null,
    "testsMs": 90
+  },
+  {
+   "file": "tests/screens/home-counts-are-read-again-after-this-app-wrote.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "The counts on Home are the workspace's now. This app writes records behind that screen, so coming back asks the counts door again once a write moved \u2014 the same rule the three generated screens keep for their own resource, asked of the one body that counts them all. A focus that found nothing written asks nothing, a write to a resource these numbers do not count asks nothing, and a pull settles what the screen has already been told.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 35280,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "coming back after a write to a counted resource asks the counts door again",
+    "a write to a resource these counts do not count asks nothing",
+    "a pull asks the counts on its own, and the focus after it owes no second read"
+   ],
+   "tests": [
+    {
+     "title": "coming back after a write to a counted resource asks the counts door again",
+     "ms": 262,
+     "measured": false
+    },
+    {
+     "title": "a write to a resource these counts do not count asks nothing",
+     "ms": 31,
+     "measured": false
+    },
+    {
+     "title": "a pull asks the counts on its own, and the focus after it owes no second read",
+     "ms": 31,
+     "measured": false
+    }
+   ],
+   "loaded": 159,
+   "coveredProdLines": 2493,
+   "onlyProdLines": null,
+   "testsMs": 324
   },
   {
    "file": "tests/screens/home-counts-are-read-from-the-documented-address.test.tsx",
