@@ -298,7 +298,9 @@ A build with no store draws no section, and a read that cannot be stored changes
 on the record screen. A record this phone deleted leaves the list with it — the delete
 that reached the server withdraws its door, because a section that kept it would lead to a
 row that answers not-found — while a delete the outbox still holds keeps its door until it
-has gone.
+has gone. A withdrawal this phone's own table refused is the device's problem and not the
+delete's: that one row stays, and the record screen still says the delete happened, which
+is what the server answered.
 
 **Limits** — a card opens its resource's list, not that list narrowed to what the card
 counted: `filter=field:value` is an equality on a closed value set and a highlight is a
