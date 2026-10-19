@@ -294,7 +294,7 @@ new person at the same phone reads an empty section without anybody deleting any
 record is remembered while its row is on screen, reopening replaces its row rather than
 adding a second one, twenty are kept and five are shown, and the pruning happens in the
 same transaction as the insert. Nothing is sent: the section says what this device opened.
-A build with no store draws no section, and a read that cannot be stored changes nothing
+A build that ships no table for them draws no section, and a read that cannot be stored changes nothing
 on the record screen. A record this phone deleted leaves the list with it — the delete
 that reached the server withdraws its door, because a section that kept it would lead to a
 row that answers not-found — while a delete the outbox still holds keeps its door until it

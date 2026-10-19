@@ -62,8 +62,8 @@ export interface ShellValue {
   /** reads answers an unreachable read from the last response this phone got. */
   readonly reads: ReadCache | undefined;
   /**
-   * recents is what this device remembers this person opened, or nothing where no store was
-   * supplied. It is read by the screen that shows a person their own recent opens.
+   * recents is what this device remembers this person opened, or nothing where this build
+   * ships no table for them. It is read by the screen that shows a person their own recent opens.
    */
   readonly recents: Recents | undefined;
   /** where the person standing in front of the app is; every route file says so as it draws. */
@@ -165,7 +165,13 @@ interface Props {
   readonly store?: {
     readonly outbox: OutboxStore;
     readonly reads: ReadStore;
-    readonly recents: RecentsStore;
+    /**
+     * recents is the table of opens this device remembers — the one member a host may leave
+     * out while shipping the other two. A remembered open is a convenience no write waits
+     * on, so a host that ships no table for them loses the section that lists them and keeps
+     * its queue and its cache, exactly as a host with no store at all does.
+     */
+    readonly recents?: RecentsStore;
   };
   /** clock is what stamps a held write; the queue's order never comes from it. */
   readonly clock?: Clock;
@@ -492,11 +498,12 @@ export function Shell({
     [store, baseURL, userId, clock],
   );
 
+  const recentTable = store?.recents;
   const recents = useMemo(
     () =>
-      store && userId
+      recentTable && userId
         ? createRecents({
-            store: store.recents,
+            store: recentTable,
             clock: clock ?? systemClock,
             // The same owner of a scope the queue and the cache ask, so one rule says whose
             // opens these are — and a person who signs in at a phone another person used
@@ -504,7 +511,7 @@ export function Shell({
             scope: () => heldScope(baseURL, userId),
           })
         : undefined,
-    [store, baseURL, userId, clock],
+    [recentTable, baseURL, userId, clock],
   );
 
   useEffect(() => {
