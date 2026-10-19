@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `85be34cfd` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `6bc50fcd9` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 224 | 47.6 s | 77 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 253 | 1194 | 63.2 s | 2016 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 115 | 365 | 43.6 s | 2647 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 255 | 1197 | 63.4 s | 2086 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 116 | 367 | 43.6 s | 2679 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 462
+* keep: 465
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 462 — 203 `tests/*.test.ts` (node), 202 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1783; cases in files no runner reaches: 35
-* isolated wall time: contract 77 s, behaviour 2016 s, composition 2647 s, journey 0 s
+* files inventoried: 465 — 203 `tests/*.test.ts` (node), 205 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1788; cases in files no runner reaches: 35
+* isolated wall time: contract 77 s, behaviour 2086 s, composition 2679 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -131,7 +131,9 @@ suite whatever the push tier selected, and a selection that named no file says s
 
 | test file | runner | layer | cases | wall ms | tests ms | only-it-covers (prod lines) | tests with a line no other test covers | production files only it loads | flaky / reach | verdict | the rule it proves |
 |---|---|---|---|---|---|---|---|---|---|---|---|
+| tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx | jest | behaviour | 1 | 38736 | 119 |  | not measured | — | 0 | keep | The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gest… |
 | tests/native-store-scope.test.tsx | jest | behaviour | 4 | 30107 | 14 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
+| tests/screens/a-cancelled-swipe-runs-nothing.test.tsx | jest | behaviour | 2 | 30721 | 11 |  | not measured | — | 0 | keep | The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or … |
 | tests/screens/nativeImage.test.tsx | jest | behaviour | 2 | 17291 | 1010 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) replaced and unmounted image sources cannot report into the active scope |
 | tests/screens/refusal-words-never-quote-the-wire.test.tsx | jest | behaviour | 25 | 24619 | 4149 | 1 | not measured | — | 0 | keep | A phone reads a refusal in its own words. The classifier decides which sentence a refusal is, but a decided sentence only counts once it is the one drawn, so t… |
 | tests/screens/useFeedback.test.tsx | jest | behaviour | 3 | 22923 | 18 | 8 | 1 of 3 | src/screens/StateFeedback.tsx | 0 | keep | (no first comment; first test title) each mounted form samples its explicit clock once, independently of another form |
@@ -471,6 +473,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/useSingleton.test.tsx | jest | composition | 8 | 17869 | 56 |  | not measured | — | 0 | keep | A singleton is one row, written with a PUT of the whole of it, and its form is drawn on the same screen as the record — so the protections the create and edit … |
 | tests/screens/write-doors-drawn.test.tsx | jest | composition | 10 | 6191 | 1390 | 0 | 0 of 10 | — | 0 | keep | `operations` says which doors the server mounted, and a door it did not mount must not be drawn. The hooks are proven beside this file (write-doors.test.tsx se… |
 | tests/screens/write-doors.test.tsx | jest | composition | 3 | 3879 | 17 | 0 | 0 of 3 | — | 0 | keep | A door is drawn where `writable` and `operations` agree, and never where only one of them does. Hiding the door is half the rule; this is the other half: a wri… |
+| tests/shell-a-receipt-is-spent-by-its-own-token-or-by-signing-out.test.tsx | jest | composition | 2 | 32246 | 15 |  | not measured | — | 0 | keep | The receipt a row's command leaves is the shell's, so its life is the shell's to keep: a filing replaces the one before it under a new token, a timer holding a… |
 | tests/shell-bearer-credential.test.tsx | jest | composition | 2 | 22586 | 112 |  | not measured | — | 0 | keep | A phone is not a browser: after a sign-in it mints a scoped bearer token (auth-token-issue), keeps only that in secure storage and presents it as `Authorizatio… |
 | tests/shell-concurrent-sign-ins.test.tsx | jest | composition | 1 | 4516 | 207 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) a late first sign-in cannot replace the second session |
 | tests/shell-dead-key-on-restore.test.tsx | jest | composition | 1 | 19082 | 546 |  | not measured | — | 0 | keep | A key the server no longer recognises — revoked from the account's devices, or past the lifetime the mint gave it — is answered the way the kernel answers ever… |

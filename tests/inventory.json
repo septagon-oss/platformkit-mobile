@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 253,
-   "cases": 1194,
-   "ms": 2016258,
-   "testsMs": 63240.60000000002,
+   "files": 255,
+   "cases": 1197,
+   "ms": 2085715,
+   "testsMs": 63370.60000000002,
    "runners": {
-    "jest": 87,
+    "jest": 89,
     "node": 166
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 115,
-   "cases": 365,
-   "ms": 2647219,
-   "testsMs": 43621,
+   "files": 116,
+   "cases": 367,
+   "ms": 2679465,
+   "testsMs": 43636,
    "runners": {
-    "jest": 115
+    "jest": 116
    },
    "unreachable": 0
   },
@@ -3302,6 +3302,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gesture-handler recognizes no gesture outside a `GestureHandlerRootView` (in a development build it refuses to render one); the native stack supplies none, so the root has to. Under Jest that refusal is switched off, so the only way a suite sees the root is to ask the tree the layout draws.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 38736,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "draws the navigator, and every screen in it, under one gesture root"
+   ],
+   "tests": [
+    {
+     "title": "draws the navigator, and every screen in it, under one gesture root",
+     "ms": 119,
+     "measured": false
+    }
+   ],
+   "loaded": 176,
+   "coveredProdLines": 2021,
+   "onlyProdLines": null,
+   "testsMs": 119
+  },
+  {
    "file": "tests/native-store-scope.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -3347,6 +3376,41 @@
    "coveredProdLines": 1926,
    "onlyProdLines": null,
    "testsMs": 14
+  },
+  {
+   "file": "tests/screens/a-cancelled-swipe-runs-nothing.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or a second finger took away is not a release. RNGH reports both through `onEnd`, and tells them apart only by its second argument \u2014 `true` for a gesture that reached END, `false` for one that was CANCELLED or FAILED while active (src/handlers/gestures/eventReceiver.ts in the pinned package). So the surface is driven here the way the library drives it, with the libraries replaced by the shape of their contract.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30721,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a release past the threshold runs the row's command",
+    "a drag past the threshold that was cancelled while the finger was down runs nothing"
+   ],
+   "tests": [
+    {
+     "title": "a release past the threshold runs the row's command",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a drag past the threshold that was cancelled while the finger was down runs nothing",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 125,
+   "coveredProdLines": 1810,
+   "onlyProdLines": null,
+   "testsMs": 11
   },
   {
    "file": "tests/screens/nativeImage.test.tsx",
@@ -24804,6 +24868,41 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/shell-a-receipt-is-spent-by-its-own-token-or-by-signing-out.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The receipt a row's command leaves is the shell's, so its life is the shell's to keep: a filing replaces the one before it under a new token, a timer holding a replaced token closes nothing, the bar's own token closes it, and signing out ends it with the rest of what a session that is going away leaves behind. Held against the shell itself, not a double of it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 32246,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a newer filing replaces the sentence, and only its own token closes it",
+    "signing out ends the receipt still owed, and a later spend of it closes nothing"
+   ],
+   "tests": [
+    {
+     "title": "a newer filing replaces the sentence, and only its own token closes it",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "signing out ends the receipt still owed, and a later spend of it closes nothing",
+     "ms": 4,
+     "measured": false
+    }
+   ],
+   "loaded": 153,
+   "coveredProdLines": 2137,
+   "onlyProdLines": null,
+   "testsMs": 15
   },
   {
    "file": "tests/shell-bearer-credential.test.tsx",
