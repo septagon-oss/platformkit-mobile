@@ -2332,10 +2332,12 @@ export function greeting(
 /**
  * workspaceName is what the page calls the place these records live.
  *
- * The address the session is held open at, reduced to what a person typed, is the
- * one fact this app holds about where its records are; the copy table's own word for
- * a workspace is what is left when the address cannot be read. A product name in
- * either place would say which app this is, which nobody reading their own list asks.
+ * The name the workspace itself answered wins: it is the word that place uses for itself,
+ * and a phone that has read it and still prints an address would be saying less than it
+ * knows. What a person typed, reduced to its host, is what is left when nothing answered,
+ * and the copy table's own word for a workspace when the address cannot be read either. A
+ * product name in either place would say which app this is, which nobody reading their own
+ * list asks.
  */
-export const workspaceName = (baseURL: string, copy: Copy): string =>
-  hostLabel(baseURL) || copy.kit.workspace;
+export const workspaceName = (baseURL: string, copy: Copy, answered?: string): string =>
+  answered?.trim() || hostLabel(baseURL) || copy.kit.workspace;

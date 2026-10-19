@@ -18,6 +18,12 @@ env:
 - eraseText
 - inputText: ${SERVER}
 - tapOn:
+    id: "continue"
+- extendedWaitUntil:
+    visible:
+      id: "workspace-name"
+    timeout: 15000
+- tapOn:
     id: "email"
 - inputText: ${TOTP_EMAIL}
 - tapOn:

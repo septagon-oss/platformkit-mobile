@@ -25,6 +25,7 @@ import { useOperation } from "./useOperation";
 import { Button } from "../ui/atoms/Button";
 import { choose } from "../ui/chooser";
 import { Home as HomeView } from "../ui/organisms/Home";
+import { WorkspaceMark } from "./WorkspaceMark";
 import { useTheme } from "../ui/theme";
 
 interface Props {
@@ -33,7 +34,16 @@ interface Props {
 
 export function Home({ entries }: Props) {
   const feedback = useFeedback();
-  const { refresh, baseURL, identity, outbox, state, recents, writes } = useShell();
+  const {
+    refresh,
+    baseURL,
+    identity,
+    outbox,
+    state,
+    recents,
+    writes,
+    workspace: shellWorkspace,
+  } = useShell();
   const pointers = useMemo(
     () => accountPointers(state.catalog?.resources ?? [], identity?.userId),
     [state.catalog, identity?.userId],
@@ -107,7 +117,7 @@ export function Home({ entries }: Props) {
   // motion travel with the locale the numbers are read in.
   const presentation: Presentation = useMemo(() => ({ ...feedback, weekStartsOn: 1 }), [feedback]);
   const hello = greeting(person, presentation);
-  const workspace = workspaceName(baseURL, feedback.copy);
+  const workspace = workspaceName(baseURL, feedback.copy, shellWorkspace.name);
   // Both are a pure join of the answered body with the caller's catalogue, so a read
   // that refused leaves both empty rather than stale: a count with no stated age is a
   // claim about now, and the rows keep what they always drew.
@@ -175,6 +185,11 @@ export function Home({ entries }: Props) {
         person={person ? avatar(person, media.states, media.enabled) : undefined}
         greeting={hello.line}
         workspace={workspace}
+        mark={
+          shellWorkspace.logoPath === undefined ? null : (
+            <WorkspaceMark description={feedback.copy.kit.workspaceMark(workspace)} />
+          )
+        }
         cards={cards}
         counts={counts}
         {...(recents === undefined ? {} : { recents: recentDoors })}

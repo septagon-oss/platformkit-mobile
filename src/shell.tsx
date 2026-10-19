@@ -35,6 +35,9 @@ import type { Session as Saved } from "./effects/session";
 import { createOutbox, type Outbox, type OutboxStore } from "./effects/outbox";
 import { createReadCache, type ReadCache, type ReadStore } from "./effects/read-cache";
 import { createRecents, type Recents, type RecentsStore } from "./effects/recents";
+import { createWorkspaces, type Workspaces, type WorkspaceStore } from "./effects/workspaces";
+import { unknownWorkspace, workspaceOf, type Workspace } from "./core/workspace";
+import { hostLabel } from "./core/derive";
 import { sessions } from "./effects/native-session";
 import type { Reach } from "./effects/native-reach";
 import { systemClock } from "./screens/clock";
@@ -66,6 +69,26 @@ export interface ShellValue {
    * ships no table for them. It is read by the screen that shows a person their own recent opens.
    */
   readonly recents: Recents | undefined;
+  /**
+   * workspaces is what this device remembers of the places it has seen a workspace answer
+   * on, or nothing where this build ships no table for them. Name, host and mark only: a
+   * remembered workspace fills an address and never signs anybody in.
+   */
+  readonly workspaces: Workspaces | undefined;
+  /**
+   * workspace is the face the address this shell is using answered for itself — its name,
+   * colour and mark — or the one the connect step looked up. Never absent: with nothing
+   * answered it is the host and nothing else, which is what keeps every screen drawing one
+   * thing rather than handling "no workspace".
+   */
+  readonly workspace: Workspace;
+  /**
+   * lookUp reads what the workspace at an address says of itself, before anybody has a
+   * session there, and wears it. It answers undefined for a server that answers nothing —
+   * no workspace, no network, a body outside the document — and never throws at a form;
+   * the address stays typed and the password still gets asked there.
+   */
+  readonly lookUp: (baseURL: string) => Promise<Workspace | undefined>;
   /** where the person standing in front of the app is; every route file says so as it draws. */
   readonly saw: (href: string) => void;
   /** what the person has typed into the sheet at this address, while the server refuses the
@@ -172,6 +195,12 @@ interface Props {
      * its queue and its cache, exactly as a host with no store at all does.
      */
     readonly recents?: RecentsStore;
+    /**
+     * workspaces is the table of places this device has seen a workspace answer on. Like
+     * `recents` it is a convenience no write waits on, so a host that ships no table for it
+     * loses the list on the connect step and keeps its queue, its cache and its opens.
+     */
+    readonly workspaces?: WorkspaceStore;
   };
   /** clock is what stamps a held write; the queue's order never comes from it. */
   readonly clock?: Clock;
@@ -297,6 +326,15 @@ export function Shell({
    */
   const challenge = useRef<string | undefined>(undefined);
   const [identity, setIdentity] = useState<Identity | undefined>();
+  // What the address this app is using said about itself, worn by the theme and the header.
+  const [workspace, setWorkspace] = useState<Workspace>(() => unknownWorkspace(initialURL));
+  /**
+   * looked counts the lookups this shell has asked for. A lookup is not a session attempt,
+   * so it spends no generation of its own: spending one would retire a load already under
+   * way. The lookup that answered last is the only answer the phone wears, and a session
+   * that arrives afterwards answers the same value it read for itself.
+   */
+  const looked = useRef(0);
   const [returning, setReturning] = useState<Remembered | undefined>();
   const [writes, setWrites] = useState<Readonly<Record<string, number>>>({});
   const wrote = useCallback(
@@ -514,6 +552,17 @@ export function Shell({
     [recentTable, baseURL, userId, clock],
   );
 
+  const workspaceTable = store?.workspaces;
+  const workspaces = useMemo(
+    () =>
+      // A workspace's row names a server, not a person, so this table waits for no sign-in:
+      // the connect step remembers a place the moment it answers, before anybody has a
+      // session there. The clock is the injected one, so the stamp is UTC like every other
+      // moment this kit writes.
+      workspaceTable && createWorkspaces({ store: workspaceTable, clock: clock ?? systemClock }),
+    [workspaceTable, clock],
+  );
+
   useEffect(() => {
     if (!outbox) return;
     // `mounted` is this effect's own, and says what `live` above — the session the
@@ -570,6 +619,37 @@ export function Shell({
     setConnection(value);
   }, []);
 
+  /**
+   * lookUp asks the workspace at an address what it calls itself, what colour it wears and
+   * what mark it hands out, and wears that answer while the person stands at the form. It is
+   * the kernel's public door (`x-platformkit-auth.kind: public`), asked with a transport that
+   * holds no key, so nothing here can end a session or read a person.
+   *
+   * Failure is the same shape as silence: an unanswered address, a refusal, a timeout and a
+   * body outside the pinned schema all answer undefined, leave the address typed, and write
+   * no remembered row. The answer that arrives last is the one worn, and a lookup superseded
+   * while it was away answers nothing.
+   */
+  const lookUp = useCallback(
+    async (url: string) => {
+      const asked = ++looked.current;
+      try {
+        const answer = await transport(url).operations.appConnection({});
+        if (looked.current !== asked) return undefined;
+        const face = workspaceOf(answer.data, url);
+        setWorkspace(face);
+        void workspaces?.remember(face, url);
+        return face;
+      } catch {
+        // Nothing was answered, so nothing is known about the place: the address the person
+        // typed is the only thing the screen can say, and their password gets asked there.
+        if (looked.current === asked) setWorkspace(unknownWorkspace(url));
+        return undefined;
+      }
+    },
+    [transport, workspaces],
+  );
+
   const load = useCallback(
     async (a: Api, started: number, url: string) => {
       if (generation.current !== started) return;
@@ -581,10 +661,28 @@ export function Shell({
           if (generation.current === started) setIdentity(who);
           return who;
         });
-        const [answered, catalog] = await Promise.all([me, a.catalog()]);
+        // Observe the connection read as it arrives: a body outside its schema, a 404 and a
+        // host that never answers all become "nothing said" here, so no rejection is ever
+        // left unobserved and none of them fails the session it rode in on.
+        const face = a.operations
+          .appConnection({})
+          .then((answer) => answer.data)
+          .catch(() => undefined);
+        const [answered, catalog, answer] = await Promise.all([me, a.catalog(), face]);
         if (generation.current === started) {
           const server = active.current.baseURL;
           const next = whoOf(server, answered?.userId);
+          // The workspace's own face rides along with the two reads that decide the
+          // session: it says nothing about a person, decides no command and holds nothing
+          // the queue consults, so a phone that cannot get it wears the kit's look and the
+          // host for a name rather than failing a sign-in. A read that refused leaves the
+          // last answer standing — one failed request does not unmake what that server said
+          // about itself a minute ago — and signing out is what clears it.
+          if (answer !== undefined) {
+            const face = workspaceOf(answer, server);
+            setWorkspace(face);
+            void workspaces?.remember(face, server);
+          }
           // Between the identity arriving and this catalogue becoming ready sits the
           // one comparison: what the last person left behind — where they stood, what
           // they typed, what this app counted — survives only a sign-in that is
@@ -619,13 +717,16 @@ export function Shell({
           setIdentity(undefined);
           connect(url, createApi(url));
           dispatch({ type: "no-session", generation: started, error: kitEnglish.sessionExpired });
+          // The key is gone, so the face it wore with it is gone: the next thing this phone
+          // wears a workspace's colour is the next document it reads.
+          setWorkspace(unknownWorkspace(url));
           void sessions.clear(url).catch(() => undefined);
           return;
         }
         dispatch({ type: "failed", generation: started, error: catalogFailure(e) || message(e) });
       }
     },
-    [connect, forget],
+    [connect, forget, workspaces],
   );
 
   useEffect(() => {
@@ -679,6 +780,9 @@ export function Shell({
       outbox: outboxValue,
       reads,
       recents,
+      workspaces,
+      workspace,
+      lookUp,
       entry: (module, entity) =>
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
       async signIn(url, email, password) {
@@ -803,6 +907,9 @@ export function Shell({
         challenge.current = undefined;
         connect(previous.baseURL, transport(previous.baseURL));
         setIdentity(undefined);
+        // A person who signs out leaves the workspace's colours behind with the key: what is
+        // on screen now is the form, which wears them again only when a lookup answers.
+        setWorkspace(unknownWorkspace(previous.baseURL));
         dispatch({ type: "signed-out", generation: started });
         // Signing out means two things, and the phone does the first on its own:
         // it forgets the key here, and it asks the server to stop it. Forgetting is
@@ -880,6 +987,9 @@ export function Shell({
       outboxValue,
       reads,
       recents,
+      workspaces,
+      workspace,
+      lookUp,
       begin,
       connect,
       load,

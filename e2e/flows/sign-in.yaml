@@ -1,5 +1,7 @@
-# The way in: the server, then who you are. Every value comes from the
-# environment (make e2e-android passes them); nothing here names a tenant.
+# The way in: where you mean, then who you are. The phone asks the workspace what it
+# is before it asks for a password, so the journey taps Continue and waits for the
+# name — the proof that a person aims at a place and not at an address. Every value
+# comes from the environment (make e2e-android passes them); nothing here names a tenant.
 # screen: app/sign-in.tsx
 appId: ${APP_ID}
 env:
@@ -13,6 +15,12 @@ env:
     id: "server"
 - eraseText
 - inputText: ${SERVER}
+- tapOn:
+    id: "continue"
+- extendedWaitUntil:
+    visible:
+      id: "workspace-name"
+    timeout: 15000
 - tapOn:
     id: "email"
 - inputText: ${EMAIL}

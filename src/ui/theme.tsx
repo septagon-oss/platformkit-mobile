@@ -5,7 +5,8 @@
 // scale.ts. Nothing else reads a colour.
 import React, { createContext, useContext, useMemo } from "react";
 import { Platform, StyleSheet, useColorScheme, type ViewStyle } from "react-native";
-import { alpha, mix, type AAKind } from "../core/color";
+import { ACCENT } from "../core/workspace";
+import { AA, alpha, contrastRatio, meetsAA, mix, type AAKind } from "../core/color";
 import type { Status } from "../core/shared";
 import { elevation, extent, hit, icon, radius, space, type } from "./scale";
 import { palette, type Mode, type Palette } from "./tokens";
@@ -235,6 +236,80 @@ export const contrastPairs: readonly [string, string, AAKind][] = [
   ["color.textMuted", "color.surfacePrimary", "graphic"],
   ["color.textMuted", "color.surfaceCanvas", "graphic"],
 ];
+
+/** role reads one registry path ("color.textMuted") out of a built theme. */
+const role = (theme: Theme, path: string): string =>
+  path
+    .split(".")
+    .reduce<unknown>((value, key) => (value as Record<string, unknown>)[key], theme) as string;
+
+/** failures measures one built theme against every pair the registry below names. */
+const failures = (theme: Theme): readonly string[] =>
+  contrastPairs
+    .map(([front, back, kind]) => {
+      const ratio = contrastRatio(role(theme, front), role(theme, back));
+      return meetsAA(ratio, kind)
+        ? undefined
+        : `${front} on ${back} is ${ratio}, below ${AA[kind]}`;
+    })
+    .filter((row): row is string => row !== undefined);
+
+/**
+ * ACCENT_STEPS is how far a workspace's colour may be pulled toward a mode's own ink:
+ * twenty-five hundredths of a shade at a time, up to half. Past half the painted colour
+ * no longer claims to be the colour that workspace chose, so the search stops there and
+ * the kit's own palette is kept.
+ */
+const ACCENT_STEPS = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5];
+
+/**
+ * accentPalette wears one workspace's colour on the kit's generated palette.
+ *
+ * A workspace answers *one* accent; this palette carries two, because `#0f5d4e` reads on
+ * paper and `#4bbf9c` on ink, and no single `#rrggbb` reaches body-text contrast against
+ * both canvases — so the colour a phone paints is the nearest shade of the answered one
+ * that keeps every pair `contrastPairs` measures, in both modes at once. Mixing toward
+ * each mode's own `textPrimary` is the only direction that can only help: it darkens the
+ * light palette and lightens the dark one, and it is a generated colour, so no hex is
+ * written here. `accentHover` is the worn shade pulled a further 0.15 toward that ink,
+ * which is what a hover has always been; `accentOn` stays the generated ink.
+ *
+ * Inputs: the palettes to wear the colour over (the generated pair by default) and the
+ * workspace's accent as `core/workspace`'s `ACCENT` reads it. Failure behaviour is the
+ * base object returned **by identity** — an unreadable colour, and a colour that would
+ * strand an ink in either mode at any step, keep today's look rather than a half-worn
+ * brand. A returned pair is frozen and new, so a caller may memoise on it and
+ * `ThemeProvider` settles.
+ */
+export function accentPalette(
+  base: Readonly<Record<Mode, Palette>> = palette,
+  accent: string | undefined,
+): Readonly<Record<Mode, Palette>> {
+  if (accent === undefined || !ACCENT.test(accent)) return base;
+  const worn = (mode: Mode): Palette | undefined => {
+    const ink = base[mode].textPrimary;
+    for (const step of ACCENT_STEPS) {
+      const accentDefault = mix(accent, ink, step);
+      const colors: Palette = {
+        ...base[mode],
+        accentDefault,
+        accentHover: mix(accentDefault, ink, 0.15),
+      };
+      if (failures(themeFor(mode, both(base, mode, colors))).length === 0) return colors;
+    }
+    return undefined;
+  };
+  const light = worn("light");
+  const dark = worn("dark");
+  // Both modes or neither: a brand that reads by day and is refused by night would be
+  // two workspaces in one app, and the refusal says so by painting the kit's own pair.
+  if (light === undefined || dark === undefined) return base;
+  return Object.freeze({ light, dark });
+}
+
+/** both replaces one mode of a palette pair, leaving the other mode's object standing. */
+const both = (base: Readonly<Record<Mode, Palette>>, mode: Mode, colors: Palette) =>
+  mode === "light" ? { light: colors, dark: base.dark } : { light: base.light, dark: colors };
 
 const Context = createContext<Theme>(themeFor("light"));
 

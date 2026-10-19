@@ -45,8 +45,8 @@ export const kitEnglish = {
   // screens still draw the record, so this is the app saying it is behind, not a
   // refusal — quiet, one line, and the only thing said about it.
   shellUpdate: "Update the app for this record's full screen.",
-  // What the first screen says about the session: the address the person signed in
-  // at is the workspace's name until a name exists, the account under it is the
+  // What the first screen says about the session: the workspace's own name when it answered
+  // one and the address the person signed in at until it does, the account under it is the
   // person's own words, and a row that opens nothing is said to be read alone.
   workspace: "Workspace",
   // What the first screen says to the person standing in front of it: three parts of
@@ -106,6 +106,18 @@ export const kitEnglish = {
   tomorrow: "tomorrow",
   signInIntro: "Enter your workspace address and the email you use there.",
   workspaceAddress: "Workspace address",
+  // The step before a password: the phone reads what the workspace says of itself and puts
+  // that on screen, so a person aims at a place they recognise rather than an address. The
+  // two headings are that step's own — the title names the act and the intro what to type —
+  // and `changeWorkspace` is the one way back from the credentials to the address.
+  connectTitle: "Connect to your workspace",
+  connectIntro: "Enter the address of your workspace.",
+  continueLabel: "Continue",
+  changeWorkspace: "Change",
+  rememberedWorkspaces: "Other workspaces",
+  // What a mark is said to be where the mark is the only thing saying which workspace
+  // this is: the picture's name is the place's own, never "logo" and never a file name.
+  workspaceMark: (name: string) => `${name} mark`,
   allLoaded: "Select loaded items",
   of: "of",
   selection: "Selection",
@@ -472,6 +484,12 @@ export const kitPortuguese: KitWords = {
   tomorrow: "amanhã",
   signInIntro: "Indique o endereço do espaço de trabalho e o email que usa nele.",
   workspaceAddress: "Endereço do espaço de trabalho",
+  connectTitle: "Ligue-se ao seu espaço de trabalho",
+  connectIntro: "Introduza o endereço do seu espaço de trabalho.",
+  continueLabel: "Continuar",
+  changeWorkspace: "Alterar",
+  rememberedWorkspaces: "Outros espaços de trabalho",
+  workspaceMark: (name: string) => `Marca de ${name}`,
   allLoaded: "Selecionar itens carregados",
   of: "de",
   selection: "Seleção",

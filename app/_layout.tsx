@@ -14,7 +14,8 @@ import { screenCopy } from "../src/screens/failure";
 import { NativeZoom } from "../src/screens/NativeZoom";
 import { device } from "../src/screens/device";
 import { Shell, useShell } from "../src/shell";
-import { ThemeProvider, useTheme } from "../src/ui/theme";
+import { WorkspaceTheme } from "../src/screens/WorkspaceTheme";
+import { useTheme } from "../src/ui/theme";
 
 export default function Layout() {
   return (
@@ -29,9 +30,12 @@ export default function Layout() {
       reach={device.reach}
       media={{ zoom: NativeZoom, coverMotion: CoverMotion, finishing: FinishingMotion }}
     >
-      <ThemeProvider>
+      {/* The workspace's own colour, worn over the generated palette, is what the whole app
+          is painted with; it is read between the shell and the theme because that is the one
+          place both are known. */}
+      <WorkspaceTheme>
         <Root />
-      </ThemeProvider>
+      </WorkspaceTheme>
     </Shell>
   );
 }
