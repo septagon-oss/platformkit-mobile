@@ -18,6 +18,10 @@ import { ListScreen } from "../../src/ui/templates/ListScreen";
 jest.mock("expo-haptics", () => ({
   notificationAsync: jest.fn(async () => undefined),
   NotificationFeedbackType: { Success: "success", Warning: "warning", Error: "error" },
+  // The felt tick a row's swipe gives at its threshold. A double that answers no question a
+  // surface asks is a surface whose tests throw on the thing they are there to watch.
+  impactAsync: jest.fn(async () => undefined),
+  ImpactFeedbackStyle: { Light: "light", Medium: "medium", Heavy: "heavy" },
 }));
 
 // The safe area comes from a native provider the router installs at the root;
