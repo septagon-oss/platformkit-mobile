@@ -749,6 +749,56 @@ export function statusPill(e: Entry, row: Row, format: Formatting): RecordPill |
   };
 }
 
+/**
+ * finishedValues are the values of an entry's status field that mean *finished* — the subset its
+ * `doneValues` hint declares, and the only thing a celebration may be asked about. It answers `[]`
+ * when the entry names no `statusField`, when that field is plumbing, or when nothing was
+ * declared. A tone never answers it: `enumTones` says what finished wears, not what is finished,
+ * and the two tables are the kernel's own orthogonal pair.
+ */
+export const finishedValues = (e: Entry): readonly string[] =>
+  statusField(e)?.hints?.doneValues ?? [];
+
+/**
+ * isFinished says whether this row's state is one the entry calls finished.
+ *
+ * The test is the row's stored value against `finishedValues`, never the pill's label: a label is
+ * the author's words in the reader's language, so the same state would finish in one locale and
+ * not in another. An entry declaring no done values answers false for every row, and so does a row
+ * holding no status value — nothing is inferred (`statusField`'s own rule).
+ */
+export const isFinished = (e: Entry, row: Row): boolean => {
+  const status = statusField(e);
+  const done = finishedValues(e);
+  return (
+    done.length > 0 &&
+    status !== undefined &&
+    hasValue(status, row[status.name]) &&
+    done.includes(text(row[status.name]))
+  );
+};
+
+/**
+ * finishedWord is the one sentence a record says when its state crosses into one its entry calls
+ * finished: the entry's own noun, and the author's own word for the state it reached. Both words
+ * are served and neither is this kit's, so the kit composes them and no screen spells the
+ * sentence out a second time.
+ */
+export const finishedWord = (singular: string, state: string, copy: Copy): string =>
+  copy.kit.finished(singular, state);
+
+/**
+ * statusTone is the colour an entry declared for this row's state, asked by a surface that draws
+ * the tone of a value without its words — a mark drawn in that colour, for instance. It is
+ * `statusPill`'s read and nothing new: the same declaration, the same fallback to neutral, and
+ * `undefined` when the entry names no `statusField` or this row holds nothing in it.
+ */
+export const statusTone = (
+  e: Entry,
+  row: Row,
+  format: Formatting,
+): RecordPill["tone"] | undefined => statusPill(e, row, format)?.tone;
+
 export interface RecordHeader {
   readonly title: string;
   /** absent when the entry declares no `statusField`, or its row holds no value: no status is ever inferred. */

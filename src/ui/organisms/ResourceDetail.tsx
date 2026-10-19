@@ -11,6 +11,7 @@ import React, { type ReactNode, useState } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Entry } from "../../core/catalog";
+import type { Motion } from "../../core/presentation";
 import {
   failureSubject,
   failureTone,
@@ -34,7 +35,7 @@ import {
   type StateModel,
 } from "../../core/derive";
 import { Notice } from "../atoms/Notice";
-import { Badge } from "../atoms/Badge";
+import { Badge, type BadgeTone } from "../atoms/Badge";
 import { Text } from "../atoms/Text";
 import { Actions, type Props as ActionsProps } from "./Actions";
 import { Activity, type Props as ActivityProps } from "./Activity";
@@ -119,6 +120,18 @@ export interface Props {
    */
   readonly richText?: (body: string, testID: string, fallback: ReactNode) => ReactNode;
   /**
+   * finishing is this record's own finishing moment: the sentence that says what its state became,
+   * and — when the person asked for motion and the product ships a renderer — the burst drawn over
+   * the record surface and the word for the state the mark is drawn in. Absent means this record
+   * reached nothing: it is drawn exactly as it was, with no line and no overlay.
+   */
+  readonly finishing?: {
+    readonly words: string;
+    readonly state?: BadgeTone;
+    readonly burst?: Finishing | undefined;
+    readonly onEnd: () => void;
+  };
+  /**
    * files is what this phone read of each file the row points at — the frame the server
    * probed, the caption, whether the picture carries information. Absent, or no entry for
    * an id, means the record draws its facts and no pictures: the header block stays.
@@ -132,6 +145,19 @@ export interface Props {
    */
   readonly coverMotion?: CoverMotion | undefined;
 }
+
+/**
+ * FinishingProps is what the record surface hands the motion layer for its finishing moment: the
+ * tone the arrived state wears, the person's motion preference, and the call that says the drawn
+ * burst is over. A renderer moves ink and says nothing: the words below are drawn here, so a
+ * product that supplies no renderer keeps this tree whole and simply draws no overlay.
+ */
+export interface FinishingProps {
+  readonly tone: BadgeTone;
+  readonly motion: Motion;
+  readonly onEnd: () => void;
+}
+export type Finishing = (props: FinishingProps) => ReactNode;
 
 export function ResourceDetail({
   feedback,
@@ -157,6 +183,7 @@ export function ResourceDetail({
   files,
   onOpenPhoto,
   coverMotion,
+  finishing,
 }: Props) {
   const s = useStyles(kitStyles),
     t = useTheme(),
@@ -226,6 +253,14 @@ export function ResourceDetail({
         ) : null}
         {row ? (
           <>
+            {finishing ? (
+              /* The record's own line, said once in a voice a screen reader is told to wait for,
+                and drawn whether or not anything moves: it is what the moment says when nothing
+                may be drawn, and it is what stays on screen after the burst has gone. */
+              <Text testID="record-finished" accessibilityLiveRegion="polite">
+                {finishing.words}
+              </Text>
+            ) : null}
             {cover !== undefined && header ? (
               <RecordCover
                 cover={cover}
@@ -240,11 +275,25 @@ export function ResourceDetail({
             {cover === undefined && (header?.status || header?.summary) ? (
               <View style={s.stack}>
                 {header.status ? (
-                  <Badge label={header.status.label} tone={header.status.tone} />
+                  <Badge
+                    label={header.status.label}
+                    tone={header.status.tone}
+                    motion={feedback.motion}
+                  />
                 ) : null}
                 {header.summary ? <Text>{header.summary}</Text> : null}
               </View>
             ) : null}
+            {finishing?.burst
+              ? /* The burst is drawn over the record's own surface, above the cover it belongs to
+                and below nothing: it is a thing happening to this record, not a dialog, so it takes
+                no focus, answers no press, and asks for nothing when it is over but its one call. */
+                finishing.burst({
+                  tone: finishing.state ?? "neutral",
+                  motion: feedback.motion,
+                  onEnd: finishing.onEnd,
+                })
+              : null}
             {/* What the `…` in the native header opened, drawn directly under the header
               it belongs to and above every row of the record: a person pressed a button
               at the top of the screen, so the answer appears where they were looking —

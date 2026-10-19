@@ -8,7 +8,7 @@
 // then the pair the theme already answers for (`textPrimary` on `surfaceCanvas`), and the
 // first section below starts in the ink the photo ends in, so there is no seam to paint.
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, type LayoutRectangle } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import type { Feedback, Motion, RecordCover as CoverModel, RecordHeader } from "../../core/derive";
 import { Badge } from "../atoms/Badge";
@@ -33,21 +33,27 @@ export interface Props {
    */
   readonly offset?: number;
   readonly collapseAt?: number;
+  /** from is the frame the record's own picture flew from, when the person came from a row that
+   * was measured. Absent means this record did not come from a press: it is drawn where it stands. */
+  readonly from?: LayoutRectangle | undefined;
   readonly coverMotion?: CoverMotion | undefined;
   readonly testID?: string;
 }
 
 /**
- * CoverMotionProps is what a record's cover hands the motion layer: how far the page has
- * scrolled, how far before the photo is gone, what the person's motion preference is, and the
- * surface to move. A renderer must draw `photo` whether or not it animates it and says nothing
- * of its own — the words are drawn here — so a product that supplies none gets this tree.
+ * CoverMotionProps is what a record's cover hands the motion layer: how far the page has scrolled,
+ * how far before the photo is gone, what the person's motion preference is, the surface to move,
+ * and — when the person came from a row they pressed — the frame that row's picture held. A
+ * renderer must draw `photo` whether or not it animates it and say nothing of its own; the words
+ * are drawn here, so a product that supplies no renderer gets this tree, and any open this phone
+ * did not measure gets a `from` of nothing and the native push alone.
  */
 export interface CoverMotionProps {
   readonly offset: number;
   readonly collapseAt: number;
   readonly motion: Motion;
   readonly photo: React.ReactNode;
+  readonly from?: LayoutRectangle | undefined;
 }
 export type CoverMotion = (props: CoverMotionProps) => React.ReactNode;
 
@@ -58,6 +64,7 @@ export function RecordCover({
   renderImage,
   offset = 0,
   collapseAt = 0,
+  from,
   coverMotion,
   testID,
 }: Props) {
@@ -90,7 +97,9 @@ export function RecordCover({
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#coverFoot)" />
       </Svg>
       <View style={s.caption}>
-        {header.status ? <Badge label={header.status.label} tone={header.status.tone} /> : null}
+        {header.status ? (
+          <Badge label={header.status.label} tone={header.status.tone} motion={feedback.motion} />
+        ) : null}
         <Text role="title" testID="record-title">
           {header.title}
         </Text>
@@ -103,7 +112,13 @@ export function RecordCover({
     </View>
   );
   return coverMotion
-    ? coverMotion({ offset, collapseAt, motion: feedback.motion, photo: surface })
+    ? coverMotion({
+        offset,
+        collapseAt,
+        motion: feedback.motion,
+        photo: surface,
+        ...(from === undefined ? {} : { from }),
+      })
     : surface;
 }
 

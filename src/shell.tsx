@@ -1,5 +1,6 @@
 // shell.tsx is the composition root's context: one API, one lifecycle state,
 // one renderer pack. It is the only place an effect turns into an event.
+import type { LayoutRectangle } from "react-native";
 import React, {
   createContext,
   useCallback,
@@ -72,6 +73,26 @@ export interface ShellValue {
   /** heard reads that sentence once, and it is gone: a record says what its write did
    * once, not on every visit afterwards. */
   readonly heard: (href: string) => string;
+  /**
+   * celebrate files that a write this phone made reached the record at this address, so that
+   * record's own screen — the one holding the row to compare — can decide whether its state
+   * actually crossed into one the entry calls finished. A filing says only that this phone wrote;
+   * it files no row and no value, so it can carry nothing the person was not shown. Filing twice
+   * for one address is filing once: a record surprises a person once per session.
+   */
+  readonly celebrate: (href: string) => void;
+  /** celebrating says whether this address is the one due its moment. It reads, it does not clear. */
+  readonly celebrating: (href: string) => boolean;
+  /** celebrated says the record looked: the filing is spent, whether or not anything crossed. */
+  readonly celebrated: (href: string) => void;
+  /**
+   * travelTo files the frame of the thumbnail a person pressed, for the record address it opens
+   * into, so the record can begin where the finger was. Only the frame travels, never a row.
+   */
+  readonly travelTo: (href: string, frame: LayoutRectangle) => void;
+  /** travelled reads that frame once and it is gone: a record flies in from where the person came
+   * once, not on every visit afterwards, and a press this phone never measured flies in nowhere. */
+  readonly travelled: (href: string) => LayoutRectangle | undefined;
   /** where a re-authentication returns to and what to prefill: set when the server refuses a
    * session this app was using, cleared when the app learns that whoever signs in now is not
    * that person, or when a sign-in starts that is not a re-authentication at all. */
@@ -222,6 +243,16 @@ export function Shell({
   // The one sentence a write said, filed by the address it was said for. One slot,
   // because one write lands on one record, and the writer names where the person goes.
   const sentence = useRef<{ href: string; text: string } | undefined>(undefined);
+  // The one record due its moment, and the records this session already surprised. One slot, as
+  // with the sentence, because one person looks at one record: a filing for a second replaces the
+  // pending first rather than queueing it, since a burst nobody ever saw is better than a burst
+  // drawn over the wrong record. The address joins the set when it is filed, not when it is
+  // played, so a second write to a record whose burst is still waiting cannot surprise twice.
+  const due = useRef<string | undefined>(undefined);
+  const surprised = useRef<Set<string>>(new Set());
+  // Where the person came from, filed by the row they pressed under the address it opens. One
+  // slot, because one navigation is under way at a time.
+  const journey = useRef<{ href: string; frame: LayoutRectangle } | undefined>(undefined);
   // The person a remembered route and a held sheet belong to, waiting to be
   // compared with whoever the next completed sign-in turns out to be.
   const expected = useRef<Who | undefined>(undefined);
@@ -266,6 +297,9 @@ export function Shell({
     expected.current = undefined;
     sheet.current = undefined;
     sentence.current = undefined;
+    due.current = undefined;
+    surprised.current = new Set();
+    journey.current = undefined;
     remember(undefined);
   }, [remember]);
   const saw = useCallback((href: string) => {
@@ -279,6 +313,24 @@ export function Shell({
     const said = sentence.current.text;
     sentence.current = undefined;
     return said;
+  }, []);
+  const celebrate = useCallback((href: string) => {
+    if (surprised.current.has(href)) return;
+    surprised.current.add(href);
+    due.current = href;
+  }, []);
+  const celebrating = useCallback((href: string) => due.current === href, []);
+  const celebrated = useCallback((href: string) => {
+    if (due.current === href) due.current = undefined;
+  }, []);
+  const travelTo = useCallback((href: string, frame: LayoutRectangle) => {
+    journey.current = { href, frame };
+  }, []);
+  const travelled = useCallback((href: string) => {
+    if (journey.current?.href !== href) return undefined;
+    const frame = journey.current.frame;
+    journey.current = undefined;
+    return frame;
   }, []);
   const typed = useCallback(
     (href: string) => (sheet.current?.href === href ? sheet.current.values : undefined),
@@ -575,6 +627,11 @@ export function Shell({
       keep,
       say,
       heard,
+      celebrate,
+      celebrating,
+      celebrated,
+      travelTo,
+      travelled,
       returning,
       outbox: outboxValue,
       reads,
@@ -769,6 +826,11 @@ export function Shell({
       keep,
       say,
       heard,
+      celebrate,
+      celebrating,
+      celebrated,
+      travelTo,
+      travelled,
       returning,
       outboxValue,
       reads,

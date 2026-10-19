@@ -4,6 +4,7 @@
 import type { ComponentType } from "react";
 import type { Entry } from "./core/catalog";
 import type { Operations } from "./generated/operations.gen";
+import type { FinishingProps } from "./ui/organisms/ResourceDetail";
 import type { CoverMotionProps } from "./ui/organisms/RecordCover";
 import type { ZoomSlotProps } from "./ui/organisms/PhotoViewer";
 
@@ -24,16 +25,19 @@ export interface Renderer {
 export type Renderers = Readonly<Record<string, Renderer>>;
 
 /**
- * MediaRenderers is the native media a product supplies once to `<Shell>`: the gesture surface
- * a picture opens into, and the motion a record's cover collapses with. Both name a surface a
- * screen may not import itself — react-native-reanimated, and zoom-toolkit through it, cannot
- * be evaluated in the environment every screen is tested in — so they are declared here and
- * arrived at by composition. A product that supplies neither gets the still record: the photo
- * holds still, the picture opens at the page's own size, and the buttons page between them.
+ * MediaRenderers is the native media a product supplies once to `<Shell>`: the gesture surface a
+ * picture opens into, the motion a record's cover collapses and flies in with, and the motion a
+ * record makes when it reaches a state its entry calls finished. Each names a surface a screen may
+ * not import itself — react-native-reanimated, and zoom-toolkit through it, cannot be evaluated in
+ * the environment every screen is tested in — so they are declared here and arrived at by
+ * composition. A product that supplies none of them gets the still product: the photo holds still,
+ * the picture opens at the page's own size, the buttons page between them, and a record that
+ * finishes says so in words and in a felt haptic and draws no ink of its own.
  */
 export interface MediaRenderers {
   readonly zoom?: ComponentType<ZoomSlotProps>;
   readonly coverMotion?: ComponentType<CoverMotionProps>;
+  readonly finishing?: ComponentType<FinishingProps>;
 }
 
 export const defaultRenderers: Renderers = {};

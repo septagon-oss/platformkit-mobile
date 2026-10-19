@@ -145,6 +145,15 @@ export interface FieldHints {
   readonly enumLabels?: Readonly<Record<string, string>>;
   readonly enumTones?: Readonly<Record<string, HintTone>>;
   /**
+   * doneValues are the values of this field's enum that mean *finished* — the subset a shell may
+   * celebrate (`kit/entity/hints.go`). It is orthogonal to `enumTones`: which values are finished
+   * is the entity's fact, which colour finished wears is a drawing decision, so neither answers
+   * the other. The author declares it on the entry's `statusField` alone and the mount gate
+   * refuses it anywhere else. Absent, or a list holding none of this field's values, is stored as
+   * silence: nothing is finished and nothing celebrates.
+   */
+  readonly doneValues?: readonly string[];
+  /**
    * reference names the resource this field's value points at, spelled the way
    * the document spells it (`"user/user"`). It is what lets a value read as the
    * record it points at rather than as the identifier stored for it; a pointer
@@ -513,6 +522,36 @@ function hintField(
     (v) => (typeof v === "string" && HINT_TONES.includes(v) ? (v as HintTone) : undefined),
     "tones",
   );
+  // A done value is read the way an enum label is: one bad entry is named and dropped on its own,
+  // so an author's mistake costs the celebration and never the field. A value the enum does not
+  // hold is refused here rather than remembered, because the phone compares it against rows and
+  // a value no row can hold would ask a question nothing answers.
+  const doneValues = ((): readonly string[] | undefined => {
+    const value = raw.doneValues;
+    if (value === undefined) return undefined;
+    if (!Array.isArray(value)) {
+      notice(`${at}.doneValues`, `is not a list of this field's values: nothing is finished`);
+      return undefined;
+    }
+    const kept: string[] = [];
+    for (const held of value) {
+      if (typeof held !== "string" || !values.includes(held)) {
+        const name = typeof held === "string" ? `"${held}"` : String(held);
+        notice(
+          `${at}.doneValues`,
+          `names ${name}, which is no value of this field: it is not finished`,
+        );
+        continue;
+      }
+      if (!kept.includes(held)) kept.push(held);
+    }
+    if (kept.length === 0) {
+      // An empty list is the one absence no entry named, so it names itself.
+      if (value.length === 0) notice(`${at}.doneValues`, "names no value: nothing is finished");
+      return undefined;
+    }
+    return kept;
+  })();
   // A pointer is read as an object with one word in it, and a wrong one costs the
   // reading of the value and nothing else: the field keeps its label, its section
   // and its visibility, and the value is shown the way a document with no hint
@@ -538,6 +577,7 @@ function hintField(
     ...(visibility === undefined ? {} : { visibility: visibility as FieldVisibility }),
     ...(enumLabels === undefined ? {} : { enumLabels }),
     ...(enumTones === undefined ? {} : { enumTones }),
+    ...(doneValues === undefined ? {} : { doneValues }),
     ...(reference === undefined ? {} : { reference }),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;

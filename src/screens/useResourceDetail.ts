@@ -13,6 +13,7 @@ import { key, offers, type Entry } from "../core/catalog";
 import {
   failureSubject,
   instantValue,
+  isFinished,
   label,
   nounPhrase,
   presentedTime,
@@ -40,7 +41,7 @@ export function useResourceDetail(
   format: Formatting,
   clock: Clock = systemClock,
 ) {
-  const { api, writes, wrote, heard, outbox, reads } = useShell();
+  const { api, writes, wrote, heard, celebrating, celebrated, outbox, reads } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   // The three format fields this hook reads are strings and a frozen bundle, so
@@ -58,6 +59,16 @@ export function useResourceDetail(
   // focus. It is drawn beside the row it is about and then gone: a record says what
   // its write did once, not on every visit afterwards.
   const [saved, setSaved] = useState("");
+  // The row whose state this phone's own write crossed into one the entry calls finished, and
+  // nothing when nothing was crossed. It is held for the visit the way `saved` is: a record says
+  // once what its own write did, and a record read in its finished state from the first moment says
+  // nothing, because for it nothing crossed. What the row *says* is read from it by the screen that
+  // draws it, in the reader's own formatting, and never from a copy kept here.
+  const [reached, setReached] = useState<Row | undefined>(undefined);
+  // Whether the burst drawn over this record is still playing. It is one drawn thing with a
+  // ceiling, so the surface that draws it says when it is over; nothing the record says depends
+  // on that answer, and no read waits for it.
+  const [bursting, setBursting] = useState(false);
   // The record's `…` is open. The button sits in the native header and the rows it
   // opens in the body, so the state lives where both can reach it, and Delete closes
   // it as it asks its question — a platform dialog drawn over a menu that is still
@@ -66,6 +77,16 @@ export function useResourceDetail(
   const generation = useRef(0);
   const [visit, setVisit] = useState(0);
   const seen = useRef(writes[k] ?? 0);
+  // The row this screen last drew — the half of the crossing test no read can supply. Only this
+  // screen knows what it showed a moment ago, so only it can tell a state that changed from one
+  // that arrived already changed.
+  const drawn = useRef<Row | undefined>(undefined);
+  // Whether a write this phone made filed a moment for this record. The shell keeps the one-shot;
+  // this is this screen's read of it, spent by the next read that answers, crossed or not, so a
+  // filing can never sit waiting through a slow answer and fire over a record the person stopped
+  // looking at. The words a moment speaks are made in `format`, which is rebuilt on every render
+  // and so is read through a ref rather than becoming a dependency of the read below.
+  const filing = useRef(false);
   // The instant of the last read that answered. A refresh names it, and while it
   // is empty there is nothing to name — which is why an unread refresh is a read.
   const read = useRef("");
@@ -90,11 +111,28 @@ export function useResourceDetail(
           () => api.get(entry, id),
         );
         if (generation.current !== started) return;
+        // The two halves meet here: the filing says this phone wrote, the rows say the state
+        // crossed, and an answer this phone merely stored counts as no answer at all. The filing is
+        // spent either way, so a state the server reached on its own and a state this person
+        // already celebrated are both answered with silence.
+        const caused = filing.current;
+        filing.current = false;
+        const crossed =
+          caused &&
+          drawn.current !== undefined &&
+          got.source !== "device" &&
+          isFinished(entry, got.value) &&
+          !isFinished(entry, drawn.current);
+        drawn.current = got.value;
         setRow(got.value);
         setSavedAt(got.source === "device" ? got.savedAt : undefined);
         setError("");
         setRefusal(undefined);
         read.current = clock.now();
+        if (crossed) {
+          setReached(got.value);
+          setBursting(true);
+        }
       } catch (e) {
         if (generation.current !== started) return;
         const at = instantValue(read.current);
@@ -127,7 +165,8 @@ export function useResourceDetail(
     useCallback(() => {
       // Whoever wrote here said what the write did; this is the screen that lands on
       // it, and the focus that reconciles the write counter is the moment to hear it.
-      const said = heard(address("detail", entry, id));
+      const at = address("detail", entry, id);
+      const said = heard(at);
       // A focus that heard nothing has nothing to say. The sentence belongs to the
       // visit it was heard in: a person who comes back to this record by way of a
       // sheet that wrote nothing is not told again what an earlier write did.
@@ -135,9 +174,16 @@ export function useResourceDetail(
       const now = writes[k] ?? 0;
       if (now !== seen.current) {
         seen.current = now;
+        // A write this phone made filed that it wrote here; the filing is taken now and spent by
+        // the read below. A reconciliation with no filing behind it — another person's change, a
+        // pull to refresh — is a read, and a read celebrates nothing.
+        if (celebrating(at)) {
+          celebrated(at);
+          filing.current = true;
+        }
         void load("refresh");
       }
-    }, [writes, k, load, heard, entry, id]),
+    }, [writes, k, load, heard, celebrating, celebrated, entry, id]),
   );
 
   const remove = useCallback(() => {
@@ -203,6 +249,9 @@ export function useResourceDetail(
 
   const toggleMenu = useCallback(() => setMenu((open) => !open), []);
 
+  // The burst is over: the drawn thing goes away and what the record said stays said.
+  const burstOver = useCallback(() => setBursting(false), []);
+
   return {
     visit,
     row,
@@ -210,6 +259,9 @@ export function useResourceDetail(
     error,
     refusal,
     saved,
+    reached,
+    bursting,
+    burstOver,
     reload,
     dismiss,
     remove,

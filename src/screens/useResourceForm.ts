@@ -38,7 +38,7 @@ import { useTheme } from "../ui/theme";
 import { refusalFields, refusalOf, screenCopy, screenLanguage } from "./failure";
 
 export function useResourceForm(entry: Entry, id: string | undefined) {
-  const { api, wrote, typed, keep, say, outbox } = useShell();
+  const { api, wrote, typed, keep, say, celebrate, outbox } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
@@ -335,6 +335,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
           : address("detail", entry, id),
         create ? copy.kit.created(noun(entry).singular) : copy.kit.changesSaved,
       );
+      // An edit is filed for the record it edited. A create is not filed at all: a first state
+      // crossed nothing — there was no earlier value to cross from — so a new record is never the
+      // one a phone surprises a person with.
+      if (!create && id) celebrate(address("detail", entry, id));
       setSaved(written);
       setPhase("saved");
     } catch (e) {
@@ -351,7 +355,22 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setRefusals((n) => n + 1);
       setPhase("editing");
     }
-  }, [phase, controls, held, row, servedIn, id, api, entry, wrote, copy, create, say, outbox]);
+  }, [
+    phase,
+    controls,
+    held,
+    row,
+    servedIn,
+    id,
+    api,
+    entry,
+    wrote,
+    copy,
+    create,
+    say,
+    celebrate,
+    outbox,
+  ]);
 
   // Cancel is the third door out of a dirty sheet, and it asks the same question the
   // gesture and the system back are asked: an answer of "Keep editing" leaves the
