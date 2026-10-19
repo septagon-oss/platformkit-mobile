@@ -59,6 +59,7 @@ import { Screen } from "./templates/Screen";
 import { VerbStage } from "./verb";
 import { ThemeProvider, useStyles, useTheme, type Theme, type Palette, type Fonts } from "./theme";
 import { StateView, type Props as StateViewProps } from "./molecules/StateView";
+import { Snackbar } from "./molecules/Snackbar";
 import type { Mode } from "./tokens";
 
 import { ActionControl } from "./atoms/ActionControl";
@@ -280,6 +281,10 @@ export function Gallery({
                 motion={example.model.motion}
                 testID="gallery-spinner"
               />
+            ) : example.renderer === "snackbar" ? (
+              // The bar over the rail rather than in its flow: what a person sees of a receipt is
+              // that it stands above where they were, for as long as they are reading it.
+              <Snackbar model={example.model} renderState={renderState} testID="gallery-snackbar" />
             ) : (
               renderState({ model: example.model, onAction: setAction, testID: "gallery-state" })
             )}
