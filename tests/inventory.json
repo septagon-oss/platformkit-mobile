@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 245,
-   "cases": 1129,
-   "ms": 1859170,
-   "testsMs": 62972.20000000002,
+   "files": 246,
+   "cases": 1130,
+   "ms": 1860903,
+   "testsMs": 62973.60000000002,
    "runners": {
     "jest": 82,
-    "node": 163
+    "node": 164
    },
    "unreachable": 0
   },
@@ -10383,6 +10383,35 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-remembered-record-opens-one-record-whatever-its-id-holds.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A remembered open's address is typed `RecordAddress`, but a template literal's `${string}` matches a slash, a question mark and a hash: the type cannot say \"three path parts, no query and no fragment\". Only the escaping in `address` can, so the promise the type's doc makes is asked here of ids that would break it unescaped.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1733,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a remembered record opens one record whatever its id holds"
+   ],
+   "tests": [
+    {
+     "title": "a remembered record opens one record whatever its id holds",
+     "ms": 1.379942,
+     "measured": false
+    }
+   ],
+   "loaded": 36,
+   "coveredProdLines": 12085,
+   "onlyProdLines": null,
+   "testsMs": 1.4
   },
   {
    "file": "tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts",
