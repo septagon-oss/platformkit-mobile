@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 104,
-   "cases": 333,
-   "ms": 2331445,
-   "testsMs": 40694,
+   "files": 105,
+   "cases": 336,
+   "ms": 2359334,
+   "testsMs": 40717,
    "runners": {
-    "jest": 104
+    "jest": 105
    },
    "unreachable": 0
   },
@@ -19906,6 +19906,47 @@
    "coveredProdLines": 1784,
    "onlyProdLines": null,
    "testsMs": 188
+  },
+  {
+   "file": "tests/screens/a-completed-delete-survives-local-recents-failure.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A server-confirmed delete stays completed when this device cannot clean up its reading history. A local cache error cannot turn that answer into an uncertain mutation or keep the deleted record available for another delete.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 27889,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a confirmed delete leaves the record even when forgetting its recent open fails",
+    "a confirmed delete withdraws its recent open and leaves the record",
+    "a refused delete keeps its recent open and records no successful write"
+   ],
+   "tests": [
+    {
+     "title": "a confirmed delete leaves the record even when forgetting its recent open fails",
+     "ms": 14,
+     "measured": false
+    },
+    {
+     "title": "a confirmed delete withdraws its recent open and leaves the record",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a refused delete keeps its recent open and records no successful write",
+     "ms": 4,
+     "measured": false
+    }
+   ],
+   "loaded": 154,
+   "coveredProdLines": 2193,
+   "onlyProdLines": null,
+   "testsMs": 23
   },
   {
    "file": "tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx",

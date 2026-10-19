@@ -2,7 +2,9 @@
 // this app wrote to the resource while a sheet was above, and the delete,
 // confirmed by the platform's own dialog with a warning felt before it and a
 // success felt after. A delete that reached the server also takes this device's
-// memory of the record away, so no section points at a row that is gone.
+// memory of the record away, so no section points at a row that is gone — and that
+// memory sits outside the verdict: a table this phone cannot write to says nothing
+// about what the server answered.
 //
 // A refusal is classified, not printed: whether the record stays on the screen is
 // decided by the verdict (`withdraws`), so a refresh answered 403 takes the row
@@ -248,7 +250,18 @@ export function useResourceDetail(
             // outbox still holds keeps its door until it is sent.
             if (answer.sent) {
               wrote(k);
-              await recents?.forgot({ resourceKey: k, recordId: id });
+              // Withdrawing the record from this device's memory is bookkeeping after an
+              // answer that already came, so it is awaited inside its own boundary: the door
+              // is gone before the person is, and a table this phone cannot write to cannot
+              // read back as a delete nobody answered. What such a failure leaves behind is
+              // one stale row in a list of five, which the person can open again; what it
+              // must not leave behind is a sentence saying the delete may not have happened.
+              try {
+                await recents?.forgot({ resourceKey: k, recordId: id });
+              } catch {
+                // The delete reached the server and is counted; nothing about that changes
+                // because this device's own reading history refused a row.
+              }
             }
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             leave();
