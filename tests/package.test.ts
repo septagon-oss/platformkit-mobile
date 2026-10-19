@@ -41,6 +41,7 @@ test("a packed dependency resolves the shared composition and atomic layers with
   const names = [
     "core/catalog",
     "core/derive",
+    "core/gesture",
     "effects/api",
     "effects/media",
     "core/outbox",

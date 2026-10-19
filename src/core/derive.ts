@@ -14,6 +14,7 @@ import {
   type People,
   type Person,
   type PictureStates,
+  type ResourceIcon,
   type RowMediaModel,
 } from "./pictures";
 // derive.ts is ADR 0007 on a phone: what a list, a detail and a form are, given
@@ -1765,6 +1766,55 @@ export const commandScope = (id: string | undefined): CommandScope =>
 /** commandOf finds the command a route's verb names at the address it was opened at. */
 export const commandOf = (e: Entry, verb: string, at: CommandScope): Command | undefined =>
   e.commands.find((c) => c.verb === verb && commandAt(c, at));
+
+/**
+ * RowAction is what one of an entry's rows offers a swipe: the verb, the words the
+ * revealed surface and the receipt after it, and whether running it hurts.
+ */
+export interface RowAction {
+  readonly verb: string;
+  /** label is the short domain word the surface is built of — never a whole sentence. */
+  readonly label: string;
+  /** success is the sentence said afterwards, the same one the record would say. */
+  readonly success: string;
+  /** consequence is what running it does, "" when the document says nothing. */
+  readonly consequence: string;
+  readonly destructive: boolean;
+  /** icon is the entry's own declared picture, worn in the command's tone; absent when the entry declares none this build draws. */
+  readonly icon?: ResourceIcon;
+}
+
+/**
+ * rowAction is the command this entry's rows may be swiped to run, resolved the way
+ * a deep link resolves it, or nothing when no row of this entry swipes.
+ *
+ * It answers to the verb the entry declared, through the same lookup a routed sheet
+ * uses, so a swipe and a typed address cannot disagree about which command a verb
+ * names. Availability is all the phone is given: the command reached this session's
+ * document, is not run by the kernel for its own reasons, and runs on one record.
+ * Whether it runs on *this* record is the server's answer to the request, and a
+ * refusal is reported there rather than guessed at here.
+ */
+export function rowAction(e: Entry, copy: Copy): RowAction | undefined {
+  const verb = e.hints?.primaryCommand;
+  if (verb === undefined) return undefined;
+  const c = commandOf(e, verb, "record");
+  if (c === undefined || !offered(c)) return undefined;
+  const { button, success, consequence } = commandWording(c, "", copy);
+  const icon = entryIcon(e);
+  return {
+    verb,
+    label: button,
+    success,
+    consequence,
+    destructive: c.hints?.destructive === true,
+    ...(icon === undefined ? {} : { icon }),
+  };
+}
+
+/** rowSwipeTone is which pair the revealed surface wears: the one that hurts, or the one that acts. */
+export const rowSwipeTone = (action: RowAction): "primary" | "destructive" =>
+  action.destructive ? "destructive" : "primary";
 
 /** listValues retains the element types the server declared, or refuses the whole list. */
 function listValues(field: Field, raw: string): (string | number | boolean)[] | undefined {

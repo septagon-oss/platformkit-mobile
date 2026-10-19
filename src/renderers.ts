@@ -7,6 +7,7 @@ import type { Operations } from "./generated/operations.gen";
 import type { FinishingProps } from "./ui/organisms/ResourceDetail";
 import type { CoverMotionProps } from "./ui/organisms/RecordCover";
 import type { ZoomSlotProps } from "./ui/organisms/PhotoViewer";
+import type { RowActionProps } from "./ui/organisms/DataList";
 
 export interface ScreenProps {
   readonly entry: Entry;
@@ -26,18 +27,21 @@ export type Renderers = Readonly<Record<string, Renderer>>;
 
 /**
  * MediaRenderers is the native media a product supplies once to `<Shell>`: the gesture surface a
- * picture opens into, the motion a record's cover collapses and flies in with, and the motion a
- * record makes when it reaches a state its entry calls finished. Each names a surface a screen may
- * not import itself — react-native-reanimated, and zoom-toolkit through it, cannot be evaluated in
- * the environment every screen is tested in — so they are declared here and arrived at by
- * composition. A product that supplies none of them gets the still product: the photo holds still,
- * the picture opens at the page's own size, the buttons page between them, and a record that
- * finishes says so in words and in a felt haptic and draws no ink of its own.
+ * picture opens into, the motion a record's cover collapses and flies in with, the motion a record
+ * makes when it reaches a state its entry calls finished, and the gesture surface a row's command
+ * stands open under. Each names a surface a screen may not import itself — react-native-reanimated,
+ * react-native-gesture-handler and zoom-toolkit through them cannot be evaluated in the environment
+ * every screen is tested in — so they are declared here and arrived at by composition. A product
+ * that supplies none of them gets the still product: the photo holds still, the picture opens at the
+ * page's own size, the buttons page between them, a record that finishes says so in words and in a
+ * felt haptic and draws no ink of its own, and a row's command is offered as an action of the row
+ * rather than under a finger.
  */
 export interface MediaRenderers {
   readonly zoom?: ComponentType<ZoomSlotProps>;
   readonly coverMotion?: ComponentType<CoverMotionProps>;
   readonly finishing?: ComponentType<FinishingProps>;
+  readonly rowAction?: ComponentType<RowActionProps>;
 }
 
 export const defaultRenderers: Renderers = {};

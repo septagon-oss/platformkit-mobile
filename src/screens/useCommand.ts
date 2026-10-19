@@ -23,12 +23,14 @@ import { key, type Command, type Entry } from "../core/catalog";
 import { address } from "../core/reentry";
 import {
   changedFields,
+  commandOf,
   commandPath,
   commandSections,
   commandTitle,
   commandWording,
   failureSubject,
   label,
+  offered,
   problems,
   screenPath,
   values,
@@ -229,13 +231,82 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
 }
 
 /**
+ * useCommandSend is one command's submit, shared by every door that runs one: the hold, the
+ * idempotency key, the write count, the felt tick and the filing.
+ *
+ * The caller is handed the success sentence rather than printing it, because only the caller
+ * knows who is left standing to say it: the record a sheet dismissed files it for the address the
+ * person lands on, a row that stayed on the screen says it there. A command this phone is holding
+ * has not run, so nothing is filed and the hold's own sentence is shown where it was asked. A
+ * refusal is a report and not a question — the platform's alert with its one answer, because
+ * there is no form on screen to put it under.
+ */
+function useCommandSend(entry: Entry) {
+  const { api, wrote, celebrate, outbox } = useShell();
+  return useCallback(
+    async (c: Command, id: string | undefined, told: (success: string) => void) => {
+      const { title, success } = commandWording(c, "", screenCopy());
+      try {
+        // A command that takes no argument sends no argument at all, key or
+        // no key: the key rides after the argument slot it does not use.
+        const live = (idem?: string) =>
+          idem === undefined
+            ? api.command(entry, id, c.verb)
+            : api.command(entry, id, c.verb, undefined, { idempotencyKey: idem });
+        // A command is the write most worth holding: it is the one the person
+        // cannot repeat by retyping a field, and the server that never heard it
+        // never ran it.
+        const answer = outbox
+          ? await outbox.submit(
+              {
+                kind: "command",
+                resourceKey: key(entry),
+                path: commandPath(entry, c.verb, id),
+              },
+              live,
+            )
+          : { sent: true as const, row: await live() };
+        if (answer.sent) {
+          // The record the command ran on is what says what it did — unless the
+          // thing that ran it never left the screen, which is the caller's
+          // decision and the only reason this line is a callback. A command
+          // about the whole list has no record to land on, and one the phone is
+          // holding has not run.
+          told(success);
+          // The record decides what this write did to its own state; this one files only
+          // the fact that the person, standing here, asked for it.
+          if (id) celebrate(address("detail", entry, id));
+          wrote(key(entry));
+        } else {
+          const words = screenCopy();
+          Alert.alert(title, words.state.holding(words.state.held.title));
+        }
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (e) {
+        // A report, not a question: the platform's alert with its one OK,
+        // because there is no form on screen to put the refusal under.
+        // The report is the classified sentence, so an unanswered command
+        // says nothing is known rather than claiming the command failed.
+        Alert.alert(
+          title,
+          refusalOf(e, "command", failureSubject(entry, title), screenCopy()).text ||
+            screenCopy().failure.commandFailed(title),
+        );
+      }
+    },
+    [api, entry, wrote, celebrate, outbox],
+  );
+}
+
+/**
  * useCommandAsk is a command with no argument: the confirmation, and what it
  * does when the answer is yes. The refusal is reported where it happened,
  * because there is no form on screen to put it under.
  */
 export function useCommandAsk(entry: Entry, id: string | undefined) {
-  const { api, wrote, say, celebrate, outbox } = useShell();
+  const { say } = useShell();
   const { mode } = useTheme();
+  const send = useCommandSend(entry);
   const [busy, setBusy] = useState("");
 
   const ask = useCallback(
@@ -245,67 +316,81 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
       // record the command acts on is the screen the dialog is drawn over, so it
       // is not repeated inside the question, and a command about the whole list
       // has no record to name.
-      const { title, button, consequence, success } = commandWording(c, "", screenCopy());
+      const { title, button, consequence } = commandWording(c, "", screenCopy());
       confirm(
         title,
         {
           label: button,
           onPress: async () => {
             setBusy(c.verb);
-            try {
-              // A command that takes no argument sends no argument at all, key or
-              // no key: the key rides after the argument slot it does not use.
-              const live = (idem?: string) =>
-                idem === undefined
-                  ? api.command(entry, id, c.verb)
-                  : api.command(entry, id, c.verb, undefined, { idempotencyKey: idem });
-              const answer = outbox
-                ? await outbox.submit(
-                    {
-                      kind: "command",
-                      resourceKey: key(entry),
-                      path: commandPath(entry, c.verb, id),
-                    },
-                    live,
-                  )
-                : { sent: true as const, row: await live() };
-              if (answer.sent) {
-                // The record the dialog was drawn over is what says what its
-                // command did; a command about the whole list has no record to
-                // land on, and one the phone is holding has not run.
-                if (id) say(address("detail", entry, id), success);
-                // The record decides what this write did to its own state; this one files only
-                // the fact that the person, standing here, asked for it.
-                if (id) celebrate(address("detail", entry, id));
-                wrote(key(entry));
-              } else {
-                const words = screenCopy();
-                Alert.alert(title, words.state.holding(words.state.held.title));
-              }
-              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            } catch (e) {
-              // A report, not a question: the platform's alert with its one OK,
-              // because there is no form on screen to put the refusal under.
-              // The report is the classified sentence, so an unanswered command
-              // says nothing is known rather than claiming the command failed.
-              Alert.alert(
-                title,
-                refusalOf(e, "command", failureSubject(entry, title), screenCopy()).text ||
-                  screenCopy().failure.commandFailed(title),
-              );
-            } finally {
-              setBusy("");
-            }
+            await send(c, id, (success) => {
+              if (id) say(address("detail", entry, id), success);
+            });
+            setBusy("");
           },
         },
         mode,
         { message: consequence },
       );
     },
-    [api, entry, id, wrote, say, celebrate, mode, outbox],
+    [entry, id, say, send, mode],
   );
 
   return { ask, busy };
+}
+
+/**
+ * useRowCommand is a list's commands: the same submit as a record's, with the record named when the
+ * person chooses rather than when the screen mounts — a list holds many rows and a hook is made for
+ * the screen, not for each row.
+ *
+ * Which command a row runs is the entry's declaration and nothing else, resolved by the same lookup
+ * a routed sheet uses, so a swipe and a typed deep link cannot disagree about what a verb names. A
+ * release at the end of a drag is an answer already given, so it runs straight through except where
+ * the document says the act hurts, or says what it does: a revealed surface carries one word and no
+ * sentence under it, so those two are asked first. One run per record and verb at a time; two rows
+ * are two records, and neither one is "the command is running".
+ */
+export function useRowCommand(entry: Entry) {
+  const { mode } = useTheme();
+  const { report } = useShell();
+  const send = useCommandSend(entry);
+  // Which `${id}/${verb}` pairs are under way. A ref, not state: nothing draws it, and a row
+  // released twice while its write is out must have been released once.
+  const running = useRef<Set<string>>(new Set());
+
+  const run = useCallback(
+    (id: string) => {
+      const verb = entry.hints?.primaryCommand;
+      const c = verb === undefined ? undefined : commandOf(entry, verb, "record");
+      if (c === undefined || !offered(c)) return;
+      const at = `${id}/${c.verb}`;
+      if (running.current.has(at)) return;
+      const start = () => {
+        if (running.current.has(at)) return;
+        running.current.add(at);
+        void send(c, id, report).finally(() => {
+          running.current.delete(at);
+        });
+      };
+      const { title, button, consequence } = commandWording(c, "", screenCopy());
+      // Either declaration opens the question: that the act hurts, or that its author said what
+      // it does. They are independent facts on the wire and neither is guessed here.
+      if (c.hints?.destructive === true || consequence !== "") {
+        confirm(
+          title,
+          { label: button, destructive: c.hints?.destructive === true, onPress: start },
+          mode,
+          { message: consequence },
+        );
+        return;
+      }
+      start();
+    },
+    [entry, report, send, mode],
+  );
+
+  return { run };
 }
 
 /**

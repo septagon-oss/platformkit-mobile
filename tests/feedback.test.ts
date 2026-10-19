@@ -250,8 +250,8 @@ test("the literal gallery derives every example in EN/PT and all required format
     for (const locale of ["en-GB", "pt-PT", "pt-BR"]) {
       const result = stateExamples({ ...p, copy: deriveCopy(language), locale });
       assert.ok(result.ok);
-      assert.equal(result.value.length, 31);
-      assert.equal(new Set(result.value.map((example) => example.id)).size, 31);
+      assert.equal(result.value.length, 32);
+      assert.equal(new Set(result.value.map((example) => example.id)).size, 32);
       assert.ok(result.value.every((example) => example.model.language === language));
     }
 });

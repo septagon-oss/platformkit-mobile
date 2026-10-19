@@ -191,7 +191,11 @@ for (const language of ["en", "pt"] as const)
       for (const example of examples.value) {
         await render(<Gallery presentation={p} initialMode={mode} initialCaseId={example.id} />);
         const view = screen.getByTestId(
-          example.renderer === "spinner" ? "gallery-spinner" : "gallery-state",
+          example.renderer === "spinner"
+            ? "gallery-spinner"
+            : example.renderer === "snackbar"
+              ? "gallery-snackbar"
+              : "gallery-state",
         );
         expect(view).toBeOnTheScreen();
         if (example.model.component === "skeleton")

@@ -21,11 +21,15 @@ test("malformed hints at every nesting level preserve the unhinted catalog", () 
     parseCatalog(input, (at) => noticed.push(at)),
     baseline,
   );
+  // The four paths, in the order the document is read: a command's own hints are checked while
+  // the entry's commands are read, before the entry's own hints, because the verb an entry
+  // declares for a row can only be checked against commands that have been read. The set is the
+  // rule; this order is what the reading is worth, so it is pinned too.
   assert.deepEqual(noticed, [
-    "resources[0].fields[1].presentation",
-    "resources[0].presentation",
     "resources[0].commands[0].presentation",
     "resources[0].commands[0].fields[0].presentation",
+    "resources[0].fields[1].presentation",
+    "resources[0].presentation",
   ]);
 });
 

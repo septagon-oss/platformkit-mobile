@@ -271,7 +271,7 @@
       "store_sha256": "4709fceb746a8171c71cf7dc51ad8c10ef11e177a31b95c7bb4ac814970e4ca1",
       "store_bytes": 2036648,
       "why": "The only notice any screen in the pool carries: a band with its own type over the content it belongs to. No screen in refs/apps/*/refs.json shows a toast, snack or banner, so this row's pixel is a notice in place, not a timed one.",
-      "ours": "Notice is an in-flow band with a tone, an optional title, its own action and an announcement politeness; it never removes layout without saying so. It has no timed presence and no elevation above the surface \u2014 a Notice stays where the screen put it.",
+      "ours": "Notice is an in-flow band with a tone, an optional title, its own action and an announcement politeness; it never removes layout without saying so. A Notice stays where the screen put it: no timed presence, no elevation above the surface. The family\u2019s timed half is Snackbar \u2014 the same derived model floated above the surface it happened on, which leaves on its own clock and answers no touch while it holds nothing to press. The picture below stays the in-flow band: a specimen of a bar that went away after four seconds would photograph nothing.",
       "ours_case": "notice/offline",
       "ours_file": "R40-toast.png",
       "sha256": "244fce9d07cb23651c76389a8a8cdc9ba14edd4351772013aadf3df5bd8bac08",

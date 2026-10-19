@@ -5,7 +5,7 @@ import type { Presentation, Result } from "./presentation";
 export interface StateExample {
   readonly id: string;
   readonly model: StateModel;
-  readonly renderer: "state" | "spinner";
+  readonly renderer: "state" | "spinner" | "snackbar";
 }
 
 export function stateExamples(p: Presentation): Result<readonly StateExample[]> {
@@ -119,6 +119,9 @@ export function stateExamples(p: Presentation): Result<readonly StateExample[]> 
     ["notice/pressed", read],
     ["notice/focus", read],
     ["notice/large-text", { ...read, title: gallery.longTitle, body: gallery.longBody }],
+    // The same model a notice draws in the page's own flow, floated above the page: the specimen
+    // of the timed bar, so the receipt a write leaves is looked at beside the surfaces it borrows.
+    ["snackbar/receipt", { kind: "success" }],
     ["skeleton/lines", { kind: "loading", skeleton: "lines" }],
     ["skeleton/rows", { kind: "loading", skeleton: "rows" }],
     ["skeleton/detail", { kind: "loading", skeleton: "detail" }],
@@ -137,7 +140,11 @@ export function stateExamples(p: Presentation): Result<readonly StateExample[]> 
     examples.push({
       id,
       model: result.value,
-      renderer: id.startsWith("spinner/") ? "spinner" : "state",
+      renderer: id.startsWith("spinner/")
+        ? "spinner"
+        : id.startsWith("snackbar/")
+          ? "snackbar"
+          : "state",
     });
   }
   return { ok: true, value: examples };

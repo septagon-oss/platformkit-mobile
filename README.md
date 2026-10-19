@@ -420,6 +420,41 @@ renderer pack reach for; and `kitCopy` gained the direction words, the three emp
 and "All"/"Clear filters" in `en` and `pt`, so the next screen that orders or narrows a
 list writes no sentence of its own.
 
+A row can also be acted on from where it stands. When the entry declares
+`hints.primaryCommand`, its row is dragged from the trailing edge, the command the verb names is
+uncovered under it, and **the release is the moment of decision**: at or past the width of what
+the person uncovered, the phone runs it — and a drag the system or a second finger took back away
+from the row is not a release and runs nothing. What the surface is worth is the width it stands
+open at, so a command that will run and a row that looks ready are one sight, read by one function
+(`readSwipe`) that the reanimated surface, the component fake and the threshold's own suite all
+consult — a function marked `"worklet"`, because a drag is read on the UI runtime, where a plain
+shared function arrives as one that may not be called from the finger at all, and where the two
+things the crossing asks the phone to do — the tick and the run — are therefore asked for from
+inside the worklet (`scheduleOnRN`) rather than through a function prepared beside it. What hurts, or what
+the author declared a consequence for, is asked about first, in the
+same question the record asks; the verb resolves through the same lookup a typed address uses, so
+the two doors cannot disagree about which command a name means; and nothing is swipe-only — `Row`
+still offers the same command as a named action a reader can speak. A list whose app supplies no
+surface draws its rows exactly as it did. A write that opened no page leaves its receipt at the
+foot of wherever the person is standing (`Snackbar` over the navigator, filed by the shell), for
+as long as it takes to read once — and only for that person: a write that answers after its own
+session signed out files no receipt, no sentence and no moment for whoever signs in next.
+
+**Reused** — `commandOf`, `commandAt`, `offered` and `commandWording` for which verb a row runs and
+in whose words, `entryIcon` for the picture it wears, `Row`'s existing action title for the door
+with no finger in it, `outbox.submit` and its existing idempotency key for the run, and
+`deriveState`/`StateView`/`Notice` for every word and colour the receipt draws. **Added** —
+`rowAction` and `rowSwipeTone` in the core, and `readSwipe` in the new `core/gesture` subpath,
+because the inventory found no threshold of any presence in this repository; `Snackbar`, because
+the register's `R40` records that nothing here was ever timed or elevated; `report`, `reporting`
+and `spent` on the shell, a third channel of the shape it already kept twice over; and
+`RowSwipe` behind the renderer pack — the drag is react-native-gesture-handler, and importing it
+evaluates react-native-worklets, which throws wherever no native runtime is loaded, which is the
+same reason `src/renderers.ts` exists. **Made reusable** — `useCommandSend`, the submit that lived
+inside `useCommandAsk`, is now the one submit the sheet and the row share; `readSwipe` is the one
+reading any future surface is measured against; and the composition root draws its screens inside
+one `GestureHandlerRootView`, which is where every gesture this app recognises is recognised.
+
 ### How a record opens
 
 One rule decides the whole of a record's hierarchy: **a fact is drawn once, at the

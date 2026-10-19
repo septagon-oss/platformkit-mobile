@@ -3,7 +3,7 @@
 // its own: the group it sits in separates its rows, so a row outside a group is
 // one thing on a page and not a fragment of a table.
 import React, { useState, type ReactNode } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, type AccessibilityActionEvent } from "react-native";
 import { Icon } from "../atoms/Icon";
 import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
@@ -36,6 +36,13 @@ interface Props {
    * radio, and a group of them is read down as one question.
    */
   readonly role?: "button" | "radio";
+  /**
+   * action is the command this row can be swiped to run, offered to a reader as a named
+   * action of the row itself. Nothing a swipe may do may be swipe-only: a person who cannot
+   * drag reaches the same command from the same element, and the row's own name keeps its
+   * words — the command is something the row offers, not a fact about the record.
+   */
+  readonly action?: { readonly label: string; readonly onRun: () => void };
   /** opens says pressing leads somewhere, which is what the chevron promises. */
   readonly opens?: boolean;
   readonly testID?: string;
@@ -72,6 +79,7 @@ export function Row({
   busy = false,
   selected,
   role = "button",
+  action,
   opens: leads,
   testID,
 }: Props) {
@@ -92,6 +100,14 @@ export function Row({
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
       accessibilityRole={role}
+      {...(action
+        ? {
+            accessibilityActions: [{ name: "run", label: action.label }],
+            onAccessibilityAction: (event: AccessibilityActionEvent) => {
+              if (event.nativeEvent.actionName === "run") action.onRun();
+            },
+          }
+        : {})}
       aria-busy={busy}
       aria-disabled={!onPress || busy}
       {...chosenState(role, selected)}

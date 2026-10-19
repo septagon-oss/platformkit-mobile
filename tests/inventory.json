@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 249,
-   "cases": 1161,
-   "ms": 1959451,
-   "testsMs": 63093.60000000002,
+   "files": 257,
+   "cases": 1200,
+   "ms": 2098213,
+   "testsMs": 69814.30000000002,
    "runners": {
-    "jest": 85,
-    "node": 164
+    "jest": 89,
+    "node": 168
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 113,
-   "cases": 349,
-   "ms": 2591093,
-   "testsMs": 42769,
+   "files": 120,
+   "cases": 374,
+   "ms": 2782654,
+   "testsMs": 43856,
    "runners": {
-    "jest": 113
+    "jest": 120
    },
    "unreachable": 0
   },
@@ -3302,6 +3302,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gesture-handler recognizes no gesture outside a `GestureHandlerRootView` (in a development build it refuses to render one); the native stack supplies none, so the root has to. Under Jest that refusal is switched off, so the only way a suite sees the root is to ask the tree the layout draws.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 38736,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "draws the navigator, and every screen in it, under one gesture root"
+   ],
+   "tests": [
+    {
+     "title": "draws the navigator, and every screen in it, under one gesture root",
+     "ms": 119,
+     "measured": false
+    }
+   ],
+   "loaded": 176,
+   "coveredProdLines": 2021,
+   "onlyProdLines": null,
+   "testsMs": 119
+  },
+  {
    "file": "tests/native-store-scope.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -3347,6 +3376,41 @@
    "coveredProdLines": 1926,
    "onlyProdLines": null,
    "testsMs": 14
+  },
+  {
+   "file": "tests/screens/a-cancelled-swipe-runs-nothing.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or a second finger took away is not a release. RNGH reports both through `onEnd`, and tells them apart only by its second argument \u2014 `true` for a gesture that reached END, `false` for one that was CANCELLED or FAILED while active (src/handlers/gestures/eventReceiver.ts in the pinned package). So the surface is driven here the way the library drives it, with the libraries replaced by the shape of their contract.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30721,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a release past the threshold runs the row's command",
+    "a drag past the threshold that was cancelled while the finger was down runs nothing"
+   ],
+   "tests": [
+    {
+     "title": "a release past the threshold runs the row's command",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a drag past the threshold that was cancelled while the finger was down runs nothing",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 125,
+   "coveredProdLines": 1810,
+   "onlyProdLines": null,
+   "testsMs": 11
   },
   {
    "file": "tests/screens/nativeImage.test.tsx",
@@ -4124,6 +4188,65 @@
    "coveredProdLines": 1916,
    "onlyProdLines": null,
    "testsMs": 631
+  },
+  {
+   "file": "tests/ui/a-row-offers-its-command-without-a-finger.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 6,
+   "rule": "Nothing a swipe can do may be swipe-only. The command a row's swipe runs is offered to a reader as a named action of the row itself, the row's own name keeps the words it always had, and a row of an entry that names no command is the same row it was \u2014 with no surface standing under it until a product supplies one.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20500,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a reader is offered the same command the swipe runs, on the row it belongs to",
+    "the command is something the row offers, not a fact added to its name",
+    "an action that is not the row's own asks nothing of the phone",
+    "a row of an entry that names no command is offered nothing, and is otherwise the same row",
+    "no surface stands under a row until the product supplies one",
+    "the surface the product supplies stands under the row it belongs to"
+   ],
+   "tests": [
+    {
+     "title": "a reader is offered the same command the swipe runs, on the row it belongs to",
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "the command is something the row offers, not a fact added to its name",
+     "ms": 16,
+     "measured": false
+    },
+    {
+     "title": "an action that is not the row's own asks nothing of the phone",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "a row of an entry that names no command is offered nothing, and is otherwise the same row",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "no surface stands under a row until the product supplies one",
+     "ms": 16,
+     "measured": false
+    },
+    {
+     "title": "the surface the product supplies stands under the row it belongs to",
+     "ms": 19,
+     "measured": false
+    }
+   ],
+   "loaded": 125,
+   "coveredProdLines": 1845,
+   "onlyProdLines": null,
+   "testsMs": 102
   },
   {
    "file": "tests/ui/a-workspaces-accent-enters-the-theme-without-a-hand-edited-token.test.tsx",
@@ -8057,6 +8180,71 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/row-swipe.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 7,
+   "rule": "What a swipe does at each distance: the surface's width is the threshold, a release short of it asks nothing of the phone at all, the reveal is clamped to what stands open, one drag is felt once, and a reader who asked for less motion runs the same command with less ink. The suite drives the fake in tests/fakes/gesture.tsx, which decides these with the same `readSwipe` and the same src/ui/scale.ts lengths the product's reanimated surface reads.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 32562,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the width the surface stands open at is the page's fingertip beside its widest gap",
+    "a drag one point short of that width uncovers the surface and runs nothing",
+    "a drag to that width is the command, and a release runs it",
+    "a drag back across the row uncovers nothing, and a long drag uncovers no more than stands open",
+    "one drag is felt once, at the crossing and not again on the way back over it",
+    "a drag that never reached the threshold is felt as nothing",
+    "a reader who asked for less motion runs the same command, felt the same tick, with no ink easing"
+   ],
+   "tests": [
+    {
+     "title": "the width the surface stands open at is the page's fingertip beside its widest gap",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a drag one point short of that width uncovers the surface and runs nothing",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a drag to that width is the command, and a release runs it",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a drag back across the row uncovers nothing, and a long drag uncovers no more than stands open",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "one drag is felt once, at the crossing and not again on the way back over it",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a drag that never reached the threshold is felt as nothing",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a reader who asked for less motion runs the same command, felt the same tick, with no ink easing",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 125,
+   "coveredProdLines": 1780,
+   "onlyProdLines": null,
+   "testsMs": 17
+  },
+  {
    "file": "tests/ui/search-busy-submit.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -10715,6 +10903,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-released-swipe-reaches-its-command-from-the-ui-runtime.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A native row's drag is read and released on the UI runtime: the gesture callbacks are worklets, and whatever they call synchronously must be callable there. This compiles the real surface with the app's native Babel preset, serializes its gesture callbacks through the installed Worklets serializer and unpackers, and drives one armed, released drag: the threshold's tick and the command must both reach the React Native runtime. The JS gesture double cannot see this boundary.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 8286,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a drag past the threshold asks for its tick from the UI runtime",
+    "a released armed drag runs its command from the UI runtime"
+   ],
+   "tests": [
+    {
+     "title": "a drag past the threshold asks for its tick from the UI runtime",
+     "ms": 4359.253343,
+     "measured": false
+    },
+    {
+     "title": "a released armed drag runs its command from the UI runtime",
+     "ms": 447.941805,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 4807.2
   },
   {
    "file": "tests/a-remembered-record-opens-one-record-whatever-its-id-holds.test.ts",
@@ -18628,6 +18851,172 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/row-primary-command.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 10,
+   "rule": "The row's command is the entry's declaration, read: which verb a swipe may run, and what an author's mistake costs. Every case is served bytes through the shipped `parseCatalog`, because the kernel refuses these same four declarations when it mounts the resource (`kit/rest/hints.go`) and a phone in a pocket may still be served them by an older one \u2014 the phone refuses what the server refuses, and refuses it with a line a developer hears rather than a swipe that cannot run.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1009,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a verb naming a record command that takes no argument is the verb a row swipes",
+    "a verb that names no command of this entry is refused by name and costs the swipe",
+    "a verb the kernel runs for its own reasons is never what a row runs",
+    "a verb about the whole collection is not one a row runs",
+    "a verb that takes an argument is not one a swipe sends",
+    "a declaration that is no word is refused as the kind of thing it is",
+    "an entry that names no row command keeps every other hint and says nothing",
+    "a command that says it hurts is read as one that hurts",
+    "silence about hurting and a declared no are one reading, and neither is stored",
+    "a command that cannot say whether it hurts is asked before it runs"
+   ],
+   "tests": [
+    {
+     "title": "a verb naming a record command that takes no argument is the verb a row swipes",
+     "ms": 9.343722,
+     "measured": false
+    },
+    {
+     "title": "a verb that names no command of this entry is refused by name and costs the swipe",
+     "ms": 0.67064,
+     "measured": false
+    },
+    {
+     "title": "a verb the kernel runs for its own reasons is never what a row runs",
+     "ms": 0.430255,
+     "measured": false
+    },
+    {
+     "title": "a verb about the whole collection is not one a row runs",
+     "ms": 0.440776,
+     "measured": false
+    },
+    {
+     "title": "a verb that takes an argument is not one a swipe sends",
+     "ms": 0.632791,
+     "measured": false
+    },
+    {
+     "title": "a declaration that is no word is refused as the kind of thing it is",
+     "ms": 0.425537,
+     "measured": false
+    },
+    {
+     "title": "an entry that names no row command keeps every other hint and says nothing",
+     "ms": 0.451825,
+     "measured": false
+    },
+    {
+     "title": "a command that says it hurts is read as one that hurts",
+     "ms": 0.52429,
+     "measured": false
+    },
+    {
+     "title": "silence about hurting and a declared no are one reading, and neither is stored",
+     "ms": 0.371027,
+     "measured": false
+    },
+    {
+     "title": "a command that cannot say whether it hurts is asked before it runs",
+     "ms": 0.933427,
+     "measured": false
+    }
+   ],
+   "loaded": 4,
+   "coveredProdLines": 3973,
+   "onlyProdLines": null,
+   "testsMs": 14.2
+  },
+  {
+   "file": "tests/row-swipe.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 10,
+   "rule": "Where a drag has got, and which command a row would run: the one arithmetic a swiped surface makes, and the one resolution of the entry's declared verb. Both are read the same way by the reanimated surface on a device and by the fake a component suite drives, so a threshold that moves in src/ui/scale.ts moves the answer, and nothing in a surface gets to decide it twice.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2736,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a drag short of the surface's width is not yet the command",
+    "a drag to the width the surface stands open at is the command",
+    "a drag past the width opens no more of the surface than stands open",
+    "a drag back across the row reads as closed, and a drag never measured is closed",
+    "a surface measured as nothing arms on nothing",
+    "the row's command is the entry's own verb, in the words the command already uses",
+    "the sentence the bar reads is the one the dialog would have read",
+    "a command that hurts is revealed in the pair that hurts",
+    "the word under a finger wears the picture the entry itself declared",
+    "an entry that names no row command has none, however it is otherwise described"
+   ],
+   "tests": [
+    {
+     "title": "a drag short of the surface's width is not yet the command",
+     "ms": 1.267023,
+     "measured": false
+    },
+    {
+     "title": "a drag to the width the surface stands open at is the command",
+     "ms": 0.15706,
+     "measured": false
+    },
+    {
+     "title": "a drag past the width opens no more of the surface than stands open",
+     "ms": 0.090548,
+     "measured": false
+    },
+    {
+     "title": "a drag back across the row reads as closed, and a drag never measured is closed",
+     "ms": 1.019716,
+     "measured": false
+    },
+    {
+     "title": "a surface measured as nothing arms on nothing",
+     "ms": 0.135771,
+     "measured": false
+    },
+    {
+     "title": "the row's command is the entry's own verb, in the words the command already uses",
+     "ms": 8.248577,
+     "measured": false
+    },
+    {
+     "title": "the sentence the bar reads is the one the dialog would have read",
+     "ms": 0.662615,
+     "measured": false
+    },
+    {
+     "title": "a command that hurts is revealed in the pair that hurts",
+     "ms": 0.531573,
+     "measured": false
+    },
+    {
+     "title": "the word under a finger wears the picture the entry itself declared",
+     "ms": 0.966648,
+     "measured": false
+    },
+    {
+     "title": "an entry that names no row command has none, however it is otherwise described",
+     "ms": 0.753884,
+     "measured": false
+    }
+   ],
+   "loaded": 34,
+   "coveredProdLines": 11462,
+   "onlyProdLines": null,
+   "testsMs": 13.8
+  },
+  {
    "file": "tests/scale.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -19621,6 +20010,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/swipe-reading-runs-on-the-ui-thread.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A native gesture calls the shared swipe reading synchronously on the UI runtime. Compile it with the app's native Babel preset, then use the installed Worklets serializer and unpackers; the JS gesture double cannot expose a function that cannot cross that runtime boundary.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4212,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the shared swipe reading stays synchronous after native worklet serialization"
+   ],
+   "tests": [
+    {
+     "title": "the shared swipe reading stays synchronous after native worklet serialization",
+     "ms": 1636.499435,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 1636.5
+  },
+  {
    "file": "tests/table-figures.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -20135,6 +20553,35 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-command-receipt-stays-with-the-session-that-started-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A command may finish after its list unmounts and another tenant signs in. Its receipt belongs to the session that sent it; a late response must not file that tenant's words over the next person's screen. Keep the real shell, hook and transport in this race.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25348,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "another tenant never receives the receipt of a command still finishing at sign-out"
+   ],
+   "tests": [
+    {
+     "title": "another tenant never receives the receipt of a command still finishing at sign-out",
+     "ms": 167,
+     "measured": false
+    }
+   ],
+   "loaded": 158,
+   "coveredProdLines": 2567,
+   "onlyProdLines": null,
+   "testsMs": 167
+  },
+  {
    "file": "tests/a-connection-document-outside-its-schema-is-refused-like-a-refusal.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -20599,6 +21046,47 @@
    "coveredProdLines": 1423,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A malformed destructive hint must keep the confirmation between a row action and its write. Follow served catalogue bytes through derivation and the command hook, using the shared shell and transport doubles; only an explicit affirmative answer may send the command or its receipt.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21149,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a destructive declaration of null never becomes an immediate row write",
+    "a destructive declaration of 0 never becomes an immediate row write",
+    "a destructive declaration of \"false\" never becomes an immediate row write"
+   ],
+   "tests": [
+    {
+     "title": "a destructive declaration of null never becomes an immediate row write",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "a destructive declaration of 0 never becomes an immediate row write",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a destructive declaration of \"false\" never becomes an immediate row write",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 147,
+   "coveredProdLines": 2102,
+   "onlyProdLines": null,
+   "testsMs": 15
   },
   {
    "file": "tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx",
@@ -21235,6 +21723,83 @@
    "coveredProdLines": 1691,
    "onlyProdLines": null,
    "testsMs": 104
+  },
+  {
+   "file": "tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 9,
+   "rule": "What a release at the end of a row's swipe does: the command the entry named runs through the one submit every other door uses, and is asked first wherever the document says the act hurts or says what it does. The receipt it leaves is filed for the person standing at the list \u2014 not for the record, which says nothing because nothing about it left the screen \u2014 and a write this phone is holding, or one the server refused, files no receipt at all.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 27340,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a command that hurts nobody runs at once, and its sentence is filed for the person here",
+    "the record still hears that this phone wrote here",
+    "a command that hurts is asked before it runs, and only when the answer is yes",
+    "a command whose consequence the author declared is asked, though it hurts nobody",
+    "a verb the entry does not offer runs nothing",
+    "the same row released twice while its write is out is one run",
+    "two rows of one list are two records, and neither is the command being run",
+    "a write this phone is holding has not run, and says nothing in the bar",
+    "a refusal writes nothing, files nothing and is reported where it happened"
+   ],
+   "tests": [
+    {
+     "title": "a command that hurts nobody runs at once, and its sentence is filed for the person here",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "the record still hears that this phone wrote here",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a command that hurts is asked before it runs, and only when the answer is yes",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a command whose consequence the author declared is asked, though it hurts nobody",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a verb the entry does not offer runs nothing",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "the same row released twice while its write is out is one run",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "two rows of one list are two records, and neither is the command being run",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a write this phone is holding has not run, and says nothing in the bar",
+     "ms": 76,
+     "measured": false
+    },
+    {
+     "title": "a refusal writes nothing, files nothing and is reported where it happened",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 149,
+   "coveredProdLines": 2145,
+   "onlyProdLines": null,
+   "testsMs": 106
   },
   {
    "file": "tests/screens/a-translatable-record-follows-the-device-language.test.tsx",
@@ -24439,6 +25004,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/shell-a-receipt-is-spent-by-its-own-token-or-by-signing-out.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The receipt a row's command leaves is the shell's, so its life is the shell's to keep: a filing replaces the one before it under a new token, a timer holding a replaced token closes nothing, the bar's own token closes it, and signing out ends it with the rest of what a session that is going away leaves behind. Held against the shell itself, not a double of it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 32246,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a newer filing replaces the sentence, and only its own token closes it",
+    "signing out ends the receipt still owed, and a later spend of it closes nothing"
+   ],
+   "tests": [
+    {
+     "title": "a newer filing replaces the sentence, and only its own token closes it",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "signing out ends the receipt still owed, and a later spend of it closes nothing",
+     "ms": 4,
+     "measured": false
+    }
+   ],
+   "loaded": 153,
+   "coveredProdLines": 2137,
+   "onlyProdLines": null,
+   "testsMs": 15
+  },
+  {
    "file": "tests/shell-bearer-credential.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25371,6 +25971,41 @@
    "testsMs": 692
   },
   {
+   "file": "tests/shell-what-one-session-earned-stays-with-that-session.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "Three of the shell's filings carry words or a moment a person was owed: the sentence a write said for the record its person lands on, the receipt of an act that opened nothing, and the moment a record plays over its own change. A write answers when it answers, so an answer can arrive after the session that earned it has gone \u2014 and then it belongs to nobody standing here. Held against the shell itself, because it is the shell that decides whether a filing reaches a screen: the channel a write files through is one the caller holds, so a caller that is gone holds a filing that is gone with it. Filing from the session that *is* standing here still lands all three.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30884,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sentence, a receipt and a moment earned by a session that has ended reach nobody",
+    "the session standing here is owed all three of its own filings"
+   ],
+   "tests": [
+    {
+     "title": "a sentence, a receipt and a moment earned by a session that has ended reach nobody",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "the session standing here is owed all three of its own filings",
+     "ms": 10,
+     "measured": false
+    }
+   ],
+   "loaded": 154,
+   "coveredProdLines": 2154,
+   "onlyProdLines": null,
+   "testsMs": 19
+  },
+  {
    "file": "tests/shell.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25558,6 +26193,71 @@
    "testsMs": 118
   },
   {
+   "file": "tests/ui/a-receipt-says-what-the-write-just-did.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 7,
+   "rule": "The life of the bar: filed, drawn, read as what a write just did, and spent \u2014 by its own clock, and by the filing that replaced it. The words are the command's own and the state around them is `deriveState`'s, so the receipt is not a second success surface with rules of its own; the shell holds the filing, so navigating away from where it happened cannot take it back.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 28786,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "nothing is owed the person until a write files something",
+    "a filing is drawn where the person is standing, in the words the command gave",
+    "it is gone at its own four seconds, and is still there one before",
+    "a phone that asks for motion is owed the same four seconds and an easing out",
+    "the newest act replaces the sentence and starts its own clock",
+    "a clock kept by a bar that was replaced closes nothing",
+    "a session that is going away is owed no receipt at all"
+   ],
+   "tests": [
+    {
+     "title": "nothing is owed the person until a write files something",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a filing is drawn where the person is standing, in the words the command gave",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "it is gone at its own four seconds, and is still there one before",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "a phone that asks for motion is owed the same four seconds and an easing out",
+     "ms": 692,
+     "measured": false
+    },
+    {
+     "title": "the newest act replaces the sentence and starts its own clock",
+     "ms": 14,
+     "measured": false
+    },
+    {
+     "title": "a clock kept by a bar that was replaced closes nothing",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "a session that is going away is owed no receipt at all",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 145,
+   "coveredProdLines": 2029,
+   "onlyProdLines": null,
+   "testsMs": 746
+  },
+  {
    "file": "tests/ui/list-from-the-phone-says-so.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25632,6 +26332,35 @@
    "coveredProdLines": 701,
    "onlyProdLines": null,
    "testsMs": 23
+  },
+  {
+   "file": "tests/ui/two-acts-that-read-alike-are-told-twice.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Two acts that read alike are two facts. The bar keeps its sentence when the next command's answer happens to be the sentence the first one said \u2014 two rows of one list resolved back to back both say \"Task resolved\" \u2014 so a surface that re-tells only what changed in its text leaves the second act unheard by the reader who cannot see the bar change. What is told is keyed on the filing, not on its wording, and this is the one suite that can see the difference: iOS announcements are an effect of a mounted surface, so a bar that never remounts never speaks again.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25808,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a person who acted twice is told twice when both acts read alike"
+   ],
+   "tests": [
+    {
+     "title": "a person who acted twice is told twice when both acts read alike",
+     "ms": 19,
+     "measured": false
+    }
+   ],
+   "loaded": 145,
+   "coveredProdLines": 2025,
+   "onlyProdLines": null,
+   "testsMs": 19
   },
   {
    "file": "tests/what-this-device-remembers-is-listed-as-places-and-fills-the-address.test.tsx",

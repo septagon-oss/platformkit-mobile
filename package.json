@@ -6,6 +6,7 @@
   "exports": {
     "./core/catalog": "./src/core/catalog.ts",
     "./core/derive": "./src/core/derive.ts",
+    "./core/gesture": "./src/core/gesture.ts",
     "./effects/api": "./src/effects/api.ts",
     "./core/outbox": "./src/core/outbox.ts",
     "./core/read-cache": "./src/core/read-cache.ts",
