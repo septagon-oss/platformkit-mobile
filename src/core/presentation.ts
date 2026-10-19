@@ -237,6 +237,23 @@ export function civilDay(at: Date, zone: string): number {
   return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
 }
 
+/**
+ * civilHour is the hour a reader's own clock shows, 0 to 23 in the named zone, read
+ * as civil parts rather than out of a formatted string. `hourCycle: "h23"` is what
+ * keeps midnight at 0 — `en-GB` answers 24 for it otherwise — so a caller may put the
+ * number straight into a table of bands with no second rule for the day's first hour.
+ * A zone the runtime cannot name throws out of `Intl.DateTimeFormat` rather than
+ * answering an hour: `presentationIssues` refuses one before a screen gets this far.
+ */
+export function civilHour(at: Date, zone: string): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: zone,
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(at);
+  return Number(parts.find((candidate) => candidate.type === "hour")?.value ?? "0");
+}
+
 const MINUTE = 60_000,
   HOUR = 3_600_000;
 

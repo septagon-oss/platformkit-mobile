@@ -126,6 +126,7 @@ export const kitCaseIds = [
   "bar-chart/negative",
   "stat-tile/lower-is-better",
   "stat-tile/zero-baseline",
+  "stat-card/default",
   "progress-meter/fraction",
   "progress-meter/percent",
   "progress-meter/steps",
@@ -499,6 +500,16 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
       fractionDigits: 0,
       ranges: [],
     };
+    // The card's own number and shape: what the counts body answers for one resource,
+    // and the two words the catalogue declares about it.
+    const cardStat = v.take(
+      deriveStat(
+        { label: c.seriesVisitors, value: 128, fractionDigits: 0, preference: "neutral" },
+        p,
+      ),
+    );
+    const cardSecondary = c.cardSecondary(c.today, "4");
+    const cardSpark = v.take(deriveSparkline(chartInput, p));
     return {
       actions: v.take(deriveActions({ label: c.actions, actions: [action, secondary] }, p)),
       choices: v.take(deriveChoices(choice, p)),
@@ -818,7 +829,7 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
         ),
       ),
       viewer: v.take(deriveViewer({ ...mediaInput, open: held.open ?? true }, p)),
-      spark: v.take(deriveSparkline(chartInput, p)),
+      spark: cardSpark,
       chart: v.take(
         deriveChart(
           state === "multiple-series"
@@ -904,6 +915,12 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
           p,
         ),
       ),
+      card: {
+        stat: cardStat,
+        secondary: cardSecondary,
+        spark: cardSpark,
+        aloud: c.cardAloud(c.seriesVisitors, cardStat.text, cardSecondary),
+      },
       // The four interaction shapes the phone owes the most: how far through,
       // where you can go, what the query found, and what is still playing.
       meter: v.take(

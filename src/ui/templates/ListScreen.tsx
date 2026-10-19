@@ -31,6 +31,15 @@ interface Props<T> {
    * virtualised view, which cannot hold one surface across the rows it recycles.
    */
   readonly grouped?: boolean;
+  /**
+   * groupTitle names the one card the grouped rows stand in. A page that labels its own
+   * rows in its header would restate the heading the group already knows how to draw —
+   * Section owns that caption, its inset and the gap above it — so the name arrives here
+   * and the group draws it. groupTestID is that group's address, for a journey that has
+   * to find the section by id rather than by the word over it.
+   */
+  readonly groupTitle?: string;
+  readonly groupTestID?: string;
   readonly testID?: string;
 }
 
@@ -47,6 +56,8 @@ export function ListScreen<T>({
   footer,
   empty,
   grouped = false,
+  groupTitle,
+  groupTestID,
   testID,
 }: Props<T>) {
   const t = useTheme();
@@ -84,7 +95,10 @@ export function ListScreen<T>({
         {data.length === 0 ? (
           region
         ) : (
-          <Section>
+          <Section
+            {...(groupTitle === undefined ? {} : { title: groupTitle })}
+            {...(groupTestID === undefined ? {} : { testID: groupTestID })}
+          >
             {data.map((item) => (
               <Fragment key={keyOf(item)}>{render(item)}</Fragment>
             ))}

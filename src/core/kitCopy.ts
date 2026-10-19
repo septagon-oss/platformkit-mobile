@@ -49,6 +49,26 @@ export const kitEnglish = {
   // at is the workspace's name until a name exists, the account under it is the
   // person's own words, and a row that opens nothing is said to be read alone.
   workspace: "Workspace",
+  // What the first screen says to the person standing in front of it: three parts of
+  // day, and the line that puts a first name after one. Three and not four — "Good
+  // night" is a farewell, and a screen that wished a person well at 23:00 would be
+  // asking them to leave. An empty name says the greeting alone: the app never
+  // invents a name it was not given.
+  goodMorning: "Good morning",
+  goodAfternoon: "Good afternoon",
+  goodEvening: "Good evening",
+  greeting: (part: string, name: string) => (name === "" ? part : `${part}, ${name}`),
+  // A card's sub-count: the catalogue's own word for what it counts, then the number
+  // the server answered for it.
+  cardSecondary: (label: string, count: string) => `${label} · ${count}`,
+  // The one sentence a card says aloud, which is what lets its sparkline stay
+  // decoration rather than a fourteen-point sentence.
+  cardAloud: (label: string, value: string, secondary?: string) =>
+    secondary === undefined ? `${label}: ${value}.` : `${label}: ${value}. ${secondary}.`,
+  // The two blocks under the greeting: what this device opened, and everything the
+  // person may reach here.
+  recentlyOpened: "Recently opened",
+  allResources: "All resources",
   readOnly: "Read only",
   // A record whose schema names nothing to read as its title. The noun arrives
   // from the catalogue, the way `failure.loadFailed` takes one: this is the only
@@ -421,6 +441,15 @@ export const kitPortuguese: KitWords = {
   unavailable: "Já não está disponível. Escolha novamente ou atualize.",
   shellUpdate: "Atualize a aplicação para o ecrã completo deste registo.",
   workspace: "Espaço de trabalho",
+  goodMorning: "Bom dia",
+  goodAfternoon: "Boa tarde",
+  goodEvening: "Boa noite",
+  greeting: (part: string, name: string) => (name === "" ? part : `${part}, ${name}`),
+  cardSecondary: (label: string, count: string) => `${label} · ${count}`,
+  cardAloud: (label: string, value: string, secondary?: string) =>
+    secondary === undefined ? `${label}: ${value}.` : `${label}: ${value}. ${secondary}.`,
+  recentlyOpened: "Abertos recentemente",
+  allResources: "Todos os recursos",
   readOnly: "Apenas leitura",
   untitled: (singular: string) => `${singular} sem título`,
   overview: "Visão geral",

@@ -5,7 +5,7 @@ import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AccessibilityInfo, Platform, StyleSheet, View } from "react-native";
-import { doors } from "../core/catalog";
+import { doors, key } from "../core/catalog";
 import {
   deriveDisclosure,
   deriveEventActivity,
@@ -44,7 +44,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   const feedback = useFeedback();
   // The pinch surface and the cover's motion are what the product shipped at composition; a
   // product that shipped neither gets the still record, which is a complete record.
-  const { media: native, travelled } = useShell();
+  const { media: native, travelled, recents } = useShell();
   const CoverMotion = native?.coverMotion;
   const Zoom = native?.zoom;
   const Finishing = native?.finishing;
@@ -141,6 +141,14 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   // the promise that a cover stands under it. The row's own name is then drawn once — in
   // the native header — and the options settle as soon as the door's state is known.
   const cover = media.enabled && detail.row !== undefined && headerCover(entry, detail.row);
+  // An open is remembered while the row is on the screen, under the words this screen drew
+  // for it: no row means no open to remember, and the title is what the person read, not a
+  // field. The list is this device's own, so an open that cannot be stored is an open the
+  // phone was never told about, and nothing on this screen changes because of it.
+  useEffect(() => {
+    if (!id || !detail.row || !title) return;
+    void recents?.opened({ resourceKey: key(entry), recordId: id, title });
+  }, [recents, entry, id, detail.row, title]);
   // The collapsed Record information block is a disclosure, and a disclosure's open
   // state is the screen's. Its words come from the reader's bundle; what it holds is
   // the section model's.

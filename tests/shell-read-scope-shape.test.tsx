@@ -8,7 +8,7 @@ import { act, render, waitFor } from "@testing-library/react-native";
 import React from "react";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 import { catalog } from "./fakes/shell";
-import { clock, fakeOutboxStore, fakeReadStore, mint } from "./fakes/store";
+import { clock, fakeOutboxStore, fakeRecentsStore, fakeReadStore, mint } from "./fakes/store";
 import { issuedTokenResponse, loginIdentity } from "./fakes/wire";
 
 /** login is the answer this test needs: the person, and the session cookie a real server sets with them. */
@@ -55,7 +55,11 @@ test("a server typed with a trailing slash is one scope for the queue and the ca
     <Shell
       baseURL="https://acme.test/"
       renderers={{}}
-      store={{ outbox: fakeOutboxStore().store, reads: reads.store }}
+      store={{
+        outbox: fakeOutboxStore().store,
+        reads: reads.store,
+        recents: fakeRecentsStore().store,
+      }}
       clock={clock()}
       mint={mint()}
     >

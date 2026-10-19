@@ -129,6 +129,9 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     // No device store: a screen under test writes live, as it did before the kit could hold a write.
     outbox: undefined,
     reads: undefined,
+    // No store, so no remembered opens either: a screen that shows them draws no section,
+    // which is what a device without a database is.
+    recents: undefined,
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),
     signIn: jest.fn<ShellValue["signIn"]>(async () => ({ kind: "signed-in" })),

@@ -15,9 +15,15 @@ import type {
   AppConnectionData,
   AppConnectionErrors,
   AppConnectionResponses,
+  AppOperationOutcomeData,
+  AppOperationOutcomeErrors,
+  AppOperationOutcomeResponses,
   AppResourcesData,
   AppResourcesErrors,
   AppResourcesResponses,
+  AppSummaryData,
+  AppSummaryErrors,
+  AppSummaryResponses,
   AuditEventListData,
   AuditEventListErrors,
   AuditEventListResponses,
@@ -270,6 +276,63 @@ import type {
   NotificationNotificationReadData,
   NotificationNotificationReadErrors,
   NotificationNotificationReadResponses,
+  ScimGroupCreateData,
+  ScimGroupCreateErrors,
+  ScimGroupCreateResponses,
+  ScimGroupDeleteData,
+  ScimGroupDeleteErrors,
+  ScimGroupDeleteResponses,
+  ScimGroupGetData,
+  ScimGroupGetErrors,
+  ScimGroupGetResponses,
+  ScimGroupMappingsListData,
+  ScimGroupMappingsListErrors,
+  ScimGroupMappingsListResponses,
+  ScimGroupMappingWriteData,
+  ScimGroupMappingWriteErrors,
+  ScimGroupMappingWriteResponses,
+  ScimGroupPatchData,
+  ScimGroupPatchErrors,
+  ScimGroupPatchResponses,
+  ScimGroupReplaceData,
+  ScimGroupReplaceErrors,
+  ScimGroupReplaceResponses,
+  ScimGroupsListData,
+  ScimGroupsListErrors,
+  ScimGroupsListResponses,
+  ScimResourceTypeGetData,
+  ScimResourceTypeGetErrors,
+  ScimResourceTypeGetResponses,
+  ScimResourceTypesListData,
+  ScimResourceTypesListErrors,
+  ScimResourceTypesListResponses,
+  ScimSchemaGetData,
+  ScimSchemaGetErrors,
+  ScimSchemaGetResponses,
+  ScimSchemasListData,
+  ScimSchemasListErrors,
+  ScimSchemasListResponses,
+  ScimServiceProviderConfigData,
+  ScimServiceProviderConfigErrors,
+  ScimServiceProviderConfigResponses,
+  ScimUserCreateData,
+  ScimUserCreateErrors,
+  ScimUserCreateResponses,
+  ScimUserDeleteData,
+  ScimUserDeleteErrors,
+  ScimUserDeleteResponses,
+  ScimUserGetData,
+  ScimUserGetErrors,
+  ScimUserGetResponses,
+  ScimUserPatchData,
+  ScimUserPatchErrors,
+  ScimUserPatchResponses,
+  ScimUserReplaceData,
+  ScimUserReplaceErrors,
+  ScimUserReplaceResponses,
+  ScimUsersListData,
+  ScimUsersListErrors,
+  ScimUsersListResponses,
   SiteSettingsPublicData,
   SiteSettingsPublicErrors,
   SiteSettingsPublicResponses,
@@ -420,7 +483,9 @@ import type {
 } from "./types.gen";
 import {
   zAppConnectionResponse,
+  zAppOperationOutcomeResponse,
   zAppResourcesResponse,
+  zAppSummaryResponse,
   zAuditEventListResponse,
   zAuditEventReadResponse,
   zAuthChallengePasskeyBeginResponse,
@@ -501,6 +566,25 @@ import {
   zFileQuotaReadResponse,
   zNotificationNotificationListResponse,
   zNotificationNotificationReadResponse,
+  zScimGroupCreateResponse,
+  zScimGroupDeleteResponse,
+  zScimGroupGetResponse,
+  zScimGroupMappingsListResponse,
+  zScimGroupMappingWriteResponse,
+  zScimGroupPatchResponse,
+  zScimGroupReplaceResponse,
+  zScimGroupsListResponse,
+  zScimResourceTypeGetResponse,
+  zScimResourceTypesListResponse,
+  zScimSchemaGetResponse,
+  zScimSchemasListResponse,
+  zScimServiceProviderConfigResponse,
+  zScimUserCreateResponse,
+  zScimUserDeleteResponse,
+  zScimUserGetResponse,
+  zScimUserPatchResponse,
+  zScimUserReplaceResponse,
+  zScimUsersListResponse,
   zSiteSettingsReadResponse,
   zSiteSettingsSaveResponse,
   zTaskTaskAssignResponse,
@@ -601,6 +685,18 @@ export const appConnection = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Read an operation started by the current person
+ */
+export const appOperationOutcome = <ThrowOnError extends boolean = false>(
+  options: Options<AppOperationOutcomeData, ThrowOnError>,
+): RequestResult<AppOperationOutcomeResponses, AppOperationOutcomeErrors, ThrowOnError> =>
+  options.client.get<AppOperationOutcomeResponses, AppOperationOutcomeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAppOperationOutcomeResponse.parseAsync(data),
+    url: "/api/v1/app/operations/me/{ref}",
+    ...options,
+  });
+
+/**
  * The resources this caller may reach, with their schemas
  *
  * The same document the generated screens are built from, for a shell that is not a browser.
@@ -611,6 +707,20 @@ export const appResources = <ThrowOnError extends boolean = false>(
   options.client.get<AppResourcesResponses, AppResourcesErrors, ThrowOnError>({
     responseValidator: async (data) => await zAppResourcesResponse.parseAsync(data),
     url: "/api/v1/app/resources",
+    ...options,
+  });
+
+/**
+ * What each resource this caller may read holds, at one instant
+ *
+ * One total per readable resource, plus the one sub-count and the daily series each resource declares. A number the installation could not answer is absent, which is not zero: an empty workspace and a workspace that would not answer are two different things to say. Nothing here is a word — the labels are in /resources — so the body is the same in every language.
+ */
+export const appSummary = <ThrowOnError extends boolean = false>(
+  options: Options<AppSummaryData, ThrowOnError>,
+): RequestResult<AppSummaryResponses, AppSummaryErrors, ThrowOnError> =>
+  options.client.get<AppSummaryResponses, AppSummaryErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAppSummaryResponse.parseAsync(data),
+    url: "/api/v1/app/summary",
     ...options,
   });
 
@@ -2279,6 +2389,36 @@ export const siteSettingsPublic = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Which role each group brings
+ */
+export const scimGroupMappingsList = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupMappingsListData, ThrowOnError>,
+): RequestResult<ScimGroupMappingsListResponses, ScimGroupMappingsListErrors, ThrowOnError> =>
+  options.client.get<ScimGroupMappingsListResponses, ScimGroupMappingsListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupMappingsListResponse.parseAsync(data),
+    url: "/api/v1/scim/group-mappings",
+    ...options,
+  });
+
+/**
+ * Bind a group to a role, or clear the binding
+ *
+ * An empty role clears the binding; the group stays, because a connector still mirrors it. The role has to be one this tenant knows.
+ */
+export const scimGroupMappingWrite = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupMappingWriteData, ThrowOnError>,
+): RequestResult<ScimGroupMappingWriteResponses, ScimGroupMappingWriteErrors, ThrowOnError> =>
+  options.client.put<ScimGroupMappingWriteResponses, ScimGroupMappingWriteErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupMappingWriteResponse.parseAsync(data),
+    url: "/api/v1/scim/group-mappings",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Read this tenant's settings
  */
 export const siteSettingsRead = <ThrowOnError extends boolean = false>(
@@ -2805,6 +2945,264 @@ export const webhookEndpointTarget = <ThrowOnError extends boolean = false>(
   options.client.post<WebhookEndpointTargetResponses, WebhookEndpointTargetErrors, ThrowOnError>({
     responseValidator: async (data) => await zWebhookEndpointTargetResponse.parseAsync(data),
     url: "/api/v1/webhook/endpoints/{id}/target",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * List the tenant's groups
+ */
+export const scimGroupsList = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupsListData, ThrowOnError>,
+): RequestResult<ScimGroupsListResponses, ScimGroupsListErrors, ThrowOnError> =>
+  options.client.get<ScimGroupsListResponses, ScimGroupsListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupsListResponse.parseAsync(data),
+    url: "/scim/v2/Groups",
+    ...options,
+  });
+
+/**
+ * Declare a group
+ *
+ * The collection and who is in it. A document that names a role is refused: the role a group brings is this tenant's to bind, at its own door, and a credential that could write it could grant itself anything.
+ */
+export const scimGroupCreate = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupCreateData, ThrowOnError>,
+): RequestResult<ScimGroupCreateResponses, ScimGroupCreateErrors, ThrowOnError> =>
+  options.client.post<ScimGroupCreateResponses, ScimGroupCreateErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupCreateResponse.parseAsync(data),
+    url: "/scim/v2/Groups",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Remove a group
+ *
+ * Refused while the group has members: a connector that deleted a group out from under people would take their role with it and say nothing.
+ */
+export const scimGroupDelete = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupDeleteData, ThrowOnError>,
+): RequestResult<ScimGroupDeleteResponses, ScimGroupDeleteErrors, ThrowOnError> =>
+  options.client.delete<ScimGroupDeleteResponses, ScimGroupDeleteErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupDeleteResponse.parseAsync(data),
+    url: "/scim/v2/Groups/{id}",
+    ...options,
+  });
+
+/**
+ * One group
+ */
+export const scimGroupGet = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupGetData, ThrowOnError>,
+): RequestResult<ScimGroupGetResponses, ScimGroupGetErrors, ThrowOnError> =>
+  options.client.get<ScimGroupGetResponses, ScimGroupGetErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupGetResponse.parseAsync(data),
+    url: "/scim/v2/Groups/{id}",
+    ...options,
+  });
+
+/**
+ * Move membership
+ *
+ * add, remove or replace on members — whole, or one person selected by members[value eq "<id>"]. This is the only door that moves a membership, and it writes no role: the tenant binds one at its own group-mappings door.
+ */
+export const scimGroupPatch = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupPatchData, ThrowOnError>,
+): RequestResult<ScimGroupPatchResponses, ScimGroupPatchErrors, ThrowOnError> =>
+  options.client.patch<ScimGroupPatchResponses, ScimGroupPatchErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupPatchResponse.parseAsync(data),
+    url: "/scim/v2/Groups/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Replace a group
+ *
+ * The name has to stay this group's: it keys the role mapping somebody chose for it, and a document that says nothing about the role leaves that mapping alone.
+ */
+export const scimGroupReplace = <ThrowOnError extends boolean = false>(
+  options: Options<ScimGroupReplaceData, ThrowOnError>,
+): RequestResult<ScimGroupReplaceResponses, ScimGroupReplaceErrors, ThrowOnError> =>
+  options.client.put<ScimGroupReplaceResponses, ScimGroupReplaceErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimGroupReplaceResponse.parseAsync(data),
+    url: "/scim/v2/Groups/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * The resource types this service serves
+ */
+export const scimResourceTypesList = <ThrowOnError extends boolean = false>(
+  options: Options<ScimResourceTypesListData, ThrowOnError>,
+): RequestResult<ScimResourceTypesListResponses, ScimResourceTypesListErrors, ThrowOnError> =>
+  options.client.get<ScimResourceTypesListResponses, ScimResourceTypesListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimResourceTypesListResponse.parseAsync(data),
+    url: "/scim/v2/ResourceTypes",
+    ...options,
+  });
+
+/**
+ * One resource type
+ */
+export const scimResourceTypeGet = <ThrowOnError extends boolean = false>(
+  options: Options<ScimResourceTypeGetData, ThrowOnError>,
+): RequestResult<ScimResourceTypeGetResponses, ScimResourceTypeGetErrors, ThrowOnError> =>
+  options.client.get<ScimResourceTypeGetResponses, ScimResourceTypeGetErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimResourceTypeGetResponse.parseAsync(data),
+    url: "/scim/v2/ResourceTypes/{name}",
+    ...options,
+  });
+
+/**
+ * The attribute documents
+ */
+export const scimSchemasList = <ThrowOnError extends boolean = false>(
+  options: Options<ScimSchemasListData, ThrowOnError>,
+): RequestResult<ScimSchemasListResponses, ScimSchemasListErrors, ThrowOnError> =>
+  options.client.get<ScimSchemasListResponses, ScimSchemasListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimSchemasListResponse.parseAsync(data),
+    url: "/scim/v2/Schemas",
+    ...options,
+  });
+
+/**
+ * One attribute document
+ *
+ * The identifier is the urn the document answers with, sent as one path segment: a client reads it out of /Schemas and comes straight back with it.
+ */
+export const scimSchemaGet = <ThrowOnError extends boolean = false>(
+  options: Options<ScimSchemaGetData, ThrowOnError>,
+): RequestResult<ScimSchemaGetResponses, ScimSchemaGetErrors, ThrowOnError> =>
+  options.client.get<ScimSchemaGetResponses, ScimSchemaGetErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimSchemaGetResponse.parseAsync(data),
+    url: "/scim/v2/Schemas/{id}",
+    ...options,
+  });
+
+/**
+ * What this service supports
+ *
+ * The service's own account of what it implements. Every yes is a route that exists and every no is one that does not.
+ */
+export const scimServiceProviderConfig = <ThrowOnError extends boolean = false>(
+  options: Options<ScimServiceProviderConfigData, ThrowOnError>,
+): RequestResult<
+  ScimServiceProviderConfigResponses,
+  ScimServiceProviderConfigErrors,
+  ThrowOnError
+> =>
+  options.client.get<
+    ScimServiceProviderConfigResponses,
+    ScimServiceProviderConfigErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zScimServiceProviderConfigResponse.parseAsync(data),
+    url: "/scim/v2/ServiceProviderConfig",
+    ...options,
+  });
+
+/**
+ * List the tenant's people
+ *
+ * Paginated. The one filter this service honours is userName eq "<address>"; any other filter is refused rather than dropped, because a connector handed the whole directory when it asked for a subset would act on everybody it meant to leave alone.
+ */
+export const scimUsersList = <ThrowOnError extends boolean = false>(
+  options: Options<ScimUsersListData, ThrowOnError>,
+): RequestResult<ScimUsersListResponses, ScimUsersListErrors, ThrowOnError> =>
+  options.client.get<ScimUsersListResponses, ScimUsersListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimUsersListResponse.parseAsync(data),
+    url: "/scim/v2/Users",
+    ...options,
+  });
+
+/**
+ * Provision a person
+ *
+ * active false (or absent) invites the person; active true says the identity provider vouches for the address and activates them in the same transaction. Neither sets a password: the person signs in through the tenant's own door.
+ */
+export const scimUserCreate = <ThrowOnError extends boolean = false>(
+  options: Options<ScimUserCreateData, ThrowOnError>,
+): RequestResult<ScimUserCreateResponses, ScimUserCreateErrors, ThrowOnError> =>
+  options.client.post<ScimUserCreateResponses, ScimUserCreateErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimUserCreateResponse.parseAsync(data),
+    url: "/scim/v2/Users",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Stop a person signing in
+ *
+ * Deactivation, not deletion: the person's row keeps its address reserved so the same person is never provisioned twice, and their history stays where it is.
+ */
+export const scimUserDelete = <ThrowOnError extends boolean = false>(
+  options: Options<ScimUserDeleteData, ThrowOnError>,
+): RequestResult<ScimUserDeleteResponses, ScimUserDeleteErrors, ThrowOnError> =>
+  options.client.delete<ScimUserDeleteResponses, ScimUserDeleteErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimUserDeleteResponse.parseAsync(data),
+    url: "/scim/v2/Users/{id}",
+    ...options,
+  });
+
+/**
+ * One person
+ */
+export const scimUserGet = <ThrowOnError extends boolean = false>(
+  options: Options<ScimUserGetData, ThrowOnError>,
+): RequestResult<ScimUserGetResponses, ScimUserGetErrors, ThrowOnError> =>
+  options.client.get<ScimUserGetResponses, ScimUserGetErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimUserGetResponse.parseAsync(data),
+    url: "/scim/v2/Users/{id}",
+    ...options,
+  });
+
+/**
+ * Change one part of a person's record
+ *
+ * active, externalId and the name. An operation this service cannot apply fails the whole request: a partial application would leave the connector's idea of the person and this tenant's two different things.
+ */
+export const scimUserPatch = <ThrowOnError extends boolean = false>(
+  options: Options<ScimUserPatchData, ThrowOnError>,
+): RequestResult<ScimUserPatchResponses, ScimUserPatchErrors, ThrowOnError> =>
+  options.client.patch<ScimUserPatchResponses, ScimUserPatchErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimUserPatchResponse.parseAsync(data),
+    url: "/scim/v2/Users/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Replace a person's record
+ *
+ * A field the document leaves empty is a field the caller is not naming, not a field being cleared — and it is never a reason to deactivate somebody.
+ */
+export const scimUserReplace = <ThrowOnError extends boolean = false>(
+  options: Options<ScimUserReplaceData, ThrowOnError>,
+): RequestResult<ScimUserReplaceResponses, ScimUserReplaceErrors, ThrowOnError> =>
+  options.client.put<ScimUserReplaceResponses, ScimUserReplaceErrors, ThrowOnError>({
+    responseValidator: async (data) => await zScimUserReplaceResponse.parseAsync(data),
+    url: "/scim/v2/Users/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",

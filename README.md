@@ -266,6 +266,93 @@ state, which is what `primaryField` and `statusField` answer there): the referen
 kernel refuses that document at mount (`kit/rest/hints.go`, `namedFieldFault`), and
 one author's slip is not worth this app's screens.
 
+### How Home greets the person
+
+Home is a greeting, a name and a few counts before it is a list. Top to bottom: the
+accent wash with the greeting and the workspace under it, the account line, what this
+phone is holding, up to three stat cards, the records this phone remembers opening, and
+the resources as icon-tile rows — now with the installation's own count in the column a
+scan reads down. Pulling refreshes the catalogue and the counts with one spinner. Three
+cards are wider than any phone's column, so the card row wraps: two share the first line
+and a third stands on the next one, every card drawn whole.
+
+The greeting is the part of day in the reader's own zone (morning from 05:00, afternoon
+from 12:00, evening from 17:00) and the person's first word — an address is never a name,
+so `joao@acme.test` is greeted "Good morning" and nothing else. A card counts the total
+when the body answered one and the highlight when it answered only that; its label is the
+entry's declared plural or the declared `presentation.highlight.label`, and its secondary
+line is drawn only when both numbers arrived *and* the catalogue named the second one.
+The counts body carries integers and dates and no word, so the phone writes none: an
+absent number stays absent — no card, no row count, and never a `0` nobody answered. The
+body is the workspace's *now*, so Home asks it on opening, on a pull, and on coming back
+after this app wrote to a resource those counts count: a number that outlived a record
+this phone created is a claim about a moment that has passed.
+
+A remembered open is one row of `recent_open`: the resource, the record, the words the
+record screen drew for it and the instant it was opened, keyed by server and sign-in so a
+new person at the same phone reads an empty section without anybody deleting anything. A
+record is remembered while its row is on screen, reopening replaces its row rather than
+adding a second one, twenty are kept and five are shown, and the pruning happens in the
+same transaction as the insert. Nothing is sent: the section says what this device opened.
+A build that ships no table for them draws no section, and a read that cannot be stored changes nothing
+on the record screen. A record this phone deleted leaves the list with it — the delete
+that reached the server withdraws its door, because a section that kept it would lead to a
+row that answers not-found — while a delete the outbox still holds keeps its door until it
+has gone. A withdrawal this phone's own table refused is the device's problem and not the
+delete's: that one row stays, and the record screen still says the delete happened, which
+is what the server answered.
+
+**Limits** — a card opens its resource's list, not that list narrowed to what the card
+counted: `filter=field:value` is an equality on a closed value set and a highlight is a
+predicate range whose anchors the server resolves per request, so the kernel has to echo
+the address, or name the spelling that opens what the card counted, before this kit can.
+The number is drawn still, not rolled in — the motion is T-0334's, and no screen may
+import `react-native-reanimated`. Which three counts a workspace means is the body's own
+order, because the catalogue carries no order to read. `firstName("Dr. Ana")` is `"Dr"`:
+the rule takes the first word, and nothing names which words are honorifics. The section
+is this device's own — an open is not carried to another phone, and it is not cleared at
+sign-out, which is why a new person at the same phone reads an empty one.
+
+**Reused** — `ListScreen`'s `header` slot and its one `RefreshControl`, `Section` (with
+its caption naming the resources group, through `ListScreen`'s new `groupTitle`, rather
+than a heading the page drew beside it), `Row`
+(with its `trailing` column), `RowMedia`/`homeMedia`, `Avatar`, `Text`; `StatTile` and
+`Sparkline`, the two molecules nothing but the kit gallery drew until now; `deriveStat`
+and `deriveSparkline` (`src/core/charts.ts`) for every number and every shape; `noun`,
+`accountPerson`, `hostLabel`, `key`; `useOperation` for the read and the `reload`/`refreshing`
+pair the screen already had; `react-native-svg`'s `LinearGradient`, the overlay
+`RecordCover` already draws, rather than a new gradient dependency; `useFeedback`'s
+`now`/`timeZone`; `tests/fakes/shell.ts`'s `answering`-style transport in the pin test.
+**Added** — `src/core/summary.ts` (`statCards`, `rowCounts`, `StatCardModel`), because the
+join between the counts body and the catalogue existed nowhere and a component joining them
+would be a second implementation; `EntryHints.highlight`, because the kernel puts a
+sub-count's words in the catalogue (`kit/entity/hints.go`) and this parser read no
+`highlight`, so the label vanished silently; `greeting`, `firstName` and `workspaceName`
+beside `accountPerson`/`hostLabel`, which own the name and the address they read; `civilHour`
+in `presentation.ts`, where `civilParts` already reads parts rather than strings; `StatCard`,
+because `StatTile` is a panel and a card is a panel plus a shape plus one sentence; the
+two `Sparkline` props (`height`, `decorative`) and `StatTile`'s `framed`, each read by
+`StatCard` and by nobody else; `surface.band` and its two contrast pairs, the tint measured
+to 0.07 rather than picked; three `extent` members; eight words in both languages; and the
+pin's counts door (`build(api)`, first commit), which `documented()` refused until it moved;
+`src/core/recents.ts` and `src/effects/recents.ts` (`Recent`, `RecentRef`, `RecentDoor`,
+`recentHref`, `RECENT_SHOWN`, `RECENT_KEEP`, `createRecents` and its `forgot`) over a
+`recent_open` table, exported as the `./core/recents` and `./effects/recents` subpaths
+beside the `read-cache` ones they are modelled on — same `(server, person)` scope, same
+bound-pruned-in-the-write, same parse-on-read that drops a row it cannot read rather than
+refusing its table, because a cache may be lost and a held write may not. `ListScreen`
+gains the optional `groupTitle`/`groupTestID`, which are the grouped `Section`'s own
+caption and address.
+**Made reusable** — `ShellValue.recents`, so a product's own "continue where you left off"
+reads the same handle rather than a second table; `src/core/summary.ts` as the one reading of `GET /api/v1/app/summary`
+for any surface that shows counts (a client's own dashboard, a widget, the web twin's
+columns); `StatCard` and `StatTile`'s `framed`/`Sparkline`'s `height`+`decorative` as kit
+molecules any client composes; `greeting`/`firstName`/`workspaceName`/`civilHour` as the
+name-and-hour rules any first screen reads; `EntryHints.highlight` as the parse a declared
+sub-count needs; `surface.band` as the registry's first painted page; and the ids
+`home-greeting`, `home-workspace`, `home-stat-${module}-${entity}` and
+`home-count-${module}-${entity}` for a journey to find.
+
 ### How a list row reads
 
 A row answers four questions and no fifth: **which record is this**, **what state is it

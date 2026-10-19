@@ -141,6 +141,7 @@ export const galleryPages = {
       "progress-meter/fraction",
       "progress-meter/percent",
       "progress-meter/unmeasured",
+      "stat-card/default",
     ],
   },
   player: {

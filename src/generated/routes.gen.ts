@@ -38,6 +38,23 @@ const routes = [
   },
   {
     method: "GET",
+    pattern: new RegExp("^/api/v1/app/operations/me/[^/]+$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.appOperationOutcome({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.appOperationOutcome<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
     pattern: new RegExp("^/api/v1/app/resources$"),
     statuses: [200],
     json: true,
@@ -50,6 +67,23 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.appResources<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/app/summary$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.appSummary({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.appSummary<true>>[0]);
       return result;
     },
   },
@@ -1755,6 +1789,40 @@ const routes = [
   },
   {
     method: "GET",
+    pattern: new RegExp("^/api/v1/scim/group-mappings$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupMappingsList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupMappingsList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "PUT",
+    pattern: new RegExp("^/api/v1/scim/group-mappings$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupMappingWrite({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupMappingWrite<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
     pattern: new RegExp("^/api/v1/site/settings$"),
     statuses: [200],
     json: true,
@@ -2311,6 +2379,295 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.webhookEndpointTarget<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/Groups$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupsList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupsList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/scim/v2/Groups$"),
+    statuses: [201],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupCreate({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupCreate<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "DELETE",
+    pattern: new RegExp("^/scim/v2/Groups/[^/]+$"),
+    statuses: [204],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupDelete({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupDelete<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/Groups/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupGet({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupGet<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "PATCH",
+    pattern: new RegExp("^/scim/v2/Groups/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupPatch({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupPatch<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "PUT",
+    pattern: new RegExp("^/scim/v2/Groups/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimGroupReplace({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimGroupReplace<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/ResourceTypes$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimResourceTypesList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimResourceTypesList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/ResourceTypes/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimResourceTypeGet({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimResourceTypeGet<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/Schemas$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimSchemasList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimSchemasList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/Schemas/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimSchemaGet({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimSchemaGet<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/ServiceProviderConfig$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimServiceProviderConfig({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimServiceProviderConfig<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/Users$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimUsersList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimUsersList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/scim/v2/Users$"),
+    statuses: [201],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimUserCreate({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimUserCreate<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "DELETE",
+    pattern: new RegExp("^/scim/v2/Users/[^/]+$"),
+    statuses: [204],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimUserDelete({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimUserDelete<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/scim/v2/Users/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimUserGet({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimUserGet<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "PATCH",
+    pattern: new RegExp("^/scim/v2/Users/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimUserPatch({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimUserPatch<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "PUT",
+    pattern: new RegExp("^/scim/v2/Users/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.scimUserReplace({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.scimUserReplace<true>>[0]);
       return result;
     },
   },

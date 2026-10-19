@@ -6,8 +6,10 @@
 // fails here rather than quietly passing against a store that never checks.
 import { heldFrom, isScope, type PendingWrite, type Scope } from "../../src/core/outbox";
 import { cachedFrom, CACHE_VERSION, type CachedAnswer } from "../../src/core/read-cache";
+import { RECENT_KEEP, recentFrom, recentKey, type Recent } from "../../src/core/recents";
 import type { OutboxStore } from "../../src/effects/outbox";
 import type { ReadStore } from "../../src/effects/read-cache";
+import type { RecentsStore } from "../../src/effects/recents";
 
 interface Row {
   readonly seq: number;
@@ -214,4 +216,85 @@ export function mint(): () => string {
 /** heldRow is a held write as the device would answer it, after a test moved it on. */
 export function heldRow(item: PendingWrite, over: Partial<PendingWrite> = {}): PendingWrite {
   return heldFrom({ ...item, ...over });
+}
+
+interface Remembered {
+  readonly server: string;
+  readonly userId: string;
+  readonly item: Recent;
+}
+
+/**
+ * fakeRecentsStore holds one row per (server, sign-in, resource, record) — the table's own
+ * key — and enforces the same scope rule as the device: a call whose scope names nobody
+ * stores nothing and reads nothing. `rows` is every scope's row, so a test can show what
+ * one sign-in cannot see.
+ */
+export function fakeRecentsStore() {
+  const rows: Remembered[] = [];
+  const calls: string[] = [];
+
+  function inScope(scope: Scope): Remembered[] {
+    return rows.filter((row) => row.server === scope.server && row.userId === scope.userId);
+  }
+
+  // Newest first, and the later open first among rows that carry the same instant: what
+  // the device's `ORDER BY opened_at DESC, rowid DESC` answers, read off insertion order.
+  function byNewest(rowsIn: readonly Remembered[]): Remembered[] {
+    return rowsIn
+      .map((row, at) => ({ row, at }))
+      .sort((a, b) =>
+        a.row.item.openedAt === b.row.item.openedAt
+          ? b.at - a.at
+          : a.row.item.openedAt < b.row.item.openedAt
+            ? 1
+            : -1,
+      )
+      .map((entry) => entry.row);
+  }
+
+  const store: RecentsStore = {
+    open: async () => {
+      calls.push("open");
+    },
+    save: async (scope, recent) => {
+      guard("save", scope);
+      calls.push("save");
+      // The row goes through the device's own validator, so a test cannot seed a row the
+      // table would never hold.
+      const item = recentFrom(recent);
+      const held = inScope(scope).find((row) => recentKey(row.item) === recentKey(item));
+      if (held) rows.splice(rows.indexOf(held), 1);
+      rows.push({ server: scope.server, userId: scope.userId, item });
+      // The same bound the insert transaction prunes to.
+      while (inScope(scope).length > RECENT_KEEP) {
+        const oldest = byNewest(inScope(scope)).at(-1);
+        if (!oldest) break;
+        rows.splice(rows.indexOf(oldest), 1);
+      }
+    },
+    forget: async (scope, ref) => {
+      guard("forget", scope);
+      calls.push("forget");
+      const gone = inScope(scope).find(
+        (row) => row.item.resourceKey === ref.resourceKey && row.item.recordId === ref.recordId,
+      );
+      if (gone) rows.splice(rows.indexOf(gone), 1);
+    },
+    recent: async (scope, limit) => {
+      guard("recent", scope);
+      calls.push("recent");
+      return byNewest(inScope(scope))
+        .slice(0, limit)
+        .map((row) => row.item);
+    },
+  };
+
+  return {
+    store,
+    calls,
+    rows,
+    /** remembered answers what this scope's section would be drawn from, cap and all. */
+    shown: (scope: Scope) => byNewest(inScope(scope)).map((row) => row.item),
+  };
 }

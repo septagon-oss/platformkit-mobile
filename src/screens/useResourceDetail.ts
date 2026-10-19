@@ -1,7 +1,10 @@
 // useResourceDetail is the detail's imperative shell: one row, re-read when
 // this app wrote to the resource while a sheet was above, and the delete,
 // confirmed by the platform's own dialog with a warning felt before it and a
-// success felt after.
+// success felt after. A delete that reached the server also takes this device's
+// memory of the record away, so no section points at a row that is gone — and that
+// memory sits outside the verdict: a table this phone cannot write to says nothing
+// about what the server answered.
 //
 // A refusal is classified, not printed: whether the record stays on the screen is
 // decided by the verdict (`withdraws`), so a refresh answered 403 takes the row
@@ -41,7 +44,7 @@ export function useResourceDetail(
   format: Formatting,
   clock: Clock = systemClock,
 ) {
-  const { api, writes, wrote, heard, celebrating, celebrated, surprised, outbox, reads } =
+  const { api, writes, wrote, heard, celebrating, celebrated, surprised, outbox, reads, recents } =
     useShell();
   const { mode } = useTheme();
   const router = useRouter();
@@ -242,7 +245,24 @@ export function useResourceDetail(
               : { sent: true as const, row: await live() };
             // A delete this phone is holding is still a delete the person asked
             // for: they leave the record either way, and the row shows what is owed.
-            if (answer.sent) wrote(k);
+            // Once it is on a wire the door this phone drew to the record goes with it,
+            // so "Recently opened" never leads to a row that answers not-found; one the
+            // outbox still holds keeps its door until it is sent.
+            if (answer.sent) {
+              wrote(k);
+              // Withdrawing the record from this device's memory is bookkeeping after an
+              // answer that already came, so it is awaited inside its own boundary: the door
+              // is gone before the person is, and a table this phone cannot write to cannot
+              // read back as a delete nobody answered. What such a failure leaves behind is
+              // one stale row in a list of five, which the person can open again; what it
+              // must not leave behind is a sentence saying the delete may not have happened.
+              try {
+                await recents?.forgot({ resourceKey: k, recordId: id });
+              } catch {
+                // The delete reached the server and is counted; nothing about that changes
+                // because this device's own reading history refused a row.
+              }
+            }
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             leave();
           } catch (e) {
@@ -257,7 +277,7 @@ export function useResourceDetail(
       mode,
       { message: copy.kit.deleteWarning, cancel: copy.kit.cancel },
     );
-  }, [id, entry, row, api, wrote, k, leave, mode, copy, outbox]);
+  }, [id, entry, row, api, wrote, k, leave, mode, copy, outbox, recents]);
 
   // Retry reads the row again; reconcile reads it too, and is what an unanswered
   // write offers instead of sending the same write a second time. Dismiss puts the

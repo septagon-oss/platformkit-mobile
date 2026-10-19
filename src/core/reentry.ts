@@ -49,11 +49,27 @@ export interface Remembered {
 export type ScreenKind = "list" | "detail" | "form" | "command";
 
 /**
+ * RecordAddress is one record's route in the shape the router accepts it: the resource's
+ * screen path and one encoded id — three path parts, no query and no fragment. The shape is
+ * written here as a template literal rather than imported from the router because the core
+ * names no SDK, the same way `screenPath` writes a list's two parts; what it buys is that a
+ * screen handing an address it built itself to `router.push` is checked against the route
+ * declarations the app's own startup generates, instead of being waved through as a string.
+ */
+export type RecordAddress = `/${string}/${string}/${string}`;
+
+/**
  * address spells one screen's route, once, in the words the router uses:
  * `screenPath` for a list (which for a singleton is the record itself), the row
  * for a detail, `new` or the row's `edit` for a sheet, and `run/<verb>` — at the
  * row or at the collection — for a command.
+ *
+ * A detail named a record answers a RecordAddress, which is what the router takes; every
+ * other spelling answers a plain string, because the screens that use those file a sentence
+ * under an address or look one up by it, and never ask the router to go there.
  */
+export function address(kind: "detail", e: Entry, id: string): RecordAddress;
+export function address(kind: ScreenKind, e: Entry, id?: string, verb?: string): string;
 export function address(kind: ScreenKind, e: Entry, id?: string, verb?: string): string {
   const at = screenPath(e);
   const row = id === undefined ? undefined : encodeURIComponent(id);
