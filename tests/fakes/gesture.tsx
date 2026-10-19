@@ -31,12 +31,24 @@ export interface Props extends RowActionProps {
 
 export function RowSwipe({ action, motion, onRun, children, onReady }: Props) {
   const s = useStyles(styles);
-  const [open, setOpen] = useState(0);
+  const [open, setOpen] = React.useState(0);
   // How far the surface stands open, kept beside the state that draws it: a test reads what the
   // last drag decided without waiting for the render that drawing it needs.
-  const shown = useRef(0);
-  const finger = useRef({ travel: 0, ticked: false });
-  const handle: SwipeHandle = {
+  const shown = React.useRef(0);
+  const finger = React.useRef({ travel: 0, ticked: false });
+  // The two facts a render can change under a drag that is already in progress. They end in
+  // `Ref` and are written from an effect, because a render never reads a ref: the moment of
+  // decision is a release, which happens after every render that led to it.
+  const onRunRef = React.useRef(onRun);
+  const motionRef = React.useRef(motion);
+  React.useEffect(() => {
+    onRunRef.current = onRun;
+    motionRef.current = motion;
+  });
+  // One handle for the mount, so a test never has to re-ask for it between renders. Everything it
+  // reads is a ref or the one pure reading both surfaces share, so it decides as the surface
+  // standing in front of it decides — including for a row rendered later in its place.
+  const [proxy] = React.useState<SwipeHandle>(() => ({
     drag: (travel) => {
       const read = readSwipe(travel, swipe.reveal);
       finger.current.travel = travel;
@@ -52,23 +64,14 @@ export function RowSwipe({ action, motion, onRun, children, onReady }: Props) {
       finger.current = { travel: 0, ticked: false };
       shown.current = 0;
       setOpen(0);
-      if (read.armed) onRun();
+      // Release is the moment of decision: nothing before it acts, and a short drag says nothing.
+      if (read.armed) onRunRef.current();
     },
     open: () => shown.current,
     // The reader's own preference, in the one way a suite can see it: the surface that closes
     // without easing is the surface a reduced-motion request is owed.
-    movement: () => (motion === "normal" ? "spring" : "instant"),
-  };
-  // One handle for the mount, delegating to whatever the surface's latest render decided: the
-  // test holds it and never has to re-ask for it between renders.
-  const [proxy] = React.useState<SwipeHandle>(() => ({
-    drag: (travel) => latest.current.drag(travel),
-    release: () => latest.current.release(),
-    open: () => latest.current.open(),
-    movement: () => latest.current.movement(),
+    movement: () => (motionRef.current === "normal" ? "spring" : "instant"),
   }));
-  const latest = useRef(handle);
-  latest.current = handle;
   // Said on every render: the handle is one object for the mount, and a suite that renders a
   // second row into the same root is handed the new row's handle rather than the first one's.
   onReady?.(proxy);
