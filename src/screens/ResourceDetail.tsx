@@ -3,19 +3,23 @@
 // may, and the organism that draws it.
 import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
-import React, { useCallback, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { AccessibilityInfo, Platform, StyleSheet, View } from "react-native";
 import { doors } from "../core/catalog";
 import {
   deriveDisclosure,
   deriveEventActivity,
   deriveOffline,
   deriveViewer,
+  finishedWord,
   headerCover,
+  noun,
   pointerTargets,
   recordHeader,
+  statusTone,
   recordMedia,
   rowCommands,
+  statusPill,
   screenPath,
   type Presentation,
 } from "../core/derive";
@@ -23,6 +27,8 @@ import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { PhotoViewer, type ZoomSlotProps } from "../ui/organisms/PhotoViewer";
 import type { CoverMotionProps } from "../ui/organisms/RecordCover";
+import type { FinishingProps } from "../ui/organisms/ResourceDetail";
+import { address } from "../core/reentry";
 import { ResourceDetail as ResourceDetailView } from "../ui/organisms/ResourceDetail";
 import { useShell } from "../shell";
 import { useActivity } from "./useActivity";
@@ -38,9 +44,10 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   const feedback = useFeedback();
   // The pinch surface and the cover's motion are what the product shipped at composition; a
   // product that shipped neither gets the still record, which is a complete record.
-  const { media: native } = useShell();
+  const { media: native, travelled } = useShell();
   const CoverMotion = native?.coverMotion;
   const Zoom = native?.zoom;
+  const Finishing = native?.finishing;
   const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
   const detail = useResourceDetail(entry, id, feedback);
   const activity = useActivity(entry, id);
@@ -77,6 +84,29 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   );
   const { names, people } = useRecordPeople(asked, detail.visit);
   const [informationOpen, setInformationOpen] = useState(false);
+  // Where the person came from, read once as this record mounts: the row they pressed filed it and
+  // no other opening has one. It is a frame, never a row, so nothing another record or another
+  // reader wrote can arrive in this one.
+  const [from] = useState(() => (id ? travelled(address("detail", entry, id)) : undefined));
+  // The burst is drawn only where it was asked for: a product that ships no motion renderer, and a
+  // person who asked for less motion, get the sentence and the write's own haptic and no ink. The
+  // hook owns how long it is owed and the renderer says when it is over.
+  const bursting = Finishing !== undefined && feedback.motion === "normal" && detail.bursting;
+  // What the moment says is read off the row that crossed, in the reader's own formatting: the
+  // entry's own noun and the author's own word for the state it reached. The sentence is then said
+  // aloud once, on the platform that has no live region to say it with; the words stay drawn either
+  // way, so a screen reader is given the one sentence the eye is shown.
+  const said = detail.reached
+    ? finishedWord(
+        noun(entry).singular,
+        statusPill(entry, detail.reached, feedback)?.label ?? "",
+        feedback.copy,
+      )
+    : undefined;
+  useEffect(() => {
+    if (said !== undefined && Platform.OS === "ios")
+      AccessibilityInfo.announceForAccessibilityWithOptions(said, { queue: true });
+  }, [said]);
   // The cover and the galleries are this record's own pictures, so they are asked for as
   // soon as the record is drawn — never behind the Record information disclosure, which is
   // lazy. One read of the metadata per file, at the width the cover is drawn in.
@@ -242,6 +272,21 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
         {...(CoverMotion === undefined
           ? {}
           : { coverMotion: (props: CoverMotionProps) => <CoverMotion {...props} /> })}
+        {...(from === undefined ? {} : { from })}
+        {...(said === undefined
+          ? {}
+          : {
+              finishing: {
+                words: said,
+                ...(detail.reached === undefined
+                  ? {}
+                  : { state: statusTone(entry, detail.reached, feedback) ?? "neutral" }),
+                ...(bursting && Finishing
+                  ? { burst: (props: FinishingProps) => <Finishing {...props} /> }
+                  : {}),
+                onEnd: detail.burstOver,
+              },
+            })}
         // A rich text body is read, not printed: the reader is supplied here because it is
         // this screen that can ask for a figure's file, and the organism that decides
         // which field is one (derive.richBody).

@@ -435,8 +435,8 @@ does this record draw, and in which block"; in `pictures.ts`, `fileMeta`, `fileP
 `pictureState`, because nothing exposed a `file` row's `width`, `height`, `alt` or
 `decorative` past the picture door; `PhotoStrip` (no horizontal list existed in the kit:
 `grep -rn "horizontal=" src/ui` is empty, and `PhotoGallery`/`MasonryWall` are paged
-collections a resource answers) and `RecordCover` (`MediaHero` writes its caption *below*
-the frame and an Open button under that, where the record must put its name *on* the photo
+collections a resource answers) and `RecordCover` (`MediaHero` writes its caption _below_
+the frame and an Open button under that, where the record must put its name _on_ the photo
 and offer no open affordance of its own); `kit.photoCount` in both languages; `extent.cover`,
 `strip`, `coverFoot` and `headerBar`; `Screen`'s optional `onOffset`, the handle a cover
 needs and no rule of its own; `usePictures`'s third argument (how wide a slot draws) and its
@@ -462,6 +462,63 @@ record — the photo holds still, the picture opens at the page's own size, and 
 between them — which is a complete record, not a broken one. `extent.coverParallax`,
 `coverShrink` and `coverFoot` are the numbers a device will judge, owned by `src/ui/scale.ts`
 and by no component.
+
+#### A record opens where the press was
+
+A list row that draws a picture, pressed, files the frame that picture stood in — `measureInWindow`
+at the moment of the press, for the address the row opens — and the record it opens into grows its
+cover from that frame instead of waiting at the top of the stack. One press opens one record however
+the platform answers that question: a surface that answers as it is asked opens from its answer,
+which is the only way the frame can be filed before the record mounts to read it, and a surface that
+answers late or not at all opens from the press itself and simply draws no flight. What travels is a
+frame and an address — `travelTo`/`travelled`, read once, the same one-shot lifetime the sentence a
+write says already has — so no row, no value and no other record's state can arrive in this one, and a
+row this phone never measured opens the ordinary native push it always opened.
+
+#### A record finishes on the write that finished it
+
+A state crossing into one the entry calls _finished_ is the one moment on this phone that a person
+may not have seen coming, and it is worth saying so out loud. Which values mean finished is the
+author's fact and nobody else's: `presentation.doneValues` on the field the entry names as its
+`statusField` (`kit/entity/hints.go`), read by `finishedValues` and asked by `isFinished` — never a
+tone, never the word a pill happens to wear, because `enumTones` says what finished _looks like_ and
+the two tables are the kernel's own orthogonal pair. A document that declares nothing finishes
+nothing, a value the field's enum does not hold is refused by name at parse time, and one bad entry
+costs the celebration and never the field beside it. The entry's declaration is what makes a value
+celebrable: the hint served on a field no entry reads as its state parses, and answers `[]`.
+
+Two halves decide whether the moment plays, and neither one alone is enough. **The filing** says this
+phone wrote to this record: a write that the server accepted files the record's address with the
+shell, beside the one sentence a write already leaves there. A refused write, a write this phone is
+still holding, a command over a whole collection and a create all file nothing. **The crossing**
+says the state actually moved: the record screen keeps the row it last drew, and its next live read
+can compare against it — a row that arrived already finished crossed under nobody's hand and says
+nothing, and a row that an answer merely read back out of this phone's own cache proves nothing.
+An answer this phone stored, a read that came from nobody's write, and a record that already had its
+moment are all answered with silence. The line it says is made of the two words that are not this
+kit's — the entry's own noun and the author's own word for the state — composed in `finishedWord`,
+and iOS, which has no live region to say it with, is asked to announce the same sentence once.
+
+The record's one moment per session is spent by the moment _playing_, never by a write filing it:
+most writes to a record finish nothing — an acknowledgement, a title correction — and a person who
+then resolves it is owed the sentence the earlier write would otherwise have taken. See
+[docs/the-finishing-moment-needs-a-filing-and-a-crossing.md](docs/the-finishing-moment-needs-a-filing-and-a-crossing.md).
+A person who asked for less motion, and a product that shipped no burst renderer, are given the
+sentence with no ink drawn over the record, which is a complete moment rather than a broken one.
+
+**Reused** — `statusField` and `statusPill` for the field and its word (`finishedValues` and
+`isFinished` are their siblings, not a second owner of either), `ShellValue`'s one-shot
+`say`/`heard` slot for the shape and lifetime of the filing and the journey's frame, `noun` and the
+author's `enumLabels` for the sentence, `Badge` and `statusPair` for the state's colour, `MediaRenderers`
+for the seam `zoom` and `coverMotion` already proved, `RecordCover`'s `CoverMotionProps` for the frame a
+flight is drawn between, `Feedback.motion` for the preference and `extent` for every distance. **Added**
+— `RolledValue`, because no atom in the kit owned "the same value, changed": it draws a string somebody
+else derived, rolls only between two strings that share their columns, and never reads a rendered value
+back into a number. **Made reusable** — `Badge`'s `motion` (a pill that changed while the person was
+reading it changes in place, and asks nothing of a caller that has no preference to hand it),
+`MediaRenderers.finishing`, and `ResourceDetail`'s `finishing` prop, absent meaning the record reached
+nothing; `travelTo`/`travelled` on the shell, which carry one frame under one address and never a row;
+and `record-finished` as the id a journey and a screen reader both find the sentence by.
 
 ### How a form asks
 
@@ -2130,7 +2187,6 @@ screen that shows two facts reads two records; the settled-map discipline in
 withdrawn session ends every name at once; and the `DUE_FIELD`/`STATUS_FIELD`/
 `STATUS_VALUE` the journeys now read from the environment, which is what lets a
 second client's flow exist without a word of its product in this repository.
-
 
 ## People and row pictures
 

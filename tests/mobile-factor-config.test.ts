@@ -33,7 +33,14 @@ bash scripts/e2e/mobile_ci.sh fixture.apk`,
     ],
     {
       encoding: "utf8",
-      timeout: 10000,
+      // The bound ends a harness that never answers; it does not budget one that
+      // does. The walk to bootstrap forks a python interpreter for the kernel pin,
+      // one for each PostgreSQL URL and one for each generated key, so its wall
+      // time belongs to the host: a quarter second alone and eight seconds on the
+      // job's own container, where the suite's other files share the machine. A
+      // bound near that cost refuses a harness which reached bootstrap and said
+      // so; the deeper case of this same harness is bounded at 30 seconds.
+      timeout: 30000,
       env: {
         ...process.env,
         TMPDIR: root,

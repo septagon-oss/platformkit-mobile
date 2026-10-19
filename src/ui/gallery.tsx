@@ -36,6 +36,7 @@ import {
 } from "../core/galleryPages";
 import { deriveDisclosure } from "../core/surfaces";
 import { Badge } from "./atoms/Badge";
+import { RolledValue } from "./atoms/RolledValue";
 import { Button } from "./atoms/Button";
 import { ChoiceRow } from "./atoms/ChoiceRow";
 import { DateTimeRow } from "./atoms/DateTimeRow";
@@ -502,6 +503,8 @@ function Samples({
   const [tags, setTags] = useState("alpha, beta");
   const [server, setServer] = useState("https://acme.example.com");
   const [words, setWords] = useState("");
+  // A count the person can move while looking at it, so the roll is seen rather than described.
+  const [places, setPlaces] = useState(4);
   const none = () => undefined;
   return (
     <>
@@ -550,6 +553,24 @@ function Samples({
               <Icon key={n} name={n} label={n} />
             ),
           )}
+        </View>
+      </Section>
+
+      {/* A number the person may be reading when it changes elsewhere rolls to its new value rather
+          than replacing the line under their eye. Only the count is drawn here: the string is the
+          caller's own, and this atom formats nothing — the same rule a Price and a StatTile keep. */}
+      <Section title="A value that changed">
+        <View style={s.stack}>
+          <RolledValue
+            value={`${places} places left`}
+            role="title"
+            weight="semibold"
+            motion={feedback.motion}
+            announcement="polite"
+            testID="gallery-rolled-value"
+          />
+          <RolledValue value={`${places}`} motion={feedback.motion} testID="gallery-rolled-count" />
+          <Button label="One more place" tone="secondary" onPress={() => setPlaces((n) => n + 1)} />
         </View>
       </Section>
 

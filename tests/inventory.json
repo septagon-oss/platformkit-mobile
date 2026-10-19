@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 237,
-   "cases": 1083,
-   "ms": 1701397,
-   "testsMs": 49728.20000000002,
+   "files": 240,
+   "cases": 1104,
+   "ms": 1747306,
+   "testsMs": 50417.10000000002,
    "runners": {
-    "jest": 77,
-    "node": 160
+    "jest": 79,
+    "node": 161
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 96,
-   "cases": 310,
-   "ms": 2057112,
-   "testsMs": 33895,
+   "files": 100,
+   "cases": 320,
+   "ms": 2209646,
+   "testsMs": 39462,
    "runners": {
-    "jest": 96
+    "jest": 100
    },
    "unreachable": 0
   },
@@ -3742,6 +3742,47 @@
    "testsMs": 18
   },
   {
+   "file": "tests/ui/a-pill-crosses-from-the-colour-it-wore.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "A pill whose state moved while it was on screen crosses from the pair it wore to the pair it reached: the pair it left is laid over the pill, fully on, hidden from a reader and answering no press, and it is gone once the crossing ends \u2014 leaving the tree a pill that drew the reached state from the start draws. The word is never doubled at any point of the crossing. A reader who asked for less motion, and a pill re-drawn in the state it already wore, start no crossing at all. Jest's Animated finishes every timing at once, so each case holds the crossing open by answering `Animated.timing` itself and ends it by hand; every colour is read off a pill in the same tree.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 15145,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a moved pill wears the pair it left over the pair it reached until its crossing ends",
+    "a pill whose reader asked for less motion starts no crossing and lays nothing over itself",
+    "a pill re-drawn in the state it already wore starts no crossing"
+   ],
+   "tests": [
+    {
+     "title": "a moved pill wears the pair it left over the pair it reached until its crossing ends",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a pill whose reader asked for less motion starts no crossing and lays nothing over itself",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a pill re-drawn in the state it already wore starts no crossing",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 123,
+   "coveredProdLines": 1772,
+   "onlyProdLines": null,
+   "testsMs": 18
+  },
+  {
    "file": "tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -3769,6 +3810,77 @@
    "coveredProdLines": 1730,
    "onlyProdLines": null,
    "testsMs": 7
+  },
+  {
+   "file": "tests/ui/a-record-that-just-finished-names-its-own-state.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 8,
+   "rule": "What the record owes the person when their own write moved its state into one the entry calls finished: one line, in the record's own words, drawn whether or not anything is allowed to move. The organism draws what the screen composes and composes nothing of its own \u2014 no overlay appears without a `finishing` prop, no burst appears without a renderer, and every row the record always drew stays drawn under the line. The words come from the entry's noun and the author's own word for the state, both read off the served catalog, so nothing here spells a sentence out a second time.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 27266,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the line says what the record became, in the entry's own two words",
+    "the record under the line is the record it always drew",
+    "a record that reached nothing draws no line at all",
+    "the burst is drawn over the record and asked for nothing but its own ending",
+    "a product that ships no burst renderer keeps the line and the whole record",
+    "the pill the line is about changed, and nothing beside it did",
+    "a pill moved out of its state ends saying and wearing the state it reached",
+    "a pill whose reader asked for less motion arrives as a plain swap of the same tree"
+   ],
+   "tests": [
+    {
+     "title": "the line says what the record became, in the entry's own two words",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "the record under the line is the record it always drew",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "a record that reached nothing draws no line at all",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "the burst is drawn over the record and asked for nothing but its own ending",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "a product that ships no burst renderer keeps the line and the whole record",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "the pill the line is about changed, and nothing beside it did",
+     "ms": 22,
+     "measured": false
+    },
+    {
+     "title": "a pill moved out of its state ends saying and wearing the state it reached",
+     "ms": 555,
+     "measured": false
+    },
+    {
+     "title": "a pill whose reader asked for less motion arrives as a plain swap of the same tree",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 123,
+   "coveredProdLines": 1916,
+   "onlyProdLines": null,
+   "testsMs": 631
   },
   {
    "file": "tests/ui/agenda-appointment-lines.test.tsx",
@@ -8873,6 +8985,89 @@
    "coveredProdLines": 15863,
    "onlyProdLines": null,
    "testsMs": 42.1
+  },
+  {
+   "file": "tests/a-finished-state-is-what-the-catalogue-names.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 10,
+   "rule": "Which states count as *finished* is the author's fact, served in the document, and this phone only reads it. These are the bytes that rule and what an author's mistake costs: the hint is read off the entry's `statusField` alone, a value the field's enum does not hold is refused by name, one bad entry costs the celebration and never the field beside it, and nothing is ever inferred from a colour, from a word the pill happens to wear, or from a value a document happened to use. Every case is served bytes through the shipped `parseCatalog` \u2014 the kernel refuses a malformed hint at mount (`kit/rest/hints.go`), so these bytes decide the phone's robustness, not a server's behaviour \u2014 and the pinned captures are read rather than recalled: the golden's `note.status` is `open`/`done`, and the pictures capture's `task.status` is finished at `resolved` and not at `closed`.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 3498,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the done values an entry declares are read, and say which rows finished",
+    "a document that declares nothing finishes nothing, not even at a value that reads as done",
+    "a done value the field's own enum does not hold is refused by name",
+    "a malformed done list costs the celebration and the field nothing",
+    "the entry's declaration is what makes a value celebrable, not a field's",
+    "a done value served on a field the entry does not read as its state is answered as nothing",
+    "the pinned capture's task is finished when it is resolved, and not when it is closed",
+    "which values finish and which colour finished wears are separate declarations",
+    "a state kept off every screen, and a row holding no state, finish nothing",
+    "declaring done values changes no read this phone makes and no request it sends"
+   ],
+   "tests": [
+    {
+     "title": "the done values an entry declares are read, and say which rows finished",
+     "ms": 14.706663,
+     "measured": false
+    },
+    {
+     "title": "a document that declares nothing finishes nothing, not even at a value that reads as done",
+     "ms": 1.521745,
+     "measured": false
+    },
+    {
+     "title": "a done value the field's own enum does not hold is refused by name",
+     "ms": 2.472984,
+     "measured": false
+    },
+    {
+     "title": "a malformed done list costs the celebration and the field nothing",
+     "ms": 7.648107,
+     "measured": false
+    },
+    {
+     "title": "the entry's declaration is what makes a value celebrable, not a field's",
+     "ms": 0.736643,
+     "measured": false
+    },
+    {
+     "title": "a done value served on a field the entry does not read as its state is answered as nothing",
+     "ms": 0.635446,
+     "measured": false
+    },
+    {
+     "title": "the pinned capture's task is finished when it is resolved, and not when it is closed",
+     "ms": 2.76293,
+     "measured": false
+    },
+    {
+     "title": "which values finish and which colour finished wears are separate declarations",
+     "ms": 3.568511,
+     "measured": false
+    },
+    {
+     "title": "a state kept off every screen, and a row holding no state, finish nothing",
+     "ms": 1.846024,
+     "measured": false
+    },
+    {
+     "title": "declaring done values changes no read this phone makes and no request it sends",
+     "ms": 3.956368,
+     "measured": false
+    }
+   ],
+   "loaded": 33,
+   "coveredProdLines": 11426,
+   "onlyProdLines": null,
+   "testsMs": 39.9
   },
   {
    "file": "tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts",
@@ -19434,6 +19629,41 @@
    "testsMs": 45
   },
   {
+   "file": "tests/screens/a-finished-line-speaks-only-for-the-write-that-finished-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The finished line (\"Note done\", `record-finished`) is about the state the record holds and the write this phone made. When a later write takes the record back to open, the line goes with the state it described. When the re-read after a write never answers, the write's filing is spent anyway, so a Retry that later finds the record finished (because someone elsewhere finished it) draws no line. The real `Shell` is mounted; only the transport, the catalogue and the device store are laid over it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 29837,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a record taken back to open after it finished no longer says it finished",
+    "a retry after a write's re-read failed draws no line for a state this phone did not write"
+   ],
+   "tests": [
+    {
+     "title": "a record taken back to open after it finished no longer says it finished",
+     "ms": 1280,
+     "measured": false
+    },
+    {
+     "title": "a retry after a write's re-read failed draws no line for a state this phone did not write",
+     "ms": 63,
+     "measured": false
+    }
+   ],
+   "loaded": 167,
+   "coveredProdLines": 2654,
+   "onlyProdLines": null,
+   "testsMs": 1343
+  },
+  {
    "file": "tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -19568,6 +19798,82 @@
    "testsMs": 48
   },
   {
+   "file": "tests/screens/a-pressed-row-opens-its-record-once.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A row a person presses opens its record once: one press, one record on the stack, however the platform answers the question of where the row's picture stood. A device answers that question (`measureInWindow` calls back with the frame); the host mock every other suite renders against never does, so this file answers it the way a device does before pressing.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 36568,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a row pressed once opens its record once"
+   ],
+   "tests": [
+    {
+     "title": "a row pressed once opens its record once",
+     "ms": 150,
+     "measured": false
+    }
+   ],
+   "loaded": 160,
+   "coveredProdLines": 2222,
+   "onlyProdLines": null,
+   "testsMs": 150
+  },
+  {
+   "file": "tests/screens/a-record-celebrates-the-write-that-finished-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "Which writes owe a record its finishing moment, and which do not: the moment belongs to a write this phone made that moved the state into one the entry calls finished, so a read that merely answers a state the server already held says nothing, a record read finished from the first moment says nothing \u2014 for it nothing crossed \u2014 and a person who asked for less motion is given the sentence with no ink drawn over the record. The session's memory is the shell's own, so the real `Shell` is mounted and only the transport, the catalogue and the device store are laid over it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 42602,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a read that answers a state the server already reached says nothing",
+    "a record read finished from the first moment keeps quiet about it",
+    "a person who asked for less motion is given the sentence and no ink",
+    "the burst a motion-asking person is given is drawn once, over the record it belongs to"
+   ],
+   "tests": [
+    {
+     "title": "a read that answers a state the server already reached says nothing",
+     "ms": 1867,
+     "measured": false
+    },
+    {
+     "title": "a record read finished from the first moment keeps quiet about it",
+     "ms": 30,
+     "measured": false
+    },
+    {
+     "title": "a person who asked for less motion is given the sentence and no ink",
+     "ms": 76,
+     "measured": false
+    },
+    {
+     "title": "the burst a motion-asking person is given is drawn once, over the record it belongs to",
+     "ms": 60,
+     "measured": false
+    }
+   ],
+   "loaded": 167,
+   "coveredProdLines": 2602,
+   "onlyProdLines": null,
+   "testsMs": 2033
+  },
+  {
    "file": "tests/screens/a-record-gallery-opens-and-closes-its-viewer.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -19624,6 +19930,47 @@
    "coveredProdLines": 2117,
    "onlyProdLines": null,
    "testsMs": 43
+  },
+  {
+   "file": "tests/screens/a-record-says-it-finished-when-this-phone-finished-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A record that reaches a state its entry calls finished, through a command the person ran on this phone, says so once: \"Note done\" is drawn on the record (`record-finished`). Writes on the same record that finished nothing \u2014 a command that left the state where it was \u2014 are routine, and routine work earns no moment and spends none: the record's one moment per session is the one it actually finished in. The session's memory is the shell's own (`celebrate` and the writes count), so the real `Shell` is mounted and only the transport, the catalogue and the device store are laid over it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 43527,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a command that finishes the record says the record finished",
+    "a command that finished nothing leaves the record its moment for the command that finishes it",
+    "a record whose moment already played this session does not play it again"
+   ],
+   "tests": [
+    {
+     "title": "a command that finishes the record says the record finished",
+     "ms": 1711,
+     "measured": false
+    },
+    {
+     "title": "a command that finished nothing leaves the record its moment for the command that finishes it",
+     "ms": 186,
+     "measured": false
+    },
+    {
+     "title": "a record whose moment already played this session does not play it again",
+     "ms": 144,
+     "measured": false
+    }
+   ],
+   "loaded": 167,
+   "coveredProdLines": 2603,
+   "onlyProdLines": null,
+   "testsMs": 2041
   },
   {
    "file": "tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx",

@@ -119,6 +119,12 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     keep: jest.fn<ShellValue["keep"]>(),
     say: jest.fn<ShellValue["say"]>(),
     heard: jest.fn<ShellValue["heard"]>(() => ""),
+    celebrate: jest.fn<ShellValue["celebrate"]>(),
+    celebrating: jest.fn<ShellValue["celebrating"]>(() => false),
+    celebrated: jest.fn<ShellValue["celebrated"]>(),
+    surprised: jest.fn<ShellValue["surprised"]>(),
+    travelTo: jest.fn<ShellValue["travelTo"]>(),
+    travelled: jest.fn<ShellValue["travelled"]>(() => undefined),
     returning: undefined,
     // No device store: a screen under test writes live, as it did before the kit could hold a write.
     outbox: undefined,

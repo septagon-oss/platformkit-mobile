@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from "react";
 import { defaultRenderers } from "../src/renderers";
 import { commandSheet, sheet } from "../src/route";
 import { CoverMotion } from "../src/screens/CoverMotion";
+import { FinishingMotion } from "../src/screens/FinishingMotion";
 import { screenCopy } from "../src/screens/failure";
 import { NativeZoom } from "../src/screens/NativeZoom";
 import { device } from "../src/screens/device";
@@ -26,7 +27,7 @@ export default function Layout() {
       store={device.store}
       mint={device.mint}
       reach={device.reach}
-      media={{ zoom: NativeZoom, coverMotion: CoverMotion }}
+      media={{ zoom: NativeZoom, coverMotion: CoverMotion, finishing: FinishingMotion }}
     >
       <ThemeProvider>
         <Root />

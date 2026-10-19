@@ -92,6 +92,19 @@ export const extent = {
   stand: pageColumn * 2 + space.xl,
   /** scrim is how much of the screen a backdrop keeps back. */
   scrim: 0.45,
+  /**
+   * mark is the side of the checkmark a record draws itself when it reaches a state its entry
+   * calls finished: big enough to be read as a shape, small enough to sit over a cover without
+   * hiding the record under it.
+   */
+  mark: 72,
+  /** confetti is one chip of the burst that plays with it: a fragment, not a shape to read. */
+  confetti: 8,
+  /**
+   * burstSpread is how far from the mark the chips scatter, as a fraction of the surface they are
+   * drawn over. A fraction, so the burst reaches the same proportion of a cover and of a tile.
+   */
+  burstSpread: 0.32,
 } as const;
 
 /** type is the size and line height of each Text role, and how far Dynamic Type may scale it. */

@@ -91,7 +91,7 @@ export function useRecordTitle(entry: Entry, id: string | undefined): string {
 
 /** useCommandForm is a command with an argument: the sheet that sends it. */
 export function useCommandForm(entry: Entry, id: string | undefined, c: Command): Running {
-  const { api, wrote, say, outbox } = useShell();
+  const { api, wrote, say, celebrate, outbox } = useShell();
   const { mode } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
@@ -207,6 +207,10 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
       // list has no record to land on and files nothing, and a command the phone
       // is holding has not run.
       if (id) say(address("detail", entry, id), wording.success);
+      // Whether that change ended the record is not this sheet's to know and not its to guess:
+      // the filing below says only that this phone wrote here, and the record holding the row
+      // decides whether the state it holds is one its entry calls finished.
+      if (id) celebrate(address("detail", entry, id));
       wrote(key(entry));
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPhase("ran");
@@ -219,7 +223,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
       setErrors(refusalFields(said.verdict));
       setDetail(said.text);
     }
-  }, [api, entry, id, c, controls, held, wrote, say, leave, copy, wording, outbox]);
+  }, [api, entry, id, c, controls, held, wrote, say, celebrate, leave, copy, wording, outbox]);
 
   return { blocks, held, errors, detail, phase, wording, change, fieldRefused, run, cancel: leave };
 }
@@ -230,7 +234,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
  * because there is no form on screen to put it under.
  */
 export function useCommandAsk(entry: Entry, id: string | undefined) {
-  const { api, wrote, say, outbox } = useShell();
+  const { api, wrote, say, celebrate, outbox } = useShell();
   const { mode } = useTheme();
   const [busy, setBusy] = useState("");
 
@@ -270,6 +274,9 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
                 // command did; a command about the whole list has no record to
                 // land on, and one the phone is holding has not run.
                 if (id) say(address("detail", entry, id), success);
+                // The record decides what this write did to its own state; this one files only
+                // the fact that the person, standing here, asked for it.
+                if (id) celebrate(address("detail", entry, id));
                 wrote(key(entry));
               } else {
                 const words = screenCopy();
@@ -295,7 +302,7 @@ export function useCommandAsk(entry: Entry, id: string | undefined) {
         { message: consequence },
       );
     },
-    [api, entry, id, wrote, say, mode, outbox],
+    [api, entry, id, wrote, say, celebrate, mode, outbox],
   );
 
   return { ask, busy };
