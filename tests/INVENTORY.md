@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `3c3b8d69e` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `8cdd7da4d` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 224 | 47.6 s | 77 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 249 | 1161 | 63.1 s | 1959 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 113 | 349 | 42.8 s | 2591 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 253 | 1194 | 63.2 s | 2033 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 115 | 365 | 43.6 s | 2647 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 456
+* keep: 462
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 456 — 201 `tests/*.test.ts` (node), 198 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1734; cases in files no runner reaches: 35
-* isolated wall time: contract 77 s, behaviour 1959 s, composition 2591 s, journey 0 s
+* files inventoried: 462 — 203 `tests/*.test.ts` (node), 202 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1783; cases in files no runner reaches: 35
+* isolated wall time: contract 77 s, behaviour 2033 s, composition 2647 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -143,6 +143,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/a-pill-crosses-from-the-colour-it-wore.test.tsx | jest | behaviour | 3 | 15145 | 18 |  | not measured | — | 0 | keep | A pill whose state moved while it was on screen crosses from the pair it wore to the pair it reached: the pair it left is laid over the pill, fully on, hidden … |
 | tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx | jest | behaviour | 1 | 30398 | 7 |  | not measured | — | 0 | keep | A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared compo… |
 | tests/ui/a-record-that-just-finished-names-its-own-state.test.tsx | jest | behaviour | 8 | 27266 | 631 |  | not measured | — | 0 | keep | What the record owes the person when their own write moved its state into one the entry calls finished: one line, in the record's own words, drawn whether or n… |
+| tests/ui/a-row-offers-its-command-without-a-finger.test.tsx | jest | behaviour | 6 | 37252 | 76 |  | not measured | — | 0 | keep | Nothing a swipe can do may be swipe-only. The command a row's swipe runs is offered to a reader as a named action of the row itself, the row's own name keeps t… |
 | tests/ui/a-workspaces-accent-enters-the-theme-without-a-hand-edited-token.test.tsx | jest | behaviour | 10 | 21472 | 32 |  | not measured | — | 0 | keep | A workspace's accent arrives as a value, never as a token: the generated palette stays the only writer of colour in the repository, and `accentPalette` copies … |
 | tests/ui/agenda-appointment-lines.test.tsx | jest | behaviour | 3 | 19211 | 106 | 0 | 0 of 3 | — | 0 | keep | An appointment is its name and, beneath it, when it is. Welding the two into one control label gave every entry the same long centred line of text, and a headi… |
 | tests/ui/atoms.test.tsx | jest | behaviour | 11 | 18901 | 51 | 0 | 0 of 11 | — | 0 | keep | (no first comment; first test title) a busy button is a button that cannot be pressed and says so |
@@ -196,6 +197,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/record-opens-on-its-photo.test.tsx | jest | behaviour | 7 | 20655 | 101 |  | not measured | — | 0 | keep | A record's picture is drawn where the record begins, and the facts it draws there are not drawn again below it. These are the record screen's two picture surfa… |
 | tests/ui/refused-field-asks-for-its-box.test.tsx | jest | behaviour | 4 | 16050 | 405 |  | not measured | — | 0 | keep | The sheet does not merely say which field is wrong, it asks for that field: the organism keeps the ref of every box it drew and, when the hook names the field … |
 | tests/ui/resource-list-spoken-time.test.tsx | jest | behaviour | 2 | 20368 | 937 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) en generated list announces the exact local instant through its composed row |
+| tests/ui/row-swipe.test.tsx | jest | behaviour | 7 | 32562 | 17 |  | not measured | — | 0 | keep | What a swipe does at each distance: the surface's width is the threshold, a release short of it asks nothing of the phone at all, the reveal is clamped to what… |
 | tests/ui/search-busy-submit.test.tsx | jest | behaviour | 1 | 19090 | 14 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) a busy search blocks submission until the pending search completes |
 | tests/ui/selected-day-contrast.test.tsx | jest | behaviour | 2 | 19477 | 66 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light: the selected calendar day retains readable text |
 | tests/ui/selection-control-drawn-state.test.tsx | jest | behaviour | 2 | 18953 | 13 | 0 | 0 of 2 | — | 0 | keep | "A state is visible or it is not a state." The selection control carries what a person did to it in `checked`, which reached the accessibility tree and nothing… |
@@ -352,6 +354,8 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/request.test.ts | node | behaviour | 10 | 1163 | 129.4 | 3 | 1 of 10 | — | 0 | keep | (no first comment; first test title) a custom write with a lost response is recovered through its persisted read without replay |
 | tests/restored-token-revocation.test.ts | node | behaviour | 2 | 1023 | 53.2 |  | not measured | — | 0 | keep | What survives a restart on this phone is the key alone — the session that signed in is held in memory for as long as the key it minted is held and never writte… |
 | tests/richtext-field-is-prose.test.ts | node | behaviour | 1 | 692 | 1.1 | 0 | 0 of 1 | — | 0 | keep | A `widget:richtext` field held a one-line text box on the phone (2026-10-09, the owner writing content): kind() had no richtext branch, so a body fell through … |
+| tests/row-primary-command.test.ts | node | behaviour | 10 | 1009 | 14.2 |  | not measured | — | 0 | keep | The row's command is the entry's declaration, read: which verb a swipe may run, and what an author's mistake costs. Every case is served bytes through the ship… |
+| tests/row-swipe.test.ts | node | behaviour | 10 | 2736 | 13.8 |  | not measured | — | 0 | keep | Where a drag has got, and which command a row would run: the one arithmetic a swiped surface makes, and the one resolution of the entry's declared verb. Both a… |
 | tests/scale.test.ts | node | behaviour | 2 | 344 | 7.9 | 0 | 0 of 2 | — | 0 | keep | A distance is written once, in src/ui/scale.ts. This reads every other presentation source and refuses a nonzero numeric literal where a style or a prop asks f… |
 | tests/secret-scan-exemption-target.test.ts | node | behaviour | 1 | 356 | 1.5 | 0 | 0 of 1 | — | 0 | keep | The history scan's exemption is matched against the secret a rule captured, not against the line that holds it. gitleaks reads `regexTarget = "line"` as "swall… |
 | tests/secret-scan-fixture-allowlist.test.ts | node | behaviour | 6 | 348 | 4.2 | 0 | 0 of 6 | — | 0 | keep | What the history scan is told to swallow, held to its size. `scripts/gitleaks.sh` reads every commit, so a credential-shaped string a test introduces stays und… |
@@ -414,6 +418,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx | jest | composition | 1 | 21217 | 34 |  | not measured | — | 0 | keep | An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload. |
 | tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx | jest | composition | 1 | 23646 | 85 |  | not measured | — | 0 | keep | A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores … |
 | tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx | jest | composition | 1 | 23943 | 104 |  | not measured | — | 0 | keep | A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write. |
+| tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx | jest | composition | 9 | 27340 | 106 |  | not measured | — | 0 | keep | What a release at the end of a row's swipe does: the command the entry named runs through the one submit every other door uses, and is asked first wherever the… |
 | tests/screens/a-translatable-record-follows-the-device-language.test.tsx | jest | composition | 2 | 25311 | 611 |  | not measured | — | 0 | keep | A translatable record is requested in the device language. A source-language fallback is identified in Portuguese rather than silently shown as translated cont… |
 | tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx | jest | composition | 7 | 21179 | 38 |  | not measured | — | 0 | keep | A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answe… |
 | tests/screens/activity-catalog-withdrawal-inflight.test.tsx | jest | composition | 2 | 23253 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a late actor lookup cannot restore identity after catalog withdrawal |
@@ -494,6 +499,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/the-app-hands-the-shell-its-workspaces-table.test.tsx | jest | composition | 1 | 21476 | 2 |  | not measured | — | 0 | keep | What the reference app keeps on the phone is one list in src/screens/device.ts, and the shell only remembers the workspaces a person has connected to when that… |
 | tests/the-connect-step-asks-a-workspace-what-it-is-before-it-asks-who-you-are.test.tsx | jest | composition | 2 | 31669 | 193 |  | not measured | — | 0 | keep | The connect step, end to end: the person types an address, the phone asks that address what it is, and the answer — name, host, colour, mark — is on screen bef… |
 | tests/the-mark-is-asked-of-the-address-that-named-it.test.tsx | jest | composition | 2 | 22052 | 118 |  | not measured | — | 0 | keep | A workspace's mark is a path on the host that answered the document naming it, so the phone asks that host for it: on a blank phone, and on a phone that was po… |
+| tests/ui/a-receipt-says-what-the-write-just-did.test.tsx | jest | composition | 7 | 28786 | 746 |  | not measured | — | 0 | keep | The life of the bar: filed, drawn, read as what a write just did, and spent — by its own clock, and by the filing that replaced it. The words are the command's… |
 | tests/ui/list-from-the-phone-says-so.test.tsx | jest | composition | 3 | 18949 | 826 |  | not measured | — | 0 | keep | An empty page this phone answered is not "nothing exists": it is "nothing was there the last time this device heard". The list says which of the two it is, and… |
 | tests/ui/prose-code-reads-as-written.test.tsx | jest | composition | 2 | 21325 | 23 |  | not measured | — | 0 | keep | Code is drawn as the author wrote it: a fenced block and an inline code span are literal in 0069 §1 and in CommonMark, so no character inside them is escaped o… |
 | tests/what-this-device-remembers-is-listed-as-places-and-fills-the-address.test.tsx | jest | composition | 1 | 26444 | 665 |  | not measured | — | 0 | keep | A remembered workspace is an address with a name on it: listed as a place, pressed without a field being touched, and asked about once. It never signs anybody … |
