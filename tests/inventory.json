@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 105,
-   "cases": 336,
-   "ms": 2359334,
-   "testsMs": 40717,
+   "files": 109,
+   "cases": 341,
+   "ms": 2480079,
+   "testsMs": 41939,
    "runners": {
-    "jest": 105
+    "jest": 109
    },
    "unreachable": 0
   },
@@ -20094,6 +20094,64 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-connection-document-outside-its-schema-is-refused-like-a-refusal.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "The generated validator is the phone's own boundary: a document that names a name and nothing else is not a workspace description, and it is refused the way a 404 is \u2014 the address step stays, the kit's accent stays, and no remembered row is written for a host whose answer this phone could not read.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 31373,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a body outside the pinned schema is answered the same way a refusal is"
+   ],
+   "tests": [
+    {
+     "title": "a body outside the pinned schema is answered the same way a refusal is",
+     "ms": 174,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2550,
+   "onlyProdLines": null,
+   "testsMs": 174
+  },
+  {
+   "file": "tests/an-address-that-answers-nothing-asks-for-the-address-as-it-always-did.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "An address that answers nothing is not a workspace and not a failure: the phone stays on the address, wears its own colours and remembers nothing. The person finds out at the password, which is what they do today \u2014 a 404, a refusal and a body outside the pinned schema are one answer here, and none of them is allowed to strand the screen.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 31259,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "an address that answers nothing keeps the address step and the kit's own look"
+   ],
+   "tests": [
+    {
+     "title": "an address that answers nothing keeps the address step and the kit's own look",
+     "ms": 190,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2539,
+   "onlyProdLines": null,
+   "testsMs": 190
+  },
+  {
    "file": "tests/route.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25325,6 +25383,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-connect-step-asks-a-workspace-what-it-is-before-it-asks-who-you-are.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The connect step, end to end: the person types an address, the phone asks that address what it is, and the answer \u2014 name, host, colour, mark \u2014 is on screen before a password is asked for, painted in the colour the workspace brought. Everything below runs over the real transport (the pinned `zConnection` and the route table are in the path) and the real shell; only the network and the device's tables are answered from memory.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 31669,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the address step asks for a place before anything asks who you are",
+    "Continue asks once, and the workspace it answered for is on screen before the password"
+   ],
+   "tests": [
+    {
+     "title": "the address step asks for a place before anything asks who you are",
+     "ms": 120,
+     "measured": false
+    },
+    {
+     "title": "Continue asks once, and the workspace it answered for is on screen before the password",
+     "ms": 73,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2603,
+   "onlyProdLines": null,
+   "testsMs": 193
+  },
+  {
    "file": "tests/ui/list-from-the-phone-says-so.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25399,6 +25492,35 @@
    "coveredProdLines": 701,
    "onlyProdLines": null,
    "testsMs": 23
+  },
+  {
+   "file": "tests/what-this-device-remembers-is-listed-as-places-and-fills-the-address.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A remembered workspace is an address with a name on it: listed as a place, pressed without a field being touched, and asked about once. It never signs anybody in \u2014 the row carries a server, a name, a mark and a moment, and no credential has a slot to live in.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26444,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "what this device remembers is listed as places, and a press fills the address with it"
+   ],
+   "tests": [
+    {
+     "title": "what this device remembers is listed as places, and a press fills the address with it",
+     "ms": 665,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2603,
+   "onlyProdLines": null,
+   "testsMs": 665
   },
   {
    "file": "tests/chart-axis-position.case.mjs",
