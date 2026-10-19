@@ -6,7 +6,7 @@
 // reads an empty section without anybody deleting anything.
 import { z } from "zod";
 import type { Entry } from "./catalog";
-import { address } from "./reentry";
+import { address, type RecordAddress } from "./reentry";
 
 /**
  * RECENT_KEEP is how many records one person's browsing may leave on the device. Five are
@@ -63,6 +63,10 @@ export interface RecentDoor {
   readonly entry: Entry;
 }
 
-/** recentHref is where a remembered open goes: the record, at the address the router knows. */
-export const recentHref = (door: RecentDoor): string =>
+/**
+ * recentHref is where a remembered open goes: the record, at the address the router knows —
+ * the detail address `address` spells, so a tap on a remembered row navigates by the same
+ * route the record screen is served at and compiles against this app's own typed routes.
+ */
+export const recentHref = (door: RecentDoor): RecordAddress =>
   address("detail", door.entry, door.recent.recordId);

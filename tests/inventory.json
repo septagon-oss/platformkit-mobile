@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 244,
-   "cases": 1128,
-   "ms": 1845120,
-   "testsMs": 50545.20000000002,
+   "files": 245,
+   "cases": 1129,
+   "ms": 1859170,
+   "testsMs": 62972.20000000002,
    "runners": {
     "jest": 82,
-    "node": 162
+    "node": 163
    },
    "unreachable": 0
   },
@@ -14955,6 +14955,35 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/home-opens-recents-with-typed-routes.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "Home must compile with the route declarations Expo generates when this app starts. Generate them with Expo's own scanner in memory so a clean checkout and a checkout whose developer already started Metro check the same contract.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 14050,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "Home can open remembered records with the app's generated typed routes"
+   ],
+   "tests": [
+    {
+     "title": "Home can open remembered records with the app's generated typed routes",
+     "ms": 12427.039853,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 12427
   },
   {
    "file": "tests/illustrations.test.ts",
