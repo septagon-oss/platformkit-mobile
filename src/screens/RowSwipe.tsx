@@ -86,7 +86,9 @@ export function RowSwipe({ action, motion, onRun, children }: RowActionProps) {
   const row = useAnimatedStyle(() => ({ transform: [{ translateX: -open.value }] }));
   const surface = useAnimatedStyle(() => ({ width: open.value }));
   return (
-    <View style={s.hold}>
+    // `row-reveal` is the holder a journey finds a swipeable row by; the layer under the row keeps
+    // the command's own verb, which is what a flow says the row is for.
+    <View style={s.hold} testID="row-reveal">
       {/* The command, under the row. It answers no press — a tap can only land on the row it sits
           beneath — and says nothing to a reader, who is offered the same command as a named action
           of the row instead. */}

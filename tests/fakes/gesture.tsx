@@ -76,9 +76,9 @@ export function RowSwipe({ action, motion, onRun, children, onReady }: Props) {
   // second row into the same root is handed the new row's handle rather than the first one's.
   onReady?.(proxy);
   return (
-    // The holder carries the fake's own id; the revealed surface keeps the `command-*` vocabulary
-    // the real one uses, which a reader is told past rather than shown, and so answers no query.
-    <View style={s.hold} testID={`swipe-${action.verb}`}>
+    // The holder answers to the id the product's surface gives it; the layer under the row keeps
+    // the command's own verb, which a reader is told past rather than shown, and so answers no query.
+    <View style={s.hold} testID="row-reveal">
       {/* The command the way the product's surface draws it: the word, in the pair the command
           deserves, uncovered by exactly the distance the finger travelled. */}
       <View

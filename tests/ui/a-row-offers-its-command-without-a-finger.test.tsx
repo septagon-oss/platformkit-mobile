@@ -99,16 +99,16 @@ describe("the row's command, with no finger", () => {
       />,
     );
     expect(row().props.accessibilityActions).toBeUndefined();
-    expect(screen.queryByTestId("swipe-resolve")).toBeNull();
+    expect(screen.queryByTestId("row-reveal")).toBeNull();
   });
 
   test("no surface stands under a row until the product supplies one", async () => {
     await list({ onRowRun: () => undefined });
-    expect(screen.queryByTestId("swipe-resolve")).toBeNull();
+    expect(screen.queryByTestId("row-reveal")).toBeNull();
   });
 
-  test("the command the product's surface reveals is the entry's own verb", async () => {
+  test("the surface the product supplies stands under the row it belongs to", async () => {
     await list({ onRowRun: () => undefined, renderRowAction: true });
-    expect(screen.getByTestId("swipe-resolve")).toBeTruthy();
+    expect(screen.getByTestId("row-reveal")).toBeTruthy();
   });
 });
