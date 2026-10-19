@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 239,
-   "cases": 1099,
-   "ms": 1734204,
-   "testsMs": 49823.10000000002,
+   "cases": 1101,
+   "ms": 1732161,
+   "testsMs": 50399.10000000002,
    "runners": {
     "jest": 78,
     "node": 161
@@ -3774,7 +3774,7 @@
    "file": "tests/ui/a-record-that-just-finished-names-its-own-state.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": 6,
+   "cases": 8,
    "rule": "What the record owes the person when their own write moved its state into one the entry calls finished: one line, in the record's own words, drawn whether or not anything is allowed to move. The organism draws what the screen composes and composes nothing of its own \u2014 no overlay appears without a `finishing` prop, no burst appears without a renderer, and every row the record always drew stays drawn under the line. The words come from the entry's noun and the author's own word for the state, both read off the served catalog, so nothing here spells a sentence out a second time.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -3782,7 +3782,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 29309,
+   "ms": 27266,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "the line says what the record became, in the entry's own two words",
@@ -3790,44 +3790,56 @@
     "a record that reached nothing draws no line at all",
     "the burst is drawn over the record and asked for nothing but its own ending",
     "a product that ships no burst renderer keeps the line and the whole record",
-    "the pill the line is about changed, and nothing beside it did"
+    "the pill the line is about changed, and nothing beside it did",
+    "a pill moved out of its state ends saying and wearing the state it reached",
+    "a pill whose reader asked for less motion arrives as a plain swap of the same tree"
    ],
    "tests": [
     {
      "title": "the line says what the record became, in the entry's own two words",
-     "ms": 10,
+     "ms": 11,
      "measured": false
     },
     {
      "title": "the record under the line is the record it always drew",
-     "ms": 19,
+     "ms": 17,
      "measured": false
     },
     {
      "title": "a record that reached nothing draws no line at all",
-     "ms": 4,
+     "ms": 7,
      "measured": false
     },
     {
      "title": "the burst is drawn over the record and asked for nothing but its own ending",
-     "ms": 6,
+     "ms": 9,
      "measured": false
     },
     {
      "title": "a product that ships no burst renderer keeps the line and the whole record",
-     "ms": 6,
+     "ms": 7,
      "measured": false
     },
     {
      "title": "the pill the line is about changed, and nothing beside it did",
-     "ms": 10,
+     "ms": 22,
+     "measured": false
+    },
+    {
+     "title": "a pill moved out of its state ends saying and wearing the state it reached",
+     "ms": 555,
+     "measured": false
+    },
+    {
+     "title": "a pill whose reader asked for less motion arrives as a plain swap of the same tree",
+     "ms": 3,
      "measured": false
     }
    ],
    "loaded": 123,
-   "coveredProdLines": 1908,
+   "coveredProdLines": 1916,
    "onlyProdLines": null,
-   "testsMs": 55
+   "testsMs": 631
   },
   {
    "file": "tests/ui/agenda-appointment-lines.test.tsx",

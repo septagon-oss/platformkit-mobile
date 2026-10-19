@@ -6,9 +6,9 @@
 // the state, both read off the served catalog, so nothing here spells a sentence out a second time.
 import React from "react";
 import { beforeEach, describe, expect, jest, test } from "@jest/globals";
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, within } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { parseCatalog, type Entry } from "../../src/core/catalog";
 import {
   deriveCopy,
@@ -20,6 +20,7 @@ import {
   statusTone,
   type Presentation,
 } from "../../src/core/derive";
+import { Badge } from "../../src/ui/atoms/Badge";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import type { BadgeTone } from "../../src/ui/atoms/Badge";
 import type { Finishing, FinishingProps } from "../../src/ui/organisms/ResourceDetail";
@@ -187,5 +188,59 @@ describe("a record that just finished names its own state", () => {
     await record({ finishing: { words: "Task resolved", state: "ok", onEnd: () => undefined } });
     expect(screen.getAllByText("Resolved")).toHaveLength(1);
     expect(screen.getAllByText("Task resolved")).toHaveLength(1);
+  });
+});
+
+describe("the pill the line is about, changed in place", () => {
+  /** worn is the background a pill settled on, read off its own style. */
+  const worn = (id: string) =>
+    (StyleSheet.flatten(screen.getByTestId(id).props.style as never) as { backgroundColor: string })
+      .backgroundColor;
+
+  /**
+   * moved re-renders one pill from a state into another beside a pill that drew the state it reached
+   * from the start, so "the pair it reached" is read off a pill in the same tree and no colour is
+   * written into this file.
+   */
+  async function moved(motion: "normal" | "reduced") {
+    const pill = (testID: string, label: string, tone: BadgeTone) => (
+      <Badge label={label} tone={tone} motion={motion} testID={testID} />
+    );
+    const before = (
+      <ThemeProvider mode="light">
+        {pill("moving", "Open", "info")}
+        {pill("reached", "Done", "ok")}
+      </ThemeProvider>
+    );
+    const after = (
+      <ThemeProvider mode="light">
+        {pill("moving", "Done", "ok")}
+        {pill("reached", "Done", "ok")}
+      </ThemeProvider>
+    );
+    const shown = await render(before);
+    await shown.rerender(after);
+  }
+
+  test("a pill moved out of its state ends saying and wearing the state it reached", async () => {
+    await moved("normal");
+    const pill = screen.getByTestId("moving");
+    expect(within(pill).getByText("Done")).toBeTruthy();
+    // The word it wore is never drawn again: the state a record is in is one fact, and a second word
+    // in the tree is a second thing for a journey to find and a reader to be told.
+    expect(within(pill).queryByText("Open")).toBeNull();
+    // It settled on the pair the state it reached wears, read off a pill that drew that state from
+    // the start rather than off a colour written here.
+    expect(worn("moving")).toEqual(worn("reached"));
+    expect(screen.getByTestId("reached")).toHaveTextContent("Done");
+  });
+
+  test("a pill whose reader asked for less motion arrives as a plain swap of the same tree", async () => {
+    // Nothing animating and nothing left over: the reduced-motion pill is the tree the same state
+    // draws for anybody who never changed state at all.
+    await moved("reduced");
+    expect(JSON.stringify(screen.getByTestId("moving"))).toEqual(
+      JSON.stringify(screen.getByTestId("reached")).replace(/"reached"/, '"moving"'),
+    );
   });
 });
