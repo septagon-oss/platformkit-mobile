@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 248,
-   "cases": 1158,
-   "ms": 1922557,
-   "testsMs": 63069.60000000002,
+   "files": 249,
+   "cases": 1161,
+   "ms": 1959451,
+   "testsMs": 63093.60000000002,
    "runners": {
-    "jest": 84,
+    "jest": 85,
     "node": 164
    },
    "unreachable": 0
@@ -3907,6 +3907,47 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/the-device-table-keeps-one-row-for-each-workspace-it-was-pointed-at.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "What this phone remembers of the workspaces it was pointed at is a SQLite table, and this is where its own statements run: one row per server, replaced in place when that server answers again, the mark round-tripping through its column, the list newest-first within the window the connect step draws, and the bound pruned in the same transaction that wrote. The stand-in below binds positional parameters the way expo-sqlite does on a device, over node:sqlite, so a device table is not shipped on the strength of an in-memory double alone. It is a .tsx file only so Jest, which can mock expo-sqlite, discovers it; it needs a Node that ships node:sqlite.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 36894,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "one server holds one row, and what it answers again replaces it mark and all",
+    "the list is newest first within the window asked for, and never outlives its bound",
+    "a row whose text no longer reads is dropped where it stands, and its neighbours are still listed"
+   ],
+   "tests": [
+    {
+     "title": "one server holds one row, and what it answers again replaces it mark and all",
+     "ms": 14,
+     "measured": false
+    },
+    {
+     "title": "the list is newest first within the window asked for, and never outlives its bound",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a row whose text no longer reads is dropped where it stands, and its neighbours are still listed",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 131,
+   "coveredProdLines": 1950,
+   "onlyProdLines": null,
+   "testsMs": 24
   },
   {
    "file": "tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx",

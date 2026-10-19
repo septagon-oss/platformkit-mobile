@@ -2295,9 +2295,10 @@ a host, a mark and a moment, five of at most eight listed, and no phone reads a 
 A lookup that answered nothing is said by the host standing where the answered word would have
 been and by no sentence: the phone cannot tell "no workspace here" from "this network is
 lying", and an address that is a typo is refused at the password, where the server can say so.
-The `workspace_seen` statements run on a device only — every suite over the list answers from
-the in-memory table in `tests/fakes/store.ts`, so the SQL is read here rather than executed — and
-the two changed flows are proven on an emulator with `make e2e-android`, not in this suite.
+The `workspace_seen` statements run against the SQL through the same `expo-sqlite` stand-in the
+rest of the device store is read with, which is the statement and not the device's own file: the
+bounds are what an in-memory SQLite agrees to, and a real phone's WAL is unexercised here, as are
+the two changed flows, which belong to `make e2e-android`.
 
 ## Read the first journey end to end
 
