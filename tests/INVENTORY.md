@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `31772e55c` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `7ae782e6b` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 201 | 47.5 s | 73 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 239 | 1101 | 50.4 s | 1732 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 99 | 318 | 38.1 s | 2180 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 100 | 320 | 39.5 s | 2210 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 430
+* keep: 431
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 430 — 196 `tests/*.test.ts` (node), 177 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1620; cases in files no runner reaches: 35
-* isolated wall time: contract 73 s, behaviour 1732 s, composition 2180 s, journey 0 s
+* files inventoried: 431 — 196 `tests/*.test.ts` (node), 178 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1622; cases in files no runner reaches: 35
+* isolated wall time: contract 73 s, behaviour 1732 s, composition 2210 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -377,6 +377,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-complete-translation-save-keeps-the-source.test.tsx | jest | composition | 2 | 20586 | 188 |  | not measured | — | 0 | keep | Content-Language names the requested locale; _i18n may instead name the source of a fallback. A translator's edit in that locale must preserve the source in bo… |
 | tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx | jest | composition | 1 | 27490 | 66 |  | not measured | — | 0 | keep | A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering. |
 | tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
+| tests/screens/a-finished-line-speaks-only-for-the-write-that-finished-it.test.tsx | jest | composition | 2 | 29837 | 1343 |  | not measured | — | 0 | keep | The finished line ("Note done", `record-finished`) is about the state the record holds and the write this phone made. When a later write takes the record back … |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
 | tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx | jest | composition | 3 | 26306 | 168 |  | not measured | — | 0 | keep | A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation… |
 | tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx | jest | composition | 1 | 20976 | 162 |  | not measured | — | 0 | keep | A camera image must reach the real API transport as a native file part, retain its session, and enter the body only after the file endpoint accepts that part. |
