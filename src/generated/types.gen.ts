@@ -71,6 +71,14 @@ export type AssignBody = {
   assigneeId: string;
 };
 
+export type AuthScheme = {
+  description?: string;
+  name?: string;
+  primary?: boolean;
+  specURI?: string;
+  type?: string;
+};
+
 export type CancelBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -146,6 +154,12 @@ export type CommandPresentation = {
   primary?: boolean;
   successMessage?: string;
   system?: boolean;
+};
+
+export type ConfigFeature = {
+  maxOperations?: number;
+  maxPayloadSize?: number;
+  supported: boolean;
 };
 
 export type Connection = {
@@ -349,6 +363,12 @@ export type DoneOutputBody = {
   done: boolean;
 };
 
+export type Email = {
+  primary?: boolean;
+  type?: string;
+  value?: string;
+};
+
 export type Endpoint = {
   /**
    * A URL to the JSON Schema for this object.
@@ -418,11 +438,23 @@ export type Entry = {
   write_path?: string;
 };
 
+export type EntryHighlight = {
+  filter: Array<EntryPredicate> | null;
+  label: string;
+};
+
+export type EntryPredicate = {
+  field: string;
+  op: string;
+  value: string;
+};
+
 export type EntryPresentation = {
   coverField?: string;
   description?: string;
   emptyDescription?: string;
   group?: ResourceGroup;
+  highlight?: EntryHighlight;
   icon?: string;
   order?: number;
   plural?: string;
@@ -435,6 +467,7 @@ export type EntryPresentation = {
   statusField?: string;
   summaryFields?: Array<string>;
   thumbnailField?: string;
+  trendField?: string;
 };
 
 export type EraseBody = {
@@ -501,6 +534,12 @@ export type Event = {
    * When the state changed
    */
   occurredAt: string;
+  operationId?: string;
+  operationOutcome?: string;
+  operationPersonId?: string;
+  operationRef?: string;
+  operationRevision?: number;
+  operationTenantId?: string;
   /**
    * The event's payload, as its module published it
    */
@@ -686,6 +725,59 @@ export type Grant = {
   readonly $schema?: string;
   expiresAt: string;
   url: string;
+};
+
+export type GroupDraft = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  displayName?: string;
+  externalId?: string;
+  members?: Array<MemberRef> | null;
+  role?: string;
+  schemas?: Array<string> | null;
+};
+
+export type GroupList = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  Resources?: Array<GroupResource> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
+};
+
+export type GroupMapping = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  group: string;
+  role: string;
+};
+
+export type GroupRef = {
+  display?: string;
+  type?: string;
+  value?: string;
+};
+
+export type GroupResource = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  displayName: string;
+  externalId?: string;
+  id: string;
+  members?: Array<MemberRef> | null;
+  meta: Meta;
+  role?: string;
+  schemas: Array<string> | null;
 };
 
 export type HandleBody = {
@@ -887,6 +979,36 @@ export type MapKey = {
   widget?: string;
 };
 
+export type MappingInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  group: string;
+  role: string;
+};
+
+export type MemberRef = {
+  $ref?: string;
+  display?: string;
+  type?: string;
+  value?: string;
+};
+
+export type Meta = {
+  created?: string;
+  lastModified?: string;
+  location?: string;
+  resourceType?: string;
+  version?: string;
+};
+
+export type Name = {
+  familyName?: string;
+  formatted?: string;
+  givenName?: string;
+};
+
 export type NavItem = {
   /**
    * What the link says
@@ -994,6 +1116,12 @@ export type OidcSettings = {
    * Where the client secret is kept — an environment variable's name, never the secret
    */
   secretRef: string;
+};
+
+export type Operation = {
+  op?: string;
+  path?: string;
+  value?: unknown;
 };
 
 export type Page = {
@@ -1227,6 +1355,21 @@ export type PasswordRegistrationInputBody = {
   termsAccepted: boolean;
 };
 
+export type PatchInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The add, replace and remove operations to apply, in the order they are listed
+   */
+  Operations: Array<Operation> | null;
+  /**
+   * The URIs of the schemas this request conforms to. RFC 7644 §3.5.2 gives exactly one: urn:ietf:params:scim:api:messages:2.0:PatchOp
+   */
+  schemas: Array<string> | null;
+};
+
 export type Pictures = {
   source: string;
   widths?: Array<number> | null;
@@ -1383,6 +1526,22 @@ export type Proposal = {
   readonly verdict: "" | "approved" | "declined";
 };
 
+export type ProviderConfig = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  authenticationSchemes?: Array<AuthScheme> | null;
+  bulk: ConfigFeature;
+  changePassword: ConfigFeature;
+  etag: ConfigFeature;
+  filter: ConfigFeature;
+  meta: Meta;
+  patch: ConfigFeature;
+  schemas: Array<string> | null;
+  sort: ConfigFeature;
+};
+
 export type Quota = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1404,6 +1563,21 @@ export type Quota = {
    * Bytes of those bytes that are other widths of the same pictures
    */
   readonly variants: number;
+};
+
+export type Receipt = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  id: string;
+  method: string;
+  outcome?: string;
+  outcomeAt?: string;
+  ref: string;
+  revision: number;
+  route: string;
+  startedAt: string;
 };
 
 export type RecoveryAvailability = {
@@ -1484,6 +1658,32 @@ export type ResolveBody = {
 export type ResourceGroup = {
   key: string;
   label: string;
+};
+
+export type ResourceType = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  description?: string;
+  endpoint?: string;
+  id?: string;
+  name?: string;
+  schema?: string;
+  schemaExtensions?: string;
+  schemas: Array<string> | null;
+};
+
+export type ResourceTypeList = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  Resources?: Array<ResourceType> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
 };
 
 export type RetainBody = {
@@ -1599,6 +1799,44 @@ export type SamlSettings = {
    * What a provisioned person is given, and only under provision
    */
   roles?: Array<string> | null;
+};
+
+export type Schema = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  attributes?: Array<SchemaAttribute> | null;
+  description?: string;
+  id: string;
+  meta: Meta;
+  name?: string;
+};
+
+export type SchemaAttribute = {
+  canonicalValues?: Array<string> | null;
+  caseExact?: boolean;
+  description?: string;
+  multiValued?: boolean;
+  mutability?: string;
+  name: string;
+  required?: boolean;
+  returned?: string;
+  subAttributes?: Array<SchemaAttribute> | null;
+  type: string;
+  uniqueness?: string;
+};
+
+export type SchemaList = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  Resources?: Array<Schema> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
 };
 
 export type SessionListing = {
@@ -1770,6 +2008,23 @@ export type Subscription = {
    */
   readonly trialUsedAt?: string;
   readonly updatedAt?: string;
+};
+
+export type Summary = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  asOf: string;
+  entries: Array<SummaryEntry> | null;
+};
+
+export type SummaryEntry = {
+  entity: string;
+  highlight?: number;
+  module: string;
+  total?: number;
+  trend?: Trend;
 };
 
 export type TotpEnrolment = {
@@ -1960,6 +2215,16 @@ export type TranslationFieldsBody = {
   lang: string;
 };
 
+export type Trend = {
+  days: Array<TrendDay> | null;
+  field: string;
+};
+
+export type TrendDay = {
+  count: number;
+  day: string;
+};
+
 export type UseRow = {
   Entity: string;
   Field: string;
@@ -2002,6 +2267,34 @@ export type User = {
   readonly updatedAt?: string;
 };
 
+export type UserDraft = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  active?: boolean;
+  displayName?: string;
+  emails?: Array<Email> | null;
+  externalId?: string;
+  groups?: Array<GroupRef> | null;
+  name?: Name;
+  password?: string;
+  schemas?: Array<string> | null;
+  userName?: string;
+};
+
+export type UserList = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  Resources?: Array<UserResource> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
+};
+
 export type UserPatch = {
   /**
    * Name to show
@@ -2011,6 +2304,23 @@ export type UserPatch = {
    * Address this person signs in with, unique within the tenant
    */
   email?: string;
+};
+
+export type UserResource = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  active: boolean;
+  displayName?: string;
+  emails?: Array<Email> | null;
+  externalId?: string;
+  groups?: Array<GroupRef> | null;
+  id: string;
+  meta: Meta;
+  name?: Name;
+  schemas: Array<string> | null;
+  userName: string;
 };
 
 export type VerifyEmailInputBody = {
@@ -2260,6 +2570,12 @@ export type EventWritable = {
    * When the state changed
    */
   occurredAt: string;
+  operationId?: string;
+  operationOutcome?: string;
+  operationPersonId?: string;
+  operationRef?: string;
+  operationRevision?: number;
+  operationTenantId?: string;
   /**
    * The event's payload, as its module published it
    */
@@ -2349,6 +2665,37 @@ export type ForgotInputBodyWritable = {
 export type GrantWritable = {
   expiresAt: string;
   url: string;
+};
+
+export type GroupDraftWritable = {
+  displayName?: string;
+  externalId?: string;
+  members?: Array<MemberRef> | null;
+  role?: string;
+  schemas?: Array<string> | null;
+};
+
+export type GroupListWritable = {
+  Resources?: Array<GroupResourceWritable> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
+};
+
+export type GroupMappingWritable = {
+  group: string;
+  role: string;
+};
+
+export type GroupResourceWritable = {
+  displayName: string;
+  externalId?: string;
+  id: string;
+  members?: Array<MemberRef> | null;
+  meta: Meta;
+  role?: string;
+  schemas: Array<string> | null;
 };
 
 export type HandleBodyWritable = {
@@ -2478,6 +2825,11 @@ export type MailDeliveryOutputBodyWritable = {
    * Whether the mail that call asked for was refused
    */
   state: "pending" | "failed";
+};
+
+export type MappingInputBodyWritable = {
+  group: string;
+  role: string;
 };
 
 export type NewProposalWritable = {
@@ -2718,6 +3070,17 @@ export type PasswordRegistrationInputBodyWritable = {
   termsAccepted: boolean;
 };
 
+export type PatchInputBodyWritable = {
+  /**
+   * The add, replace and remove operations to apply, in the order they are listed
+   */
+  Operations: Array<Operation> | null;
+  /**
+   * The URIs of the schemas this request conforms to. RFC 7644 §3.5.2 gives exactly one: urn:ietf:params:scim:api:messages:2.0:PatchOp
+   */
+  schemas: Array<string> | null;
+};
+
 export type PlanWritable = {
   /**
    * Whether this plan accepts new subscriptions
@@ -2787,6 +3150,29 @@ export type ProposalWritable = {
   summary: string;
 };
 
+export type ProviderConfigWritable = {
+  authenticationSchemes?: Array<AuthScheme> | null;
+  bulk: ConfigFeature;
+  changePassword: ConfigFeature;
+  etag: ConfigFeature;
+  filter: ConfigFeature;
+  meta: Meta;
+  patch: ConfigFeature;
+  schemas: Array<string> | null;
+  sort: ConfigFeature;
+};
+
+export type ReceiptWritable = {
+  id: string;
+  method: string;
+  outcome?: string;
+  outcomeAt?: string;
+  ref: string;
+  revision: number;
+  route: string;
+  startedAt: string;
+};
+
 export type RecoveryCodesOutputBodyWritable = {
   codes: Array<string> | null;
   factor?: FactorWritable;
@@ -2822,6 +3208,24 @@ export type ResolveBodyWritable = {
    * How the task was resolved
    */
   resolution?: string;
+};
+
+export type ResourceTypeWritable = {
+  description?: string;
+  endpoint?: string;
+  id?: string;
+  name?: string;
+  schema?: string;
+  schemaExtensions?: string;
+  schemas: Array<string> | null;
+};
+
+export type ResourceTypeListWritable = {
+  Resources?: Array<ResourceTypeWritable> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
 };
 
 export type RetainBodyWritable = {
@@ -2907,6 +3311,22 @@ export type SamlSettingsWritable = {
   roles?: Array<string> | null;
 };
 
+export type SchemaWritable = {
+  attributes?: Array<SchemaAttribute> | null;
+  description?: string;
+  id: string;
+  meta: Meta;
+  name?: string;
+};
+
+export type SchemaListWritable = {
+  Resources?: Array<SchemaWritable> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
+};
+
 export type SessionsOutputBodyWritable = {
   items: Array<SessionListing> | null;
   total: number;
@@ -2974,6 +3394,11 @@ export type SubscriptionWritable = {
    * Lifecycle state
    */
   status?: "trial" | "active" | "past_due" | "cancelled";
+};
+
+export type SummaryWritable = {
+  asOf: string;
+  entries: Array<SummaryEntry> | null;
 };
 
 export type TotpEnrolmentWritable = {
@@ -3119,6 +3544,39 @@ export type UserWritable = {
   status?: "invited" | "pending" | "unverified" | "active" | "inactive";
 };
 
+export type UserDraftWritable = {
+  active?: boolean;
+  displayName?: string;
+  emails?: Array<Email> | null;
+  externalId?: string;
+  groups?: Array<GroupRef> | null;
+  name?: Name;
+  password?: string;
+  schemas?: Array<string> | null;
+  userName?: string;
+};
+
+export type UserListWritable = {
+  Resources?: Array<UserResourceWritable> | null;
+  itemsPerPage: number;
+  schemas: Array<string> | null;
+  startIndex: number;
+  totalResults: number;
+};
+
+export type UserResourceWritable = {
+  active: boolean;
+  displayName?: string;
+  emails?: Array<Email> | null;
+  externalId?: string;
+  groups?: Array<GroupRef> | null;
+  id: string;
+  meta: Meta;
+  name?: Name;
+  schemas: Array<string> | null;
+  userName: string;
+};
+
 export type VerifyFactorInputBodyWritable = {
   /**
    * The code from the app, or one of the recovery codes
@@ -3134,7 +3592,7 @@ export type AppAccessRequestData = {
   body: AccessBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3204,6 +3662,50 @@ export type AppConnectionResponses = {
 
 export type AppConnectionResponse = AppConnectionResponses[keyof AppConnectionResponses];
 
+export type AppOperationOutcomeData = {
+  body?: never;
+  path: {
+    ref: string;
+  };
+  query?: never;
+  url: "/api/v1/app/operations/me/{ref}";
+};
+
+export type AppOperationOutcomeErrors = {
+  /**
+   * Bad Request
+   */
+  400: Problem;
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AppOperationOutcomeError = AppOperationOutcomeErrors[keyof AppOperationOutcomeErrors];
+
+export type AppOperationOutcomeResponses = {
+  /**
+   * OK
+   */
+  200: Receipt;
+};
+
+export type AppOperationOutcomeResponse =
+  AppOperationOutcomeResponses[keyof AppOperationOutcomeResponses];
+
 export type AppResourcesData = {
   body?: never;
   path?: never;
@@ -3229,10 +3731,43 @@ export type AppResourcesResponses = {
 
 export type AppResourcesResponse = AppResourcesResponses[keyof AppResourcesResponses];
 
+export type AppSummaryData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/app/summary";
+};
+
+export type AppSummaryErrors = {
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AppSummaryError = AppSummaryErrors[keyof AppSummaryErrors];
+
+export type AppSummaryResponses = {
+  /**
+   * OK
+   */
+  200: Summary;
+};
+
+export type AppSummaryResponse = AppSummaryResponses[keyof AppSummaryResponses];
+
 export type AuditEventListData = {
   body?: never;
   path?: never;
   query?: {
+    /**
+     * Only events caused by this operation occurrence
+     */
+    operationRef?: string;
     /**
      * Only events with this name
      */
@@ -3349,7 +3884,7 @@ export type AuthChallengePasskeyBeginData = {
   body: PasskeyBeginAssertionInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3390,7 +3925,7 @@ export type AuthChallengePasskeyVerifyData = {
   body: PasskeyVerifyInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3510,7 +4045,7 @@ export type AuthFactorPasskeyBeginData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3543,7 +4078,7 @@ export type AuthFactorPasskeyFinishData = {
   body: PasskeyFinishInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3588,7 +4123,7 @@ export type AuthRecoveryCodesRotateData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3629,7 +4164,7 @@ export type AuthFactorTotpBeginData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3665,7 +4200,7 @@ export type AuthFactorTotpFinishData = {
   body: FinishTotpInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3802,7 +4337,7 @@ export type AuthLoginPasskeyBeginData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3843,7 +4378,7 @@ export type AuthLoginPasskeyVerifyData = {
   body: PasskeyVerifyInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -3892,7 +4427,7 @@ export type AuthLogoutData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4035,7 +4570,7 @@ export type AuthPasswordChangeData = {
   body: ChangeInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4188,7 +4723,7 @@ export type AuthSamlCallbackData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4334,7 +4869,7 @@ export type AuthSessionRevokeAllData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4371,7 +4906,7 @@ export type AuthSessionRevokeData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4420,7 +4955,7 @@ export type AuthPasskeySignInSetData = {
   body: PasskeySignInSettingInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4482,7 +5017,7 @@ export type AuthTokenIssueData = {
   body: IssueTokenInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4521,7 +5056,7 @@ export type AuthTokenRevokeSelfData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4565,7 +5100,7 @@ export type AuthTokenRevokeData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4760,7 +5295,7 @@ export type BillingSubscriptionCancelData = {
   body?: CancelBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4809,7 +5344,7 @@ export type BillingSubscriptionSubscribeData = {
   body?: SubscribeBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -4925,7 +5460,7 @@ export type ChangeProposalProposeData = {
   body: NewProposalWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5021,7 +5556,7 @@ export type ChangeProposalApplyData = {
   body: RevisionInputWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5074,7 +5609,7 @@ export type ChangeProposalReviewData = {
   body: ReviewWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5128,7 +5663,7 @@ export type ChangeProposalWithdrawData = {
   body: RevisionInputWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5245,7 +5780,7 @@ export type ContentContentCreateData = {
   body: ContentWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5404,7 +5939,7 @@ export type ContentContentUpdateData = {
      */
     "If-Match"?: string;
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5463,7 +5998,7 @@ export type ContentContentArchiveData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5517,7 +6052,7 @@ export type ContentContentPublishData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5571,7 +6106,7 @@ export type ContentContentReviewTranslationData = {
   body?: TranslationFieldsBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5625,7 +6160,7 @@ export type ContentContentSuggestTranslationData = {
   body?: TranslationFieldsBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5679,7 +6214,7 @@ export type ContentContentTranslateData = {
   body?: TranslateBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5733,7 +6268,7 @@ export type ContentContentUnpublishData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5787,7 +6322,7 @@ export type ContentContentUntranslateData = {
   body?: TranslationFieldsBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5907,7 +6442,7 @@ export type FileFileUploadData = {
   body: unknown;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -5943,6 +6478,10 @@ export type FileFileUploadErrors = {
    */
   422: Problem;
   /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
    * Internal Server Error
    */
   500: Problem;
@@ -5967,7 +6506,7 @@ export type FileFileEraseData = {
   body?: EraseBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -6114,7 +6653,7 @@ export type FileFileAltCommandData = {
   body?: AltBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -6414,7 +6953,7 @@ export type FileFileRetainData = {
   body?: RetainBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -6605,7 +7144,7 @@ export type NotificationNotificationReadData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -7505,7 +8044,7 @@ export type AuthMailDeliveryData = {
   body: MailDeliveryInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -7548,7 +8087,7 @@ export type AuthPasswordForgotData = {
   body: ForgotInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -7592,7 +8131,7 @@ export type AuthRegisterData = {
   body: PasswordRegistrationInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -7639,7 +8178,7 @@ export type AuthResendVerificationData = {
   body: ResendVerificationInputBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -7688,7 +8227,7 @@ export type AuthVerifyEmailData = {
   body: VerifyEmailInputBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -7902,6 +8441,72 @@ export type SiteSettingsPublicResponses = {
   200: unknown;
 };
 
+export type ScimGroupMappingsListData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/scim/group-mappings";
+};
+
+export type ScimGroupMappingsListErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimGroupMappingsListError =
+  ScimGroupMappingsListErrors[keyof ScimGroupMappingsListErrors];
+
+export type ScimGroupMappingsListResponses = {
+  /**
+   * OK
+   */
+  200: Array<GroupMapping> | null;
+};
+
+export type ScimGroupMappingsListResponse =
+  ScimGroupMappingsListResponses[keyof ScimGroupMappingsListResponses];
+
+export type ScimGroupMappingWriteData = {
+  body: MappingInputBodyWritable;
+  path?: never;
+  query?: never;
+  url: "/api/v1/scim/group-mappings";
+};
+
+export type ScimGroupMappingWriteErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimGroupMappingWriteError =
+  ScimGroupMappingWriteErrors[keyof ScimGroupMappingWriteErrors];
+
+export type ScimGroupMappingWriteResponses = {
+  /**
+   * OK
+   */
+  200: GroupMapping;
+};
+
+export type ScimGroupMappingWriteResponse =
+  ScimGroupMappingWriteResponses[keyof ScimGroupMappingWriteResponses];
+
 export type SiteSettingsReadData = {
   body?: never;
   path?: never;
@@ -8046,7 +8651,7 @@ export type TaskTaskCreateData = {
   body: TaskWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8195,7 +8800,7 @@ export type TaskTaskUpdateData = {
      */
     "If-Match"?: string;
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8247,7 +8852,7 @@ export type TaskTaskAssignData = {
   body?: AssignBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8299,7 +8904,7 @@ export type TaskTaskCheckSlaData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8351,7 +8956,7 @@ export type TaskTaskResolveData = {
   body?: ResolveBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8403,7 +9008,7 @@ export type UserInvitationCreateData = {
   body: InvitationWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8506,7 +9111,7 @@ export type UserUserCreateData = {
   body: UserWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8655,7 +9260,7 @@ export type UserUserUpdateData = {
      */
     "If-Match"?: string;
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8707,7 +9312,7 @@ export type UserUserApproveRegistrationData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8761,7 +9366,7 @@ export type UserUserDeactivateData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8814,7 +9419,7 @@ export type UserUserHandleData = {
   body?: HandleBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8866,7 +9471,7 @@ export type UserUserRolesData = {
   body?: RolesBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -8918,7 +9523,7 @@ export type UserUserSetPasswordData = {
   body?: PasswordBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9077,7 +9682,7 @@ export type WebhookDeliveryReplayData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9190,7 +9795,7 @@ export type WebhookEndpointCreateData = {
   body?: CreateBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9344,7 +9949,7 @@ export type WebhookEndpointUpdateData = {
      */
     "If-Match"?: string;
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9398,7 +10003,7 @@ export type WebhookEndpointDisableData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9452,7 +10057,7 @@ export type WebhookEndpointEnableData = {
   body?: CommandInputStructBody;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9506,7 +10111,7 @@ export type WebhookEndpointRotateData = {
   body?: never;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9560,7 +10165,7 @@ export type WebhookEndpointTargetData = {
   body?: TargetBodyWritable;
   headers?: {
     /**
-     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key runs as it always did. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
      */
     "Idempotency-Key"?: string;
   };
@@ -9609,3 +10214,663 @@ export type WebhookEndpointTargetResponses = {
 
 export type WebhookEndpointTargetResponse =
   WebhookEndpointTargetResponses[keyof WebhookEndpointTargetResponses];
+
+export type ScimGroupsListData = {
+  body?: never;
+  path?: never;
+  query?: {
+    filter?: string;
+    startIndex?: number;
+    count?: number;
+  };
+  url: "/scim/v2/Groups";
+};
+
+export type ScimGroupsListErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimGroupsListError = ScimGroupsListErrors[keyof ScimGroupsListErrors];
+
+export type ScimGroupsListResponses = {
+  /**
+   * OK
+   */
+  200: GroupList;
+};
+
+export type ScimGroupsListResponse = ScimGroupsListResponses[keyof ScimGroupsListResponses];
+
+export type ScimGroupCreateData = {
+  body: GroupDraftWritable;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/scim/v2/Groups";
+};
+
+export type ScimGroupCreateErrors = {
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Precondition Failed
+   */
+  412: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimGroupCreateError = ScimGroupCreateErrors[keyof ScimGroupCreateErrors];
+
+export type ScimGroupCreateResponses = {
+  /**
+   * Created
+   */
+  201: GroupResource;
+};
+
+export type ScimGroupCreateResponse = ScimGroupCreateResponses[keyof ScimGroupCreateResponses];
+
+export type ScimGroupDeleteData = {
+  body?: never;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Groups/{id}";
+};
+
+export type ScimGroupDeleteErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Precondition Failed
+   */
+  412: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimGroupDeleteError = ScimGroupDeleteErrors[keyof ScimGroupDeleteErrors];
+
+export type ScimGroupDeleteResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type ScimGroupDeleteResponse = ScimGroupDeleteResponses[keyof ScimGroupDeleteResponses];
+
+export type ScimGroupGetData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Groups/{id}";
+};
+
+export type ScimGroupGetErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimGroupGetError = ScimGroupGetErrors[keyof ScimGroupGetErrors];
+
+export type ScimGroupGetResponses = {
+  /**
+   * OK
+   */
+  200: GroupResource;
+};
+
+export type ScimGroupGetResponse = ScimGroupGetResponses[keyof ScimGroupGetResponses];
+
+export type ScimGroupPatchData = {
+  body: PatchInputBodyWritable;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Groups/{id}";
+};
+
+export type ScimGroupPatchErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimGroupPatchError = ScimGroupPatchErrors[keyof ScimGroupPatchErrors];
+
+export type ScimGroupPatchResponses = {
+  /**
+   * OK
+   */
+  200: GroupResource;
+};
+
+export type ScimGroupPatchResponse = ScimGroupPatchResponses[keyof ScimGroupPatchResponses];
+
+export type ScimGroupReplaceData = {
+  body: GroupDraftWritable;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Groups/{id}";
+};
+
+export type ScimGroupReplaceErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Precondition Failed
+   */
+  412: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimGroupReplaceError = ScimGroupReplaceErrors[keyof ScimGroupReplaceErrors];
+
+export type ScimGroupReplaceResponses = {
+  /**
+   * OK
+   */
+  200: GroupResource;
+};
+
+export type ScimGroupReplaceResponse = ScimGroupReplaceResponses[keyof ScimGroupReplaceResponses];
+
+export type ScimResourceTypesListData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/scim/v2/ResourceTypes";
+};
+
+export type ScimResourceTypesListErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimResourceTypesListError =
+  ScimResourceTypesListErrors[keyof ScimResourceTypesListErrors];
+
+export type ScimResourceTypesListResponses = {
+  /**
+   * OK
+   */
+  200: ResourceTypeList;
+};
+
+export type ScimResourceTypesListResponse =
+  ScimResourceTypesListResponses[keyof ScimResourceTypesListResponses];
+
+export type ScimResourceTypeGetData = {
+  body?: never;
+  path: {
+    /**
+     * The resource type this service serves
+     */
+    name: string;
+  };
+  query?: never;
+  url: "/scim/v2/ResourceTypes/{name}";
+};
+
+export type ScimResourceTypeGetErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimResourceTypeGetError = ScimResourceTypeGetErrors[keyof ScimResourceTypeGetErrors];
+
+export type ScimResourceTypeGetResponses = {
+  /**
+   * OK
+   */
+  200: ResourceType;
+};
+
+export type ScimResourceTypeGetResponse =
+  ScimResourceTypeGetResponses[keyof ScimResourceTypeGetResponses];
+
+export type ScimSchemasListData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/scim/v2/Schemas";
+};
+
+export type ScimSchemasListErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimSchemasListError = ScimSchemasListErrors[keyof ScimSchemasListErrors];
+
+export type ScimSchemasListResponses = {
+  /**
+   * OK
+   */
+  200: SchemaList;
+};
+
+export type ScimSchemasListResponse = ScimSchemasListResponses[keyof ScimSchemasListResponses];
+
+export type ScimSchemaGetData = {
+  body?: never;
+  path: {
+    /**
+     * The urn of the attribute document, as /Schemas names it
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Schemas/{id}";
+};
+
+export type ScimSchemaGetErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimSchemaGetError = ScimSchemaGetErrors[keyof ScimSchemaGetErrors];
+
+export type ScimSchemaGetResponses = {
+  /**
+   * OK
+   */
+  200: Schema;
+};
+
+export type ScimSchemaGetResponse = ScimSchemaGetResponses[keyof ScimSchemaGetResponses];
+
+export type ScimServiceProviderConfigData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/scim/v2/ServiceProviderConfig";
+};
+
+export type ScimServiceProviderConfigErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimServiceProviderConfigError =
+  ScimServiceProviderConfigErrors[keyof ScimServiceProviderConfigErrors];
+
+export type ScimServiceProviderConfigResponses = {
+  /**
+   * OK
+   */
+  200: ProviderConfig;
+};
+
+export type ScimServiceProviderConfigResponse =
+  ScimServiceProviderConfigResponses[keyof ScimServiceProviderConfigResponses];
+
+export type ScimUsersListData = {
+  body?: never;
+  path?: never;
+  query?: {
+    filter?: string;
+    startIndex?: number;
+    count?: number;
+  };
+  url: "/scim/v2/Users";
+};
+
+export type ScimUsersListErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimUsersListError = ScimUsersListErrors[keyof ScimUsersListErrors];
+
+export type ScimUsersListResponses = {
+  /**
+   * OK
+   */
+  200: UserList;
+};
+
+export type ScimUsersListResponse = ScimUsersListResponses[keyof ScimUsersListResponses];
+
+export type ScimUserCreateData = {
+  body: UserDraftWritable;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/scim/v2/Users";
+};
+
+export type ScimUserCreateErrors = {
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Precondition Failed
+   */
+  412: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimUserCreateError = ScimUserCreateErrors[keyof ScimUserCreateErrors];
+
+export type ScimUserCreateResponses = {
+  /**
+   * Created
+   */
+  201: UserResource;
+};
+
+export type ScimUserCreateResponse = ScimUserCreateResponses[keyof ScimUserCreateResponses];
+
+export type ScimUserDeleteData = {
+  body?: never;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Users/{id}";
+};
+
+export type ScimUserDeleteErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Precondition Failed
+   */
+  412: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimUserDeleteError = ScimUserDeleteErrors[keyof ScimUserDeleteErrors];
+
+export type ScimUserDeleteResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type ScimUserDeleteResponse = ScimUserDeleteResponses[keyof ScimUserDeleteResponses];
+
+export type ScimUserGetData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Users/{id}";
+};
+
+export type ScimUserGetErrors = {
+  /**
+   * Error
+   */
+  default: Problem;
+};
+
+export type ScimUserGetError = ScimUserGetErrors[keyof ScimUserGetErrors];
+
+export type ScimUserGetResponses = {
+  /**
+   * OK
+   */
+  200: UserResource;
+};
+
+export type ScimUserGetResponse = ScimUserGetResponses[keyof ScimUserGetResponses];
+
+export type ScimUserPatchData = {
+  body: PatchInputBodyWritable;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Users/{id}";
+};
+
+export type ScimUserPatchErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Precondition Failed
+   */
+  412: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimUserPatchError = ScimUserPatchErrors[keyof ScimUserPatchErrors];
+
+export type ScimUserPatchResponses = {
+  /**
+   * OK
+   */
+  200: UserResource;
+};
+
+export type ScimUserPatchResponse = ScimUserPatchResponses[keyof ScimUserPatchResponses];
+
+export type ScimUserReplaceData = {
+  body: UserDraftWritable;
+  headers?: {
+    /**
+     * Refused: this service issues no resource version to match, and will not perform a conditional write as an unconditional one
+     */
+    "If-Match"?: string;
+  };
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/scim/v2/Users/{id}";
+};
+
+export type ScimUserReplaceErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Precondition Failed
+   */
+  412: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ScimUserReplaceError = ScimUserReplaceErrors[keyof ScimUserReplaceErrors];
+
+export type ScimUserReplaceResponses = {
+  /**
+   * OK
+   */
+  200: UserResource;
+};
+
+export type ScimUserReplaceResponse = ScimUserReplaceResponses[keyof ScimUserReplaceResponses];

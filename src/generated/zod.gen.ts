@@ -36,6 +36,14 @@ export const zAssignBody = z.object({
   assigneeId: z.uuid(),
 });
 
+export const zAuthScheme = z.object({
+  description: z.string().optional(),
+  name: z.string().optional(),
+  primary: z.boolean().optional(),
+  specURI: z.string().optional(),
+  type: z.string().optional(),
+});
+
 export const zCancelBody = z.object({
   $schema: z.url().readonly().optional(),
   atPeriodEnd: z.boolean().optional().default(false),
@@ -70,6 +78,12 @@ export const zCommandPresentation = z.object({
   primary: z.boolean().optional(),
   successMessage: z.string().optional(),
   system: z.boolean().optional(),
+});
+
+export const zConfigFeature = z.object({
+  maxOperations: z.number().int().optional(),
+  maxPayloadSize: z.number().int().optional(),
+  supported: z.boolean(),
 });
 
 export const zContent = z.object({
@@ -131,6 +145,12 @@ export const zDoneOutputBody = z.object({
   done: z.boolean(),
 });
 
+export const zEmail = z.object({
+  primary: z.boolean().optional(),
+  type: z.string().optional(),
+  value: z.string().optional(),
+});
+
 export const zEndpoint = z.object({
   $schema: z.url().readonly().optional(),
   createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
@@ -152,6 +172,17 @@ export const zEndpointPatch = z.object({
 
 export const zEntitySection = z.object({
   key: z.string(),
+  label: z.string(),
+});
+
+export const zEntryPredicate = z.object({
+  field: z.string(),
+  op: z.string(),
+  value: z.string(),
+});
+
+export const zEntryHighlight = z.object({
+  filter: z.array(zEntryPredicate).nullable(),
   label: z.string(),
 });
 
@@ -180,6 +211,12 @@ export const zEvent = z.object({
   initiator: z.uuid().optional(),
   name: z.string(),
   occurredAt: z.iso.datetime({ offset: true }),
+  operationId: z.string().optional(),
+  operationOutcome: z.string().optional(),
+  operationPersonId: z.string().optional(),
+  operationRef: z.string().optional(),
+  operationRevision: z.number().int().optional(),
+  operationTenantId: z.string().optional(),
   payload: z.unknown(),
   requestId: z.string().optional(),
   sourceFile: z.string().max(512).optional(),
@@ -258,6 +295,18 @@ export const zGrant = z.object({
   $schema: z.url().readonly().optional(),
   expiresAt: z.iso.datetime({ offset: true }),
   url: z.string(),
+});
+
+export const zGroupMapping = z.object({
+  $schema: z.url().readonly().optional(),
+  group: z.string(),
+  role: z.string(),
+});
+
+export const zGroupRef = z.object({
+  display: z.string().optional(),
+  type: z.string().optional(),
+  value: z.string().optional(),
 });
 
 export const zHandleBody = z.object({
@@ -383,6 +432,62 @@ export const zCommand = z.object({
   verb: z.string(),
 });
 
+export const zMappingInputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  group: z.string(),
+  role: z.string(),
+});
+
+export const zMemberRef = z.object({
+  $ref: z.string().optional(),
+  display: z.string().optional(),
+  type: z.string().optional(),
+  value: z.string().optional(),
+});
+
+export const zGroupDraft = z.object({
+  $schema: z.url().readonly().optional(),
+  displayName: z.string().optional(),
+  externalId: z.string().optional(),
+  members: z.array(zMemberRef).nullish(),
+  role: z.string().optional(),
+  schemas: z.array(z.string()).nullish(),
+});
+
+export const zMeta = z.object({
+  created: z.string().optional(),
+  lastModified: z.string().optional(),
+  location: z.string().optional(),
+  resourceType: z.string().optional(),
+  version: z.string().optional(),
+});
+
+export const zGroupResource = z.object({
+  $schema: z.url().readonly().optional(),
+  displayName: z.string(),
+  externalId: z.string().optional(),
+  id: z.string(),
+  members: z.array(zMemberRef).nullish(),
+  meta: zMeta,
+  role: z.string().optional(),
+  schemas: z.array(z.string()).nullable(),
+});
+
+export const zGroupList = z.object({
+  $schema: z.url().readonly().optional(),
+  Resources: z.array(zGroupResource).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
+});
+
+export const zName = z.object({
+  familyName: z.string().optional(),
+  formatted: z.string().optional(),
+  givenName: z.string().optional(),
+});
+
 export const zNavItem = z.object({
   label: z.string(),
   path: z.string(),
@@ -425,6 +530,12 @@ export const zOidcSettings = z.object({
   registration: z.string().optional(),
   roles: z.array(z.string()).nullish(),
   secretRef: z.string().max(64),
+});
+
+export const zOperation = z.object({
+  op: z.string().optional(),
+  path: z.string().optional(),
+  value: z.unknown().optional(),
 });
 
 export const zPage = z.object({
@@ -530,6 +641,12 @@ export const zPasswordRegistrationInputBody = z.object({
   termsAccepted: z.boolean(),
 });
 
+export const zPatchInputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  Operations: z.array(zOperation).nullable(),
+  schemas: z.array(z.string()).nullable(),
+});
+
 export const zPictures = z.object({
   source: z.string(),
   widths: z.array(z.number().int()).nullish(),
@@ -607,12 +724,37 @@ export const zPageProposalBody = z.object({
   total: z.number().int(),
 });
 
+export const zProviderConfig = z.object({
+  $schema: z.url().readonly().optional(),
+  authenticationSchemes: z.array(zAuthScheme).nullish(),
+  bulk: zConfigFeature,
+  changePassword: zConfigFeature,
+  etag: zConfigFeature,
+  filter: zConfigFeature,
+  meta: zMeta,
+  patch: zConfigFeature,
+  schemas: z.array(z.string()).nullable(),
+  sort: zConfigFeature,
+});
+
 export const zQuota = z.object({
   $schema: z.url().readonly().optional(),
   quota: z.number().int().readonly(),
   unlimited: z.boolean().readonly(),
   used: z.number().int().readonly(),
   variants: z.number().int().readonly(),
+});
+
+export const zReceipt = z.object({
+  $schema: z.url().readonly().optional(),
+  id: z.string(),
+  method: z.string(),
+  outcome: z.string().optional(),
+  outcomeAt: z.iso.datetime({ offset: true }).optional(),
+  ref: z.string(),
+  revision: z.number().int(),
+  route: z.string(),
+  startedAt: z.iso.datetime({ offset: true }),
 });
 
 export const zRecoveryAvailability = z.object({
@@ -661,6 +803,7 @@ export const zEntryPresentation = z.object({
   description: z.string().optional(),
   emptyDescription: z.string().optional(),
   group: zResourceGroup.optional(),
+  highlight: zEntryHighlight.optional(),
   icon: z.string().optional(),
   order: z.number().int().optional(),
   plural: z.string().optional(),
@@ -673,6 +816,7 @@ export const zEntryPresentation = z.object({
   statusField: z.string().optional(),
   summaryFields: z.array(z.string()).optional(),
   thumbnailField: z.string().optional(),
+  trendField: z.string().optional(),
 });
 
 export const zEntry = z.object({
@@ -695,6 +839,26 @@ export const zCatalog = z.object({
   catalogVersion: z.number().int(),
   pictures: zPictures.optional(),
   resources: z.array(zEntry).nullable(),
+});
+
+export const zResourceType = z.object({
+  $schema: z.url().readonly().optional(),
+  description: z.string().optional(),
+  endpoint: z.string().optional(),
+  id: z.string().optional(),
+  name: z.string().optional(),
+  schema: z.string().optional(),
+  schemaExtensions: z.string().optional(),
+  schemas: z.array(z.string()).nullable(),
+});
+
+export const zResourceTypeList = z.object({
+  $schema: z.url().readonly().optional(),
+  Resources: z.array(zResourceType).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
 });
 
 export const zRetainBody = z.object({
@@ -747,6 +911,38 @@ export const zSamlSettings = z.object({
   metadataXml: z.string().max(65536).optional(),
   registration: z.string().optional(),
   roles: z.array(z.string()).nullish(),
+});
+
+export const zSchemaAttribute = z.object({
+  canonicalValues: z.array(z.string()).nullish(),
+  caseExact: z.boolean().optional(),
+  description: z.string().optional(),
+  multiValued: z.boolean().optional(),
+  mutability: z.string().optional(),
+  name: z.string(),
+  required: z.boolean().optional(),
+  returned: z.string().optional(),
+  subAttributes: z.array(z.lazy((): any => zSchemaAttribute)).nullish(),
+  type: z.string(),
+  uniqueness: z.string().optional(),
+});
+
+export const zSchema = z.object({
+  $schema: z.url().readonly().optional(),
+  attributes: z.array(zSchemaAttribute).nullish(),
+  description: z.string().optional(),
+  id: z.string(),
+  meta: zMeta,
+  name: z.string().optional(),
+});
+
+export const zSchemaList = z.object({
+  $schema: z.url().readonly().optional(),
+  Resources: z.array(zSchema).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
 });
 
 export const zSessionListing = z.object({
@@ -934,6 +1130,30 @@ export const zTranslationFieldsBody = z.object({
   lang: z.string(),
 });
 
+export const zTrendDay = z.object({
+  count: z.number().int(),
+  day: z.string(),
+});
+
+export const zTrend = z.object({
+  days: z.array(zTrendDay).nullable(),
+  field: z.string(),
+});
+
+export const zSummaryEntry = z.object({
+  entity: z.string(),
+  highlight: z.number().int().optional(),
+  module: z.string(),
+  total: z.number().int().optional(),
+  trend: zTrend.optional(),
+});
+
+export const zSummary = z.object({
+  $schema: z.url().readonly().optional(),
+  asOf: z.iso.datetime({ offset: true }),
+  entries: z.array(zSummaryEntry).nullable(),
+});
+
 export const zUseRow = z.object({
   Entity: z.string(),
   Field: z.string(),
@@ -966,9 +1186,45 @@ export const zPageUserBody = z.object({
   total: z.number().int(),
 });
 
+export const zUserDraft = z.object({
+  $schema: z.url().readonly().optional(),
+  active: z.boolean().optional(),
+  displayName: z.string().optional(),
+  emails: z.array(zEmail).nullish(),
+  externalId: z.string().optional(),
+  groups: z.array(zGroupRef).nullish(),
+  name: zName.optional(),
+  password: z.string().optional(),
+  schemas: z.array(z.string()).nullish(),
+  userName: z.string().optional(),
+});
+
 export const zUserPatch = z.object({
   displayName: z.string().max(200).optional(),
   email: z.email().max(320).optional(),
+});
+
+export const zUserResource = z.object({
+  $schema: z.url().readonly().optional(),
+  active: z.boolean(),
+  displayName: z.string().optional(),
+  emails: z.array(zEmail).nullish(),
+  externalId: z.string().optional(),
+  groups: z.array(zGroupRef).nullish(),
+  id: z.string(),
+  meta: zMeta,
+  name: zName.optional(),
+  schemas: z.array(z.string()).nullable(),
+  userName: z.string(),
+});
+
+export const zUserList = z.object({
+  $schema: z.url().readonly().optional(),
+  Resources: z.array(zUserResource).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
 });
 
 export const zVerifyEmailInputBody = z.object({
@@ -1080,6 +1336,12 @@ export const zEventWritable = z.object({
   initiator: z.uuid().optional(),
   name: z.string(),
   occurredAt: z.iso.datetime({ offset: true }),
+  operationId: z.string().optional(),
+  operationOutcome: z.string().optional(),
+  operationPersonId: z.string().optional(),
+  operationRef: z.string().optional(),
+  operationRevision: z.number().int().optional(),
+  operationTenantId: z.string().optional(),
   payload: z.unknown(),
   requestId: z.string().optional(),
   sourceFile: z.string().max(512).optional(),
@@ -1121,6 +1383,37 @@ export const zForgotInputBodyWritable = z.object({
 export const zGrantWritable = z.object({
   expiresAt: z.iso.datetime({ offset: true }),
   url: z.string(),
+});
+
+export const zGroupDraftWritable = z.object({
+  displayName: z.string().optional(),
+  externalId: z.string().optional(),
+  members: z.array(zMemberRef).nullish(),
+  role: z.string().optional(),
+  schemas: z.array(z.string()).nullish(),
+});
+
+export const zGroupMappingWritable = z.object({
+  group: z.string(),
+  role: z.string(),
+});
+
+export const zGroupResourceWritable = z.object({
+  displayName: z.string(),
+  externalId: z.string().optional(),
+  id: z.string(),
+  members: z.array(zMemberRef).nullish(),
+  meta: zMeta,
+  role: z.string().optional(),
+  schemas: z.array(z.string()).nullable(),
+});
+
+export const zGroupListWritable = z.object({
+  Resources: z.array(zGroupResourceWritable).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
 });
 
 export const zHandleBodyWritable = z.object({
@@ -1191,6 +1484,11 @@ export const zMailDeliveryInputBodyWritable = z.object({
 
 export const zMailDeliveryOutputBodyWritable = z.object({
   state: z.enum(["pending", "failed"]),
+});
+
+export const zMappingInputBodyWritable = z.object({
+  group: z.string(),
+  role: z.string(),
 });
 
 export const zNewProposalWritable = z.object({
@@ -1314,6 +1612,11 @@ export const zPasswordRegistrationInputBodyWritable = z.object({
   termsAccepted: z.boolean(),
 });
 
+export const zPatchInputBodyWritable = z.object({
+  Operations: z.array(zOperation).nullable(),
+  schemas: z.array(z.string()).nullable(),
+});
+
 export const zPlanWritable = z.object({
   active: z.boolean(),
   code: z.string().min(1).max(60),
@@ -1356,6 +1659,29 @@ export const zPageProposalBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zProviderConfigWritable = z.object({
+  authenticationSchemes: z.array(zAuthScheme).nullish(),
+  bulk: zConfigFeature,
+  changePassword: zConfigFeature,
+  etag: zConfigFeature,
+  filter: zConfigFeature,
+  meta: zMeta,
+  patch: zConfigFeature,
+  schemas: z.array(z.string()).nullable(),
+  sort: zConfigFeature,
+});
+
+export const zReceiptWritable = z.object({
+  id: z.string(),
+  method: z.string(),
+  outcome: z.string().optional(),
+  outcomeAt: z.iso.datetime({ offset: true }).optional(),
+  ref: z.string(),
+  revision: z.number().int(),
+  route: z.string(),
+  startedAt: z.iso.datetime({ offset: true }),
+});
+
 export const zRecoveryCodesOutputBodyWritable = z.object({
   codes: z.array(z.string()).nullable(),
   factor: zFactorWritable.optional(),
@@ -1376,6 +1702,24 @@ export const zResetInputBodyWritable = z.object({
 
 export const zResolveBodyWritable = z.object({
   resolution: z.string().max(4000).optional(),
+});
+
+export const zResourceTypeWritable = z.object({
+  description: z.string().optional(),
+  endpoint: z.string().optional(),
+  id: z.string().optional(),
+  name: z.string().optional(),
+  schema: z.string().optional(),
+  schemaExtensions: z.string().optional(),
+  schemas: z.array(z.string()).nullable(),
+});
+
+export const zResourceTypeListWritable = z.object({
+  Resources: z.array(zResourceTypeWritable).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
 });
 
 export const zRetainBodyWritable = z.object({
@@ -1422,6 +1766,22 @@ export const zSamlSettingsWritable = z.object({
   roles: z.array(z.string()).nullish(),
 });
 
+export const zSchemaWritable = z.object({
+  attributes: z.array(zSchemaAttribute).nullish(),
+  description: z.string().optional(),
+  id: z.string(),
+  meta: zMeta,
+  name: z.string().optional(),
+});
+
+export const zSchemaListWritable = z.object({
+  Resources: z.array(zSchemaWritable).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
+});
+
 export const zSessionsOutputBodyWritable = z.object({
   items: z.array(zSessionListing).nullable(),
   total: z.number().int(),
@@ -1453,6 +1813,11 @@ export const zSubscriptionWritable = z.object({
   cancelAtPeriodEnd: z.boolean().optional().default(false),
   planId: z.uuid(),
   status: z.enum(["trial", "active", "past_due", "cancelled"]).optional().default("trial"),
+});
+
+export const zSummaryWritable = z.object({
+  asOf: z.iso.datetime({ offset: true }),
+  entries: z.array(zSummaryEntry).nullable(),
 });
 
 export const zTotpEnrolmentWritable = z.object({
@@ -1545,6 +1910,39 @@ export const zPageUserBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zUserDraftWritable = z.object({
+  active: z.boolean().optional(),
+  displayName: z.string().optional(),
+  emails: z.array(zEmail).nullish(),
+  externalId: z.string().optional(),
+  groups: z.array(zGroupRef).nullish(),
+  name: zName.optional(),
+  password: z.string().optional(),
+  schemas: z.array(z.string()).nullish(),
+  userName: z.string().optional(),
+});
+
+export const zUserResourceWritable = z.object({
+  active: z.boolean(),
+  displayName: z.string().optional(),
+  emails: z.array(zEmail).nullish(),
+  externalId: z.string().optional(),
+  groups: z.array(zGroupRef).nullish(),
+  id: z.string(),
+  meta: zMeta,
+  name: zName.optional(),
+  schemas: z.array(z.string()).nullable(),
+  userName: z.string(),
+});
+
+export const zUserListWritable = z.object({
+  Resources: z.array(zUserResourceWritable).nullish(),
+  itemsPerPage: z.number().int(),
+  schemas: z.array(z.string()).nullable(),
+  startIndex: z.number().int(),
+  totalResults: z.number().int(),
+});
+
 export const zVerifyFactorInputBodyWritable = z.object({
   code: z.string().max(40),
   email: z.email().max(320),
@@ -1561,12 +1959,27 @@ export const zAppAccessRequestHeaders = z.object({
  */
 export const zAppConnectionResponse = zConnection;
 
+export const zAppOperationOutcomePath = z.object({
+  ref: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zAppOperationOutcomeResponse = zReceipt;
+
 /**
  * OK
  */
 export const zAppResourcesResponse = zCatalog;
 
+/**
+ * OK
+ */
+export const zAppSummaryResponse = zSummary;
+
 export const zAuditEventListQuery = z.object({
+  operationRef: z.uuid().optional(),
   name: z.string().optional(),
   actor: z.uuid().optional(),
   record: z.uuid().optional(),
@@ -2617,6 +3030,18 @@ export const zFileFilePublicHeadQuery = z.object({
 /**
  * OK
  */
+export const zScimGroupMappingsListResponse = z.array(zGroupMapping).nullable();
+
+export const zScimGroupMappingWriteBody = zMappingInputBodyWritable;
+
+/**
+ * OK
+ */
+export const zScimGroupMappingWriteResponse = zGroupMapping;
+
+/**
+ * OK
+ */
 export const zSiteSettingsReadResponse = zSiteSettings;
 
 export const zSiteSettingsSaveBody = zSiteSettingsWritable;
@@ -3033,3 +3458,188 @@ export const zWebhookEndpointTargetPath = z.object({
  * OK
  */
 export const zWebhookEndpointTargetResponse = zEndpoint;
+
+export const zScimGroupsListQuery = z.object({
+  filter: z.string().optional(),
+  startIndex: z.number().int().optional(),
+  count: z.number().int().optional(),
+});
+
+/**
+ * OK
+ */
+export const zScimGroupsListResponse = zGroupList;
+
+export const zScimGroupCreateBody = zGroupDraftWritable;
+
+export const zScimGroupCreateHeaders = z.object({
+  "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
+});
+
+/**
+ * Created
+ */
+export const zScimGroupCreateResponse = zGroupResource;
+
+export const zScimGroupDeleteHeaders = z.object({
+  "If-Match": z.string().optional(),
+});
+
+export const zScimGroupDeletePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * No Content
+ */
+export const zScimGroupDeleteResponse = z.void();
+
+export const zScimGroupGetPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zScimGroupGetResponse = zGroupResource;
+
+export const zScimGroupPatchBody = zPatchInputBodyWritable;
+
+export const zScimGroupPatchHeaders = z.object({
+  "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
+});
+
+export const zScimGroupPatchPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zScimGroupPatchResponse = zGroupResource;
+
+export const zScimGroupReplaceBody = zGroupDraftWritable;
+
+export const zScimGroupReplaceHeaders = z.object({
+  "If-Match": z.string().optional(),
+});
+
+export const zScimGroupReplacePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zScimGroupReplaceResponse = zGroupResource;
+
+/**
+ * OK
+ */
+export const zScimResourceTypesListResponse = zResourceTypeList;
+
+export const zScimResourceTypeGetPath = z.object({
+  name: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zScimResourceTypeGetResponse = zResourceType;
+
+/**
+ * OK
+ */
+export const zScimSchemasListResponse = zSchemaList;
+
+export const zScimSchemaGetPath = z.object({
+  id: z.string(),
+});
+
+/**
+ * OK
+ */
+export const zScimSchemaGetResponse = zSchema;
+
+/**
+ * OK
+ */
+export const zScimServiceProviderConfigResponse = zProviderConfig;
+
+export const zScimUsersListQuery = z.object({
+  filter: z.string().optional(),
+  startIndex: z.number().int().optional(),
+  count: z.number().int().optional(),
+});
+
+/**
+ * OK
+ */
+export const zScimUsersListResponse = zUserList;
+
+export const zScimUserCreateBody = zUserDraftWritable;
+
+export const zScimUserCreateHeaders = z.object({
+  "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
+});
+
+/**
+ * Created
+ */
+export const zScimUserCreateResponse = zUserResource;
+
+export const zScimUserDeleteHeaders = z.object({
+  "If-Match": z.string().optional(),
+});
+
+export const zScimUserDeletePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * No Content
+ */
+export const zScimUserDeleteResponse = z.void();
+
+export const zScimUserGetPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zScimUserGetResponse = zUserResource;
+
+export const zScimUserPatchBody = zPatchInputBodyWritable;
+
+export const zScimUserPatchHeaders = z.object({
+  "If-Match": z.string().optional(),
+  "Idempotency-Key": z.string().optional(),
+});
+
+export const zScimUserPatchPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zScimUserPatchResponse = zUserResource;
+
+export const zScimUserReplaceBody = zUserDraftWritable;
+
+export const zScimUserReplaceHeaders = z.object({
+  "If-Match": z.string().optional(),
+});
+
+export const zScimUserReplacePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zScimUserReplaceResponse = zUserResource;

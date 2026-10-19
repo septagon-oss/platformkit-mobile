@@ -6,6 +6,8 @@ import { mkdtemp, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { compare, generate, verifySource } from "../scripts/api";
+import { createApi } from "../src/effects/api";
+import { documentedRoute } from "../src/generated/routes.gen";
 
 test("two generations agree and every class of generated drift is refused without repair", async () => {
   const temporary = await mkdtemp(join(tmpdir(), "api-generation-"));
@@ -35,4 +37,60 @@ test("two generations agree and every class of generated drift is refused withou
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
+});
+
+test("the pin answers the counts door, and answers it with numbers only", async () => {
+  // A path the document does not print is refused before the wire, so "the phone may
+  // ask" is a fact about the pin and not about a screen: it is checked here, where the
+  // generated route table and the generated validator are the subjects.
+  const route = documentedRoute("GET", "/api/v1/app/summary");
+  assert.ok(route);
+  assert.equal(route.json, true);
+  assert.deepEqual(route.statuses, [200]);
+  const answering = (body: unknown) =>
+    createApi(
+      "https://counts.test",
+      (async () =>
+        new Response(JSON.stringify(body), {
+          headers: { "Content-Type": "application/json" },
+        })) as typeof fetch,
+    ).operations;
+  const summary = (
+    await answering({
+      asOf: "2026-07-18T09:00:00Z",
+      entries: [
+        {
+          module: "note",
+          entity: "note",
+          total: 128,
+          highlight: 4,
+          trend: {
+            field: "createdAt",
+            days: [{ day: "2026-07-17", count: 3 }],
+          },
+        },
+      ],
+    }).appSummary({})
+  ).data;
+  assert.equal(summary.entries?.[0]?.total, 128);
+  assert.equal(summary.entries?.[0]?.highlight, 4);
+  assert.equal(summary.entries?.[0]?.trend?.days?.[0]?.count, 3);
+  // A number that is not a number is refused by the generated validator, so a body
+  // this build cannot read becomes one refusal and never a row with a blank in it.
+  await assert.rejects(
+    answering({
+      asOf: "2026-07-18T09:00:00Z",
+      entries: [{ module: "note", entity: "note", total: "many" }],
+    }).appSummary({}),
+    /failed validation/,
+  );
+  // An absent number stays absent: nothing here turns "nobody answered" into zero.
+  const quiet = (
+    await answering({
+      asOf: "2026-07-18T09:00:00Z",
+      entries: [{ module: "note", entity: "note" }],
+    }).appSummary({})
+  ).data;
+  assert.equal(quiet.entries?.[0]?.total, undefined);
+  assert.equal(quiet.entries?.[0]?.highlight, undefined);
 });

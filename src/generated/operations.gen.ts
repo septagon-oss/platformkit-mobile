@@ -11,8 +11,13 @@ export function bindOperations(
     ) => invoke((client) => sdk.appAccessRequest({ ...options, client, throwOnError: true })),
     appConnection: (options: Omit<types.AppConnectionData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.appConnection({ ...options, client, throwOnError: true })),
+    appOperationOutcome: (
+      options: Omit<types.AppOperationOutcomeData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.appOperationOutcome({ ...options, client, throwOnError: true })),
     appResources: (options: Omit<types.AppResourcesData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.appResources({ ...options, client, throwOnError: true })),
+    appSummary: (options: Omit<types.AppSummaryData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.appSummary({ ...options, client, throwOnError: true })),
     auditEventList: (options: Omit<types.AuditEventListData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.auditEventList({ ...options, client, throwOnError: true })),
     auditEventRead: (options: Omit<types.AuditEventReadData, "url"> & { signal?: AbortSignal }) =>
@@ -308,6 +313,12 @@ export function bindOperations(
     siteSettingsPublic: (
       options: Omit<types.SiteSettingsPublicData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.siteSettingsPublic({ ...options, client, throwOnError: true })),
+    scimGroupMappingsList: (
+      options: Omit<types.ScimGroupMappingsListData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.scimGroupMappingsList({ ...options, client, throwOnError: true })),
+    scimGroupMappingWrite: (
+      options: Omit<types.ScimGroupMappingWriteData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.scimGroupMappingWrite({ ...options, client, throwOnError: true })),
     siteSettingsRead: (
       options: Omit<types.SiteSettingsReadData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.siteSettingsRead({ ...options, client, throwOnError: true })),
@@ -396,6 +407,45 @@ export function bindOperations(
     webhookEndpointTarget: (
       options: Omit<types.WebhookEndpointTargetData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.webhookEndpointTarget({ ...options, client, throwOnError: true })),
+    scimGroupsList: (options: Omit<types.ScimGroupsListData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimGroupsList({ ...options, client, throwOnError: true })),
+    scimGroupCreate: (options: Omit<types.ScimGroupCreateData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimGroupCreate({ ...options, client, throwOnError: true })),
+    scimGroupDelete: (options: Omit<types.ScimGroupDeleteData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimGroupDelete({ ...options, client, throwOnError: true })),
+    scimGroupGet: (options: Omit<types.ScimGroupGetData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimGroupGet({ ...options, client, throwOnError: true })),
+    scimGroupPatch: (options: Omit<types.ScimGroupPatchData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimGroupPatch({ ...options, client, throwOnError: true })),
+    scimGroupReplace: (
+      options: Omit<types.ScimGroupReplaceData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.scimGroupReplace({ ...options, client, throwOnError: true })),
+    scimResourceTypesList: (
+      options: Omit<types.ScimResourceTypesListData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.scimResourceTypesList({ ...options, client, throwOnError: true })),
+    scimResourceTypeGet: (
+      options: Omit<types.ScimResourceTypeGetData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.scimResourceTypeGet({ ...options, client, throwOnError: true })),
+    scimSchemasList: (options: Omit<types.ScimSchemasListData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimSchemasList({ ...options, client, throwOnError: true })),
+    scimSchemaGet: (options: Omit<types.ScimSchemaGetData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimSchemaGet({ ...options, client, throwOnError: true })),
+    scimServiceProviderConfig: (
+      options: Omit<types.ScimServiceProviderConfigData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.scimServiceProviderConfig({ ...options, client, throwOnError: true })),
+    scimUsersList: (options: Omit<types.ScimUsersListData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimUsersList({ ...options, client, throwOnError: true })),
+    scimUserCreate: (options: Omit<types.ScimUserCreateData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimUserCreate({ ...options, client, throwOnError: true })),
+    scimUserDelete: (options: Omit<types.ScimUserDeleteData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimUserDelete({ ...options, client, throwOnError: true })),
+    scimUserGet: (options: Omit<types.ScimUserGetData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimUserGet({ ...options, client, throwOnError: true })),
+    scimUserPatch: (options: Omit<types.ScimUserPatchData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimUserPatch({ ...options, client, throwOnError: true })),
+    scimUserReplace: (options: Omit<types.ScimUserReplaceData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.scimUserReplace({ ...options, client, throwOnError: true })),
   };
 }
 export type Operations = ReturnType<typeof bindOperations>;
