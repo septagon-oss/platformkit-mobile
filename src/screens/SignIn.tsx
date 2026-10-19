@@ -9,7 +9,10 @@
 import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import { useSignOut } from "./useSignOut";
-import React, { useRef, useState } from "react";
+import { WorkspaceMark } from "./WorkspaceMark";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { workspaceName } from "../core/derive";
+import { rememberedFace, type Remembered } from "../core/workspace";
 import { useShell } from "../shell";
 import { ApiError } from "../effects/api";
 import { SignInForm } from "../ui/organisms/SignInForm";
@@ -24,7 +27,17 @@ interface Props {
 
 export function SignIn({ title }: Props = {}) {
   const feedback = useFeedback();
-  const { state, baseURL, signIn, answerFactor, refresh, returning } = useShell();
+  const {
+    state,
+    baseURL,
+    signIn,
+    answerFactor,
+    refresh,
+    returning,
+    workspace,
+    lookUp,
+    workspaces,
+  } = useShell();
   // Both ways off this screen — the failed phase's way to another server and the
   // anonymous phase's clearing of a saved sign-in — leave through the one door
   // that asks while this phone holds a write. Signing out clears what is held,
@@ -43,7 +56,64 @@ export function SignIn({ title }: Props = {}) {
    * busy only carries the same answer to the screen.
    */
   const working = useRef(false);
-  const [step, setStep] = useState<"credentials" | "code">("credentials");
+  /**
+   * step is how far this person has got with one form: the address they are pointing at, the
+   * password for it, or the code the server asked about. Where it opens follows from what
+   * this phone already knows — an address it was built with, one it restored from a saved
+   * sign-in, or one a refused session left filled in — so nobody retypes an address the
+   * phone already had, and a person arriving at a blank phone is asked where they mean
+   * before they are asked who they are.
+   */
+  const [step, setStep] = useState<"address" | "credentials" | "code">(() =>
+    baseURL === "" && !returning ? "address" : "credentials",
+  );
+  const [connecting, setConnecting] = useState(false);
+  // The same answer as `connecting`, read before anything is drawn: a second press of
+  // Continue while the first is still away would ask about an address twice.
+  const asking = useRef(false);
+  // What this device remembers of the places it has been pointed at. Read where it is
+  // drawn, and a build with no table for them has no list to read.
+  const [remembered, setRemembered] = useState<readonly Remembered[]>([]);
+  useEffect(() => {
+    if (!workspaces) return;
+    let mine = true;
+    void workspaces.list().then((rows) => {
+      if (mine) setRemembered(rows);
+    });
+    return () => {
+      mine = false;
+    };
+  }, [workspaces]);
+  const connect = async (url: string) => {
+    if (asking.current) return;
+    asking.current = true;
+    setConnecting(true);
+    setError("");
+    try {
+      // Whatever the answer, the person stands at the password for the address they named:
+      // a workspace older than the connection document, one whose document is briefly
+      // unavailable and a network that never answers are all still places a person can sign
+      // in at, and a phone that cannot read one has no warrant to close the door for not
+      // knowing which of the three it met. An unanswered address wears today's look and is
+      // named by its host, which is what the phone can honestly say about it.
+      await lookUp(url);
+      setStep("credentials");
+    } finally {
+      asking.current = false;
+      setConnecting(false);
+    }
+  };
+  // The name over the fields, by the one rule the header and Home's band read too, so the
+  // three cannot call the same place two things. The address behind it is the one the face
+  // was read from — the place being connected to, which is not always the one this build was
+  // configured with.
+  const place = useMemo(
+    () => ({
+      name: workspaceName(workspace.server, feedback.copy, workspace.name),
+      host: workspace.host,
+    }),
+    [feedback.copy, workspace],
+  );
   // challenged is the address the server refused to finish signing in. The code
   // is offered about that address, not whatever is left in the field after a
   // correction, and it is what the retry sends.
@@ -109,6 +179,25 @@ export function SignIn({ title }: Props = {}) {
         booting={state.phase === "booting" || state.phase === "loading"}
         failed={failed ? (state.error ?? feedback.copy.failure.loadCatalog) : ""}
         expired={state.reason === "expired" ? feedback.copy.failure.signedOut : ""}
+        workspace={place}
+        mark={
+          workspace.logoPath === undefined ? null : (
+            <WorkspaceMark description={feedback.copy.kit.workspaceMark(place.name)} />
+          )
+        }
+        remembered={remembered}
+        markFor={(place) => (
+          <WorkspaceMark
+            description={feedback.copy.kit.workspaceMark(place.name)}
+            face={rememberedFace(place)}
+          />
+        )}
+        connecting={connecting}
+        onContinue={(url) => void connect(url)}
+        onEditAddress={() => {
+          setStep("address");
+          setError("");
+        }}
         {...(returning ? { initialEmail: returning.email } : {})}
         onRetry={() => void refresh()}
         busy={busy}

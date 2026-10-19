@@ -147,7 +147,11 @@ describe("an expired session", () => {
     });
     expect(screen.getByTestId("sign-in-expired")).toHaveTextContent(/Sign in again to continue/);
     expect(screen.getByTestId("email")).toHaveProp("value", "a@acme.test");
-    expect(screen.getByTestId("server")).toHaveProp("value", "https://acme.test");
+    // The address the session was held open at is not lost with it: the step a refused
+    // person lands on names that place, and the one door back to the field keeps what was
+    // there, so nobody retypes an address the phone already knew.
+    expect(screen.getByTestId("workspace-host")).toHaveTextContent("acme.test");
+    expect(latest?.baseURL).toBe("https://acme.test");
     expect(last()).toBe("/sign-in");
     // A cookie this app no longer holds is not worth a revocation round trip.
     expect(calls).not.toContain(routes.logout);

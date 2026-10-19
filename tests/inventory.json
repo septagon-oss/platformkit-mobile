@@ -275,33 +275,33 @@
  },
  "totals": {
   "contract": {
-   "files": 36,
-   "cases": 215,
-   "ms": 75180,
-   "testsMs": 47548.80000000001,
+   "files": 37,
+   "cases": 224,
+   "ms": 77056,
+   "testsMs": 47554.80000000001,
    "runners": {
-    "node": 36
+    "node": 37
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 246,
-   "cases": 1130,
-   "ms": 1860903,
-   "testsMs": 62973.60000000002,
+   "files": 249,
+   "cases": 1161,
+   "ms": 1959451,
+   "testsMs": 63093.60000000002,
    "runners": {
-    "jest": 82,
+    "jest": 85,
     "node": 164
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 105,
-   "cases": 336,
-   "ms": 2359334,
-   "testsMs": 40717,
+   "files": 113,
+   "cases": 349,
+   "ms": 2591093,
+   "testsMs": 42769,
    "runners": {
-    "jest": 105
+    "jest": 113
    },
    "unreachable": 0
   },
@@ -3114,6 +3114,83 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-connection-documents-face-becomes-one-workspace.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 9,
+   "rule": "One connection document is read as three things: what the place is called, what colour it wears and what mark it hands out. The name a person may paint comes only in the one spelling the workspace's own document names for it, and a mark only as a path on the host that named it \u2014 the phone never follows a URL a server points it at, never asks a second server for the first one's path, and never paints a colour it cannot read.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1876,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an answered document becomes one workspace: name trimmed, colour lower-cased, mark kept",
+    "the same host with and without a trailing slash is one workspace",
+    "an empty accent says nobody chose one; the name and the mark are worn all the same",
+    "an accent in any other spelling is refused by name and never guessed at",
+    "a workspace whose name is only spaces has no name, which is what sends a screen to the host",
+    "a mark is a path on the host that named it, and nothing else",
+    "a remembered row names the server, its own name and the moment; a credential has nowhere to go",
+    "an address that answered nothing, and a name nobody can read, are never remembered",
+    "the bounds are the ones the connect step draws within"
+   ],
+   "tests": [
+    {
+     "title": "an answered document becomes one workspace: name trimmed, colour lower-cased, mark kept",
+     "ms": 2.042217,
+     "measured": false
+    },
+    {
+     "title": "the same host with and without a trailing slash is one workspace",
+     "ms": 0.520002,
+     "measured": false
+    },
+    {
+     "title": "an empty accent says nobody chose one; the name and the mark are worn all the same",
+     "ms": 0.134308,
+     "measured": false
+    },
+    {
+     "title": "an accent in any other spelling is refused by name and never guessed at",
+     "ms": 0.232339,
+     "measured": false
+    },
+    {
+     "title": "a workspace whose name is only spaces has no name, which is what sends a screen to the host",
+     "ms": 0.218084,
+     "measured": false
+    },
+    {
+     "title": "a mark is a path on the host that named it, and nothing else",
+     "ms": 0.154866,
+     "measured": false
+    },
+    {
+     "title": "a remembered row names the server, its own name and the moment; a credential has nowhere to go",
+     "ms": 2.420467,
+     "measured": false
+    },
+    {
+     "title": "an address that answered nothing, and a name nobody can read, are never remembered",
+     "ms": 0.173581,
+     "measured": false
+    },
+    {
+     "title": "the bounds are the ones the connect step draws within",
+     "ms": 0.100265,
+     "measured": false
+    }
+   ],
+   "loaded": 35,
+   "coveredProdLines": 12104,
+   "onlyProdLines": null,
+   "testsMs": 6
+  },
+  {
    "file": "tests/tokens.test.ts",
    "runner": "node",
    "layer": "contract",
@@ -3832,6 +3909,47 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-device-table-keeps-one-row-for-each-workspace-it-was-pointed-at.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "What this phone remembers of the workspaces it was pointed at is a SQLite table, and this is where its own statements run: one row per server, replaced in place when that server answers again, the mark round-tripping through its column, the list newest-first within the window the connect step draws, and the bound pruned in the same transaction that wrote. The stand-in below binds positional parameters the way expo-sqlite does on a device, over node:sqlite, so a device table is not shipped on the strength of an in-memory double alone. It is a .tsx file only so Jest, which can mock expo-sqlite, discovers it; it needs a Node that ships node:sqlite.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 36894,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "one server holds one row, and what it answers again replaces it mark and all",
+    "the list is newest first within the window asked for, and never outlives its bound",
+    "a row whose text no longer reads is dropped where it stands, and its neighbours are still listed"
+   ],
+   "tests": [
+    {
+     "title": "one server holds one row, and what it answers again replaces it mark and all",
+     "ms": 14,
+     "measured": false
+    },
+    {
+     "title": "the list is newest first within the window asked for, and never outlives its bound",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "a row whose text no longer reads is dropped where it stands, and its neighbours are still listed",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 131,
+   "coveredProdLines": 1950,
+   "onlyProdLines": null,
+   "testsMs": 24
+  },
+  {
    "file": "tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -4006,6 +4124,89 @@
    "coveredProdLines": 1916,
    "onlyProdLines": null,
    "testsMs": 631
+  },
+  {
+   "file": "tests/ui/a-workspaces-accent-enters-the-theme-without-a-hand-edited-token.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 10,
+   "rule": "A workspace's accent arrives as a value, never as a token: the generated palette stays the only writer of colour in the repository, and `accentPalette` copies it and wears the workspace's colour in its accent roles. This suite pins that the copy is a copy, that the palette on disk is never touched, and that an accent the theme cannot keep legible keeps the kit's own colours by identity \u2014 so a refused accent cannot even ask for a re-render.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21472,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "as the nearest legible shade of itself, in both modes, over an untouched palette",
+    "and reaches a shared component in both modes through the provider that already takes a palette",
+    "#ffd400 keeps the kit's own colours, answered by identity",
+    "#c2c23a keeps the kit's own colours, answered by identity",
+    "#4bbf9c keeps the kit's own colours, answered by identity",
+    "#ffffff keeps the kit's own colours, answered by identity",
+    "rgb(1,2,3) keeps the kit's own colours, answered by identity",
+    "#fff keeps the kit's own colours, answered by identity",
+    "#GGGGGG keeps the kit's own colours, answered by identity",
+    "and so does no accent at all, which is what a workspace with nothing to say answers"
+   ],
+   "tests": [
+    {
+     "title": "as the nearest legible shade of itself, in both modes, over an untouched palette",
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "and reaches a shared component in both modes through the provider that already takes a palette",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "#ffd400 keeps the kit's own colours, answered by identity",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "#c2c23a keeps the kit's own colours, answered by identity",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "#4bbf9c keeps the kit's own colours, answered by identity",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "#ffffff keeps the kit's own colours, answered by identity",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "rgb(1,2,3) keeps the kit's own colours, answered by identity",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "#fff keeps the kit's own colours, answered by identity",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "#GGGGGG keeps the kit's own colours, answered by identity",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "and so does no accent at all, which is what a workspace with nothing to say answers",
+     "ms": 0,
+     "measured": false
+    }
+   ],
+   "loaded": 126,
+   "coveredProdLines": 1910,
+   "onlyProdLines": null,
+   "testsMs": 32
   },
   {
    "file": "tests/ui/agenda-appointment-lines.test.tsx",
@@ -8855,6 +9056,137 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/the-worn-accent-keeps-every-pair-the-registry-measures.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 18,
+   "rule": "The theme's promise is measured, not asserted: `contrastPairs` names every role the theme hands a component and the minimum it reaches on the surface it is drawn over. This suite puts a stranger's colour in front of that measurement \u2014 the nearest shade of a workspace's accent, found by the ladder in `accentPalette` \u2014 and refuses to let one pair fall. It also pins why the ladder exists: the raw colour a workspace answers does fail the registry, in at least one mode, for every accent here.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 40182,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "#2563eb in light fails no pair the registry measures",
+    "#2563eb in dark fails no pair the registry measures",
+    "#b3245c in light fails no pair the registry measures",
+    "#b3245c in dark fails no pair the registry measures",
+    "#7a3cc4 in light fails no pair the registry measures",
+    "#7a3cc4 in dark fails no pair the registry measures",
+    "#e0641b in light fails no pair the registry measures",
+    "#e0641b in dark fails no pair the registry measures",
+    "#2f8f2f in light fails no pair the registry measures",
+    "#2f8f2f in dark fails no pair the registry measures",
+    "#0f7f8c in light fails no pair the registry measures",
+    "#0f7f8c in dark fails no pair the registry measures",
+    "#8b8b8b in light fails no pair the registry measures",
+    "#8b8b8b in dark fails no pair the registry measures",
+    "#111111 in light fails no pair the registry measures",
+    "#111111 in dark fails no pair the registry measures",
+    "exists because the colour as answered is not legible everywhere",
+    "is never pulled further than half the mode's own ink"
+   ],
+   "tests": [
+    {
+     "title": "#2563eb in light fails no pair the registry measures",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "#2563eb in dark fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#b3245c in light fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#b3245c in dark fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#7a3cc4 in light fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#7a3cc4 in dark fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#e0641b in light fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#e0641b in dark fails no pair the registry measures",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "#2f8f2f in light fails no pair the registry measures",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "#2f8f2f in dark fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#0f7f8c in light fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#0f7f8c in dark fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#8b8b8b in light fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#8b8b8b in dark fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#111111 in light fails no pair the registry measures",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "#111111 in dark fails no pair the registry measures",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "exists because the colour as answered is not legible everywhere",
+     "ms": 6,
+     "measured": false
+    },
+    {
+     "title": "is never pulled further than half the mode's own ink",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 126,
+   "coveredProdLines": 1909,
+   "onlyProdLines": null,
+   "testsMs": 64
   },
   {
    "file": "tests/ui/theme.test.tsx",
@@ -19803,6 +20135,99 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-connection-document-outside-its-schema-is-refused-like-a-refusal.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "The generated validator is the phone's own boundary: a document that names a name and nothing else is not a workspace description, and it is refused the way a 404 is \u2014 nothing is worn, no remembered row is written for a host whose answer this phone could not read, and the person is still asked for their password at the address they typed, under its host.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 31373,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a body outside the pinned schema is answered the same way a refusal is"
+   ],
+   "tests": [
+    {
+     "title": "a body outside the pinned schema is answered the same way a refusal is",
+     "ms": 174,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2550,
+   "onlyProdLines": null,
+   "testsMs": 174
+  },
+  {
+   "file": "tests/a-lookup-that-never-answers-asks-for-the-password-at-the-address-it-was-typed.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A lookup the network never answers is one of the ways a workspace says nothing: the phone wears its own look, names the place by the host the person typed, and asks for the email and the password there. Two things are pinned here that no other case reaches: the request went to the address that was typed and to no other, and a wire that dies mid-flight strands nobody \u2014 no remembered row, no half-worn colour, no screen without a way forward.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 29759,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "an address the network never answers is still asked for a password, at its own host"
+   ],
+   "tests": [
+    {
+     "title": "an address the network never answers is still asked for a password, at its own host",
+     "ms": 172,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2520,
+   "onlyProdLines": null,
+   "testsMs": 172
+  },
+  {
+   "file": "tests/an-address-with-no-connection-document-still-asks-for-a-password.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A workspace that answers no connection document is still a place a person can sign in at: the phone wears its own look, names the place by its host, and asks for the email and the password there. A server that predates the document, or one whose document is briefly unavailable, must not leave a fresh install with no way past the address.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 27059,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a absent connection document still reaches the password with the host as the name",
+    "a failing connection document still reaches the password with the host as the name"
+   ],
+   "tests": [
+    {
+     "title": "a absent connection document still reaches the password with the host as the name",
+     "ms": 467,
+     "measured": false
+    },
+    {
+     "title": "a failing connection document still reaches the password with the host as the name",
+     "ms": 15,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2544,
+   "onlyProdLines": null,
+   "testsMs": 482
+  },
+  {
    "file": "tests/route.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25034,6 +25459,105 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-app-hands-the-shell-its-workspaces-table.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "What the reference app keeps on the phone is one list in src/screens/device.ts, and the shell only remembers the workspaces a person has connected to when that list hands it the table for them. A store the device creates and never passes on is a list no person sees.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21476,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the device hands the shell the table of workspaces this phone has connected to"
+   ],
+   "tests": [
+    {
+     "title": "the device hands the shell the table of workspaces this phone has connected to",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 133,
+   "coveredProdLines": 1920,
+   "onlyProdLines": null,
+   "testsMs": 2
+  },
+  {
+   "file": "tests/the-connect-step-asks-a-workspace-what-it-is-before-it-asks-who-you-are.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The connect step, end to end: the person types an address, the phone asks that address what it is, and the answer \u2014 name, host, colour, mark \u2014 is on screen before a password is asked for, painted in the colour the workspace brought. Everything below runs over the real transport (the pinned `zConnection` and the route table are in the path) and the real shell; only the network and the device's tables are answered from memory.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 31669,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the address step asks for a place before anything asks who you are",
+    "Continue asks once, and the workspace it answered for is on screen before the password"
+   ],
+   "tests": [
+    {
+     "title": "the address step asks for a place before anything asks who you are",
+     "ms": 120,
+     "measured": false
+    },
+    {
+     "title": "Continue asks once, and the workspace it answered for is on screen before the password",
+     "ms": 73,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2603,
+   "onlyProdLines": null,
+   "testsMs": 193
+  },
+  {
+   "file": "tests/the-mark-is-asked-of-the-address-that-named-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A workspace's mark is a path on the host that answered the document naming it, so the phone asks that host for it: on a blank phone, and on a phone that was pointed somewhere else before the person changed the address. The mark is on the connect step's credentials before the password is asked for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22052,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a blank phone asks the address it connected to for the mark",
+    "a changed address asks the new host for the mark, never the one before it"
+   ],
+   "tests": [
+    {
+     "title": "a blank phone asks the address it connected to for the mark",
+     "ms": 99,
+     "measured": false
+    },
+    {
+     "title": "a changed address asks the new host for the mark, never the one before it",
+     "ms": 19,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2610,
+   "onlyProdLines": null,
+   "testsMs": 118
+  },
+  {
    "file": "tests/ui/list-from-the-phone-says-so.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25108,6 +25632,76 @@
    "coveredProdLines": 701,
    "onlyProdLines": null,
    "testsMs": 23
+  },
+  {
+   "file": "tests/what-this-device-remembers-is-listed-as-places-and-fills-the-address.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A remembered workspace is an address with a name on it: listed as a place, pressed without a field being touched, and asked about once. It never signs anybody in \u2014 the row carries a server, a name, a mark and a moment, and no credential has a slot to live in.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26444,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "what this device remembers is listed as places, and a press fills the address with it"
+   ],
+   "tests": [
+    {
+     "title": "what this device remembers is listed as places, and a press fills the address with it",
+     "ms": 665,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2603,
+   "onlyProdLines": null,
+   "testsMs": 665
+  },
+  {
+   "file": "tests/workspace-sign-in-keeps-its-address-through-refusals.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A connection document describes a place without deciding whether anyone can sign in: a refused read still signs in at the address shown, a superseded read cannot replace the newer place, and a saved sign-in that cannot be read says so on the address step.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 41927,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a refused connection read still submits and opens the session at the changed address",
+    "a late successful lookup cannot replace or remember the newer refused workspace",
+    "an unreadable saved sign-in is visible and can be cleared on the address step"
+   ],
+   "tests": [
+    {
+     "title": "a refused connection read still submits and opens the session at the changed address",
+     "ms": 206,
+     "measured": false
+    },
+    {
+     "title": "a late successful lookup cannot replace or remember the newer refused workspace",
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "an unreadable saved sign-in is visible and can be cleared on the address step",
+     "ms": 21,
+     "measured": false
+    }
+   ],
+   "loaded": 169,
+   "coveredProdLines": 2791,
+   "onlyProdLines": null,
+   "testsMs": 246
   },
   {
    "file": "tests/chart-axis-position.case.mjs",
@@ -26113,7 +26707,7 @@
    "ms": null,
    "onlyProdLines": null,
    "onlyFiles": [],
-   "rule": "The way in: the server, then who you are. Every value comes from the environment (make e2e-android passes them); nothing here names a tenant.",
+   "rule": "The way in: where you mean, then who you are. The phone asks the workspace what it is before it asks for a password, so the journey taps Continue and waits for the name \u2014 the proof that a person aims at a place and not at an address. Every value comes from the environment (make e2e-android passes them); nothing here names a tenant.",
    "claims": [
     "app/sign-in.tsx"
    ],

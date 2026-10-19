@@ -5,7 +5,8 @@
 // the same frame: a saved sign-in being restored, and one that could not be
 // opened, so a product need not draw those screens itself.
 import type { Feedback } from "../../core/derive";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import type { Remembered, Workspace } from "../../core/workspace";
+import React, { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../atoms/Button";
@@ -14,8 +15,10 @@ import { Spinner } from "../atoms/Spinner";
 import { Text } from "../atoms/Text";
 import { TextField } from "../atoms/TextField";
 import { FormField } from "../molecules/FormField";
+import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 import { ServerField } from "../molecules/ServerField";
+import { testable } from "../props";
 import { Screen } from "../templates/Screen";
 import { useStyles, useTheme, type Theme } from "../theme";
 
@@ -35,7 +38,7 @@ export interface Props {
    * window a challenge opens is the server's five minutes, and the phone keeps
    * no copy of it.
    */
-  readonly step?: "credentials" | "code";
+  readonly step?: "address" | "credentials" | "code";
   /** code is what is typed now, held by the caller so a refusal can empty the field. */
   readonly code?: string;
   readonly onCodeChange?: (code: string) => void;
@@ -55,7 +58,52 @@ export interface Props {
   /** initialEmail is who that session belonged to, so the address is not asked for twice. */
   readonly initialEmail?: string;
   readonly onRetry?: () => void;
+  /**
+   * workspace is the face of the place this password is offered at: the name to say over the
+   * fields and the host to say under it. The screen resolves the name — the workspace's own
+   * word, the address, or the copy table's word for a workspace — so the form and the header
+   * can never call the same place two things. Absent is a form with nothing to say about
+   * the place yet — no line and no way back to the address.
+   */
+  readonly workspace?: { readonly name: string; readonly host: string } | undefined;
+  /**
+   * mark is the workspace's own image, built by the composition that owns an image view;
+   * this frame only says where it sits. Absent — or a mark that never arrived — is no image.
+   */
+  readonly mark?: ReactNode;
+  /**
+   * remembered are the workspaces this device has been pointed at, newest first. Absent is
+   * a build with no table for them; an empty list is a person who has connected nowhere.
+   */
+  readonly remembered?: readonly Remembered[] | undefined;
+  /**
+   * markFor builds one remembered workspace's mark, the same way `mark` is built for the place
+   * being connected to: the composition that owns an image view makes it, and this frame only
+   * says where it sits. It is asked of a row whose own record holds a mark; absent, it is a
+   * build with no image view and no row is given a tile.
+   */
+  readonly markFor?: ((workspace: Remembered) => ReactNode) | undefined;
+  /** connecting says the address the person typed is being asked what it is. */
+  readonly connecting?: boolean;
+  /**
+   * onContinue asks what the workspace at an address is, and onContinue's answer decides
+   * whether the password is asked there. The address goes as it was typed.
+   */
+  readonly onContinue?: (baseURL: string) => void;
+  /** onEditAddress goes back from the workspace's face to the address, with what was typed kept. */
+  readonly onEditAddress?: () => void;
 }
+
+/**
+ * slug is an address turned into the safe half of a testID: a remembered row is named for
+ * the host it points at, so a test can reach one workspace without knowing the others.
+ */
+const slug = (server: string): string =>
+  server
+    .replace(/^[a-z]+:\/\//i, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
 
 export function SignInForm({
   feedback,
@@ -76,6 +124,13 @@ export function SignInForm({
   onCodeChange,
   onSubmitCode,
   onEditCredentials,
+  workspace,
+  mark,
+  remembered,
+  markFor,
+  connecting = false,
+  onContinue,
+  onEditAddress,
 }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
@@ -139,6 +194,69 @@ export function SignInForm({
         />
       </Screen>
     );
+  if (step === "address") {
+    // One door for both ways onto an address: typed in the field or remembered on the list.
+    // The value is written where a pressed control reads it, so the address the lookup asks
+    // about is the one the person saw, not the one before they typed.
+    const go = (server: string) => {
+      typed.current.url = server;
+      setURL(server);
+      onContinue?.(server);
+    };
+    return (
+      <Screen form testID="sign-in">
+        {head(kit.connectTitle, kit.connectIntro)}
+        {/* The notice the credentials step draws, in the same words: a saved sign-in this phone
+            could not read, or could not clear, is about the address being typed here, and an
+            address step that drew it nowhere would keep a failure it has to itself. */}
+        {notice ? (
+          <Notice
+            announcement="polite"
+            tone="warning"
+            text={notice}
+            action={{ label: "Clear saved sign-in", onPress: onClear }}
+            testID="sign-in-notice"
+          />
+        ) : null}
+        {remembered === undefined || remembered.length === 0 ? null : (
+          <Section title={kit.rememberedWorkspaces} testID="sign-in-remembered">
+            {remembered.map((entry) => (
+              <Row
+                key={entry.host}
+                // A row that remembers no mark reserves no tile beside it: the name keeps the
+                // whole line, as it does on a build that ships no image view at all.
+                {...(markFor === undefined || entry.logoPath === undefined
+                  ? {}
+                  : { leading: <View style={s.rowMark}>{markFor(entry)}</View> })}
+                title={entry.name}
+                summary={entry.host}
+                opens
+                onPress={() => go(entry.host)}
+                testID={`workspace-remembered-${slug(entry.host)}`}
+              />
+            ))}
+          </Section>
+        )}
+        <Section>
+          <ServerField
+            caption={kit.workspaceAddress}
+            value={url}
+            onChange={(v) => {
+              typed.current.url = v;
+              setURL(v);
+            }}
+            disabled={busy || connecting}
+          />
+        </Section>
+        <Button
+          label={connecting ? kit.checking : kit.continueLabel}
+          onPress={() => go(typed.current.url.trim())}
+          busy={connecting}
+          testID="continue"
+        />
+      </Screen>
+    );
+  }
   if (step === "code") {
     const sendCode = () => {
       if (!busy) onSubmitCode?.(typed.current.code);
@@ -219,16 +337,34 @@ export function SignInForm({
           testID="sign-in-notice"
         />
       ) : null}
-      <Section>
-        <ServerField
-          caption={feedback.copy.kit.workspaceAddress}
-          value={url}
-          onChange={(v) => {
-            typed.current.url = v;
-            setURL(v);
-          }}
-          disabled={busy}
+      <View style={s.here}>
+        {mark ? (
+          <View style={s.mark} {...testable("workspace-mark")}>
+            {mark}
+          </View>
+        ) : null}
+        {workspace ? (
+          <View style={s.named}>
+            {/* The name the workspace used for itself, and the address under it: a person
+              aims at a place they recognise, and can still tell which one this is. */}
+            <Text role="title" numberOfLines={1} testID="workspace-name">
+              {workspace.name}
+            </Text>
+            {workspace.host === "" ? null : (
+              <Text role="caption" tone="muted" numberOfLines={1} testID="workspace-host">
+                {workspace.host}
+              </Text>
+            )}
+          </View>
+        ) : null}
+        <Button
+          label={kit.changeWorkspace}
+          tone="secondary"
+          onPress={() => onEditAddress?.()}
+          testID="change-workspace"
         />
+      </View>
+      <Section>
         <FormField label="Email">
           <TextField
             kind="email"
@@ -277,4 +413,25 @@ export function SignInForm({
 const styles = (t: Theme) =>
   StyleSheet.create({
     head: { gap: t.space.xs, paddingBottom: t.space.sm },
+    here: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: t.space.sm,
+      paddingVertical: t.space.sm,
+    },
+    named: { flexShrink: 1, flexGrow: 1, gap: t.space.xs },
+    mark: {
+      width: t.extent.avatar,
+      height: t.extent.avatar,
+      borderRadius: t.radius.md,
+      overflow: "hidden",
+    },
+    // The remembered row's own tile: a list of places this phone has been at is read by
+    // their marks, the same way the step itself is.
+    rowMark: {
+      width: t.extent.rowMedia,
+      height: t.extent.rowMedia,
+      borderRadius: t.radius.md,
+      overflow: "hidden",
+    },
   });

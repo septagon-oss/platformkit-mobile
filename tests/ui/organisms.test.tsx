@@ -680,23 +680,31 @@ describe("SignInForm", () => {
   });
 
   test("the form asks for the workspace address in the person's words, not in tenancy jargon", async () => {
-    await inTheme(
-      <SignInForm
-        feedback={feedback}
-        baseURL="https://acme.test"
-        notice=""
-        busy={false}
-        error=""
-        onSubmit={none}
-        onClear={none}
-      />,
-    );
-    expect(
-      screen.getByText("Enter your workspace address and the email you use there."),
-    ).toBeOnTheScreen();
+    const base = {
+      feedback,
+      baseURL: "https://acme.test",
+      notice: "",
+      busy: false,
+      error: "",
+      onSubmit: none,
+      onClear: none,
+    };
+    // The address is asked on the step that asks for it, in the words the reader's language
+    // holds — and never as a tenant.
+    await inTheme(<SignInForm {...base} step="address" />);
+    expect(screen.getByText("Enter the address of your workspace.")).toBeOnTheScreen();
     expect(screen.getByText("Workspace address")).toBeOnTheScreen();
     // The input itself says what it holds, and keeps the id the sign-in flow types into.
     expect(screen.getByTestId("server").props.accessibilityLabel).toBe("Workspace address");
+    expect(screen.queryByText(/tenant/i)).toBeNull();
+    await screen.unmount();
+    // The password step says the same thing about the same place, in the same words.
+    // The password step asks for the two things it actually holds, in the same words a reader
+    // of the other language gets.
+    await inTheme(<SignInForm {...base} workspace={{ name: "acme.test", host: "acme.test" }} />);
+    expect(
+      screen.getByText("Enter the email and password you use at this workspace."),
+    ).toBeOnTheScreen();
     expect(screen.queryByText(/tenant/i)).toBeNull();
   });
 

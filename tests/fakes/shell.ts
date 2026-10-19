@@ -132,6 +132,12 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     // No store, so no remembered opens either: a screen that shows them draws no section,
     // which is what a device without a database is.
     recents: undefined,
+    // No store, so no remembered workspaces either: the connect step draws the field alone,
+    // which is what a device without a database is.
+    workspaces: undefined,
+    // Nothing answered this address, so the phone knows its host and nothing else.
+    workspace: { server: "https://acme.test", host: "acme.test", name: "" },
+    lookUp: jest.fn<ShellValue["lookUp"]>(async () => undefined),
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),
     signIn: jest.fn<ShellValue["signIn"]>(async () => ({ kind: "signed-in" })),

@@ -6,6 +6,8 @@
 // fails here rather than quietly passing against a store that never checks.
 import { heldFrom, isScope, type PendingWrite, type Scope } from "../../src/core/outbox";
 import { cachedFrom, CACHE_VERSION, type CachedAnswer } from "../../src/core/read-cache";
+import { WORKSPACES_KEEP, type Remembered as RememberedWorkspace } from "../../src/core/workspace";
+import type { WorkspaceStore } from "../../src/effects/workspaces";
 import { RECENT_KEEP, recentFrom, recentKey, type Recent } from "../../src/core/recents";
 import type { OutboxStore } from "../../src/effects/outbox";
 import type { ReadStore } from "../../src/effects/read-cache";
@@ -296,5 +298,32 @@ export function fakeRecentsStore() {
     rows,
     /** remembered answers what this scope's section would be drawn from, cap and all. */
     shown: (scope: Scope) => byNewest(inScope(scope)).map((row) => row.item),
+  };
+}
+
+/**
+ * fakeWorkspaceStore is the `workspace_seen` table as this suite can hold it: one row per
+ * server (the table's own key), replaced rather than doubled, pruned to WORKSPACES_KEEP
+ * newest-first in the same call — which is what the device does in one transaction, and is
+ * why a test can ask what a ninth workspace did to the first. `rows` is the live list oldest
+ * first, so a test reads what the phone would still hold.
+ */
+export function fakeWorkspaceStore() {
+  const rows: RememberedWorkspace[] = [];
+  const order = (a: RememberedWorkspace, b: RememberedWorkspace): number =>
+    a.seenAt < b.seenAt ? -1 : 1;
+  return {
+    rows,
+    store: {
+      open: async () => undefined,
+      save: async (workspace: RememberedWorkspace) => {
+        const held = rows.filter((row) => row.host !== workspace.host);
+        rows.length = 0;
+        rows.push(...held, workspace);
+        rows.sort(order);
+        while (rows.length > WORKSPACES_KEEP) rows.shift();
+      },
+      listed: async (limit: number) => [...rows].reverse().slice(0, limit),
+    } satisfies WorkspaceStore,
   };
 }

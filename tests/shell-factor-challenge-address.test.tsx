@@ -114,6 +114,7 @@ test("a code that opens the session is answered at the origin that asked for it"
     "factor.test/api/v1/auth/challenge/verify",
     "factor.test/api/v1/auth/tokens",
     "factor.test/api/v1/auth/me",
+    "factor.test/api/v1/app/connection",
     "factor.test/api/v1/app/resources",
   ]);
 });
@@ -149,6 +150,7 @@ test("a newer sign-in owns the challenge the code will answer", async () => {
     "second.test/api/v1/auth/challenge/verify",
     "second.test/api/v1/auth/tokens",
     "second.test/api/v1/auth/me",
+    "second.test/api/v1/app/connection",
     "second.test/api/v1/app/resources",
   ]);
   expect(savedRecord().baseURL).toBe("https://second.test");
@@ -220,6 +222,7 @@ test("a refused code leaves the same challenge open on the same server", async (
     "factor.test/api/v1/auth/challenge/verify",
     "factor.test/api/v1/auth/tokens",
     "factor.test/api/v1/auth/me",
+    "factor.test/api/v1/app/connection",
     "factor.test/api/v1/app/resources",
   ]);
 });

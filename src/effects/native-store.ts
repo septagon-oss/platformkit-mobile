@@ -1,7 +1,8 @@
 // native-store.ts is the one file in the kit that names expo-sqlite. It owns
-// the database file, its schema version and the SQL behind the two table ports
-// in src/effects/outbox.ts and src/effects/read-cache.ts — every decision about
-// what a held write means lives above this file, in src/core/outbox.ts.
+// the database file, its schema version and the SQL behind the table ports in
+// src/effects/outbox.ts, src/effects/read-cache.ts, src/effects/recents.ts and
+// src/effects/workspaces.ts — every decision about what a held write means
+// lives above this file, in src/core/outbox.ts.
 //
 // The file is platformkit.db in the app's private directory. No cookie, token
 // or Set-Cookie value is ever written here: a held write is sent with the
@@ -11,16 +12,19 @@ import { openDatabaseAsync, type SQLiteDatabase, type SQLiteBindValue } from "ex
 import { heldFrom, WRITE_METHOD, type PendingWrite, type Scope } from "../core/outbox";
 import { cachedFrom, CACHE_KEEP, type CachedAnswer } from "../core/read-cache";
 import { RECENT_KEEP, recentFrom, type Recent, type RecentRef } from "../core/recents";
+import { WORKSPACES_KEEP, rememberedFrom, type Remembered } from "../core/workspace";
 import type { OutboxStore } from "./outbox";
 import type { ReadStore } from "./read-cache";
 import type { RecentsStore } from "./recents";
+import type { WorkspaceStore } from "./workspaces";
 
 export const DATABASE = "platformkit.db";
 
 /** SCHEMA_VERSION is the file's shape, kept in PRAGMA user_version the way expo-sqlite's own storage does. A file that reports a newer version refuses to open; the future never guesses about the present. */
-// A newer table does not make an older one wrong: `recent_open` was added to version 1,
-// whose tables are created `IF NOT EXISTS`, so a file written by an app that never had the
-// section gains it on the next open and keeps every row it holds. Nothing changed shape.
+// A newer table does not make an older one wrong: `recent_open` and `workspace_seen` were
+// both added to version 1, whose tables are created `IF NOT EXISTS`, so a file written by
+// an app that never had either gains it on the next open and keeps every row it holds.
+// Nothing changed shape.
 export const SCHEMA_VERSION = 1;
 
 const PENDING = `CREATE TABLE IF NOT EXISTS pending_write (
@@ -52,6 +56,17 @@ const RECENT = `CREATE TABLE IF NOT EXISTS recent_open (
   PRIMARY KEY (server, user_id, resource_key, record_id))`;
 
 const RECENT_SCOPE = `CREATE INDEX IF NOT EXISTS recent_scope ON recent_open (server, user_id, opened_at)`;
+
+// One row per server, keyed by its origin: a workspace's face is the same whatever person
+// or app opened the phone, so no user column and no scope — the row names the server, and
+// `seen_at` is what the prune orders itself by.
+const WORKSPACE = `CREATE TABLE IF NOT EXISTS workspace_seen (
+  host TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  logo_path TEXT,
+  seen_at TEXT NOT NULL)`;
+
+const WORKSPACE_SEEN = `CREATE INDEX IF NOT EXISTS workspace_seen_at ON workspace_seen (seen_at)`;
 
 const CACHED = `CREATE TABLE IF NOT EXISTS cached_read (
   server TEXT NOT NULL,
@@ -131,6 +146,7 @@ export function createNativeStore(): {
   outbox: OutboxStore;
   reads: ReadStore;
   recents: RecentsStore;
+  workspaces: WorkspaceStore;
 } {
   let opening: Promise<SQLiteDatabase> | undefined;
 
@@ -153,6 +169,8 @@ export function createNativeStore(): {
         await txn.execAsync(CACHED);
         await txn.execAsync(RECENT);
         await txn.execAsync(RECENT_SCOPE);
+        await txn.execAsync(WORKSPACE);
+        await txn.execAsync(WORKSPACE_SEEN);
         if (version < SCHEMA_VERSION)
           await txn.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION}`);
         await txn.execAsync(
@@ -422,7 +440,69 @@ export function createNativeStore(): {
     },
   };
 
-  return { outbox: outboxStore, reads: readStore, recents: recentStore };
+  interface WorkspaceRow {
+    readonly host: string;
+    readonly name: string;
+    readonly logo_path: string | null;
+    readonly seen_at: string;
+  }
+
+  // A remembered workspace is a convenience: a row whose text no longer reads is dropped
+  // where an unreadable held write refuses its table, exactly as `remembered` does for an
+  // open, because the address is still one tap away in the field.
+  function seen(row: WorkspaceRow): Remembered | undefined {
+    try {
+      return rememberedFrom({
+        host: row.host,
+        name: row.name,
+        ...(row.logo_path === null ? {} : { logoPath: row.logo_path }),
+        seenAt: row.seen_at,
+      });
+    } catch {
+      return undefined;
+    }
+  }
+
+  const workspaceStore: WorkspaceStore = {
+    open: () => database().then(() => undefined),
+
+    save: async (workspace) => {
+      const db = await database();
+      // One answer replaces this server's row and trims the list in the same
+      // transaction: a workspace whose name changed is not two rows, and the
+      // list never outlives the bound that says how long it may be.
+      await db.withExclusiveTransactionAsync(async (txn) => {
+        await txn.runAsync(
+          `INSERT INTO workspace_seen (host, name, logo_path, seen_at)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT (host) DO UPDATE SET
+             name = excluded.name, logo_path = excluded.logo_path, seen_at = excluded.seen_at`,
+          [workspace.host, workspace.name, workspace.logoPath ?? null, workspace.seenAt],
+        );
+        await txn.runAsync(
+          `DELETE FROM workspace_seen WHERE host NOT IN (
+             SELECT host FROM workspace_seen ORDER BY seen_at DESC LIMIT ?)`,
+          [WORKSPACES_KEEP],
+        );
+      });
+    },
+
+    listed: async (limit) => {
+      const db = await database();
+      const rows = await db.getAllAsync<WorkspaceRow>(
+        "SELECT * FROM workspace_seen ORDER BY seen_at DESC, host DESC LIMIT ?",
+        [limit],
+      );
+      return rows.map(seen).filter((row): row is Remembered => row !== undefined);
+    },
+  };
+
+  return {
+    outbox: outboxStore,
+    reads: readStore,
+    recents: recentStore,
+    workspaces: workspaceStore,
+  };
 }
 
 /** deviceStore is the one database file, seen as the table ports the kit owns. */

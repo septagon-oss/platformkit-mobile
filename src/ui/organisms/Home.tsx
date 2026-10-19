@@ -5,7 +5,7 @@
 // native header, set by the screen composition. What this phone is holding to the
 // person is above the counts, because it is the first thing a phone that lost its
 // network owes an answer to.
-import React from "react";
+import React, { type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import type { Entry } from "../../core/catalog";
@@ -42,6 +42,12 @@ export interface Props {
   readonly greeting: string;
   readonly workspace: string;
   /**
+   * mark is the workspace's own image, built by the composition that owns an image view and
+   * drawn beside the line that names the place. Absent — or a mark that never arrived — is
+   * no image: the greeting and the name are said either way.
+   */
+  readonly mark?: ReactNode;
+  /**
    * cards are the counts the installation answered, and counts the rows of the same
    * resource. Absent is absence: an empty list draws no cards and no numbers, which is
    * what a body that never answered, or a read that was refused, looks like — never a
@@ -74,6 +80,7 @@ export function Home({
   renderImage,
   greeting,
   workspace,
+  mark,
   cards,
   counts,
   recents,
@@ -107,9 +114,16 @@ export function Home({
       <Text role="title" numberOfLines={1}>
         {greeting}
       </Text>
-      <Text role="caption" tone="muted" numberOfLines={1} testID="home-workspace">
-        {workspace}
-      </Text>
+      <View style={s.named}>
+        {mark ? (
+          <View style={s.mark} {...testable("home-workspace-mark")}>
+            {mark}
+          </View>
+        ) : null}
+        <Text role="caption" tone="muted" numberOfLines={1} testID="home-workspace">
+          {workspace}
+        </Text>
+      </View>
     </View>
   );
   const header = (
@@ -227,4 +241,15 @@ const styles = (t: Theme) =>
     // three fitted would trade a readable number for arithmetic, and a sideways scroll would
     // hide a count behind a gesture nobody offers on a page that already scrolls down.
     cards: { flexDirection: "row", flexWrap: "wrap", gap: t.space.sm },
+    // The workspace's own mark sits beside the line that names the place, at the small
+    // avatar's size: same height as the account row under it, so the page reads down one
+    // column of faces.
+    named: { flexDirection: "row", alignItems: "center", gap: t.space.xs },
+    mark: {
+      width: t.extent.avatarSmall,
+      height: t.extent.avatarSmall,
+      borderRadius: t.radius.full,
+      overflow: "hidden",
+      flexShrink: 0,
+    },
   });
