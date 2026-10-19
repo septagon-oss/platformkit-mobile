@@ -34,6 +34,7 @@ import {
 import type { Session as Saved } from "./effects/session";
 import { createOutbox, type Outbox, type OutboxStore } from "./effects/outbox";
 import { createReadCache, type ReadCache, type ReadStore } from "./effects/read-cache";
+import { createRecents, type Recents, type RecentsStore } from "./effects/recents";
 import { sessions } from "./effects/native-session";
 import type { Reach } from "./effects/native-reach";
 import { systemClock } from "./screens/clock";
@@ -60,6 +61,11 @@ export interface ShellValue {
   readonly outbox: OutboxValue | undefined;
   /** reads answers an unreachable read from the last response this phone got. */
   readonly reads: ReadCache | undefined;
+  /**
+   * recents is what this device remembers this person opened, or nothing where no store was
+   * supplied. It is read by the screen that shows a person their own recent opens.
+   */
+  readonly recents: Recents | undefined;
   /** where the person standing in front of the app is; every route file says so as it draws. */
   readonly saw: (href: string) => void;
   /** what the person has typed into the sheet at this address, while the server refuses the
@@ -151,11 +157,16 @@ interface Props {
   /** media is the pinch and motion surface this product ships with, named once here. */
   readonly media?: MediaRenderers | undefined;
   /**
-   * store is the device's two tables, supplied by the composition root; the kit
+   * store is the device's tables, supplied by the composition root; the kit
    * opens no database of its own, so a host without one (a test, a web build)
-   * simply has no queue and no cache, and every write behaves as it did.
+   * simply has no queue, no cache and no remembered opens, and every write behaves
+   * as it did.
    */
-  readonly store?: { readonly outbox: OutboxStore; readonly reads: ReadStore };
+  readonly store?: {
+    readonly outbox: OutboxStore;
+    readonly reads: ReadStore;
+    readonly recents: RecentsStore;
+  };
   /** clock is what stamps a held write; the queue's order never comes from it. */
   readonly clock?: Clock;
   /** mint names an idempotency key: expo-crypto's randomUUID on a device. */
@@ -481,6 +492,21 @@ export function Shell({
     [store, baseURL, userId, clock],
   );
 
+  const recents = useMemo(
+    () =>
+      store && userId
+        ? createRecents({
+            store: store.recents,
+            clock: clock ?? systemClock,
+            // The same owner of a scope the queue and the cache ask, so one rule says whose
+            // opens these are — and a person who signs in at a phone another person used
+            // reads a section of their own.
+            scope: () => heldScope(baseURL, userId),
+          })
+        : undefined,
+    [store, baseURL, userId, clock],
+  );
+
   useEffect(() => {
     if (!outbox) return;
     // `mounted` is this effect's own, and says what `live` above — the session the
@@ -645,6 +671,7 @@ export function Shell({
       returning,
       outbox: outboxValue,
       reads,
+      recents,
       entry: (module, entity) =>
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
       async signIn(url, email, password) {
@@ -845,6 +872,7 @@ export function Shell({
       returning,
       outboxValue,
       reads,
+      recents,
       begin,
       connect,
       load,

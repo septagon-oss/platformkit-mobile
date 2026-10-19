@@ -4,7 +4,7 @@ import React from "react";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 import { heldWrite } from "../src/core/outbox";
 import { catalog } from "./fakes/shell";
-import { clock, fakeOutboxStore, fakeReadStore, mint } from "./fakes/store";
+import { clock, fakeOutboxStore, fakeRecentsStore, fakeReadStore, mint } from "./fakes/store";
 import { loginIdentity, loginResponse } from "./fakes/wire";
 
 jest.mock("expo-secure-store", () => ({
@@ -68,7 +68,13 @@ test("refreshing the catalog does not send the next held write before the first 
     throw new Error(`Unexpected request: ${path}`);
   }) as typeof fetch;
   await render(
-    <Shell baseURL="https://acme.test" renderers={{}} store={store} clock={clock()} mint={mint()}>
+    <Shell
+      baseURL="https://acme.test"
+      renderers={{}}
+      store={{ ...store, recents: fakeRecentsStore().store }}
+      clock={clock()}
+      mint={mint()}
+    >
       <Session />
     </Shell>,
   );

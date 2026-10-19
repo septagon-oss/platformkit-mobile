@@ -8,10 +8,15 @@ import { randomUUID } from "expo-crypto";
 import { deviceStore } from "../effects/native-store";
 import { createReach, type Reach } from "../effects/native-reach";
 import type { OutboxStore } from "../effects/outbox";
+import type { RecentsStore } from "../effects/recents";
 import type { ReadStore } from "../effects/read-cache";
 
 export interface Device {
-  readonly store: { readonly outbox: OutboxStore; readonly reads: ReadStore };
+  readonly store: {
+    readonly outbox: OutboxStore;
+    readonly reads: ReadStore;
+    readonly recents: RecentsStore;
+  };
   readonly mint: () => string;
   readonly reach: Reach;
 }
@@ -22,7 +27,11 @@ export interface Device {
  * run, and a mint that could repeat a key is worse than no key at all.
  */
 export const device: Device = Object.freeze({
-  store: Object.freeze({ outbox: deviceStore.outbox, reads: deviceStore.reads }),
+  store: Object.freeze({
+    outbox: deviceStore.outbox,
+    reads: deviceStore.reads,
+    recents: deviceStore.recents,
+  }),
   mint: randomUUID,
   reach: createReach(),
 });

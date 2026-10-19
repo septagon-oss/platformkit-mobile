@@ -36,7 +36,11 @@ for the version being released.
   `EntryHints.highlight`, the declared word a sub-count needs. `./ui/molecules/StatCard` is
   new; `StatTile` gains `framed` and `Sparkline` gains `height`/`decorative`, each optional
   and each defaulting to the bytes every existing caller already passed; `theme.tsx` gains
-  `surface.band` and its two contrast pairs.
+  `surface.band` and its two contrast pairs. Home also remembers: `./core/recents.ts` and
+  `./effects/recents.ts` are added, `createRecents` over a `recent_open` table keyed by
+  server and sign-in (five shown, twenty kept, pruned in the insert), and `ShellValue.recents`
+  carries it, absent where no store was supplied — a breaking change only to a host that
+  implements `ShellValue` itself, which below 1.0.0 the minor carries.
 - New in the same subpath, additive: `hasValue` (the one emptiness rule a record reads
   a row with), `informationFields` (the identifier and the two stamps, named once) and
   the section model itself; `record-menu` and `record-information` are the two ids a

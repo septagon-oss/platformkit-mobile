@@ -10,12 +10,17 @@
 import { openDatabaseAsync, type SQLiteDatabase, type SQLiteBindValue } from "expo-sqlite";
 import { heldFrom, WRITE_METHOD, type PendingWrite, type Scope } from "../core/outbox";
 import { cachedFrom, CACHE_KEEP, type CachedAnswer } from "../core/read-cache";
+import { RECENT_KEEP, recentFrom, type Recent } from "../core/recents";
 import type { OutboxStore } from "./outbox";
 import type { ReadStore } from "./read-cache";
+import type { RecentsStore } from "./recents";
 
 export const DATABASE = "platformkit.db";
 
 /** SCHEMA_VERSION is the file's shape, kept in PRAGMA user_version the way expo-sqlite's own storage does. A file that reports a newer version refuses to open; the future never guesses about the present. */
+// A newer table does not make an older one wrong: `recent_open` was added to version 1,
+// whose tables are created `IF NOT EXISTS`, so a file written by an app that never had the
+// section gains it on the next open and keeps every row it holds. Nothing changed shape.
 export const SCHEMA_VERSION = 1;
 
 const PENDING = `CREATE TABLE IF NOT EXISTS pending_write (
@@ -36,6 +41,17 @@ const PENDING = `CREATE TABLE IF NOT EXISTS pending_write (
   version INTEGER NOT NULL)`;
 
 const BY_SCOPE = `CREATE INDEX IF NOT EXISTS pending_scope ON pending_write (server, user_id, state, seq)`;
+
+const RECENT = `CREATE TABLE IF NOT EXISTS recent_open (
+  server TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  resource_key TEXT NOT NULL,
+  record_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  opened_at TEXT NOT NULL,
+  PRIMARY KEY (server, user_id, resource_key, record_id))`;
+
+const RECENT_SCOPE = `CREATE INDEX IF NOT EXISTS recent_scope ON recent_open (server, user_id, opened_at)`;
 
 const CACHED = `CREATE TABLE IF NOT EXISTS cached_read (
   server TEXT NOT NULL,
@@ -110,8 +126,12 @@ function answer(row: CachedRow): CachedAnswer | undefined {
   }
 }
 
-/** createNativeStore opens the file once and answers both table ports from the one connection. */
-export function createNativeStore(): { outbox: OutboxStore; reads: ReadStore } {
+/** createNativeStore opens the file once and answers every table port from the one connection. */
+export function createNativeStore(): {
+  outbox: OutboxStore;
+  reads: ReadStore;
+  recents: RecentsStore;
+} {
   let opening: Promise<SQLiteDatabase> | undefined;
 
   function database(): Promise<SQLiteDatabase> {
@@ -131,6 +151,8 @@ export function createNativeStore(): { outbox: OutboxStore; reads: ReadStore } {
         await txn.execAsync(PENDING);
         await txn.execAsync(BY_SCOPE);
         await txn.execAsync(CACHED);
+        await txn.execAsync(RECENT);
+        await txn.execAsync(RECENT_SCOPE);
         if (version < SCHEMA_VERSION)
           await txn.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION}`);
         await txn.execAsync(
@@ -323,8 +345,74 @@ export function createNativeStore(): { outbox: OutboxStore; reads: ReadStore } {
     },
   };
 
-  return { outbox: outboxStore, reads: readStore };
+  interface RecentRow {
+    readonly resource_key: string;
+    readonly record_id: string;
+    readonly title: string;
+    readonly opened_at: string;
+  }
+
+  // A row whose text no longer reads as an open is dropped rather than refused: a
+  // remembered open is a convenience, and the record behind it is still one tap away
+  // on its list. This is what a cache may do and a held write may not.
+  function remembered(row: RecentRow): Recent | undefined {
+    try {
+      return recentFrom({
+        resourceKey: row.resource_key,
+        recordId: row.record_id,
+        title: row.title,
+        openedAt: row.opened_at,
+      });
+    } catch {
+      return undefined;
+    }
+  }
+
+  const recentStore: RecentsStore = {
+    open: () => database().then(() => undefined),
+
+    save: async (scope, recent) => {
+      const db = await database();
+      // One open replaces this record's row and trims the list in the same
+      // transaction: reopening is not two rows, and a list never outlives its own
+      // ceiling on the way to the statement that trims it.
+      await db.withExclusiveTransactionAsync(async (txn) => {
+        await txn.runAsync(
+          `INSERT INTO recent_open (server, user_id, resource_key, record_id, title, opened_at)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT (server, user_id, resource_key, record_id) DO UPDATE SET
+             title = excluded.title, opened_at = excluded.opened_at`,
+          [
+            scope.server,
+            scope.userId,
+            recent.resourceKey,
+            recent.recordId,
+            recent.title,
+            recent.openedAt,
+          ],
+        );
+        await txn.runAsync(
+          `DELETE FROM recent_open WHERE server = ? AND user_id = ? AND rowid NOT IN (
+             SELECT rowid FROM recent_open WHERE server = ? AND user_id = ?
+             ORDER BY opened_at DESC LIMIT ?)`,
+          [scope.server, scope.userId, scope.server, scope.userId, RECENT_KEEP],
+        );
+      });
+    },
+
+    recent: async (scope, limit) => {
+      const db = await database();
+      const rows = await db.getAllAsync<RecentRow>(
+        `SELECT * FROM recent_open WHERE server = ? AND user_id = ?
+         ORDER BY opened_at DESC, rowid DESC LIMIT ?`,
+        [scope.server, scope.userId, limit],
+      );
+      return rows.map(remembered).filter((recent): recent is Recent => recent !== undefined);
+    },
+  };
+
+  return { outbox: outboxStore, reads: readStore, recents: recentStore };
 }
 
-/** deviceStore is the one database file, seen as the two table ports the kit owns. */
+/** deviceStore is the one database file, seen as the table ports the kit owns. */
 export const deviceStore = createNativeStore();

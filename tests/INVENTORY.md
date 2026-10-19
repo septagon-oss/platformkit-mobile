@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `4cd973b78` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `e737573df` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 36 | 215 | 47.5 s | 75 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 241 | 1110 | 50.5 s | 1766 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 101 | 325 | 39.7 s | 2235 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 243 | 1123 | 50.5 s | 1807 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 102 | 328 | 40.4 s | 2263 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 435
+* keep: 438
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 435 — 197 `tests/*.test.ts` (node), 181 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1650; cases in files no runner reaches: 35
-* isolated wall time: contract 75 s, behaviour 1766 s, composition 2235 s, journey 0 s
+* files inventoried: 438 — 198 `tests/*.test.ts` (node), 183 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1666; cases in files no runner reaches: 35
+* isolated wall time: contract 75 s, behaviour 1807 s, composition 2263 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -130,7 +130,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 
 | test file | runner | layer | cases | wall ms | tests ms | only-it-covers (prod lines) | tests with a line no other test covers | production files only it loads | flaky / reach | verdict | the rule it proves |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| tests/native-store-scope.test.tsx | jest | behaviour | 1 | 19973 | 8 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
+| tests/native-store-scope.test.tsx | jest | behaviour | 2 | 24678 | 12 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
 | tests/screens/nativeImage.test.tsx | jest | behaviour | 2 | 17291 | 1010 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) replaced and unmounted image sources cannot report into the active scope |
 | tests/screens/refusal-words-never-quote-the-wire.test.tsx | jest | behaviour | 25 | 24619 | 4149 | 1 | not measured | — | 0 | keep | A phone reads a refusal in its own words. The classifier decides which sentence a refusal is, but a decided sentence only counts once it is the one drawn, so t… |
 | tests/screens/useFeedback.test.tsx | jest | behaviour | 3 | 22923 | 18 | 8 | 1 of 3 | src/screens/StateFeedback.tsx | 0 | keep | (no first comment; first test title) each mounted form samples its explicit clock once, independently of another form |
@@ -167,6 +167,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/held-write-row.test.tsx | jest | behaviour | 3 | 15243 | 25 |  | not measured | — | 0 | keep | A write this phone is holding is shown as what it is: not saved, not lost, and with the two acts that belong to the person. The sentence comes from src/core/ou… |
 | tests/ui/home-greets-the-person.test.tsx | jest | behaviour | 6 | 19125 | 58 |  | not measured | — | 0 | keep | Home's first minute: the person is greeted, the workspace is named, and the counts the installation answered stand under them. A number the server never answer… |
 | tests/ui/home-held-writes.test.tsx | jest | behaviour | 1 | 16223 | 21 |  | not measured | — | 0 | keep | What this phone is holding is on the home screen, above the resources, with the two acts that belong to the person. A write that left the sheet and never reach… |
+| tests/ui/home-recently-opened.test.tsx | jest | behaviour | 5 | 34006 | 32 |  | not measured | — | 0 | keep | Home's "Recently opened" is a list of the phone's own: it is drawn from what this device remembers this person opening, in the order they opened them, and it l… |
 | tests/ui/illustration-drawing.test.tsx | jest | behaviour | 3 | 37413 | 242 |  | not measured | — | 0 | keep | The two inks of a drawing are the theme's: every stroke a picture paints is a palette colour of the mode it is drawn in, at the side and stroke the kit names, … |
 | tests/ui/interaction.test.tsx | jest | behaviour | 15 | 21059 | 939 | 4 | 1 of 15 | — | 0 | keep | The five molecules the reference bar asked for, and the states the theme hands them. Each one is asked the question a person looks at it to answer: how far thr… |
 | tests/ui/list-count-announcement.test.tsx | jest | behaviour | 2 | 20702 | 189 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) en announces a lone group's count once and withdraws it while loading |
@@ -334,6 +335,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/read-cache-answers-who-is-asking.test.ts | node | behaviour | 3 | 1008 | 5.3 |  | not measured | — | 0 | keep | Rules this file holds. An answer the phone keeps is kept for the person whose request brought it, whoever is signed in when it arrives. The offline fallback an… |
 | tests/read-cache-session-transition.test.ts | node | behaviour | 2 | 995 | 1.9 |  | not measured | — | 0 | keep | Either refusing an obsolete read or completing it for its original scope is acceptable; persisting its data under the new scope is not. |
 | tests/read-cache.test.ts | node | behaviour | 9 | 977 | 8.4 |  | not measured | — | 0 | keep | The read cache answers a screen from the last response this phone received for one read address when the server cannot be reached. These cases hold which respo… |
+| tests/recents-are-this-phones-own-list.test.ts | node | behaviour | 7 | 2043 | 8.8 |  | not measured | — | 0 | keep | "Recently opened" is this phone's own list: it belongs to one server and one sign-in, it replaces a record's row when it is opened again, it is bounded, and it… |
 | tests/reentry.test.ts | node | behaviour | 4 | 959 | 1.9 | 72 | 1 of 4 | src/core/reentry.ts | 0 | keep | The rule behind coming back in, asked directly: which identity a session is bound to, when two of them are the same person, and what address each of the four s… |
 | tests/reference-coverage.test.ts | node | behaviour | 1 | 236 | 2.4 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) each shared phone pattern has a visual reference |
 | tests/reference-images.test.ts | node | behaviour | 1 | 251 | 5 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) chosen gallery references are available beside their manifest |
@@ -389,6 +391,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-record-celebrates-the-write-that-finished-it.test.tsx | jest | composition | 4 | 42602 | 2033 |  | not measured | — | 0 | keep | Which writes owe a record its finishing moment, and which do not: the moment belongs to a write this phone made that moved the state into one the entry calls f… |
 | tests/screens/a-record-gallery-opens-and-closes-its-viewer.test.tsx | jest | composition | 1 | 19346 | 1226 |  | not measured | — | 0 | keep | A pressed gallery tile opens the kit's viewer at the very picture that was pressed, pages it by file identifier — never by position — and closes back to the re… |
 | tests/screens/a-record-keeps-its-name-without-a-picture-door.test.tsx | jest | composition | 1 | 18418 | 43 |  | not measured | — | 0 | keep | A record whose entry names a cover field, served by a catalogue that offers no picture door, cannot draw its cover: the phone has no way to read the bytes. It … |
+| tests/screens/a-record-opened-on-this-phone-is-remembered-where-it-was-opened.test.tsx | jest | composition | 3 | 28129 | 662 |  | not measured | — | 0 | keep | The junction: a record screen that got its row writes the open it just drew. The port, the table and the screen's own title rule are each tested where they liv… |
 | tests/screens/a-record-says-it-finished-when-this-phone-finished-it.test.tsx | jest | composition | 3 | 43527 | 2041 |  | not measured | — | 0 | keep | A record that reaches a state its entry calls finished, through a command the person ran on this phone, says so once: "Note done" is drawn on the record (`reco… |
 | tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx | jest | composition | 2 | 19848 | 872 |  | not measured | — | 0 | keep | A refresh never blanks what the list already says (0085): a row's assignee keeps the name the directory answered while a refresh asks again, and keeps it when … |
 | tests/screens/a-refused-cover-still-names-its-record.test.tsx | jest | composition | 2 | 22587 | 478 |  | not measured | — | 0 | keep | A record whose cover file the server refuses to describe still opens on its cover: the picture door is composed and the session can read with it, so the native… |

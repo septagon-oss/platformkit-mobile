@@ -1,12 +1,12 @@
 // Home is the catalog as rows, with the account in the native header: the
 // platform's own menu offers Refresh and Sign out.
-import { Stack, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useRecordPeople } from "./useReferenceNames";
 import { usePictures } from "./usePictures";
 import { useFeedback } from "./useFeedback";
 import { useSignOut } from "./useSignOut";
 import React, { useCallback, useMemo, useState } from "react";
-import type { Entry } from "../core/catalog";
+import { key, type Entry } from "../core/catalog";
 import {
   screenPath,
   accountPerson,
@@ -18,6 +18,7 @@ import {
   type Presentation,
 } from "../core/derive";
 import { rowCounts, statCards } from "../core/summary";
+import { recentHref, type Recent, type RecentDoor } from "../core/recents";
 import { heldWriteView } from "../core/outbox";
 import { useShell } from "../shell";
 import { useOperation } from "./useOperation";
@@ -32,7 +33,7 @@ interface Props {
 
 export function Home({ entries }: Props) {
   const feedback = useFeedback();
-  const { refresh, baseURL, identity, outbox, state } = useShell();
+  const { refresh, baseURL, identity, outbox, state, recents } = useShell();
   const pointers = useMemo(
     () => accountPointers(state.catalog?.resources ?? [], identity?.userId),
     [state.catalog, identity?.userId],
@@ -50,6 +51,20 @@ export function Home({ entries }: Props) {
   // no parameters to get wrong and no filter to invent: the installation answers for
   // what this person may read and nothing else.
   const { data: counted, reload: rereadCounts } = useOperation("appSummary", {});
+  // What this device remembers this person opened is the phone's own list, so it is read
+  // where it is drawn: on every focus, which is also the first time it is asked. A record
+  // came back from is in the section as soon as the page is in front of the person again,
+  // and a build that keeps no list has no list to read.
+  const [remembered, setRemembered] = useState<readonly Recent[]>([]);
+  const rereadRecents = useCallback(async () => {
+    const opened = recents ? await recents.list() : [];
+    setRemembered(opened);
+  }, [recents]);
+  useFocusEffect(
+    useCallback(() => {
+      void rereadRecents();
+    }, [rereadRecents]),
+  );
   const reload = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -84,6 +99,17 @@ export function Home({ entries }: Props) {
   const counts = useMemo(
     () => rowCounts(counted, entries, presentation),
     [counted, entries, presentation],
+  );
+  // A remembered open is only a door while the catalogue still hands over that resource:
+  // a record whose entry this person was not given drops out rather than drawing a row
+  // that opens nothing.
+  const recentDoors = useMemo<readonly RecentDoor[]>(
+    () =>
+      remembered.flatMap((recent) => {
+        const entry = entries.find((e) => key(e) === recent.resourceKey);
+        return entry ? [{ recent, entry }] : [];
+      }),
+    [remembered, entries],
   );
   const account = useCallback(
     () =>
@@ -132,11 +158,13 @@ export function Home({ entries }: Props) {
         workspace={workspace}
         cards={cards}
         counts={counts}
+        {...(recents === undefined ? {} : { recents: recentDoors })}
         {...(media.enabled ? { renderImage: media.renderImage } : {})}
         held={held}
         onRetryHeld={retryHeld}
         onDiscardHeld={discardHeld}
         onOpen={(e) => router.push(screenPath(e))}
+        onOpenRecent={(door) => router.push(recentHref(door))}
         onRefresh={() => void reload()}
       />
     </>

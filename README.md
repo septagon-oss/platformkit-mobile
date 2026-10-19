@@ -270,9 +270,9 @@ one author's slip is not worth this app's screens.
 
 Home is a greeting, a name and a few counts before it is a list. Top to bottom: the
 accent wash with the greeting and the workspace under it, the account line, what this
-phone is holding, up to three stat cards, and the resources as icon-tile rows — now with
-the installation's own count in the column a scan reads down. Pulling refreshes the
-catalogue and the counts with one spinner.
+phone is holding, up to three stat cards, the records this phone remembers opening, and
+the resources as icon-tile rows — now with the installation's own count in the column a
+scan reads down. Pulling refreshes the catalogue and the counts with one spinner.
 
 The greeting is the part of day in the reader's own zone (morning from 05:00, afternoon
 from 12:00, evening from 17:00) and the person's first word — an address is never a name,
@@ -282,6 +282,15 @@ entry's declared plural or the declared `presentation.highlight.label`, and its 
 line is drawn only when both numbers arrived *and* the catalogue named the second one.
 The counts body carries integers and dates and no word, so the phone writes none: an
 absent number stays absent — no card, no row count, and never a `0` nobody answered.
+
+A remembered open is one row of `recent_open`: the resource, the record, the words the
+record screen drew for it and the instant it was opened, keyed by server and sign-in so a
+new person at the same phone reads an empty section without anybody deleting anything. A
+record is remembered while its row is on screen, reopening replaces its row rather than
+adding a second one, twenty are kept and five are shown, and the pruning happens in the
+same transaction as the insert. Nothing is sent: the section says what this device opened.
+A build with no store draws no section, and a read that cannot be stored changes nothing
+on the record screen.
 
 **Reused** — `ListScreen`'s `header` slot and its one `RefreshControl`, `Section`, `Row`
 (with its `trailing` column), `RowMedia`/`homeMedia`, `Avatar`, `Text`; `StatTile` and
@@ -302,8 +311,14 @@ because `StatTile` is a panel and a card is a panel plus a shape plus one senten
 two `Sparkline` props (`height`, `decorative`) and `StatTile`'s `framed`, each read by
 `StatCard` and by nobody else; `surface.band` and its two contrast pairs, the tint measured
 to 0.07 rather than picked; three `extent` members; eight words in both languages; and the
-pin's counts door (`build(api)`, first commit), which `documented()` refused until it moved.
-**Made reusable** — `src/core/summary.ts` as the one reading of `GET /api/v1/app/summary`
+pin's counts door (`build(api)`, first commit), which `documented()` refused until it moved;
+`src/core/recents.ts` and `src/effects/recents.ts` (`Recent`, `RecentDoor`, `recentHref`,
+`RECENT_SHOWN`, `RECENT_KEEP`, `createRecents`) over a `recent_open` table, modelled on
+`read-cache.ts` — same `(server, person)` scope, same bound-pruned-in-the-write, same
+parse-on-read that drops a row it cannot read rather than refusing its table, because a
+cache may be lost and a held write may not.
+**Made reusable** — `ShellValue.recents`, so a product's own "continue where you left off"
+reads the same handle rather than a second table; `src/core/summary.ts` as the one reading of `GET /api/v1/app/summary`
 for any surface that shows counts (a client's own dashboard, a widget, the web twin's
 columns); `StatCard` and `StatTile`'s `framed`/`Sparkline`'s `height`+`decorative` as kit
 molecules any client composes; `greeting`/`firstName`/`workspaceName`/`civilHour` as the

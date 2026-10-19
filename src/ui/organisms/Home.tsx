@@ -11,6 +11,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import type { Entry } from "../../core/catalog";
 import { noun, homeMedia, type AvatarModel, type Feedback } from "../../core/derive";
 import type { HeldWriteView } from "../../core/outbox";
+import { recentKey, type RecentDoor } from "../../core/recents";
 import type { StatCardModel } from "../../core/summary";
 import { EmptyState } from "../atoms/EmptyState";
 import { Text } from "../atoms/Text";
@@ -48,7 +49,15 @@ export interface Props {
    */
   readonly cards: readonly StatCardModel[];
   readonly counts: Readonly<Record<string, string>>;
+  /**
+   * recents are the records this device remembers this person opened, newest first. They
+   * are absent — not empty — where the phone keeps no list at all, which is a build with no
+   * store; an empty list is a person who has opened nothing, and neither draws a section.
+   */
+  readonly recents?: readonly RecentDoor[] | undefined;
   readonly onOpen: (entry: Entry) => void;
+  /** onOpenRecent opens one remembered record. Where it is not supplied, a row is not drawn. */
+  readonly onOpenRecent?: ((door: RecentDoor) => void) | undefined;
   readonly onRefresh: () => void;
   /** held is every write this phone still holds, in the order it was made. */
   readonly held: readonly HeldWriteView[];
@@ -67,7 +76,9 @@ export function Home({
   workspace,
   cards,
   counts,
+  recents,
   onOpen,
+  onOpenRecent,
   onRefresh,
   held,
   onRetryHeld,
@@ -136,8 +147,28 @@ export function Home({
           ))}
         </View>
       )}
+      {recents === undefined || recents.length === 0 || !onOpenRecent ? null : (
+        <Section title={feedback.copy.kit.recentlyOpened} testID="home-section-recent">
+          {recents.map((door) => (
+            <Row
+              key={recentKey(door.recent)}
+              title={door.recent.title}
+              leading={<RowMedia model={homeMedia(door.entry)} />}
+              onPress={() => onOpenRecent(door)}
+              testID={`home-recent-${door.entry.module}-${door.entry.entity}-${door.recent.recordId}`}
+            />
+          ))}
+        </Section>
+      )}
       {entries.length === 0 ? null : (
-        <Text role="caption" tone="muted" uppercase style={s.title} accessibilityRole="header">
+        <Text
+          role="caption"
+          tone="muted"
+          uppercase
+          style={s.title}
+          accessibilityRole="header"
+          testID="home-section-resources"
+        >
           {feedback.copy.kit.allResources}
         </Text>
       )}
