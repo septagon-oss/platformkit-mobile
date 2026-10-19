@@ -33,6 +33,7 @@ const identity = {
 };
 const routes = {
   me: "GET /api/v1/auth/me",
+  connection: "GET /api/v1/app/connection",
   resources: "GET /api/v1/app/resources",
   login: "POST /api/v1/auth/login",
   tokens: "POST /api/v1/auth/tokens",
@@ -115,7 +116,14 @@ describe("Shell", () => {
     ]);
     expect(latest?.entry("note", "note")?.path).toBe("/api/v1/note/notes");
     expect(latest?.entry("note", "invoice")).toBeUndefined();
-    expect(calls.map((c) => c.key).sort()).toEqual([routes.resources, routes.me]);
+    // A restored session asks the workspace whose records it is reading for its face as
+    // well: the name, the colour and the mark say nothing about a person, so they are read
+    // with the session and never instead of it.
+    expect(calls.map((c) => c.key).sort()).toEqual([
+      routes.connection,
+      routes.resources,
+      routes.me,
+    ]);
     // Every request after the restore presents the saved key and no cookie: the
     // record holds no cookie to present, and nothing read it if it did.
     for (const call of calls) {
