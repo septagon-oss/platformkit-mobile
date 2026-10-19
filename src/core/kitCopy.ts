@@ -263,6 +263,8 @@ export const kitEnglish = {
   images: "Images",
   imageUnavailable: "Image unavailable",
   retryImage: "Reload image",
+  /** photoCount names how many pictures a record holds: the line above a strip of them, in the reader's own digits. */
+  photoCount: (count: string, total: number) => `${count} ${total === 1 ? "photo" : "photos"}`,
   // Which language a record's words actually arrived in: `_i18n` names the language of a
   // translatable field the reader's own had no words for, and the sentence says so rather
   // than letting source-language prose pass for translated. The two languages this kit
@@ -556,6 +558,7 @@ export const kitPortuguese: KitWords = {
   images: "Imagens",
   imageUnavailable: "Imagem indisponível",
   retryImage: "Recarregar imagem",
+  photoCount: (count: string, total: number) => `${count} ${total === 1 ? "foto" : "fotos"}`,
   shownInLanguage: (language: string) => `Mostrado em ${language} — ainda não traduzido`,
   languageEnglish: "inglês",
   languagePortuguese: "português",

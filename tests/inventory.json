@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 234,
-   "cases": 1067,
-   "ms": 1645916,
-   "testsMs": 49589.900000000016,
+   "files": 237,
+   "cases": 1083,
+   "ms": 1701397,
+   "testsMs": 49728.20000000002,
    "runners": {
-    "jest": 75,
-    "node": 159
+    "jest": 77,
+    "node": 160
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 93,
-   "cases": 306,
-   "ms": 1996761,
-   "testsMs": 32148,
+   "files": 96,
+   "cases": 310,
+   "ms": 2057112,
+   "testsMs": 33895,
    "runners": {
-    "jest": 93
+    "jest": 96
    },
    "unreachable": 0
   },
@@ -3740,6 +3740,35 @@
    "coveredProdLines": 739,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared component setup mounts the reference catalogue's note in exactly this shape before every suite, so this also holds the precondition that hook leans on: the note is a resource the reference catalogue declares.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30398,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a record page given no picture door draws its header block and no cover"
+   ],
+   "tests": [
+    {
+     "title": "a record page given no picture door draws its header block and no cover",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 122,
+   "coveredProdLines": 1730,
+   "onlyProdLines": null,
+   "testsMs": 7
   },
   {
    "file": "tests/ui/agenda-appointment-lines.test.tsx",
@@ -7289,6 +7318,71 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/record-opens-on-its-photo.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 7,
+   "rule": "A record's picture is drawn where the record begins, and the facts it draws there are not drawn again below it. These are the record screen's two picture surfaces read off the rendered tree: the cover carries the record's name and no row prints its identifier, and the gallery offers a press only on a picture this phone can name.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20655,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the photo carries the record's name and no row prints its identifier",
+    "the gallery holds one tile per picture and opens only the ones it can name",
+    "the record's own information asks for no row the header or a gallery drew",
+    "the band that names the record waits until the photo is scrolled away",
+    "a supplied motion renderer is given the photo, the scroll and the preference",
+    "the band names the record once the photo is scrolled away, without fading in",
+    "the header block stays exactly the block it was"
+   ],
+   "tests": [
+    {
+     "title": "the photo carries the record's name and no row prints its identifier",
+     "ms": 31,
+     "measured": false
+    },
+    {
+     "title": "the gallery holds one tile per picture and opens only the ones it can name",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "the record's own information asks for no row the header or a gallery drew",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "the band that names the record waits until the photo is scrolled away",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "a supplied motion renderer is given the photo, the scroll and the preference",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "the band names the record once the photo is scrolled away, without fading in",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "the header block stays exactly the block it was",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 119,
+   "coveredProdLines": 1701,
+   "onlyProdLines": null,
+   "testsMs": 101
+  },
+  {
    "file": "tests/ui/refused-field-asks-for-its-box.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -9627,6 +9721,77 @@
    "coveredProdLines": 9101,
    "onlyProdLines": null,
    "testsMs": 15.9
+  },
+  {
+   "file": "tests/a-record-opens-on-its-picture.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 8,
+   "rule": "A record with a picture opens on it: the field `coverField` names is the picture, and a field declared `present: \"images\"` is a gallery of them. Three rules decide what the rest of the page may draw \u2014 the picture is drawn at the highest place that draws it and nowhere below, the record asks for exactly the bytes it draws, and a file this phone holds no words for is drawn but never opened.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4428,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a record whose cover field holds a file opens on that file",
+    "a record with no cover picture answers none, and its header stays as it was",
+    "a file the server carried no frame for is drawn in the frame the phone declared",
+    "a decorative file is drawn and never opened, and one with no caption is too",
+    "a gallery draws its pictures in the order the row holds them, in the block the document filed",
+    "a gallery declared over something that is no list of files keeps its ordinary row",
+    "the cover and every gallery are drawn once: no row below repeats them, valued or not",
+    "a record asks for the bytes it draws, and nothing held behind a disclosure"
+   ],
+   "tests": [
+    {
+     "title": "a record whose cover field holds a file opens on that file",
+     "ms": 2.495947,
+     "measured": false
+    },
+    {
+     "title": "a record with no cover picture answers none, and its header stays as it was",
+     "ms": 0.324309,
+     "measured": false
+    },
+    {
+     "title": "a file the server carried no frame for is drawn in the frame the phone declared",
+     "ms": 0.331162,
+     "measured": false
+    },
+    {
+     "title": "a decorative file is drawn and never opened, and one with no caption is too",
+     "ms": 0.296989,
+     "measured": false
+    },
+    {
+     "title": "a gallery draws its pictures in the order the row holds them, in the block the document filed",
+     "ms": 16.616181,
+     "measured": false
+    },
+    {
+     "title": "a gallery declared over something that is no list of files keeps its ordinary row",
+     "ms": 2.397403,
+     "measured": false
+    },
+    {
+     "title": "the cover and every gallery are drawn once: no row below repeats them, valued or not",
+     "ms": 5.481147,
+     "measured": false
+    },
+    {
+     "title": "a record asks for the bytes it draws, and nothing held behind a disclosure",
+     "ms": 2.336531,
+     "measured": false
+    }
+   ],
+   "loaded": 32,
+   "coveredProdLines": 10917,
+   "onlyProdLines": null,
+   "testsMs": 30.3
   },
   {
    "file": "tests/a-record-opens-on-what-it-is.test.ts",
@@ -19403,6 +19568,64 @@
    "testsMs": 48
   },
   {
+   "file": "tests/screens/a-record-gallery-opens-and-closes-its-viewer.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A pressed gallery tile opens the kit's viewer at the very picture that was pressed, pages it by file identifier \u2014 never by position \u2014 and closes back to the record untouched. This is that round trip read off the real screen, with no pinch surface supplied, which is what a product that ships one still falls back to on every other page.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19346,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a pressed gallery tile opens the viewer at that picture and closes back to the record"
+   ],
+   "tests": [
+    {
+     "title": "a pressed gallery tile opens the viewer at that picture and closes back to the record",
+     "ms": 1226,
+     "measured": false
+    }
+   ],
+   "loaded": 160,
+   "coveredProdLines": 2421,
+   "onlyProdLines": null,
+   "testsMs": 1226
+  },
+  {
+   "file": "tests/screens/a-record-keeps-its-name-without-a-picture-door.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A record whose entry names a cover field, served by a catalogue that offers no picture door, cannot draw its cover: the phone has no way to read the bytes. It is then a record with no picture, and it keeps the header a record with no picture has always had \u2014 its name in the native header, which is not made transparent over a photo that is not there.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18418,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a record with a cover field keeps its name when the server offers no picture door"
+   ],
+   "tests": [
+    {
+     "title": "a record with a cover field keeps its name when the server offers no picture door",
+     "ms": 43,
+     "measured": false
+    }
+   ],
+   "loaded": 160,
+   "coveredProdLines": 2117,
+   "onlyProdLines": null,
+   "testsMs": 43
+  },
+  {
    "file": "tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -19436,6 +19659,41 @@
    "coveredProdLines": 2190,
    "onlyProdLines": null,
    "testsMs": 872
+  },
+  {
+   "file": "tests/screens/a-refused-cover-still-names-its-record.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A record whose cover file the server refuses to describe still opens on its cover: the picture door is composed and the session can read with it, so the native header goes transparent \u2014 and the cover then owes the record its name, standing in the frame beside the sentence that says the picture will not come. The name is drawn once, on the cover.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22587,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a record whose cover file is refused (403) keeps its name on the cover under a transparent header",
+    "a record whose cover file is refused (404) keeps its name on the cover under a transparent header"
+   ],
+   "tests": [
+    {
+     "title": "a record whose cover file is refused (403) keeps its name on the cover under a transparent header",
+     "ms": 455,
+     "measured": false
+    },
+    {
+     "title": "a record whose cover file is refused (404) keeps its name on the cover under a transparent header",
+     "ms": 23,
+     "measured": false
+    }
+   ],
+   "loaded": 162,
+   "coveredProdLines": 2235,
+   "onlyProdLines": null,
+   "testsMs": 478
   },
   {
    "file": "tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx",

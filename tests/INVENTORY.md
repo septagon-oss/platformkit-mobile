@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `43279f424` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `6399946af` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 201 | 47.5 s | 73 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 234 | 1067 | 49.6 s | 1646 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 93 | 306 | 32.1 s | 1997 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 237 | 1083 | 49.7 s | 1701 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 96 | 310 | 33.9 s | 2057 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 419
+* keep: 425
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 419 — 194 `tests/*.test.ts` (node), 168 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1574; cases in files no runner reaches: 35
-* isolated wall time: contract 73 s, behaviour 1646 s, composition 1997 s, journey 0 s
+* files inventoried: 425 — 195 `tests/*.test.ts` (node), 173 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1594; cases in files no runner reaches: 35
+* isolated wall time: contract 73 s, behaviour 1701 s, composition 2057 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -137,6 +137,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/viewer-recovery-retains-loader.test.tsx | jest | behaviour | 1 | 20708 | 737 | 0 | 0 of 1 | — | 0 | keep | Recovery keeps what is already true: the loader stays while it is genuinely loading, and a selection the viewer abandoned stays abandoned until its own read su… |
 | tests/screens/viewer-revoked-selection.test.tsx | jest | behaviour | 4 | 19774 | 756 | 0 | 0 of 4 | — | 0 | keep | Losing the selected image loses it: the viewer shows its unavailable state rather than the next item, and an id that becomes authorized again is shown only thr… |
 | tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx | jest | behaviour | 2 | 24193 | 18 |  | not measured | — | 0 | keep | The entrance of an empty screen's picture is the model's to ask for, not the atom's to guess: a state derived on a device that asks for motion rises once, for … |
+| tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx | jest | behaviour | 1 | 30398 | 7 |  | not measured | — | 0 | keep | A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared compo… |
 | tests/ui/agenda-appointment-lines.test.tsx | jest | behaviour | 3 | 19211 | 106 | 0 | 0 of 3 | — | 0 | keep | An appointment is its name and, beneath it, when it is. Welding the two into one control label gave every entry the same long centred line of text, and a headi… |
 | tests/ui/atoms.test.tsx | jest | behaviour | 11 | 18901 | 51 | 0 | 0 of 11 | — | 0 | keep | (no first comment; first test title) a busy button is a button that cannot be pressed and says so |
 | tests/ui/calendar-withdrawal.test.tsx | jest | behaviour | 12 | 20965 | 1566 | 180 | 0 of 12 | — | 0 | keep | Denied calendar content removes what the person could act on in every view — day, week and agenda — and asks for an explicit recovery intent instead of silentl… |
@@ -183,6 +184,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/prose-draws-no-face-of-its-own.test.tsx | jest | behaviour | 2 | 17666 | 58 |  | not measured | — | 0 | keep | The reader is drawn only from the kit's tokens, in both modes — no colour, face or size of the Markdown library ever reaches a screen. One element cannot answe… |
 | tests/ui/prose-reader.test.tsx | jest | behaviour | 8 | 18254 | 103 |  | not measured | — | 0 | keep | A rich text body is read natively: every construct 0069 §1 allows comes back as text a person can read, in both modes, with the figure's box reserved by the fr… |
 | tests/ui/record-menu-opens-under-its-header.test.tsx | jest | behaviour | 1 | 20512 | 22 | 0 | 0 of 1 | — | 0 | keep | The `…` sits in the native header, which stays put while the record scrolls, so what it opens appears where the person was looking: the open menu is the first … |
+| tests/ui/record-opens-on-its-photo.test.tsx | jest | behaviour | 7 | 20655 | 101 |  | not measured | — | 0 | keep | A record's picture is drawn where the record begins, and the facts it draws there are not drawn again below it. These are the record screen's two picture surfa… |
 | tests/ui/refused-field-asks-for-its-box.test.tsx | jest | behaviour | 4 | 16050 | 405 |  | not measured | — | 0 | keep | The sheet does not merely say which field is wrong, it asks for that field: the organism keeps the ref of every box it drew and, when the hook names the field … |
 | tests/ui/resource-list-spoken-time.test.tsx | jest | behaviour | 2 | 20368 | 937 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) en generated list announces the exact local instant through its composed row |
 | tests/ui/search-busy-submit.test.tsx | jest | behaviour | 1 | 19090 | 14 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) a busy search blocks submission until the pending search completes |
@@ -219,6 +221,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts | node | behaviour | 13 | 1214 | 43.4 | 0 | 0 of 13 | — | 0 | keep | A list row says which record it is, what state that record is in, and what sets it apart — and nothing else. The four answers come from four declarations (the … |
 | tests/a-person-reads-one-colour-wherever-they-appear.test.ts | node | behaviour | 3 | 962 | 52.5 |  | not measured | — | 0 | keep | A person's disc colour is a function of their id alone: the same id reads the same tone in a directory row, in a field that points at them, as an activity acto… |
 | tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts | node | behaviour | 7 | 868 | 15.9 |  | not measured | — | 0 | keep | A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one … |
+| tests/a-record-opens-on-its-picture.test.ts | node | behaviour | 8 | 4428 | 30.3 |  | not measured | — | 0 | keep | A record with a picture opens on it: the field `coverField` names is the picture, and a field declared `present: "images"` is a gallery of them. Three rules de… |
 | tests/a-record-opens-on-what-it-is.test.ts | node | behaviour | 10 | 1225 | 51.7 | 2 | 0 of 10 | — | 0 | keep | A record opens on what it is, not on how it is stored (0085). The whole of the hierarchy is one pure function of the entry and the row — `recordHeader`, `recor… |
 | tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts | node | behaviour | 5 | 1021 | 36.1 |  | not measured | — | 0 | keep | A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are writ… |
 | tests/a-save-carries-what-the-person-wrote.test.ts | node | behaviour | 3 | 947 | 13.8 |  | not measured | — | 0 | keep | What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading … |
@@ -376,7 +379,10 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx | jest | composition | 3 | 26306 | 168 |  | not measured | — | 0 | keep | A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation… |
 | tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx | jest | composition | 1 | 20976 | 162 |  | not measured | — | 0 | keep | A camera image must reach the real API transport as a native file part, retain its session, and enter the body only after the file endpoint accepts that part. |
 | tests/screens/a-picture-taken-on-the-phone-is-stored-before-it-enters-the-body.test.tsx | jest | composition | 1 | 20228 | 48 |  | not measured | — | 0 | keep | A picture taken on the phone is stored as a file before the body points at it: the body never learns an address that only this phone could read. |
+| tests/screens/a-record-gallery-opens-and-closes-its-viewer.test.tsx | jest | composition | 1 | 19346 | 1226 |  | not measured | — | 0 | keep | A pressed gallery tile opens the kit's viewer at the very picture that was pressed, pages it by file identifier — never by position — and closes back to the re… |
+| tests/screens/a-record-keeps-its-name-without-a-picture-door.test.tsx | jest | composition | 1 | 18418 | 43 |  | not measured | — | 0 | keep | A record whose entry names a cover field, served by a catalogue that offers no picture door, cannot draw its cover: the phone has no way to read the bytes. It … |
 | tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx | jest | composition | 2 | 19848 | 872 |  | not measured | — | 0 | keep | A refresh never blanks what the list already says (0085): a row's assignee keeps the name the directory answered while a refresh asks again, and keeps it when … |
+| tests/screens/a-refused-cover-still-names-its-record.test.tsx | jest | composition | 2 | 22587 | 478 |  | not measured | — | 0 | keep | A record whose cover file the server refuses to describe still opens on its cover: the picture door is composed and the session can read with it, so the native… |
 | tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx | jest | composition | 4 | 20219 | 22 |  | not measured | — | 0 | keep | (no first comment; first test title) HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false |
 | tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx | jest | composition | 4 | 17242 | 39 |  | not measured | — | 0 | keep | An explicit refusal settles its picture independently of unrelated pending metadata reads. |
 | tests/screens/a-replaced-row-picture-starts-with-its-own-state.test.tsx | jest | composition | 1 | 18050 | 27 |  | not measured | — | 0 | keep | Replacing one row's picture starts a new load even while another row keeps the old file. |

@@ -36,7 +36,7 @@ import { createReadCache, type ReadCache, type ReadStore } from "./effects/read-
 import { sessions } from "./effects/native-session";
 import type { Reach } from "./effects/native-reach";
 import { systemClock } from "./screens/clock";
-import type { Renderers } from "./renderers";
+import type { MediaRenderers, Renderers } from "./renderers";
 import { catalogFailure } from "./screens/failure";
 
 export interface ShellValue {
@@ -44,6 +44,11 @@ export interface ShellValue {
   readonly baseURL: string;
   readonly state: State;
   readonly renderers: Renderers;
+  /**
+   * media is the native media this product supplied at composition — the pinch surface a
+   * picture opens into and the motion a cover collapses with. Absent means the still record.
+   */
+  readonly media?: MediaRenderers | undefined;
   /** who this session belongs to, once the server has said. */
   readonly identity: Identity | undefined;
   readonly entry: (module: string, entity: string) => Entry | undefined;
@@ -115,6 +120,8 @@ export interface OutboxValue {
 interface Props {
   readonly baseURL: string;
   readonly renderers: Renderers;
+  /** media is the pinch and motion surface this product ships with, named once here. */
+  readonly media?: MediaRenderers | undefined;
   /**
    * store is the device's two tables, supplied by the composition root; the kit
    * opens no database of its own, so a host without one (a test, a web build)
@@ -192,6 +199,7 @@ function heldKey(session: Saved | undefined): Bearer | undefined {
 export function Shell({
   baseURL: initialURL,
   renderers,
+  media,
   store,
   clock,
   mint,
@@ -558,6 +566,7 @@ export function Shell({
       baseURL,
       state,
       renderers,
+      media,
       identity,
       writes,
       wrote,
@@ -751,6 +760,7 @@ export function Shell({
       baseURL,
       state,
       renderers,
+      media,
       identity,
       writes,
       wrote,

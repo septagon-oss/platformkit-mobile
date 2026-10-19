@@ -7,7 +7,12 @@ import { beforeAll, jest } from "@jest/globals";
 import { render, screen } from "@testing-library/react-native";
 import React from "react";
 import { Text } from "react-native";
+import { readFileSync } from "node:fs";
+import { parseCatalog } from "../../src/core/catalog";
+import { noOrder } from "../../src/core/derive";
 import { Gallery } from "../../src/ui/gallery";
+import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
+import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { ListScreen } from "../../src/ui/templates/ListScreen";
 
 jest.mock("expo-haptics", () => ({
@@ -34,6 +39,16 @@ jest.mock(
 // rendering the library's gallery and a list; the bound is generous because
 // it measures the machine, and every test keeps its own five seconds for what
 // it asserts.
+// The gallery draws every atom, molecule and template but no record screen, so the
+// record's list and record page are mounted here as well: without them the first
+// test of a suite that mounts one pays that organism's first mount inside its own
+// five seconds, which is machine speed and not what the test asserts.
+const warmEntry = parseCatalog(
+  JSON.parse(readFileSync("testdata/catalog.json", "utf8")),
+).resources.find((r) => r.entity === "note")!;
+const warmRow = { id: "warm", title: "Warm", status: "open", rank: 1, pinned: false, tags: [] };
+const none = () => undefined;
+
 beforeAll(async () => {
   await render(
     <>
@@ -48,6 +63,22 @@ beforeAll(async () => {
         onRefresh={() => undefined}
         empty={null}
       />
+      <ResourceList
+        presentation={presentation}
+        entry={warmEntry}
+        rows={[warmRow]}
+        total={1}
+        loading={false}
+        refreshing={false}
+        more={false}
+        error=""
+        order={noOrder}
+        onOrder={none}
+        onOpen={none}
+        onMore={none}
+        onRefresh={none}
+      />
+      <ResourceDetail feedback={feedback} entry={warmEntry} row={warmRow} error="" onRetry={none} />
     </>,
   );
   await screen.unmount();

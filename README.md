@@ -390,6 +390,79 @@ document declared for that value, which is the pill a list row wants next; and
 `record-menu`/`record-information` are the two ids a journey finds a record's header
 menu and its collapsed block by.
 
+#### A record opens on its picture
+
+A record whose entry declares `coverField`, and whose row holds a file identifier in it,
+opens full-bleed on that picture: `extent.cover` tall, under a transparent native header
+that keeps only Edit and `record-menu`. The record's own three facts — its name, its pill,
+its one summary line — are drawn by the page over the photo's foot rather than by the
+header, and the gradient under them ends in the page's own ink (`surfaceCanvas`), so the
+title is measured on the pair `contrastPairs` already answers for and the first section
+below starts where the photo ends. Scrolled past `extent.cover - extent.headerBar`, a band
+pinned under the native bar names the record; it is a cut in both motion modes, because a
+band that fades in over a scroll-driven transform re-renders vibrancy every frame. A record
+with no cover field, with one its row leaves empty, or whose pictures this phone cannot read
+at all — no picture door in the catalogue, or no session ready to read one with — draws the
+header block it always drew and keeps its native title: the same `recordHeader`, two drawings,
+chosen by whether a cover can be drawn, which is the same answer the organism is given in
+`files`.
+
+A field declared `present: "images"` is a gallery: a horizontal strip of `extent.strip`
+tiles in the block the document filed its field in, after that block's facts, each tile
+opening the kit's `PhotoViewer` at that picture (a fixed list — `more: false`, so no "Load
+more" — paged by file identifier, never by position). Both surfaces take the field out of
+the rows below through `headerDrawn`, valued or not: a file identifier printed as a fact
+about the record is the same fault as printing it twice. `visiblePictures` asks for exactly
+these ids when the record is drawn, always, and never for what the Record information
+disclosure still holds back. A file the server carried no frame for is drawn in the frame
+the slot declared and cropped to it; a file nobody captioned is drawn and never offered for
+opening, because this phone holds no words for it and inventing none is the point.
+
+**Reused** — `recordHeader` for the three facts the cover draws, and `headerDrawn`,
+`shownFields` and `informationHeld` for who draws a field (the exclusion is the existing
+answer, grown by the cover and the galleries, not a second rule); `picturePointer`'s
+validation of `coverField` at parse time; `pictureId` and `compactPicture`'s
+`(file id, instance)` identity; `visiblePictures` as the one selector `usePictures` is fed;
+`MediaHero`'s `ImageRenderer` slot, `Badge`, `Text`, `Notice`, `Skeleton`, `radius.lg`,
+`space.*`, `type.title` and `theme.tsx`'s roles (no new colour, no hex); `react-native-svg`,
+already drawn on by `Sparkline` and `AreaChart`, for the one overlay; `kitCopy`'s `images`,
+`open`, `imageUnavailable` and loading line; `PhotoViewer` reused as the full-screen surface,
+grown only by the two props named below, with `deriveViewer` and `deriveMedia` untouched and
+`pageControl`'s answer to a page with no more unchanged. **Added** — in the core, `coverPicture`, `galleryFields`, `headerCover`,
+`recordCover`, `recordMedia`, `recordPictureIds` and `RecordBlock.strips`, because the
+inventory held the record's three places and the row media but no answer to "which files
+does this record draw, and in which block"; in `pictures.ts`, `fileMeta`, `filePicture` and
+`pictureState`, because nothing exposed a `file` row's `width`, `height`, `alt` or
+`decorative` past the picture door; `PhotoStrip` (no horizontal list existed in the kit:
+`grep -rn "horizontal=" src/ui` is empty, and `PhotoGallery`/`MasonryWall` are paged
+collections a resource answers) and `RecordCover` (`MediaHero` writes its caption *below*
+the frame and an Open button under that, where the record must put its name *on* the photo
+and offer no open affordance of its own); `kit.photoCount` in both languages; `extent.cover`,
+`strip`, `coverFoot` and `headerBar`; `Screen`'s optional `onOffset`, the handle a cover
+needs and no rule of its own; `usePictures`'s third argument (how wide a slot draws) and its
+`files` answer; `PhotoViewer`'s optional `renderZoom` and its
+`animationType="fade"`, so a picture may open without the gesture surface a product has not
+chosen and its modal opens with a cross-fade. `expo-linear-gradient` and `expo-blur` were
+refused: either changes `fingerprint.json` and therefore the binary, and `svg` already
+draws the one overlay this page needs. **Made reusable** — `recordSections`'s optional
+`media` argument, which is how any block answers the galleries filed in it without a second
+block-order rule in a component; `filePicture`, the file-row→picture step for any surface
+that draws a file by identifier; `usePictures(ids, attempt, width)` answering pixels per
+caller; `PhotoStrip` and `RecordCover` as the two surfaces a client's renderer pack can mount
+on its own record screen; and `record-cover`, `record-title`, `photo-strip`, `photo-<n>` and
+`record-title-bar` as the ids a journey finds them by; and `MediaRenderers` in
+`src/renderers.ts` — the pinch surface a picture opens into and the cover's motion, named once
+on `<Shell>` by the composition root — with `src/screens/CoverMotion.tsx` as the one file in
+the app that names `react-native-reanimated`, and this app supplying it and `NativeZoom` in
+`app/_layout.tsx`. Those two had to arrive as props rather than imports for a fact about the
+environment: importing reanimated evaluates `react-native-worklets`, which throws where no
+native runtime is loaded, and zoom-toolkit imports reanimated in 45 of its files, while every
+screen is loaded by the suite that checks it. A product that supplies neither gets the still
+record — the photo holds still, the picture opens at the page's own size, and the buttons page
+between them — which is a complete record, not a broken one. `extent.coverParallax`,
+`coverShrink` and `coverFoot` are the numbers a device will judge, owned by `src/ui/scale.ts`
+and by no component.
+
 ### How a form asks
 
 Three questions decide what a sheet holds, and all three are answered in
