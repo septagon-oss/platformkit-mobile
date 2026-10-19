@@ -142,6 +142,14 @@ export interface EntryHints {
    * word for the sub-count, and no sub-count is drawn.
    */
   readonly highlight?: { readonly label: string };
+  /**
+   * primaryCommand is the verb a row's swipe runs, kept only when it resolves: one of this
+   * entry's own commands, offered to a person, about one record and taking no argument. The
+   * kernel refuses every other declaration when it mounts the resource, and a phone built
+   * against an older kernel refuses it here, so the model can hold no verb it could not run.
+   * Absent means no row of this entry swipes.
+   */
+  readonly primaryCommand?: string;
 }
 
 export interface FieldHints {
@@ -185,6 +193,13 @@ export interface CommandHints {
   readonly confirmation?: { readonly body: string };
   /** successMessage is the sentence the record says after the command ran. */
   readonly successMessage?: string;
+  /**
+   * destructive is stored only when declared true, like `system`. Where a wrong reading of
+   * `system` hides a button, a wrong reading of this one burns a record, so a declared value
+   * that is not yes or no is read as destructive and said: the question stays, the write does
+   * not run on a guess.
+   */
+  readonly destructive?: true;
 }
 
 /**
@@ -360,12 +375,16 @@ function hintNames(
  * here, where the schema is in hand, so a hint that names no field of this entry
  * is a fallback rather than a blank screen. `sections` is what `readSections`
  * kept of the blocks the entry declares, judged before the fields that name them.
+ * `commands` are the entry's own commands, already read: the verb a row swipes to
+ * run is resolved against them here, where both are in hand, so no surface ever
+ * holds a command this entry does not have.
  */
 function hintEntry(
   raw: unknown,
   at: string,
   fields: readonly Field[],
   sections: readonly Section[],
+  commands: readonly Command[],
   notice: HintNotice,
 ): EntryHints | undefined {
   if (raw === undefined || raw === null) return undefined;
@@ -423,6 +442,41 @@ function hintEntry(
   const primaryField = pointer("primaryField");
   const previewField = pointer("previewField");
   const statusField = pointer("statusField");
+  // The verb a row swipes to run is asked the four questions the kernel asks of it when it
+  // mounts the resource (kit/rest's own row-hint gate): is it a command of this entry, is it
+  // offered to a person, does it run on one record, does it send no argument. The phone asks
+  // them anyway because a build in somebody's pocket may meet an older server, and a row that
+  // offered a command it cannot resolve would ask a question no door answers. Each refusal
+  // costs the swipe and nothing else: the entry keeps its rows, its commands and every other
+  // hint it declared.
+  const primaryCommand = ((): string | undefined => {
+    const verb = hintWord(raw, "primaryCommand", at, "a command of this entry", notice);
+    if (verb === undefined) return undefined;
+    const named = commands.find((c) => c.verb === verb);
+    if (named === undefined) {
+      notice(`${at}.primaryCommand`, "names no command of this entry: the row offers no swipe");
+      return undefined;
+    }
+    if (named.hints?.system === true) {
+      notice(
+        `${at}.primaryCommand`,
+        "is a system command; no person is offered it: the row offers no swipe",
+      );
+      return undefined;
+    }
+    if (named.collection === true) {
+      notice(`${at}.primaryCommand`, "runs on the collection: the row offers no swipe");
+      return undefined;
+    }
+    if (named.fields.length > 0) {
+      notice(
+        `${at}.primaryCommand`,
+        "takes arguments; a row's swipe sends none: the row offers no swipe",
+      );
+      return undefined;
+    }
+    return verb;
+  })();
   // The same question `summaryFields` asks: a name that matches no field of this
   // entry costs one sort row and says so, and a list left with nothing in it is
   // the default answer rather than "this list orders by nothing".
@@ -466,6 +520,7 @@ function hintEntry(
     ...(summary === undefined ? {} : { summaryFields: summary }),
     ...(highlight === undefined ? {} : { highlight }),
     ...(sections.length === 0 ? {} : { sections }),
+    ...(primaryCommand === undefined ? {} : { primaryCommand }),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;
 }
@@ -617,6 +672,11 @@ function hintCommand(raw: unknown, at: string, notice: HintNotice): CommandHints
   const system = raw.system;
   if (system !== undefined && typeof system !== "boolean")
     notice(`${at}.system`, "is not yes or no: the command is offered");
+  // Read as destructively as it is refused: a value that is neither yes nor no is asked about
+  // before it runs, which is the one way a malformed declaration cannot cost a record.
+  const destructive = raw.destructive;
+  if (destructive !== undefined && typeof destructive !== "boolean")
+    notice(`${at}.destructive`, "is not yes or no: the command is asked before it runs");
   // The consequence is one word in an object. A confirmation that is not an
   // object, or holds no readable body, costs the sentence under the question and
   // says so; the command keeps its label, its `system` tag and its success line.
@@ -636,6 +696,9 @@ function hintCommand(raw: unknown, at: string, notice: HintNotice): CommandHints
   const hints: CommandHints = {
     ...(label === undefined ? {} : { label }),
     ...(system === true ? { system: true as const } : {}),
+    ...(destructive === true || (destructive !== undefined && typeof destructive !== "boolean")
+      ? { destructive: true as const }
+      : {}),
     ...(confirmation === undefined ? {} : { confirmation }),
     ...(successMessage === undefined ? {} : { successMessage }),
   };
@@ -723,6 +786,22 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
   const { fields, commands, immutable, operations, renderer, singleton, presentation, ...rest } = v;
   const pack = rendererRef(renderer);
   const blocks = readSections(presentation, `${at}.presentation`, notice);
+  // The commands are read before the entry's own hints because one of those hints names one of
+  // them: a verb no command of this entry answers is no hint at all, and the resolution happens
+  // here, once, rather than at every surface that offers the verb.
+  const commandsRead = (commands ?? []).map(
+    ({ fields: arguments_, path, presentation: commandHint, ...command }, i) => {
+      const hint = hintCommand(commandHint, `${at}.commands[${i}].presentation`, notice);
+      return {
+        ...command,
+        ...(hint === undefined ? {} : { hints: hint }),
+        ...(path === undefined ? {} : { path: absolute(path, `${at}.commands[${i}].path`) }),
+        fields: (arguments_ ?? []).map((f, n) =>
+          field(f, `${at}.commands[${i}].fields[${n}]`, [], notice),
+        ),
+      };
+    },
+  );
   const fieldsRead = (fields ?? []).map((f, i) =>
     field(
       f,
@@ -731,7 +810,14 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       notice,
     ),
   );
-  const hints = hintEntry(presentation, `${at}.presentation`, fieldsRead, blocks, notice);
+  const hints = hintEntry(
+    presentation,
+    `${at}.presentation`,
+    fieldsRead,
+    blocks,
+    commandsRead,
+    notice,
+  );
   return {
     ...rest,
     path: absolute(v.path, `${at}.path`),
@@ -745,17 +831,7 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
     // A nil operation set prints as null and is the absent set: kit/rest reads
     // a nil slice and an empty one as all five, and so does `offers`.
     ...(operations == null ? {} : { operations: verbs(operations, `${at}.operations`) }),
-    commands: (commands ?? []).map(({ fields, path, presentation: commandHint, ...command }, i) => {
-      const hint = hintCommand(commandHint, `${at}.commands[${i}].presentation`, notice);
-      return {
-        ...command,
-        ...(hint === undefined ? {} : { hints: hint }),
-        ...(path === undefined ? {} : { path: absolute(path, `${at}.commands[${i}].path`) }),
-        fields: (fields ?? []).map((f, n) =>
-          field(f, `${at}.commands[${i}].fields[${n}]`, [], notice),
-        ),
-      };
-    }),
+    commands: commandsRead,
     singleton: singleton ?? false,
   };
 }

@@ -10,6 +10,7 @@ import {
   deriveFilterSheet,
   deriveListToolbar,
   deriveSortSheet,
+  rowAction,
   type Names,
   type People,
   type PictureStates,
@@ -22,7 +23,7 @@ import { Notice } from "../atoms/Notice";
 import { ActionBar } from "../molecules/ActionBar";
 import { ChoiceRows } from "../molecules/ChoiceRows";
 import { Actions, type Props as ActionsProps } from "./Actions";
-import { DataList } from "./DataList";
+import { DataList, type RowActionProps } from "./DataList";
 import { DetailSheet } from "../templates/DetailSheet";
 export interface Props {
   readonly people?: People | undefined;
@@ -55,6 +56,11 @@ export interface Props {
   readonly onNew?: () => void;
   /** actions are the commands about the whole list rather than one row. */
   readonly actions?: ActionsProps;
+  /** onRowRun runs the command one row was swiped to run. Absent, or an entry that names no
+   * primary command, means no row of this list swipes. */
+  readonly onRowRun?: (id: string) => void;
+  /** renderRowAction is the swipe surface the product supplied; see DataList's prop of that name. */
+  readonly renderRowAction?: (React.ComponentType<RowActionProps> | undefined) | undefined;
 }
 
 export function ResourceList(props: Props) {
@@ -74,8 +80,13 @@ export function ResourceList(props: Props) {
     onRefresh,
     onNew,
     actions,
+    onRowRun,
+    renderRowAction,
     ...input
   } = props;
+  // Which verb a row of this list may be swiped to run, resolved once for the whole list: it is
+  // the entry's declaration and the command's own words, and no row changes either.
+  const swipe = rowAction(entry, presentation.copy);
   const result = deriveCatalogList(
     { entry, order, names, ...input, images: !!renderImage, pictureStates, canCreate: !!onNew },
     presentation,
@@ -127,6 +138,9 @@ export function ResourceList(props: Props) {
         onOpen={onOpen}
         onMore={onMore}
         onRefresh={onRefresh}
+        {...(swipe ? { rowAction: swipe } : {})}
+        {...(onRowRun ? { onRowRun } : {})}
+        {...(renderRowAction ? { renderRowAction } : {})}
         onStateAction={(id) => {
           if (id === "new") onNew?.();
           else if (id === "refresh") onRefresh();

@@ -103,6 +103,17 @@ export interface ShellValue {
    * once, not on every visit afterwards. */
   readonly heard: (href: string) => string;
   /**
+   * report files what a write just did for the person standing where they are: the receipt of an
+   * act that opened nothing, and so left no sheet to say it. A filing before the bar is spent
+   * replaces the sentence — the newest act is what they need to read, and a queue would deliver a
+   * receipt for something that already left the screen.
+   */
+  readonly report: (sentence: string) => void;
+  /** reporting reads the sentence still owed and the token that spends it. It reads, it does not clear. */
+  readonly reporting: () => { readonly sentence: string; readonly token: number } | undefined;
+  /** spent closes that filing and only that one: a timer kept by a replaced bar closes nothing. */
+  readonly spent: (token: number) => void;
+  /**
    * celebrate files that a write this phone made reached the record at this address, so that
    * record's own screen — the one holding the row to compare — can decide whether its state
    * actually crossed into one the entry calls finished. A filing says only that this phone wrote;
@@ -306,6 +317,15 @@ export function Shell({
   // Where the person came from, filed by the row they pressed under the address it opens. One
   // slot, because one navigation is under way at a time.
   const journey = useRef<{ href: string; frame: LayoutRectangle } | undefined>(undefined);
+  // The one receipt a write owes the person where they are standing, and this shell's own count of
+  // them. One slot, as with the sentence, because one receipt is read at a time; the token is what
+  // lets the bar's own timer close the bar it was started for and no other. This one is state and
+  // not a ref, because the bar draws it: a filing has to arrive as a render, not be discovered the
+  // next time something else re-renders the screen.
+  const [receipt, setReceipt] = useState<{ sentence: string; token: number } | undefined>(
+    undefined,
+  );
+  const receipts = useRef(0);
   // The person a remembered route and a held sheet belong to, waiting to be
   // compared with whoever the next completed sign-in turns out to be.
   const expected = useRef<Who | undefined>(undefined);
@@ -359,6 +379,7 @@ export function Shell({
     expected.current = undefined;
     sheet.current = undefined;
     sentence.current = undefined;
+    setReceipt(undefined);
     due.current = undefined;
     played.current = new Set();
     journey.current = undefined;
@@ -375,6 +396,14 @@ export function Shell({
     const said = sentence.current.text;
     sentence.current = undefined;
     return said;
+  }, []);
+  const report = useCallback((sentence: string) => {
+    receipts.current += 1;
+    setReceipt({ sentence, token: receipts.current });
+  }, []);
+  const reporting = useCallback(() => receipt, [receipt]);
+  const spent = useCallback((token: number) => {
+    setReceipt((now) => (now?.token === token ? undefined : now));
   }, []);
   const celebrate = useCallback((href: string) => {
     if (played.current.has(href)) return;
@@ -770,6 +799,9 @@ export function Shell({
       keep,
       say,
       heard,
+      report,
+      reporting,
+      spent,
       celebrate,
       celebrating,
       celebrated,
@@ -977,6 +1009,9 @@ export function Shell({
       keep,
       say,
       heard,
+      report,
+      reporting,
+      spent,
       celebrate,
       celebrating,
       celebrated,

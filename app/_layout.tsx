@@ -3,6 +3,7 @@
 // native stack draws every header; and everything else derives from the
 // catalog.
 import { Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect, useMemo } from "react";
@@ -10,6 +11,8 @@ import { defaultRenderers } from "../src/renderers";
 import { commandSheet, sheet } from "../src/route";
 import { CoverMotion } from "../src/screens/CoverMotion";
 import { FinishingMotion } from "../src/screens/FinishingMotion";
+import { Announcement } from "../src/screens/Announcement";
+import { RowSwipe } from "../src/screens/RowSwipe";
 import { screenCopy } from "../src/screens/failure";
 import { NativeZoom } from "../src/screens/NativeZoom";
 import { device } from "../src/screens/device";
@@ -28,7 +31,12 @@ export default function Layout() {
       store={device.store}
       mint={device.mint}
       reach={device.reach}
-      media={{ zoom: NativeZoom, coverMotion: CoverMotion, finishing: FinishingMotion }}
+      media={{
+        zoom: NativeZoom,
+        coverMotion: CoverMotion,
+        finishing: FinishingMotion,
+        rowAction: RowSwipe,
+      }}
     >
       {/* The workspace's own colour, worn over the generated palette, is what the whole app
           is painted with; it is read between the shell and the theme because that is the one
@@ -88,6 +96,11 @@ function Root() {
         <Stack.Screen name="[module]/[entity]/[id]/run/[verb]" options={commandSheet} />
         <Stack.Screen name="[module]/[entity]/run/[verb]" options={commandSheet} />
       </Stack>
+      {/* The receipt of a write that opened nothing is drawn over the navigator rather than inside
+          one screen: it belongs to the person, not to the list that asked for it. */}
+      <Announcement />
     </>
   );
 }
+
+const root = { flex: 1 };

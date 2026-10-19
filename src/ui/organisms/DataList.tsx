@@ -1,6 +1,14 @@
-import React, { useRef } from "react";
+import React, { useRef, type ComponentType, type ReactNode } from "react";
 import { View, type LayoutRectangle } from "react-native";
-import type { DataListModel, Names, People, PictureStates, Order } from "../../core/derive";
+import type {
+  DataListModel,
+  Motion,
+  Names,
+  People,
+  PictureStates,
+  Order,
+  RowAction,
+} from "../../core/derive";
 import { ActionControl } from "../atoms/ActionControl";
 import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";
@@ -33,6 +41,20 @@ export interface Props {
    */
   readonly onOpen?: (id: string, frame?: LayoutRectangle) => void;
   readonly onRowAction?: (rowId: string, actionId: string) => void;
+  /**
+   * rowAction is the command a row of this list may be swiped to run and onRowRun names which
+   * row asked for it. Absent means no row of this list swipes: the row reads, presses and
+   * speaks exactly as it did before the swipe existed.
+   */
+  readonly rowAction?: RowAction | undefined;
+  readonly onRowRun?: ((rowId: string) => void) | undefined;
+  /**
+   * renderRowAction is the surface the product supplied to draw that command under a row. It
+   * moves ink and says nothing: the words, the tone and the decision to run come from the model
+   * and the caller. Absent is the still product — the command stays an action of the row itself
+   * and a line in the record, and no ink moves.
+   */
+  readonly renderRowAction?: (ComponentType<RowActionProps> | undefined) | undefined;
   readonly onView?: (id: string) => void;
   readonly onViewAction?: (viewId: string, actionId: string) => void;
   readonly onSaveView?: (value: { readonly order: Order; readonly groupId?: string }) => void;
@@ -46,6 +68,21 @@ export interface Props {
   readonly onStateAction?: (id: string) => void;
   readonly rowTestID?: (id: string) => string;
 }
+
+/**
+ * RowActionProps is what a swipe surface is handed: the command it reveals, the motion the
+ * person asked the phone for, and what to call when a release lands at or past the threshold.
+ *
+ * The surface owns the drag and its geometry, which it reads from src/ui/scale.ts as every other
+ * surface does, and it holds no words, no tone rule and no decision of its own: those are
+ * derived, and a rule restated under a finger is a second implementation of it.
+ */
+export interface RowActionProps {
+  readonly action: RowAction;
+  readonly motion: Motion;
+  readonly onRun: () => void;
+  readonly children: ReactNode;
+}
 export function DataList({
   names,
   people,
@@ -54,6 +91,9 @@ export function DataList({
   model,
   onOpen,
   onRowAction,
+  rowAction,
+  onRowRun,
+  renderRowAction,
   onView,
   onViewAction,
   onSaveView,
@@ -156,8 +196,15 @@ export function DataList({
           </View>
         );
       }}
-      render={(row) => (
-        <View style={s.panel}>
+      render={(row) => {
+        // A row swipes only when the list names the command and who runs it. The surface is a
+        // third, separate yes: without it the command stays an action of the row and a line in
+        // the record, which is the still product rather than a broken one.
+        const swipe = rowAction !== undefined && onRowRun !== undefined ? rowAction : undefined;
+        const act = () => {
+          onRowRun?.(row.id);
+        };
+        const line = (
           <Row
             title={row.title}
             {...(row.avatar
@@ -252,21 +299,34 @@ export function DataList({
                     : `${testID}/row/${encodeURIComponent(row.id)}`,
                 }
               : {})}
+            {...(swipe ? { action: { label: swipe.label, onRun: act } } : {})}
           />
-          {row.selection && onSelection ? (
-            <SelectionControl
-              model={row.selection}
-              onChange={() => onSelection(row.selectionTarget)}
-            />
-          ) : null}
-          {onRowAction ? (
-            <ActionBar
-              model={{ label: model.bulk.label, actions: row.actions }}
-              onAction={(id) => onRowAction(row.id, id)}
-            />
-          ) : null}
-        </View>
-      )}
+        );
+        const Surface = renderRowAction;
+        return (
+          <View style={s.panel}>
+            {swipe && Surface ? (
+              <Surface action={swipe} motion={model.feedback.motion} onRun={act}>
+                {line}
+              </Surface>
+            ) : (
+              line
+            )}
+            {row.selection && onSelection ? (
+              <SelectionControl
+                model={row.selection}
+                onChange={() => onSelection(row.selectionTarget)}
+              />
+            ) : null}
+            {onRowAction ? (
+              <ActionBar
+                model={{ label: model.bulk.label, actions: row.actions }}
+                onAction={(id) => onRowAction(row.id, id)}
+              />
+            ) : null}
+          </View>
+        );
+      }}
       footer={
         <View style={s.stack}>
           {model.pageError ? <Notice text={model.pageError} announcement="urgent" /> : null}

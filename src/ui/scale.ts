@@ -137,3 +137,13 @@ export type Role = keyof typeof type;
 
 /** hit is the smallest thing a finger is asked to press: Apple's 44pt, Android's 48dp. */
 export const hit = Platform.select({ android: 48, default: 44 });
+/**
+ * swipe is the geometry of acting from a row. `reveal` is how far the command's surface stands
+ * open, and it is also the threshold: what a person sees is exactly what the phone requires, so a
+ * surface fully drawn and a command that will run are one sight. It is a fingertip's press beside
+ * the page's widest gap, and the surface is laid as an icon over its word, which is what fits that
+ * width — icon beside word would need twice it and push the row's own name off a narrow phone.
+ * `armX` and `failY` are the page's own two gaps: a horizontal drag becomes the row's once it has
+ * moved `armX`, and stays the row's only while it keeps inside `failY` of the horizontal.
+ */
+export const swipe = { reveal: hit + space.xl, armX: space.lg, failY: space.xl } as const;

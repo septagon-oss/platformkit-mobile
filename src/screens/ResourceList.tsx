@@ -15,7 +15,7 @@ import type { ScreenProps } from "../renderers";
 import type { LayoutRectangle } from "react-native";
 import { Button } from "../ui/atoms/Button";
 import { ResourceList as ResourceListView } from "../ui/organisms/ResourceList";
-import { useCommandAsk } from "./useCommand";
+import { useCommandAsk, useRowCommand } from "./useCommand";
 import { useResourceList } from "./useResourceList";
 import { usePictures } from "./usePictures";
 import { useDirectoryPeople } from "./useReferenceNames";
@@ -29,7 +29,12 @@ export function ResourceList({ entry }: ScreenProps) {
   // Where the person pressed is filed under the record it opens: that record is the only place
   // the flight can be drawn, and the list is leaving the screen by then. A press this phone never
   // measured files nothing, which is the ordinary push.
-  const { travelTo } = useShell();
+  const { travelTo, media: native } = useShell();
+  // A row's command is the entry's own declaration, run through the same submit a record's command
+  // uses. The surface that uncovers it is the product's, and a product that supplies none is
+  // offered the command as an action of the row instead.
+  const row = useRowCommand(entry);
+  const RowSwipe = native?.rowAction;
   const open = (id: string, frame?: LayoutRectangle) => {
     const href = `${at}/${encodeURIComponent(id)}`;
     if (frame) travelTo(href, frame);
@@ -103,6 +108,8 @@ export function ResourceList({ entry }: ScreenProps) {
         onOpen={open}
         onMore={list.loadMore}
         onRefresh={list.refresh}
+        onRowRun={row.run}
+        {...(RowSwipe ? { renderRowAction: RowSwipe } : {})}
         {...(mayCreate ? { onNew: add } : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}
       />
