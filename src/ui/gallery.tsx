@@ -80,6 +80,7 @@ import { MapLegend } from "./molecules/MapLegend";
 import { MediaHero, type ImageRenderer } from "./molecules/MediaHero";
 import { ModelState } from "./molecules/ModelState";
 import { Sparkline } from "./molecules/Sparkline";
+import { StatCard } from "./molecules/StatCard";
 import { StatTile } from "./molecules/StatTile";
 import { DataTable } from "./organisms/DataTable";
 import { Activity } from "./organisms/Activity";
@@ -1302,6 +1303,17 @@ function KitSamples({
       return <DataTable model={k.table} />;
     case "stat-tile":
       return <StatTile model={k.stat} />;
+    case "stat-card":
+      return (
+        <StatCard
+          stat={k.card.stat}
+          secondary={k.card.secondary}
+          spark={k.card.spark}
+          aloud={k.card.aloud}
+          onPress={() => action("open")}
+          testID="gallery-card"
+        />
+      );
     case "progress-meter":
       return (
         <ProgressMeter

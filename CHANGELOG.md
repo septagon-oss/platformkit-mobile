@@ -26,6 +26,17 @@ for the version being released.
   `recordHeader`, `recordSections` and `recordInformation` answer the question it used to
   — which facts a record draws — as three levels instead of one flat list of every
   non-hidden field, which is what let a record open on its own identifier.
+- Home greets the person and counts what the installation answers. The API pin moves to
+  the kernel commit that serves `GET /api/v1/app/summary`, which is what makes the door
+  askable at all (`documented()` refuses a path the document does not print). New in
+  `./core/derive`, additive: `statCards`/`rowCounts`/`StatCardModel`/`cardLimit` (the join
+  between that body and the catalogue — an absent number stays absent, so a card and a row
+  count never invent a zero), `greeting`/`firstName` (the part of day in the reader's zone
+  and the one word a name may be greeted by), `workspaceName`, `civilHour`, and
+  `EntryHints.highlight`, the declared word a sub-count needs. `./ui/molecules/StatCard` is
+  new; `StatTile` gains `framed` and `Sparkline` gains `height`/`decorative`, each optional
+  and each defaulting to the bytes every existing caller already passed; `theme.tsx` gains
+  `surface.band` and its two contrast pairs.
 - New in the same subpath, additive: `hasValue` (the one emptiness rule a record reads
   a row with), `informationFields` (the identifier and the two stamps, named once) and
   the section model itself; `record-menu` and `record-information` are the two ids a

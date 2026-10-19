@@ -5,10 +5,19 @@ import { Badge } from "../atoms/Badge";
 import { Text } from "../atoms/Text";
 import { kitStyles } from "../layout";
 import { useStyles } from "../theme";
-export function StatTile({ model }: { readonly model: StatModel }) {
+export interface Props {
+  readonly model: StatModel;
+  /**
+   * framed is whether the tile draws the panel around itself. A caller that owns the
+   * surface the number stands on — a card with a shape under it — passes false, so the
+   * statistic is not a box inside a box; the words and their order stay this one rule.
+   */
+  readonly framed?: boolean;
+}
+export function StatTile({ model, framed = true }: Props) {
   const s = useStyles(kitStyles);
   return (
-    <View style={s.panel} accessible>
+    <View {...(framed ? { style: s.panel } : {})} accessible>
       <Text role="label" tone="muted">
         {model.label}
       </Text>

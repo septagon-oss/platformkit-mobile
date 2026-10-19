@@ -275,33 +275,33 @@
  },
  "totals": {
   "contract": {
-   "files": 35,
-   "cases": 201,
-   "ms": 73486,
-   "testsMs": 47523.600000000006,
+   "files": 36,
+   "cases": 215,
+   "ms": 75180,
+   "testsMs": 47548.80000000001,
    "runners": {
-    "node": 35
+    "node": 36
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 240,
-   "cases": 1104,
-   "ms": 1747306,
-   "testsMs": 50417.10000000002,
+   "files": 241,
+   "cases": 1110,
+   "ms": 1766431,
+   "testsMs": 50475.10000000002,
    "runners": {
-    "jest": 79,
+    "jest": 80,
     "node": 161
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 100,
-   "cases": 320,
-   "ms": 2209646,
-   "testsMs": 39462,
+   "files": 101,
+   "cases": 325,
+   "ms": 2234660,
+   "testsMs": 39694,
    "runners": {
-    "jest": 100
+    "jest": 101
    },
    "unreachable": 0
   },
@@ -1454,6 +1454,113 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/home-greeting-and-counts.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 14,
+   "rule": "Home's first screen is a greeting and a few counts. The greeting's bands, the one word it may use, and the join between the counts body and the catalogue are decided here, on the two documents, with examples chosen independently of the code.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1694,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the day divides at 05:00, 12:00 and 17:00 in the reader's own zone",
+    "a name is greeted by its first word and an address by none",
+    "the greeting says the name it was given, in the reader's language",
+    "the workspace is the address a person typed, and a word when it is not one",
+    "a card counts the total, names the sub-count the catalogue declared",
+    "absence stays absence: no card, no count and no zero anywhere",
+    "an answered zero is an answer: the card and the row both say 0",
+    "a highlight with no total is the headline, and only in the catalogue's word",
+    "a highlight nobody named is not drawn under a total that was answered",
+    "an entry nobody handed the phone is dropped, and the rest is untouched",
+    "the body's own order stands, and three is the most one screen leads with",
+    "an empty window draws no shape, and fourteen quiet days draw a flat one",
+    "the row's count and the card's number are one formatting of one integer",
+    "a highlight enters through the catalogue and a broken one says so"
+   ],
+   "tests": [
+    {
+     "title": "the day divides at 05:00, 12:00 and 17:00 in the reader's own zone",
+     "ms": 3.023981,
+     "measured": false
+    },
+    {
+     "title": "a name is greeted by its first word and an address by none",
+     "ms": 0.365696,
+     "measured": false
+    },
+    {
+     "title": "the greeting says the name it was given, in the reader's language",
+     "ms": 1.399698,
+     "measured": false
+    },
+    {
+     "title": "the workspace is the address a person typed, and a word when it is not one",
+     "ms": 0.248029,
+     "measured": false
+    },
+    {
+     "title": "a card counts the total, names the sub-count the catalogue declared",
+     "ms": 11.391172,
+     "measured": false
+    },
+    {
+     "title": "absence stays absence: no card, no count and no zero anywhere",
+     "ms": 0.185533,
+     "measured": false
+    },
+    {
+     "title": "an answered zero is an answer: the card and the row both say 0",
+     "ms": 0.486409,
+     "measured": false
+    },
+    {
+     "title": "a highlight with no total is the headline, and only in the catalogue's word",
+     "ms": 0.396363,
+     "measured": false
+    },
+    {
+     "title": "a highlight nobody named is not drawn under a total that was answered",
+     "ms": 0.592065,
+     "measured": false
+    },
+    {
+     "title": "an entry nobody handed the phone is dropped, and the rest is untouched",
+     "ms": 0.517026,
+     "measured": false
+    },
+    {
+     "title": "the body's own order stands, and three is the most one screen leads with",
+     "ms": 0.718168,
+     "measured": false
+    },
+    {
+     "title": "an empty window draws no shape, and fourteen quiet days draw a flat one",
+     "ms": 3.152168,
+     "measured": false
+    },
+    {
+     "title": "the row's count and the card's number are one formatting of one integer",
+     "ms": 0.523839,
+     "measured": false
+    },
+    {
+     "title": "a highlight enters through the catalogue and a broken one says so",
+     "ms": 2.178408,
+     "measured": false
+    }
+   ],
+   "loaded": 34,
+   "coveredProdLines": 12289,
+   "onlyProdLines": null,
+   "testsMs": 25.2
   },
   {
    "file": "tests/journey-job-runs-on-the-runner-that-has-a-device.test.ts",
@@ -5671,6 +5778,65 @@
    "coveredProdLines": 611,
    "onlyProdLines": null,
    "testsMs": 25
+  },
+  {
+   "file": "tests/ui/home-greets-the-person.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 6,
+   "rule": "Home's first minute: the person is greeted, the workspace is named, and the counts the installation answered stand under them. A number the server never answered must not appear as a zero, and a count that went out of date must go away.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19125,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the greeting and the workspace name open the page, above the rows",
+    "a card says its number, its word and the sub-count the catalogue named",
+    "the row carries the same count the card leads with",
+    "a count nobody answered draws no card, no number and no zero",
+    "a refresh that refuses takes the cards that were drawn away",
+    "the same page draws with motion allowed"
+   ],
+   "tests": [
+    {
+     "title": "the greeting and the workspace name open the page, above the rows",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "a card says its number, its word and the sub-count the catalogue named",
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "the row carries the same count the card leads with",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "a count nobody answered draws no card, no number and no zero",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a refresh that refuses takes the cards that were drawn away",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "the same page draws with motion allowed",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 125,
+   "coveredProdLines": 1998,
+   "onlyProdLines": null,
+   "testsMs": 58
   },
   {
    "file": "tests/ui/home-held-writes.test.tsx",
@@ -21885,6 +22051,59 @@
    "coveredProdLines": 1847,
    "onlyProdLines": null,
    "testsMs": 90
+  },
+  {
+   "file": "tests/screens/home-counts-are-read-from-the-documented-address.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 5,
+   "rule": "Home's counts are a read of a documented address, asked through the generated operation: the route table, the validator and ApiError are all in the path these tests walk. One pull asks both documents; a refusal withdraws the numbers it never gave.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25014,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "it asks the documented counts address once and draws the number it answered",
+    "the greeting is drawn whatever the counts read answered",
+    "a summary that refuses leaves no card, no count and no zero",
+    "one pull asks the catalogue and the counts again",
+    "a card opens the list its row opens"
+   ],
+   "tests": [
+    {
+     "title": "it asks the documented counts address once and draws the number it answered",
+     "ms": 120,
+     "measured": false
+    },
+    {
+     "title": "the greeting is drawn whatever the counts read answered",
+     "ms": 22,
+     "measured": false
+    },
+    {
+     "title": "a summary that refuses leaves no card, no count and no zero",
+     "ms": 22,
+     "measured": false
+    },
+    {
+     "title": "one pull asks the catalogue and the counts again",
+     "ms": 40,
+     "measured": false
+    },
+    {
+     "title": "a card opens the list its row opens",
+     "ms": 28,
+     "measured": false
+    }
+   ],
+   "loaded": 157,
+   "coveredProdLines": 2537,
+   "onlyProdLines": null,
+   "testsMs": 232
   },
   {
    "file": "tests/screens/newer-shell-fallback.test.tsx",

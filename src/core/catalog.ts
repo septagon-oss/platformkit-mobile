@@ -134,6 +134,14 @@ export interface EntryHints {
    */
   readonly sortable?: readonly string[];
   readonly sections?: readonly { readonly key: string; readonly label: string }[];
+  /**
+   * highlight is what one sub-count of this entry counts, in the words the catalogue
+   * declares. The counts body answers numbers and never a word, so a card may say
+   * about a sub-count only what is declared here; its `filter` member is not read,
+   * because nothing in this build narrows a list with it. Absent means there is no
+   * word for the sub-count, and no sub-count is drawn.
+   */
+  readonly highlight?: { readonly label: string };
 }
 
 export interface FieldHints {
@@ -432,6 +440,19 @@ function hintEntry(
     }
     return kept.length === 0 ? undefined : kept;
   })();
+  // A sub-count is only sayable in the catalogue's own words, so a highlight that is
+  // not an object, or names nobody, costs the sub-count and says which: the entry's
+  // other readings survive their author's typo, as every other hint's do.
+  const highlight = ((): { readonly label: string } | undefined => {
+    const declared = raw.highlight;
+    if (declared === undefined || declared === null) return undefined;
+    if (!isRecord(declared)) {
+      notice(`${at}.highlight`, "is not a hint object: the sub-count is not drawn");
+      return undefined;
+    }
+    const label = hintWord(declared, "label", `${at}.highlight`, "a word", notice);
+    return label === undefined ? undefined : { label };
+  })();
   const hints: EntryHints = {
     ...(singular === undefined ? {} : { singular }),
     ...(plural === undefined ? {} : { plural }),
@@ -443,6 +464,7 @@ function hintEntry(
     ...(statusField === undefined ? {} : { statusField }),
     ...(sortable === undefined ? {} : { sortable }),
     ...(summary === undefined ? {} : { summaryFields: summary }),
+    ...(highlight === undefined ? {} : { highlight }),
     ...(sections.length === 0 ? {} : { sections }),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;

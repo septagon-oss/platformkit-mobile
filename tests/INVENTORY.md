@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `d38bd6079` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `4cd973b78` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 35 | 201 | 47.5 s | 73 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 240 | 1104 | 50.4 s | 1747 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 100 | 320 | 39.5 s | 2210 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 36 | 215 | 47.5 s | 75 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 241 | 1110 | 50.5 s | 1766 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 101 | 325 | 39.7 s | 2235 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 432
+* keep: 435
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 432 — 196 `tests/*.test.ts` (node), 179 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1625; cases in files no runner reaches: 35
-* isolated wall time: contract 73 s, behaviour 1747 s, composition 2210 s, journey 0 s
+* files inventoried: 435 — 197 `tests/*.test.ts` (node), 181 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1650; cases in files no runner reaches: 35
+* isolated wall time: contract 75 s, behaviour 1766 s, composition 2235 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -104,6 +104,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts | node | contract | 15 | 620 | 303.6 |  | not measured | — | 0 | keep | The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches h… |
 | tests/factor-person-provisioning.test.ts | node | contract | 1 | 585 | 271.7 |  | not measured | — | 0 | keep | The device harness creates the person who answers the second factor, and the kernel it serves accepts that person.  At the commit testdata/openapi.source.json … |
 | tests/fingerprint.test.ts | node | contract | 3 | 573 | 2.1 | 0 | 0 of 3 | scripts/fingerprint.ts | 0 | keep | The hook resets after EOF, even when a caller reads the same source twice. |
+| tests/home-greeting-and-counts.test.ts | node | contract | 14 | 1694 | 25.2 |  | not measured | — | 0 | keep | Home's first screen is a greeting and a few counts. The greeting's bands, the one word it may use, and the join between the counts body and the catalogue are d… |
 | tests/journey-job-runs-on-the-runner-that-has-a-device.test.ts | node | contract | 5 | 836 | 425.2 |  | not measured | — | 0 | keep | The device journey runs on `pkit-ci-android`, the runner whose image carries adb, the emulator, Maestro and /dev/kvm, and its probe step refuses by name on a h… |
 | tests/kernel-main-bound.test.ts | node | contract | 3 | 1969 | 1289.7 | 0 | 0 of 3 | — | 0 | keep | These cases hold the nightly's bound to what `startBound` says it is: a timer the process keeps. A process whose only pending work is the bound must stay alive… |
 | tests/kernel-main-budget.test.ts | node | contract | 2 | 1142 | 485.7 | 0 | 1 of 2 | — | 0 | keep | The command refuses an unrepresentable timer budget before reading the forge, while both ends of the supported interval remain usable configuration. |
@@ -164,6 +165,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/gallery-primary-action.test.tsx | jest | behaviour | 1 | 19989 | 98 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) the player page offers at most one filled action |
 | tests/ui/grouped-controls-reachable.test.tsx | jest | behaviour | 2 | 20096 | 16 | 0 | 0 of 2 | — | 0 | keep | A container marked `accessible` becomes one accessibility element: on iOS its child buttons are no longer reachable one by one. A tab bar whose tabs a screen-r… |
 | tests/ui/held-write-row.test.tsx | jest | behaviour | 3 | 15243 | 25 |  | not measured | — | 0 | keep | A write this phone is holding is shown as what it is: not saved, not lost, and with the two acts that belong to the person. The sentence comes from src/core/ou… |
+| tests/ui/home-greets-the-person.test.tsx | jest | behaviour | 6 | 19125 | 58 |  | not measured | — | 0 | keep | Home's first minute: the person is greeted, the workspace is named, and the counts the installation answered stand under them. A number the server never answer… |
 | tests/ui/home-held-writes.test.tsx | jest | behaviour | 1 | 16223 | 21 |  | not measured | — | 0 | keep | What this phone is holding is on the home screen, above the resources, with the two acts that belong to the person. A write that left the sheet and never reach… |
 | tests/ui/illustration-drawing.test.tsx | jest | behaviour | 3 | 37413 | 242 |  | not measured | — | 0 | keep | The two inks of a drawing are the theme's: every stroke a picture paints is a palette colour of the mode it is drawn in, at the side and stroke the kit names, … |
 | tests/ui/interaction.test.tsx | jest | behaviour | 15 | 21059 | 939 | 4 | 1 of 15 | — | 0 | keep | The five molecules the reference bar asked for, and the states the theme hands them. Each one is asked the question a person looks at it to answer: how far thr… |
@@ -422,6 +424,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/example-task-detail.test.tsx | jest | composition | 6 | 18703 | 189 | 20 | 1 of 6 | — | 0 | keep | The example pack is the pattern a product copies, so what is proved here is the pattern's two halves: a screen whose data arrives as the operation's own respon… |
 | tests/screens/expired-people-stay-withdrawn-until-the-session-changes.test.tsx | jest | composition | 2 | 21149 | 18 |  | not measured | — | 0 | keep | A session refusal withdraws every retained person before peers finish. Later successes cannot revive that session, and a replacement workspace accepts only its… |
 | tests/screens/generated-richtext-record-renders-natively.test.tsx | jest | composition | 3 | 25745 | 90 |  | not measured | — | 0 | keep | A generated record reads a richtext declaration without a product renderer. Markdown headings become native text while a plain text field keeps its syntax. |
+| tests/screens/home-counts-are-read-from-the-documented-address.test.tsx | jest | composition | 5 | 25014 | 232 |  | not measured | — | 0 | keep | Home's counts are a read of a documented address, asked through the generated operation: the route table, the validator and ApiError are all in the path these … |
 | tests/screens/newer-shell-fallback.test.tsx | jest | composition | 6 | 23705 | 570 | 0 | 0 of 6 | — | 0 | keep | A catalogue document, as the server prints it, that names a pack this build carries but cannot draw yet: the record is still read and drawn by the generated de… |
 | tests/screens/offline-detail-says-when-it-was-saved.test.tsx | jest | composition | 1 | 29273 | 44 |  | not measured | — | 0 | keep | A record the phone answered rather than the server is drawn with the same quiet line a list carries: what it is, and when this device last received it. One der… |
 | tests/screens/offline-list-says-when-it-was-saved.test.tsx | jest | composition | 1 | 26758 | 1127 |  | not measured | — | 0 | keep | A page answered from the phone rather than the server is drawn with a quiet line that says so and when it was saved: a person in a tunnel must be able to tell … |

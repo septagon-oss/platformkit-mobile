@@ -26,7 +26,14 @@ import { copyLanguage, type Copy, type Language } from "./copy";
 import type { EntrySubject } from "./failure";
 import type { DataCell } from "./collections";
 import type { Status } from "./shared";
-import { presentedInstant, presentedTime, type Formatting } from "./presentation";
+import {
+  civilHour,
+  instantValue,
+  presentedInstant,
+  presentedTime,
+  type Formatting,
+  type Presentation,
+} from "./presentation";
 
 export * from "./pictures";
 export * from "./illustrations";
@@ -38,6 +45,7 @@ export {
   presentedTime,
   presentedInstant,
   civilDay,
+  civilHour,
   type Clock,
   type Feedback,
   type Formatting,
@@ -2111,6 +2119,7 @@ export * from "./pricing";
 export * from "./map";
 export * from "./media";
 export * from "./charts";
+export * from "./summary";
 export * from "./table";
 export type { Content, ContentModel, Page, Status, Control as ActionModel } from "./shared";
 
@@ -2259,3 +2268,74 @@ export function accountPointers(entries: readonly Entry[], userId?: string): rea
     ? [{ resource: directory, id: userId }]
     : [];
 }
+
+/**
+ * firstName is the one word a greeting may use.
+ *
+ * An address is not a name: a display name holding `@` greets nobody, because
+ * "Good morning, joao" from joao@acme.test would say the app cannot tell the two
+ * apart and the person would be right to hear it as a mistake. A compound name is
+ * greeted by its first word (`Ana Rita` → Ana, `Maria do Carmo` → Maria), a
+ * hyphenated given name stays the one word it is, and the punctuation a directory
+ * leaves on the end of a name is not part of it. The rule never invents a name: an
+ * empty answer, and a value too long to be one word, both greet nobody.
+ */
+const firstNameMax = 32;
+
+export function firstName(displayName: string): string {
+  const trimmed = displayName.trim();
+  if (trimmed.includes("@")) return "";
+  const word = trimmed.split(/\s+/)[0]!.replace(/^[.,;:!?–—-]+|[.,;:!?–—-]+$/g, "");
+  return word === "" || word.length > firstNameMax ? "" : word;
+}
+
+/**
+ * Greeting is Home's first sentence and the name it is said to — empty when nobody
+ * may be named, which the organism draws as the part of day alone.
+ */
+export interface Greeting {
+  readonly line: string;
+  readonly name: string;
+}
+
+/**
+ * greeting says the part of day the reader's own clock is in, and greets the reader
+ * by first name when the session or the directory holds one.
+ *
+ * The hour is read in `Presentation.timeZone`, the reader's zone, so a person at
+ * 03:20 their time stands in the night band whatever the server's UTC says. Three
+ * bands and not four, because that is what both languages this table speaks greet
+ * with: morning 05:00–11:59, afternoon 12:00–16:59, evening from 17:00 until 05:00,
+ * and "Good night"/"Boa noite" is a farewell no screen says to a person it is
+ * keeping. An instant this build cannot read claims no band at all, so `line` is
+ * empty and the screen says nothing rather than guessing a morning.
+ */
+export function greeting(
+  person: { readonly name?: string } | undefined,
+  p: Presentation,
+): Greeting {
+  const name = person?.name === undefined ? "" : firstName(person.name);
+  const at = instantValue(p.now);
+  if (at === undefined) return { line: "", name };
+  const hour = civilHour(at, p.timeZone);
+  const part =
+    hour < 5
+      ? p.copy.kit.goodEvening
+      : hour < 12
+        ? p.copy.kit.goodMorning
+        : hour < 17
+          ? p.copy.kit.goodAfternoon
+          : p.copy.kit.goodEvening;
+  return { line: p.copy.kit.greeting(part, name), name };
+}
+
+/**
+ * workspaceName is what the page calls the place these records live.
+ *
+ * The address the session is held open at, reduced to what a person typed, is the
+ * one fact this app holds about where its records are; the copy table's own word for
+ * a workspace is what is left when the address cannot be read. A product name in
+ * either place would say which app this is, which nobody reading their own list asks.
+ */
+export const workspaceName = (baseURL: string, copy: Copy): string =>
+  hostLabel(baseURL) || copy.kit.workspace;

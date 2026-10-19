@@ -30,6 +30,7 @@ export interface Theme {
   readonly type: typeof type;
   readonly elevation: typeof elevation;
   readonly state: Interaction;
+  readonly surface: Surfaces;
   readonly hit: number;
 }
 
@@ -97,14 +98,29 @@ const fonts: Fonts = {
   mono: Platform.select({ ios: "Menlo", android: "monospace", default: "monospace" }),
 };
 
+/**
+ * Surfaces are the painted pages the palette carries no role for. `band` is Home's
+ * greeting wash: the accent mixed into the canvas it sits on, at 0.07 — the most tint
+ * that keeps both inks the band draws on it (a greeting in full-strength ink, the
+ * workspace line in muted) above AA in both palettes, measured by the pair registry
+ * below the way `interaction.selected` states its own factor. Ink over the accent
+ * itself is refused: `accentOn` fades into a near-white canvas and strands the
+ * greeting halfway down the band. The gradient this wash is the top of ends in
+ * `color.surfaceCanvas`, so no seam is painted between the two.
+ */
+export interface Surfaces {
+  readonly band: string;
+}
+
 export function themeFor(
   mode: Mode,
   colors: Readonly<Record<Mode, Palette>> = palette,
   faces: Fonts = fonts,
 ): Theme {
+  const color = colors[mode];
   return {
     mode,
-    color: colors[mode],
+    color,
     font: faces,
     space,
     radius,
@@ -112,7 +128,8 @@ export function themeFor(
     extent,
     type,
     elevation,
-    state: interaction(colors[mode]),
+    state: interaction(color),
+    surface: { band: mix(color.surfaceCanvas, color.accentDefault, 0.07) },
     hit,
   };
 }
@@ -185,6 +202,10 @@ export const contrastPairs: readonly [string, string, AAKind][] = [
   ["color.statusOk", "color.surfaceMuted", "graphic"],
   ["color.statusWarning", "color.surfaceMuted", "graphic"],
   ["state.disabled.text", "state.disabled.fill", "text"],
+  // Home's greeting band is a surface no control sits on and both inks are read on:
+  // the greeting at display size, the workspace line at caption size, the binding one.
+  ["color.textPrimary", "surface.band", "text"],
+  ["color.textMuted", "surface.band", "text"],
   // A selected tab's glyph and a selected row's tick: an icon that carries the
   // selection, not the label, which is drawn in full-strength ink.
   ["color.accentDefault", "state.selected", "graphic"],
