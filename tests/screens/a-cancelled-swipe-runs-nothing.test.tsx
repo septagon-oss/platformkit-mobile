@@ -36,12 +36,16 @@ jest.mock("react-native-reanimated", () => {
   return {
     __esModule: true,
     default: { View },
-    runOnJS: (f: Callback) => f,
     useSharedValue: (value: unknown) => ({ value }),
     useAnimatedStyle: (style: () => unknown) => style(),
     withTiming: (to: unknown) => to,
   };
 });
+// react-native-worklets refuses to load where no native runtime is loaded, and this suite stands in
+// for the crossing it performs: the same call, asked for on the runtime the suite runs on.
+jest.mock("react-native-worklets", () => ({
+  scheduleOnRN: (f: Callback, ...args: unknown[]) => f(...args),
+}));
 
 const action: RowAction = {
   verb: "resolve",

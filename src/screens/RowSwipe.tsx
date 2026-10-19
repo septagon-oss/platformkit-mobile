@@ -12,12 +12,8 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import * as Haptics from "expo-haptics";
 import { readSwipe } from "../core/gesture";
 import type { RowActionProps } from "../ui/organisms/DataList";
@@ -48,8 +44,6 @@ export function RowSwipe({ action, motion, onRun, children }: RowActionProps) {
   const tick = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
-  const felt = runOnJS(tick);
-  const act = runOnJS(onRun);
   const gesture = Gesture.Pan()
     .maxPointers(1)
     // A horizontal drag becomes the row's once it has moved the page's own gap, and stops being
@@ -73,7 +67,11 @@ export function RowSwipe({ action, motion, onRun, children }: RowActionProps) {
       // nothing of the motion preference: less motion is a request about ink, not about touch.
       if (read.armed && !ticked.value) {
         ticked.value = true;
-        felt();
+        // The tick and, at the release, the command both belong to the React Native runtime, so the
+        // worklet that noticed the crossing asks for them there: `scheduleOnRN` is itself a worklet
+        // and so is callable on the UI runtime, while a closure prepared outside it — what `runOnJS`
+        // returns — arrives there as one that refuses a synchronous call.
+        scheduleOnRN(tick);
       }
     })
     .onEnd((_event, released) => {
@@ -84,7 +82,7 @@ export function RowSwipe({ action, motion, onRun, children }: RowActionProps) {
       // callback with `released` false for a drag it cancelled or failed while the finger was
       // down — a second finger, a call, the system taking the touch stream back — and a write is
       // never what one of those means.
-      if (released && readSwipe(travel.value, swipe.reveal).armed) act();
+      if (released && readSwipe(travel.value, swipe.reveal).armed) scheduleOnRN(onRun);
     })
     // A drag the list took back never reaches onEnd as a release, and the surface has to go home
     // either way.

@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 256,
-   "cases": 1198,
-   "ms": 2089927,
-   "testsMs": 65007.10000000002,
+   "files": 257,
+   "cases": 1200,
+   "ms": 2098213,
+   "testsMs": 69814.30000000002,
    "runners": {
     "jest": 89,
-    "node": 167
+    "node": 168
    },
    "unreachable": 0
   },
@@ -10903,6 +10903,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-released-swipe-reaches-its-command-from-the-ui-runtime.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A native row's drag is read and released on the UI runtime: the gesture callbacks are worklets, and whatever they call synchronously must be callable there. This compiles the real surface with the app's native Babel preset, serializes its gesture callbacks through the installed Worklets serializer and unpackers, and drives one armed, released drag: the threshold's tick and the command must both reach the React Native runtime. The JS gesture double cannot see this boundary.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 8286,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a drag past the threshold asks for its tick from the UI runtime",
+    "a released armed drag runs its command from the UI runtime"
+   ],
+   "tests": [
+    {
+     "title": "a drag past the threshold asks for its tick from the UI runtime",
+     "ms": 4359.253343,
+     "measured": false
+    },
+    {
+     "title": "a released armed drag runs its command from the UI runtime",
+     "ms": 447.941805,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 4807.2
   },
   {
    "file": "tests/a-remembered-record-opens-one-record-whatever-its-id-holds.test.ts",
