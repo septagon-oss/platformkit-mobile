@@ -32,8 +32,15 @@ export function Snackbar({ model, insets: given, renderState: State = StateView,
   const s = useStyles(styles);
   const fromRoot = useSafeAreaInsets();
   const insets = given ?? fromRoot;
+  // The card answers touch only while it holds something to press. A receipt is read, not worked
+  // on, and the bar floats over a live screen: a card that caught touches would hold the list
+  // beneath it — its rows, its swipe, its presses — for as long as the sentence is on screen.
+  const pressable = model.actions.length > 0;
   return (
-    <View style={[s.card, { paddingBottom: insets.bottom + t.space.lg }]}>
+    <View
+      pointerEvents={pressable ? "auto" : "none"}
+      style={[s.card, { paddingBottom: insets.bottom + t.space.lg }]}
+    >
       <State model={model} onAction={() => undefined} {...testable(testID)} />
     </View>
   );
