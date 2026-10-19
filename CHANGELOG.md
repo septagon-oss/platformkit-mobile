@@ -19,6 +19,21 @@ for the version being released.
 
 ## 0.3.0 (unreleased)
 
+- A list row can be swiped to run the command its entry names. The author says which
+  with `hints.primaryCommand` — a verb the entry offers for a record, one the server
+  declared, that asks for no value — and the kit reads it once at mount and says nothing
+  else about it, so a client can promise the gesture in its copy before the next server
+  release adds the verb. `derive.rowAction` answers which command a row would run and in
+  whose tone, `derive.readSwipe` answers how far a drag has got, and both readings are
+  the same ones the reanimated surface and the component fake use, so the line a person
+  can see is the line a release runs at and no surface gets to decide it twice. The run
+  goes through the submit every other door uses, and a command that hurts, or whose
+  consequence the author declared, is asked first. Nothing a swipe can do is swipe-only:
+  `Row` offers the same command as a named accessibility action, and a list draws its
+  rows unchanged when the app supplies no surface. Added to `./core/derive`:
+  `rowAction`, `rowSwipeTone`, `readSwipe`, `RowAction`, `SwipeReading`; `MediaRenderers`
+  gains `rowAction`, the kit's atoms gain a `receipt` distance and the `command-*`,
+  `row-reveal` and `snackbar` ids a journey finds these by.
 - catalogVersion: 2
 - `detailItems` is gone from `./core/derive`, which is a breaking change to a published
   subpath: below 1.0.0 the minor carries that, so the removal is documented here rather
