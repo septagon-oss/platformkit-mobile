@@ -30,10 +30,11 @@ for the version being released.
   goes through the submit every other door uses, and a command that hurts, or whose
   consequence the author declared, is asked first. Nothing a swipe can do is swipe-only:
   `Row` offers the same command as a named accessibility action, and a list draws its
-  rows unchanged when the app supplies no surface. Added to `./core/derive`:
-  `rowAction`, `rowSwipeTone`, `readSwipe`, `RowAction`, `SwipeReading`; `MediaRenderers`
-  gains `rowAction`, the kit's atoms gain a `receipt` distance and the `command-*`,
-  `row-reveal` and `snackbar` ids a journey finds these by.
+  rows unchanged when the app supplies no surface. Added to `./core/derive`: `rowAction`,
+  `rowSwipeTone` and `RowAction`; the new subpath `./core/gesture` answers `readSwipe` and
+  `SwipeRead`, so an app that draws its own reveal surface reads a drag the way this one
+  does; `MediaRenderers` gains `rowAction`, `./ui/scale` gains the `swipe` distances, and
+  the `command-*`, `row-reveal` and `snackbar` ids are what a journey finds these by.
 - catalogVersion: 2
 - `detailItems` is gone from `./core/derive`, which is a breaking change to a published
   subpath: below 1.0.0 the minor carries that, so the removal is documented here rather
