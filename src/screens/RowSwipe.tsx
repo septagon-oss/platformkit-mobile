@@ -57,6 +57,9 @@ export function RowSwipe({ action, motion, onRun, children }: RowActionProps) {
     .activeOffsetX([-swipe.armX, swipe.armX])
     .failOffsetY([-swipe.failY, swipe.failY])
     .onBegin(() => {
+      // A new drag starts from where the finger landed, not from where the last one ended: a
+      // surface that kept the previous travel would read armed before this finger moved.
+      travel.value = 0;
       ticked.value = false;
     })
     .onUpdate((event) => {
@@ -73,13 +76,18 @@ export function RowSwipe({ action, motion, onRun, children }: RowActionProps) {
         felt();
       }
     })
-    .onEnd(() => {
+    .onEnd((_event, released) => {
       // The surface closes whichever way the decision goes: a command that runs leaves no open row
       // behind it, and one that must be asked first stays a question the row keeps over it.
       open.value = withTiming(0, { duration });
-      if (readSwipe(travel.value, swipe.reveal).armed) act();
+      // Only a finger that left the row on its own decides anything. The library calls this same
+      // callback with `released` false for a drag it cancelled or failed while the finger was
+      // down — a second finger, a call, the system taking the touch stream back — and a write is
+      // never what one of those means.
+      if (released && readSwipe(travel.value, swipe.reveal).armed) act();
     })
-    // A drag the list took back instead never reaches onEnd, and the surface has to go home anyway.
+    // A drag the list took back never reaches onEnd as a release, and the surface has to go home
+    // either way.
     .onFinalize(() => {
       open.value = withTiming(0, { duration });
     });
