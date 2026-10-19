@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 119,
-   "cases": 371,
-   "ms": 2761505,
-   "testsMs": 43841,
+   "files": 120,
+   "cases": 374,
+   "ms": 2782654,
+   "testsMs": 43856,
    "runners": {
-    "jest": 119
+    "jest": 120
    },
    "unreachable": 0
   },
@@ -21046,6 +21046,47 @@
    "coveredProdLines": 1423,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A malformed destructive hint must keep the confirmation between a row action and its write. Follow served catalogue bytes through derivation and the command hook, using the shared shell and transport doubles; only an explicit affirmative answer may send the command or its receipt.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21149,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a destructive declaration of null never becomes an immediate row write",
+    "a destructive declaration of 0 never becomes an immediate row write",
+    "a destructive declaration of \"false\" never becomes an immediate row write"
+   ],
+   "tests": [
+    {
+     "title": "a destructive declaration of null never becomes an immediate row write",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "a destructive declaration of 0 never becomes an immediate row write",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a destructive declaration of \"false\" never becomes an immediate row write",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 147,
+   "coveredProdLines": 2102,
+   "onlyProdLines": null,
+   "testsMs": 15
   },
   {
    "file": "tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx",
