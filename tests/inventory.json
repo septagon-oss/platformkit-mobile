@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 112,
-   "cases": 346,
-   "ms": 2549166,
-   "testsMs": 42523,
+   "files": 113,
+   "cases": 349,
+   "ms": 2591093,
+   "testsMs": 42769,
    "runners": {
-    "jest": 112
+    "jest": 113
    },
    "unreachable": 0
   },
@@ -25661,6 +25661,47 @@
    "coveredProdLines": 2603,
    "onlyProdLines": null,
    "testsMs": 665
+  },
+  {
+   "file": "tests/workspace-sign-in-keeps-its-address-through-refusals.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A connection document describes a place without deciding whether anyone can sign in: a refused read still signs in at the address shown, a superseded read cannot replace the newer place, and a saved sign-in that cannot be read says so on the address step.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 41927,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a refused connection read still submits and opens the session at the changed address",
+    "a late successful lookup cannot replace or remember the newer refused workspace",
+    "an unreadable saved sign-in is visible and can be cleared on the address step"
+   ],
+   "tests": [
+    {
+     "title": "a refused connection read still submits and opens the session at the changed address",
+     "ms": 206,
+     "measured": false
+    },
+    {
+     "title": "a late successful lookup cannot replace or remember the newer refused workspace",
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "an unreadable saved sign-in is visible and can be cleared on the address step",
+     "ms": 21,
+     "measured": false
+    }
+   ],
+   "loaded": 169,
+   "coveredProdLines": 2791,
+   "onlyProdLines": null,
+   "testsMs": 246
   },
   {
    "file": "tests/chart-axis-position.case.mjs",
