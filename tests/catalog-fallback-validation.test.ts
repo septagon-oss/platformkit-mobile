@@ -21,11 +21,14 @@ test("malformed hints at every nesting level preserve the unhinted catalog", () 
     parseCatalog(input, (at) => noticed.push(at)),
     baseline,
   );
-  assert.deepEqual(noticed, [
+  // Which four paths are the rule; the order they are named in is the document's read order, and
+  // a command's own hints now come before the entry's, because the verb an entry declares for a
+  // row can only be checked against commands that have been read.
+  assert.deepEqual([...noticed].sort(), [
+    "resources[0].commands[0].fields[0].presentation",
+    "resources[0].commands[0].presentation",
     "resources[0].fields[1].presentation",
     "resources[0].presentation",
-    "resources[0].commands[0].presentation",
-    "resources[0].commands[0].fields[0].presentation",
   ]);
 });
 

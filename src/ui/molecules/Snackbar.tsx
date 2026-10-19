@@ -27,12 +27,7 @@ export interface Props {
   readonly testID?: string;
 }
 
-export function Snackbar({
-  model,
-  insets: given,
-  renderState: State = StateView,
-  testID,
-}: Props) {
+export function Snackbar({ model, insets: given, renderState: State = StateView, testID }: Props) {
   const t = useTheme();
   const s = useStyles(styles);
   const fromRoot = useSafeAreaInsets();
