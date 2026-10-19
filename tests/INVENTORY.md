@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `8cdd7da4d` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `85be34cfd` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,7 +24,7 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 224 | 47.6 s | 77 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 253 | 1194 | 63.2 s | 2033 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 253 | 1194 | 63.2 s | 2016 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 115 | 365 | 43.6 s | 2647 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
@@ -48,7 +48,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 * files inventoried: 462 — 203 `tests/*.test.ts` (node), 202 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1783; cases in files no runner reaches: 35
-* isolated wall time: contract 77 s, behaviour 2033 s, composition 2647 s, journey 0 s
+* isolated wall time: contract 77 s, behaviour 2016 s, composition 2647 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -143,7 +143,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/a-pill-crosses-from-the-colour-it-wore.test.tsx | jest | behaviour | 3 | 15145 | 18 |  | not measured | — | 0 | keep | A pill whose state moved while it was on screen crosses from the pair it wore to the pair it reached: the pair it left is laid over the pill, fully on, hidden … |
 | tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx | jest | behaviour | 1 | 30398 | 7 |  | not measured | — | 0 | keep | A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared compo… |
 | tests/ui/a-record-that-just-finished-names-its-own-state.test.tsx | jest | behaviour | 8 | 27266 | 631 |  | not measured | — | 0 | keep | What the record owes the person when their own write moved its state into one the entry calls finished: one line, in the record's own words, drawn whether or n… |
-| tests/ui/a-row-offers-its-command-without-a-finger.test.tsx | jest | behaviour | 6 | 37252 | 76 |  | not measured | — | 0 | keep | Nothing a swipe can do may be swipe-only. The command a row's swipe runs is offered to a reader as a named action of the row itself, the row's own name keeps t… |
+| tests/ui/a-row-offers-its-command-without-a-finger.test.tsx | jest | behaviour | 6 | 20500 | 102 |  | not measured | — | 0 | keep | Nothing a swipe can do may be swipe-only. The command a row's swipe runs is offered to a reader as a named action of the row itself, the row's own name keeps t… |
 | tests/ui/a-workspaces-accent-enters-the-theme-without-a-hand-edited-token.test.tsx | jest | behaviour | 10 | 21472 | 32 |  | not measured | — | 0 | keep | A workspace's accent arrives as a value, never as a token: the generated palette stays the only writer of colour in the repository, and `accentPalette` copies … |
 | tests/ui/agenda-appointment-lines.test.tsx | jest | behaviour | 3 | 19211 | 106 | 0 | 0 of 3 | — | 0 | keep | An appointment is its name and, beneath it, when it is. Welding the two into one control label gave every entry the same long centred line of text, and a headi… |
 | tests/ui/atoms.test.tsx | jest | behaviour | 11 | 18901 | 51 | 0 | 0 of 11 | — | 0 | keep | (no first comment; first test title) a busy button is a button that cannot be pressed and says so |

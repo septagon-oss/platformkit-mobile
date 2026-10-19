@@ -287,8 +287,8 @@
   "behaviour": {
    "files": 253,
    "cases": 1194,
-   "ms": 2033010,
-   "testsMs": 63214.60000000002,
+   "ms": 2016258,
+   "testsMs": 63240.60000000002,
    "runners": {
     "jest": 87,
     "node": 166
@@ -4137,7 +4137,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 37252,
+   "ms": 20500,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a reader is offered the same command the swipe runs, on the row it belongs to",
@@ -4145,44 +4145,44 @@
     "an action that is not the row's own asks nothing of the phone",
     "a row of an entry that names no command is offered nothing, and is otherwise the same row",
     "no surface stands under a row until the product supplies one",
-    "the command the product's surface reveals is the entry's own verb"
+    "the surface the product supplies stands under the row it belongs to"
    ],
    "tests": [
     {
      "title": "a reader is offered the same command the swipe runs, on the row it belongs to",
-     "ms": 17,
+     "ms": 19,
      "measured": false
     },
     {
      "title": "the command is something the row offers, not a fact added to its name",
-     "ms": 11,
+     "ms": 16,
      "measured": false
     },
     {
      "title": "an action that is not the row's own asks nothing of the phone",
-     "ms": 9,
+     "ms": 17,
      "measured": false
     },
     {
      "title": "a row of an entry that names no command is offered nothing, and is otherwise the same row",
-     "ms": 14,
+     "ms": 15,
      "measured": false
     },
     {
      "title": "no surface stands under a row until the product supplies one",
-     "ms": 13,
+     "ms": 16,
      "measured": false
     },
     {
-     "title": "the command the product's surface reveals is the entry's own verb",
-     "ms": 12,
+     "title": "the surface the product supplies stands under the row it belongs to",
+     "ms": 19,
      "measured": false
     }
    ],
    "loaded": 125,
    "coveredProdLines": 1845,
    "onlyProdLines": null,
-   "testsMs": 76
+   "testsMs": 102
   },
   {
    "file": "tests/ui/a-workspaces-accent-enters-the-theme-without-a-hand-edited-token.test.tsx",
