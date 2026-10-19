@@ -61,7 +61,16 @@ export function Announcement() {
     // the bar says one thing and answers no touch, so the screen under it stays that screen.
     <View pointerEvents="box-none" style={page.foot}>
       <Animated.View pointerEvents="box-none" style={{ opacity: fade }}>
-        <Snackbar model={model.value} renderState={StateFeedback} testID="snackbar" />
+        {/* The token is the bar's identity, not the sentence: two rows of one list resolved back
+            to back file the same words, and a reader who was told the first is owed the second.
+            Keying on the filing remounts the surface, which is what makes an identical sentence
+            a new fact rather than one the reader already heard. */}
+        <Snackbar
+          key={filed.token}
+          model={model.value}
+          renderState={StateFeedback}
+          testID="snackbar"
+        />
       </Animated.View>
     </View>
   );
