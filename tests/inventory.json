@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 261,
+   "files": 263,
    "cases": 1232,
    "ms": 2133632,
    "testsMs": 69152.40000000001,
    "runners": {
-    "jest": 90,
+    "jest": 92,
     "node": 171
    },
    "unreachable": 0
@@ -3528,6 +3528,46 @@
    "coveredProdLines": 1810,
    "onlyProdLines": null,
    "testsMs": 11
+  },
+  {
+   "file": "tests/screens/a-new-sign-in-registers-while-an-earlier-push-pass-finishes.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "A new sign-in has its own notification pass even while an earlier session's answer is pending. Finishing the earlier sign-out must leave the new workspace addressable.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-new-sign-in-registers-while-an-earlier-push-pass-finishes.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
+   "file": "tests/screens/a-slow-device-sign-out-preserves-the-next-saved-sign-in.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "An older sign-out waiting for its device answer cannot clear a newer sign-in's saved key. The phone must restore the workspace whose sign-in completed most recently.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-slow-device-sign-out-preserves-the-next-saved-sign-in.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/nativeImage.test.tsx",

@@ -718,21 +718,19 @@ export function Shell({
   // just signed in and taken back from the one who just signed out, and nothing in between
   // decides either. The token itself is memory-only, like the key that reaches it, and so is the
   // row it became — held beside the connection that wrote it, because a row outliving the session
-  // that registered it is an address the next person on this phone would inherit.
-  const heldDevice = useRef<
-    { readonly api: Api; readonly token: string; readonly id: string } | undefined
-  >(undefined);
-  // A registration this phone has on the wire, with the connection that sent it: its answer is a
-  // row only that connection's key reaches, so a sign-out waits for it rather than spending the
-  // key first.
-  const rowOnWire = useRef<{ readonly api: Api; readonly settled: Promise<void> } | undefined>(
-    undefined,
-  );
+  // that registered it is an address the next person on this phone would inherit. An old
+  // sign-out and a new sign-in are live at the same moment when the row answer is slow, so each
+  // of these is keyed by the connection that owns it: what one session writes never stands in
+  // the place a newer session's own row would be read from.
+  const heldDevice = useRef(new Map<Api, { readonly token: string; readonly id: string }>());
+  // A registration this phone has on the wire, per sending connection: its answer is a row only
+  // that connection's key reaches, so a sign-out waits for it rather than spending the key first.
+  const rowOnWire = useRef(new Map<Api, Promise<void>>());
   // Whether this person has already said "not now": the platform's own prompt is spent once
   // it is answered, so the offer this app owns is spent the same way — once per sign-in, and
   // kept in memory rather than in a table, because a dismissed offer decides no command.
   const declined = useRef(false);
-  const passing = useRef<Promise<void> | undefined>(undefined);
+  const passing = useRef(new Map<Api, Promise<void>>());
   // A server that answered no to this phone's address is not asked again in the same session:
   // a deployment carrying no adapter for the platform, and a credential the door does not
   // accept, are both answered by the deployment and not by waiting. A new sign-in asks again.
@@ -772,18 +770,18 @@ export function Shell({
     // that fails must not have taken away the address that still works.
     const written = answer.then((row) => {
       const id = row.data?.id;
-      if (id !== undefined) heldDevice.current = { api: a, token, id };
+      if (id !== undefined) heldDevice.current.set(a, { token, id });
       return id;
     });
     const onWire: Promise<void> = written.then(
       () => undefined,
       () => undefined,
     );
-    rowOnWire.current = { api: a, settled: onWire };
+    rowOnWire.current.set(a, onWire);
     try {
       return await written;
     } finally {
-      if (rowOnWire.current?.settled === onWire) rowOnWire.current = undefined;
+      if (rowOnWire.current.get(a) === onWire) rowOnWire.current.delete(a);
     }
   }, []);
 
@@ -791,18 +789,17 @@ export function Shell({
    * handBack asks the session `a` for this phone's row back, and says whether it did. No row, no
    * request: a phone that never registered has nothing to remove, and a registration still on the
    * wire is waited for first, because the row it is writing is this session's own. A row another
-   * connection registered is let go unsaid — its key, or the sign-in its door answers to, ended
-   * with that connection, and no server is asked for a row that is not its tenant's. The address
+   * connection wrote is not this one's to ask about and is left held: that connection's key still
+   * reaches it, and the session that wrote it will give it back. The address this connection wrote
    * is let go either way, because the session that could reach it is ending, and a row remembered
    * past that point is one nobody is ever going to ask for back.
    */
   const handBack = useCallback(async (a: Api): Promise<boolean> => {
-    const onWire = rowOnWire.current;
-    if (onWire !== undefined && onWire.api === a) await onWire.settled;
-    const held = heldDevice.current;
+    const onWire = rowOnWire.current.get(a);
+    if (onWire !== undefined) await onWire;
+    const held = heldDevice.current.get(a);
     if (held === undefined) return true;
-    heldDevice.current = undefined;
-    if (held.api !== a) return true;
+    heldDevice.current.delete(a);
     try {
       await a.operations.notificationDeviceRemove({ path: { id: held.id } });
       return true;
@@ -849,9 +846,8 @@ export function Shell({
         // row, so there is nothing new to hand over; the same token at another server is that
         // server's row to write, and a row left against a connection that has ended is held by
         // nobody, so it stops nothing the next session has to do.
-        const previous = heldDevice.current;
-        const same = previous !== undefined && previous.api === a;
-        if (same && previous?.token === token) {
+        const previous = heldDevice.current.get(a);
+        if (previous !== undefined && previous.token === token) {
           wearPush(still, { status: "registered", offer: false });
           return;
         }
@@ -860,9 +856,10 @@ export function Shell({
           wearPush(still, { status: "unreachable", offer: false });
           return;
         }
-        // Only the connection that wrote a row takes it back: the row `previous` names stands on
-        // a session that has ended, and this server would be asked for somebody else's row.
-        if (same && previous !== undefined) {
+        // A token the platform replaced leaves its old row standing at this server, and this is
+        // the one connection whose key reaches it: the new address is written first, so a
+        // re-registration that fails has not taken away the address that still works.
+        if (previous !== undefined) {
           try {
             await a.operations.notificationDeviceRemove({ path: { id: previous.id } });
           } catch {
@@ -884,16 +881,21 @@ export function Shell({
   );
 
   /**
-   * passPush keeps one notification pass in flight: a sign-in and a token refresh arriving
-   * together share the first one's answer rather than racing two registrations of one token.
+   * passPush keeps one notification pass in flight for a connection: a sign-in and a token
+   * refresh arriving together share the first one's answer rather than racing two registrations
+   * of one token. The in-flight pass belongs to the connection that sent it — a row is a row only
+   * that connection's key reaches — so a sign-in made while an older session's answer is still
+   * away starts its own pass instead of borrowing one that will hand its row to a session that
+   * has ended.
    */
   const passPush = useCallback(
     (a: Api): Promise<void> => {
-      if (passing.current !== undefined) return passing.current;
+      const inFlight = passing.current.get(a);
+      if (inFlight !== undefined) return inFlight;
       const run = carryPush(a).finally(() => {
-        passing.current = undefined;
+        if (passing.current.get(a) === run) passing.current.delete(a);
       });
-      passing.current = run;
+      passing.current.set(a, run);
       return run;
     },
     [carryPush],
@@ -1016,6 +1018,10 @@ export function Shell({
           // wears a workspace's colour is the next document it reads.
           setWorkspace(unknownWorkspace(url));
           void sessions.clear(url).catch(() => undefined);
+          // A dead key reaches its device row no more than it reaches its own revoke: the row
+          // stays the server's, and this phone keeps no address beside a connection it will
+          // never ask anything of again. The next sign-in holds its own connection.
+          heldDevice.current.delete(a);
           return;
         }
         dispatch({ type: "failed", generation: started, error: catalogFailure(e) || message(e) });
@@ -1198,6 +1204,9 @@ export function Shell({
       async signOut() {
         const started = begin();
         const previous = active.current;
+        // The key this connection signs with is the key the saved record has to be carrying for
+        // the record to be this session's to forget. It is read before anything spends it.
+        const leaving = previous.api.bearer();
         live.current = undefined;
         // Signing out is the person ending the session themselves, so nobody is
         // coming back to the address a refusal left behind: it goes now, rather
@@ -1233,7 +1242,10 @@ export function Shell({
         outbox?.clear();
         let cleared = true;
         try {
-          await sessions.clear(previous.baseURL);
+          // The phone's own half of signing out, and it reaches only the record this session
+          // wrote: a newer sign-in that completed while the row was being handed back saved its
+          // own key, and an ending session that cleared the slot then would take that key away.
+          await sessions.forget({ baseURL: previous.baseURL, token: leaving?.token });
         } catch {
           cleared = false;
           if (generation.current === started)
