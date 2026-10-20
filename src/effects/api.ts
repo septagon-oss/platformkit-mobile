@@ -1,6 +1,30 @@
-// JSON and stored-file requests carry the connection's scoped bearer.
-// SignedIn doors, including composed pictures, carry its private in-memory
-// sign-in session alone. Restored keys have no session; nothing persists it.
+// api.ts is every request the shell makes. The kernel's routes are the same
+// ones the web shell's screens call — list and read at the entry's own path,
+// and every write at the address the entry names for writes (writePath in
+// src/core/derive.ts, which is the entry's own path unless the server printed
+// another) — so there is no second API to keep honest.
+//
+// The credential a signed-in phone works with is a bearer key of the auth
+// module's api_tokens, never the session cookie. A native client is not a
+// browser: it presents `Authorization: Bearer` on its requests and reads no
+// Set-Cookie, because a request that carries both a cookie and a bearer is
+// answered as anonymous (kit/httpx/authenticate.go's ambiguousCredential), and
+// the kernel's CSRF rule accepts a caller that sends neither Sec-Fetch-Site nor
+// Origin (kit/httpx.SameSite).
+//
+// The session a sign-in opens is held, in memory only, for as long as the key it
+// minted is held — never stored, never sent to work. It is what a door that answers
+// to the holder takes, and the pinned document names which doors those are: every
+// operation whose `x-platformkit-auth.kind` is `signed_in` — the mint, who-this-is,
+// the key's own revoke, the sign-out that closes the session, and a phone's own
+// device rows, and a composed picture read back through one. A scoped key is refused at every one of them
+// (kit/httpx/authorize.go: "this credential carries its own scope, and this
+// operation answers only to its holder"), so a phone that kept only the key could
+// neither ask who it is, nor stop its own key, nor hold a notification address. A
+// key restored from storage comes back with no session, which is why signing out
+// says whether the server stopped the key or only this phone forgot it, and why a
+// restored phone hears about its address from the devices door rather than from an
+// assumption made here.
 import {
   type Catalog,
   type Entry,
@@ -463,7 +487,8 @@ export function createApi(
   /**
    * session is the cookie the sign-in that minted this connection's key answered
    * with, held only while that key is held and only in memory. A key read back out
-   * of storage arrives here with none. Only SignedIn operations use it.
+   * of storage arrives here with none: nothing stores a session, and every door that
+   * answers to the holder is then one this phone cannot ask.
    */
   let session: string | undefined;
   /**
@@ -544,8 +569,9 @@ export function createApi(
       if (refusal) throw new TypeError(refusal);
       headers["Idempotency-Key"] = idempotencyKey;
     }
-    // One credential per request, never both: the session belongs to the frame
-    // that is minting its key, and every other request carries the key alone.
+    // One credential per request, never both: a request that carries the session carries no
+    // key, and one that carries no session presents the key — the one a caller named to stand
+    // in for the held key, or the held key itself.
     const sendingCookie = prepared?.cookie;
     if (sendingCookie) headers.Cookie = sendingCookie;
     else {
@@ -704,8 +730,9 @@ export function createApi(
    * carried is what one request presents besides its own body: the sign-in frame
    * whose session it mints with, a key to present in place of the held one, and the
    * idempotency key the queue minted for the write. Each is named by a caller inside
-   * this file — a sign-in leg, a sign-out, the queue — and a request carried by none
-   * presents the key this connection holds and nothing else.
+   * this file — a sign-in leg, a sign-out, the queue. A request carried by none
+   * presents the credential its door answers to: the session this connection holds at
+   * a door the document says answers to the holder, and its key everywhere else.
    */
   interface Carried {
     readonly session?: SessionFrame | undefined;
@@ -718,7 +745,6 @@ export function createApi(
     carried: Carried = {},
   ): Promise<T> {
     const { session: frame, key, idempotencyKey } = carried;
-    const sendingCookie = frame?.cookie;
     const bodies = new WeakMap<Request, BodyInit | null>();
     const nativeFetch: typeof fetch = async (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init);
@@ -744,7 +770,10 @@ export function createApi(
         {
           body,
           headers: request.headers,
-          cookie: sendingCookie,
+          // A door the document says answers to the holder is asked with the holder's session,
+          // as `me` and the revoke already are. Where this connection holds no session, the key
+          // presents itself and the door answers what it answers.
+          cookie: frame?.cookie ?? (route?.holder && key === undefined ? session : undefined),
           ...(frame ? { frame } : {}),
           ...(key ? { key } : {}),
         },
