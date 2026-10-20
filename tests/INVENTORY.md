@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `510790248` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `8fb1acb85` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 260 | 1230 | 69.1 s | 2108 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 124 | 425 | 45.5 s | 2902 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 261 | 1230 | 69.1 s | 2108 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 127 | 425 | 45.5 s | 2902 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 58 | 50 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 479
+* keep: 483
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 479 — 208 `tests/*.test.ts` (node), 213 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
+* files inventoried: 483 — 208 `tests/*.test.ts` (node), 217 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 1884; cases in files no runner reaches: 35
 * isolated wall time: contract 74 s, behaviour 2108 s, composition 2902 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -131,6 +131,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 
 | test file | runner | layer | cases | wall ms | tests ms | only-it-covers (prod lines) | tests with a line no other test covers | production files only it loads | flaky / reach | verdict | the rule it proves |
 |---|---|---|---|---|---|---|---|---|---|---|---|
+| tests/a-link-the-arrival-rule-does-not-read-reaches-the-router.test.tsx | jest | behaviour |  |  |  |  | not measured | — | 0 | keep | A link the arrival rule does not read reaches the router as it arrived. expo-router hands every URL the platform opened the app with to `redirectSystemPath` an… |
 | tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx | jest | behaviour | 1 | 38736 | 119 |  | not measured | — | 0 | keep | The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gest… |
 | tests/native-store-scope.test.tsx | jest | behaviour | 4 | 30107 | 14 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
 | tests/screens/a-cancelled-swipe-runs-nothing.test.tsx | jest | behaviour | 2 | 30721 | 11 |  | not measured | — | 0 | keep | The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or … |
@@ -405,6 +406,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-completed-delete-survives-local-recents-failure.test.tsx | jest | composition | 3 | 27889 | 23 |  | not measured | — | 0 | keep | A server-confirmed delete stays completed when this device cannot clean up its reading history. A local cache error cannot turn that answer into an uncertain m… |
 | tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx | jest | composition | 1 | 27490 | 66 |  | not measured | — | 0 | keep | A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering. |
 | tests/screens/a-delete-that-left-this-phone-takes-its-door-with-it.test.tsx | jest | composition | 2 | 33376 | 14 |  | not measured | — | 0 | keep | "Recently opened" is a door onto a record, so a record this phone deleted leaves the list: a section that kept its row would draw a door onto a 404. The delete… |
+| tests/screens/a-device-is-registered-with-the-credential-its-door-answers-to.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A device is registered, and taken back, with the credential its door answers to. The pinned API document says which one each door takes (`x-platformkit-auth`):… |
 | tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
 | tests/screens/a-finished-line-speaks-only-for-the-write-that-finished-it.test.tsx | jest | composition | 2 | 29837 | 1343 |  | not measured | — | 0 | keep | The finished line ("Note done", `record-finished`) is about the state the record holds and the write this phone made. When a later write takes the record back … |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
@@ -428,6 +430,8 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx | jest | composition | 3 | 22148 | 1215 |  | not measured | — | 0 | keep | A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at th… |
 | tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx | jest | composition | 1 | 21217 | 34 |  | not measured | — | 0 | keep | An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload. |
 | tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx | jest | composition | 1 | 23646 | 85 |  | not measured | — | 0 | keep | A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores … |
+| tests/screens/a-sign-in-after-an-expired-session-registers-its-own-device.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A device row belongs to the sign-in that registered it. When that session ends without a sign-out — the server stops recognising the key — the next sign-in, at… |
+| tests/screens/a-sign-out-during-a-registration-takes-that-row-back.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A sign-out takes back every row the session it ends registered, including the one whose registration was still on the wire when the person pressed sign out. Th… |
 | tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx | jest | composition | 1 | 23943 | 104 |  | not measured | — | 0 | keep | A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write. |
 | tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx | jest | composition | 9 | 27340 | 106 |  | not measured | — | 0 | keep | What a release at the end of a row's swipe does: the command the entry named runs through the one submit every other door uses, and is asked first wherever the… |
 | tests/screens/a-translatable-record-follows-the-device-language.test.tsx | jest | composition | 2 | 25311 | 611 |  | not measured | — | 0 | keep | A translatable record is requested in the device language. A source-language fallback is identified in Portuguese rather than silently shown as translated cont… |
