@@ -723,9 +723,14 @@ export function Shell({
   // of these is keyed by the connection that owns it: what one session writes never stands in
   // the place a newer session's own row would be read from.
   const heldDevice = useRef(new Map<Api, { readonly token: string; readonly id: string }>());
-  // A registration this phone has on the wire, per sending connection: its answer is a row only
-  // that connection's key reaches, so a sign-out waits for it rather than spending the key first.
-  const rowOnWire = useRef(new Map<Api, Promise<void>>());
+  // A registration this phone has on the wire, per sending connection, with the address the ask
+  // carries: its answer is a row only that connection's key reaches, so a sign-out waits for it
+  // rather than spending the key first — and a sign-out of another session waits for it too when
+  // that ask carries the very address it means to give back, because the server holds the row from
+  // the moment it takes the ask, answer or no answer.
+  const rowOnWire = useRef(
+    new Map<Api, { readonly token: string; readonly settled: Promise<void> }>(),
+  );
   // Whether this person has already said "not now": the platform's own prompt is spent once
   // it is answered, so the offer this app owns is spent the same way — once per sign-in, and
   // kept in memory rather than in a table, because a dismissed offer decides no command.
@@ -777,10 +782,11 @@ export function Shell({
       if (id !== undefined) heldDevice.current.set(a, { token, id });
       return id;
     });
-    const onWire: Promise<void> = written.then(
+    const settled: Promise<void> = written.then(
       () => undefined,
       () => undefined,
     );
+    const onWire = { token, settled };
     rowOnWire.current.set(a, onWire);
     try {
       return await written;
@@ -791,28 +797,33 @@ export function Shell({
 
   /**
    * handBack asks the session `a` for this phone's row back, and says whether it did. No row, no
-   * request: a phone that never registered has nothing to remove, and a registration still on the
-   * wire is waited for first, because the row it is writing is this session's own. A row another
-   * connection wrote is not this one's to ask about and is left held: that connection's key still
-   * reaches it, and the session that wrote it will give it back. A row the live connection
-   * holds under its own key is left for that connection too, because the server answers the
-   * same token with the same row. The address this connection wrote
-   * is let go either way, because the session that could reach it is ending, and a row remembered
-   * past that point is one nobody is ever going to ask for back.
+   * request: a phone that never registered has nothing to remove, and a registration of its own
+   * still on the wire is waited for first, because the row it is writing is this session's own. A
+   * row another connection wrote is not this one's to ask about and is left held: that connection's
+   * key still reaches it, and the session that wrote it will give it back. A row the live
+   * connection holds — or has an ask for on the wire, which the server holds the row for already,
+   * answer or no answer — is left for that connection too, because the server answers the same
+   * token with the same row. The address this connection wrote is let go either way, because the
+   * session that could reach it is ending, and a row remembered past that point is one nobody is
+   * ever going to ask for back.
    */
   const handBack = useCallback(async (a: Api): Promise<boolean> => {
-    const onWire = rowOnWire.current.get(a);
-    if (onWire !== undefined) await onWire;
+    const own = rowOnWire.current.get(a);
+    if (own !== undefined) await own.settled;
     const held = heldDevice.current.get(a);
     if (held === undefined) return true;
     heldDevice.current.delete(a);
     // One row can stand under two connections at once. The server keys a device on tenant,
-    // platform, token and recipient, so a sign-in that reuses the address an older session
-    // handed over answers the row that older session believes it holds, and the older session's
-    // answer may be the later one to arrive. The live connection is the one that may give that
-    // address back; asking for it here would take away a notification address from a person who
-    // is signed in right now, and the session that lost it has no key left with which to put it
-    // back. A row no live connection holds is this session's own, and goes back as usual.
+    // platform, token and recipient, so a newer sign-in that reuses this phone's address holds the
+    // row this session believes it holds — and holds it from the moment its ask reaches the
+    // server, not from the moment its answer reaches this phone. Either answer may be the later
+    // one home, so the live connection's own ask for this address is waited for here too: asking
+    // for the row while that ask is away would take a notification address from a person who is
+    // signed in right now, and the session that lost it has no key left with which to put it back.
+    // An ask carrying another address can only be answered by another row, and holds nothing up.
+    // A row no live connection holds or is being handed is this session's own, and goes back.
+    const away = rowOnWire.current.get(active.current.api);
+    if (away !== undefined && away.token === held.token) await away.settled;
     const living = heldDevice.current.get(active.current.api);
     if (living !== undefined && living.id === held.id) return true;
     try {
