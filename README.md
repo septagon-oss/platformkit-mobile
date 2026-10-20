@@ -2361,12 +2361,18 @@ as its own brief: the phone can claim a host, not vouch for it. iOS is untouched
 Notifications arrive through `expo-notifications` behind one bridge (`src/screens/push.ts`) that
 the composition root hands the shell beside the store, the mint and the network listener. The
 session owns the address: after a completed sign-in it names the Android channel, reads what the
-platform already recorded, and registers the Expo token through the devices door with the key
-that just signed in — never the prompt unprompted, which is a person's own answer to a sentence
-on this phone (`push.turnOn`), spent once per sign-in either way. A token is memory-only, like
-the key that reaches it. A server that will not carry this device, a phone with no push service
+platform already recorded, and registers the Expo token through the devices door. That door
+answers to the holder, not to a scoped key (`x-platformkit-auth.kind: signed_in`), so it is
+asked with the sign-in session behind the key, as the mint, who-this-is, the revoke and the
+sign-out are; a phone working from a key read back out of storage holds no session and hears
+that door's own refusal. The prompt is never opened unprompted: the sentence and its two answers
+are a person's own (`push.turnOn`), spent once per sign-in either way. A token is memory-only,
+like the key that reaches it, and so is the row it became — held with the sign-in that wrote it,
+so a session the server ended leaves no address behind for whoever signs in next, at this server
+or another. A server that will not carry this device, a phone with no push service
 and a person who says not now all leave the session standing and say one sentence. Sign-out asks
-for the row back *before* it spends the key, because only that key reaches the row, and it says
+for the row back *before* it spends the key, waiting for a registration still on the wire, because
+only that key reaches the row, and it says
 so when the ask did not answer — while the key may still be live, the key is what is said.
 
 **Reused** — `screenPath` and `address` (`src/core/derive.ts`, `src/core/reentry.ts`), which
@@ -2374,7 +2380,7 @@ still spell every route and gained `rowAt` so a link arrives at the same href a 
 `ResourceRoute`'s catalogue-miss `Notice` and the `access` row of the failure grid, which are the
 refusal a link lands on; the generated operations for the devices door, reached through the pin
 this delivery moved and not through a hand-written request; `Notice`'s `action`/`secondary` pair;
-`Announcement`'s mount beside the navigator; `src/screens/native-reach.ts`'s bridge shape; the
+`Announcement`'s mount beside the navigator; `src/effects/native-reach.ts`'s bridge shape; the
 copy table, `kitEnglish` and `kitPortuguese` together; and `e2e/flows/detail.yaml`'s ids, which
 `deep-link.yaml` reuses rather than inventing.
 **Added** — `src/core/arrival.ts`, because nothing in this repository could read a URL back
@@ -2392,6 +2398,12 @@ own push client can answer instead; `tests/fakes/push.ts`, which lets any later 
 platform's answers rather than mock the library; and `scripts/check_flows.ts`'s exemption of
 `+`-prefixed files, so a router configuration file is never asked for a journey that cannot land
 on it.
+
+*Verified* — the reading of a link, the door it arrives at, and a device row's hold on the
+sign-in that wrote it run under `npm test`, in both halves. `e2e/flows/deep-link.yaml` never ran:
+it needs `make e2e-android`, an emulator, `maestro` and a signed-in kernel, and this delivery had
+none of them, so the link and the notification tap are proven through expo-router's own reading
+and not on a device.
 
 ## Read the first journey end to end
 
