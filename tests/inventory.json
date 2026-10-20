@@ -285,34 +285,34 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 257,
-   "cases": 1217,
-   "ms": 2102322,
-   "testsMs": 69127.60000000002,
+   "files": 260,
+   "cases": 1230,
+   "ms": 2107755,
+   "testsMs": 69147.40000000001,
    "runners": {
     "jest": 89,
-    "node": 168
+    "node": 171
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 122,
-   "cases": 406,
-   "ms": 2851904,
-   "testsMs": 45150,
+   "files": 124,
+   "cases": 425,
+   "ms": 2902273,
+   "testsMs": 45477,
    "runners": {
-    "jest": 122
+    "jest": 124
    },
    "unreachable": 0
   },
   "journey": {
-   "files": 57,
-   "cases": 49,
+   "files": 58,
+   "cases": 50,
    "ms": 0,
    "testsMs": 0,
    "runners": {
     "browser": 43,
-    "maestro": 14
+    "maestro": 15
    },
    "unreachable": 43
   }
@@ -9620,6 +9620,47 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-build-claims-only-the-host-it-serves.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "What a build may claim about a link: the private scheme always, and a verified HTTPS host only when the build names one itself. Android fetches /.well-known/assetlinks.json from the host, so a claimed host is a fact about the deployment \u2014 the manifest may carry the one the build already connects to, and no other, or the filter opens the browser all the same and leaves a claim nobody owns in the binary.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 283,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the app's own scheme is declared whatever the build connects to",
+    "the server a build names is the one host it verifies, and the only one",
+    "a host the platform will not verify is claimed nowhere"
+   ],
+   "tests": [
+    {
+     "title": "the app's own scheme is declared whatever the build connects to",
+     "ms": 1.618182,
+     "measured": false
+    },
+    {
+     "title": "the server a build names is the one host it verifies, and the only one",
+     "ms": 0.327445,
+     "measured": false
+    },
+    {
+     "title": "a host the platform will not verify is claimed nowhere",
+     "ms": 0.165596,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 2.1
+  },
+  {
    "file": "tests/a-command-says-what-it-runs-on-and-what-it-does.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -9981,6 +10022,35 @@
    "coveredProdLines": 11426,
    "onlyProdLines": null,
    "testsMs": 39.9
+  },
+  {
+   "file": "tests/a-flow-names-no-screen-that-draws-none.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A route file the router never routes is a file no journey can ever name, so refusing it as uncovered would ask for a flow that lands on a screen that does not exist. expo-router reads `+html` and `+native-intent` as its own configuration and leaves them out of the route tree (getRoutesCore's ignore list), exactly as a layout composes screens without drawing one of its own \u2014 and a layout stays refused by name below, because its children's claims are what cover it.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 379,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a +-prefixed app file names no screen a journey could reach"
+   ],
+   "tests": [
+    {
+     "title": "a +-prefixed app file names no screen a journey could reach",
+     "ms": 5.958289,
+     "measured": false
+    }
+   ],
+   "loaded": 1,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 6
   },
   {
    "file": "tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts",
@@ -10382,6 +10452,83 @@
    "coveredProdLines": 0,
    "onlyProdLines": null,
    "testsMs": 3.7
+  },
+  {
+   "file": "tests/a-link-to-a-record-opens-that-record.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 9,
+   "rule": "One link, one reading: what a person taps in an e-mail, what another app opens, and what a notification carries all answer the same route, because one rule (`src/core/arrival.ts`) reads all three. Held against the rule and the href it composes \u2014 the route itself is spelled by `reentry`, which has always spelled it, so a second spelling here is the defect this file exists to catch.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 4771,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a scheme link naming a record answers that record's route",
+    "a verified-host link answers the same route",
+    "the host never decides, and a query or a fragment never joins the id",
+    "the surface alone is the start of the app",
+    "a resource answers its list, and a link naming nothing of ours is left alone",
+    "a link from another app changes nothing",
+    "a launch that carried no link is not a refusal of anything",
+    "a link on our own surface that names no address opens the start of the app",
+    "an id that arrives percent-encoded is read once and written once"
+   ],
+   "tests": [
+    {
+     "title": "a scheme link naming a record answers that record's route",
+     "ms": 4.393555,
+     "measured": false
+    },
+    {
+     "title": "a verified-host link answers the same route",
+     "ms": 0.791163,
+     "measured": false
+    },
+    {
+     "title": "the host never decides, and a query or a fragment never joins the id",
+     "ms": 0.39479,
+     "measured": false
+    },
+    {
+     "title": "the surface alone is the start of the app",
+     "ms": 0.24326,
+     "measured": false
+    },
+    {
+     "title": "a resource answers its list, and a link naming nothing of ours is left alone",
+     "ms": 0.280138,
+     "measured": false
+    },
+    {
+     "title": "a link from another app changes nothing",
+     "ms": 0.172359,
+     "measured": false
+    },
+    {
+     "title": "a launch that carried no link is not a refusal of anything",
+     "ms": 0.796082,
+     "measured": false
+    },
+    {
+     "title": "a link on our own surface that names no address opens the start of the app",
+     "ms": 0.241286,
+     "measured": false
+    },
+    {
+     "title": "an id that arrives percent-encoded is read once and written once",
+     "ms": 4.366936,
+     "measured": false
+    }
+   ],
+   "loaded": 36,
+   "coveredProdLines": 12491,
+   "onlyProdLines": null,
+   "testsMs": 11.7
   },
   {
    "file": "tests/a-list-orders-itself-and-narrows-itself.test.ts",
@@ -21344,6 +21491,125 @@
    "testsMs": 168
   },
   {
+   "file": "tests/screens/a-phone-is-addressable-when-the-person-says-so.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 16,
+   "rule": "A phone is addressable when the person says so, for as long as the sign-in that said it lasts. Held against the real shell, the real transport and the real push bridge, with only the platform's answers and one server's answers held by the test: what a device row is worth is who holds it, when it was written and what sign-out asked back for it \u2014 none of which a double of the shell could answer for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 28232,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a session the platform has never been asked about is offered, and asks nothing",
+    "a session the platform already permits registers its token once, and again is once",
+    "a refused registration blocks nothing, and a phone that held no row removes nothing",
+    "a credential the door will not accept is asked once, not retried",
+    "a phone with no push service is unreachable, and its session never notices",
+    "a token of another kind is no address, and is not sent",
+    "sign-out takes the row back before it spends the key",
+    "a sign-out that never held a row asks neither door",
+    "a row this phone could not take back is said, and only when the key stopped",
+    "the key is the bigger fact: nothing is said about a row while the key may live",
+    "a token that changed is held before the old row goes",
+    "a token answer that arrives after the person signed out registers nothing",
+    "the prompt is opened by the person's own answer, and once per sign-in",
+    "a person who says not now is not asked again in that session",
+    "a prompt the person answers no to is not asked again, and the session stands",
+    "a tapped notification opens its link through the reading every link gets"
+   ],
+   "tests": [
+    {
+     "title": "a session the platform has never been asked about is offered, and asks nothing",
+     "ms": 134,
+     "measured": false
+    },
+    {
+     "title": "a session the platform already permits registers its token once, and again is once",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "a refused registration blocks nothing, and a phone that held no row removes nothing",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a credential the door will not accept is asked once, not retried",
+     "ms": 11,
+     "measured": false
+    },
+    {
+     "title": "a phone with no push service is unreachable, and its session never notices",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a token of another kind is no address, and is not sent",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "sign-out takes the row back before it spends the key",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a sign-out that never held a row asks neither door",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "a row this phone could not take back is said, and only when the key stopped",
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "the key is the bigger fact: nothing is said about a row while the key may live",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a token that changed is held before the old row goes",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "a token answer that arrives after the person signed out registers nothing",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "the prompt is opened by the person's own answer, and once per sign-in",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "a person who says not now is not asked again in that session",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a prompt the person answers no to is not asked again, and the session stands",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "a tapped notification opens its link through the reading every link gets",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 166,
+   "coveredProdLines": 2841,
+   "onlyProdLines": null,
+   "testsMs": 304
+  },
+  {
    "file": "tests/screens/a-phone-photo-upload-carries-its-file-part.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -24610,6 +24876,47 @@
    "testsMs": 16
   },
   {
+   "file": "tests/screens/the-notification-offer-is-one-sentence-and-two-answers.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "The notification question is one block on the page: the sentence the copy table owns, the one primary answer that opens the platform's prompt, and a secondary that spends the offer. Which of those states the phone is in is the shell's decision (`push`), so what a screen draws follows it exactly \u2014 including the states where nothing may be pressed at all.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22137,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the offer is one sentence and the two answers that person has",
+    "an offer that is not on is drawn nowhere, and so is a phone that is already reachable",
+    "an address this phone could not get is said, with nothing to press"
+   ],
+   "tests": [
+    {
+     "title": "the offer is one sentence and the two answers that person has",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "an offer that is not on is drawn nowhere, and so is a phone that is already reachable",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "an address this phone could not get is said, with nothing to press",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 150,
+   "coveredProdLines": 2190,
+   "onlyProdLines": null,
+   "testsMs": 23
+  },
+  {
    "file": "tests/screens/typed-write-names-the-write-the-queue-holds.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -27680,6 +27987,23 @@
    "tier": "nightly",
    "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
    "runsNowhere": false
+  },
+  {
+   "file": "e2e/flows/deep-link.yaml",
+   "runner": "maestro",
+   "layer": "journey",
+   "cases": 1,
+   "rule": "The phone opens where a link says. A tap in an e-mail, and the tap on a notification, are answered by one reading (src/core/arrival.ts): the surface the kernel mounts its generated shell on, then the two words of a resource, then at most one record. This journey is the device's evidence that the browser is not opened and the app is: a collection link lands on the list, and a cold start through a record link lands on the record's own screen \u2014 where the address is read as an address and asked of the server, which for an id nobody may open answers with the kit's refusal rather than an empty page.  The record is a syntactically valid id that no run of this harness creates, on purpose: a journey that reached a readable row would need the harness to provision one and name its id, which is the follow-up README names. What is proven here is the arrival and the refusal.",
+   "ruleSource": "first comment",
+   "tier": "nightly",
+   "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.maestro",
+   "claims": [
+    "app/[module]/[entity]/[id]/index.tsx"
+   ],
+   "steps": 1
   },
   {
    "file": "e2e/flows/detail.yaml",
