@@ -1221,41 +1221,42 @@ export function Shell({
         // on screen now is the form, which wears them again only when a lookup answers.
         setWorkspace(unknownWorkspace(previous.baseURL));
         dispatch({ type: "signed-out", generation: started });
-        // Signing out means two things, and the phone does the first on its own:
-        // it forgets the key here, and it asks the server to stop it. Forgetting is
-        // not waiting for the asking — that is the half that works offline, and on a
-        // phone somebody is about to pick up. The asking is not swallowed either:
-        // a key the server still answers to after this phone forgot it is a live
-        // credential, and a signed-out screen that said nothing about it would let
-        // the person believe it dead. The revoke is one of the few doors that can
-        // honestly answer no: it stands at httpx.SignedIn(), which refuses a
-        // credential carrying its own scopes (kit/httpx/authorize.go), so a key
-        // restored from storage — which has no sign-in session behind it — cannot
-        // spend itself.
-        // The phone's own row is the person's, and only their key reaches it: it is asked
-        // back while that key still spends, and the local forget above is not undone by the
-        // asking. A sign-out that cannot take the row back still forgets the key.
+        // Signing out means two things, and the phone does the first on its own: it forgets the
+        // key here, and it asks the server to stop it. Forgetting is not waiting for the asking —
+        // that is the half that works offline, and on a phone somebody is about to pick up: a
+        // person who signs out and closes the app while an answer is away must not leave their
+        // session open for the next hand. It reaches only the record this session wrote — a newer
+        // sign-in that completed since saved its own key, and an ending session that cleared the
+        // slot then would take that key away. The asking is not swallowed either: a key the server
+        // still answers to after this phone forgot it is a live credential, and a signed-out
+        // screen that said nothing about it would let the person believe it dead. The revoke is
+        // one of the few doors that can honestly answer no: it stands at httpx.SignedIn(), which
+        // refuses a credential carrying its own scopes (kit/httpx/authorize.go), so a key restored
+        // from storage — which has no sign-in session behind it — cannot spend itself.
+        // The result is read at the end rather than dropped: a phone whose own storage refused to
+        // clear has that to say, and it is a fact about the phone, not about the server.
+        const forgotten = sessions
+          .forget({ baseURL: previous.baseURL, token: leaving?.token })
+          .then(
+            () => true,
+            () => false,
+          );
+        // The phone's own row is the person's, and only their key reaches it: it is asked back
+        // while that key still spends, which is why the asking stands between the forgetting above
+        // and the stopping below. A sign-out that cannot take the row back still forgets the key.
         const removed = await handBack(previous.api);
         const stopped = previous.api.logout();
         // A person who chose to keep their held writes never reaches this line:
         // every door that leaves asks first (src/screens/useSignOut.ts).
         outbox?.clear();
-        let cleared = true;
-        try {
-          // The phone's own half of signing out, and it reaches only the record this session
-          // wrote: a newer sign-in that completed while the row was being handed back saved its
-          // own key, and an ending session that cleared the slot then would take that key away.
-          await sessions.forget({ baseURL: previous.baseURL, token: leaving?.token });
-        } catch {
-          cleared = false;
-          if (generation.current === started)
-            dispatch({
-              type: "signed-out",
-              generation: started,
-              error:
-                "The saved sign-in could not be cleared. Please try again before closing the app.",
-            });
-        }
+        const cleared = await forgotten;
+        if (!cleared && generation.current === started)
+          dispatch({
+            type: "signed-out",
+            generation: started,
+            error:
+              "The saved sign-in could not be cleared. Please try again before closing the app.",
+          });
         // A server that would not answer the ask about the key keeps its exception,
         // and the honest answer to "is my key still live" from a refusal to answer is
         // that it may be: the notice is owed, not swallowed. Nothing that failed after

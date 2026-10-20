@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `e3757f7ef` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `6ba073bd4` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 263 | 1232 | 69.2 s | 2134 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 127 | 428 | 46.2 s | 2962 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 263 | 1236 | 69.7 s | 2177 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 128 | 428 | 46.2 s | 2962 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 58 | 50 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 485
+* keep: 486
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 485 — 208 `tests/*.test.ts` (node), 219 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1889; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2134 s, composition 2962 s, journey 0 s
+* files inventoried: 486 — 208 `tests/*.test.ts` (node), 220 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1893; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2177 s, composition 2962 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -135,8 +135,8 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx | jest | behaviour | 1 | 38736 | 119 |  | not measured | — | 0 | keep | The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gest… |
 | tests/native-store-scope.test.tsx | jest | behaviour | 4 | 30107 | 14 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
 | tests/screens/a-cancelled-swipe-runs-nothing.test.tsx | jest | behaviour | 2 | 30721 | 11 |  | not measured | — | 0 | keep | The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or … |
-| tests/screens/a-new-sign-in-registers-while-an-earlier-push-pass-finishes.test.tsx | jest | behaviour |  |  |  |  | not measured | — | 0 | keep | A new sign-in has its own notification pass even while an earlier session's answer is pending. Finishing the earlier sign-out must leave the new workspace addr… |
-| tests/screens/a-slow-device-sign-out-preserves-the-next-saved-sign-in.test.tsx | jest | behaviour |  |  |  |  | not measured | — | 0 | keep | An older sign-out waiting for its device answer cannot clear a newer sign-in's saved key. The phone must restore the workspace whose sign-in completed most rec… |
+| tests/screens/a-new-sign-in-registers-while-an-earlier-push-pass-finishes.test.tsx | jest | behaviour | 3 | 22361 | 118 |  | not measured | — | 0 | keep | A new sign-in has its own notification pass even while an earlier session's answer is pending. Finishing the earlier sign-out must leave the new workspace addr… |
+| tests/screens/a-slow-device-sign-out-preserves-the-next-saved-sign-in.test.tsx | jest | behaviour | 1 | 21077 | 445 |  | not measured | — | 0 | keep | An older sign-out waiting for its device answer cannot clear a newer sign-in's saved key. The phone must restore the workspace whose sign-in completed most rec… |
 | tests/screens/nativeImage.test.tsx | jest | behaviour | 9 | 20607 | 76 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) replaced and unmounted image sources cannot report into the active scope |
 | tests/screens/refusal-words-never-quote-the-wire.test.tsx | jest | behaviour | 25 | 24619 | 4149 | 1 | not measured | — | 0 | keep | A phone reads a refusal in its own words. The classifier decides which sentence a refusal is, but a decided sentence only counts once it is the one drawn, so t… |
 | tests/screens/useFeedback.test.tsx | jest | behaviour | 3 | 22923 | 18 | 8 | 1 of 3 | src/screens/StateFeedback.tsx | 0 | keep | (no first comment; first test title) each mounted form samples its explicit clock once, independently of another form |
@@ -434,6 +434,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx | jest | composition | 1 | 23646 | 85 |  | not measured | — | 0 | keep | A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores … |
 | tests/screens/a-sign-in-after-an-expired-session-registers-its-own-device.test.tsx | jest | composition | 1 | 19519 | 484 |  | not measured | — | 0 | keep | A device row belongs to the sign-in that registered it. When that session ends without a sign-out — the server stops recognising the key — the next sign-in, at… |
 | tests/screens/a-sign-out-during-a-registration-takes-that-row-back.test.tsx | jest | composition | 1 | 18987 | 99 |  | not measured | — | 0 | keep | A sign-out takes back every row the session it ends registered, including the one whose registration was still on the wire when the person pressed sign out. Th… |
+| tests/screens/a-sign-out-forgets-the-saved-key-before-its-device-answer.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | Signing out forgets the saved key on the phone without waiting for the server: that is the half that works offline, and on a phone somebody is about to pick up… |
 | tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx | jest | composition | 1 | 23943 | 104 |  | not measured | — | 0 | keep | A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write. |
 | tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx | jest | composition | 9 | 27340 | 106 |  | not measured | — | 0 | keep | What a release at the end of a row's swipe does: the command the entry named runs through the one submit every other door uses, and is asked first wherever the… |
 | tests/screens/a-translatable-record-follows-the-device-language.test.tsx | jest | composition | 2 | 25311 | 611 |  | not measured | — | 0 | keep | A translatable record is requested in the device language. A source-language fallback is identified in Portuguese rather than silently shown as translated cont… |

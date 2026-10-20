@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 263,
-   "cases": 1232,
-   "ms": 2133632,
-   "testsMs": 69152.40000000001,
+   "cases": 1236,
+   "ms": 2177070,
+   "testsMs": 69715.40000000001,
    "runners": {
     "jest": 92,
     "node": 171
@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 127,
+   "files": 128,
    "cases": 428,
    "ms": 2961649,
    "testsMs": 46164,
    "runners": {
-    "jest": 127
+    "jest": 128
    },
    "unreachable": 0
   },
@@ -3533,7 +3533,7 @@
    "file": "tests/screens/a-new-sign-in-registers-while-an-earlier-push-pass-finishes.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 3,
    "rule": "A new sign-in has its own notification pass even while an earlier session's answer is pending. Finishing the earlier sign-out must leave the new workspace addressable.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -3541,19 +3541,40 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-new-sign-in-registers-while-an-earlier-push-pass-finishes.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 22361,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a second workspace registers when the earlier push pass already finished",
+    "a new workspace registers after sign-out while the earlier token answer finishes",
+    "a new workspace registers after sign-out while the earlier registration answer finishes"
+   ],
+   "tests": [
+    {
+     "title": "a second workspace registers when the earlier push pass already finished",
+     "ms": 88,
+     "measured": false
+    },
+    {
+     "title": "a new workspace registers after sign-out while the earlier token answer finishes",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "a new workspace registers after sign-out while the earlier registration answer finishes",
+     "ms": 15,
+     "measured": false
+    }
+   ],
+   "loaded": 165,
+   "coveredProdLines": 2679,
+   "onlyProdLines": null,
+   "testsMs": 118
   },
   {
    "file": "tests/screens/a-slow-device-sign-out-preserves-the-next-saved-sign-in.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 1,
    "rule": "An older sign-out waiting for its device answer cannot clear a newer sign-in's saved key. The phone must restore the workspace whose sign-in completed most recently.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -3561,13 +3582,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-slow-device-sign-out-preserves-the-next-saved-sign-in.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 21077,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out awaiting a device registration preserves the next workspace's saved sign-in"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out awaiting a device registration preserves the next workspace's saved sign-in",
+     "ms": 445,
+     "measured": false
+    }
+   ],
+   "loaded": 165,
+   "coveredProdLines": 2681,
+   "onlyProdLines": null,
+   "testsMs": 445
   },
   {
    "file": "tests/screens/nativeImage.test.tsx",
@@ -22371,6 +22401,26 @@
    "coveredProdLines": 2756,
    "onlyProdLines": null,
    "testsMs": 99
+  },
+  {
+   "file": "tests/screens/a-sign-out-forgets-the-saved-key-before-its-device-answer.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "Signing out forgets the saved key on the phone without waiting for the server: that is the half that works offline, and on a phone somebody is about to pick up. Taking the phone's device row back is a request like any other, and a slow answer to it must not leave the key in storage, where the next launch would open the person's session for whoever holds the phone. Held against the real shell, the real transport and the real push bridge, with one server whose answer to the device removal the test releases.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-forgets-the-saved-key-before-its-device-answer.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
