@@ -1,0 +1,30 @@
+# The phone opens where a link says. A tap in an e-mail, and the tap on a notification, are
+# answered by one reading (src/core/arrival.ts): the surface the kernel mounts its generated
+# shell on, then the two words of a resource, then at most one record. This journey is the
+# device's evidence that the browser is not opened and the app is: a collection link lands on
+# the list, and a cold start through a record link lands on the record's own screen — where
+# the address is read as an address and asked of the server, which for an id nobody may open
+# answers with the kit's refusal rather than an empty page.
+#
+# The record is a syntactically valid id that no run of this harness creates, on purpose: a
+# journey that reached a readable row would need the harness to provision one and name its id,
+# which is the follow-up README names. What is proven here is the arrival and the refusal.
+# screen: app/[module]/[entity]/[id]/index.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+---
+- runFlow: sign-in.yaml
+- openLink: platformkit://app/${MODULE}/${ENTITY}
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- killApp
+- openLink: platformkit://app/${MODULE}/${ENTITY}/00000000-0000-4000-8000-000000000001
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- assertVisible:
+    id: "refusal"

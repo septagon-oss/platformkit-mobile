@@ -11,6 +11,7 @@ import {
   screenPath,
   visiblePictures,
 } from "../core/derive";
+import { rowAt } from "../core/reentry";
 import type { ScreenProps } from "../renderers";
 import type { LayoutRectangle } from "react-native";
 import { Button } from "../ui/atoms/Button";
@@ -36,7 +37,9 @@ export function ResourceList({ entry }: ScreenProps) {
   const row = useRowCommand(entry);
   const RowSwipe = native?.rowAction;
   const open = (id: string, frame?: LayoutRectangle) => {
-    const href = `${at}/${encodeURIComponent(id)}`;
+    // One row's route is `rowAt`'s to spell, and its answer carries the shape the route
+    // declarations generated at startup accept; the same path joined by hand is only a string.
+    const href = rowAt(entry.module, entry.entity, id);
     if (frame) travelTo(href, frame);
     router.push(href);
   };

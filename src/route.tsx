@@ -24,6 +24,12 @@ import { kitStyles } from "./ui/layout";
 import { Screen } from "./ui/templates/Screen";
 import { useStyles } from "./ui/theme";
 
+// systemHref is the arrival rule — the one place a URL the platform handed this app becomes
+// a route — named at the door an app route may stand at: the reading itself lives in
+// `src/core/arrival.ts`, and the system link and a tapped notification both come through
+// here, so no route file holds a rule of its own.
+export { systemHref } from "./core/arrival";
+
 const generated: Required<Renderer> = {
   list: ResourceList,
   detail: ResourceDetail,

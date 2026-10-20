@@ -106,6 +106,11 @@ export async function generate(root: string, output: string): Promise<void> {
 /**
  * The document is the only route inventory. This cannot add composition routes.
  *
+ * It is also the only inventory of which credential a door answers to: the kind the operation
+ * prints is `signed_in` where the kernel asks for the holder itself, and that kind refuses a
+ * credential carrying its own scope (kit/httpx/authorize.go) — which every key this phone mints
+ * does. So the transport reads the kind off the route rather than guessing what to present.
+ *
  * It is also the only inventory of what a key may be narrowed to: the mint
  * refuses a scope no module declares and a scope its holder does not already
  * grant (modules/auth/internal/tokens.go's IssueToken), so a phone that wants a
@@ -164,8 +169,10 @@ async function routeCalls(root: string, output: string): Promise<void> {
       const statuses = Object.keys(operation.responses)
         .filter((status) => /^2\d\d$/.test(status))
         .map(Number);
+      // `holder` says the door answers to the signed-in person and to nobody holding a key.
+      const holder = declared?.kind === "signed_in";
       entries.push(
-        `{ method: ${JSON.stringify(method.toUpperCase())}, pattern: new RegExp(${JSON.stringify(pattern)}), statuses: ${JSON.stringify(statuses)}, json: ${jsonResponse}, multipart: ${multipart}, run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => { const result = await sdk.${name}({ client, url, ...(body === undefined ? {} : {body}), throwOnError: true, ...(signal === undefined ? {} : {signal}) } as unknown as Parameters<typeof sdk.${name}<true>>[0]); return result; } }`,
+        `{ method: ${JSON.stringify(method.toUpperCase())}, pattern: new RegExp(${JSON.stringify(pattern)}), statuses: ${JSON.stringify(statuses)}, json: ${jsonResponse}, multipart: ${multipart}, holder: ${holder}, run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => { const result = await sdk.${name}({ client, url, ...(body === undefined ? {} : {body}), throwOnError: true, ...(signal === undefined ? {} : {signal}) } as unknown as Parameters<typeof sdk.${name}<true>>[0]); return result; } }`,
       );
     }
   }

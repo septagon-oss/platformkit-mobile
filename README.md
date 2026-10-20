@@ -40,14 +40,15 @@ holds into the permissions the pinned document declares for this phone's own
 surface, and leaves out every grant the installation's operator holds alone. The other
 credential is the session the password leg or the challenge leg answers with. It
 is held in memory for as long as the key it minted is held, never written to
-storage, and sent only at doors that answer to the person rather than
-to a key: the mint, who-this-is (`GET /auth/me`), the key's own revoke
-(`POST /auth/tokens/{id}/revoke`), the sign-out that closes it and a declared
-composed-picture read. Those doors are
-`httpx.SignedIn()`, and a credential that carries its own scopes is refused at
-every one of them (kit/httpx/authorize.go), so a phone that kept only the key
-could neither ask who it is nor stop the key it is throwing away. No request ever
-presents both, because a request carrying both is answered as anonymous
+storage, and sent at the doors that answer to the person rather than to a
+key: the mint, who-this-is (`GET /auth/me`), the key's own revoke
+(`POST /auth/tokens/{id}/revoke`), the sign-out that closes it, this phone's own device
+rows, and a composed picture read from a declared source. The pinned document names
+`httpx.SignedIn()` at each of those operations that it carries, and a credential that
+carries its own scopes is refused at all of them (kit/httpx/authorize.go), so a phone
+that kept only the key could neither ask who it is, nor stop the key it is throwing away,
+nor take back the row that carries its address. No request ever presents both, because a
+request carrying both is answered as anonymous
 (kit/httpx/authenticate.go's ambiguousCredential). Browser cookie restrictions
 make that preview unsuitable as proof that sign-in works on a device.
 
@@ -2335,6 +2336,97 @@ The `workspace_seen` statements run against the SQL through the same `expo-sqlit
 rest of the device store is read with, which is the statement and not the device's own file: the
 bounds are what an in-memory SQLite agrees to, and a real phone's WAL is unexercised here, as are
 the two changed flows, which belong to `make e2e-android`.
+
+## Opened by a link, and reached by a notification
+
+A link in an e-mail, a link another app opens, and the address a notification carries are one
+question — *where does this person want to be* — and this phone answers it once, in
+`src/core/arrival.ts`. The surface is the kernel's own: `app`, the root its generated shell is
+mounted on, then the two words of a resource, then at most one record. `platformkit://app/note/notes/7`
+and `https://platformkit.example/app/note/notes/7` answer the same href, because the host is
+where the person signed in and says nothing about the address; a query, a fragment and a port
+say nothing either. A link that does not open on that surface is left where it is — the router
+has always routed what it was given, and the gallery and the command journeys depend on it —
+and a link that opens on it and breaks its shape opens the start of the app, which is a real
+place, rather than the router's own not-found page, which names nothing. Arrival is not
+authorisation: a record link lands on the record's screen, which asks the server and draws the
+kit's refusal when the answer is no.
+
+Android routes an HTTPS link to the app only when the host says it may, so the manifest claims
+one host and no other: the one the build already connects to, through `EXPO_PUBLIC_API_URL`,
+over HTTPS, with `autoVerify`. A build that names no server — every development checkout, and
+the emulator's `adb reverse` — carries the private scheme alone. Serving `/.well-known/assetlinks.json`
+per tenant host, with this binary's signing fingerprint, is the kernel's to serve and no
+client's to write: the phone can claim a host, not vouch for it, and nothing in this
+repository proves a verified Android association. iOS is untouched here.
+
+Notifications arrive through `expo-notifications` behind one bridge (`src/screens/push.ts`) that
+the composition root hands the shell beside the store, the mint and the network listener. The
+session owns the address: after a completed sign-in it names the Android channel, reads what the
+platform already recorded, and registers the Expo token through the devices door. That door
+answers to the holder, not to a scoped key (`x-platformkit-auth.kind: signed_in`), so it is
+asked with the sign-in session behind the key, as the mint, who-this-is, the revoke and the
+sign-out are; a phone working from a key read back out of storage holds no session and hears
+that door's own refusal. The prompt is never opened unprompted: the sentence and its two answers
+are a person's own (`push.turnOn`), spent once per sign-in either way. A token is memory-only,
+like the key that reaches it, and so is the row it became — held with the sign-in that wrote it,
+so a session the server ended leaves no address behind for whoever signs in next, at this server
+or another. Each of those three is kept under the connection that wrote it — the pass in
+flight, the row whose answer is still away, the row it wrote — so a sign-in made while an
+earlier session's answer is pending runs its own pass and gets its own row, instead of
+being handed an ended session's promise that nothing will ever answer. A refusal holds the
+same scope: a workspace that answered no to this phone's address is not asked again in that
+session, and a no that answers late is still the ended session's, never a reason for the
+workspace signing in now to keep silent. And because the server keys a device on tenant,
+platform, token and recipient, a newer sign-in that reuses an older session's token holds
+*that* row from the moment its ask lands, whichever answer reaches the phone first: the live
+session is the one that may give it back, so an older sign-out — whether its own answer came
+home first or last — leaves the address the person at the phone is signed in with untouched, and
+asks for a row of its own only behind an ask for that same address. The registration's answer
+hands responsibility for cleanup to that connection even if it signs out before the answer
+arrives: its own sign-out removes the row or hands it to the next registering connection.
+Each sign-out waits for its own registration and at most one matching address already being
+registered, without chasing later sign-ins. A server that will
+not carry this device, a phone with no push service and a person who says not now all
+leave the session standing and say one sentence. Sign-out asks for the row back *before*
+it spends the key, waiting for a registration of that address still on the wire, because only
+that key reaches the row, and it says so when the ask did not answer — while the key may still be
+live, the key is what is said. The key it forgets here is only the record that sign-in
+wrote: a person who signed into another workspace while the row was being handed back
+keeps the sign-in this launch would restore. No asking holds that forgetting — the record
+is put away before the first request leaves, so a phone signed out and then closed while
+an answer is away opens signed out for whoever picks it up, not into the session that was
+just ended.
+
+**Reused** — `screenPath` and `address` (`src/core/derive.ts`, `src/core/reentry.ts`), which
+still spell every route and gained `rowAt` so a link arrives at the same href a screen leaves by;
+`ResourceRoute`'s catalogue-miss `Notice` and the `access` row of the failure grid, which are the
+refusal a link lands on; the generated operations for the devices door, reached through the pin
+this delivery moved and not through a hand-written request; `Notice`'s `action`/`secondary` pair;
+`Announcement`'s mount beside the navigator; `src/effects/native-reach.ts`'s bridge shape; the
+copy table, `kitEnglish` and `kitPortuguese` together; and `e2e/flows/detail.yaml`'s ids, which
+`deep-link.yaml` reuses rather than inventing.
+**Added** — `src/core/arrival.ts`, because nothing in this repository could read a URL back
+(the only reader of a path was the router itself) and a link parser that re-spelled routes would
+be a second implementation of the address rule; `app/+native-intent.tsx`, which is expo-router
+57's only hook for a system URL and is one line of delegation; `app.config.ts`'s `intentFilters`,
+because a verified link is build input and there was none; `src/screens/push.ts`, because no push
+client existed and `src/effects/**` may not name one; and the shell's push lifecycle, because the
+session is the only thing an address is scoped to.
+**Made reusable** — `rowAt`, the one spelling of a record's route, which every caller of
+`address("detail", …)` already used without naming it; `systemHref` exported from
+`src/route.tsx`, so a link, a notification tap and any later arrival share one reading;
+`PushBridge`, four questions with no decisions in them, which a web host or a product with its
+own push client can answer instead; `tests/fakes/push.ts`, which lets any later suite set the
+platform's answers rather than mock the library; and `scripts/check_flows.ts`'s exemption of
+`+`-prefixed files, so a router configuration file is never asked for a journey that cannot land
+on it.
+
+*Verified* — the reading of a link, the door it arrives at, and a device row's hold on the
+sign-in that wrote it run under `npm test`, in both halves. `e2e/flows/deep-link.yaml` never ran:
+it needs `make e2e-android`, an emulator, `maestro` and a signed-in kernel, and this delivery had
+none of them, so the link and the notification tap are proven through expo-router's own reading
+and not on a device.
 
 ## Read the first journey end to end
 

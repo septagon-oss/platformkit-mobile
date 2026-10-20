@@ -12,6 +12,8 @@ import { commandSheet, sheet } from "../src/route";
 import { CoverMotion } from "../src/screens/CoverMotion";
 import { FinishingMotion } from "../src/screens/FinishingMotion";
 import { Announcement } from "../src/screens/Announcement";
+import { PushInvite } from "../src/screens/PushInvite";
+import { PushTravel } from "../src/screens/PushTravel";
 import { RowSwipe } from "../src/screens/RowSwipe";
 import { screenCopy } from "../src/screens/failure";
 import { NativeZoom } from "../src/screens/NativeZoom";
@@ -35,6 +37,7 @@ export default function Layout() {
         store={device.store}
         mint={device.mint}
         reach={device.reach}
+        push={device.push}
         media={{
           zoom: NativeZoom,
           coverMotion: CoverMotion,
@@ -104,6 +107,11 @@ function Root() {
       {/* The receipt of a write that opened nothing is drawn over the navigator rather than inside
           one screen: it belongs to the person, not to the list that asked for it. */}
       <Announcement />
+      {/* Whether this phone should be reachable at all is the person's answer, asked once a
+          session and asked of the person; the notification it earns opens wherever its own
+          link points, through the reading every other link gets. */}
+      <PushInvite />
+      <PushTravel />
     </>
   );
 }
