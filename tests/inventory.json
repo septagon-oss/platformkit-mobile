@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 129,
-   "cases": 430,
-   "ms": 2996947,
-   "testsMs": 46948,
+   "files": 130,
+   "cases": 432,
+   "ms": 3024542,
+   "testsMs": 47253,
    "runners": {
-    "jest": 129
+    "jest": 130
    },
    "unreachable": 0
   },
@@ -22377,7 +22377,7 @@
    "file": "tests/screens/a-sign-out-awaits-a-registration-without-holding-the-key-it-forgets.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 2,
    "rule": "A registration still on the wire is a second answer a sign-out waits for, and it holds the forgetting no better than a removal does: the saved key is put away before either is asked about, so a phone signed out and closed while a registration is away opens signed out for whoever picks it up. The row that registration is writing is still given back \u2014 it is this session's own, and only this session's key reaches it \u2014 and it is asked for before the key is stopped. Held against the real shell, the real transport and the real push bridge, with one server whose answer to the registration the test releases.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -22385,13 +22385,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-awaits-a-registration-without-holding-the-key-it-forgets.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 27595,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out forgets the saved key while a registration is still on the wire",
+    "a phone relaunched while sign-out waits for a registration opens signed out"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out forgets the saved key while a registration is still on the wire",
+     "ms": 279,
+     "measured": false
+    },
+    {
+     "title": "a phone relaunched while sign-out waits for a registration opens signed out",
+     "ms": 26,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2778,
+   "onlyProdLines": null,
+   "testsMs": 305
   },
   {
    "file": "tests/screens/a-sign-out-during-a-registration-takes-that-row-back.test.tsx",
@@ -22456,6 +22471,26 @@
    "coveredProdLines": 2778,
    "onlyProdLines": null,
    "testsMs": 784
+  },
+  {
+   "file": "tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "Signing out has two halves, and a phone whose own secure storage refuses to clear has a fact of its own to report \u2014 before anything the server may owe about the key, because it is a fact about the phone. The asking still goes on regardless: taking the key's device row back and stopping the key are the server's half, and a full local slot does not make them somebody else's problem. Held against the real shell and the real transport, with storage that writes a record carrying no key no longer.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
