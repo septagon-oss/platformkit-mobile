@@ -1,7 +1,9 @@
 # People and row pictures
 
-Status: implemented contract. The conformance cases below were specified before
-code; delivery evidence and native verification limits belong in the README.
+Status: implemented contract for people, stored pictures and
+[composed pictures](#composed-pictures) at the core/API/component boundary.
+The conformance cases were specified before code; delivery evidence and
+native verification limits belong in the README.
 
 The mobile kit draws people with a portrait or initials, declared groups as
 an overlapping stack, and resource rows with a picture or an icon tile. The
@@ -493,3 +495,332 @@ The theme's status-pair helper is shared by badges and avatars.
 No native project or dependency changes are required. Android/iOS, native byte
 loading/caching/redirects, revocation and screen-reader behavior need device
 verification; component evidence alone does not establish them.
+
+## Composed pictures
+
+Status: implemented at the core/API/component boundary; device acceptance is
+unverified. This section extends the stored-picture contract above only where
+it explicitly names composed pictures. Existing stored UUIDs,
+portraits, galleries, width planning and cache rules retain their meaning.
+
+### Server contract and pinned inputs
+
+The public OpenAPI document and its receipt pin the composed-picture merge,
+`aa35944f576e143190ea67ba12bf812dd1b4cc0c`; `npm run api` regenerates its client.
+At that commit the document's SHA-256 is
+`562707090f4720b316f997ee22d9bb0dddbae5b8b0f3a396adf3ab5420e6cbad`.
+The ordinary catalogue fixture and its receipt pin the same commit through
+the existing refresh workflow; its SHA-256 is
+`6da10d4ccc03578cbe29622116d7f03a04b9fc058b874c2d5eea4d9b2716db8a`.
+Those receipts agree because the existing device runner serves their one
+kernel pin. The genuine stored-picture capture keeps its original capture receipt.
+
+The merged [picture contract](https://github.com/septagon-oss/platformkit/blob/aa35944f576e143190ea67ba12bf812dd1b4cc0c/modules/picture/README.md)
+and [reference decoder](https://github.com/septagon-oss/platformkit/blob/aa35944f576e143190ea67ba12bf812dd1b4cc0c/kit/entity/picture.go)
+are authoritative. The ordinary reference OpenAPI has 130 paths and no composed
+content route: it gains the optional catalogue member, not a generated SVG
+operation. Use the catalogue's declared door through the existing API effect.
+Do not add a fabricated route to the golden or generated client.
+
+The server composes templates, validates options/colours and authorizes the
+source in its request's tenant transaction before using its cache. The phone
+receives an already-composed image. It never receives a template/value pair,
+interprets `data-part`/`data-option`/`data-slot`, or recolours server output.
+
+| Deliverable | Reuse decision from the trace inventory |
+| --- | --- |
+| Pin and generated contract | **Composed from** the existing OpenAPI/catalogue fixtures, source receipts, `scripts/api.ts` and catalogue refresh workflow. |
+| Catalogue version and picture scalar | **Composed from** `core/catalog.ts` and `core/pictures.ts`; extend their version, field-kind and optional-door validation. Update the existing release entry's supported catalogue version with implementation. |
+| Reference and visible-picture selection | **Composed from** the existing `pictureId`, `thumbnailField`, `rowMedia`, `visiblePictures` and slot-state helpers; retain one validation/selection owner in core. |
+| Authenticated SVG read | **Composed from** `createApi`'s private session, `call`, deadline, cancellation, problem decoding and 401 notice. The trace found no composed-text read; add one narrow method there. |
+| SVG resource and rendering | **Composed from** `effects/media.ts`, `NativeImage`, `ImageSlotProps` and the already-installed SVG primitive. Add an XML resource alternative to the existing adapter, not another image system. |
+| Fetch and slot lifetime | **Composed from** `usePictures`'s coalescing, scope/attempt guards and per-slot callbacks; add the composed branch before the stored-file metadata branch. |
+| Empty picture | **Composed from** core's existing row-media fallback, `RowMedia` and the full-frame media state/copy; no new atom, icon, illustration, colour or error sentence. |
+| Conformance examples and doubles | **Composed from** `tests/pictures.test.ts`, `tests/api.test.ts`, the native-image/compact-picture/refusal screen suites, `tests/fakes/{shell,image,wire}.ts` and their deferred responses. Extend terminal observations; do not duplicate decisions in a fake. |
+| Fixture and device journey | **Composed from** the foundation's domain-free `picturetest.Oracle`, the existing catalogue-fixture provenance shape and sign-in/record flows. Add a clearly synthetic composed catalogue example and an affected-list journey using component testIDs. |
+| Documentation | **Composed from** this contract's ownership, refusals, conformance and Limits structure; implementation updates the existing README fetch/credential explanation to match. |
+
+### Catalogue, fields and references
+
+Raise supported catalogue version to 3 while retaining unstamped, version-1
+and version-2 compatibility. Explicit zero, malformed stamps and versions above
+3 retain the existing whole-catalogue compatibility refusal (**immutable** for
+that document/build). This does not admit other unsupported field kinds.
+
+Accept resource scalar `type: "picture"`. It denotes a derived reference, never
+a file row. Treat it as read-only throughout form and write derivation, including
+whole-row replacement: no editor, submitted/echoed picture field, file-use write,
+sort option or filter. A contradictory writable declaration is diagnosed and
+its picture input is ignored (**immutable** for that declaration); it cannot
+turn the scalar into a control. A list with `elem: "picture"` is unsupported
+(**immutable** catalogue-shape refusal); this task adds no composed gallery.
+Do not print the encoded reference as a row name, preview, value cell or detail
+fact. An unplaced derived image is omitted from textual facts. Other fields and
+the row's existing untitled fallback remain readable.
+
+Normalize the two doors independently as optional `source` and `composedSource`
+members of `Pictures`. Keep `widths` only with a valid stored `source`. A block
+with no valid door normalizes to absence. Missing/null/empty door members mean
+valid absence. A nonempty malformed member produces the existing path/reason
+diagnostic and disables that member alone (**immutable** for that catalogue).
+Thus an empty stored source with a valid composed source works, and a defective
+composed source cannot disable stored pictures. Width defects still request the
+stored original and never change composed requests.
+
+`composedSource` uses the same restricted root-relative `/api/v1/` template
+grammar as `source`, substituting exactly one entire `{reference}` segment
+instead of `{id}`. Share the grammar with a placeholder parameter. Refuse remote
+origins, authorities, query/fragment, percent escapes, backslashes, whitespace,
+dot-only segments, repeated/wrong placeholders and extra braces (**immutable**
+for that template). Do not guess a route when the declaration is absent.
+
+A composed value is `c1.` followed by canonical unpadded base64url. Decode
+strictly: 1–512 bytes of valid UTF-8, no Unicode control characters (U+0000–001F,
+U+007F–009F), maximum 686 bytes including the prefix, and re-encoding must equal
+the original token. Do not trim, repair padding, accept nonzero unused bits,
+decode a source key into a URL, or regard the reference as authorization.
+Invalid nonempty values are **immutable** for those bytes and select the empty
+picture without HTTP. Null/empty values are valid absence. Stored `pictureId`
+remains UUID-only; a string/UUID field holding `c1.*` is not a composed field.
+
+Independent vectors: `c1.YQ` encodes `a`; `c1.w6k` encodes `é`;
+`c1.c2hhcGUvYWxwaGE` encodes `shape/alpha`, whose slash stays inside the token.
+Reject `c1.`, `c1.YQ==`, `c1.YR` (noncanonical unused bits), `c1._w`
+(invalid UTF-8), `c1.Cg` (newline), uppercase prefix and nonstring values.
+A 512-byte ASCII key produces a 686-byte reference; 513 decoded bytes refuse.
+
+Extend the existing thumbnail eligibility to scalar `picture` with
+`present: "image"`, using the same visibility rule. Selection stays explicit
+thumbnail, otherwise eligible cover default. A valid explicit thumbnail whose
+value is absent/invalid never searches another field. Select and fetch only
+visible images. Repeated visible references coalesce in the existing hook;
+simultaneous slots still have separate render state. The generated acceptance
+surface is the compact list picture. A composed cover declaration may supply
+that list's default thumbnail; new composed detail heroes, galleries and viewers
+are outside this change. Stored detail media remains as specified above.
+
+### Fetch and credential ownership
+
+Extend `Api` with `composedPicture(source, reference, options?)`, returning
+`Promise<string>` containing SVG XML. `source` is the normalized composed door,
+`reference` the canonical token, and options accept only an optional abort
+signal. Recheck both through the core helpers at this effect boundary. Invalid
+arguments reject before HTTP (**immutable** for those arguments). No arbitrary
+URL, caller-supplied credential, response validator, query or request body enters
+this method. The existing JSON `request` method keeps its bearer-only contract.
+
+The content GET uses the selected API connection's origin and current
+in-memory sign-in session as `Cookie`, with **no Authorization header**.
+The merged door requires `SignedIn` and refuses scoped bearer keys. Keep the
+cookie private in `createApi`; return no cookie/headers to a hook, component,
+resource model, cache identity, log or device store. Both password and
+second-factor sign-in use their existing session owner. Ignore Set-Cookie on
+this image response, as ordinary post-sign-in reads already do.
+
+Without that session, reject locally as an image-unavailable 403 and send no
+request (**correctable** by a fresh sign-in). A restored bearer cannot mint or
+stand in for it. Keep the authorized record readable with its empty picture;
+do not persist a cookie, invent a reauthentication flow, send both credentials,
+retry with bearer, or change the server's admission. Missing shell identity or
+non-ready session also draws the fallback and sends no image request
+(**correctable** through the existing shell lifecycle).
+
+Reuse `call` for the deadline (15 seconds by default, constructor-overridable),
+caller cancellation, status/problem decoding and shell's existing 401 notice.
+Add a narrowly selected SVG response mode there rather than fetch in a screen.
+It sends GET, `Accept: image/svg+xml`, `credentials: "omit"` and
+`cache: "no-store"`, with no body, width/language/token query, range, conditional
+headers or automatic retry. Request redirects as errors; a redirect is an
+unavailable image (**correctable** after the server supplies a direct door).
+Actual native redirect/cookie behavior remains a device acceptance obligation.
+
+Only status 200 with media type `image/svg+xml` (case-insensitive, optional
+parameters) and nonblank XML is a candidate. The deadline includes consuming
+the response body. Refuse an accepted body over the server's 1 MiB output limit;
+measure received bytes rather than trust Content-Length. This is an acceptance
+limit after the existing buffered read, not a promised streaming memory bound.
+Return no partial body on failure. Unexpected successful status, wrong media
+type, empty/oversize body and later parse failure are **immutable** for that
+response; a new explicit visit can obtain repaired output. Do not recreate the
+server's SVG allowlist or template validator on the phone.
+
+### Renderer, state and lifetime
+
+Add an effects-owned SVG resource alternative containing `kind: "svg"`,
+`scope`, `id` (the reference), `version` (the attempt identity) and `xml`.
+Keep the existing URI resource contract for stored images. SVG resources carry
+no credential or fetch callback. `NativeImage` accepts the alternatives, and
+the existing render closure binds them to `ImageSlotProps`. Core/UI slots keep
+only reference, instance, fit, description and decorative semantics.
+
+Use `react-native-svg`'s existing `parse` and `SvgAst` in the native adapter:
+parse once per resource, require a non-null `svg` root, then mount the resulting
+tree. Catch parse/render errors without exposing the parser's XML snippet.
+Report ready from a guarded post-render effect after a successful parse/mount;
+report error on failure. The installed `SvgXml` has no success callback despite
+its `onLoad` prop type, so waiting for that callback would leave rows hidden.
+This ready state means the source/component boundary succeeded; native pixels
+still require device evidence.
+
+Fill the existing slot; override root width/height to the slot and map
+`fit: "cover"` to `xMidYMid slice`, `fit: "contain"` to `xMidYMid meet`.
+Keep server geometry and paint. Do not theme/recolour remote SVG, fetch external
+assets, use a URI-fetching SVG component or send it to the stored-image loader.
+External-resource exclusion relies on the server's constrained output contract;
+the library parser is not a separate sanitizer or complete XML validator.
+Keep the existing accessible/decorative props, zero image transition and scale
+tokens. Compact row pictures are decorative under their named row; no new
+press target, announcement, retry button or illustration is introduced.
+
+For composed references the existing hook skips `file/file` reads, metadata,
+variant planning and public-image caching entirely. No stored door means no
+stored compact request; a composed-only door must not disable an independently
+declared legacy rich-text file path. A missing composed door settles the
+composed slot as empty rather than waiting forever or trying the file door.
+
+| Input/event | Composed-picture state and action |
+| --- | --- |
+| Absent value/door or no supplied renderer | Empty picture immediately; no request. Valid absence is not a refusal. |
+| Valid visible reference in a ready scope | Loading with the existing still state; one GET per distinct reference per hook/attempt. |
+| Current XML parsed and mounted | Loading → ready for that slot. |
+| HTTP 403/404/410/422 or other nontransient 4xx | Loading/ready → error; immediately discard XML and draw empty, independently of pending peers. **Immutable** for that response/current authority/source visit; no image-specific retry or stale bytes. |
+| HTTP 401 | Discard XML and report through the existing API notice; the shell owns reentry. **Correctable** by reauthentication. A 403 alone never triggers that notice. |
+| Network/body-read failure, deadline, 408/429 or 5xx | Loading/ready → error and discard XML. **Correctable** by explicit refresh/remount; no automatic/background retry or retained composed SVG. |
+| Parse/render or response-format failure | Error and existing empty picture, never partial SVG or raw error text. **Immutable** for that body; a later explicit visit may read repaired bytes. |
+| Explicit refresh, source/reference replacement | Clear previous XML immediately, start a new attempt in loading if eligible; failed refresh cannot retain a previously ready composed image. |
+| Session/server/catalogue change, removed slot, unmount | Withdraw XML immediately; abort pending work where possible. Old success/error/ready callbacks do nothing. Ignoring an obsolete result is not a refusal. |
+
+The empty picture is the existing core-derived icon tile when the entry names
+an icon, otherwise no compact image slot. Existing full-frame callers keep
+their existing unavailable state/copy. Do not mount a broken-image view.
+An explicit refresh creates a new visit and can recheck grants; it never
+replays the refused result as an authorized image.
+
+Scope identity includes normalized server, authenticated person, bearer key ID,
+shell generation, catalogue/source and hook mount. Attempt/reference identity
+additionally distinguishes refreshes and replacements. Never include secrets.
+Check request and slot/resource identity before publishing both success and
+failure; abort alone is not sufficient. Deduplication is per active hook and
+attempt, not a cross-session or persistent SVG cache. On removal, release the
+reference's pending/result entry; retain at most the currently selected set.
+Received XML/parsed trees live only with the active rendering resources: no
+read cache, secure store, disk cache, outbox, export, prefetch or background job.
+Release references on invalidation; no secure memory-erasure claim is made.
+
+There is no client transaction across record and image GETs, no subscription to
+grant changes, and no promise of instantaneous remote revocation of a mounted
+picture. Each new GET reauthorizes server-side before cached output. A changed
+value behind the same source reference is observed only on a new read.
+
+### Ten domain questions for this extension
+
+| Question | Resolved mobile share |
+| --- | --- |
+| Entity fields | Consume version 3, derived scalar `picture`, optional `pictures.composedSource` and existing image hints; no persisted domain field or template/value model. |
+| Identity and relationships | Canonical opaque reference identifies a server source, independently of file UUIDs. Origin/person/key/session/catalogue/attempt scopes isolate rendering; infer no tenant ID from the value. |
+| States and transitions | Empty/loading/ready/error and every invalidation/refusal follow the table above. A failed picture leaves the base record readable. |
+| Authorization | Session-only image GET; existing bearer semantics elsewhere. Source grants, tenant `db.Tx[db.Tenant]` and RLS stay on the server. The phone cannot prove permission from a hint/reference/cache. |
+| Transaction and concurrency | No SQL/client mutation or expected revision. Server request consistency is consumed unchanged; request/slot generations prevent obsolete publication without claiming a snapshot across GETs. |
+| Events and idempotency | Read-only GET, no command/receipt/event/outbox change. Coalesce active duplicate references, not authorization decisions. New visits are new reads; no idempotency key. |
+| Retention and export | Active XML/trees only; no persistent/offline bytes, upload, save, export or migration. Product/source retention remains server-owned. |
+| Provider integration | Extend the existing API, hook and native adapter with the pinned SVG renderer. No new server port, module, provider discovery, registry, route pack or login path. |
+| Locale/time/money | Reuse existing en/pt fallback words and decorative labels. No new copy, domain clock, timestamp or money. Transport timeout is explicit; server ETags/digests and references remain opaque. |
+| Specialist validation | Native code checks the declared path, scalar reference, response shape and parser outcome. Server validates inert SVG, template/options/colour domains and source access; product owns artwork and specialist meaning. |
+
+This repository adds no Go module, SQL service, table, migration or server
+conformance fake. The module-only `contracts/` import and migration rules do not
+require creating those artifacts for a native GET/render change.
+
+### Conformance cases and evidence
+
+The core/API cases run in `tests/pictures.test.ts`, `tests/catalog.test.ts` and
+`tests/api.test.ts`; `tests/screens/nativeImage.test.tsx` and
+`tests/screens/composed-pictures.test.tsx` exercise the parser/tree and lifecycle
+beside the existing stored-picture/refusal suites. Device case D1 remains
+unverified. The wire fake returns literal bytes/statuses and records requests; it never validates a
+reference, selects a credential, chooses a fallback or marks a slot ready.
+Run the production core/API/hook decisions over it. Reuse the existing shell
+and image recorders; stub only native terminal drawing when necessary, keeping
+the installed SVG parser and SVG tree composition real. There is no SQL
+decision on the phone to duplicate in a fake.
+
+Use the merged foundation's independently authored `picturetest.Oracle` as the
+received SVG fixture, not its marked-up template. It is a 100×80 SVG with a
+white background, a circle filled `#AABBCC` and a line stroked `#112233`;
+SHA-256 `2ab9f69bb3f58230f64771b7fdb0a55cee88c9536bde570a2546fd4be6e63fb1`.
+Copy the literal expected output with public-commit provenance; no mobile
+composer or product artwork is needed. A synthetic version-3 catalogue must
+be labelled synthetic; the ordinary reference catalogue does not compose this
+route. Keep the genuine stored-picture capture and its original receipt.
+
+| Case / existing harness | Independent setup and required observation |
+| --- | --- |
+| C1 — pictures/core | Parse unstamped/1/2/3 catalogues; accept each. Explicit 0, fractional/string stamps and 4 refuse by the existing compatibility path (**immutable**). Accept one read-only picture/image field without admitting an unrelated unsupported kind. |
+| C2 — pictures/core | Valid composed door with empty stored source survives; valid stored source with bad composed door survives; both valid survive; both absent produce fallback. Test malformed/duplicate placeholders, external/encoded/traversal/query/fragment paths and widths [160, 640]; diagnostics name only the defective optional member (**immutable**). |
+| C3 — pictures/core | Assert all literal reference vectors and refusal reasons above; exact 512/513 decoded-byte boundaries, C1 controls, invalid UTF-8, padding and unused bits. UUID validator must still reject composed references; scalar kind prevents cross-use. Invalid bytes are **immutable**. |
+| C4 — pictures/derivation | Alternate declared field names, two populated pictures, valid explicit thumbnail blank, cover default, hidden/detail/hideList picture. Select only the eligible declaration, never scan values or expose an encoded token as text. Composed fields produce no form/PUT/PATCH body, sort or filter, even with contradictory writable metadata (**immutable** declaration defect). |
+| F1 — API wire fake | Complete real password sign-in/mint with the existing synthetic wire fixture; serve the Oracle bytes. Assert exact declared-origin/substituted GET, session Cookie, absence of Authorization, SVG Accept, omitted browser credentials, no-store, redirect error, no body/query/range/conditional. A following ordinary JSON read must still send bearer alone. This proves the credential actually passed to fetch. |
+| F2 — API wire fake | Complete the factor leg using its existing wire responses; assert its own session on the image GET. Return a later Set-Cookie on an image and verify it cannot replace the held session. Cookie never appears in returned XML resource or identities. |
+| F3 — API wire fake | Construct with restored bearer only, then call composedPicture: local 403, zero content requests (**correctable** by sign-in), and ordinary bearer reads remain available. Also assert missing/invalid door/ref rejects before fetch (**immutable** input). |
+| F4 — API wire fake | Return 403, 404, 410, 422, 429 and 503 independently, including non-JSON problem bodies. Return no XML; preserve status; only the corresponding table recovery is possible. A 403 must not trigger shell expiry; an actual 401 must. |
+| F5 — API deferred fetch | Abort before sending and while reading; stall the body past a short explicitly supplied deadline. No partial SVG/resource, no automatic retry, timer cleanup and existing AbortError/timeout semantics. Correctable transport failure cannot restore prior bytes. |
+| F6 — API response boundary | Return 204, 206, 304, 200 text/html, empty/blank SVG and 1 MiB + 1 received bytes with misleading Content-Length. Each is **immutable** for that response and returns no resource. Valid MIME parameters and the exact allowed byte boundary remain accepted before parsing. |
+| R1 — native-image suite | Feed the exact Oracle to the real SVG parser/tree through NativeImage's SVG resource. Assert background/circle/line and literal paints, slot width/height, cover/contain mapping and one current ready report. Assert no stored-image loader request. Merely recording XML in a stub is insufficient. |
+| R2 — native-image/compact suite | Feed mismatched `<svg><g></svg>` and a no-root body; parser failure yields empty with no raw XML/error text (**immutable** body). Exercise a terminal render error too. Do not expect SvgXml.onLoad to fire. |
+| R3 — compact screen + real API fake fetch | Draw a real generated list row with the synthetic composed field; 200 Oracle makes its slot ready. On explicit refresh return 403 for that same reference while another SVG remains deferred: its old SVG disappears immediately, declared icon remains, title/link and other row remain. With no entry icon there is no compact image slot. |
+| L1 — hook/refusal suite | Two slots sharing one reference issue one GET and keep separate slot callbacks. A second distinct reference issues its own GET. Assert zero file metadata calls and no width query for either, including a mixed stored/composed screen. |
+| L2 — hook/native-image suite | Replace reference, source, attempt, catalogue, server, person and session independently; settle old success and old error afterwards, then test unmount/remount. None can draw or alter the replacement. A peer never delays a settled refusal. |
+| L3 — hook/compact suite | Successful composed picture → refresh → network/503 failure stays empty; a later explicit successful read may restore it. Removed references leave no retained request/result entry. No persistent store/image cache receives XML. |
+| B1 — existing picture suites | Stored UUID thumbnails/portraits/galleries retain bearer headers, metadata/width decisions, public/private caching and legacy rich-text behavior. Invalid composed input never falls through to a file request. |
+| D1 — existing device harness | Fresh sign-in → generated composed list → visible fixture geometry; refused-content row → existing empty picture; refresh and session switch withdraw old content. Use real composed server setup and current testIDs, not a mocked API. Record the exact make/flow commands and native evidence separately. |
+
+Run focused core/API/native-image/compact/refusal suites, then `npm run check`.
+Regenerate test inventory only if implementation changes its measured inputs.
+`check:flows` proves selectors/coverage, not SVG pixels or credential forwarding.
+Device acceptance uses `make e2e-android` with an explicitly composed server;
+the ordinary pinned reference application alone cannot supply this fixture.
+If required native inputs change, refresh the fingerprint with its existing
+command and record why a new binary is needed. No dependency change is expected.
+
+### Dependency evidence for this extension
+
+No dependency is added or upgraded. The following registry answers were read
+during specification; latest versions establish existence, not upgrade intent.
+The installed LICENSE file of every listed package was read in full: each is
+MIT, allowing inclusion with Apache-2.0 subject to its attribution/warranty
+notice. No GPL/AGPL dependency is proposed.
+
+| Library | Literal `npm view <package> version license` answer | Literal locked-version answer and LICENSE file |
+| --- | --- | --- |
+| `react-native-svg` | `version = '15.16.0'`, `license = 'MIT'` | `npm view react-native-svg@15.15.4 version license` → `version = '15.15.4'`, `license = 'MIT'`; `node_modules/react-native-svg/LICENSE` (Horcrux). |
+| `expo` | `version = '58.0.16'`, `license = 'MIT'` | `npm view expo@57.0.23 version license` → `version = '57.0.23'`, `license = 'MIT'`; `node_modules/expo/LICENSE` (650 Industries). |
+| `expo-image` | `version = '58.0.16'`, `license = 'MIT'` | `npm view expo-image@57.0.5 version license` → `version = '57.0.5'`, `license = 'MIT'`; `node_modules/expo-image/LICENSE` (650 Industries). |
+| `react` | `version = '19.3.1'`, `license = 'MIT'` | `npm view react@19.2.3 version license` → `version = '19.2.3'`, `license = 'MIT'`; `node_modules/react/LICENSE` (Meta Platforms and affiliates). |
+| `react-native` | `version = '0.88.0'`, `license = 'MIT'` | `npm view react-native@0.86.3 version license` → `version = '0.86.3'`, `license = 'MIT'`; `node_modules/react-native/LICENSE` (Meta Platforms and affiliates). |
+
+The installed Expo bundled-native manifest names `react-native-svg: 15.15.4`,
+equal to the current application and lockfile pins. Conditional installation
+in the brief is already satisfied. Library source confirms the parser/AST
+interface; it does not prove Android or iOS rendering.
+
+### Limits and product decisions
+
+Products compose the server module and declare the composed door. They own
+source keys and access rules, template artifacts/versions, artwork, palette and
+option meaning, snapshots/retention, image placement, copy and specialist
+validation. They must retain original artifacts when their snapshots promise
+reproduction. This phone work changes none of those decisions or server grants.
+
+The brief's “session credentials” is resolved to the sign-in cookie because the
+merged endpoint refuses scoped keys. Fetch and render are split between the
+existing API/hook/adapter owners; “picture” is split by declared scalar kind,
+not guessed from a URL or a file extension. Failure means the existing empty
+picture. No acceptance item is dropped. Composed detail layouts and bearer-only
+server admission are separate follow-up capabilities, not undecided choices
+for this implementation.
+
+No product artwork/provider, deployment, production adoption or all-version
+compatibility is established by the synthetic fixture. Android/iOS decoding,
+cookie/header forwarding, native redirect enforcement, memory cleanup,
+TalkBack/VoiceOver and live tenancy/revocation remain unverified until their
+own runs. Browser/component results cannot substitute for those observations.

@@ -32,17 +32,18 @@ must contain no secret.
 `npm run ios` build and run native projects using the corresponding local
 platform toolchain. `npm run web` starts a browser preview, but the credential
 is a native one: a sign-in mints a scoped bearer key (`POST /auth/tokens`) and
-every request that does work presents `Authorization: Bearer` alone. The scopes
-are not the list the sign-in answered with: the mint refuses the wildcard by name,
+ordinary JSON and stored-file requests present `Authorization: Bearer` alone.
+The scopes are not the list the sign-in answered with: the mint refuses the wildcard by name,
 and the built-in administrator role grants nothing else
 (`modules/auth/internal/seed.go`), so `src/core/scopes.ts` turns what the account
 holds into the permissions the pinned document declares for this phone's own
 surface, and leaves out every grant the installation's operator holds alone. The other
 credential is the session the password leg or the challenge leg answers with. It
 is held in memory for as long as the key it minted is held, never written to
-storage, and sent at exactly the four doors that answer to the person rather than
+storage, and sent only at doors that answer to the person rather than
 to a key: the mint, who-this-is (`GET /auth/me`), the key's own revoke
-(`POST /auth/tokens/{id}/revoke`) and the sign-out that closes it. Those four are
+(`POST /auth/tokens/{id}/revoke`), the sign-out that closes it and a declared
+composed-picture read. Those doors are
 `httpx.SignedIn()`, and a credential that carries its own scopes is refused at
 every one of them (kit/httpx/authorize.go), so a phone that kept only the key
 could neither ask who it is nor stop the key it is throwing away. No request ever
@@ -146,7 +147,7 @@ read, how an entry asks for it, and which screens the schema already does well.
 The HTTP contract is pinned in [testdata/openapi.json](testdata/openapi.json),
 with its public commit and SHA-256 in
 [testdata/openapi.source.json](testdata/openapi.source.json). This pin contains
-110 paths and 130 operations, among them a read's `?lang`, a stored picture's
+130 paths and 163 operations, among them a read's `?lang`, a stored picture's
 `?w`, the four translation members of a content record, and the `translatable`
 and `keys` members of a catalogue field. `npm run api` generates the TypeScript
 types, Zod validators, SDK and documented route table in `src/generated/`; `npm run
@@ -2388,8 +2389,8 @@ pictures because the existing full-frame media hero cannot carry those shapes.
 planner, session-scoped image adapter and genuine read-scoped catalog fixture
 serve the next resource without another transport or design system.
 
-The HTTP fixtures and generated API now pin public kernel commit
-`42d4b8e8c21d4b7a512d2437c20ee5c729dbecc0`. Optional `pictures.source` and
+The HTTP fixtures and generated API pin public kernel commit
+`aa35944f576e143190ea67ba12bf812dd1b4cc0c`. Optional `pictures.source` and
 `pictures.widths` choose the byte door and variants; `thumbnailField` defaults
 to a valid `coverField`. The parser diagnoses defective optional declarations
 and keeps the resource. It accepts a restricted root-relative `/api/v1/`
@@ -2416,7 +2417,8 @@ Account initials use `displayName`, then
 email. A declared account portrait permits one own-record read; the pinned
 reference user/identity contracts have no portrait, so they need no extra read.
 
-Compact pictures use the current session's bearer header, never a query token.
+Stored compact pictures use the current session's bearer header, never a
+query token.
 The shared compact-picture/prose width planner uses the stored original when
 the selected declared width exceeds the known frame; small originals never
 request a larger variant that the server cannot build.
@@ -2442,8 +2444,8 @@ The [component and lifetime contract](docs/people-and-row-pictures.md) specifies
 fallbacks, visibility, validation and product-owned decisions. Gallery samples
 include initials, unknown names, loading/ready/failed portraits, groups and row
 media. `testdata/catalog.pictures.json` is a genuine authenticated response from
-the pinned public reference composition using the read scopes recorded in its
-source receipt. It establishes that fixture's cover, thumbnail, author and
+the public reference composition at its original recorded capture commit, using
+the read scopes recorded in its source receipt. It establishes that fixture's cover, thumbnail, author and
 assignee contract. The pin's file icon is outside its frozen vocabulary and
 uses the documented fallback. The broader admin catalog includes translation
 map inputs this client's supported field kinds still refuse; this delivery does
@@ -2455,6 +2457,49 @@ establish Android/iOS rendering, redirects, actual native cache reuse/eviction,
 revocation or TalkBack/VoiceOver output. The browser preview's design probe does
 not measure React Native Web's div-based text; its zero-refusal report is not a
 native visual or accessibility verdict.
+
+## Composed pictures
+
+A catalogue version 3 scalar `picture` with `present: image` can supply a generated
+list's declared thumbnail or default cover thumbnail. Its canonical `c1.` reference
+identifies a server source, and `pictures.composedSource` supplies the root-relative
+`{reference}` door. The phone draws the received SVG; templates and source access
+remain server-owned. Derived pictures never enter forms, writes, sorting, filters
+or textual facts. Unstamped and version 1–2 catalogues remain supported.
+
+`api.composedPicture(source, reference, { signal })` uses the private in-memory
+sign-in cookie alone because this door requires `SignedIn`. A restored bearer has
+no such session and shows the existing empty picture until a fresh sign-in. No
+cookie enters a resource, component or store. SVG reads use the existing transport's
+deadline and cancellation, request no caching or redirects, accept only a 200 SVG
+response of at most 1 MiB, and render with the installed `react-native-svg` parser
+and tree. A fetch, parse or render failure uses the declared icon or no compact slot.
+Refresh, replacement and scope loss discard old XML immediately; no SVG is retained
+as an offline or persistent image. Stored pictures keep their existing behavior.
+
+**Reused** — `parseCatalog`, core picture/row derivation, `createApi`, `usePictures`,
+`NativeImage`, `RowMedia` and the pinned `react-native-svg` compose the existing
+session and presentation path. **Added** — the composed-reference validator,
+session-only SVG response mode and XML resource alternative bridge a contract that
+the stored UUID metadata/URI loader cannot carry. **Made reusable** — any resource
+can declare a composed thumbnail, with the domain-free server Oracle, synthetic
+catalogue example and shared fetch/render/lifetime conformance cases available to
+the next consumer.
+
+`testdata/catalog.composed.json` is synthetic; `testdata/composed-picture.svg` is
+the public foundation's independently authored Oracle at the receipt's commit.
+The ordinary reference application does not compose the picture module. A real
+composed-server device run can extend `record.yaml` by supplying `COMPOSED_MODULE`,
+`COMPOSED_ENTITY`, `COMPOSED_READY_TITLE` and `COMPOSED_REFUSED_TITLE` to
+`make e2e-android`. These select a resource containing a fixture-SVG row and a 403
+row; the flow records `composed-pictures` and `composed-pictures-refreshed`
+screenshots for visual inspection, then continues the existing record journey.
+Without these inputs that fixture visit is skipped. Selector checks do not prove
+SVG pixels. Android/iOS drawing, native Cookie/redirect handling, screen readers,
+live grants/revocation and session-switch behavior remain unverified. Composed
+detail heroes and galleries are outside this delivery. The
+[fetch/render contract](docs/people-and-row-pictures.md#composed-pictures) records
+the supported inputs, refusals and lifetimes.
 
 ## An empty list is drawn
 

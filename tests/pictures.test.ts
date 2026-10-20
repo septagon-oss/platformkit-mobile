@@ -360,3 +360,200 @@ test("the icon an entry declared is answered once, whichever surface asks", () =
   assert.ok(notices.includes("resources[0].presentation.icon"));
   assert.equal(rowMedia(odd, {}, false).kind, "none");
 });
+
+test("composed catalogue versions and independent doors retain the readable resource", () => {
+  const doc = () => JSON.parse(readFileSync("testdata/catalog.composed.json", "utf8"));
+  const composedSource = "/api/v1/picture/pictures/{reference}/content";
+  for (const version of [undefined, 1, 2, 3]) {
+    const input = doc();
+    if (version === undefined) delete input.catalogVersion;
+    else input.catalogVersion = version;
+    assert.equal(parseCatalog(input).version, version ?? 0);
+  }
+  for (const version of [0, 1.5, "3", 4]) {
+    assert.throws(() => parseCatalog({ ...doc(), catalogVersion: version }), /catalogVersion/);
+  }
+  for (const absent of [undefined, null, ""]) {
+    const input = doc();
+    input.pictures.source = absent;
+    input.pictures.widths = [160, 640];
+    assert.deepEqual(parseCatalog(input).pictures, { composedSource });
+  }
+  for (const bad of [
+    "https://example.test/api/v1/{reference}",
+    "//example.test/{reference}",
+    "/api/v1/{reference}?x=1",
+    "/api/v1/{reference}#x",
+    "/api/v1/%61/{reference}",
+    "/api/v1/../{reference}",
+    "/api/v1/\\/{reference}",
+    "/api/v1/{reference}/{reference}",
+    "/api/v1/prefix-{reference}",
+    "/api/v1/{id}",
+    "/api/v1/{reference}/ ",
+    "/api/v1/{reference}/{x}",
+  ]) {
+    const input = doc();
+    input.pictures = { source, composedSource: bad, widths: [160, 640] };
+    const notices: string[] = [];
+    assert.deepEqual(parseCatalog(input, (at) => notices.push(at)).pictures, {
+      source,
+      widths: [160, 640],
+    });
+    assert.deepEqual(notices, ["pictures.composedSource"]);
+    input.pictures = {
+      source: bad.replaceAll("{id}", "{other}"),
+      composedSource,
+      widths: [160, 640],
+    };
+    assert.deepEqual(parseCatalog(input).pictures, { composedSource });
+  }
+  assert.equal(parseCatalog({ ...doc(), pictures: {} }).pictures, undefined);
+  const unsupported = doc();
+  unsupported.resources[0].fields[2].type = "secret-shape";
+  assert.throws(() => parseCatalog(unsupported), /type/);
+  unsupported.resources[0].fields[2] = { name: "drawings", type: "list", elem: "picture" };
+  assert.throws(() => parseCatalog(unsupported), /elem/);
+});
+
+test("composed references are canonical opaque UTF-8 tokens, separate from stored UUIDs", async () => {
+  const { composedReference, pictureId } = await import("../src/core/pictures");
+  for (const good of [
+    "c1.YQ",
+    "c1.w6k",
+    "c1.c2hhcGUvYWxwaGE",
+    `c1.${Buffer.from("a".repeat(512)).toString("base64url")}`,
+  ]) {
+    assert.equal(composedReference(good), true, good);
+    assert.equal(pictureId(good), false);
+  }
+  for (const bad of [
+    "c1.",
+    "c1.YQ==",
+    "c1.YR",
+    "c1._w",
+    "c1.Cg",
+    "C1.YQ",
+    FILE,
+    null,
+    4,
+    `c1.${Buffer.from("a".repeat(513)).toString("base64url")}`,
+    ...["\u0000", "\u001f", "\u007f", "\u0080", "\u009f"].map(
+      (key) => `c1.${Buffer.from(key).toString("base64url")}`,
+    ),
+    "c1.wK8",
+    "c1.7aCA",
+    "c1.9ICA",
+    "c1.Y",
+    "c1.YQ/",
+    " c1.YQ",
+  ])
+    assert.equal(composedReference(bad), false, String(bad));
+});
+
+test("derived pictures select declared visible media and never become text, controls or writes", async () => {
+  const {
+    display,
+    listCells,
+    label,
+    recordSections,
+    recordInformation,
+    formControls,
+    writeControls,
+    values,
+    sortFields,
+    filterFields,
+  } = await import("../src/core/derive");
+  const input = JSON.parse(readFileSync("testdata/catalog.composed.json", "utf8"));
+  const raw = input.resources[0];
+  raw.fields[2].readOnly = false;
+  raw.fields[2].enum = ["c1.YQ"];
+  raw.fields.push({ name: "alternate", type: "picture", present: "image", readOnly: true });
+  raw.presentation = {
+    icon: "document",
+    coverField: "alternate",
+    thumbnailField: "drawing",
+    primaryField: "drawing",
+    previewField: "drawing",
+    statusField: "drawing",
+    summaryFields: ["drawing"],
+    sortable: ["drawing"],
+  };
+  const notices: string[] = [];
+  const entry = parseCatalog(input, (at) => notices.push(at)).resources[0]!;
+  const row = { id: "sample", title: "Shape study", drawing: "c1.YQ", alternate: "c1.w6k" };
+  assert.ok(notices.includes("resources[0].fields[2].readOnly"));
+  assert.equal(entry.fields.find((f) => f.name === "drawing")?.readOnly, true);
+  assert.deepEqual(visiblePictures(entry, [row], {}, "row", feedback), ["c1.YQ"]);
+  assert.deepEqual(rowMedia(entry, { ...row, drawing: "" }, true), {
+    kind: "icon",
+    icon: "document",
+  });
+  assert.equal(label(entry, row, feedback.copy.kit.untitled), "Shape study");
+  assert.equal(display(entry.fields[2]!, row.drawing, feedback), "");
+  assert.deepEqual(listCells(entry), []);
+  assert.deepEqual(sortFields(entry), []);
+  assert.deepEqual(filterFields(entry), []);
+  const facts = JSON.stringify([
+    recordSections(entry, row, feedback),
+    recordInformation(entry, row, feedback),
+  ]);
+  assert.ok(!facts.includes("c1."));
+  const controls = formControls(entry, row, false);
+  assert.ok(controls.every((c) => c.field.type !== "picture"));
+  const body = values(writeControls(entry, row, controls), {});
+  assert.ok(!("drawing" in body) && !("alternate" in body));
+  for (const visibility of ["hidden", "detail"]) {
+    const hidden = structuredClone(input);
+    hidden.resources[0].fields[2].presentation = { visibility };
+    hidden.resources[0].presentation = { thumbnailField: "drawing" };
+    assert.deepEqual(
+      visiblePictures(parseCatalog(hidden).resources[0]!, [row], {}, "row", feedback),
+      [],
+    );
+  }
+  const legacy = {
+    ...entry,
+    fields: entry.fields.map((f) => (f.name === "drawing" ? { ...f, type: "string" as const } : f)),
+  };
+  assert.deepEqual(rowMedia(legacy, row, true), { kind: "icon", icon: "document" });
+});
+
+test("the public composed Oracle has independent provenance", async () => {
+  const { createHash } = await import("node:crypto");
+  const receipt = JSON.parse(readFileSync("testdata/composed-picture.source.json", "utf8"));
+  assert.equal(receipt.upstream.commit, "aa35944f576e143190ea67ba12bf812dd1b4cc0c");
+  assert.equal(receipt.upstream.constant, "Oracle");
+  assert.equal(receipt.sha256, "2ab9f69bb3f58230f64771b7fdb0a55cee88c9536bde570a2546fd4be6e63fb1");
+  assert.equal(
+    createHash("sha256").update(readFileSync(receipt.fixture)).digest("hex"),
+    receipt.sha256,
+  );
+});
+
+test("composed cover defaults obey field visibility and invalid values cannot enter stored detail media", async () => {
+  const { headerCover, recordPictureIds, pictureDoor } = await import("../src/core/derive");
+  const raw = JSON.parse(readFileSync("testdata/catalog.composed.json", "utf8"));
+  raw.resources[0].presentation = { coverField: "drawing" };
+  let entry = parseCatalog(raw).resources[0]!;
+  assert.deepEqual(visiblePictures(entry, [{ drawing: "c1.YQ" }], {}, "row", feedback), ["c1.YQ"]);
+  assert.equal(headerCover(entry, { drawing: FILE }), false);
+  assert.deepEqual(recordPictureIds(entry, { drawing: FILE }), []);
+  raw.resources[0].fields[2].hideList = true;
+  entry = parseCatalog(raw).resources[0]!;
+  assert.deepEqual(visiblePictures(entry, [{ drawing: "c1.YQ" }], {}, "row", feedback), []);
+  raw.resources[0].fields[2].presentation = { visibility: "shown" };
+  entry = parseCatalog(raw).resources[0]!;
+  assert.deepEqual(visiblePictures(entry, [{ drawing: "c1.YQ" }], {}, "row", feedback), ["c1.YQ"]);
+  assert.deepEqual(
+    pictureDoor(
+      {
+        source,
+        composedSource: "/api/v1/picture/pictures/{reference}/content",
+        widths: [160, 640],
+      },
+      () => assert.fail("valid doors refused"),
+    ),
+    { source, composedSource: "/api/v1/picture/pictures/{reference}/content", widths: [160, 640] },
+  );
+});

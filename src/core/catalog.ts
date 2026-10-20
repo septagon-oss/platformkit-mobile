@@ -30,6 +30,7 @@ export const FIELD_TYPES = [
   "bool",
   "time",
   "uuid",
+  "picture",
   "list",
 ] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
@@ -222,7 +223,7 @@ export type HintNotice = (at: string, why: string) => void;
  * learned to render the new shape, which is the same rule the server applies from
  * its side, and the two numbers meeting in the middle is the whole contract.
  */
-export const SUPPORTED_CATALOG_VERSION = 2;
+export const SUPPORTED_CATALOG_VERSION = 3;
 
 /**
  * SHELL_VERSION is what this build of the shell can draw.
@@ -431,7 +432,11 @@ function hintEntry(
       (!row ||
         (field.hints?.visibility !== "detail" &&
           (field.hints?.visibility !== undefined || !field.hideList)));
-    if (field.present !== "image" || !["string", "uuid"].includes(field.type) || !visible) {
+    if (
+      field.present !== "image" ||
+      !["string", "uuid", "picture"].includes(field.type) ||
+      !visible
+    ) {
       notice(`${at}.${member}`, "does not name a visible scalar picture: the default is used");
       return undefined;
     }
@@ -730,8 +735,13 @@ function field(v: ParsedField, at: string, blocks: readonly string[], notice: Hi
   // the person is the product's.
   if (hints?.visibility === "hidden" && v.required === true)
     notice(`${at}.presentation.visibility`, "names a required field: it stays in the form");
+  if (type === "picture" && v.readOnly !== true)
+    notice(`${at}.readOnly`, "is a derived picture: writable input is ignored");
+  if (elem === "picture")
+    throw new CatalogError(`${at}.elem`, "lists of pictures are not supported");
   return {
     ...rest,
+    ...(type === "picture" ? { readOnly: true } : {}),
     type: fieldType(type, `${at}.type`),
     ...(elem === undefined ? {} : { elem: fieldType(elem, `${at}.elem`) }),
     ...(keys === undefined ? {} : { keys }),

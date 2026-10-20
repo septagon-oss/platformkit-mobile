@@ -11,6 +11,31 @@ env:
   APP_ID: dev.septagon.platformkit.ci
 ---
 - runFlow: sign-in.yaml
+# A composed server supplies the two fixture rows. Screenshots are native visual
+# evidence to inspect; row selectors alone make no claim about SVG pixels.
+- runFlow:
+    when:
+      true: ${COMPOSED_MODULE != ""}
+    commands:
+      - tapOn:
+          id: "open-${COMPOSED_MODULE}-${COMPOSED_ENTITY}"
+      - assertVisible:
+          id: "resource-list"
+      - assertVisible:
+          text: "${COMPOSED_READY_TITLE}"
+      - assertVisible:
+          text: "${COMPOSED_REFUSED_TITLE}"
+      - takeScreenshot: composed-pictures
+      - swipe:
+          start: 50%, 30%
+          end: 50%, 80%
+          duration: 500
+      - assertVisible:
+          text: "${COMPOSED_READY_TITLE}"
+      - assertVisible:
+          text: "${COMPOSED_REFUSED_TITLE}"
+      - takeScreenshot: composed-pictures-refreshed
+      - back
 - tapOn:
     id: "open-${MODULE}-${ENTITY}"
 - assertVisible:

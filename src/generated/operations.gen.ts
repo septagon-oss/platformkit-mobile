@@ -16,6 +16,8 @@ export function bindOperations(
     ) => invoke((client) => sdk.appOperationOutcome({ ...options, client, throwOnError: true })),
     appResources: (options: Omit<types.AppResourcesData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.appResources({ ...options, client, throwOnError: true })),
+    appStream: (options: Omit<types.AppStreamData, "url"> & { signal?: AbortSignal }) =>
+      invoke((client) => sdk.appStream({ ...options, client, throwOnError: true })),
     appSummary: (options: Omit<types.AppSummaryData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.appSummary({ ...options, client, throwOnError: true })),
     auditEventList: (options: Omit<types.AuditEventListData, "url"> & { signal?: AbortSignal }) =>
@@ -169,6 +171,9 @@ export function bindOperations(
     contentContentPublish: (
       options: Omit<types.ContentContentPublishData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.contentContentPublish({ ...options, client, throwOnError: true })),
+    contentContentRestore: (
+      options: Omit<types.ContentContentRestoreData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.contentContentRestore({ ...options, client, throwOnError: true })),
     contentContentReviewTranslation: (
       options: Omit<types.ContentContentReviewTranslationData, "url"> & { signal?: AbortSignal },
     ) =>
@@ -193,6 +198,9 @@ export function bindOperations(
       options: Omit<types.ContentContentUntranslateData, "url"> & { signal?: AbortSignal },
     ) =>
       invoke((client) => sdk.contentContentUntranslate({ ...options, client, throwOnError: true })),
+    contentContentVersions: (
+      options: Omit<types.ContentContentVersionsData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.contentContentVersions({ ...options, client, throwOnError: true })),
     fileFileList: (options: Omit<types.FileFileListData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.fileFileList({ ...options, client, throwOnError: true })),
     fileFileUpload: (options: Omit<types.FileFileUploadData, "url"> & { signal?: AbortSignal }) =>
@@ -229,6 +237,19 @@ export function bindOperations(
       invoke((client) =>
         sdk.notificationNotificationList({ ...options, client, throwOnError: true }),
       ),
+    notificationDeviceList: (
+      options: Omit<types.NotificationDeviceListData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.notificationDeviceList({ ...options, client, throwOnError: true })),
+    notificationDeviceRegister: (
+      options: Omit<types.NotificationDeviceRegisterData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) =>
+        sdk.notificationDeviceRegister({ ...options, client, throwOnError: true }),
+      ),
+    notificationDeviceRemove: (
+      options: Omit<types.NotificationDeviceRemoveData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.notificationDeviceRemove({ ...options, client, throwOnError: true })),
     notificationNotificationRead: (
       options: Omit<types.NotificationNotificationReadData, "url"> & { signal?: AbortSignal },
     ) =>

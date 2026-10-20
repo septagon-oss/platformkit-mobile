@@ -1,0 +1,11 @@
+{
+  "schema": "platformkit.picture-oracle.v1",
+  "fixture": "testdata/composed-picture.svg",
+  "sha256": "2ab9f69bb3f58230f64771b7fdb0a55cee88c9536bde570a2546fd4be6e63fb1",
+  "upstream": {
+    "repository": "https://github.com/septagon-oss/platformkit",
+    "commit": "aa35944f576e143190ea67ba12bf812dd1b4cc0c",
+    "path": "modules/picture/contracts/picturetest/conformance.go",
+    "constant": "Oracle"
+  }
+}

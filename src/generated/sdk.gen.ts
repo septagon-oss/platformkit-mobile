@@ -21,6 +21,9 @@ import type {
   AppResourcesData,
   AppResourcesErrors,
   AppResourcesResponses,
+  AppStreamData,
+  AppStreamErrors,
+  AppStreamResponses,
   AppSummaryData,
   AppSummaryErrors,
   AppSummaryResponses,
@@ -204,6 +207,9 @@ import type {
   ContentContentReadData,
   ContentContentReadErrors,
   ContentContentReadResponses,
+  ContentContentRestoreData,
+  ContentContentRestoreErrors,
+  ContentContentRestoreResponses,
   ContentContentReviewTranslationData,
   ContentContentReviewTranslationErrors,
   ContentContentReviewTranslationResponses,
@@ -222,6 +228,9 @@ import type {
   ContentContentUpdateData,
   ContentContentUpdateErrors,
   ContentContentUpdateResponses,
+  ContentContentVersionsData,
+  ContentContentVersionsErrors,
+  ContentContentVersionsResponses,
   FileFileAltCommandData,
   FileFileAltCommandErrors,
   FileFileAltCommandResponses,
@@ -270,6 +279,15 @@ import type {
   FileQuotaReadData,
   FileQuotaReadErrors,
   FileQuotaReadResponses,
+  NotificationDeviceListData,
+  NotificationDeviceListErrors,
+  NotificationDeviceListResponses,
+  NotificationDeviceRegisterData,
+  NotificationDeviceRegisterErrors,
+  NotificationDeviceRegisterResponses,
+  NotificationDeviceRemoveData,
+  NotificationDeviceRemoveErrors,
+  NotificationDeviceRemoveResponses,
   NotificationNotificationListData,
   NotificationNotificationListErrors,
   NotificationNotificationListResponses,
@@ -546,12 +564,14 @@ import {
   zContentContentPublicResponse,
   zContentContentPublishResponse,
   zContentContentReadResponse,
+  zContentContentRestoreResponse,
   zContentContentReviewTranslationResponse,
   zContentContentSuggestTranslationResponse,
   zContentContentTranslateResponse,
   zContentContentUnpublishResponse,
   zContentContentUntranslateResponse,
   zContentContentUpdateResponse,
+  zContentContentVersionsResponse,
   zFileFileAltCommandResponse,
   zFileFileAltResponse,
   zFileFileDeleteResponse,
@@ -564,6 +584,9 @@ import {
   zFileFileUploadResponse,
   zFileFileUsesResponse,
   zFileQuotaReadResponse,
+  zNotificationDeviceListResponse,
+  zNotificationDeviceRegisterResponse,
+  zNotificationDeviceRemoveResponse,
   zNotificationNotificationListResponse,
   zNotificationNotificationReadResponse,
   zScimGroupCreateResponse,
@@ -707,6 +730,19 @@ export const appResources = <ThrowOnError extends boolean = false>(
   options.client.get<AppResourcesResponses, AppResourcesErrors, ThrowOnError>({
     responseValidator: async (data) => await zAppResourcesResponse.parseAsync(data),
     url: "/api/v1/app/resources",
+    ...options,
+  });
+
+/**
+ * Watch declared events until the connection ends
+ *
+ * Server-Sent Events: one frame per notice, and no payload in any of them. Every topic must be declared by a composed module, and a topic whose policy names a grant this caller does not hold refuses the whole connection. The first frame is always a resync: what the caller knew before this connection is not what this connection can promise.
+ */
+export const appStream = <ThrowOnError extends boolean = false>(
+  options: Options<AppStreamData, ThrowOnError>,
+): RequestResult<AppStreamResponses, AppStreamErrors, ThrowOnError> =>
+  options.client.get<AppStreamResponses, AppStreamErrors, ThrowOnError>({
+    url: "/api/v1/app/stream",
     ...options,
   });
 
@@ -1463,7 +1499,7 @@ export const changeProposalWithdraw = <ThrowOnError extends boolean = false>(
 /**
  * List contents
  *
- * Sortable and filterable by: id, createdAt, updatedAt, slug, title, body, coverImageId, kind, status, publishedAt, author
+ * Sortable and filterable by: id, createdAt, updatedAt, slug, title, body, coverImageId, kind, status, publishedAt, author, revision
  */
 export const contentContentList = <ThrowOnError extends boolean = false>(
   options: Options<ContentContentListData, ThrowOnError>,
@@ -1563,6 +1599,24 @@ export const contentContentPublish = <ThrowOnError extends boolean = false>(
   options.client.post<ContentContentPublishResponses, ContentContentPublishErrors, ThrowOnError>({
     responseValidator: async (data) => await zContentContentPublishResponse.parseAsync(data),
     url: "/api/v1/content/contents/{id}/publish",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Restore a version of this content
+ *
+ * Writes a new version with the stored one's content. No version is changed or removed, and the row's lifecycle fields are not replayed.
+ */
+export const contentContentRestore = <ThrowOnError extends boolean = false>(
+  options: Options<ContentContentRestoreData, ThrowOnError>,
+): RequestResult<ContentContentRestoreResponses, ContentContentRestoreErrors, ThrowOnError> =>
+  options.client.post<ContentContentRestoreResponses, ContentContentRestoreErrors, ThrowOnError>({
+    responseValidator: async (data) => await zContentContentRestoreResponse.parseAsync(data),
+    url: "/api/v1/content/contents/{id}/restore",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1692,6 +1746,20 @@ export const contentContentUntranslate = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * List this content's versions
+ *
+ * Newest first, one locale at a time. A version is one committed write.
+ */
+export const contentContentVersions = <ThrowOnError extends boolean = false>(
+  options: Options<ContentContentVersionsData, ThrowOnError>,
+): RequestResult<ContentContentVersionsResponses, ContentContentVersionsErrors, ThrowOnError> =>
+  options.client.get<ContentContentVersionsResponses, ContentContentVersionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zContentContentVersionsResponse.parseAsync(data),
+    url: "/api/v1/content/contents/{id}/versions",
+    ...options,
   });
 
 /**
@@ -1928,6 +1996,64 @@ export const notificationNotificationList = <ThrowOnError extends boolean = fals
   >({
     responseValidator: async (data) => await zNotificationNotificationListResponse.parseAsync(data),
     url: "/api/v1/notification/notifications",
+    ...options,
+  });
+
+/**
+ * List my registered devices
+ *
+ * The caller's own devices, newest first, with the tokens registered for them. There is no route that lists anybody else's.
+ */
+export const notificationDeviceList = <ThrowOnError extends boolean = false>(
+  options: Options<NotificationDeviceListData, ThrowOnError>,
+): RequestResult<NotificationDeviceListResponses, NotificationDeviceListErrors, ThrowOnError> =>
+  options.client.get<NotificationDeviceListResponses, NotificationDeviceListErrors, ThrowOnError>({
+    responseValidator: async (data) => await zNotificationDeviceListResponse.parseAsync(data),
+    url: "/api/v1/notification/notifications/devices",
+    ...options,
+  });
+
+/**
+ * Register a device of mine
+ *
+ * The token the person's own client holds, for a platform this installation carries. Registering the one that is already registered changes nothing and publishes nothing; it becomes the caller's if somebody else held it.
+ */
+export const notificationDeviceRegister = <ThrowOnError extends boolean = false>(
+  options: Options<NotificationDeviceRegisterData, ThrowOnError>,
+): RequestResult<
+  NotificationDeviceRegisterResponses,
+  NotificationDeviceRegisterErrors,
+  ThrowOnError
+> =>
+  options.client.post<
+    NotificationDeviceRegisterResponses,
+    NotificationDeviceRegisterErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zNotificationDeviceRegisterResponse.parseAsync(data),
+    url: "/api/v1/notification/notifications/devices",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Remove one of my devices
+ *
+ * A device id that is not one of the caller's live devices is not found: the answer to somebody else's is the answer to one that never existed.
+ */
+export const notificationDeviceRemove = <ThrowOnError extends boolean = false>(
+  options: Options<NotificationDeviceRemoveData, ThrowOnError>,
+): RequestResult<NotificationDeviceRemoveResponses, NotificationDeviceRemoveErrors, ThrowOnError> =>
+  options.client.post<
+    NotificationDeviceRemoveResponses,
+    NotificationDeviceRemoveErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zNotificationDeviceRemoveResponse.parseAsync(data),
+    url: "/api/v1/notification/notifications/devices/{id}/remove",
     ...options,
   });
 

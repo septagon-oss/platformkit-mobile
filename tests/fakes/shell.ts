@@ -38,6 +38,9 @@ export function fakeApi(operations: Partial<Operations> = {}): FakeApi {
     request: jest.fn<Api["request"]>(async (_method, _path, validate) =>
       validate(undefined),
     ) as jest.MockedFunction<Api["request"]>,
+    composedPicture: jest.fn<Api["composedPicture"]>(async () => {
+      throw new Error("Supply SVG explicitly.");
+    }),
     me: jest.fn<Api["me"]>(async () => undefined),
     events: jest.fn<Api["events"]>(async () => ({ items: [], total: 0 })),
     signIn: jest.fn<Api["signIn"]>(async () => ({ kind: "signed-in", bearer })),

@@ -4,7 +4,8 @@ import type { ImageSlotProps, MediaItem } from "./media";
 import type { Status } from "./shared";
 
 export interface Pictures {
-  readonly source: string;
+  readonly source?: string;
+  readonly composedSource?: string;
   readonly widths?: readonly number[];
 }
 export const resourceIcons = [
@@ -54,35 +55,82 @@ export const pictureId = (value: unknown): value is string =>
   typeof value === "string" &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value);
 
-/** pictureDoor accepts the native client's relative template subset; defects disable only pictures. */
-export function pictureDoor(raw: unknown, notice: HintNotice): Pictures | undefined {
-  if (raw == null) return undefined;
-  const source = typeof raw === "object" ? (raw as Record<string, unknown>).source : undefined;
-  if (
-    typeof source !== "string" ||
-    !source.startsWith("/api/v1/") ||
-    source.split("/").filter((s) => s === "{id}").length !== 1 ||
-    !source
+/** pictureTemplate accepts one entire placeholder segment under the selected API origin. */
+export function pictureTemplate(value: unknown, placeholder: "id" | "reference"): value is string {
+  const slot = `{${placeholder}}`;
+  return (
+    typeof value === "string" &&
+    value.startsWith("/api/v1/") &&
+    value.split("/").filter((s) => s === slot).length === 1 &&
+    value
       .slice(1)
       .split("/")
-      .every((s) => s === "{id}" || (/^[A-Za-z0-9_.-]+$/.test(s) && !/^\.+$/.test(s)))
-  ) {
-    notice(
-      "pictures.source",
-      "is not a supported relative picture template: pictures are not loaded",
+      .every((s) => s === slot || (/^[A-Za-z0-9_.-]+$/.test(s) && !/^\.+$/.test(s)))
+  );
+}
+
+/** composedReference accepts canonical c1 tokens for 1–512 UTF-8 bytes without control characters. */
+export function composedReference(value: unknown): value is string {
+  if (typeof value !== "string" || value.length > 686 || !/^c1\.[A-Za-z0-9_-]+$/.test(value))
+    return false;
+  const token = value.slice(3);
+  if (token.length % 4 === 1) return false;
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  let bits = 0,
+    pending = 0;
+  const bytes: number[] = [];
+  for (const char of token) {
+    pending = (pending << 6) | alphabet.indexOf(char);
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      bytes.push((pending >> bits) & 255);
+      pending &= (1 << bits) - 1;
+    }
+  }
+  if (pending !== 0 || bytes.length < 1 || bytes.length > 512) return false;
+  try {
+    const key = decodeURIComponent(
+      bytes.map((byte) => `%${byte.toString(16).padStart(2, "0")}`).join(""),
     );
+    return !/[\u0000-\u001f\u007f-\u009f]/.test(key);
+  } catch {
+    return false;
+  }
+}
+
+/** pictureDoor normalizes independent optional doors; a defective member disables only that door. */
+export function pictureDoor(raw: unknown, notice: HintNotice): Pictures | undefined {
+  if (raw == null) return undefined;
+  if (typeof raw !== "object" || Array.isArray(raw)) {
+    notice("pictures", "is not a picture declaration: pictures are not loaded");
     return undefined;
   }
-  const widths = (raw as Record<string, unknown>).widths;
-  if (widths == null || (Array.isArray(widths) && widths.length === 0)) return { source };
+  const block = raw as Record<string, unknown>;
+  const door = (member: "source" | "composedSource", slot: "id" | "reference") => {
+    const value = block[member];
+    if (value == null || value === "") return undefined;
+    if (pictureTemplate(value, slot)) return value;
+    notice(
+      `pictures.${member}`,
+      "is not a supported relative picture template: this door is not loaded",
+    );
+    return undefined;
+  };
+  const source = door("source", "id");
+  const composedSource = door("composedSource", "reference");
+  if (!source && !composedSource) return undefined;
+  const doors = { ...(source ? { source } : {}), ...(composedSource ? { composedSource } : {}) };
+  const widths = block.widths;
+  if (!source || widths == null || (Array.isArray(widths) && widths.length === 0)) return doors;
   if (
     !Array.isArray(widths) ||
     !widths.every((w, i) => Number.isSafeInteger(w) && w > 0 && (i === 0 || w > widths[i - 1]))
   ) {
     notice("pictures.widths", "is not an ascending set of positive widths: the original is used");
-    return { source };
+    return doors;
   }
-  return { source, widths };
+  return { ...doors, widths };
 }
 export interface Person {
   readonly id?: string;
