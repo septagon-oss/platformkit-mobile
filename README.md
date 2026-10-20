@@ -2374,7 +2374,13 @@ so a session the server ended leaves no address behind for whoever signs in next
 or another. Each of those three is kept under the connection that wrote it — the pass in
 flight, the row whose answer is still away, the row it wrote — so a sign-in made while an
 earlier session's answer is pending runs its own pass and gets its own row, instead of
-being handed an ended session's promise that nothing will ever answer. A server that will
+being handed an ended session's promise that nothing will ever answer. A refusal holds the
+same scope: a workspace that answered no to this phone's address is not asked again in that
+session, and a no that answers late is still the ended session's, never a reason for the
+workspace signing in now to keep silent. And because the server keys a device on tenant,
+platform, token and recipient, a newer sign-in that reuses an older session's token holds
+*that* row: the live session is the one that may give it back, so a sign-out whose answer came
+late leaves the address the person at the phone is signed in with untouched. A server that will
 not carry this device, a phone with no push service and a person who says not now all
 leave the session standing and say one sentence. Sign-out asks for the row back *before*
 it spends the key, waiting for a registration still on the wire, because only that key
