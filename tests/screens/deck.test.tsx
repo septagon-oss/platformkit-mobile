@@ -223,6 +223,29 @@ test("a real outbox hold and later disappearance never masquerade as a direct co
   await waitFor(() => expect(result.current.state.phase).toBe("closed"));
   expect(result.current.state.history).toHaveLength(0);
   expect(shell.value!.wrote).not.toHaveBeenCalled();
+  for (const row of [
+    { id: "new", title: "Elm" },
+    { id: "next", title: "Fir" },
+  ]) {
+    api.list.mockResolvedValueOnce({ items: [row], total: 1 });
+    await act(async () => result.current.refresh());
+    await waitFor(() => expect(result.current.state.phase).toBe("ready"));
+    expect(result.current.state.active).toEqual([row.id]);
+    expect(result.current.state.history).toHaveLength(0);
+    await act(async () => result.current.action("right"));
+    await waitFor(() => expect(result.current.state.phase).toBe("held"));
+    const nextItems = await held.list();
+    expect(nextItems).toHaveLength(1);
+    expect(nextItems[0]!.path).toBe(commandPath(entry, "accept", row.id));
+    shell.value = { ...shell.value!, outbox: { ...shell.value!.outbox!, items: nextItems } };
+    await rerender({});
+    await held.discard(nextItems[0]!.id);
+    shell.value = { ...shell.value!, outbox: { ...shell.value!.outbox!, items: [] } };
+    await rerender({});
+    await waitFor(() => expect(result.current.state.phase).toBe("closed"));
+    expect(api.command).not.toHaveBeenCalled();
+    expect(shell.value!.wrote).not.toHaveBeenCalled();
+  }
 });
 
 test("an existing unknown outbox write blocks every direction before the first card can be acted on", async () => {

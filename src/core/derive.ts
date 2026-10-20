@@ -29,7 +29,7 @@ import { copyLanguage, type Copy, type Language } from "./copy";
 import type { EntrySubject } from "./failure";
 import type { DataCell } from "./collections";
 import type { Status } from "./shared";
-import { deckCanRewind, deckChoices, reviewDeck, type DeckState } from "./deck";
+import { deckCanRefresh, deckCanRewind, deckChoices, reviewDeck, type DeckState } from "./deck";
 import { deckDirections, type DeckDirection } from "./catalogDeck";
 import { deriveMeter } from "./progress";
 import type { PendingWrite } from "./outbox";
@@ -2582,7 +2582,7 @@ export function deriveDeck(
     endName: [endTitle, ...counts.map((count) => count.label)].filter(Boolean).join(". "),
     retry: p.copy.state.retry,
     canRetry: state.retryable && ["read-error", "pass-end"].includes(state.phase) && !!state.notice,
-    canRefresh: ["ready", "pass-end"].includes(state.phase),
+    canRefresh: deckCanRefresh(state),
     refresh: p.copy.kit.refresh,
     back: p.copy.failure.backTo(noun(entry).plural),
   };

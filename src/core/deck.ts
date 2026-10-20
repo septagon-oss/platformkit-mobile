@@ -132,6 +132,9 @@ export function startDeck(deck: Deck, session = 1): DeckState {
   };
 }
 
+export const deckCanRefresh = (s: DeckState): boolean =>
+  ["ready", "pass-end", "closed"].includes(s.phase);
+
 export const deckCanRewind = (s: DeckState): boolean => {
   const last = s.history.at(-1);
   return (
@@ -223,8 +226,9 @@ function complete(s: DeckState, kind: "command" | "skip"): DeckState {
 /** deckEvent is the only choice/settlement rule. Obsolete, duplicate and locked inputs have no effect. */
 export function deckEvent(s: DeckState, e: DeckEvent): DeckState {
   if (e.session !== s.session || ("operation" in e && e.operation !== s.operation)) return s;
-  if (e.type === "close") return { ...s, ...startDeck(s.deck, s.session + 1), phase: "closed" };
-  if (["closed", "withdrawn"].includes(s.phase)) return s;
+  if (e.type === "close")
+    return { ...startDeck(s.deck, s.session + 1), phase: "closed", operation: s.operation + 1 };
+  if (s.phase === "withdrawn" || (s.phase === "closed" && e.type !== "refresh")) return s;
   switch (e.type) {
     case "page":
       return capturePage(s, e);
@@ -318,11 +322,16 @@ export function deckEvent(s: DeckState, e: DeckEvent): DeckState {
           ? s.phase === "suspended"
           : e.type === "retry"
             ? s.retryable && ["read-error", "pass-end"].includes(s.phase)
-            : ["ready", "pass-end"].includes(s.phase);
+            : deckCanRefresh(s);
       if (!allowed) return s;
       if (e.type === "retry" && s.phase === "pass-end")
         return { ...s, phase: "checking", operation: s.operation + 1, notice: "" };
-      const purpose = s.phase === "read-error" ? s.capture.purpose : "revalidate";
+      const purpose =
+        s.phase === "closed"
+          ? "initial"
+          : s.phase === "read-error"
+            ? s.capture.purpose
+            : "revalidate";
       return {
         ...s,
         phase: "loading",

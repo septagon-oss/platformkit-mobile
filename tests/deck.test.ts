@@ -131,6 +131,48 @@ test("held and unknown results keep the card locked and never become choices", (
   }
 });
 
+test("a resolved held or unknown choice offers a fresh capture without crediting the old intent", () => {
+  const rows = [{ id: "new", title: "Elm" }];
+  for (const type of ["held", "unknown"] as const) {
+    let s = event(skip(ready()), { type: "choose", direction: "right", confirmation: false });
+    const former = s;
+    s = event(s, { type, operation: s.operation, heldID: "stored", text: "Unconfirmed" });
+    s = event(s, { type: "close" });
+    assert.equal(s.phase, "closed");
+    assert.deepEqual(s.history, []);
+    assert.deepEqual(s.active, []);
+    assert.deepEqual(s.deferred, []);
+    assert.deepEqual(s.rows, {});
+    assert.equal(s.pending, undefined);
+    const model = deriveDeck(entry, s, presentation);
+    assert.equal(model.canRefresh, true);
+    assert.deepEqual(model.stack, []);
+    assert.deepEqual(model.available, []);
+    assert.equal(model.progress, undefined);
+    assert.equal(model.finishing, false);
+    assert.equal(event(s, { type: "accepted", operation: former.operation }), s);
+    s = event(s, { type: "refresh" });
+    assert.equal(s.phase, "loading");
+    assert.equal(deckWindow(s, 20).offset, 0);
+    const page = {
+      type: "page" as const,
+      operation: s.operation,
+      offset: 0,
+      items: rows,
+      total: 1,
+    };
+    assert.equal(deckEvent(s, { ...page, session: former.session }), s);
+    s = event(s, page);
+    assert.equal(s.phase, "ready");
+    assert.deepEqual(s.active, ["new"]);
+    assert.deepEqual(deckChoices(s), ["left", "down", "right"]);
+    s = event(s, { type: "choose", direction: "right", confirmation: false });
+    assert.ok(s.operation > former.operation);
+    assert.equal(event(s, { type: "accepted", operation: former.operation }), s);
+    assert.deepEqual(s.history, []);
+  }
+});
+
 test("skip-only decks finish their pass without claiming the server queue is empty", () => {
   let s = skip(skip(skip(ready())));
   assert.equal(s.phase, "checking");
