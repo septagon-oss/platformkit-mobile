@@ -40,14 +40,15 @@ holds into the permissions the pinned document declares for this phone's own
 surface, and leaves out every grant the installation's operator holds alone. The other
 credential is the session the password leg or the challenge leg answers with. It
 is held in memory for as long as the key it minted is held, never written to
-storage, and sent only at doors that answer to the person rather than
-to a key: the mint, who-this-is (`GET /auth/me`), the key's own revoke
-(`POST /auth/tokens/{id}/revoke`), the sign-out that closes it and a declared
-composed-picture read. Those doors are
-`httpx.SignedIn()`, and a credential that carries its own scopes is refused at
-every one of them (kit/httpx/authorize.go), so a phone that kept only the key
-could neither ask who it is nor stop the key it is throwing away. No request ever
-presents both, because a request carrying both is answered as anonymous
+storage, and sent at the doors that answer to the person rather than to a
+key: the mint, who-this-is (`GET /auth/me`), the key's own revoke
+(`POST /auth/tokens/{id}/revoke`), the sign-out that closes it, this phone's own device
+rows, and a composed picture read from a declared source. The pinned document names
+`httpx.SignedIn()` at each of those operations that it carries, and a credential that
+carries its own scopes is refused at all of them (kit/httpx/authorize.go), so a phone
+that kept only the key could neither ask who it is, nor stop the key it is throwing away,
+nor take back the row that carries its address. No request ever presents both, because a
+request carrying both is answered as anonymous
 (kit/httpx/authenticate.go's ambiguousCredential). Browser cookie restrictions
 make that preview unsuitable as proof that sign-in works on a device.
 
@@ -2355,8 +2356,9 @@ Android routes an HTTPS link to the app only when the host says it may, so the m
 one host and no other: the one the build already connects to, through `EXPO_PUBLIC_API_URL`,
 over HTTPS, with `autoVerify`. A build that names no server — every development checkout, and
 the emulator's `adb reverse` — carries the private scheme alone. Serving `/.well-known/assetlinks.json`
-per tenant host, with this binary's signing fingerprint, is the kernel's to serve and is filed
-as its own brief: the phone can claim a host, not vouch for it. iOS is untouched here.
+per tenant host, with this binary's signing fingerprint, is the kernel's to serve and no
+client's to write: the phone can claim a host, not vouch for it, and nothing in this
+repository proves a verified Android association. iOS is untouched here.
 
 Notifications arrive through `expo-notifications` behind one bridge (`src/screens/push.ts`) that
 the composition root hands the shell beside the store, the mint and the network listener. The
@@ -2369,11 +2371,17 @@ that door's own refusal. The prompt is never opened unprompted: the sentence and
 are a person's own (`push.turnOn`), spent once per sign-in either way. A token is memory-only,
 like the key that reaches it, and so is the row it became — held with the sign-in that wrote it,
 so a session the server ended leaves no address behind for whoever signs in next, at this server
-or another. A server that will not carry this device, a phone with no push service
-and a person who says not now all leave the session standing and say one sentence. Sign-out asks
-for the row back *before* it spends the key, waiting for a registration still on the wire, because
-only that key reaches the row, and it says
-so when the ask did not answer — while the key may still be live, the key is what is said.
+or another. Each of those three is kept under the connection that wrote it — the pass in
+flight, the row whose answer is still away, the row it wrote — so a sign-in made while an
+earlier session's answer is pending runs its own pass and gets its own row, instead of
+being handed an ended session's promise that nothing will ever answer. A server that will
+not carry this device, a phone with no push service and a person who says not now all
+leave the session standing and say one sentence. Sign-out asks for the row back *before*
+it spends the key, waiting for a registration still on the wire, because only that key
+reaches the row, and it says so when the ask did not answer — while the key may still be
+live, the key is what is said. The key it forgets here is only the record that sign-in
+wrote: a person who signed into another workspace while the row was being handed back
+keeps the sign-in this launch would restore.
 
 **Reused** — `screenPath` and `address` (`src/core/derive.ts`, `src/core/reentry.ts`), which
 still spell every route and gained `rowAt` so a link arrives at the same href a screen leaves by;
