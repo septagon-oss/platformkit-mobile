@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 126,
-   "cases": 435,
-   "ms": 2970532,
-   "testsMs": 49260,
+   "files": 127,
+   "cases": 437,
+   "ms": 3011410,
+   "testsMs": 50278,
    "runners": {
-    "jest": 126
+    "jest": 127
    },
    "unreachable": 0
   },
@@ -22257,6 +22257,41 @@
    "coveredProdLines": 2728,
    "onlyProdLines": null,
    "testsMs": 1063
+  },
+  {
+   "file": "tests/screens/a-retryable-queue-read-offers-retry-and-reads-again.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A queue read that fails for a reason the person can retry (the server unavailable) keeps the deck screen open instead of taking the pass away: the refusal carries a retry, nothing is drawn as a card or claimed as the end, and a retry reads the queue again \u2014 a first page then draws its first card, and a final count that finds nothing says \"caught up\". No command is sent along the way.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 40878,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a queue read answered 503 while loading offers retry and a retry that succeeds draws the first card",
+    "a final count answered 503 offers retry and claims no end until a retry finds the queue empty"
+   ],
+   "tests": [
+    {
+     "title": "a queue read answered 503 while loading offers retry and a retry that succeeds draws the first card",
+     "ms": 951,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 503 offers retry and claims no end until a retry finds the queue empty",
+     "ms": 67,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2695,
+   "onlyProdLines": null,
+   "testsMs": 1018
   },
   {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
