@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 121,
-   "cases": 404,
-   "ms": 2808135,
-   "testsMs": 44175,
+   "files": 122,
+   "cases": 406,
+   "ms": 2851904,
+   "testsMs": 45150,
    "runners": {
-    "jest": 121
+    "jest": 122
    },
    "unreachable": 0
   },
@@ -21651,6 +21651,41 @@
    "coveredProdLines": 2190,
    "onlyProdLines": null,
    "testsMs": 872
+  },
+  {
+   "file": "tests/screens/a-refused-composed-picture-shows-the-empty-picture.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A composed picture the server refuses draws the kit's empty picture in its own row \u2014 the entry's declared icon, or neither glyph nor SVG when it declares none \u2014 while a peer row's SVG renders.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 43769,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a refused composed picture draws the entry's declared icon in its row while the peer's SVG renders",
+    "a refused composed picture of an entry with no declared icon draws neither a glyph nor an SVG in its row"
+   ],
+   "tests": [
+    {
+     "title": "a refused composed picture draws the entry's declared icon in its row while the peer's SVG renders",
+     "ms": 885,
+     "measured": false
+    },
+    {
+     "title": "a refused composed picture of an entry with no declared icon draws neither a glyph nor an SVG in its row",
+     "ms": 90,
+     "measured": false
+    }
+   ],
+   "loaded": 166,
+   "coveredProdLines": 2861,
+   "onlyProdLines": null,
+   "testsMs": 975
   },
   {
    "file": "tests/screens/a-refused-cover-still-names-its-record.test.tsx",

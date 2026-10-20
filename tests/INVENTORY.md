@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `dd34c2474` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `99ce59eed` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 257 | 1217 | 69.1 s | 2102 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 121 | 404 | 44.2 s | 2808 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 122 | 406 | 45.1 s | 2852 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 472
+* keep: 473
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 472 — 205 `tests/*.test.ts` (node), 210 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1850; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2102 s, composition 2808 s, journey 0 s
+* files inventoried: 473 — 205 `tests/*.test.ts` (node), 211 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1852; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2102 s, composition 2852 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -416,6 +416,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-record-opened-on-this-phone-is-remembered-where-it-was-opened.test.tsx | jest | composition | 3 | 28129 | 662 |  | not measured | — | 0 | keep | The junction: a record screen that got its row writes the open it just drew. The port, the table and the screen's own title rule are each tested where they liv… |
 | tests/screens/a-record-says-it-finished-when-this-phone-finished-it.test.tsx | jest | composition | 3 | 43527 | 2041 |  | not measured | — | 0 | keep | A record that reaches a state its entry calls finished, through a command the person ran on this phone, says so once: "Note done" is drawn on the record (`reco… |
 | tests/screens/a-refreshed-list-keeps-the-names-it-read.test.tsx | jest | composition | 2 | 19848 | 872 |  | not measured | — | 0 | keep | A refresh never blanks what the list already says (0085): a row's assignee keeps the name the directory answered while a refresh asks again, and keeps it when … |
+| tests/screens/a-refused-composed-picture-shows-the-empty-picture.test.tsx | jest | composition | 2 | 43769 | 975 |  | not measured | — | 0 | keep | A composed picture the server refuses draws the kit's empty picture in its own row — the entry's declared icon, or neither glyph nor SVG when it declares none … |
 | tests/screens/a-refused-cover-still-names-its-record.test.tsx | jest | composition | 2 | 22587 | 478 |  | not measured | — | 0 | keep | A record whose cover file the server refuses to describe still opens on its cover: the picture door is composed and the session can read with it, so the native… |
 | tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx | jest | composition | 4 | 20219 | 22 |  | not measured | — | 0 | keep | (no first comment; first test title) HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false |
 | tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx | jest | composition | 4 | 17242 | 39 |  | not measured | — | 0 | keep | An explicit refusal settles its picture independently of unrelated pending metadata reads. |
