@@ -19,7 +19,7 @@
 //   from, and an app link is claimed for it at build time, not read back out of the path.
 
 import { screenPath } from "./derive";
-import { rowAt } from "./reentry";
+import { rowAt, type RecordAddress } from "./reentry";
 
 /** The surface every in-app address sits under: the kernel's `httpx.AppRoot`. */
 export const APP_ROOT = "app";
@@ -44,6 +44,16 @@ export type LinkRefusal = "none" | "foreign" | "shape";
 
 /** Reading is one link's whole answer: where it points, or why it points nowhere. */
 export type Reading = { readonly arrival: Arrival } | { readonly refusal: LinkRefusal };
+
+/**
+ * ArrivalHref is a link's destination in the shape the router accepts it: the start of the app,
+ * one resource's list, or one record. Written from the two shapes the kit already spells a route
+ * in, rather than imported from the router, because the core names no SDK. It buys what
+ * `RecordAddress` buys: a hand-off to `router.replace` is checked against the route declarations
+ * the app's own startup generates, so an address this rule spells is a route the router answers
+ * rather than a string waved through.
+ */
+export type ArrivalHref = "/" | ReturnType<typeof screenPath> | RecordAddress;
 
 /** SCHEMES_ARE_HTTP are the spellings whose host carries the address and whose path is the address. */
 const HTTP = new Set(["https", "http"]);
@@ -150,7 +160,7 @@ export function read(url: string | null | undefined, schemes: readonly string[])
 export function systemHref(
   url: string | null | undefined,
   schemes: readonly string[],
-): string | undefined {
+): ArrivalHref | undefined {
   const reading = read(url, schemes);
   if ("refusal" in reading) return reading.refusal === "shape" ? "/" : undefined;
   const at = reading.arrival;
