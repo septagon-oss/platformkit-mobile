@@ -138,9 +138,10 @@ export function read(url: string | null | undefined, schemes: readonly string[])
  * which is the whole answer for a link in an e-mail, a link from another app and the address
  * a notification carries.
  *
- * It answers `undefined` — leave the link exactly where it was — for a launch that carried no
- * link and for a scheme this build does not declare, because that link is another app's
- * business. Anything else lands somewhere real: an address shape this app does not have
+ * It answers `undefined` — this rule has nothing to say — for a launch that carried no link and
+ * for a scheme this build does not declare, because that link is another app's business. The
+ * door the platform knocks on (`app/+native-intent.tsx`) turns that answer into the link itself,
+ * which is what the router routes when the answer is a string. Anything else lands somewhere real: an address shape this app does not have
  * opens the start of the app, since a path with no route file under it draws the router's
  * own not-found page — a second visual language for "you cannot get there" that names
  * nothing. Whether a record at a well-shaped address may be read is not asked here; the
