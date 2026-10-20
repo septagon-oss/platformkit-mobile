@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 128,
-   "cases": 428,
-   "ms": 2961649,
-   "testsMs": 46164,
+   "files": 129,
+   "cases": 430,
+   "ms": 2996947,
+   "testsMs": 46948,
    "runners": {
-    "jest": 128
+    "jest": 129
    },
    "unreachable": 0
   },
@@ -22374,6 +22374,26 @@
    "testsMs": 484
   },
   {
+   "file": "tests/screens/a-sign-out-awaits-a-registration-without-holding-the-key-it-forgets.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "A registration still on the wire is a second answer a sign-out waits for, and it holds the forgetting no better than a removal does: the saved key is put away before either is asked about, so a phone signed out and closed while a registration is away opens signed out for whoever picks it up. The row that registration is writing is still given back \u2014 it is this session's own, and only this session's key reaches it \u2014 and it is asked for before the key is stopped. Held against the real shell, the real transport and the real push bridge, with one server whose answer to the registration the test releases.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-awaits-a-registration-without-holding-the-key-it-forgets.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/screens/a-sign-out-during-a-registration-takes-that-row-back.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -22406,7 +22426,7 @@
    "file": "tests/screens/a-sign-out-forgets-the-saved-key-before-its-device-answer.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 2,
    "rule": "Signing out forgets the saved key on the phone without waiting for the server: that is the half that works offline, and on a phone somebody is about to pick up. Taking the phone's device row back is a request like any other, and a slow answer to it must not leave the key in storage, where the next launch would open the person's session for whoever holds the phone. Held against the real shell, the real transport and the real push bridge, with one server whose answer to the device removal the test releases.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -22414,13 +22434,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-forgets-the-saved-key-before-its-device-answer.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 35298,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out forgets the saved key while its device row is still being taken back",
+    "a phone relaunched while sign-out waits for its device answer opens signed out"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out forgets the saved key while its device row is still being taken back",
+     "ms": 749,
+     "measured": false
+    },
+    {
+     "title": "a phone relaunched while sign-out waits for its device answer opens signed out",
+     "ms": 35,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2778,
+   "onlyProdLines": null,
+   "testsMs": 784
   },
   {
    "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
