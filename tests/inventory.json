@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 261,
-   "cases": 1250,
-   "ms": 2284007,
-   "testsMs": 78808.39999999997,
+   "files": 262,
+   "cases": 1251,
+   "ms": 2284708,
+   "testsMs": 78810.39999999997,
    "runners": {
     "jest": 91,
-    "node": 170
+    "node": 171
    },
    "unreachable": 0
   },
@@ -9730,6 +9730,35 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-closed-deck-pass-never-reuses-its-operation-numbers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A pass the deck closes after a held or unknown choice never hands its operation numbers to the next pass. The screen remembers what it already asked to confirm and already sent by number alone, so a restarted pass that reused one would skip its confirmation or swallow its command.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 701,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a pass restarted after a held or unknown choice uses operation numbers the closed pass never issued"
+   ],
+   "tests": [
+    {
+     "title": "a pass restarted after a held or unknown choice uses operation numbers the closed pass never issued",
+     "ms": 1.987116,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 5172,
+   "onlyProdLines": null,
+   "testsMs": 2
   },
   {
    "file": "tests/a-command-says-what-it-runs-on-and-what-it-does.test.ts",
