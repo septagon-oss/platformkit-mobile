@@ -2379,12 +2379,14 @@ same scope: a workspace that answered no to this phone's address is not asked ag
 session, and a no that answers late is still the ended session's, never a reason for the
 workspace signing in now to keep silent. And because the server keys a device on tenant,
 platform, token and recipient, a newer sign-in that reuses an older session's token holds
-*that* row: the live session is the one that may give it back, so a sign-out whose answer came
-late leaves the address the person at the phone is signed in with untouched. A server that will
+*that* row from the moment its ask lands, whichever answer reaches the phone first: the live
+session is the one that may give it back, so an older sign-out — whether its own answer came
+home first or last — leaves the address the person at the phone is signed in with untouched, and
+asks for a row of its own only behind an ask for that same address. A server that will
 not carry this device, a phone with no push service and a person who says not now all
 leave the session standing and say one sentence. Sign-out asks for the row back *before*
-it spends the key, waiting for a registration still on the wire, because only that key
-reaches the row, and it says so when the ask did not answer — while the key may still be
+it spends the key, waiting for a registration of that address still on the wire, because only
+that key reaches the row, and it says so when the ask did not answer — while the key may still be
 live, the key is what is said. The key it forgets here is only the record that sign-in
 wrote: a person who signed into another workspace while the row was being handed back
 keeps the sign-in this launch would restore. No asking holds that forgetting — the record
