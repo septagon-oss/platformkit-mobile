@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 125,
-   "cases": 427,
-   "ms": 2940408,
-   "testsMs": 48428,
+   "files": 126,
+   "cases": 435,
+   "ms": 2970532,
+   "testsMs": 49260,
    "runners": {
-    "jest": 125
+    "jest": 126
    },
    "unreachable": 0
   },
@@ -22562,6 +22562,77 @@
    "coveredProdLines": 1669,
    "onlyProdLines": null,
    "testsMs": 38
+  },
+  {
+   "file": "tests/screens/a-withdrawn-queue-read-draws-no-card-and-sends-nothing.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 8,
+   "rule": "A queue read the server withdraws (signed out, off the plan, no access, gone) leaves the deck screen holding nothing it read: no card, no progress, no end counts and no retry \u2014 only the refusal and the way back \u2014 whether the read failed while loading or while checking for more.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30124,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a queue read answered 401 while loading draws no card and offers only the way back",
+    "a queue read answered 402 while loading draws no card and offers only the way back",
+    "a queue read answered 403 while loading draws no card and offers only the way back",
+    "a queue read answered 404 while loading draws no card and offers only the way back",
+    "a final count answered 401 takes away the pass it held and claims no end",
+    "a final count answered 402 takes away the pass it held and claims no end",
+    "a final count answered 403 takes away the pass it held and claims no end",
+    "a final count answered 404 takes away the pass it held and claims no end"
+   ],
+   "tests": [
+    {
+     "title": "a queue read answered 401 while loading draws no card and offers only the way back",
+     "ms": 30,
+     "measured": false
+    },
+    {
+     "title": "a queue read answered 402 while loading draws no card and offers only the way back",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "a queue read answered 403 while loading draws no card and offers only the way back",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a queue read answered 404 while loading draws no card and offers only the way back",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 401 takes away the pass it held and claims no end",
+     "ms": 607,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 402 takes away the pass it held and claims no end",
+     "ms": 56,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 403 takes away the pass it held and claims no end",
+     "ms": 50,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 404 takes away the pass it held and claims no end",
+     "ms": 52,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2676,
+   "onlyProdLines": null,
+   "testsMs": 832
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",
