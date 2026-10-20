@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 263,
+   "files": 264,
    "cases": 1236,
    "ms": 2177070,
    "testsMs": 69715.40000000001,
    "runners": {
     "jest": 92,
-    "node": 171
+    "node": 172
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 130,
-   "cases": 432,
-   "ms": 3024542,
-   "testsMs": 47253,
+   "files": 132,
+   "cases": 433,
+   "ms": 3050598,
+   "testsMs": 47380,
    "runners": {
-    "jest": 130
+    "jest": 132
    },
    "unreachable": 0
   },
@@ -10977,6 +10977,26 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": null,
+   "rule": "The notification tap compiles against the same route declarations Expo generates when this app starts. The check is scoped to the handler, independent of other screen errors.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/a-person-reads-one-colour-wherever-they-appear.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -21543,6 +21563,26 @@
    "testsMs": 18
   },
   {
+   "file": "tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "A registration refusal from an ended session cannot decide whether the next workspace registers this phone. Each completed sign-in must read its own platform and server answers.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -21623,6 +21663,26 @@
    "coveredProdLines": 1711,
    "onlyProdLines": null,
    "testsMs": 168
+  },
+  {
+   "file": "tests/screens/a-new-sign-in-keeps-the-device-row-the-server-reuses.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "The server reuses a device row for the same tenant, platform, token and person. An older sign-out cannot remove the address a newer completed sign-in now holds on that same host.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-new-sign-in-keeps-the-device-row-the-server-reuses.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-phone-is-addressable-when-the-person-says-so.test.tsx",
@@ -22476,7 +22536,7 @@
    "file": "tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "Signing out has two halves, and a phone whose own secure storage refuses to clear has a fact of its own to report \u2014 before anything the server may owe about the key, because it is a fact about the phone. The asking still goes on regardless: taking the key's device row back and stopping the key are the server's half, and a full local slot does not make them somebody else's problem. Held against the real shell and the real transport, with storage that writes a record carrying no key no longer.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -22484,13 +22544,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 26056,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out whose storage will not clear says so, and still asks the server its half"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out whose storage will not clear says so, and still asks the server its half",
+     "ms": 127,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2705,
+   "onlyProdLines": null,
+   "testsMs": 127
   },
   {
    "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
