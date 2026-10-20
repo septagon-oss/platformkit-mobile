@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `2fb093c54` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `6ac887e35` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 264 | 1237 | 83.2 s | 2195 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 134 | 436 | 47.7 s | 3134 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 135 | 438 | 48.0 s | 3210 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 58 | 50 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 493
+* keep: 494
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 493 — 209 `tests/*.test.ts` (node), 226 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1902; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2195 s, composition 3134 s, journey 0 s
+* files inventoried: 494 — 209 `tests/*.test.ts` (node), 227 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1904; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2195 s, composition 3210 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -432,7 +432,8 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx | jest | composition | 4 | 20219 | 22 |  | not measured | — | 0 | keep | (no first comment; first test title) HTTP 403 withdraws a person's name and portrait despite a pending peer and superseding refresh: false |
 | tests/screens/a-refused-picture-withdraws-before-other-reads-finish.test.tsx | jest | composition | 4 | 17242 | 39 |  | not measured | — | 0 | keep | An explicit refusal settles its picture independently of unrelated pending metadata reads. |
 | tests/screens/a-replaced-row-picture-starts-with-its-own-state.test.tsx | jest | composition | 1 | 18050 | 27 |  | not measured | — | 0 | keep | Replacing one row's picture starts a new load even while another row keeps the old file. |
-| tests/screens/a-reused-device-row-survives-answers-arriving-in-order.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | The server reuses a device row for the same tenant, platform, token and person. When an older sign-out's registration and a newer same-person sign-in's registr… |
+| tests/screens/a-reused-device-row-survives-a-third-sign-in.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | A device row belongs to the person currently signed in even when two earlier sign-outs are waiting for registrations of that same address. Answers arriving in … |
+| tests/screens/a-reused-device-row-survives-answers-arriving-in-order.test.tsx | jest | composition | 1 | 39020 | 133 |  | not measured | — | 0 | keep | The server reuses a device row for the same tenant, platform, token and person. When an older sign-out's registration and a newer same-person sign-in's registr… |
 | tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx | jest | composition | 3 | 22148 | 1215 |  | not measured | — | 0 | keep | A rich text figure names a file, not a picture: the body points at `file/files`, that row's own measurements reserve the box, and the bytes are asked for at th… |
 | tests/screens/a-richtext-form-offers-formatting-and-images.test.tsx | jest | composition | 1 | 21217 | 34 |  | not measured | — | 0 | keep | An editable richtext field offers the shared keyboard formatting toolbar and image insertion. Opening the form alone does not issue a write or an upload. |
 | tests/screens/a-richtext-image-can-recover-after-a-failed-read.test.tsx | jest | composition | 1 | 23646 | 85 |  | not measured | — | 0 | keep | A figure's native load completion removes its placeholder. A failed byte read offers retry, and the retry makes a fresh request whose successful load restores … |
@@ -440,7 +441,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-sign-out-awaits-a-registration-without-holding-the-key-it-forgets.test.tsx | jest | composition | 2 | 27595 | 305 |  | not measured | — | 0 | keep | A registration still on the wire is a second answer a sign-out waits for, and it holds the forgetting no better than a removal does: the saved key is put away … |
 | tests/screens/a-sign-out-during-a-registration-takes-that-row-back.test.tsx | jest | composition | 1 | 18987 | 99 |  | not measured | — | 0 | keep | A sign-out takes back every row the session it ends registered, including the one whose registration was still on the wire when the person pressed sign out. Th… |
 | tests/screens/a-sign-out-forgets-the-saved-key-before-its-device-answer.test.tsx | jest | composition | 2 | 35298 | 784 |  | not measured | — | 0 | keep | Signing out forgets the saved key on the phone without waiting for the server: that is the half that works offline, and on a phone somebody is about to pick up… |
-| tests/screens/a-sign-out-takes-its-own-row-while-another-address-is-being-handed.test.tsx | jest | composition |  |  |  |  | not measured | — | 0 | keep | The server keys a device row on the token it was handed, so a registration for another address can never be answered with the row an ending session holds. That… |
+| tests/screens/a-sign-out-takes-its-own-row-while-another-address-is-being-handed.test.tsx | jest | composition | 1 | 36985 | 232 |  | not measured | — | 0 | keep | The server keys a device row on the token it was handed, so a registration for another address can never be answered with the row an ending session holds. That… |
 | tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx | jest | composition | 1 | 26056 | 127 |  | not measured | — | 0 | keep | Signing out has two halves, and a phone whose own secure storage refuses to clear has a fact of its own to report — before anything the server may owe about th… |
 | tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx | jest | composition | 1 | 23943 | 104 |  | not measured | — | 0 | keep | A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write. |
 | tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx | jest | composition | 9 | 27340 | 106 |  | not measured | — | 0 | keep | What a release at the end of a row's swipe does: the command the entry named runs through the one submit every other door uses, and is asked first wherever the… |

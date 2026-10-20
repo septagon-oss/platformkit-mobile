@@ -2382,7 +2382,11 @@ platform, token and recipient, a newer sign-in that reuses an older session's to
 *that* row from the moment its ask lands, whichever answer reaches the phone first: the live
 session is the one that may give it back, so an older sign-out — whether its own answer came
 home first or last — leaves the address the person at the phone is signed in with untouched, and
-asks for a row of its own only behind an ask for that same address. A server that will
+asks for a row of its own only behind an ask for that same address. The registration's answer
+hands responsibility for cleanup to that connection even if it signs out before the answer
+arrives: its own sign-out removes the row or hands it to the next registering connection.
+Each sign-out waits for its own registration and at most one matching address already being
+registered, without chasing later sign-ins. A server that will
 not carry this device, a phone with no push service and a person who says not now all
 leave the session standing and say one sentence. Sign-out asks for the row back *before*
 it spends the key, waiting for a registration of that address still on the wire, because only

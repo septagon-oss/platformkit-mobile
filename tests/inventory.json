@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 134,
-   "cases": 436,
-   "ms": 3133996,
-   "testsMs": 47674,
+   "files": 135,
+   "cases": 438,
+   "ms": 3210001,
+   "testsMs": 48039,
    "runners": {
-    "jest": 134
+    "jest": 135
    },
    "unreachable": 0
   },
@@ -22339,11 +22339,11 @@
    "testsMs": 27
   },
   {
-   "file": "tests/screens/a-reused-device-row-survives-answers-arriving-in-order.test.tsx",
+   "file": "tests/screens/a-reused-device-row-survives-a-third-sign-in.test.tsx",
    "runner": "jest",
    "layer": "composition",
    "cases": null,
-   "rule": "The server reuses a device row for the same tenant, platform, token and person. When an older sign-out's registration and a newer same-person sign-in's registration both answer late, in the order they were sent, the older sign-out still cannot take away the row the newer one now holds.",
+   "rule": "A device row belongs to the person currently signed in even when two earlier sign-outs are waiting for registrations of that same address. Answers arriving in request order cannot withdraw the row the third sign-in has already registered on the server.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
@@ -22351,12 +22351,41 @@
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
    "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-reused-device-row-survives-answers-arriving-in-order.test.tsx fills wall time, cases and titles from one run of this file",
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-reused-device-row-survives-a-third-sign-in.test.tsx fills wall time, cases and titles from one run of this file",
    "titles": [],
    "tests": [],
    "loaded": null,
    "coveredProdLines": null,
    "onlyProdLines": null
+  },
+  {
+   "file": "tests/screens/a-reused-device-row-survives-answers-arriving-in-order.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "The server reuses a device row for the same tenant, platform, token and person. When an older sign-out's registration and a newer same-person sign-in's registration both answer late, in the order they were sent, the older sign-out still cannot take away the row the newer one now holds.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 39020,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out whose registration answers first leaves the same person's newer address registered"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out whose registration answers first leaves the same person's newer address registered",
+     "ms": 133,
+     "measured": false
+    }
+   ],
+   "loaded": 165,
+   "coveredProdLines": 2664,
+   "onlyProdLines": null,
+   "testsMs": 133
   },
   {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
@@ -22589,7 +22618,7 @@
    "file": "tests/screens/a-sign-out-takes-its-own-row-while-another-address-is-being-handed.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "The server keys a device row on the token it was handed, so a registration for another address can never be answered with the row an ending session holds. That sign-out waits for the live session's ask for *this* address, and for nothing else: the key which reaches its own row is being spent behind the asking, and a pass over another address cannot change what it holds.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -22597,13 +22626,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-takes-its-own-row-while-another-address-is-being-handed.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 36985,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out asks for its own row back while the live session is handed another address"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out asks for its own row back while the live session is handed another address",
+     "ms": 232,
+     "measured": false
+    }
+   ],
+   "loaded": 165,
+   "coveredProdLines": 2683,
+   "onlyProdLines": null,
+   "testsMs": 232
   },
   {
    "file": "tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx",
