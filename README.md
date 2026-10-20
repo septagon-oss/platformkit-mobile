@@ -2336,6 +2336,63 @@ rest of the device store is read with, which is the statement and not the device
 bounds are what an in-memory SQLite agrees to, and a real phone's WAL is unexercised here, as are
 the two changed flows, which belong to `make e2e-android`.
 
+## Opened by a link, and reached by a notification
+
+A link in an e-mail, a link another app opens, and the address a notification carries are one
+question — *where does this person want to be* — and this phone answers it once, in
+`src/core/arrival.ts`. The surface is the kernel's own: `app`, the root its generated shell is
+mounted on, then the two words of a resource, then at most one record. `platformkit://app/note/notes/7`
+and `https://platformkit.example/app/note/notes/7` answer the same href, because the host is
+where the person signed in and says nothing about the address; a query, a fragment and a port
+say nothing either. A link that does not open on that surface is left where it is — the router
+has always routed what it was given, and the gallery and the command journeys depend on it —
+and a link that opens on it and breaks its shape opens the start of the app, which is a real
+place, rather than the router's own not-found page, which names nothing. Arrival is not
+authorisation: a record link lands on the record's screen, which asks the server and draws the
+kit's refusal when the answer is no.
+
+Android routes an HTTPS link to the app only when the host says it may, so the manifest claims
+one host and no other: the one the build already connects to, through `EXPO_PUBLIC_API_URL`,
+over HTTPS, with `autoVerify`. A build that names no server — every development checkout, and
+the emulator's `adb reverse` — carries the private scheme alone. Serving `/.well-known/assetlinks.json`
+per tenant host, with this binary's signing fingerprint, is the kernel's to serve and is filed
+as its own brief: the phone can claim a host, not vouch for it. iOS is untouched here.
+
+Notifications arrive through `expo-notifications` behind one bridge (`src/screens/push.ts`) that
+the composition root hands the shell beside the store, the mint and the network listener. The
+session owns the address: after a completed sign-in it names the Android channel, reads what the
+platform already recorded, and registers the Expo token through the devices door with the key
+that just signed in — never the prompt unprompted, which is a person's own answer to a sentence
+on this phone (`push.turnOn`), spent once per sign-in either way. A token is memory-only, like
+the key that reaches it. A server that will not carry this device, a phone with no push service
+and a person who says not now all leave the session standing and say one sentence. Sign-out asks
+for the row back *before* it spends the key, because only that key reaches the row, and it says
+so when the ask did not answer — while the key may still be live, the key is what is said.
+
+**Reused** — `screenPath` and `address` (`src/core/derive.ts`, `src/core/reentry.ts`), which
+still spell every route and gained `rowAt` so a link arrives at the same href a screen leaves by;
+`ResourceRoute`'s catalogue-miss `Notice` and the `access` row of the failure grid, which are the
+refusal a link lands on; the generated operations for the devices door, reached through the pin
+this delivery moved and not through a hand-written request; `Notice`'s `action`/`secondary` pair;
+`Announcement`'s mount beside the navigator; `src/screens/native-reach.ts`'s bridge shape; the
+copy table, `kitEnglish` and `kitPortuguese` together; and `e2e/flows/detail.yaml`'s ids, which
+`deep-link.yaml` reuses rather than inventing.
+**Added** — `src/core/arrival.ts`, because nothing in this repository could read a URL back
+(the only reader of a path was the router itself) and a link parser that re-spelled routes would
+be a second implementation of the address rule; `app/+native-intent.tsx`, which is expo-router
+57's only hook for a system URL and is one line of delegation; `app.config.ts`'s `intentFilters`,
+because a verified link is build input and there was none; `src/screens/push.ts`, because no push
+client existed and `src/effects/**` may not name one; and the shell's push lifecycle, because the
+session is the only thing an address is scoped to.
+**Made reusable** — `rowAt`, the one spelling of a record's route, which every caller of
+`address("detail", …)` already used without naming it; `systemHref` exported from
+`src/route.tsx`, so a link, a notification tap and any later arrival share one reading;
+`PushBridge`, four questions with no decisions in them, which a web host or a product with its
+own push client can answer instead; `tests/fakes/push.ts`, which lets any later suite set the
+platform's answers rather than mock the library; and `scripts/check_flows.ts`'s exemption of
+`+`-prefixed files, so a router configuration file is never asked for a journey that cannot land
+on it.
+
 ## Read the first journey end to end
 
 A tenant's first screenful is a list of records, one record, and the command
