@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 261,
-   "cases": 1230,
-   "ms": 2107755,
-   "testsMs": 69147.40000000001,
+   "cases": 1232,
+   "ms": 2133632,
+   "testsMs": 69152.40000000001,
    "runners": {
     "jest": 90,
     "node": 171
@@ -297,9 +297,9 @@
   },
   "composition": {
    "files": 127,
-   "cases": 425,
-   "ms": 2902273,
-   "testsMs": 45477,
+   "cases": 428,
+   "ms": 2961649,
+   "testsMs": 46164,
    "runners": {
     "jest": 127
    },
@@ -3387,7 +3387,7 @@
    "file": "tests/a-link-the-arrival-rule-does-not-read-reaches-the-router.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 2,
    "rule": "A link the arrival rule does not read reaches the router as it arrived. expo-router hands every URL the platform opened the app with to `redirectSystemPath` and routes what it returns: on a warm start it calls its listener only `if (href)`, and on a cold start the returned value *is* the initial URL. So \"leave the link alone\" is spelled by returning it, and an answer of nothing drops the link \u2014 the gallery and the command journeys open `platformkit://` links that are not under the workspace's surface.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -3395,13 +3395,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-link-the-arrival-rule-does-not-read-reaches-the-router.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 25877,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a link to the workspace's surface still opens the record it names",
+    "a scheme link outside the workspace's surface reaches the router, warm or cold"
+   ],
+   "tests": [
+    {
+     "title": "a link to the workspace's surface still opens the record it names",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a scheme link outside the workspace's surface reaches the router, warm or cold",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 188,
+   "coveredProdLines": 2232,
+   "onlyProdLines": null,
+   "testsMs": 5
   },
   {
    "file": "tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx",
@@ -21327,7 +21342,7 @@
    "file": "tests/screens/a-device-is-registered-with-the-credential-its-door-answers-to.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A device is registered, and taken back, with the credential its door answers to. The pinned API document says which one each door takes (`x-platformkit-auth`): a `signed_in` door answers only to the holder, and the kernel refuses it to a credential that carries its own scope (kit/httpx/authorize.go: \"this credential carries its own scope, and this operation answers only to its holder\") \u2014 which every key this phone mints does. The server below enforces the declared kind on every door, so the phone's sign-in itself is held to the same rule.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -21335,13 +21350,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-device-is-registered-with-the-credential-its-door-answers-to.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 20870,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the devices doors let this phone's registration and its removal through"
+   ],
+   "tests": [
+    {
+     "title": "the devices doors let this phone's registration and its removal through",
+     "ms": 104,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2756,
+   "onlyProdLines": null,
+   "testsMs": 104
   },
   {
    "file": "tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx",
@@ -22254,7 +22278,7 @@
    "file": "tests/screens/a-sign-in-after-an-expired-session-registers-its-own-device.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A device row belongs to the sign-in that registered it. When that session ends without a sign-out \u2014 the server stops recognising the key \u2014 the next sign-in, at another workspace or as another person, is a new owner of this phone's address: it registers the token with its own server, and its sign-out asks that server for that server's row. Held against the real shell, the real transport and the real push bridge, with two servers answered by the test.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -22262,19 +22286,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-in-after-an-expired-session-registers-its-own-device.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 19519,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-in after a session the server ended registers this phone with its own server"
+   ],
+   "tests": [
+    {
+     "title": "a sign-in after a session the server ended registers this phone with its own server",
+     "ms": 484,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2781,
+   "onlyProdLines": null,
+   "testsMs": 484
   },
   {
    "file": "tests/screens/a-sign-out-during-a-registration-takes-that-row-back.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "A sign-out takes back every row the session it ends registered, including the one whose registration was still on the wire when the person pressed sign out. The server writes that row whether or not the phone is still listening, and only the key being signed out can reach it, so it is asked back before that key is spent. Held against the real shell, the real transport and the real push bridge, with one server whose register answer the test releases.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -22282,13 +22315,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-during-a-registration-takes-that-row-back.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 18987,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out pressed while the registration is on the wire still takes that row back"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out pressed while the registration is on the wire still takes that row back",
+     "ms": 99,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2756,
+   "onlyProdLines": null,
+   "testsMs": 99
   },
   {
    "file": "tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx",
