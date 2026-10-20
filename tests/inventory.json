@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 262,
-   "cases": 1251,
-   "ms": 2284708,
-   "testsMs": 78810.39999999997,
+   "files": 263,
+   "cases": 1252,
+   "ms": 2286591,
+   "testsMs": 78813.09999999996,
    "runners": {
     "jest": 91,
-    "node": 171
+    "node": 172
    },
    "unreachable": 0
   },
@@ -11457,6 +11457,35 @@
    "coveredProdLines": 8595,
    "onlyProdLines": null,
    "testsMs": 10.7
+  },
+  {
+   "file": "tests/a-withdrawn-deck-keeps-no-row-and-takes-no-input.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A deck whose read is withdrawn (no access, gone, signed out, off the plan) shows none of the rows it held and takes no further input: no choice, page, answer, refresh, retry or resume reopens it, whether the read failed while the pass was loading or while it was checking for more.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1883,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a deck whose read is withdrawn holds none of its rows and ignores every later input"
+   ],
+   "tests": [
+    {
+     "title": "a deck whose read is withdrawn holds none of its rows and ignores every later input",
+     "ms": 2.715764,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 5183,
+   "onlyProdLines": null,
+   "testsMs": 2.7
   },
   {
    "file": "tests/activity-actor-snapshot.test.ts",

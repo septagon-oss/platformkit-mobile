@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `7b8ac52ff` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `702eb2e74` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 262 | 1251 | 78.8 s | 2285 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 263 | 1252 | 78.8 s | 2287 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 125 | 427 | 48.4 s | 2940 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 58 | 50 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 482
+* keep: 483
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 482 — 208 `tests/*.test.ts` (node), 216 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1907; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2285 s, composition 2940 s, journey 0 s
+* files inventoried: 483 — 209 `tests/*.test.ts` (node), 216 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1908; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2287 s, composition 2940 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -248,6 +248,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-small-picture-uses-its-stored-frame.test.ts | node | behaviour | 2 | 1918 | 2.8 |  | not measured | — | 0 | keep | (no first comment; first test title) a 256px picture uses the original when no smaller declared variant exists |
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
 | tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts | node | behaviour | 2 | 1007 | 10.7 |  | not measured | — | 0 | keep | A whole-row replace carries what nobody typed exactly as the read returned it. The body builder is `writeControls`, and two of its promises have no case of the… |
+| tests/a-withdrawn-deck-keeps-no-row-and-takes-no-input.test.ts | node | behaviour | 1 | 1883 | 2.7 |  | not measured | — | 0 | keep | A deck whose read is withdrawn (no access, gone, signed out, off the plan) shows none of the rows it held and takes no further input: no choice, page, answer, … |
 | tests/activity-actor-snapshot.test.ts | node | behaviour | 2 | 748 | 15.5 | 0 | 0 of 2 | — | 0 | keep | An activity row may name its actor only from the directory snapshot read with it. Once that snapshot is withdrawn the row says a name is unavailable — never th… |
 | tests/activity-audit-snapshot.test.ts | node | behaviour | 2 | 799 | 15.9 | 1 | 0 of 2 | — | 0 | keep | An audit trail answers redaction and denial differently: a redacted change keeps its row and loses its value, a denied trail loses the row, the private value a… |
 | tests/activity-denial-precedes-validation.test.ts | node | behaviour | 1 | 770 | 9.6 | 0 | 0 of 1 | — | 0 | keep | A denied activity read withdraws even malformed cached events and pending pagination. Clearing the denial restores validation, not permission to display an inv… |
