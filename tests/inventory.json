@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 264,
-   "cases": 1236,
-   "ms": 2177070,
-   "testsMs": 69715.40000000001,
+   "cases": 1237,
+   "ms": 2194675,
+   "testsMs": 83245.29999999993,
    "runners": {
     "jest": 92,
     "node": 172
@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 132,
-   "cases": 433,
-   "ms": 3050598,
-   "testsMs": 47380,
+   "files": 134,
+   "cases": 436,
+   "ms": 3133996,
+   "testsMs": 47674,
    "runners": {
-    "jest": 132
+    "jest": 134
    },
    "unreachable": 0
   },
@@ -10980,7 +10980,7 @@
    "file": "tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": null,
+   "cases": 1,
    "rule": "The notification tap compiles against the same route declarations Expo generates when this app starts. The check is scoped to the handler, independent of other screen errors.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
@@ -10988,13 +10988,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 17605,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a notification tap accepts the router types generated from the app's route files"
+   ],
+   "tests": [
+    {
+     "title": "a notification tap accepts the router types generated from the app's route files",
+     "ms": 13529.948494,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 13529.9
   },
   {
    "file": "tests/a-person-reads-one-colour-wherever-they-appear.test.ts",
@@ -21566,7 +21575,7 @@
    "file": "tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 2,
    "rule": "A registration refusal from an ended session cannot decide whether the next workspace registers this phone. Each completed sign-in must read its own platform and server answers.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -21574,13 +21583,28 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 52235,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a registration refusal arriving before the next sign-in cannot suppress its notification pass",
+    "a registration refusal arriving during the next sign-in cannot suppress its notification pass"
+   ],
+   "tests": [
+    {
+     "title": "a registration refusal arriving before the next sign-in cannot suppress its notification pass",
+     "ms": 144,
+     "measured": false
+    },
+    {
+     "title": "a registration refusal arriving during the next sign-in cannot suppress its notification pass",
+     "ms": 17,
+     "measured": false
+    }
+   ],
+   "loaded": 165,
+   "coveredProdLines": 2659,
+   "onlyProdLines": null,
+   "testsMs": 161
   },
   {
    "file": "tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx",
@@ -21668,7 +21692,7 @@
    "file": "tests/screens/a-new-sign-in-keeps-the-device-row-the-server-reuses.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": null,
+   "cases": 1,
    "rule": "The server reuses a device row for the same tenant, platform, token and person. An older sign-out cannot remove the address a newer completed sign-in now holds on that same host.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -21676,13 +21700,22 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": null,
-   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-new-sign-in-keeps-the-device-row-the-server-reuses.test.tsx fills wall time, cases and titles from one run of this file",
-   "titles": [],
-   "tests": [],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "ms": 31163,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sign-out awaiting registration leaves the same person's newer address registered"
+   ],
+   "tests": [
+    {
+     "title": "a sign-out awaiting registration leaves the same person's newer address registered",
+     "ms": 133,
+     "measured": false
+    }
+   ],
+   "loaded": 165,
+   "coveredProdLines": 2660,
+   "onlyProdLines": null,
+   "testsMs": 133
   },
   {
    "file": "tests/screens/a-phone-is-addressable-when-the-person-says-so.test.tsx",
@@ -22306,6 +22339,26 @@
    "testsMs": 27
   },
   {
+   "file": "tests/screens/a-reused-device-row-survives-answers-arriving-in-order.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "The server reuses a device row for the same tenant, platform, token and person. When an older sign-out's registration and a newer same-person sign-in's registration both answer late, in the order they were sent, the older sign-out still cannot take away the row the newer one now holds.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-reused-device-row-survives-answers-arriving-in-order.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -22531,6 +22584,26 @@
    "coveredProdLines": 2778,
    "onlyProdLines": null,
    "testsMs": 784
+  },
+  {
+   "file": "tests/screens/a-sign-out-takes-its-own-row-while-another-address-is-being-handed.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": null,
+   "rule": "The server keys a device row on the token it was handed, so a registration for another address can never be answered with the row an ending session holds. That sign-out waits for the live session's ask for *this* address, and for nothing else: the key which reaches its own row is being spent behind the asking, and a pass over another address cannot change what it holds.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-sign-out-takes-its-own-row-while-another-address-is-being-handed.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [],
+   "tests": [],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx",
