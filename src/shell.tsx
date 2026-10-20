@@ -716,8 +716,18 @@ export function Shell({
 
   // Notifications. The session is what owns an address: it is registered for the person who
   // just signed in and taken back from the one who just signed out, and nothing in between
-  // decides either. The token itself is memory-only, like the key that reaches it.
-  const heldDevice = useRef<{ readonly token: string; readonly id: string } | undefined>(undefined);
+  // decides either. The token itself is memory-only, like the key that reaches it, and so is the
+  // row it became — held beside the connection that wrote it, because a row outliving the session
+  // that registered it is an address the next person on this phone would inherit.
+  const heldDevice = useRef<
+    { readonly api: Api; readonly token: string; readonly id: string } | undefined
+  >(undefined);
+  // A registration this phone has on the wire, with the connection that sent it: its answer is a
+  // row only that connection's key reaches, so a sign-out waits for it rather than spending the
+  // key first.
+  const rowOnWire = useRef<{ readonly api: Api; readonly settled: Promise<void> } | undefined>(
+    undefined,
+  );
   // Whether this person has already said "not now": the platform's own prompt is spent once
   // it is answered, so the offer this app owns is spent the same way — once per sign-in, and
   // kept in memory rather than in a table, because a dismissed offer decides no command.
@@ -745,15 +755,54 @@ export function Shell({
   );
 
   /**
-   * handBack asks the server `a` answers to for this phone's row back, and says whether it
-   * did. No row, no request: a phone that never registered has nothing to remove. The address
-   * is let go either way, because the session that could reach it is ending, and a row
-   * remembered past that point is one nobody is ever going to ask for back.
+   * handAddress gives this phone's address to the server `a` signed the person in at and holds
+   * the row that answer wrote against the connection that wrote it. It answers the new row's id,
+   * or nothing where the server wrote no row, and it throws whatever the door answered — the
+   * caller turns that into a status, never into a failed session.
+   *
+   * The ask is remembered while it is on the wire, because the row it writes belongs to this
+   * session from the moment the server has it: a sign-out pressed during it waits for this answer
+   * before it spends the only key that can reach that row.
+   */
+  const handAddress = useCallback(async (a: Api, token: string): Promise<string | undefined> => {
+    const answer = a.operations.notificationDeviceRegister({
+      body: { platform: PUSH_PLATFORM, token },
+    });
+    // The address the person has now is held before any old one is touched: a re-registration
+    // that fails must not have taken away the address that still works.
+    const written = answer.then((row) => {
+      const id = row.data?.id;
+      if (id !== undefined) heldDevice.current = { api: a, token, id };
+      return id;
+    });
+    const onWire: Promise<void> = written.then(
+      () => undefined,
+      () => undefined,
+    );
+    rowOnWire.current = { api: a, settled: onWire };
+    try {
+      return await written;
+    } finally {
+      if (rowOnWire.current?.settled === onWire) rowOnWire.current = undefined;
+    }
+  }, []);
+
+  /**
+   * handBack asks the session `a` for this phone's row back, and says whether it did. No row, no
+   * request: a phone that never registered has nothing to remove, and a registration still on the
+   * wire is waited for first, because the row it is writing is this session's own. A row another
+   * connection registered is let go unsaid — its key, or the sign-in its door answers to, ended
+   * with that connection, and no server is asked for a row that is not its tenant's. The address
+   * is let go either way, because the session that could reach it is ending, and a row remembered
+   * past that point is one nobody is ever going to ask for back.
    */
   const handBack = useCallback(async (a: Api): Promise<boolean> => {
+    const onWire = rowOnWire.current;
+    if (onWire !== undefined && onWire.api === a) await onWire.settled;
     const held = heldDevice.current;
-    heldDevice.current = undefined;
     if (held === undefined) return true;
+    heldDevice.current = undefined;
+    if (held.api !== a) return true;
     try {
       await a.operations.notificationDeviceRemove({ path: { id: held.id } });
       return true;
@@ -796,23 +845,24 @@ export function Shell({
           wearPush(still, { status: "unreachable", offer: false });
           return;
         }
+        // One phone, one address, many holders of it. The same token at the same server is one
+        // row, so there is nothing new to hand over; the same token at another server is that
+        // server's row to write, and a row left against a connection that has ended is held by
+        // nobody, so it stops nothing the next session has to do.
         const previous = heldDevice.current;
-        if (previous?.token === token) {
+        const same = previous !== undefined && previous.api === a;
+        if (same && previous?.token === token) {
           wearPush(still, { status: "registered", offer: false });
           return;
         }
-        const answer = await a.operations.notificationDeviceRegister({
-          body: { platform: PUSH_PLATFORM, token },
-        });
-        const id = answer.data?.id;
+        const id = await handAddress(a, token);
         if (id === undefined) {
           wearPush(still, { status: "unreachable", offer: false });
           return;
         }
-        // The address the person has now is held before the old one is touched: a
-        // re-registration that fails must not have taken away the address that still works.
-        heldDevice.current = { token, id };
-        if (previous !== undefined) {
+        // Only the connection that wrote a row takes it back: the row `previous` names stands on
+        // a session that has ended, and this server would be asked for somebody else's row.
+        if (same && previous !== undefined) {
           try {
             await a.operations.notificationDeviceRemove({ path: { id: previous.id } });
           } catch {
@@ -830,7 +880,7 @@ export function Shell({
         wearPush(still, { status: again ? "unreachable" : "refused", offer: false });
       }
     },
-    [push, wearPush],
+    [handAddress, push, wearPush],
   );
 
   /**
