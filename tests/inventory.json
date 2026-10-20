@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 265,
-   "cases": 1259,
-   "ms": 2292509,
-   "testsMs": 78838.29999999996,
+   "files": 266,
+   "cases": 1262,
+   "ms": 2324981,
+   "testsMs": 78866.29999999996,
    "runners": {
-    "jest": 91,
+    "jest": 92,
     "node": 174
    },
    "unreachable": 0
@@ -9483,6 +9483,47 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/the-deck-draws-its-finishing-renderer-only-under-normal-motion.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The caught-up deck hands its finishing renderer the arrived tone and the person's motion only when the derived model asks for a finish: normal motion mounts it inside the end state and its end reaches the screen's finish call; reduced motion, or a product with no renderer, draws the same still title and counts with no renderer mounted.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 32472,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "normal motion mounts the finishing renderer in the end state and its end reaches the finish call",
+    "reduced motion draws the same caught-up title and counts with no finishing renderer",
+    "a product with no finishing renderer keeps the caught-up end whole under normal motion"
+   ],
+   "tests": [
+    {
+     "title": "normal motion mounts the finishing renderer in the end state and its end reaches the finish call",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "reduced motion draws the same caught-up title and counts with no finishing renderer",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "a product with no finishing renderer keeps the caught-up end whole under normal motion",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 131,
+   "coveredProdLines": 2165,
+   "onlyProdLines": null,
+   "testsMs": 28
   },
   {
    "file": "tests/ui/the-worn-accent-keeps-every-pair-the-registry-measures.test.tsx",

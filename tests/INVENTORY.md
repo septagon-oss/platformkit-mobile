@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `39cad8958` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `d9ae5447a` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 265 | 1259 | 78.8 s | 2293 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 266 | 1262 | 78.9 s | 2325 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 128 | 439 | 51.8 s | 3065 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 58 | 50 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 488
+* keep: 489
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 488 — 211 `tests/*.test.ts` (node), 219 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1927; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2293 s, composition 3065 s, journey 0 s
+* files inventoried: 489 — 211 `tests/*.test.ts` (node), 220 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1930; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2325 s, composition 3065 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -219,6 +219,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/tag-comma-refusal.test.tsx | jest | behaviour | 4 | 18008 | 66 | 0 | 0 of 4 | — | 0 | keep | (no first comment; first test title) a tag containing a comma is refused even when splitting leaves one or no words: alpha, |
 | tests/ui/tag-correction-after-chip-removal.test.tsx | jest | behaviour | 2 | 18269 | 61 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) correcting a refused draft after removing chips preserves only intended tags with return |
 | tests/ui/tag-draft-correction.test.tsx | jest | behaviour | 1 | 18095 | 29 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) correcting a refused tag replaces the draft without storing its accepted prefix |
+| tests/ui/the-deck-draws-its-finishing-renderer-only-under-normal-motion.test.tsx | jest | behaviour | 3 | 32472 | 28 |  | not measured | — | 0 | keep | The caught-up deck hands its finishing renderer the arrived tone and the person's motion only when the derived model asks for a finish: normal motion mounts it… |
 | tests/ui/the-worn-accent-keeps-every-pair-the-registry-measures.test.tsx | jest | behaviour | 18 | 40182 | 64 |  | not measured | — | 0 | keep | The theme's promise is measured, not asserted: `contrastPairs` names every role the theme hands a component and the minimum it reaches on the surface it is dra… |
 | tests/ui/theme.test.tsx | jest | behaviour | 3 | 17888 | 39 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a client palette reaches shared components in both modes with its resolved native faces |
 | tests/ui/viewer-image-adapter.test.tsx | jest | behaviour | 3 | 19046 | 171 | 0 | 0 of 3 | — | 0 | keep | An open viewer keeps the image adapter it chose: the selected photo stays mounted while it loads, and an error or unavailable image offers recovery for that sa… |
