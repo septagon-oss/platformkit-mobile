@@ -2381,7 +2381,10 @@ it spends the key, waiting for a registration still on the wire, because only th
 reaches the row, and it says so when the ask did not answer — while the key may still be
 live, the key is what is said. The key it forgets here is only the record that sign-in
 wrote: a person who signed into another workspace while the row was being handed back
-keeps the sign-in this launch would restore.
+keeps the sign-in this launch would restore. No asking holds that forgetting — the record
+is put away before the first request leaves, so a phone signed out and then closed while
+an answer is away opens signed out for whoever picks it up, not into the session that was
+just ended.
 
 **Reused** — `screenPath` and `address` (`src/core/derive.ts`, `src/core/reentry.ts`), which
 still spell every route and gained `rowAt` so a link arrives at the same href a screen leaves by;
