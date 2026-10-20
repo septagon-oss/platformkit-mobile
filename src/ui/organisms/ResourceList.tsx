@@ -10,6 +10,7 @@ import {
   deriveFilterSheet,
   deriveListToolbar,
   deriveSortSheet,
+  deckEntry,
   rowAction,
   type Names,
   type People,
@@ -20,12 +21,16 @@ import {
 } from "../../core/derive";
 import type { ImageRenderer } from "../molecules/MediaHero";
 import { Notice } from "../atoms/Notice";
+import { Button } from "../atoms/Button";
 import { ActionBar } from "../molecules/ActionBar";
 import { ChoiceRows } from "../molecules/ChoiceRows";
 import { Actions, type Props as ActionsProps } from "./Actions";
 import { DataList, type RowActionProps } from "./DataList";
 import { DetailSheet } from "../templates/DetailSheet";
 export interface Props {
+  readonly queue?: { readonly total?: number; readonly loading: boolean; readonly error: string };
+  readonly onReview?: () => void;
+  readonly onQueueRetry?: () => void;
   readonly people?: People | undefined;
   readonly pictureStates?: PictureStates | undefined;
   readonly renderImage?: ImageRenderer | undefined;
@@ -82,6 +87,9 @@ export function ResourceList(props: Props) {
     actions,
     onRowRun,
     renderRowAction,
+    queue,
+    onReview,
+    onQueueRetry,
     ...input
   } = props;
   // Which verb a row of this list may be swiped to run, resolved once for the whole list: it is
@@ -109,6 +117,13 @@ export function ResourceList(props: Props) {
       />
     );
   const model = result.value;
+  const review = deckEntry(
+    entry,
+    queue?.total,
+    queue?.loading ?? false,
+    queue?.error ?? "",
+    presentation,
+  );
   // Nothing opens a sheet without a screen that asked for one, so the way out of a
   // sheet that is not there is the same no-op as the control that was never drawn.
   const close = () => onSheet?.("none");
@@ -151,8 +166,33 @@ export function ResourceList(props: Props) {
         testID="resource-list"
         rowTestID={(id) => `row-${id}`}
         header={
-          actions || (onSheet && toolbar.value.bar.actions.length > 0) ? (
+          review || actions || (onSheet && toolbar.value.bar.actions.length > 0) ? (
             <>
+              {review ? (
+                <>
+                  <Button
+                    label={review.label}
+                    icon="document"
+                    tone="secondary"
+                    busy={review.loading}
+                    disabled={!review.enabled}
+                    onPress={() => onReview?.()}
+                    testID="review-queue"
+                  />
+                  {review.reason ? (
+                    <Notice tone="info" text={review.reason} announcement="polite" />
+                  ) : null}
+                  {review.error ? (
+                    <Notice
+                      text={review.error}
+                      announcement="urgent"
+                      {...(onQueueRetry
+                        ? { action: { label: review.retry, onPress: onQueueRetry } }
+                        : {})}
+                    />
+                  ) : null}
+                </>
+              ) : null}
               {actions ? <Actions {...actions} /> : null}
               {/* The list's two doors sit under its header, not in it: the header says
                   what the screen is, this row says how it is being read. */}

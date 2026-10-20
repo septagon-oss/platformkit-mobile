@@ -290,6 +290,22 @@ export type CreateBody = {
   url: string;
 };
 
+export type DeckDirectionPresentation = {
+  command?: string;
+  icon?: string;
+  label?: string;
+  skip?: boolean;
+  tone?: string;
+};
+
+export type DeckPresentation = {
+  directions: {
+    [key: string]: DeckDirectionPresentation;
+  };
+  order: string;
+  queue?: Array<string> | null;
+};
+
 export type Delete = {
   /**
    * A URL to the JSON Schema for this object.
@@ -485,6 +501,7 @@ export type EntryPredicate = {
 
 export type EntryPresentation = {
   coverField?: string;
+  deck?: DeckPresentation;
   description?: string;
   emptyDescription?: string;
   group?: ResourceGroup;

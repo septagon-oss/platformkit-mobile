@@ -260,7 +260,7 @@ test("the shell version is a whole number the screens may depend on", () => {
 // The commit testdata/catalog.source.json records. It is written here as a literal on
 // purpose: a re-pin should be a diff somebody reads, and a fixture that moved under a
 // test that only ever re-read it would report agreement about bytes nobody fetched.
-const PINNED = "aa35944f576e143190ea67ba12bf812dd1b4cc0c";
+const PINNED = "5f993d8ca10ae3f15de18a30547ae8ee369a3222";
 
 const PIN_SHORT = PINNED.slice(0, 8);
 

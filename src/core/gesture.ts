@@ -37,3 +37,37 @@ export function readSwipe(travel: number, reveal: number): SwipeRead {
     return { open: 0, armed: false };
   return { open: Math.min(Math.max(travel, 0), reveal), armed: travel >= reveal };
 }
+
+/** readDeckDrag uses measured card geometry; invalid input is neutral and unavailable axes never fall back. */
+export function readDeckDrag(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  available: readonly string[],
+  reduced = false,
+): {
+  direction: "left" | "down" | "up" | "right" | undefined;
+  armed: boolean;
+  opacity: number;
+  tilt: number;
+} {
+  "worklet";
+  const neutral = { direction: undefined, armed: false, opacity: 0, tilt: 0 };
+  if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) return neutral;
+  const tx = width / 3,
+    ty = height / 4;
+  const hx = Math.abs(x) / tx,
+    hy = Math.abs(y) / ty;
+  if (!Number.isFinite(hx) || !Number.isFinite(hy) || tx <= 0 || ty <= 0 || (x === 0 && y === 0))
+    return neutral;
+  const direction = hx >= hy ? (x < 0 ? "left" : "right") : y < 0 ? "up" : "down";
+  const offered = available.includes(direction);
+  const travel = hx >= hy ? hx : hy;
+  return {
+    direction,
+    armed: offered && travel >= 1,
+    opacity: offered ? Math.min(travel, 1) : 0,
+    tilt: reduced ? 0 : 12 * Math.max(-1, Math.min(1, x / tx)),
+  };
+}

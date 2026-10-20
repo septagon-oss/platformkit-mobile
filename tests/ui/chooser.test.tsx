@@ -12,8 +12,10 @@ describe("chooser", () => {
       .spyOn(ActionSheetIOS, "showActionSheetWithOptions")
       .mockImplementation(() => undefined);
     const onPress = jest.fn();
+    const onCancel = jest.fn();
     confirm("Are you sure?", { label: "Delete", destructive: true, onPress }, "dark", {
       message: "This deletes the note. It cannot be undone.",
+      onCancel,
     });
     expect(sheet).toHaveBeenCalledTimes(1);
     const [options, answer] = sheet.mock.calls[0]!;
@@ -27,6 +29,7 @@ describe("chooser", () => {
     });
     answer(1);
     expect(onPress).not.toHaveBeenCalled();
+    expect(onCancel).toHaveBeenCalledTimes(1);
     answer(0);
     expect(onPress).toHaveBeenCalledTimes(1);
   });
@@ -92,5 +95,11 @@ describe("chooser", () => {
       ["Refresh", "default"],
       ["Sign out", "destructive"],
     ]);
+    const onCancel = jest.fn();
+    confirm("Run?", { label: "Run", onPress: jest.fn() }, "light", { onCancel });
+    const [, , cancellable, options] = alert.mock.calls[2]!;
+    cancellable![0]!.onPress?.();
+    options?.onDismiss?.();
+    expect(onCancel).toHaveBeenCalledTimes(2);
   });
 });

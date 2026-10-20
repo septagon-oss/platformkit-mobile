@@ -12,6 +12,7 @@ import { commandSheet, sheet } from "../src/route";
 import { CoverMotion } from "../src/screens/CoverMotion";
 import { FinishingMotion } from "../src/screens/FinishingMotion";
 import { Announcement } from "../src/screens/Announcement";
+import { DeckMotion } from "../src/screens/DeckMotion";
 import { RowSwipe } from "../src/screens/RowSwipe";
 import { screenCopy } from "../src/screens/failure";
 import { NativeZoom } from "../src/screens/NativeZoom";
@@ -40,6 +41,7 @@ export default function Layout() {
           coverMotion: CoverMotion,
           finishing: FinishingMotion,
           rowAction: RowSwipe,
+          deck: DeckMotion,
         }}
       >
         {/* The workspace's own colour, worn over the generated palette, is what the whole app

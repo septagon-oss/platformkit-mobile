@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `99ce59eed` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `e72913614` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 257 | 1217 | 69.1 s | 2102 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 122 | 406 | 45.1 s | 2852 s | 0 |
-| journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 261 | 1249 | 78.8 s | 2292 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 123 | 425 | 49.4 s | 2950 s | 0 |
+| journey | what a person does on a device or in a browser | nightly / before a release | 58 | 50 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 473
+* keep: 479
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 473 — 205 `tests/*.test.ts` (node), 211 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1852; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2102 s, composition 2852 s, journey 0 s
+* files inventoried: 479 — 207 `tests/*.test.ts` (node), 214 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1903; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2292 s, composition 2950 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -134,6 +134,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx | jest | behaviour | 1 | 38736 | 119 |  | not measured | — | 0 | keep | The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gest… |
 | tests/native-store-scope.test.tsx | jest | behaviour | 4 | 30107 | 14 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
 | tests/screens/a-cancelled-swipe-runs-nothing.test.tsx | jest | behaviour | 2 | 30721 | 11 |  | not measured | — | 0 | keep | The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or … |
+| tests/screens/deck-motion.test.tsx | jest | behaviour | 7 | 87960 | 19 |  | not measured | — | 0 | keep | The production pan bridges only a current, armed single-pointer release and ticks at most once per drag. |
 | tests/screens/nativeImage.test.tsx | jest | behaviour | 9 | 20607 | 76 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) replaced and unmounted image sources cannot report into the active scope |
 | tests/screens/refusal-words-never-quote-the-wire.test.tsx | jest | behaviour | 25 | 24619 | 4149 | 1 | not measured | — | 0 | keep | A phone reads a refusal in its own words. The classifier decides which sentence a refusal is, but a decided sentence only counts once it is the one drawn, so t… |
 | tests/screens/useFeedback.test.tsx | jest | behaviour | 3 | 22923 | 18 | 8 | 1 of 3 | src/screens/StateFeedback.tsx | 0 | keep | (no first comment; first test title) each mounted form samples its explicit clock once, independently of another form |
@@ -162,6 +163,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/control-focus-ring.test.tsx | jest | behaviour | 2 | 19743 | 16 | 0 | 0 of 2 | — | 0 | keep | Every control draws focus-visible the way Button does: a keyboard or switch user who moves focus onto a tab or a player control sees where it landed, in the th… |
 | tests/ui/datetime.test.tsx | jest | behaviour | 4 | 19742 | 21 | 40 | 0 of 4 | — | 0 | keep | (no first comment; first test title) an unset iOS date takes its supplied initial value and translated action |
 | tests/ui/day-strip-chosen-stands.test.tsx | jest | behaviour | 2 | 19405 | 27 | 0 | 0 of 2 | — | 0 | keep | "A state is visible or it is not a state" cuts both ways: making the chosen day's ink legible may not be done by erasing what sets it apart. The strip draws th… |
+| tests/ui/deck.test.tsx | jest | behaviour | 4 | 81962 | 68 |  | not measured | — | 0 | keep | The still stack exposes the same named choices as its visible controls, with one readable card and truthful end states. |
 | tests/ui/dialog-busy-backdrop.test.tsx | jest | behaviour | 1 | 19747 | 867 | 0 | 0 of 1 | — | 0 | keep | While the confirmed write is under way the dialog's cancel is off (Button busy). The backdrop and the platform's back gesture are the same cancel by another ro… |
 | tests/ui/dialog-idle-backdrop.test.tsx | jest | behaviour | 1 | 19912 | 833 | 0 | 0 of 1 | — | 0 | keep | The busy dialog keeps every cancel route off (dialog-busy-backdrop.test.tsx). An idle one owes the opposite: the backdrop, the platform's back gesture and the … |
 | tests/ui/empty-state-illustration.test.tsx | jest | behaviour | 6 | 35718 | 45 |  | not measured | — | 0 | keep | An empty screen is drawn: the picture a model names arrives above the model's own words, in the model's own order, and adds nothing to what the screen says out… |
@@ -262,7 +264,9 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/core-asks-no-device.test.ts | node | behaviour | 1 | 288 | 8.3 | 0 | 0 of 1 | — | 0 | keep | The core derives from what it is handed: a locale, a zone, an instant. Reading the phone's own language, hours or clock inside a derivation would make one row … |
 | tests/core-component-families.test.ts | node | behaviour | 1 | 779 | 3.3 | 0 | 0 of 1 | — | 0 | keep | Every component family the shared mobile specification names has a public core factory, so a product that composes a family reaches the same derivation its com… |
 | tests/data-list-count.test.ts | node | behaviour | 3 | 846 | 19.5 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a list whose records have not arrived draws no count of them |
-| tests/delete-selectors-match-the-dialog-answer.test.ts | node | behaviour | 6 | 440 | 36.9 | 0 | 0 of 6 | — | 0 | keep | Maestro text selectors are regex source, not JavaScript regex literals. Its YamlCommandReader preserves the scalar and StringUtils.toRegexSafe compiles it unch… |
+| tests/deck-gesture.test.ts | node | behaviour | 5 | 10221 | 9570.5 |  | not measured | — | 0 | keep | Measured card geometry owns direction arbitration, inclusive thresholds, overlay and capped tilt. |
+| tests/deck.test.ts | node | behaviour | 14 | 9278 | 33 |  | not measured | — | 0 | keep | A finite pass counts confirmed choices, keeps deferred skips rewindable, and never credits an unanswered write. |
+| tests/delete-selectors-match-the-dialog-answer.test.ts | node | behaviour | 8 | 468 | 34.3 | 0 | 0 of 6 | — | 0 | keep | Maestro text selectors are regex source, not JavaScript regex literals. Its YamlCommandReader preserves the scalar and StringUtils.toRegexSafe compiles it unch… |
 | tests/derive.test.ts | node | behaviour | 37 | 1286 | 48.6 | 14 | 6 of 37 | — | 0 | keep | (no first comment; first test title) humanize reads like the web shell |
 | tests/detail-visibility-stays-off-list-content.test.ts | node | behaviour | 3 | 1215 | 42.2 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a detail-only field stays off the list's default preview |
 | tests/device-logs-are-printed-and-the-step-still-fails.test.ts | node | behaviour | 2 | 455 | 77 |  | not measured | — | 0 | keep | A journey that fails on a device has to say why. The job's diagnostics step is the one place that asks the device for its own log, and two properties of it are… |
@@ -448,6 +452,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/composed-pictures.test.tsx | jest | composition | 30 | 25481 | 319 |  | not measured | — | 0 | keep | (no first comment; first test title) composed references coalesce reads while their rendered slots settle independently beside a stored file |
 | tests/screens/custom-renderer-catalog-withdrawal.test.tsx | jest | composition | 2 | 18420 | 59 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom detail renderer is unreachable after its catalog entry is withdrawn |
 | tests/screens/custom-renderer-session-isolation.test.tsx | jest | composition | 2 | 19295 | 438 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom renderer follows only the current session catalog |
+| tests/screens/deck.test.tsx | jest | composition | 19 | 98193 | 4203 |  | not measured | — | 0 | keep | The deck hook serializes input, reads its declared queue and counts only a direct validated command acceptance. |
 | tests/screens/editing-a-translation-keeps-the-source-language.test.tsx | jest | composition | 1 | 24330 | 180 |  | not measured | — | 0 | keep | A translated read cannot be sent back as the source-language value on Save. |
 | tests/screens/example-task-detail.test.tsx | jest | composition | 6 | 18703 | 189 | 20 | 1 of 6 | — | 0 | keep | The example pack is the pattern a product copies, so what is proved here is the pattern's two halves: a screen whose data arrives as the operation's own respon… |
 | tests/screens/expired-people-stay-withdrawn-until-the-session-changes.test.tsx | jest | composition | 2 | 21149 | 18 |  | not measured | — | 0 | keep | A session refusal withdraws every retained person before peers finish. Later successes cannot revive that session, and a replacement workspace accepts only its… |
@@ -564,6 +569,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/viewer-landscape-orientation.spec.ts | browser | journey | 1 |  |  |  | not measured | — | none | keep | Run against the exported Gallery, with its real Zoom Toolkit adapter. This is browser layout evidence; it does not assert native-device behavior. |
 | tests/viewer-zoom-reflow.spec.ts | browser | journey | 1 |  |  |  | not measured | — | none | keep | Manual browser pin for the shared viewer: run it by hand with REVIEW_GALLERY_URL and PLAYWRIGHT_MODULE set. It is not part of npm run test, which has no browse… |
 | e2e/flows/create.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | A new record: the sheet a New button opens, what it refuses, and where a saved one lands. An empty record is refused before anything is sent, and the sheet kee… |
+| e2e/flows/deck.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | A draft supplies a real queue member. A down swipe defers a card locally and Rewind restores it; closing the pass leaves that draft available to read. |
 | e2e/flows/detail.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | One record as a screen: what it is and what distinguishes it first, its fields that have values, and its own identifier kept in the collapsed Record informatio… |
 | e2e/flows/edit.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | An edit: the sheet opens holding what the record says, Cancel changes nothing, and what is saved is what the record says afterwards. |
 | e2e/flows/first-journey.yaml | maestro | journey | 1 |  |  |  | not measured | — | emulator job | keep | The first journey a person takes on the kernel's reference application: sign in, open the served resource, make a record with a deadline, read what the record … |

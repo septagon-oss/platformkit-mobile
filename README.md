@@ -133,7 +133,7 @@ the previous saved record.
 
 A custom screen belongs in the renderer pack passed to `Shell` in
 `app/_layout.tsx`. The [Renderers type](src/renderers.ts) maps `module/entity`
-to optional `list`, `detail`, `form` and `command` components. Each receives an
+to optional `list`, `detail`, `form`, `command` and `deck` components. Each receives an
 `entry` and, when applicable, an `id`; command screens also receive the `verb`.
 Any omitted component falls back to the generated screen. A product's custom
 screens belong in `src/screens/`, where effects become props for the atomic UI
@@ -455,6 +455,56 @@ same reason `src/renderers.ts` exists. **Made reusable** — `useCommandSend`, t
 inside `useCommandAsk`, is now the one submit the sheet and the row share; `readSwipe` is the one
 reading any future surface is measured against; and the composition root draws its screens inside
 one `GestureHandlerRootView`, which is where every gesture this app recognises is recognised.
+
+### Review a declared queue
+
+A resource with a valid `presentation.deck` shows **Review n** in its list toolbar.
+The count is a live read of the declared queue and order, independent of the list's
+current filters. An empty queue or a declaration with no authorized directions
+leaves the control disabled. The generated deck route is the resource's native
+screen path followed by `/review`; a renderer pack can override `Renderer.deck`,
+and `MediaRenderers.deck` supplies the optional native gesture surface once.
+
+Before enabling choices the phone captures a finite, first-seen roster through
+sequential list windows bounded by the first total. Its commands cannot shift a
+later page because capture finishes first. This is an observation of offset pages,
+not an atomic snapshot: concurrent changes can still omit rows. A final live read
+must answer zero before the phone says **All caught up**. A pass containing skips
+can instead finish as **Review complete**, with how many were left for later.
+
+The top card offers every declared direction as a visible button and a named
+accessibility action. Horizontal drags arm at one third of the measured card's
+width, vertical drags at one quarter of its height; equal normalized travel picks
+the horizontal axis. The label and tone follow that direction, tilt stops at twelve
+degrees, and one haptic tick marks a crossing. Short or cancelled drags return to
+rest. Reduced motion removes translation and tilt and cross-fades completed choices.
+The two rear cards and all controls have the same still meaning without motion.
+
+A local down skip defers a card for this pass and makes no request. Rewind restores
+only the latest skip, provided no later irreversible command stands in its way.
+The pinned server has no undo declaration, token or operation, so command rewind is
+unavailable. Declared destructive/consequence confirmations remain mandatory;
+defaulted command arguments are left to the server by sending no body. Refusal
+restores the card with safe localized words. Held or unknown writes lock it without
+progress or a second submission; the existing held-write surface owns resolution.
+
+**Reused** — catalog validation, `Api.list`, shared command/outbox submission, core
+row/value/picture derivation, `ProgressMeter`, native stack routes, the renderer
+pack, `useFeedback`, theme/scale and the finishing renderer carry Review.
+**Added** — a bounded pure deck reducer, four-direction geometry and a deck
+hook/organism/native surface, because the existing row swipe owns one trailing
+command and no queue history.
+**Made reusable** — any authorized resource can declare the same queue presentation;
+products keep their fields, predicates and command semantics and can supply a deck
+screen or motion renderer through the existing pack.
+
+The [state and threshold specification](docs/review-deck.md) defines the contract
+and independent examples. Node cases cover that reducer, geometry and Worklets
+serialization; component cases cover still cards, accessible choices, shared
+submission and refusal/uncertainty. The native `e2e/flows/deck.yaml` creates a draft,
+defers a card and rewinds it. These local suites and web still fixtures establish
+neither a device journey nor live-server authorization, concurrency or RLS. Native
+animation, gestures, haptics and screen-reader focus still require an emulator run.
 
 ### How a record opens
 

@@ -26,6 +26,7 @@ jest.mock("expo-status-bar", () => ({ StatusBar: () => null }));
 jest.mock("expo-system-ui", () => ({ setBackgroundColorAsync: jest.fn(async () => undefined) }));
 // The native media and the device's own stores cannot be evaluated where no native runtime is
 // loaded; what is under test is where the layout draws them, not what they do.
+jest.mock("../src/screens/DeckMotion", () => ({ DeckMotion: () => null }));
 jest.mock("../src/screens/RowSwipe", () => ({ RowSwipe: () => null }));
 jest.mock("../src/screens/NativeZoom", () => ({ NativeZoom: () => null }));
 jest.mock("../src/screens/CoverMotion", () => ({ CoverMotion: () => null }));

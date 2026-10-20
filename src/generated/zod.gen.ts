@@ -117,6 +117,20 @@ export const zCreateBody = z.object({
   url: z.string(),
 });
 
+export const zDeckDirectionPresentation = z.object({
+  command: z.string().optional(),
+  icon: z.string().optional(),
+  label: z.string().optional(),
+  skip: z.boolean().optional(),
+  tone: z.string().optional(),
+});
+
+export const zDeckPresentation = z.object({
+  directions: z.record(z.string(), zDeckDirectionPresentation),
+  order: z.string(),
+  queue: z.array(z.string()).nullish(),
+});
+
 export const zDelete = z.object({
   $schema: z.url().readonly().optional(),
   confirm: z.string().max(63),
@@ -831,6 +845,7 @@ export const zResourceGroup = z.object({
 
 export const zEntryPresentation = z.object({
   coverField: z.string().optional(),
+  deck: zDeckPresentation.optional(),
   description: z.string().optional(),
   emptyDescription: z.string().optional(),
   group: zResourceGroup.optional(),
