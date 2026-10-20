@@ -205,7 +205,7 @@ function publish(
       `npm() {
   printf '%s\\n' "$*" >> "$STUB"
   case "$*" in
-    *view*)
+    view|view\\ *|*\\ view|*\\ view\\ *)
       if [ "$PUBLISHED" = 1 ]; then
         printf '%s\\n' "$HELD"
       elif [ "$PUBLISHED" = down ]; then
