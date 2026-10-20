@@ -733,8 +733,12 @@ export function Shell({
   const passing = useRef(new Map<Api, Promise<void>>());
   // A server that answered no to this phone's address is not asked again in the same session:
   // a deployment carrying no adapter for the platform, and a credential the door does not
-  // accept, are both answered by the deployment and not by waiting. A new sign-in asks again.
-  const pushRefused = useRef(false);
+  // accept, are both answered by the deployment and not by waiting. The no stands against the
+  // connection that heard it, because it is that workspace and that key which answered no: a
+  // refusal still on the wire when the person moves to another workspace describes the session
+  // that has ended, and cannot close the door the next one is about to knock on. A new sign-in
+  // asks everywhere again.
+  const refusedAddress = useRef(new Map<Api, true>());
   const [pushView, setPushView] = useState<{ status: PushStatus; offer: boolean }>({
     status: "off",
     offer: false,
@@ -790,7 +794,9 @@ export function Shell({
    * request: a phone that never registered has nothing to remove, and a registration still on the
    * wire is waited for first, because the row it is writing is this session's own. A row another
    * connection wrote is not this one's to ask about and is left held: that connection's key still
-   * reaches it, and the session that wrote it will give it back. The address this connection wrote
+   * reaches it, and the session that wrote it will give it back. A row the live connection
+   * holds under its own key is left for that connection too, because the server answers the
+   * same token with the same row. The address this connection wrote
    * is let go either way, because the session that could reach it is ending, and a row remembered
    * past that point is one nobody is ever going to ask for back.
    */
@@ -800,6 +806,15 @@ export function Shell({
     const held = heldDevice.current.get(a);
     if (held === undefined) return true;
     heldDevice.current.delete(a);
+    // One row can stand under two connections at once. The server keys a device on tenant,
+    // platform, token and recipient, so a sign-in that reuses the address an older session
+    // handed over answers the row that older session believes it holds, and the older session's
+    // answer may be the later one to arrive. The live connection is the one that may give that
+    // address back; asking for it here would take away a notification address from a person who
+    // is signed in right now, and the session that lost it has no key left with which to put it
+    // back. A row no live connection holds is this session's own, and goes back as usual.
+    const living = heldDevice.current.get(active.current.api);
+    if (living !== undefined && living.id === held.id) return true;
     try {
       await a.operations.notificationDeviceRemove({ path: { id: held.id } });
       return true;
@@ -823,7 +838,7 @@ export function Shell({
   const carryPush = useCallback(
     async (a: Api) => {
       const bridge = push;
-      if (bridge === undefined || pushRefused.current) return;
+      if (bridge === undefined || refusedAddress.current.has(a)) return;
       const started = generation.current;
       const still = () => generation.current === started;
       try {
@@ -873,7 +888,7 @@ export function Shell({
         // answered no — a deployment carrying no adapter for this platform, a credential the
         // door does not accept — is not worth asking twice inside this one.
         const again = !(e instanceof ApiError) || e.status >= 500;
-        if (!again) pushRefused.current = true;
+        if (!again) refusedAddress.current.set(a, true);
         wearPush(still, { status: again ? "unreachable" : "refused", offer: false });
       }
     },
@@ -908,7 +923,7 @@ export function Shell({
    */
   const resetPush = useCallback(() => {
     declined.current = false;
-    pushRefused.current = false;
+    refusedAddress.current.clear();
     setPushView({ status: "off", offer: false });
   }, []);
 
