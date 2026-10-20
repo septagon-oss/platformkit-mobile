@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 263,
-   "cases": 1252,
-   "ms": 2286591,
-   "testsMs": 78813.09999999996,
+   "files": 264,
+   "cases": 1256,
+   "ms": 2289765,
+   "testsMs": 78824.29999999996,
    "runners": {
     "jest": 91,
-    "node": 172
+    "node": 173
    },
    "unreachable": 0
   },
@@ -11780,6 +11780,53 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/an-unanswered-final-count-withholds-the-finish-until-a-retry-finds-none.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "A final count nothing answered ends the pass with a retry and nothing more: the choices made stay in the history, the finishing moment is neither played nor spent, and the deck makes no \"caught up\" claim. Only a retried count that finds the queue empty plays the finish, once; a retried count that still finds rows ends the pass with no retry left to offer; and a count for the failed operation that lands after the retry changes nothing.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 3174,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a final count nothing answered offers retry and keeps the finish for a retried count that finds none",
+    "a retried final count that still finds rows ends the pass with no retry, no finish and no caught-up claim",
+    "a retried final count nothing answers again offers the same retry over the same history",
+    "a final count failure the person cannot retry offers no retry and a retry changes nothing"
+   ],
+   "tests": [
+    {
+     "title": "a final count nothing answered offers retry and keeps the finish for a retried count that finds none",
+     "ms": 9.506756,
+     "measured": false
+    },
+    {
+     "title": "a retried final count that still finds rows ends the pass with no retry, no finish and no caught-up claim",
+     "ms": 0.64274,
+     "measured": false
+    },
+    {
+     "title": "a retried final count nothing answers again offers the same retry over the same history",
+     "ms": 0.537806,
+     "measured": false
+    },
+    {
+     "title": "a final count failure the person cannot retry offers no retry and a retry changes nothing",
+     "ms": 0.505456,
+     "measured": false
+    }
+   ],
+   "loaded": 36,
+   "coveredProdLines": 13124,
+   "onlyProdLines": null,
+   "testsMs": 11.2
   },
   {
    "file": "tests/api.test.ts",
