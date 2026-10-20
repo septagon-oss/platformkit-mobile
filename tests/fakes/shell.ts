@@ -146,6 +146,14 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     lookUp: jest.fn<ShellValue["lookUp"]>(async () => undefined),
     entry: (module, entity) =>
       catalog.resources.find((r) => r.module === module && r.entity === entity),
+    // No push bridge: this phone has no notification address, draws no invite and asks for
+    // nothing at the door. A test that speaks push overrides the whole member.
+    push: {
+      status: "off" as const,
+      offer: false,
+      decline: jest.fn<ShellValue["push"]["decline"]>(),
+      turnOn: jest.fn<ShellValue["push"]["turnOn"]>(async () => undefined),
+    },
     signIn: jest.fn<ShellValue["signIn"]>(async () => ({ kind: "signed-in" })),
     answerFactor: jest.fn<ShellValue["answerFactor"]>(async () => undefined),
     signOut: jest.fn<ShellValue["signOut"]>(async () => undefined),

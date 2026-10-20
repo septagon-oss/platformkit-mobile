@@ -23,6 +23,7 @@ import { kitEnglish } from "./core/kitCopy";
 import { expiredCredential } from "./core/signInOutcome";
 import type { DeclaredPermission } from "./core/scopes";
 import {
+  ApiError,
   KEY_NAME,
   TIMEOUT,
   createApi,
@@ -40,6 +41,7 @@ import { unknownWorkspace, workspaceOf, type Workspace } from "./core/workspace"
 import { hostLabel } from "./core/derive";
 import { sessions } from "./effects/native-session";
 import type { Reach } from "./effects/native-reach";
+import { PUSH_PLATFORM, type PushBridge } from "./screens/push";
 import { systemClock } from "./screens/clock";
 import type { MediaRenderers, Renderers } from "./renderers";
 import { catalogFailure } from "./screens/failure";
@@ -166,6 +168,13 @@ export interface ShellValue {
    * is refused here, before any request leaves.
    */
   readonly answerFactor: (email: string, code: string) => Promise<void>;
+  /**
+   * push is this phone's notification address as the person standing in front of it can act
+   * on it: whether a server holds a row for it, whether the invite may be drawn, and the two
+   * answers the invite gives them. A build that ships no push bridge reads `off` and draws
+   * nothing; no screen decides any of that, and the token behind it appears on no screen.
+   */
+  readonly push: PushState;
   readonly signOut: () => Promise<void>;
   readonly refresh: () => Promise<void>;
 }
@@ -228,6 +237,12 @@ interface Props {
    * and the queue's authority stays whether a request reached the server.
    */
   readonly reach?: Reach;
+  /**
+   * push is the platform's notification surface, supplied by the composition root like the
+   * store and the network listener. A host that ships none has no notifications at all: the
+   * status stays `off`, no invite is drawn and no request leaves for a device.
+   */
+  readonly push?: PushBridge;
   readonly children: React.ReactNode;
   /**
    * tokenName is what this app calls its own key on the server's list of keys.
@@ -243,6 +258,25 @@ interface Props {
    * the document prints, which is this kit's surface and no other.
    */
   readonly declaredGrants?: readonly DeclaredPermission[];
+}
+
+/**
+ * PushStatus is where the notification address got to. `unreachable` says no address exists
+ * to hold — the platform has no push service, or the server could not be reached this time —
+ * which is why a session may try again at the next sign-in; `refused` says somebody, person or
+ * server, said no, which is why it may not.
+ */
+export type PushStatus = "off" | "unasked" | "registered" | "refused" | "unreachable";
+
+/** PushState is the one push block on screen sees: what to say, and the two answers it offers. */
+export interface PushState {
+  readonly status: PushStatus;
+  /** offer says the invite may be drawn: nothing else decides it, and no screen decides alone. */
+  readonly offer: boolean;
+  /** decline is "Not now": the offer goes for the rest of this session, and nothing is asked. */
+  readonly decline: () => void;
+  /** turnOn is the only door that opens the platform's prompt, and the only one a person presses. */
+  readonly turnOn: () => Promise<void>;
 }
 
 /** Session is the one this app is using, as the transport knows it: which address
@@ -294,6 +328,7 @@ export function Shell({
   clock,
   mint,
   reach,
+  push,
   children,
   tokenName = KEY_NAME,
   declaredGrants,
@@ -679,6 +714,152 @@ export function Shell({
     setConnection(value);
   }, []);
 
+  // Notifications. The session is what owns an address: it is registered for the person who
+  // just signed in and taken back from the one who just signed out, and nothing in between
+  // decides either. The token itself is memory-only, like the key that reaches it.
+  const heldDevice = useRef<{ readonly token: string; readonly id: string } | undefined>(undefined);
+  // Whether this person has already said "not now": the platform's own prompt is spent once
+  // it is answered, so the offer this app owns is spent the same way — once per sign-in, and
+  // kept in memory rather than in a table, because a dismissed offer decides no command.
+  const declined = useRef(false);
+  const passing = useRef<Promise<void> | undefined>(undefined);
+  // A server that answered no to this phone's address is not asked again in the same session:
+  // a deployment carrying no adapter for the platform, and a credential the door does not
+  // accept, are both answered by the deployment and not by waiting. A new sign-in asks again.
+  const pushRefused = useRef(false);
+  const [pushView, setPushView] = useState<{ status: PushStatus; offer: boolean }>({
+    status: "off",
+    offer: false,
+  });
+
+  /**
+   * wearPush is the only writer of the push status, and it writes nothing for a session that
+   * has ended: a token that arrives after the person signed out describes a phone nobody is
+   * holding, and the screen it would arrive on belongs to whoever comes next.
+   */
+  const wearPush = useCallback(
+    (still: () => boolean, next: { status: PushStatus; offer: boolean }) => {
+      if (still()) setPushView(next);
+    },
+    [],
+  );
+
+  /**
+   * handBack asks the server `a` answers to for this phone's row back, and says whether it
+   * did. No row, no request: a phone that never registered has nothing to remove. The address
+   * is let go either way, because the session that could reach it is ending, and a row
+   * remembered past that point is one nobody is ever going to ask for back.
+   */
+  const handBack = useCallback(async (a: Api): Promise<boolean> => {
+    const held = heldDevice.current;
+    heldDevice.current = undefined;
+    if (held === undefined) return true;
+    try {
+      await a.operations.notificationDeviceRemove({ path: { id: held.id } });
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  /**
+   * carryPush is one completed sign-in's whole notification pass: name the channel the
+   * platform needs before it can show anything, read what the platform already recorded, and
+   * hand this phone's address to the server that just signed the person in.
+   *
+   * It never opens the system prompt: a person the platform has never been asked about is
+   * offered the sentence and its two answers, and `turnOn` is the only door to the prompt.
+   * It never fails the session either — every answer it cannot act on lands on a status and a
+   * sentence, with nothing else written. The server is the authority on the row and keys a
+   * device on platform and token, which is what lets a re-sign-in, a refresh and a token
+   * refresh all be sent without a queue or an idempotency key of this phone's own.
+   */
+  const carryPush = useCallback(
+    async (a: Api) => {
+      const bridge = push;
+      if (bridge === undefined || pushRefused.current) return;
+      const started = generation.current;
+      const still = () => generation.current === started;
+      try {
+        await bridge.channel(kitEnglish.pushChannel);
+        if (!still()) return;
+        if (!(await bridge.permission())) {
+          wearPush(still, {
+            status: declined.current ? "off" : "unasked",
+            offer: !declined.current,
+          });
+          return;
+        }
+        const token = await bridge.token();
+        if (!still()) return;
+        if (token === undefined) {
+          wearPush(still, { status: "unreachable", offer: false });
+          return;
+        }
+        const previous = heldDevice.current;
+        if (previous?.token === token) {
+          wearPush(still, { status: "registered", offer: false });
+          return;
+        }
+        const answer = await a.operations.notificationDeviceRegister({
+          body: { platform: PUSH_PLATFORM, token },
+        });
+        const id = answer.data?.id;
+        if (id === undefined) {
+          wearPush(still, { status: "unreachable", offer: false });
+          return;
+        }
+        // The address the person has now is held before the old one is touched: a
+        // re-registration that fails must not have taken away the address that still works.
+        heldDevice.current = { token, id };
+        if (previous !== undefined) {
+          try {
+            await a.operations.notificationDeviceRemove({ path: { id: previous.id } });
+          } catch {
+            // Expo ends a token it says is gone, and the row stays the person's own to read
+            // and remove; nothing here retries against a session that is not over.
+          }
+        }
+        wearPush(still, { status: "registered", offer: false });
+      } catch (e) {
+        // A server that could not answer is worth asking again at the next sign-in; one that
+        // answered no — a deployment carrying no adapter for this platform, a credential the
+        // door does not accept — is not worth asking twice inside this one.
+        const again = !(e instanceof ApiError) || e.status >= 500;
+        if (!again) pushRefused.current = true;
+        wearPush(still, { status: again ? "unreachable" : "refused", offer: false });
+      }
+    },
+    [push, wearPush],
+  );
+
+  /**
+   * passPush keeps one notification pass in flight: a sign-in and a token refresh arriving
+   * together share the first one's answer rather than racing two registrations of one token.
+   */
+  const passPush = useCallback(
+    (a: Api): Promise<void> => {
+      if (passing.current !== undefined) return passing.current;
+      const run = carryPush(a).finally(() => {
+        passing.current = undefined;
+      });
+      passing.current = run;
+      return run;
+    },
+    [carryPush],
+  );
+
+  /**
+   * resetPush is what one session ending does to the other's offer: whoever said "not now"
+   * here is a person the next sign-in has not asked yet, and nothing carries over but the
+   * row, which is the server's to keep or move.
+   */
+  const resetPush = useCallback(() => {
+    declined.current = false;
+    pushRefused.current = false;
+    setPushView({ status: "off", offer: false });
+  }, []);
+
   /**
    * lookUp asks the workspace at an address what it calls itself, what colour it wears and
    * what mark it hands out, and wears that answer while the person stands at the form. It is
@@ -757,6 +938,10 @@ export function Shell({
           }
           live.current = { api: a, baseURL: server, who: next, email: answered?.email ?? "" };
           dispatch({ type: "catalog", generation: started, catalog });
+          // The session is live, so this phone is now worth an address: the pass runs after
+          // the catalogue rather than before it because a person reads the offer on a screen,
+          // and it never holds the load up — nothing the pass answers decides the session.
+          void passPush(a);
         }
       } catch (e) {
         if (generation.current !== started) return;
@@ -786,7 +971,7 @@ export function Shell({
         dispatch({ type: "failed", generation: started, error: catalogFailure(e) || message(e) });
       }
     },
-    [connect, forget, workspaces],
+    [connect, forget, passPush, workspaces],
   );
 
   useEffect(() => {
@@ -850,6 +1035,7 @@ export function Shell({
         state.catalog?.resources.find((r) => r.module === module && r.entity === entity),
       async signIn(url, email, password) {
         const started = begin();
+        resetPush();
         // Identity belongs to the previous session until this sign-in starts.
         // The new catalog may be ready before its own identity request settles.
         setIdentity(undefined);
@@ -920,6 +1106,7 @@ export function Shell({
         const open = challenge.current;
         if (!open) throw new Error(kitEnglish.noChallenge);
         const started = begin();
+        resetPush();
         // The answer makes its own connection to the server that refused, with
         // this app's own name and grant catalogue, and is the only holder of what
         // it mints. Two answers to one refusal are then two attempts that share
@@ -968,6 +1155,7 @@ export function Shell({
         forget();
         // A window this phone walked away from is not one it comes back to.
         challenge.current = undefined;
+        resetPush();
         connect(previous.baseURL, transport(previous.baseURL));
         setIdentity(undefined);
         // A person who signs out leaves the workspace's colours behind with the key: what is
@@ -985,6 +1173,10 @@ export function Shell({
         // credential carrying its own scopes (kit/httpx/authorize.go), so a key
         // restored from storage — which has no sign-in session behind it — cannot
         // spend itself.
+        // The phone's own row is the person's, and only their key reaches it: it is asked
+        // back while that key still spends, and the local forget above is not undone by the
+        // asking. A sign-out that cannot take the row back still forgets the key.
+        const removed = await handBack(previous.api);
         const stopped = previous.api.logout();
         // A person who chose to keep their held writes never reaches this line:
         // every door that leaves asks first (src/screens/useSignOut.ts).
@@ -1018,6 +1210,38 @@ export function Shell({
             generation: started,
             error: kitEnglish.keyNotStopped,
           });
+        // One notice slot, and the bigger fact first: a key that may still answer for its
+        // holder is the one worth reading. A row this phone could not take back is said only
+        // when the key really did stop, and it is said at all: a phone that goes on signing
+        // out into a device that still receives notifications is owed the difference.
+        else if (!removed && cleared && generation.current === started)
+          dispatch({
+            type: "signed-out",
+            generation: started,
+            error: kitEnglish.pushNotRemoved,
+          });
+      },
+      push: {
+        status: pushView.status,
+        offer: pushView.offer,
+        decline: () => {
+          declined.current = true;
+          setPushView({ status: "off", offer: false });
+        },
+        turnOn: async () => {
+          const bridge = push;
+          if (bridge === undefined) return;
+          const started = generation.current;
+          const answer = await bridge.ask().catch(() => false);
+          if (generation.current !== started) return;
+          if (!answer) {
+            // The platform keeps this answer and will not offer the prompt again, so neither
+            // does this app: the sentence is said once and the door stays where it was.
+            setPushView({ status: "refused", offer: false });
+            return;
+          }
+          await passPush(active.current.api);
+        },
       },
       refresh: () => {
         const current = active.current.api;
@@ -1056,6 +1280,11 @@ export function Shell({
       workspaces,
       workspace,
       lookUp,
+      push,
+      pushView,
+      passPush,
+      resetPush,
+      handBack,
       begin,
       connect,
       load,

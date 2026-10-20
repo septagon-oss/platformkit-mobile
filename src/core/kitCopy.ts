@@ -430,6 +430,20 @@ export const kitEnglish = {
   // sentence is about was read back out of storage, by whichever device did.
   keyNotStopped:
     "This device's key could not be revoked from here; remove it from your account's devices.",
+  // Notifications. The phone asks once per session, in its own words, and only ever offers
+  // the two answers: the system prompt behind "Turn on" belongs to the platform and is spent
+  // whether or not anybody here wanted it spent. The two refusal sentences say what this app
+  // could not do and nothing else — a phone nobody can send to keeps every other door.
+  pushChannel: "PlatformKit notifications",
+  pushInvite: "Get a notification when something changes on a record you follow?",
+  pushTurnOn: "Turn on",
+  pushNotNow: "Not now",
+  pushRefused: "This server could not reach a push service for this device. Nothing else changed.",
+  // The row this phone is addressable at belongs to the sign-in that registered it, so it is
+  // asked back before the key that reaches it is spent. This is the sentence for the ask that
+  // did not answer: the phone forgot the key either way, and the row stays until it is taken.
+  pushNotRemoved:
+    "This device could not be removed from your notifications. Try signing out again.",
 } as const;
 // Each word keeps its own shape, widened from the literal it is written as: most
 // are strings, and the few that take a noun as data (`untitled`) are functions
@@ -709,4 +723,12 @@ export const kitPortuguese: KitWords = {
     "Nenhuma etapa de código está aberta neste telemóvel. Inicie sessão novamente com a palavra-passe.",
   keyNotStopped:
     "A chave deste dispositivo não pôde ser revogada a partir daqui; remova-a nos dispositivos da sua conta.",
+  pushChannel: "Notificações PlatformKit",
+  pushInvite: "Quer receber uma notificação quando algo muda num registo que acompanha?",
+  pushTurnOn: "Ativar",
+  pushNotNow: "Agora não",
+  pushRefused:
+    "Este servidor não conseguiu contactar um serviço de notificações para este dispositivo. Nada mais mudou.",
+  pushNotRemoved:
+    "Este dispositivo não pôde ser removido das suas notificações. Tente terminar a sessão novamente.",
 };

@@ -24,6 +24,10 @@ jest.mock("expo-haptics", () => ({
   ImpactFeedbackStyle: { Light: "light", Medium: "medium", Heavy: "heavy" },
 }));
 
+// Notifications have no JavaScript implementation under Jest either. The answers are held in
+// the fake so a test can move them; every other suite never asks and never notices.
+jest.mock("expo-notifications", () => require("../fakes/push").expoNotifications);
+
 // The safe area comes from a native provider the router installs at the root;
 // under Jest the package's own mock supplies fixed insets.
 jest.mock(

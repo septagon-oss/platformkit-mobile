@@ -80,6 +80,9 @@ const config: ExpoConfig = {
     // camera and the photo library when the person reaches for one, and says so in the
     // platform's own words rather than in a sentence this build invented.
     "expo-image-picker",
+    // A notification arrives with the server's own words already rendered and points at the
+    // address it is about; this build names no sound, icon or colour, which are a brand's.
+    "expo-notifications",
     "@maplibre/maplibre-react-native",
     // A verification build talks plain HTTP to a server on the workstation
     // through adb reverse; a release never does.
