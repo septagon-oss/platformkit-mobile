@@ -121,7 +121,7 @@ test("this build reads kernel main as it stands", async () => {
   assert.match(
     verdict.read[0]!,
     new RegExp(
-      `^catalog ${CATALOG_FILE.replace(/[/.]/g, "\\$&")} sha256=[0-9a-f]{64} bytes=\\d+, version 2, 3 entries$`,
+      `^catalog ${CATALOG_FILE.replace(/[/.]/g, "\\$&")} sha256=[0-9a-f]{64} bytes=\\d+, version 3, 3 entries$`,
     ),
   );
   assert.match(

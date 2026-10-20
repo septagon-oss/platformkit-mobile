@@ -35,7 +35,10 @@ for the version being released.
   `SwipeRead`, so an app that draws its own reveal surface reads a drag the way this one
   does; `MediaRenderers` gains `rowAction`, `./ui/scale` gains the `swipe` distances, and
   the `command-*`, `row-reveal` and `snackbar` ids are what a journey finds these by.
-- catalogVersion: 2
+- Declared composed pictures use the in-memory sign-in session and render received
+  SVG in the existing image adapter; failed reads use the empty picture. Restored
+  bearer-only connections need a fresh sign-in for these pictures.
+- catalogVersion: 3
 - `detailItems` is gone from `./core/derive`, which is a breaking change to a published
   subpath: below 1.0.0 the minor carries that, so the removal is documented here rather
   than noted under `0.2.0`, and `package.json` moves to `0.3.0` when the cut is made.
@@ -282,7 +285,7 @@ for the version being released.
 
 ## 0.2.0
 
-- catalogVersion: 2
+- catalogVersion: 3
 - Expo SDK 57 (`expo@57.0.23`), React Native `0.86.3`, Node `>=22.18.0`.
 - Renamed from `platformkit-mobile` to `@septagon-oss/platformkit-mobile`, which
   changes the root of every import specifier a client writes. That is a breaking

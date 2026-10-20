@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `5c783333f` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `dd34c2474` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 224 | 47.6 s | 77 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 257 | 1200 | 69.8 s | 2098 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 120 | 374 | 43.9 s | 2783 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 257 | 1217 | 69.1 s | 2102 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 121 | 404 | 44.2 s | 2808 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 57 | 49 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 471
+* keep: 472
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 471 — 205 `tests/*.test.ts` (node), 209 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1798; cases in files no runner reaches: 35
-* isolated wall time: contract 77 s, behaviour 2098 s, composition 2783 s, journey 0 s
+* files inventoried: 472 — 205 `tests/*.test.ts` (node), 210 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 14 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1850; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2102 s, composition 2808 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -100,7 +100,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/catalog-fallback-validation.test.ts | node | contract | 3 | 1071 | 51.4 |  | not measured | — | 0 | keep | Presentation fallback preserves the resource contract: a bad hint can cost its label, but never its fields, commands or validation of required members. The gen… |
 | tests/catalog-golden-contract.test.ts | node | contract | 3 | 1288 | 65.8 | 0 | 0 of 3 | — | 0 | keep | The catalogue goldens copied from the kernel are answers the pinned HTTP document must accept: the shell's own catalog read and the strict generated appResourc… |
 | tests/catalog-operation-contract.test.ts | node | contract | 2 | 1255 | 52.1 | 0 | 0 of 2 | — | 0 | keep | The bound catalog operation must honor its generated return type even when the shell's compatibility adapter accepts an unstamped legacy catalog. |
-| tests/catalog.test.ts | node | contract | 26 | 1102 | 354.4 | 9 | 5 of 26 | — | 0 | keep | (no first comment; first test title) the golden catalog parses |
+| tests/catalog.test.ts | node | contract | 26 | 1013 | 346.6 | 9 | 5 of 26 | — | 0 | keep | (no first comment; first test title) the golden catalog parses |
 | tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts | node | contract | 15 | 620 | 303.6 |  | not measured | — | 0 | keep | The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches h… |
 | tests/factor-person-provisioning.test.ts | node | contract | 1 | 585 | 271.7 |  | not measured | — | 0 | keep | The device harness creates the person who answers the second factor, and the kernel it serves accepts that person.  At the commit testdata/openapi.source.json … |
 | tests/fingerprint.test.ts | node | contract | 3 | 573 | 2.1 | 0 | 0 of 3 | scripts/fingerprint.ts | 0 | keep | The hook resets after EOF, even when a caller reads the same source twice. |
@@ -110,17 +110,17 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/kernel-main-budget.test.ts | node | contract | 2 | 1142 | 485.7 | 0 | 1 of 2 | — | 0 | keep | The command refuses an unrepresentable timer budget before reading the forge, while both ends of the supported interval remain usable configuration. |
 | tests/kernel-main-deadline.test.ts | node | contract | 5 | 11235 | 10555.8 | 0 | 3 of 5 | — | 0 | keep | These cases hold one rule about the nightly's own failure modes: a read that never answers is a red that names itself, not a job that sits until something else… |
 | tests/kernel-main-response.test.ts | node | contract | 2 | 11614 | 10987.5 | 0 | 0 of 2 | — | 0 | keep | A response header is not a completed read. The shipped command must refuse a stalled catalogue body and a missing catalogue, retaining the commit it learned. T… |
-| tests/kernel-main.test.ts | node | contract | 23 | 1883 | 1189.3 | 0 | 2 of 23 | — | 0 | keep | The nightly's whole rule lives in scripts/kernel_main.ts, and every case here runs the pair that workflow step runs — `readKernelMain` over a transport double,… |
+| tests/kernel-main.test.ts | node | contract | 23 | 1581 | 963.6 | 0 | 2 of 23 | — | 0 | keep | The nightly's whole rule lives in scripts/kernel_main.ts, and every case here runs the pair that workflow step runs — `readKernelMain` over a transport double,… |
 | tests/kernel-pin-step-publishes-nothing-without-provenance.test.ts | node | contract | 1 | 415 | 82.8 |  | not measured | — | 0 | keep | A missing provenance record must end the pin step before it publishes anything: an empty ref would let the next checkout choose the kernel's default branch. Ea… |
 | tests/kernel-pin-step-refuses-what-the-records-cannot-name.test.ts | node | contract | 3 | 546 | 149.3 |  | not measured | — | 0 | keep | The step that names the kernel to build is the job's refusal when the two provenance records cannot name one: a record missing, a commit that is not a full obj… |
 | tests/layers.test.ts | node | contract | 12 | 4120 | 3005.2 | 0 | 0 of 12 | — | 0 | keep | (no first comment; first test title) atoms and molecules cannot depend on an organism or a screen layout |
 | tests/package.test.ts | node | contract | 1 | 4334 | 2654.6 | 0 | 0 of 1 | — | 0 | keep | npm 12 keys the pack report by package name; earlier versions return an array. The name is read from the manifest rather than written here, so the pack, the in… |
-| tests/pictures.test.ts | node | contract | 13 | 3713 | 193.4 |  | not measured | — | 0 | keep | (no first comment; first test title) person tones have independent stable vectors and never use danger |
+| tests/pictures.test.ts | node | contract | 18 | 1454 | 136.9 |  | not measured | — | 0 | keep | (no first comment; first test title) person tones have independent stable vectors and never use danger |
 | tests/publish-registry-credential.test.ts | node | contract | 2 | 2789 | 2394.8 | 0 | 0 of 2 | — | 0 | keep | The publish step's credential, as the real npm reads it. The workflow writes the token into a userconfig keyed by the registry's address, and npm sends it only… |
 | tests/publish-version-suffix.test.ts | node | contract | 1 | 561 | 3.1 | 0 | 0 of 1 | — | 0 | keep | The release channel accepts plain versions and refuses both prerelease and build suffixes before a registry is involved. The refusal names the supplied version… |
 | tests/publish-workflow.test.ts | node | contract | 13 | 2171 | 1509.9 | 0 | 1 of 13 | — | 0 | keep | The publish contract, in five refusals. One scoped name and one version — a released one — in a manifest that can travel; the changelog entry that version's re… |
 | tests/reference-manifest.test.ts | node | contract | 4 | 270 | 13.6 | 0 | 3 of 4 | scripts/references.ts | 0 | keep | The reference manifest is the bar in version control. These checks are the ones that need no store: every row is a row, the ids continue the record's own regis… |
-| tests/response-contracts.test.ts | node | contract | 10 | 1141 | 94.1 | 22 | 3 of 10 | — | 0 | keep | Every success crosses its wire contract; errors name fields rather than values. Documented calls are validated by their generated operation, while arbitrary ca… |
+| tests/response-contracts.test.ts | node | contract | 10 | 1156 | 92.7 | 22 | 3 of 10 | — | 0 | keep | Every success crosses its wire contract; errors name fields rather than values. Documented calls are validated by their generated operation, while arbitrary ca… |
 | tests/sdk.test.ts | node | contract | 4 | 268 | 12.1 | 0 | 0 of 4 | — | 0 | keep | check:sdk answers "do the installed native packages match the expo this repository pins?" That question has one right answer for a given tree, so the gate must… |
 | tests/sign-out-revokes-key.test.ts | node | contract | 1 | 955 | 41.7 |  | not measured | — | 0 | keep | Signing out stops the key on the server, not only on the phone.  At the commit testdata/openapi.source.json pins, auth-token-revoke is declared httpx.SignedIn(… |
 | tests/source.test.ts | node | contract | 7 | 1664 | 1367.3 | 0 | 3 of 7 | scripts/source.ts | 0 | keep | These are disposable Git fixtures owned and removed by the test harness. Their dependency metadata is intentionally small; npm installation is exercised separa… |
@@ -134,7 +134,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx | jest | behaviour | 1 | 38736 | 119 |  | not measured | — | 0 | keep | The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gest… |
 | tests/native-store-scope.test.tsx | jest | behaviour | 4 | 30107 | 14 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
 | tests/screens/a-cancelled-swipe-runs-nothing.test.tsx | jest | behaviour | 2 | 30721 | 11 |  | not measured | — | 0 | keep | The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or … |
-| tests/screens/nativeImage.test.tsx | jest | behaviour | 2 | 17291 | 1010 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) replaced and unmounted image sources cannot report into the active scope |
+| tests/screens/nativeImage.test.tsx | jest | behaviour | 9 | 20607 | 76 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) replaced and unmounted image sources cannot report into the active scope |
 | tests/screens/refusal-words-never-quote-the-wire.test.tsx | jest | behaviour | 25 | 24619 | 4149 | 1 | not measured | — | 0 | keep | A phone reads a refusal in its own words. The classifier decides which sentence a refusal is, but a decided sentence only counts once it is the one drawn, so t… |
 | tests/screens/useFeedback.test.tsx | jest | behaviour | 3 | 22923 | 18 | 8 | 1 of 3 | src/screens/StateFeedback.tsx | 0 | keep | (no first comment; first test title) each mounted form samples its explicit clock once, independently of another form |
 | tests/screens/viewer-denial-abandons-loader.test.tsx | jest | behaviour | 4 | 19683 | 1112 | 0 | 0 of 4 | — | 0 | keep | Once the media read is denied, the viewer stops showing the item it covered: no progress bar, no retry, no caption. A later authorized response carrying the sa… |
@@ -250,11 +250,11 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/activity-denial-precedes-validation.test.ts | node | behaviour | 1 | 770 | 9.6 | 0 | 0 of 1 | — | 0 | keep | A denied activity read withdraws even malformed cached events and pending pagination. Clearing the denial restores validation, not permission to display an inv… |
 | tests/activity-scope-isolation.test.ts | node | behaviour | 2 | 780 | 15 | 0 | 0 of 2 | — | 0 | keep | Two callers derive activity at the same time over equal event ids. Each row keeps the actor named by its own caller's snapshot, and one caller's withdrawal may… |
 | tests/activity.test.ts | node | behaviour | 8 | 798 | 15.3 | 22 | 2 of 8 | — | 0 | keep | What a trail shows is derived from events the server owns: an event belongs to a record when its id appears anywhere in the payload, its name's last segment is… |
-| tests/api.test.ts | node | behaviour | 25 | 1511 | 167.8 | 28 | 2 of 25 | — | 0 | keep | (no first comment; first test title) login keeps the session cookie and sends it back |
+| tests/api.test.ts | node | behaviour | 31 | 2483 | 427 | 28 | 2 of 25 | — | 0 | keep | (no first comment; first test title) sign-in mints a key with the session and sends only the key after it |
 | tests/calendar-withdrawal.test.ts | node | behaviour | 3 | 1311 | 408.1 | 1 | 0 of 3 | — | 0 | keep | Denied calendar content leaves every projection — day, week, agenda — with an explicit recovery, and each projection keeps its own bounds: an event that ended … |
 | tests/cart-quote-withdrawal.test.ts | node | behaviour | 2 | 856 | 29.2 | 0 | 0 of 2 | — | 0 | keep | Checkout exists only for the quote a person is looking at. A withdrawn quote loses the button, a fresh quote restores only its own revision, and a quote still … |
 | tests/cart-total-currency.test.ts | node | behaviour | 1 | 854 | 4.6 | 0 | 0 of 1 | — | 0 | keep | A cart total is money a renderer shows and a checkout charges: it has to carry the cart's own currency, never a default, and computing it must not edit the lin… |
-| tests/catalog-hints.test.ts | node | behaviour | 15 | 1374 | 85.5 | 8 | 2 of 15 | — | 0 | keep | The presentation contract, read: what a hint changes, what it never changes, and what an author's mistake costs. Every case is served bytes through the shipped… |
+| tests/catalog-hints.test.ts | node | behaviour | 19 | 1195 | 73.6 | 8 | 2 of 15 | — | 0 | keep | The presentation contract, read: what a hint changes, what it never changes, and what an author's mistake costs. Every case is served bytes through the shipped… |
 | tests/catalog-list-time-cell.test.ts | node | behaviour | 2 | 896 | 20.5 | 0 | 0 of 2 | — | 0 | keep | A collection row's cell carries both spellings of an instant — the distance the eye reads and the whole local date-time a screen reader says — because a row is… |
 | tests/color.test.ts | node | behaviour | 6 | 346 | 6.2 | 106 | 5 of 6 | src/core/color.ts | 0 | keep | The arithmetic every derived colour and every measured ratio comes through. Each expectation is a number the standard or a hand computes, not the output of the… |
 | tests/component-suite-gate.test.ts | node | behaviour | 2 | 401 | 71.4 | 0 | 0 of 2 | — | 0 | keep | The repository's required check has to keep running both suites: these pins read package.json and jest.config.js and refuse a script, a testMatch or a worker p… |
@@ -444,6 +444,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/collection-command-at-record-address.test.tsx | jest | composition | 3 | 18061 | 17 | 0 | 0 of 3 | — | 0 | keep | The two refusals are one rule read from each side. The record-address test shows a command about one record refused at the collection's address; this one shows… |
 | tests/screens/command-refusal-exit.test.tsx | jest | composition | 2 | 18424 | 21 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) closing a command refusal returns to the preceding screen when there is one |
 | tests/screens/compact-pictures.test.tsx | jest | composition | 20 | 20286 | 1330 |  | not measured | — | 0 | keep | (no first comment; first test title) one metadata read prepares header-authorized private bytes without a native cache |
+| tests/screens/composed-pictures.test.tsx | jest | composition | 30 | 25481 | 319 |  | not measured | — | 0 | keep | (no first comment; first test title) composed references coalesce reads while their rendered slots settle independently beside a stored file |
 | tests/screens/custom-renderer-catalog-withdrawal.test.tsx | jest | composition | 2 | 18420 | 59 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom detail renderer is unreachable after its catalog entry is withdrawn |
 | tests/screens/custom-renderer-session-isolation.test.tsx | jest | composition | 2 | 19295 | 438 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a custom renderer follows only the current session catalog |
 | tests/screens/editing-a-translation-keeps-the-source-language.test.tsx | jest | composition | 1 | 24330 | 180 |  | not measured | — | 0 | keep | A translated read cannot be sent back as the source-language value on Save. |

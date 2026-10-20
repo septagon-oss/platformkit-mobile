@@ -11,6 +11,7 @@ import {
   compactPicture,
   entryIcon,
   pictureId,
+  composedReference,
   type People,
   type Person,
   type PictureStates,
@@ -300,6 +301,7 @@ function referenceWord(f: Field, format: Formatting): string {
 
 /** display is a value as a person reads it; nothing at all is a dash. */
 export function display(f: Field, v: unknown, format: Formatting, names?: Names): string {
+  if (f.type === "picture") return "";
   const person = personValue(f, v, format, names);
   if (person) return person.description || "—";
   if (f.type === "bool")
@@ -373,7 +375,7 @@ function namedBy(e: Entry, fields: readonly Field[]): Field | undefined {
 export function primary(e: Entry): Field | undefined {
   return namedBy(
     e,
-    e.fields.filter((f) => !neverShown(f)),
+    e.fields.filter((f) => !neverShown(f) && f.type !== "picture"),
   );
 }
 
@@ -446,7 +448,9 @@ export const badgeTone = (tone: HintTone): "ok" | "warning" | "danger" | "info" 
 export const statusField = (e: Entry): Field | undefined =>
   e.hints?.statusField === undefined
     ? undefined
-    : e.fields.find((f) => f.name === e.hints?.statusField && !neverShown(f));
+    : e.fields.find(
+        (f) => f.name === e.hints?.statusField && f.type !== "picture" && !neverShown(f),
+      );
 
 /**
  * rowContent is a field's own answer about what a row may *say*: silence about its
@@ -484,7 +488,7 @@ export const onList = (f: Field): boolean =>
  * it cannot disagree about the answer.
  */
 const rowFields = (e: Entry): readonly Field[] =>
-  e.fields.filter((f) => f.name !== "id" && onList(f));
+  e.fields.filter((f) => f.name !== "id" && f.type !== "picture" && onList(f));
 
 /**
  * rowPrimary is the field a list leads with and calls a row by: the same chain as
@@ -537,7 +541,11 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
     // `limit` binds here too: a declaration says which values and in which order,
     // not that a phone has room for a third.
     return declared
-      .flatMap((name) => e.fields.filter((f) => f.name === name && rowContent(f) && !shownTwice(f)))
+      .flatMap((name) =>
+        e.fields.filter(
+          (f) => f.name === name && f.type !== "picture" && rowContent(f) && !shownTwice(f),
+        ),
+      )
       .slice(0, limit);
   const rank = (f: Field): number => {
     if (f.enum && f.enum.length > 0) return 0;
@@ -595,7 +603,7 @@ export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | 
 
 /** printed is a field only while a line can print its value: a rich text body has no printed form. */
 function printed(f: Field | undefined): Field | undefined {
-  return f !== undefined && f.widget === "richtext" ? undefined : f;
+  return f !== undefined && (f.widget === "richtext" || f.type === "picture") ? undefined : f;
 }
 
 /**
@@ -860,7 +868,9 @@ export interface RecordBlock {
  */
 export function coverPicture(e: Entry): Field | undefined {
   const name = e.hints?.coverField;
-  return name === undefined ? undefined : e.fields.find((f) => f.name === name && !neverShown(f));
+  return name === undefined
+    ? undefined
+    : e.fields.find((f) => f.name === name && f.type !== "picture" && !neverShown(f));
 }
 
 /**
@@ -1067,6 +1077,7 @@ function shownFields(e: Entry, row: Row, keep: (f: Field) => boolean): readonly 
   return e.fields.filter(
     (f) =>
       !neverShown(f) &&
+      f.type !== "picture" &&
       !drawn.has(f.name) &&
       !informationFields.includes(f.name) &&
       keep(f) &&
@@ -1130,12 +1141,15 @@ export function recordSections(
 function informationHeld(e: Entry, row: Row): readonly Field[] {
   const drawn = headerDrawn(e);
   const stamps = informationFields.flatMap((name) =>
-    e.fields.filter((f) => f.name === name && !neverShown(f) && hasValue(f, row[f.name])),
+    e.fields.filter(
+      (f) => f.name === name && f.type !== "picture" && !neverShown(f) && hasValue(f, row[f.name]),
+    ),
   );
   const kept = e.fields.filter(
     (f) =>
       f.hints?.visibility === "detail" &&
       !neverShown(f) &&
+      f.type !== "picture" &&
       !drawn.has(f.name) &&
       !informationFields.includes(f.name) &&
       hasValue(f, row[f.name]),
@@ -1520,7 +1534,7 @@ export function formControls(
 ): readonly Control[] {
   const out: Control[] = [];
   for (const f of e.fields) {
-    if (f.readOnly) continue;
+    if (f.readOnly || f.type === "picture") continue;
     // A field the author hid is plumbing: it stays in the schema, the JSON and
     // the PATCH, but not in the sheet. A *required* field is the exception —
     // taking the person's only path to a submittable create away is the write
@@ -1562,12 +1576,16 @@ export function writeControls(
 ): readonly Control[] {
   // An immutable field is drawn greyed: no keystroke can name it, so the read's own
   // value is what travels, and the control stays greyed for whoever draws it.
-  const out = drawn.map((c) =>
-    c.readOnly && row !== undefined && c.field.name in row ? { ...c, echo: row[c.field.name] } : c,
-  );
+  const out = drawn
+    .filter((c) => c.field.type !== "picture")
+    .map((c) =>
+      c.readOnly && row !== undefined && c.field.name in row
+        ? { ...c, echo: row[c.field.name] }
+        : c,
+    );
   const named = new Set(out.map((c) => c.field.name));
   for (const f of e.fields) {
-    if (f.readOnly || named.has(f.name)) continue;
+    if (f.readOnly || f.type === "picture" || named.has(f.name)) continue;
     if (row === undefined || !(f.name in row)) continue;
     // `value` stays the editor's spelling for the one answer the row cannot give —
     // a JSON `null` echoes nothing, and the box's own blank is what is left to send.
@@ -1584,7 +1602,9 @@ export function writeControls(
  * confirmation rather than a sheet.
  */
 export function commandControls(c: Command): readonly Control[] {
-  return c.fields.map((f) => control(f, f.default ?? "", false));
+  return c.fields
+    .filter((f) => f.type !== "picture")
+    .map((f) => control(f, f.default ?? "", false));
 }
 
 /**
@@ -2026,7 +2046,8 @@ export function sortFields(e: Entry): readonly Field[] {
     !informationFields.includes(f.name) &&
     f.type !== "bool" &&
     f.type !== "list" &&
-    f.type !== "uuid";
+    f.type !== "uuid" &&
+    f.type !== "picture";
   const declared = e.hints?.sortable;
   if (declared !== undefined)
     return declared.flatMap((name) => e.fields.filter((f) => f.name === name && offerable(f)));
@@ -2077,7 +2098,7 @@ export function sortOptions(
  * why `detail` still answers yes and `hidden` answers no.
  */
 export const filterFields = (e: Entry): readonly Field[] =>
-  e.fields.filter((f) => f.enum && f.enum.length > 0 && !neverShown(f));
+  e.fields.filter((f) => f.type !== "picture" && f.enum && f.enum.length > 0 && !neverShown(f));
 
 /** queryFilters spells an Order's filters the way the API takes them. */
 export const queryFilters = (order: Order): readonly string[] =>
@@ -2236,7 +2257,7 @@ export function thumbnailField(entry: Entry): Field | undefined {
       (f) =>
         f.name === name &&
         f.present === "image" &&
-        (f.type === "uuid" || f.type === "string") &&
+        (f.type === "uuid" || f.type === "string" || f.type === "picture") &&
         onList(f),
     );
   return eligible(entry.hints?.thumbnailField) ?? eligible(entry.hints?.coverField);
@@ -2250,7 +2271,8 @@ export function rowMedia(
   const icon = entryIcon(entry);
   const field = thumbnailField(entry);
   const id = field ? row[field.name] : undefined;
-  if (images && pictureId(id)) {
+  const valid = field?.type === "picture" ? composedReference(id) : pictureId(id);
+  if (images && valid && typeof id === "string") {
     const image = compactPicture(
       id,
       states,

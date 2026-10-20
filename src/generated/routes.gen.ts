@@ -72,6 +72,23 @@ const routes = [
   },
   {
     method: "GET",
+    pattern: new RegExp("^/api/v1/app/stream$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.appStream({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.appStream<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
     pattern: new RegExp("^/api/v1/app/summary$"),
     statuses: [200],
     json: true,
@@ -973,6 +990,23 @@ const routes = [
   },
   {
     method: "POST",
+    pattern: new RegExp("^/api/v1/content/contents/[^/]+/restore$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.contentContentRestore({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.contentContentRestore<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
     pattern: new RegExp("^/api/v1/content/contents/[^/]+/review-translation$"),
     statuses: [200],
     json: true,
@@ -1053,6 +1087,23 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.contentContentUntranslate<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/content/contents/[^/]+/versions$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.contentContentVersions({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.contentContentVersions<true>>[0]);
       return result;
     },
   },
@@ -1308,6 +1359,57 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.notificationNotificationList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/notification/notifications/devices$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.notificationDeviceList({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.notificationDeviceList<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/notification/notifications/devices$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.notificationDeviceRegister({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.notificationDeviceRegister<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/notification/notifications/devices/[^/]+/remove$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.notificationDeviceRemove({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.notificationDeviceRemove<true>>[0]);
       return result;
     },
   },

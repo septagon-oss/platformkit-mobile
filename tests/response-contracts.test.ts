@@ -186,7 +186,7 @@ test("catalog normalization preserves generated metadata and only defaults decla
   assert.equal(catalog.resources[0]?.fields[0]?.present, "badge");
   assert.equal(catalog.resources[0]?.fields[0]?.enum, undefined);
   assert.deepEqual(catalog.resources[0]?.commands, []);
-  for (const catalogVersion of [0, "2", 1.5, 3])
+  for (const catalogVersion of [0, "2", 1.5, 4])
     assert.throws(() => parseCatalog({ catalogVersion, resources: [] }), /catalogVersion/);
   assert.throws(() => parseCatalog({ catalogVersion: 2 }), /resources/);
   assert.throws(

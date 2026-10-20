@@ -1,0 +1,40 @@
+{
+  "catalogVersion": 3,
+  "pictures": {
+    "composedSource": "/api/v1/picture/pictures/{reference}/content"
+  },
+  "resources": [
+    {
+      "module": "note",
+      "entity": "note",
+      "path": "/api/v1/note/notes",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "readOnly": true
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "drawing",
+          "type": "picture",
+          "readOnly": true,
+          "present": "image"
+        }
+      ],
+      "presentation": {
+        "icon": "document",
+        "thumbnailField": "drawing"
+      },
+      "operations": [
+        "list",
+        "read"
+      ],
+      "writable": false,
+      "commands": []
+    }
+  ]
+}

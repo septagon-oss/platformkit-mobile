@@ -440,7 +440,7 @@ test("the hinted golden is the pinned copy plus what that copy does not yet decl
     throw new Error(`the declared fixture noticed ${at} ${why}`);
   });
   const pinned = parseCatalog(golden());
-  assert.equal(declared.version, 2);
+  assert.equal(declared.version, 3);
   assert.equal(declared.resources.length, pinned.resources.length);
   assert.equal("hints" in declared.resources[0]!, true);
   // Everything but the presentation objects is the pinned document, field for

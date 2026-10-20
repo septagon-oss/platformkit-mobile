@@ -95,6 +95,7 @@ export const zContent = z.object({
   id: z.string().readonly().optional(),
   kind: z.enum(["page", "post"]).optional().default("post"),
   publishedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  revision: z.number().int().readonly().optional(),
   slug: z.string().min(1).max(200),
   status: z.enum(["draft", "published", "archived"]).optional().default("draft"),
   title: z.string().min(1).max(200),
@@ -138,6 +139,21 @@ export const zDelivery = z.object({
   state: z.enum(["queued", "in_flight", "sent", "failed", "dropped"]).readonly(),
   statusCode: z.number().int().readonly(),
   updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zDevice = z.object({
+  $schema: z.url().readonly().optional(),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  id: z.string().readonly().optional(),
+  platform: z.string(),
+  recipientId: z.uuid().readonly(),
+  token: z.string().max(8192),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zDevicesDoneOutputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  done: z.boolean(),
 });
 
 export const zDoneOutputBody = z.object({
@@ -563,6 +579,14 @@ export const zPageDeliveryBody = z.object({
   total: z.number().int(),
 });
 
+export const zPageDeviceBody = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zDevice).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageEndpointBody = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zEndpoint).nullable(),
@@ -648,6 +672,7 @@ export const zPatchInputBody = z.object({
 });
 
 export const zPictures = z.object({
+  composedSource: z.string().optional(),
   source: z.string(),
   widths: z.array(z.number().int()).nullish(),
 });
@@ -767,6 +792,12 @@ export const zRecoveryCodesOutputBody = z.object({
   factor: zFactor.optional(),
 });
 
+export const zRegisterDeviceInputBody = z.object({
+  $schema: z.url().readonly().optional(),
+  platform: z.string().max(16),
+  token: z.string().max(8192),
+});
+
 export const zRegistrationDoor = z.object({
   address: z.string(),
   kind: z.string(),
@@ -859,6 +890,13 @@ export const zResourceTypeList = z.object({
   schemas: z.array(z.string()).nullable(),
   startIndex: z.number().int(),
   totalResults: z.number().int(),
+});
+
+export const zRestoreArgumentContent = z.object({
+  $schema: z.url().readonly().optional(),
+  expectedRevision: z.number().int().optional(),
+  locale: z.string().optional(),
+  version: z.number().int(),
 });
 
 export const zRetainBody = z.object({
@@ -1238,6 +1276,26 @@ export const zVerifyFactorInputBody = z.object({
   email: z.email().max(320),
 });
 
+export const zVersion = z.object({
+  actor: z.uuid(),
+  at: z.iso.datetime({ offset: true }),
+  changed: z.array(z.string()).nullable(),
+  entity: z.string(),
+  fields: z.unknown(),
+  id: z.uuid(),
+  locale: z.string(),
+  module: z.string(),
+  reason: z.string(),
+  record: z.uuid(),
+  version: z.number().int(),
+});
+
+export const zVersionPage = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zVersion).nullable(),
+  next: z.number().int(),
+});
+
 export const zAccessBodyWritable = z.object({
   path: z.string().max(512).optional(),
   permission: z.string().max(64),
@@ -1302,6 +1360,15 @@ export const zCreateBodyWritable = z.object({
 
 export const zDeleteWritable = z.object({
   confirm: z.string().max(63),
+});
+
+export const zDeviceWritable = z.object({
+  platform: z.string(),
+  token: z.string().max(8192),
+});
+
+export const zDevicesDoneOutputBodyWritable = z.object({
+  done: z.boolean(),
 });
 
 export const zDoneOutputBodyWritable = z.object({
@@ -1544,6 +1611,13 @@ export const zPageDeliveryBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPageDeviceBodyWritable = z.object({
+  items: z.array(zDeviceWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageEndpointBodyWritable = z.object({
   items: z.array(zEndpointWritable).nullable(),
   limit: z.number().int(),
@@ -1687,6 +1761,11 @@ export const zRecoveryCodesOutputBodyWritable = z.object({
   factor: zFactorWritable.optional(),
 });
 
+export const zRegisterDeviceInputBodyWritable = z.object({
+  platform: z.string().max(16),
+  token: z.string().max(8192),
+});
+
 export const zRenameWritable = z.object({
   name: z.string().min(1).max(200),
 });
@@ -1720,6 +1799,12 @@ export const zResourceTypeListWritable = z.object({
   schemas: z.array(z.string()).nullable(),
   startIndex: z.number().int(),
   totalResults: z.number().int(),
+});
+
+export const zRestoreArgumentContentWritable = z.object({
+  expectedRevision: z.number().int().optional(),
+  locale: z.string().optional(),
+  version: z.number().int(),
 });
 
 export const zRetainBodyWritable = z.object({
@@ -1948,6 +2033,11 @@ export const zVerifyFactorInputBodyWritable = z.object({
   email: z.email().max(320),
 });
 
+export const zVersionPageWritable = z.object({
+  items: z.array(zVersion).nullable(),
+  next: z.number().int(),
+});
+
 export const zAppAccessRequestBody = zAccessBodyWritable;
 
 export const zAppAccessRequestHeaders = z.object({
@@ -1972,6 +2062,10 @@ export const zAppOperationOutcomeResponse = zReceipt;
  * OK
  */
 export const zAppResourcesResponse = zCatalog;
+
+export const zAppStreamQuery = z.object({
+  topics: z.array(z.string()).nullish(),
+});
 
 /**
  * OK
@@ -2509,6 +2603,21 @@ export const zContentContentPublishPath = z.object({
  */
 export const zContentContentPublishResponse = zContent;
 
+export const zContentContentRestoreBody = zRestoreArgumentContentWritable;
+
+export const zContentContentRestoreHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+export const zContentContentRestorePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zContentContentRestoreResponse = zContent;
+
 export const zContentContentReviewTranslationBody = zTranslationFieldsBodyWritable;
 
 export const zContentContentReviewTranslationHeaders = z.object({
@@ -2583,6 +2692,21 @@ export const zContentContentUntranslatePath = z.object({
  * OK
  */
 export const zContentContentUntranslateResponse = zContent;
+
+export const zContentContentVersionsPath = z.object({
+  id: z.uuid(),
+});
+
+export const zContentContentVersionsQuery = z.object({
+  locale: z.string().optional(),
+  before: z.number().int().optional(),
+  limit: z.number().int().optional(),
+});
+
+/**
+ * OK
+ */
+export const zContentContentVersionsResponse = zVersionPage;
 
 export const zFileFileListQuery = z.object({
   limit: z.number().int().min(1).max(200).optional().default(50),
@@ -2747,6 +2871,41 @@ export const zNotificationNotificationListQuery = z.object({
  * OK
  */
 export const zNotificationNotificationListResponse = zPageNotificationBody;
+
+export const zNotificationDeviceListQuery = z.object({
+  limit: z.number().int().min(1).max(200).optional().default(50),
+  offset: z.number().int().min(0).optional(),
+  sort: z.string().optional(),
+});
+
+/**
+ * OK
+ */
+export const zNotificationDeviceListResponse = zPageDeviceBody;
+
+export const zNotificationDeviceRegisterBody = zRegisterDeviceInputBodyWritable;
+
+export const zNotificationDeviceRegisterHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+/**
+ * OK
+ */
+export const zNotificationDeviceRegisterResponse = zDevice;
+
+export const zNotificationDeviceRemoveHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+export const zNotificationDeviceRemovePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zNotificationDeviceRemoveResponse = zDevicesDoneOutputBody;
 
 export const zNotificationNotificationReadHeaders = z.object({
   "Idempotency-Key": z.string().optional(),

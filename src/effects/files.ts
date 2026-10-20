@@ -45,23 +45,20 @@ export function fileResource(input: {
   // that stands in for them — its id, never its secret, so a cache identity is not a
   // credential. Either way a picture decoded under one key is never painted under
   // another, and a read with neither is a read not made.
+  const pictures = input.pictures?.source ? input.pictures : undefined;
   const scope = heldScope(input.server, input.userId ?? input.key?.id ?? "");
-  if (scope === undefined || (!input.entry && !input.pictures) || !input.key) return undefined;
-  if (input.pictures && (!input.userId || !pictureId(input.id))) return undefined;
-  const width = input.pictures
-    ? input.pictures.widths?.includes(input.width)
-      ? input.width
-      : 0
-    : input.width;
-  const path = input.pictures
-    ? input.pictures.source.replace("{id}", input.id) + (width ? `?w=${width}` : "")
+  if (scope === undefined || (!input.entry && !pictures) || !input.key) return undefined;
+  if (pictures && (!input.userId || !pictureId(input.id))) return undefined;
+  const width = pictures ? (pictures.widths?.includes(input.width) ? input.width : 0) : input.width;
+  const path = pictures
+    ? pictures.source!.replace("{id}", input.id) + (width ? `?w=${width}` : "")
     : contentAddress(input.entry!, input.id, width);
   const namespace = JSON.stringify([
     scope.server,
     scope.userId,
     input.key.id,
     input.generation ?? "",
-    input.pictures?.source ?? input.entry?.path,
+    pictures?.source ?? input.entry?.path,
   ]);
   const cacheKey = JSON.stringify([namespace, input.id, input.version, width, input.attempt]);
   return {
@@ -73,7 +70,7 @@ export function fileResource(input: {
     uri: `${scope.server}${path}`,
     cacheKey,
     cachePolicy:
-      input.public && input.version && input.generation && input.pictures && input.userId
+      input.public && input.version && input.generation && pictures && input.userId
         ? "memory"
         : "none",
     // One credential per request, spelled out because the loader is not this transport:

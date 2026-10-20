@@ -1,26 +1,6 @@
-// api.ts is every request the shell makes. The kernel's routes are the same
-// ones the web shell's screens call — list and read at the entry's own path,
-// and every write at the address the entry names for writes (writePath in
-// src/core/derive.ts, which is the entry's own path unless the server printed
-// another) — so there is no second API to keep honest.
-//
-// The credential a signed-in phone works with is a bearer key of the auth
-// module's api_tokens, never the session cookie. A native client is not a
-// browser: it presents `Authorization: Bearer` on its requests and reads no
-// Set-Cookie, because a request that carries both a cookie and a bearer is
-// answered as anonymous (kit/httpx/authenticate.go's ambiguousCredential), and
-// the kernel's CSRF rule accepts a caller that sends neither Sec-Fetch-Site nor
-// Origin (kit/httpx.SameSite).
-//
-// The session a sign-in opens is held, in memory only, for as long as the key it
-// minted is held — never stored, never sent to work. It is what the four doors
-// that answer to the holder themselves take: the mint, who-this-is, the key's own
-// revoke, and the sign-out that closes it. A scoped key is refused at every
-// `httpx.SignedIn()` operation (kit/httpx/authorize.go: "this credential carries
-// its own scope, and this operation answers only to its holder"), so a phone that
-// kept only the key could neither ask who it is nor stop its own key. A key
-// restored from storage comes back with no session, which is why signing out says
-// whether the server stopped the key or only this phone forgot it.
+// JSON and stored-file requests carry the connection's scoped bearer.
+// SignedIn doors, including composed pictures, carry its private in-memory
+// sign-in session alone. Restored keys have no session; nothing persists it.
 import {
   type Catalog,
   type Entry,
@@ -31,6 +11,7 @@ import {
 import { row, page, identity, trail, issuedToken, issuePath } from "../core/responses";
 import { commandPath, writePath } from "../core/derive";
 import { keyRefusal } from "../core/outbox";
+import { composedReference, pictureTemplate } from "../core/pictures";
 import { factorRequired, unrecognisedCaller } from "../core/signInOutcome";
 import { type DeclaredPermission, delegableScopes } from "../core/scopes";
 import { declaredGrants as kitGrants } from "../generated/grants.gen";
@@ -284,6 +265,12 @@ export function langQuery(options?: RequestOptions): string {
 }
 
 export interface Api {
+  /** composedPicture reads one declared SVG with the in-memory sign-in session. Invalid input or no session refuses before HTTP. */
+  composedPicture(
+    source: string,
+    reference: string,
+    options?: { readonly signal?: AbortSignal },
+  ): Promise<string>;
   /** Generated operations bound to this connection, each with response validation. */
   readonly operations: Operations;
   /** Module-owned JSON; every successful response passes the caller's validator. */
@@ -476,8 +463,7 @@ export function createApi(
   /**
    * session is the cookie the sign-in that minted this connection's key answered
    * with, held only while that key is held and only in memory. A key read back out
-   * of storage arrives here with none: nothing stores a session, and the doors
-   * above are the only ones it stands at.
+   * of storage arrives here with none. Only SignedIn operations use it.
    */
   let session: string | undefined;
   /**
@@ -532,6 +518,7 @@ export function createApi(
       key?: Bearer | undefined;
     },
     idempotencyKey?: string,
+    responseMode: "json" | "svg" = "json",
   ): Promise<{ text: string; status: number; headers: Headers; bytes?: ArrayBuffer }> {
     apiPath(path);
     if (method === "GET" && body !== undefined)
@@ -540,7 +527,7 @@ export function createApi(
     const headers: Record<string, string> = prepared
       ? Object.fromEntries(prepared.headers.entries())
       : {};
-    headers.Accept = "application/json";
+    headers.Accept = responseMode === "svg" ? "image/svg+xml" : "application/json";
     // Whose words to answer in. A translatable record the server holds in another
     // language is served in the tenant's own and says so (`_i18n`); with no preference
     // printed there is nothing for the server to have honoured.
@@ -574,6 +561,10 @@ export function createApi(
       stop.abort();
     }, timeout);
     const init: RequestInit = { method, headers, credentials: "omit", signal: stop.signal };
+    if (responseMode === "svg") {
+      init.cache = "no-store";
+      init.redirect = "error";
+    }
     let status = 0;
     let text = "";
     let responseHeaders = new Headers();
@@ -599,9 +590,10 @@ export function createApi(
       status = res.status;
       responseHeaders = res.headers;
       if (
-        prepared &&
-        res.headers.get("Content-Type") &&
-        !res.headers.get("Content-Type")?.includes("json") &&
+        (responseMode === "svg" ||
+          (prepared &&
+            res.headers.get("Content-Type") &&
+            !res.headers.get("Content-Type")?.includes("json"))) &&
         res.status < 400
       )
         bytes = await res.arrayBuffer();
@@ -931,6 +923,42 @@ export function createApi(
   }
 
   return {
+    async composedPicture(source, reference, options) {
+      if (!pictureTemplate(source, "reference") || !composedReference(reference))
+        throw new TypeError("Expected a declared composed picture and canonical reference.");
+      if (!session) throw new ApiError(403, "");
+      const path = source.replace("{reference}", reference);
+      const result = await call(
+        "GET",
+        path,
+        undefined,
+        options?.signal,
+        { body: null, headers: new Headers(), cookie: session },
+        undefined,
+        "svg",
+      );
+      const mediaType = result.headers.get("Content-Type")?.split(";")[0]?.trim().toLowerCase();
+      if (
+        result.status !== 200 ||
+        mediaType !== "image/svg+xml" ||
+        !result.bytes ||
+        result.bytes.byteLength > 1024 * 1024
+      )
+        throw new ResponseError(result.status, "Invalid picture response.");
+      let xml: string;
+      try {
+        xml = decodeURIComponent(
+          Array.from(
+            new Uint8Array(result.bytes),
+            (byte) => `%${byte.toString(16).padStart(2, "0")}`,
+          ).join(""),
+        );
+      } catch {
+        throw new ResponseError(result.status, "Invalid picture response.");
+      }
+      if (!xml.trim()) throw new ResponseError(result.status, "Invalid picture response.");
+      return xml;
+    },
     request,
     operations: bindOperations(documented),
     bearer: () => bearer,

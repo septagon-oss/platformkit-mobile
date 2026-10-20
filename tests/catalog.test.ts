@@ -106,7 +106,7 @@ test("a malformed document is refused by name", () => {
 test("the stamp decides what the build does with the answer", () => {
   // The golden file is the contract this build was written against, so its shape is
   // in range by definition — and if the copy ever stops saying so, the copy changed.
-  assert.equal(parseCatalog(fixture()).version, 2);
+  assert.equal(parseCatalog(fixture()).version, 3);
 
   // A server old enough not to stamp is a server this shell was built against, and
   // refusing it would turn an older deployment into a broken app. The commands
@@ -260,16 +260,14 @@ test("the shell version is a whole number the screens may depend on", () => {
 // The commit testdata/catalog.source.json records. It is written here as a literal on
 // purpose: a re-pin should be a diff somebody reads, and a fixture that moved under a
 // test that only ever re-read it would report agreement about bytes nobody fetched.
-const PINNED = "f57c93a642be9c56711c6f8462766eddf0306950";
+const PINNED = "aa35944f576e143190ea67ba12bf812dd1b4cc0c";
 
 const PIN_SHORT = PINNED.slice(0, 8);
 
 test("the copy names the commit it was fetched from, and the bytes still match it", async () => {
   // Every screen is derived from this fixture, so "copied by hand" has to stay a
   // checked claim: the hash is why editing the copy to make a test pass fails instead.
-  // The revision is main, which is where the version-2 stamp lives; no tag carries it
-  // yet, so the record names a commit, which cannot move under the bytes the way a
-  // branch would, and provenance() reads it as its own tag.
+  // The receipt names an immutable commit, and provenance reads it as its own tag.
   await assert.match(await check(), new RegExp(`matches ${PIN_SHORT}`));
   const source = await readSource();
   assert.equal(source.upstream.commit, PINNED);
@@ -421,9 +419,9 @@ const controlPlane = () =>
     ),
   );
 
-test("the copy is a version-2 document and retains its published screen metadata", () => {
+test("the copy is a version-3 document and retains its published screen metadata", () => {
   const c = parseCatalog(fixture());
-  assert.equal(c.version, 2);
+  assert.equal(c.version, 3);
   assert.deepEqual(
     c.resources.map((e) => `${e.module}/${e.entity}`),
     ["note/note", "note/tag", "note/setting"],

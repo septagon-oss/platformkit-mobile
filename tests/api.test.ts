@@ -1,8 +1,8 @@
-import { issuedToken, loginIdentity } from "./fakes/wire";
+import { issuedTokenResponse, loginResponse, issuedToken, loginIdentity } from "./fakes/wire";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { ApiError, createApi } from "../src/effects/api";
+import { acceptLanguage, ApiError, createApi } from "../src/effects/api";
 import { parseCatalog } from "../src/core/catalog";
 import { deriveCopy, failureSubject, formControls, values } from "../src/core/derive";
 import { refusalOf } from "../src/screens/failure";
@@ -535,4 +535,191 @@ test("a command whose printed address needs a row is refused before anything is 
     (e: unknown) => e instanceof TypeError && e.message.includes('command "retire" is answered at'),
   );
   assert.equal(calls.length, 0, "the transport was asked to send an address it never got");
+});
+
+const composedDoor = "/api/v1/picture/pictures/{reference}/content";
+const oracle = readFileSync("testdata/composed-picture.svg", "utf8");
+async function pictureConnection(
+  answer: (input: string, init: RequestInit) => Promise<Response>,
+  options: { factor?: boolean; timeout?: number; refused?: () => void } = {},
+) {
+  const calls: { url: string; init: RequestInit }[] = [];
+  const api = createApi(
+    "https://pictures.example.test/",
+    async (input, init = {}) => {
+      const url = String(input);
+      calls.push({ url, init });
+      if (url.endsWith("/auth/login") || url.endsWith("/auth/challenge/verify"))
+        return loginResponse({
+          headers: { "Set-Cookie": "platformkit_session=synthetic; HttpOnly" },
+        });
+      if (url.endsWith("/auth/tokens")) return issuedTokenResponse();
+      return answer(url, init);
+    },
+    undefined,
+    options.timeout ?? 15000,
+    undefined,
+    undefined,
+    options.refused,
+  );
+  if (options.factor) await api.answerFactor("member@example.test", "123456");
+  else await api.signIn("member@example.test", "synthetic-password");
+  return { api, calls };
+}
+const svgResponse = (body = oracle, init: ResponseInit = {}) =>
+  new Response(body, {
+    status: 200,
+    headers: { "Content-Type": "image/svg+xml; charset=utf-8" },
+    ...init,
+  });
+
+test("a declared composed GET sends the sign-in cookie alone and JSON still sends bearer alone", async () => {
+  const { api, calls } = await pictureConnection(async (url) =>
+    url.endsWith("/content")
+      ? svgResponse()
+      : new Response("{}", { headers: { "Content-Type": "application/json" } }),
+  );
+  assert.equal(await api.composedPicture(composedDoor, "c1.c2hhcGUvYWxwaGE"), oracle);
+  const request = calls[2]!;
+  assert.equal(
+    request.url,
+    "https://pictures.example.test/api/v1/picture/pictures/c1.c2hhcGUvYWxwaGE/content",
+  );
+  assert.deepEqual(request.init, {
+    method: "GET",
+    headers: {
+      Accept: "image/svg+xml",
+      "Accept-Language": acceptLanguage(),
+      Cookie: "platformkit_session=synthetic",
+    },
+    credentials: "omit",
+    cache: "no-store",
+    redirect: "error",
+    signal: request.init.signal,
+  });
+  await api.request("GET", "/api/v1/note/notes", (v) => v);
+  const headers = calls[3]!.init.headers as Record<string, string>;
+  assert.equal(headers.Authorization, `Bearer ${issuedToken.token}`);
+  assert.equal(headers.Cookie, undefined);
+});
+
+test("factor sign-in owns its image session and image Set-Cookie never replaces it", async () => {
+  const { api, calls } = await pictureConnection(
+    async () =>
+      svgResponse(oracle, {
+        headers: {
+          "Content-Type": "IMAGE/SVG+XML; charset=UTF-8",
+          "Set-Cookie": "platformkit_session=replacement",
+        },
+      }),
+    { factor: true },
+  );
+  await api.composedPicture(composedDoor, "c1.YQ");
+  await api.composedPicture(composedDoor, "c1.w6k");
+  assert.equal(calls[0]!.url, "https://pictures.example.test/api/v1/auth/challenge/verify");
+  for (const call of calls.slice(2)) {
+    const headers = call.init.headers as Record<string, string>;
+    assert.equal(headers.Cookie, "platformkit_session=synthetic");
+    assert.equal(headers.Authorization, undefined);
+  }
+});
+
+test("restored keys and invalid composed inputs never send content requests", async () => {
+  let sent = 0;
+  const restored = createApi(
+    "https://pictures.example.test",
+    async () => {
+      sent++;
+      return new Response("{}", { headers: { "Content-Type": "application/json" } });
+    },
+    { token: "pk_live_restored", id: "restored-key" },
+  );
+  await assert.rejects(
+    restored.composedPicture(composedDoor, "c1.YQ"),
+    (e: unknown) => e instanceof ApiError && e.status === 403,
+  );
+  assert.equal(sent, 0);
+  await restored.request("GET", "/api/v1/note/notes", (v) => v);
+  assert.equal(sent, 1);
+  const { api, calls } = await pictureConnection(async () => svgResponse());
+  for (const [door, reference] of [
+    ["", "c1.YQ"],
+    ["https://remote.test/{reference}", "c1.YQ"],
+    [composedDoor, "c1.YR"],
+    [composedDoor, "uuid"],
+  ])
+    await assert.rejects(api.composedPicture(door!, reference!), TypeError);
+  assert.equal(calls.length, 2);
+});
+
+test("composed HTTP refusals return no XML and only a 401 notifies session expiry", async () => {
+  for (const status of [401, 403, 404, 410, 422, 429, 503]) {
+    let expired = 0;
+    const { api, calls } = await pictureConnection(
+      async () => new Response("unavailable", { status }),
+      { refused: () => expired++ },
+    );
+    await assert.rejects(
+      api.composedPicture(composedDoor, "c1.YQ"),
+      (e: unknown) => e instanceof ApiError && e.status === status,
+    );
+    assert.equal(expired, status === 401 ? 1 : 0);
+    assert.equal(calls.length, 3);
+  }
+});
+
+test("SVG response shape and received byte limit refuse incomplete or unexpected answers", async () => {
+  for (const response of [
+    () => new Response(null, { status: 204 }),
+    () => new Response(oracle, { status: 206 }),
+    () => new Response(null, { status: 304 }),
+    () => new Response(oracle, { headers: { "Content-Type": "text/html" } }),
+    () => svgResponse(""),
+    () => svgResponse(" \n\t"),
+    () =>
+      svgResponse("é".repeat(524288) + "a", {
+        headers: { "Content-Type": "image/svg+xml", "Content-Length": "1" },
+      }),
+    () => new Response(new Uint8Array([255]), { headers: { "Content-Type": "image/svg+xml" } }),
+  ]) {
+    const { api } = await pictureConnection(async () => response());
+    await assert.rejects(api.composedPicture(composedDoor, "c1.YQ"), /Invalid picture response/);
+  }
+  const boundary = oracle + " ".repeat(1048576 - Buffer.byteLength(oracle));
+  const { api } = await pictureConnection(async () => svgResponse(boundary));
+  assert.equal(await api.composedPicture(composedDoor, "c1.YQ"), boundary);
+});
+
+test("composed cancellation and deadline include body consumption without retry or partial XML", async () => {
+  for (const mode of ["before", "during", "deadline"]) {
+    const stop = new AbortController();
+    const reading = Promise.withResolvers<void>();
+    const { api, calls } = await pictureConnection(
+      async (_url, init) => {
+        const response = svgResponse();
+        response.arrayBuffer = () =>
+          new Promise((_resolve, reject) => {
+            init.signal?.addEventListener("abort", () => reject(new Error("aborted")), {
+              once: true,
+            });
+            reading.resolve();
+          });
+        return response;
+      },
+      { timeout: mode === "deadline" ? 20 : 15000 },
+    );
+    if (mode === "before") stop.abort();
+    const result = api.composedPicture(composedDoor, "c1.YQ", { signal: stop.signal });
+    if (mode === "during") {
+      await reading.promise;
+      stop.abort();
+    }
+    await assert.rejects(
+      result,
+      mode === "deadline"
+        ? /did not answer within/
+        : (e: unknown) => e instanceof Error && e.name === "AbortError",
+    );
+    assert.equal(calls.length, mode === "before" ? 2 : 3);
+  }
 });

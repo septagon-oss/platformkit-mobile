@@ -276,9 +276,9 @@
  "totals": {
   "contract": {
    "files": 37,
-   "cases": 224,
-   "ms": 77056,
-   "testsMs": 47554.80000000001,
+   "cases": 229,
+   "ms": 74421,
+   "testsMs": 47263.40000000001,
    "runners": {
     "node": 37
    },
@@ -286,9 +286,9 @@
   },
   "behaviour": {
    "files": 257,
-   "cases": 1200,
-   "ms": 2098213,
-   "testsMs": 69814.30000000002,
+   "cases": 1217,
+   "ms": 2102322,
+   "testsMs": 69127.60000000002,
    "runners": {
     "jest": 89,
     "node": 168
@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 120,
-   "cases": 374,
-   "ms": 2782654,
-   "testsMs": 43856,
+   "files": 121,
+   "cases": 404,
+   "ms": 2808135,
+   "testsMs": 44175,
    "runners": {
-    "jest": 120
+    "jest": 121
    },
    "unreachable": 0
   },
@@ -966,10 +966,10 @@
    "runner": "node",
    "layer": "contract",
    "cases": 26,
-   "ms": 1102,
-   "testsMs": 354.4,
-   "loaded": 4,
-   "coveredProdLines": 2811,
+   "ms": 1013,
+   "testsMs": 346.6,
+   "loaded": 5,
+   "coveredProdLines": 4674,
    "onlyProdLines": 9,
    "onlyToolLines": 31,
    "onlyFiles": [],
@@ -999,7 +999,7 @@
     "the two provenance records have not forked in the fields they share",
     "the drift report says the six things it can say, and only the true one",
     "the proxy is asked about the module path, not the repository path",
-    "the copy is a version-2 document and retains its published screen metadata",
+    "the copy is a version-3 document and retains its published screen metadata",
     "an entry keeps the write address it was given, and one that has none keeps its own",
     "the extension fixture is the pinned copy plus the case it does not carry",
     "an address without a leading slash is refused naming its own field",
@@ -1015,7 +1015,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 10.971428,
+     "measured": false
     },
     {
      "title": "a command a server spells wrongly is refused by the name of what is wrong",
@@ -1024,7 +1025,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.9906,
+     "measured": false
     },
     {
      "title": "a malformed document is refused by name",
@@ -1033,7 +1035,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.812302,
+     "measured": false
     },
     {
      "title": "the stamp decides what the build does with the answer",
@@ -1042,7 +1045,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.194468,
+     "measured": false
     },
     {
      "title": "a shape newer than this build renders is refused rather than drawn from what it recognises",
@@ -1051,7 +1055,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.293283,
+     "measured": false
     },
     {
      "title": "a stamp that is not a whole version is refused, not repaired",
@@ -1060,7 +1065,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.331353,
+     "measured": false
     },
     {
      "title": "the stamp is read before the body, so a newer server is named as a newer server",
@@ -1069,7 +1075,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.181045,
+     "measured": false
     },
     {
      "title": "an entry that names a renderer pack and a shell keeps everything else it said",
@@ -1078,7 +1085,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.019866,
+     "measured": false
     },
     {
      "title": "an entry that names no renderer carries no renderer member at all",
@@ -1087,7 +1095,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.945438,
+     "measured": false
     },
     {
      "title": "a renderer spelled any wrong way names no pack and refuses no catalogue",
@@ -1096,7 +1105,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 4.51584,
+     "measured": false
     },
     {
      "title": "a member inside a renderer this build has never read is ignored, not refused",
@@ -1105,7 +1115,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.561248,
+     "measured": false
     },
     {
      "title": "the pack a route draws is the one the entry names, and the resource it names",
@@ -1114,7 +1125,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.588849,
+     "measured": false
     },
     {
      "title": "a shell draws the pack it was built for and falls back for one it was not",
@@ -1123,7 +1135,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.700536,
+     "measured": false
     },
     {
      "title": "the shell version is a whole number the screens may depend on",
@@ -1132,7 +1145,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.68642,
+     "measured": false
     },
     {
      "title": "the copy names the commit it was fetched from, and the bytes still match it",
@@ -1141,7 +1155,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 6,
      "onlyFiles": [],
-     "measured": true
+     "ms": 9.439186,
+     "measured": false
     },
     {
      "title": "a provenance record that cannot vouch for the copy is refused by name",
@@ -1150,7 +1165,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 11,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.754575,
+     "measured": false
     },
     {
      "title": "the two provenance records have not forked in the fields they share",
@@ -1159,7 +1175,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.343184,
+     "measured": false
     },
     {
      "title": "the drift report says the six things it can say, and only the true one",
@@ -1168,7 +1185,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 10,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.078203,
+     "measured": false
     },
     {
      "title": "the proxy is asked about the module path, not the repository path",
@@ -1177,16 +1195,13 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 297.557591,
+     "measured": false
     },
     {
-     "title": "the copy is a version-2 document and retains its published screen metadata",
-     "ranAsOne": true,
-     "isolatedMs": 806.7,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "the copy is a version-3 document and retains its published screen metadata",
+     "ms": 1.024023,
+     "measured": false
     },
     {
      "title": "an entry keeps the write address it was given, and one that has none keeps its own",
@@ -1195,7 +1210,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.070289,
+     "measured": false
     },
     {
      "title": "the extension fixture is the pinned copy plus the case it does not carry",
@@ -1204,7 +1220,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.961308,
+     "measured": false
     },
     {
      "title": "an address without a leading slash is refused naming its own field",
@@ -1213,7 +1230,8 @@
      "onlyProdLines": 1,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.174531,
+     "measured": false
     },
     {
      "title": "an address that is not a string is refused as the wrong kind of thing",
@@ -1222,7 +1240,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.670059,
+     "measured": false
     },
     {
      "title": "operations holds the five words, and a sixth is refused by number and by name",
@@ -1231,7 +1250,8 @@
      "onlyProdLines": 5,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.24438,
+     "measured": false
     },
     {
      "title": "a v2 document retains generated metadata without inventing controls",
@@ -1240,7 +1260,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.447276,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -1250,7 +1271,8 @@
    "testsTotal": 26,
    "tier": "push",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts",
@@ -1856,10 +1878,10 @@
    "runner": "node",
    "layer": "contract",
    "cases": 23,
-   "ms": 1883,
-   "testsMs": 1189.3,
-   "loaded": 5,
-   "coveredProdLines": 2791,
+   "ms": 1581,
+   "testsMs": 963.6,
+   "loaded": 6,
+   "coveredProdLines": 4662,
    "onlyProdLines": 0,
    "onlyToolLines": 41,
    "onlyFiles": [],
@@ -1901,7 +1923,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 33.557862,
+     "measured": false
     },
     {
      "title": "a catalogue newer than this build renders is refused by the field that moved",
@@ -1910,7 +1933,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.360366,
+     "measured": false
     },
     {
      "title": "a catalogue that is not a document is refused at the document",
@@ -1919,7 +1943,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.779521,
+     "measured": false
     },
     {
      "title": "a sign-in wall answering 200 is refused where it lands, and the byte count names it",
@@ -1928,7 +1953,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.087301,
+     "measured": false
     },
     {
      "title": "an html page answering 200 is not read as a contract",
@@ -1937,7 +1963,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.677643,
+     "measured": false
     },
     {
      "title": "a refused credential is a credential problem, and nothing else is asked",
@@ -1946,7 +1973,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.412151,
+     "measured": false
     },
     {
      "title": "a tip that is not one commit is not a commit to read at",
@@ -1955,7 +1983,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 2,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.456414,
+     "measured": false
     },
     {
      "title": "an abbreviated tip is refused because an abbreviation moves",
@@ -1964,7 +1993,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.52474,
+     "measured": false
     },
     {
      "title": "a file no longer on main is refused by its own name, at the commit it was asked for",
@@ -1973,7 +2003,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.66527,
+     "measured": false
     },
     {
      "title": "both files are read at the one commit the tip named, never at the moving ref",
@@ -1982,7 +2013,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.542963,
+     "measured": false
     },
     {
      "title": "the token reaches every request and never reaches the log",
@@ -1991,7 +2023,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.363762,
+     "measured": false
     },
     {
      "title": "the job names what it reads, and an empty name is refused before a request",
@@ -2000,7 +2033,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 1,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.526924,
+     "measured": false
     },
     {
      "title": "fromEnv reads exactly the three names the job sets, and nothing else",
@@ -2009,7 +2043,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.328799,
+     "measured": false
     },
     {
      "title": "the document half refuses at the fields that make it a document",
@@ -2018,7 +2053,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.639633,
+     "measured": false
     },
     {
      "title": "the first refused path is the catalogue's, and both documents are still printed",
@@ -2027,7 +2063,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.564804,
+     "measured": false
     },
     {
      "title": "a green run prints the commit first and the answer last",
@@ -2036,7 +2073,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.025256,
+     "measured": false
     },
     {
      "title": "a red run prints the kernel commit and the first refused path",
@@ -2045,7 +2083,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.608866,
+     "measured": false
     },
     {
      "title": "a server that cannot be reached is named with the URL and the cause",
@@ -2054,7 +2093,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.341592,
+     "measured": false
     },
     {
      "title": "the nightly's gate is a script line, and it stays out of the merge gate",
@@ -2063,7 +2103,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.172178,
+     "measured": false
     },
     {
      "title": "the workflow is scheduled, blocking, and asks for nothing but a read",
@@ -2072,7 +2113,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.56251,
+     "measured": false
     },
     {
      "title": "the shipped script exits 0 when this build reads what kernel main serves",
@@ -2081,7 +2123,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 469.320616,
+     "measured": false
     },
     {
      "title": "the shipped script exits 1 on the refusal, and the credential stays out of both streams",
@@ -2090,7 +2133,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 444.404495,
+     "measured": false
     },
     {
      "title": "the tip's own shape is the guard, so a 200 cannot answer for two commits",
@@ -2099,7 +2143,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.704983,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -2109,7 +2154,8 @@
    "testsTotal": 23,
    "tier": "push",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/kernel-pin-step-publishes-nothing-without-provenance.test.ts",
@@ -2371,7 +2417,7 @@
    "file": "tests/pictures.test.ts",
    "runner": "node",
    "layer": "contract",
-   "cases": 13,
+   "cases": 18,
    "rule": "(no first comment; first test title) person tones have independent stable vectors and never use danger",
    "ruleSource": "first test title",
    "tier": "push",
@@ -2379,7 +2425,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 3713,
+   "ms": 1454,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "person tones have independent stable vectors and never use danger",
@@ -2394,79 +2440,109 @@
     "failed or unsupported memory purges do not reject session cleanup",
     "a directory row carries its own stable avatar while ordinary resources keep media tiles",
     "image reads exclude hidden group discs, collapsed facts and unrelated activity people",
-    "the icon an entry declared is answered once, whichever surface asks"
+    "the icon an entry declared is answered once, whichever surface asks",
+    "composed catalogue versions and independent doors retain the readable resource",
+    "composed references are canonical opaque UTF-8 tokens, separate from stored UUIDs",
+    "derived pictures select declared visible media and never become text, controls or writes",
+    "the public composed Oracle has independent provenance",
+    "composed cover defaults obey field visibility and invalid values cannot enter stored detail media"
    ],
    "tests": [
     {
      "title": "person tones have independent stable vectors and never use danger",
-     "ms": 5.307257,
+     "ms": 6.428859,
      "measured": false
     },
     {
      "title": "initials use Unicode code points and never manufacture a name",
-     "ms": 0.56163,
+     "ms": 0.65958,
      "measured": false
     },
     {
      "title": "groups deduplicate IDs in order and distinguish visible remainder from spoken others",
-     "ms": 3.742821,
+     "ms": 4.091195,
      "measured": false
     },
     {
      "title": "picture templates refuse external origins, encodings and ambiguous substitutions",
-     "ms": 10.121311,
+     "ms": 12.008437,
      "measured": false
     },
     {
      "title": "defective widths keep the valid original door and never remember a server's width set",
-     "ms": 1.804171,
+     "ms": 2.369773,
      "measured": false
     },
     {
      "title": "thumbnail selection falls back from a bad field but never from its empty value",
-     "ms": 2.212667,
+     "ms": 2.991963,
      "measured": false
     },
     {
      "title": "portraits follow presentation and visibility rather than a field's name",
-     "ms": 1.444445,
+     "ms": 1.696016,
      "measured": false
     },
     {
      "title": "compact bytes require a bearer, stay on the selected server and scope only public versioned caching",
-     "ms": 1.283026,
+     "ms": 1.640153,
      "measured": false
     },
     {
      "title": "the public served capture retains the picture door, cover, assignee and author contracts",
-     "ms": 139.025869,
+     "ms": 51.941341,
      "measured": false
     },
     {
      "title": "failed or unsupported memory purges do not reject session cleanup",
-     "ms": 8.644517,
+     "ms": 5.530247,
      "measured": false
     },
     {
      "title": "a directory row carries its own stable avatar while ordinary resources keep media tiles",
-     "ms": 1.875693,
+     "ms": 1.688032,
      "measured": false
     },
     {
      "title": "image reads exclude hidden group discs, collapsed facts and unrelated activity people",
-     "ms": 16.470669,
+     "ms": 26.672243,
      "measured": false
     },
     {
      "title": "the icon an entry declared is answered once, whichever surface asks",
-     "ms": 0.952363,
+     "ms": 2.068204,
+     "measured": false
+    },
+    {
+     "title": "composed catalogue versions and independent doors retain the readable resource",
+     "ms": 4.587203,
+     "measured": false
+    },
+    {
+     "title": "composed references are canonical opaque UTF-8 tokens, separate from stored UUIDs",
+     "ms": 8.150171,
+     "measured": false
+    },
+    {
+     "title": "derived pictures select declared visible media and never become text, controls or writes",
+     "ms": 2.675107,
+     "measured": false
+    },
+    {
+     "title": "the public composed Oracle has independent provenance",
+     "ms": 0.52448,
+     "measured": false
+    },
+    {
+     "title": "composed cover defaults obey field visibility and invalid values cannot enter stored detail media",
+     "ms": 1.142713,
      "measured": false
     }
    ],
-   "loaded": 53,
-   "coveredProdLines": 17910,
+   "loaded": 54,
+   "coveredProdLines": 20293,
    "onlyProdLines": null,
-   "testsMs": 193.4
+   "testsMs": 136.9
   },
   {
    "file": "tests/publish-registry-credential.test.ts",
@@ -2789,10 +2865,10 @@
    "runner": "node",
    "layer": "contract",
    "cases": 10,
-   "ms": 1141,
-   "testsMs": 94.1,
-   "loaded": 44,
-   "coveredProdLines": 13542,
+   "ms": 1156,
+   "testsMs": 92.7,
+   "loaded": 52,
+   "coveredProdLines": 19964,
    "onlyProdLines": 22,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -2808,7 +2884,7 @@
     "renderers invoke generated operations over the selected connection and the same validators",
     "a server content type cannot disable validation of a documented JSON success",
     "identity and audit contract failures are never optional-identity or empty-trail fallbacks",
-    "login and logout validate even void public results and reject undocumented success statuses",
+    "sign-in and sign-out validate their own answers and reject undocumented success statuses",
     "generic rows refuse primitives and a malformed write makes one attempt",
     "catalog normalization preserves generated metadata and only defaults declared nullable arrays",
     "the React Native Request polyfill sends JSON and bodyless reads without a body stream",
@@ -2823,7 +2899,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 50.358734,
+     "measured": false
     },
     {
      "title": "renderers invoke generated operations over the selected connection and the same validators",
@@ -2832,7 +2909,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.159243,
+     "measured": false
     },
     {
      "title": "a server content type cannot disable validation of a documented JSON success",
@@ -2841,7 +2919,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.221178,
+     "measured": false
     },
     {
      "title": "identity and audit contract failures are never optional-identity or empty-trail fallbacks",
@@ -2850,16 +2929,13 @@
      "onlyProdLines": 1,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 10.020522,
+     "measured": false
     },
     {
-     "title": "login and logout validate even void public results and reject undocumented success statuses",
-     "ranAsOne": true,
-     "isolatedMs": 1794.1,
-     "onlyProdLines": 8,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "sign-in and sign-out validate their own answers and reject undocumented success statuses",
+     "ms": 10.128331,
+     "measured": false
     },
     {
      "title": "generic rows refuse primitives and a malformed write makes one attempt",
@@ -2868,7 +2944,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 3.702448,
+     "measured": false
     },
     {
      "title": "catalog normalization preserves generated metadata and only defaults declared nullable arrays",
@@ -2877,7 +2954,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 5.478192,
+     "measured": false
     },
     {
      "title": "the React Native Request polyfill sends JSON and bodyless reads without a body stream",
@@ -2886,7 +2964,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 7.362967,
+     "measured": false
     },
     {
      "title": "an empty-body hint cannot skip a documented operation's validator",
@@ -2895,7 +2974,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.711795,
+     "measured": false
     },
     {
      "title": "documented JSON requests refuse unserializable bodies and unsafe paths before fetch",
@@ -2904,7 +2984,8 @@
      "onlyProdLines": 2,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.512157,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -2914,7 +2995,8 @@
    "testsTotal": 10,
    "tier": "push",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/sdk.test.ts",
@@ -3416,11 +3498,11 @@
    "file": "tests/screens/nativeImage.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
-   "cases": 2,
-   "ms": 17291,
-   "testsMs": 1010,
-   "loaded": 107,
-   "coveredProdLines": 4709,
+   "cases": 9,
+   "ms": 20607,
+   "testsMs": 76,
+   "loaded": 130,
+   "coveredProdLines": 2029,
    "onlyProdLines": 0,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -3429,7 +3511,14 @@
    "rule": "(no first comment; first test title) replaced and unmounted image sources cannot report into the active scope",
    "titles": [
     "replaced and unmounted image sources cannot report into the active scope",
-    "viewer receives retained image completions and keeps caption and recovery outside zoom"
+    "viewer receives retained image completions and keeps caption and recovery outside zoom",
+    "composed Oracle bytes render through the installed SVG parser and tree in the current slot",
+    "malformed or rootless composed XML draws nothing and reports only failure: <svg><g></svg>",
+    "malformed or rootless composed XML draws nothing and reports only failure: <g></g>",
+    "malformed or rootless composed XML draws nothing and reports only failure:",
+    "malformed or rootless composed XML draws nothing and reports only failure: no root",
+    "an SVG tree render failure withdraws the picture and reports no ready state",
+    "a replacement SVG render failure reports into its new resource attempt after commit"
    ],
    "tests": [
     {
@@ -3439,7 +3528,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 7,
+     "measured": false
     },
     {
      "title": "viewer receives retained image completions and keeps caption and recovery outside zoom",
@@ -3448,7 +3538,43 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 30,
+     "measured": false
+    },
+    {
+     "title": "composed Oracle bytes render through the installed SVG parser and tree in the current slot",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "malformed or rootless composed XML draws nothing and reports only failure: <svg><g></svg>",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "malformed or rootless composed XML draws nothing and reports only failure: <g></g>",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "malformed or rootless composed XML draws nothing and reports only failure:",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "malformed or rootless composed XML draws nothing and reports only failure: no root",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "an SVG tree render failure withdraws the picture and reports no ready state",
+     "ms": 14,
+     "measured": false
+    },
+    {
+     "title": "a replacement SVG render failure reports into its new resource attempt after commit",
+     "ms": 6,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -3458,7 +3584,8 @@
    "testsTotal": 2,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest"
   },
   {
    "file": "tests/screens/refusal-words-never-quote-the-wire.test.tsx",
@@ -11488,11 +11615,11 @@
    "file": "tests/api.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 25,
-   "ms": 1511,
-   "testsMs": 167.8,
-   "loaded": 45,
-   "coveredProdLines": 13705,
+   "cases": 31,
+   "ms": 2483,
+   "testsMs": 427,
+   "loaded": 53,
+   "coveredProdLines": 20210,
    "onlyProdLines": 28,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -11503,9 +11630,9 @@
     "src/generated/zod.gen.ts:2"
    ],
    "flakyRuns": [],
-   "rule": "(no first comment; first test title) login keeps the session cookie and sends it back",
+   "rule": "(no first comment; first test title) sign-in mints a key with the session and sends only the key after it",
    "titles": [
-    "login keeps the session cookie and sends it back",
+    "sign-in mints a key with the session and sends only the key after it",
     "a problem document becomes an ApiError with field errors",
     "the captured PlatformKit validation response identifies body fields",
     "structured Huma errors preserve nested paths and do not relabel query errors",
@@ -11515,8 +11642,8 @@
     "a non-array errors member preserves the problem detail: \"title: wrong container\"",
     "a non-array errors member preserves the problem detail: {\"title\":\"wrong container\"}",
     "list reads the page envelope",
-    "logout forgets the cookie even when the server refuses",
-    "logout clears immediately and late responses cannot restore its cookie",
+    "logout revokes the key and forgets it even when the server refuses",
+    "logout clears immediately and late responses cannot restore a credential",
     "a list is a page in an order through the filters the API takes",
     "a server that never answers gives up and says which server it was",
     "a command posts to the row's own verb, and one that takes nothing sends no body",
@@ -11529,17 +11656,19 @@
     "a write goes where the catalogue says and a read stays where it was",
     "a singleton's PUT follows its write path, and its GET stays on its own",
     "an entry that names no write address is written where it always was",
-    "a command whose printed address needs a row is refused before anything is sent"
+    "a command whose printed address needs a row is refused before anything is sent",
+    "a declared composed GET sends the sign-in cookie alone and JSON still sends bearer alone",
+    "factor sign-in owns its image session and image Set-Cookie never replaces it",
+    "restored keys and invalid composed inputs never send content requests",
+    "composed HTTP refusals return no XML and only a 401 notifies session expiry",
+    "SVG response shape and received byte limit refuse incomplete or unexpected answers",
+    "composed cancellation and deadline include body consumption without retry or partial XML"
    ],
    "tests": [
     {
-     "title": "login keeps the session cookie and sends it back",
-     "ranAsOne": true,
-     "isolatedMs": 1758,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "sign-in mints a key with the session and sends only the key after it",
+     "ms": 49.897712,
+     "measured": false
     },
     {
      "title": "a problem document becomes an ApiError with field errors",
@@ -11548,7 +11677,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.841925,
+     "measured": false
     },
     {
      "title": "the captured PlatformKit validation response identifies body fields",
@@ -11557,7 +11687,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.332673,
+     "measured": false
     },
     {
      "title": "structured Huma errors preserve nested paths and do not relabel query errors",
@@ -11566,7 +11697,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.971537,
+     "measured": false
     },
     {
      "title": "malformed error entries do not hide later valid errors",
@@ -11575,7 +11707,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.82188,
+     "measured": false
     },
     {
      "title": "a non-array errors member preserves the problem detail: null",
@@ -11584,7 +11717,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.938085,
+     "measured": false
     },
     {
      "title": "a non-array errors member preserves the problem detail: 7",
@@ -11593,7 +11727,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.619535,
+     "measured": false
     },
     {
      "title": "a non-array errors member preserves the problem detail: \"title: wrong container\"",
@@ -11602,7 +11737,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.632179,
+     "measured": false
     },
     {
      "title": "a non-array errors member preserves the problem detail: {\"title\":\"wrong container\"}",
@@ -11611,7 +11747,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.554705,
+     "measured": false
     },
     {
      "title": "list reads the page envelope",
@@ -11620,25 +11757,18 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.366827,
+     "measured": false
     },
     {
-     "title": "logout forgets the cookie even when the server refuses",
-     "ranAsOne": true,
-     "isolatedMs": 1762.5,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "logout revokes the key and forgets it even when the server refuses",
+     "ms": 1.42251,
+     "measured": false
     },
     {
-     "title": "logout clears immediately and late responses cannot restore its cookie",
-     "ranAsOne": true,
-     "isolatedMs": 1697.9,
-     "onlyProdLines": 0,
-     "onlyToolLines": 0,
-     "onlyFiles": [],
-     "measured": true
+     "title": "logout clears immediately and late responses cannot restore a credential",
+     "ms": 2.052606,
+     "measured": false
     },
     {
      "title": "a list is a page in an order through the filters the API takes",
@@ -11647,7 +11777,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.052576,
+     "measured": false
     },
     {
      "title": "a server that never answers gives up and says which server it was",
@@ -11656,7 +11787,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 21.831862,
+     "measured": false
     },
     {
      "title": "a command posts to the row's own verb, and one that takes nothing sends no body",
@@ -11665,7 +11797,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.810297,
+     "measured": false
     },
     {
      "title": "the trail is asked for one record, a page at a time, and a caller who may not read it has none",
@@ -11674,7 +11807,8 @@
      "onlyProdLines": 1,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 7.790396,
+     "measured": false
     },
     {
      "title": "a refusal about the plan is told apart from a refusal about the caller",
@@ -11683,7 +11817,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.86607,
+     "measured": false
     },
     {
      "title": "the deadline covers reading the body, not only getting the headers",
@@ -11692,7 +11827,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 22.321277,
+     "measured": false
     },
     {
      "title": "a write the deadline took is one nobody answered, and is never offered again",
@@ -11701,7 +11837,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 22.752946,
+     "measured": false
     },
     {
      "title": "a singleton is read and written at the path itself",
@@ -11710,7 +11847,8 @@
      "onlyProdLines": 22,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 4.644819,
+     "measured": false
     },
     {
      "title": "a generated edit sends cleared text and typed list items in its PATCH body",
@@ -11719,7 +11857,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.632849,
+     "measured": false
     },
     {
      "title": "a write goes where the catalogue says and a read stays where it was",
@@ -11728,7 +11867,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.727574,
+     "measured": false
     },
     {
      "title": "a singleton's PUT follows its write path, and its GET stays on its own",
@@ -11737,7 +11877,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.965215,
+     "measured": false
     },
     {
      "title": "an entry that names no write address is written where it always was",
@@ -11746,7 +11887,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.199257,
+     "measured": false
     },
     {
      "title": "a command whose printed address needs a row is refused before anything is sent",
@@ -11755,7 +11897,38 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.40038,
+     "measured": false
+    },
+    {
+     "title": "a declared composed GET sends the sign-in cookie alone and JSON still sends bearer alone",
+     "ms": 3.803294,
+     "measured": false
+    },
+    {
+     "title": "factor sign-in owns its image session and image Set-Cookie never replaces it",
+     "ms": 2.729577,
+     "measured": false
+    },
+    {
+     "title": "restored keys and invalid composed inputs never send content requests",
+     "ms": 2.176425,
+     "measured": false
+    },
+    {
+     "title": "composed HTTP refusals return no XML and only a 401 notifies session expiry",
+     "ms": 12.740811,
+     "measured": false
+    },
+    {
+     "title": "SVG response shape and received byte limit refuse incomplete or unexpected answers",
+     "ms": 218.194151,
+     "measured": false
+    },
+    {
+     "title": "composed cancellation and deadline include body consumption without retry or partial XML",
+     "ms": 27.923878,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -11765,7 +11938,8 @@
    "testsTotal": 25,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/calendar-withdrawal.test.ts",
@@ -11917,11 +12091,11 @@
    "file": "tests/catalog-hints.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 15,
-   "ms": 1374,
-   "testsMs": 85.5,
-   "loaded": 44,
-   "coveredProdLines": 13593,
+   "cases": 19,
+   "ms": 1195,
+   "testsMs": 73.6,
+   "loaded": 52,
+   "coveredProdLines": 20037,
    "onlyProdLines": 8,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -11946,7 +12120,11 @@
     "no hint changes a request",
     "the hinted golden is the pinned copy plus what that copy does not yet declare",
     "a malformed hint never costs a screen, over the wire too",
-    "the strict generated operation still refuses what the phone forgives"
+    "the strict generated operation still refuses what the phone forgives",
+    "a command's consequence and success reach the hints, and the wire shape does not",
+    "a malformed consequence, success or target costs its own reading and says so",
+    "a field names the record its value points at, or leaves the value read as stored",
+    "a command whose only presentation is a label and a system tag still parses to exactly that"
    ],
    "tests": [
     {
@@ -11956,7 +12134,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 9.866335,
+     "measured": false
     },
     {
      "title": "for the served golden every reading answer is the one this build gave before hints",
@@ -11965,7 +12144,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.166356,
+     "measured": false
     },
     {
      "title": "a declared noun reads where the humanised one used to, and is never re-cased",
@@ -11974,7 +12154,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.175544,
+     "measured": false
     },
     {
      "title": "primaryField names the field; when it does not, the chain reads on",
@@ -11983,7 +12164,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.051284,
+     "measured": false
     },
     {
      "title": "visibility decides the list, and beats hideList both ways",
@@ -11992,7 +12174,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.801732,
+     "measured": false
     },
     {
      "title": "a hidden field leaves the form, unless the form needs it",
@@ -12001,7 +12184,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.444842,
+     "measured": false
     },
     {
      "title": "a declared enum label and tone read where the value reads",
@@ -12010,7 +12194,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.218093,
+     "measured": false
     },
     {
      "title": "a system command is never offered and still resolves",
@@ -12019,7 +12204,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.64888,
+     "measured": false
     },
     {
      "title": "a command label wins, and its absence is today's answer",
@@ -12028,7 +12214,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 0.608264,
+     "measured": false
     },
     {
      "title": "every malformed hint falls back and names itself once",
@@ -12037,7 +12224,8 @@
      "onlyProdLines": 2,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.351438,
+     "measured": false
     },
     {
      "title": "a field names a block the entry kept, not one it lost",
@@ -12046,7 +12234,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.150327,
+     "measured": false
     },
     {
      "title": "no hint changes a request",
@@ -12055,7 +12244,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.273455,
+     "measured": false
     },
     {
      "title": "the hinted golden is the pinned copy plus what that copy does not yet declare",
@@ -12064,7 +12254,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 1.331812,
+     "measured": false
     },
     {
      "title": "a malformed hint never costs a screen, over the wire too",
@@ -12073,7 +12264,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 36.042801,
+     "measured": false
     },
     {
      "title": "the strict generated operation still refuses what the phone forgives",
@@ -12082,7 +12274,28 @@
      "onlyProdLines": 5,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 7.464774,
+     "measured": false
+    },
+    {
+     "title": "a command's consequence and success reach the hints, and the wire shape does not",
+     "ms": 0.589631,
+     "measured": false
+    },
+    {
+     "title": "a malformed consequence, success or target costs its own reading and says so",
+     "ms": 1.428011,
+     "measured": false
+    },
+    {
+     "title": "a field names the record its value points at, or leaves the value read as stored",
+     "ms": 1.457024,
+     "measured": false
+    },
+    {
+     "title": "a command whose only presentation is a label and a system tag still parses to exactly that",
+     "ms": 0.480178,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -12092,7 +12305,8 @@
    "testsTotal": 15,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/catalog-list-time-cell.test.ts",
@@ -23101,6 +23315,209 @@
    "coveredProdLines": 2514,
    "onlyProdLines": null,
    "testsMs": 1330
+  },
+  {
+   "file": "tests/screens/composed-pictures.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 30,
+   "rule": "(no first comment; first test title) composed references coalesce reads while their rendered slots settle independently beside a stored file",
+   "ruleSource": "first test title",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25481,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "composed references coalesce reads while their rendered slots settle independently beside a stored file",
+    "a composed refresh withdraws old XML immediately and stays empty after ApiError: Refused\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/tests/screens/composed-pictures.test.tsx:102:3)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 403,\n  detail: 'Refused',\n  fields: {},\n  type: undefined\n} while a peer waits",
+    "a composed refresh withdraws old XML immediately and stays empty after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/tests/screens/composed-pictures.test.tsx:103:3)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n} while a peer waits",
+    "a composed refresh withdraws old XML immediately and stays empty after TypeError: Offline\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/tests/screens/composed-pictures.test.tsx:104:3)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:444:34) while a peer waits",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed reference",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed reference",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed source",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed source",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed attempt",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed attempt",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed catalogue",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed catalogue",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed server",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed server",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed person",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed person",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed key",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed key",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed session",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed session",
+    "obsolete composed settlement (refused: false) and callbacks cannot alter a changed connection",
+    "obsolete composed settlement (refused: true) and callbacks cannot alter a changed connection",
+    "removed and remounted composed references get fresh reads and late failures are ignored",
+    "missing composed door or invalid references settle empty without file reads, preserving legacy file delivery",
+    "a real parsed SVG enters the compact slot and a parse failure uses the declared icon or no tile",
+    "a generated list over the real API renders Oracle geometry and withdraws a 403 before its peer finishes",
+    "no composed read starts without a ready identity",
+    "no composed read starts without a ready key",
+    "no composed read starts without a ready phase",
+    "a failed final composed slot releases its resource and adding a peer never restores or refetches it"
+   ],
+   "tests": [
+    {
+     "title": "composed references coalesce reads while their rendered slots settle independently beside a stored file",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "a composed refresh withdraws old XML immediately and stays empty after ApiError: Refused\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/tests/screens/composed-pictures.test.tsx:102:3)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 403,\n  detail: 'Refused',\n  fields: {},\n  type: undefined\n} while a peer waits",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "a composed refresh withdraws old XML immediately and stays empty after ApiError: Unavailable\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/tests/screens/composed-pictures.test.tsx:103:3)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:444:34) {\n  status: 503,\n  detail: 'Unavailable',\n  fields: {},\n  type: undefined\n} while a peer waits",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "a composed refresh withdraws old XML immediately and stays empty after TypeError: Offline\n    at Object.<anonymous> (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/tests/screens/composed-pictures.test.tsx:104:3)\n    at Runtime._execModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1439:24)\n    at Runtime._loadModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:1022:12)\n    at Runtime.requireModule (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runtime/build/index.js:882:12)\n    at jestAdapter (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)\n    at runTestInternal (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/jplr/pkit-999/worktrees/task-T-0530-the-phone-shows-composed-pictures/node_modules/jest-runner/build/runTest.js:444:34) while a peer waits",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed reference",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed reference",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed source",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed source",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed attempt",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed attempt",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed catalogue",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed catalogue",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed server",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed server",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed person",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed person",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed key",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed key",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed session",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed session",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: false) and callbacks cannot alter a changed connection",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "obsolete composed settlement (refused: true) and callbacks cannot alter a changed connection",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "removed and remounted composed references get fresh reads and late failures are ignored",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "missing composed door or invalid references settle empty without file reads, preserving legacy file delivery",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a real parsed SVG enters the compact slot and a parse failure uses the declared icon or no tile",
+     "ms": 21,
+     "measured": false
+    },
+    {
+     "title": "a generated list over the real API renders Oracle geometry and withdraws a 403 before its peer finishes",
+     "ms": 188,
+     "measured": false
+    },
+    {
+     "title": "no composed read starts without a ready identity",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "no composed read starts without a ready key",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "no composed read starts without a ready phase",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a failed final composed slot releases its resource and adding a peer never restores or refetches it",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 166,
+   "coveredProdLines": 2933,
+   "onlyProdLines": null,
+   "testsMs": 319
   },
   {
    "file": "tests/screens/custom-renderer-catalog-withdrawal.test.tsx",

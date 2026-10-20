@@ -66,6 +66,11 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 : "${DUE_FIELD:?the field of that resource that holds a deadline}"
 : "${STATUS_FIELD:?the field of that resource whose value states its condition}"
 : "${STATUS_VALUE:?the value of that field a fresh record starts in}"
+if [ -n "${COMPOSED_MODULE:-}" ]; then
+  : "${COMPOSED_ENTITY:?the composed fixture resource}"
+  : "${COMPOSED_READY_TITLE:?a row whose composed picture returns the fixture SVG}"
+  : "${COMPOSED_REFUSED_TITLE:?a row whose composed picture returns 403}"
+fi
 apk="${1:?the verification APK to install (make apk ABIS=x86_64 PROFILE=ci && make apk-debug-sign)}"
 TITLE="${TITLE:-Journey $(date +%H%M%S)}"
 MAESTRO="${MAESTRO:-maestro}"
@@ -142,5 +147,7 @@ mkdir -p "$debug"
   -e VERB="$VERB" -e VERB_FIELD="$VERB_FIELD" -e VERB_TITLE="$VERB_TITLE" \
   -e DUE_FIELD="$DUE_FIELD" -e STATUS_FIELD="$STATUS_FIELD" \
   -e STATUS_VALUE="$STATUS_VALUE" \
+  -e COMPOSED_MODULE="${COMPOSED_MODULE:-}" -e COMPOSED_ENTITY="${COMPOSED_ENTITY:-}" \
+  -e COMPOSED_READY_TITLE="${COMPOSED_READY_TITLE:-}" -e COMPOSED_REFUSED_TITLE="${COMPOSED_REFUSED_TITLE:-}" \
   -e TITLE="$TITLE" \
   --format junit --output "$report"

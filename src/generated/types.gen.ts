@@ -233,6 +233,10 @@ export type Content = {
    */
   readonly publishedAt?: string;
   /**
+   * This row's own write count, from 1
+   */
+  readonly revision?: number;
+  /**
    * URL name, unique within the tenant
    */
   slug: string;
@@ -353,6 +357,36 @@ export type Delivery = {
    */
   readonly statusCode: number;
   readonly updatedAt?: string;
+};
+
+export type Device = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  readonly createdAt?: string;
+  readonly id?: string;
+  /**
+   * What speaks this token
+   */
+  platform: string;
+  /**
+   * The person this device belongs to
+   */
+  readonly recipientId: string;
+  /**
+   * The provider's token or serialised subscription; opaque outside its adapter
+   */
+  token: string;
+  readonly updatedAt?: string;
+};
+
+export type DevicesDoneOutputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  done: boolean;
 };
 
 export type DoneOutputBody = {
@@ -1161,6 +1195,17 @@ export type PageDeliveryBody = {
   total: number;
 };
 
+export type PageDeviceBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Device> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
 export type PageEndpointBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1371,6 +1416,7 @@ export type PatchInputBody = {
 };
 
 export type Pictures = {
+  composedSource?: string;
   source: string;
   widths?: Array<number> | null;
 };
@@ -1596,6 +1642,21 @@ export type RecoveryCodesOutputBody = {
   factor?: Factor;
 };
 
+export type RegisterDeviceInputBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * What speaks this token
+   */
+  platform: string;
+  /**
+   * The provider's token, or the browser's serialised subscription
+   */
+  token: string;
+};
+
 export type RegistrationDoor = {
   /**
    * Where the registration form posts
@@ -1684,6 +1745,25 @@ export type ResourceTypeList = {
   schemas: Array<string> | null;
   startIndex: number;
   totalResults: number;
+};
+
+export type RestoreArgumentContent = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The row's write count as the caller read it; a row past it is refused with 412 and writes nothing
+   */
+  expectedRevision?: number;
+  /**
+   * The series to read it from; the record's own language when unset
+   */
+  locale?: string;
+  /**
+   * The version to write back, as the list answered it
+   */
+  version: number;
 };
 
 export type RetainBody = {
@@ -2349,6 +2429,62 @@ export type VerifyFactorInputBody = {
   email: string;
 };
 
+export type Version = {
+  /**
+   * Who made this write; the zero uuid when nobody signed in
+   */
+  actor: string;
+  /**
+   * When this write committed
+   */
+  at: string;
+  /**
+   * The fields this write moved; empty on a record's first version, which nothing preceded
+   */
+  changed: Array<string> | null;
+  /**
+   * The record's entity within that module
+   */
+  entity: string;
+  /**
+   * The record as this write committed it, in the field names the record's own body uses
+   */
+  fields: unknown;
+  /**
+   * This version row's own id
+   */
+  id: string;
+  /**
+   * The language of this version series, as a BCP-47 tag
+   */
+  locale: string;
+  /**
+   * The module that owns the record this version describes
+   */
+  module: string;
+  /**
+   * The write's own sentence about why it happened; empty for an ordinary save
+   */
+  reason: string;
+  /**
+   * The record this is one version of
+   */
+  record: string;
+  /**
+   * This version's number in its series — the row's own write count when the write made it, from 1
+   */
+  version: number;
+};
+
+export type VersionPage = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Version> | null;
+  next: number;
+};
+
 export type AccessBodyWritable = {
   /**
    * The address the caller was refused at, as a path within this application
@@ -2497,6 +2633,21 @@ export type DeleteWritable = {
    * The tenant's slug, repeated
    */
   confirm: string;
+};
+
+export type DeviceWritable = {
+  /**
+   * What speaks this token
+   */
+  platform: string;
+  /**
+   * The provider's token or serialised subscription; opaque outside its adapter
+   */
+  token: string;
+};
+
+export type DevicesDoneOutputBodyWritable = {
+  done: boolean;
 };
 
 export type DoneOutputBodyWritable = {
@@ -2932,6 +3083,13 @@ export type PageDeliveryBodyWritable = {
   total: number;
 };
 
+export type PageDeviceBodyWritable = {
+  items: Array<DeviceWritable> | null;
+  limit: number;
+  offset: number;
+  total: number;
+};
+
 export type PageEndpointBodyWritable = {
   items: Array<EndpointWritable> | null;
   limit: number;
@@ -3178,6 +3336,17 @@ export type RecoveryCodesOutputBodyWritable = {
   factor?: FactorWritable;
 };
 
+export type RegisterDeviceInputBodyWritable = {
+  /**
+   * What speaks this token
+   */
+  platform: string;
+  /**
+   * The provider's token, or the browser's serialised subscription
+   */
+  token: string;
+};
+
 export type RenameWritable = {
   /**
    * Display name
@@ -3226,6 +3395,21 @@ export type ResourceTypeListWritable = {
   schemas: Array<string> | null;
   startIndex: number;
   totalResults: number;
+};
+
+export type RestoreArgumentContentWritable = {
+  /**
+   * The row's write count as the caller read it; a row past it is refused with 412 and writes nothing
+   */
+  expectedRevision?: number;
+  /**
+   * The series to read it from; the record's own language when unset
+   */
+  locale?: string;
+  /**
+   * The version to write back, as the list answered it
+   */
+  version: number;
 };
 
 export type RetainBodyWritable = {
@@ -3588,6 +3772,11 @@ export type VerifyFactorInputBodyWritable = {
   email: string;
 };
 
+export type VersionPageWritable = {
+  items: Array<Version> | null;
+  next: number;
+};
+
 export type AppAccessRequestData = {
   body: AccessBodyWritable;
   headers?: {
@@ -3730,6 +3919,54 @@ export type AppResourcesResponses = {
 };
 
 export type AppResourcesResponse = AppResourcesResponses[keyof AppResourcesResponses];
+
+export type AppStreamData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Events to watch, each declared by a composed module; repeat the parameter or separate them with commas
+     */
+    topics?: Array<string> | null;
+  };
+  url: "/api/v1/app/stream";
+};
+
+export type AppStreamErrors = {
+  /**
+   * Bad Request
+   */
+  400: Problem;
+  /**
+   * Forbidden
+   */
+  403: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Too Many Requests
+   */
+  429: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type AppStreamError = AppStreamErrors[keyof AppStreamErrors];
+
+export type AppStreamResponses = {
+  /**
+   * OK
+   */
+  200: unknown;
+};
 
 export type AppSummaryData = {
   body?: never;
@@ -6102,6 +6339,60 @@ export type ContentContentPublishResponses = {
 export type ContentContentPublishResponse =
   ContentContentPublishResponses[keyof ContentContentPublishResponses];
 
+export type ContentContentRestoreData = {
+  body?: RestoreArgumentContentWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path: {
+    /**
+     * The row's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/content/contents/{id}/restore";
+};
+
+export type ContentContentRestoreErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ContentContentRestoreError =
+  ContentContentRestoreErrors[keyof ContentContentRestoreErrors];
+
+export type ContentContentRestoreResponses = {
+  /**
+   * OK
+   */
+  200: Content;
+};
+
+export type ContentContentRestoreResponse =
+  ContentContentRestoreResponses[keyof ContentContentRestoreResponses];
+
 export type ContentContentReviewTranslationData = {
   body?: TranslationFieldsBodyWritable;
   headers?: {
@@ -6371,6 +6662,67 @@ export type ContentContentUntranslateResponses = {
 
 export type ContentContentUntranslateResponse =
   ContentContentUntranslateResponses[keyof ContentContentUntranslateResponses];
+
+export type ContentContentVersionsData = {
+  body?: never;
+  path: {
+    /**
+     * The record whose versions are read
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * The version series, by BCP-47 tag; the record's own language when unset
+     */
+    locale?: string;
+    /**
+     * Ask for the versions older than this one
+     */
+    before?: number;
+    /**
+     * How many versions to answer with, at most
+     */
+    limit?: number;
+  };
+  url: "/api/v1/content/contents/{id}/versions";
+};
+
+export type ContentContentVersionsErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Conflict
+   */
+  409: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type ContentContentVersionsError =
+  ContentContentVersionsErrors[keyof ContentContentVersionsErrors];
+
+export type ContentContentVersionsResponses = {
+  /**
+   * OK
+   */
+  200: VersionPage;
+};
+
+export type ContentContentVersionsResponse =
+  ContentContentVersionsResponses[keyof ContentContentVersionsResponses];
 
 export type FileFileListData = {
   body?: never;
@@ -7139,6 +7491,153 @@ export type NotificationNotificationListResponses = {
 
 export type NotificationNotificationListResponse =
   NotificationNotificationListResponses[keyof NotificationNotificationListResponses];
+
+export type NotificationDeviceListData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Rows per page
+     */
+    limit?: number;
+    /**
+     * Rows to skip
+     */
+    offset?: number;
+    /**
+     * A field name, or a field name prefixed with - for descending
+     */
+    sort?: string;
+  };
+  url: "/api/v1/notification/notifications/devices";
+};
+
+export type NotificationDeviceListErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type NotificationDeviceListError =
+  NotificationDeviceListErrors[keyof NotificationDeviceListErrors];
+
+export type NotificationDeviceListResponses = {
+  /**
+   * OK
+   */
+  200: PageDeviceBody;
+};
+
+export type NotificationDeviceListResponse =
+  NotificationDeviceListResponses[keyof NotificationDeviceListResponses];
+
+export type NotificationDeviceRegisterData = {
+  body: RegisterDeviceInputBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/v1/notification/notifications/devices";
+};
+
+export type NotificationDeviceRegisterErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type NotificationDeviceRegisterError =
+  NotificationDeviceRegisterErrors[keyof NotificationDeviceRegisterErrors];
+
+export type NotificationDeviceRegisterResponses = {
+  /**
+   * OK
+   */
+  200: Device;
+};
+
+export type NotificationDeviceRegisterResponse =
+  NotificationDeviceRegisterResponses[keyof NotificationDeviceRegisterResponses];
+
+export type NotificationDeviceRemoveData = {
+  body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path: {
+    /**
+     * The device to remove, as the list showed it
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/notification/notifications/devices/{id}/remove";
+};
+
+export type NotificationDeviceRemoveErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type NotificationDeviceRemoveError =
+  NotificationDeviceRemoveErrors[keyof NotificationDeviceRemoveErrors];
+
+export type NotificationDeviceRemoveResponses = {
+  /**
+   * OK
+   */
+  200: DevicesDoneOutputBody;
+};
+
+export type NotificationDeviceRemoveResponse =
+  NotificationDeviceRemoveResponses[keyof NotificationDeviceRemoveResponses];
 
 export type NotificationNotificationReadData = {
   body?: never;
