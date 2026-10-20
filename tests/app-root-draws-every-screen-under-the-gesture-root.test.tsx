@@ -20,7 +20,12 @@ jest.mock("expo-router", () => {
   const { createElement } = require("react");
   const Stack = ({ children }: { children?: unknown }) =>
     createElement(View, { testID: "stack" }, children);
-  return { Stack: Object.assign(Stack, { Screen: () => null }) };
+  return {
+    Stack: Object.assign(Stack, { Screen: () => null }),
+    // The notification tap navigates, so it asks the router for the same fake every other
+    // screen under test is handed; without it the composition root cannot mount.
+    useRouter: () => require("./fakes/router").router,
+  };
 });
 jest.mock("expo-status-bar", () => ({ StatusBar: () => null }));
 jest.mock("expo-system-ui", () => ({ setBackgroundColorAsync: jest.fn(async () => undefined) }));
