@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 124,
-   "cases": 426,
-   "ms": 2911654,
-   "testsMs": 47365,
+   "files": 125,
+   "cases": 427,
+   "ms": 2940408,
+   "testsMs": 48428,
    "runners": {
-    "jest": 124
+    "jest": 125
    },
    "unreachable": 0
   },
@@ -22170,6 +22170,35 @@
    "coveredProdLines": 2672,
    "onlyProdLines": null,
    "testsMs": 1388
+  },
+  {
+   "file": "tests/screens/a-restarted-pass-counts-only-its-own-choices.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "When the outbox resolves a held deck choice, the deck closes and its Refresh starts a new pass (docs/review-deck.md, the held row). Disappearance is not acceptance: the new pass reads the queue from the server, counts only the choices made in it, and sends its own command once.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 28754,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a pass restarted after a held choice resolves counts only its own choices and sends its command once"
+   ],
+   "tests": [
+    {
+     "title": "a pass restarted after a held choice resolves counts only its own choices and sends its command once",
+     "ms": 1063,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2728,
+   "onlyProdLines": null,
+   "testsMs": 1063
   },
   {
    "file": "tests/screens/a-richtext-figure-reads-the-file-it-points-at.test.tsx",
