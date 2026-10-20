@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 264,
-   "cases": 1256,
-   "ms": 2289765,
-   "testsMs": 78824.29999999996,
+   "files": 265,
+   "cases": 1259,
+   "ms": 2292509,
+   "testsMs": 78838.29999999996,
    "runners": {
     "jest": 91,
-    "node": 173
+    "node": 174
    },
    "unreachable": 0
   },
@@ -20873,6 +20873,47 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/the-deck-finishing-moment-plays-only-under-normal-motion.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The deck draws its finishing moment only where motion is normal: an empty live count after a confirmed command asks for it once, normal motion plays it until it ends, and reduced motion keeps the still \"caught up\" state with the same counts. An unanswered final count asks for no finish in either motion; its retried count that finds the queue empty does.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2744,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an empty live count after a command plays the finish under normal motion until it ends",
+    "reduced motion keeps the still caught-up state with the same counts and no finish",
+    "an unanswered final count asks for no finish in either motion and its empty retry plays it"
+   ],
+   "tests": [
+    {
+     "title": "an empty live count after a command plays the finish under normal motion until it ends",
+     "ms": 10.306275,
+     "measured": false
+    },
+    {
+     "title": "reduced motion keeps the still caught-up state with the same counts and no finish",
+     "ms": 2.160226,
+     "measured": false
+    },
+    {
+     "title": "an unanswered final count asks for no finish in either motion and its empty retry plays it",
+     "ms": 1.497851,
+     "measured": false
+    }
+   ],
+   "loaded": 36,
+   "coveredProdLines": 13124,
+   "onlyProdLines": null,
+   "testsMs": 14
   },
   {
    "file": "tests/the-delete-warning-a-journey-reads-takes-the-drawn-sentence-whole.test.ts",
