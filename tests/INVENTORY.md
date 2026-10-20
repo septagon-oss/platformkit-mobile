@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `9685ae49a` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `0f6e478b2` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 263 | 1252 | 78.8 s | 2287 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 127 | 437 | 50.3 s | 3011 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 128 | 439 | 51.8 s | 3065 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 58 | 50 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 485
+* keep: 486
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 485 — 209 `tests/*.test.ts` (node), 218 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1918; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2287 s, composition 3011 s, journey 0 s
+* files inventoried: 486 — 209 `tests/*.test.ts` (node), 219 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 15 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1920; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2287 s, composition 3065 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -449,6 +449,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/activity-obsolete-page-after-refusal.test.tsx | jest | composition | 6 | 19192 | 797 | 0 | 0 of 6 | — | 0 | keep | A page requested before a refusal must not repopulate the trail after it. The current refusal stands, and only a fresh read from the start restores history and… |
 | tests/screens/activity-route-lifetime.test.tsx | jest | composition | 4 | 20215 | 349 | 0 | 0 of 4 | — | 0 | keep | Leaving this route, or replacing the session inside it, ends the enrichment in flight. A directory response that lands afterwards cannot name a row in the new … |
 | tests/screens/activity-session-denial-detail.test.tsx | jest | composition | 2 | 18947 | 148 | 0 | 0 of 2 | — | 0 | keep | A 401 on the audit read is a refused request, not an empty page: the detail withdraws the history it had shown and offers no write the refused session could no… |
+| tests/screens/an-unanswered-queue-read-offers-retry-and-reads-again.test.tsx | jest | composition | 2 | 53344 | 1533 |  | not measured | — | 0 | keep | A queue read nothing answers (the transport rejected, or the deadline passed with no status) is the phone's commonest failure, and it keeps the deck screen ope… |
 | tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx | jest | composition | 2 | 21679 | 134 |  | not measured | — | 0 | keep | Saving without a changed translation must never copy its loaded words over the source, including when typing and undoing leaves the body exactly as it arrived. |
 | tests/screens/cancel-asks-once.test.tsx | jest | composition | 1 | 17839 | 11 |  | not measured | — | 0 | keep | A dirty sheet's Cancel asks "Discard changes?" once. The sheet has two doors that can ask it: the header's Cancel, which asks before it leaves, and the `usePre… |
 | tests/screens/catalog-operation-refresh.test.tsx | jest | composition | 3 | 19415 | 1279 | 0 | 0 of 3 | — | 0 | keep | The list itself stayed: what went is the doors, not the screen behind them. |

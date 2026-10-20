@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 127,
-   "cases": 437,
-   "ms": 3011410,
-   "testsMs": 50278,
+   "files": 128,
+   "cases": 439,
+   "ms": 3064754,
+   "testsMs": 51811,
    "runners": {
-    "jest": 127
+    "jest": 128
    },
    "unreachable": 0
   },
@@ -23498,6 +23498,41 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/an-unanswered-queue-read-offers-retry-and-reads-again.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A queue read nothing answers (the transport rejected, or the deadline passed with no status) is the phone's commonest failure, and it keeps the deck screen open exactly as a server refusal the person can retry does: the connection sentence carries a retry, nothing is drawn as a card or claimed as the end, and a retry reads the queue again \u2014 a first page then draws its first card, and a final count that finds nothing says \"caught up\". No command is sent along the way.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 53344,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a queue read the transport rejects while loading offers retry and a retry that connects draws the first card",
+    "a final count that passes its deadline offers retry and claims no end until a retry finds the queue empty"
+   ],
+   "tests": [
+    {
+     "title": "a queue read the transport rejects while loading offers retry and a retry that connects draws the first card",
+     "ms": 1454,
+     "measured": false
+    },
+    {
+     "title": "a final count that passes its deadline offers retry and claims no end until a retry finds the queue empty",
+     "ms": 79,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2687,
+   "onlyProdLines": null,
+   "testsMs": 1533
   },
   {
    "file": "tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx",
