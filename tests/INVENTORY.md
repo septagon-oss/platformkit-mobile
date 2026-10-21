@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `137379cd1` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `74c965de3` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 275 | 1289 | 93.4 s | 2444 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 145 | 480 | 57.0 s | 3625 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 147 | 483 | 57.4 s | 3682 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 516
+* keep: 518
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 516 — 216 `tests/*.test.ts` (node), 241 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1998; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2444 s, composition 3625 s, journey 0 s
+* files inventoried: 518 — 216 `tests/*.test.ts` (node), 243 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2001; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2444 s, composition 3682 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -428,6 +428,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
 | tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx | jest | composition | 2 | 52235 | 161 |  | not measured | — | 0 | keep | A registration refusal from an ended session cannot decide whether the next workspace registers this phone. Each completed sign-in must read its own platform a… |
 | tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx | jest | composition | 3 | 21149 | 15 |  | not measured | — | 0 | keep | A malformed destructive hint must keep the confirmation between a row action and its write. Follow served catalogue bytes through derivation and the command ho… |
+| tests/screens/a-match-is-announced-once-and-only-when-it-is-new.test.tsx | jest | composition | 2 | 30316 | 250 |  | not measured | — | 0 | keep | A match moment interrupts once per match: what the deck found before this person sat down is not news to them, and a match they have already answered to does n… |
 | tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx | jest | composition | 3 | 26306 | 168 |  | not measured | — | 0 | keep | A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation… |
 | tests/screens/a-new-sign-in-keeps-the-device-row-the-server-reuses.test.tsx | jest | composition | 1 | 31163 | 133 |  | not measured | — | 0 | keep | The server reuses a device row for the same tenant, platform, token and person. An older sign-out cannot remove the address a newer completed sign-in now holds… |
 | tests/screens/a-phone-is-addressable-when-the-person-says-so.test.tsx | jest | composition | 16 | 28232 | 304 |  | not measured | — | 0 | keep | A phone is addressable when the person says so, for as long as the sign-in that said it lasts. Held against the real shell, the real transport and the real pus… |
@@ -466,6 +467,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx | jest | composition | 7 | 21179 | 38 |  | not measured | — | 0 | keep | A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answe… |
 | tests/screens/a-withdrawn-queue-read-draws-no-card-and-sends-nothing.test.tsx | jest | composition | 8 | 30124 | 832 |  | not measured | — | 0 | keep | A queue read the server withdraws (signed out, off the plan, no access, gone) leaves the deck screen holding nothing it read: no card, no progress, no end coun… |
 | tests/screens/a_decide_result_keeps_the_ranking_and_prints_the_meters_own_number.test.tsx | jest | composition | 2 | 46644 | 37 |  | not measured | — | 0 | keep | A Decide result is the ranking the module made, not one the phone remade. Three rules, each of which a screen could silently break: the options appear in the o… |
+| tests/screens/a_match_dismissed_is_not_announced_again.test.tsx | jest | composition | 1 | 26200 | 96 |  | not measured | — | 0 | keep | A match is announced once: the person who dismisses "It's a match!" and keeps voting is not shown the same match again when the next read still holds it. |
 | tests/screens/activity-catalog-withdrawal-inflight.test.tsx | jest | composition | 2 | 23253 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a late actor lookup cannot restore identity after catalog withdrawal |
 | tests/screens/activity-directory-catalog-withdrawal.test.tsx | jest | composition | 2 | 23238 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light catalog withdrawal removes cached actor details while retaining readable history |
 | tests/screens/activity-directory-denial.test.tsx | jest | composition | 6 | 25736 | 401 | 0 | 0 of 5 | — | 0 | keep | A directory refusal empties the actor names a trail shows, and a response to a request the screen no longer wants cannot put them back: the detail keeps its ow… |

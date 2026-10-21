@@ -82,9 +82,11 @@ export function VoteDeck({ entry }: ScreenProps) {
 
 /**
  * VoterHeader draws who has answered, and the match when one arrives. Both come from the same read
- * so the faces above the deck and the faces in the match cannot disagree. A match is *new* only
- * when the first answer the deck saw did not hold it — the module keeps its latch to itself
- * (`firstMatchedAt` is never printed), so the phone diffs two reads and never reads a field.
+ * so the faces above the deck and the faces in the match cannot disagree. A match is *new* only when
+ * the first answer the deck saw did not hold it — the module keeps its latch to itself
+ * (`firstMatchedAt` is never printed), so the phone diffs two reads and never reads a field — and it
+ * interrupts once per mount: leaving the moment records that match as seen, so a later read that
+ * still holds it says nothing new.
  */
 function VoterHeader({
   questionId,
@@ -108,7 +110,10 @@ function VoterHeader({
     ids.map((id): Person => people.people[nameKey(DIRECTORY, id)] ?? { id, label: id }),
     feedback,
   );
+  // seen is which matches this screen knows about: the ones its first read held, and every one it has
+  // shown since. It lives as long as the screen, so one match interrupts a person once per session.
   const [seen, setSeen] = useState<ReadonlySet<string>>();
+  // match is the moment on screen now, and holds no memory of its own once it is left.
   const [match, setMatch] = useState<string | undefined>();
   const baseline = useRef(false);
   useEffect(() => {
@@ -123,6 +128,16 @@ function VoterHeader({
     }
     setMatch((was) => was ?? now.find((id) => !(seen?.has(id) ?? false)));
   }, [read.data, seen]);
+  // Leaving the match records it as shown: the read underneath still holds it, so forgetting it here
+  // is what would let the next read announce the same match again.
+  const leaveMatch = useCallback(
+    (id: string) => {
+      setSeen((was) => new Set<string>([...(was ?? []), id]));
+      setMatch(undefined);
+      onResults();
+    },
+    [onResults],
+  );
   const faces = agreed(read.data, match);
   const pictures = usePictures(
     faces.flatMap((face) => (face.portrait ? [face.portrait] : [])),
@@ -164,10 +179,7 @@ function VoterHeader({
             testID="decide-match-results"
             label={copy.seeResults}
             tone="primary"
-            onPress={() => {
-              setMatch(undefined);
-              onResults();
-            }}
+            onPress={() => leaveMatch(match)}
           />
         </View>
       )}

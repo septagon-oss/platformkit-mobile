@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 145,
-   "cases": 480,
-   "ms": 3625490,
-   "testsMs": 57005,
+   "files": 147,
+   "cases": 483,
+   "ms": 3682006,
+   "testsMs": 57351,
    "runners": {
-    "jest": 145
+    "jest": 147
    },
    "unreachable": 0
   },
@@ -22290,6 +22290,41 @@
    "testsMs": 15
   },
   {
+   "file": "tests/screens/a-match-is-announced-once-and-only-when-it-is-new.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A match moment interrupts once per match: what the deck found before this person sat down is not news to them, and a match they have already answered to does not come back \u2014 but the next one still does.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30316,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a match the deck found before this person opened it is never announced to them",
+    "the match after a dismissed one is announced, and it names the option that is new"
+   ],
+   "tests": [
+    {
+     "title": "a match the deck found before this person opened it is never announced to them",
+     "ms": 80,
+     "measured": false
+    },
+    {
+     "title": "the match after a dismissed one is announced, and it names the option that is new",
+     "ms": 170,
+     "measured": false
+    }
+   ],
+   "loaded": 161,
+   "coveredProdLines": 2385,
+   "onlyProdLines": null,
+   "testsMs": 250
+  },
+  {
    "file": "tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -23762,6 +23797,35 @@
    "coveredProdLines": 2429,
    "onlyProdLines": null,
    "testsMs": 37
+  },
+  {
+   "file": "tests/screens/a_match_dismissed_is_not_announced_again.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A match is announced once: the person who dismisses \"It's a match!\" and keeps voting is not shown the same match again when the next read still holds it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26200,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a match the person dismissed does not come back on the next read"
+   ],
+   "tests": [
+    {
+     "title": "a match the person dismissed does not come back on the next read",
+     "ms": 96,
+     "measured": false
+    }
+   ],
+   "loaded": 161,
+   "coveredProdLines": 2383,
+   "onlyProdLines": null,
+   "testsMs": 96
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",
