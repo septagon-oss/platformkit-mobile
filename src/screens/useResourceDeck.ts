@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import type { Entry } from "../core/catalog";
 import { deckEvent, deckWindow, startDeck, type DeckInput, type DeckState } from "../core/deck";
 import type { Deck } from "../core/catalogDeck";
+import { boundArguments } from "../core/bindings";
 import {
   commandWording,
   commandConfirmation,
@@ -11,6 +12,7 @@ import {
   deckHeldWrite,
   failureSubject,
   type Copy,
+  type Row,
 } from "../core/derive";
 import { type PendingWrite } from "../core/outbox";
 import { PER_PAGE } from "../effects/api";
@@ -20,8 +22,26 @@ import { useTheme } from "../ui/theme";
 import { refusalOf } from "./failure";
 import { useCommandOutcome } from "./useCommand";
 
+/**
+ * DeckReceipt is what the owner of a deck's screen knows about its commands and the pass cannot:
+ * which answer counts as the card having been decided, and what the card row itself supplies as
+ * an argument. Both default to what a queue whose command returns its own row needs.
+ */
+export interface DeckReceipt {
+  /** accepted says the row the command answered is the answer to this card's intent. */
+  readonly accepted?: (id: string, row: Row) => boolean;
+  /** onAccepted tells the screen's owner that one card's command was taken, so it can ask again about what that changed. */
+  readonly onAccepted?: (id: string) => void;
+}
+
 /** useResourceDeck owns one bounded pass, its live reads and its single command intent. */
-export function useResourceDeck(entry: Entry, deck: Deck, copy: Copy, animated: boolean) {
+export function useResourceDeck(
+  entry: Entry,
+  deck: Deck,
+  copy: Copy,
+  animated: boolean,
+  receipt?: DeckReceipt,
+) {
   const { api, outbox } = useShell();
   const { mode } = useTheme();
   const send = useCommandOutcome(entry);
@@ -187,14 +207,25 @@ export function useResourceDeck(entry: Entry, deck: Deck, copy: Copy, animated: 
     const c = deckCommand(entry, direction);
     if (!c) return;
     submitted.current.add(operation);
+    // An argument the entry declares as bound is filled from the card the person is deciding —
+    // the same value a server-side screen takes from the row it drew the button beside.
+    const body = boundArguments(c, state.rows[id]);
+    if (c.bindings !== undefined && body === undefined) {
+      // The card row holds no value this command was declared to take from it, so nothing can be
+      // said about what this direction would do. It is refused where it stands, unsent.
+      event({ type: "refused", operation, text: copy.review.unavailable, missing: false });
+      return;
+    }
     void send(c, id, {
-      accept: (row) => deckAcceptedRow(id, row),
+      accept: (row) => (receipt?.accepted ?? deckAcceptedRow)(id, row),
       current: () => alive.current,
+      ...(body === undefined ? {} : { body }),
     }).then((answer) => {
       if (!alive.current || current.current.operation !== operation) return;
       switch (answer.kind) {
         case "accepted":
           event({ type: "accepted", operation });
+          receipt?.onAccepted?.(id);
           break;
         case "held":
           event({
@@ -215,7 +246,7 @@ export function useResourceDeck(entry: Entry, deck: Deck, copy: Copy, animated: 
           break;
       }
     });
-  }, [state.phase, state.pending, state.operation, entry, copy, send, event]);
+  }, [state.phase, state.pending, state.operation, entry, copy, send, event, receipt]);
 
   const settled = useCallback(
     () => event({ type: "settled", operation: state.operation }),

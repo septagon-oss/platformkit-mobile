@@ -38,7 +38,7 @@ import {
   type CommandWording,
   type Row,
 } from "../core/derive";
-import { keyed } from "../effects/api";
+import { keyed, type Api } from "../effects/api";
 import { outcomeOf } from "../effects/outbox";
 import type { PendingWrite } from "../core/outbox";
 import { failureFacts, refusalFields, refusalOf, screenCopy } from "./failure";
@@ -239,6 +239,30 @@ export type CommandOutcome =
   | { readonly kind: "refused" | "unknown"; readonly text: string; readonly status: number };
 
 /**
+ * runCommand posts one lifecycle command with the arguments its caller filled for the row it
+ * runs on. A command that takes no body and no idempotency key is sent as three arguments: the
+ * record of a call is what a test reads and what a queue replays, and `undefined` written out
+ * is not the same call as nothing said.
+ */
+function runCommand(
+  api: Api,
+  entry: Entry,
+  id: string | undefined,
+  verb: string,
+  body: Record<string, unknown> | undefined,
+  idem: string | undefined,
+): Promise<Row> {
+  const options = idem === undefined ? undefined : { idempotencyKey: idem };
+  if (body === undefined)
+    return options === undefined
+      ? api.command(entry, id, verb)
+      : api.command(entry, id, verb, undefined, options);
+  return options === undefined
+    ? api.command(entry, id, verb, body)
+    : api.command(entry, id, verb, body, options);
+}
+
+/**
  * useCommandOutcome submits a no-input command through the outbox and returns its classified result.
  * Optional receipt guards validate the row and current session before feedback; told files before wrote.
  * Held, refused and unknown outcomes produce no success feedback or automatic resubmission.
@@ -253,19 +277,27 @@ export function useCommandOutcome(entry: Entry) {
         readonly accept?: (row: Row) => boolean;
         readonly current?: () => boolean;
         readonly told?: (success: string) => void;
+        /**
+         * body is what this command's caller fills for the arguments the row carries — see
+         * `boundArguments`. It is filed with the write, so a vote this phone holds goes out
+         * with the arguments it was made with rather than with none.
+         */
+        readonly body?: Record<string, unknown>;
       },
     ): Promise<CommandOutcome> => {
       const copy = screenCopy();
       const { title, success } = commandWording(c, "", copy);
       const identity = api.bearer()?.id;
       try {
-        const live = (idem?: string) =>
-          idem === undefined
-            ? api.command(entry, id, c.verb)
-            : api.command(entry, id, c.verb, undefined, { idempotencyKey: idem });
+        const live = (idem?: string) => runCommand(api, entry, id, c.verb, receipt?.body, idem);
         const answer = outbox
           ? await outbox.submit(
-              { kind: "command", resourceKey: key(entry), path: commandPath(entry, c.verb, id) },
+              {
+                kind: "command",
+                resourceKey: key(entry),
+                path: commandPath(entry, c.verb, id),
+                ...(receipt?.body === undefined ? {} : { body: receipt.body }),
+              },
               live,
             )
           : { sent: true as const, row: await live() };
