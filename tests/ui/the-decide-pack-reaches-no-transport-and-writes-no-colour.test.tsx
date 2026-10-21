@@ -1,5 +1,6 @@
 // The decide pack is props in and elements out: it reaches no transport or secure storage
 // (`src/effects/`) and draws no colour of its own (the palette is `src/ui/theme.tsx`).
+import { describe, expect, it } from "@jest/globals";
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
 
