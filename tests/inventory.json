@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 274,
-   "cases": 1284,
-   "ms": 2443548,
-   "testsMs": 93386.99999999993,
+   "files": 275,
+   "cases": 1289,
+   "ms": 2444382,
+   "testsMs": 93402.89999999994,
    "runners": {
     "jest": 96,
-    "node": 178
+    "node": 179
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 144,
-   "cases": 478,
-   "ms": 3578846,
-   "testsMs": 56968,
+   "files": 145,
+   "cases": 480,
+   "ms": 3625490,
+   "testsMs": 57005,
    "runners": {
-    "jest": 144
+    "jest": 145
    },
    "unreachable": 0
   },
@@ -11843,6 +11843,59 @@
    "coveredProdLines": 5183,
    "onlyProdLines": null,
    "testsMs": 2.7
+  },
+  {
+   "file": "tests/a_command_fills_the_arguments_its_row_supplies.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "A rest command may declare that the server binds one of its arguments from the row the command runs on (`kit/rest`'s RowBindings): the vote commands on a ballot carry `{questionId: \"questionId\", ifRevision: \"voteRevision\"}`. A server-side screen fills those from the row it drew the button beside; a deck holds the same row as data. The three rules below are the whole of what the phone does with that declaration \u2014 read it, fill it, and refuse rather than send a body whose argument was guessed.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 834,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an entry keeps the argument pairs its command declared, and drops the one naming no field",
+    "the notice names the binding that was dropped, and the entry survives it",
+    "the bound arguments are filled from the row the card holds",
+    "a row that cannot answer a bound argument sends nothing at all",
+    "a command that declares no binding is sent with no body, as it always was"
+   ],
+   "tests": [
+    {
+     "title": "an entry keeps the argument pairs its command declared, and drops the one naming no field",
+     "ms": 13.542754,
+     "measured": false
+    },
+    {
+     "title": "the notice names the binding that was dropped, and the entry survives it",
+     "ms": 0.851284,
+     "measured": false
+    },
+    {
+     "title": "the bound arguments are filled from the row the card holds",
+     "ms": 0.911807,
+     "measured": false
+    },
+    {
+     "title": "a row that cannot answer a bound argument sends nothing at all",
+     "ms": 0.45962,
+     "measured": false
+    },
+    {
+     "title": "a command that declares no binding is sent with no body, as it always was",
+     "ms": 0.11905,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 4895,
+   "onlyProdLines": null,
+   "testsMs": 15.9
   },
   {
    "file": "tests/activity-actor-snapshot.test.ts",
@@ -23674,6 +23727,41 @@
    "coveredProdLines": 2676,
    "onlyProdLines": null,
    "testsMs": 832
+  },
+  {
+   "file": "tests/screens/a_decide_result_keeps_the_ranking_and_prints_the_meters_own_number.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A Decide result is the ranking the module made, not one the phone remade. Three rules, each of which a screen could silently break: the options appear in the order the read gave them (score order, tie-break and all, so the phone never ranks a second time); the number beside a bar is the bar's own model's number, so the two cannot disagree; and the weighted score stays inside the module \u2014 a person reads a count of voters, never an arithmetic weight. A door that is not on the entry is drawn nowhere: the close command belongs to whoever the catalogue printed it for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 46644,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the options stand in the order the read gave them, with the tally beside each",
+    "a question whose entry prints no close command is offered no close"
+   ],
+   "tests": [
+    {
+     "title": "the options stand in the order the read gave them, with the tally beside each",
+     "ms": 35,
+     "measured": false
+    },
+    {
+     "title": "a question whose entry prints no close command is offered no close",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2429,
+   "onlyProdLines": null,
+   "testsMs": 37
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",

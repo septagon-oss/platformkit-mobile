@@ -128,6 +128,12 @@ export default [
   forbid(["src/examples/**"], [
     { group: [...generatedEffects, "**/effects/**"], message: "a pack screen reads typed data through useOperation and writes through the shell's Api; the generated client is reached from neither." },
   ]),
+  // A product's pack is the same shape as the example pack — screens that read through the shell's
+  // Api and validators of its own — with one difference: it *is* composed by a product, so it may
+  // not live behind the `src/examples` ban that keeps an example from being shipped as product UI.
+  forbid(["src/packs/**"], [
+    { group: [...generatedEffects, "**/effects/**"], message: "a pack screen reads typed data through useOperation and writes through the shell's Api; the generated client is reached from neither." },
+  ]),
   // Transport is an effect. src/effects/api.ts is the one module that names
   // the platform's fetch, as the default it composes an Api around, so the
   // shell, the screens and the routes speak to a server only through an Api

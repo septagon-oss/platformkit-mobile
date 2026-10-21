@@ -67,6 +67,8 @@ export const extent = {
    * the first fact is one thumb's reach below it.
    */
   cover: 300,
+  /** qr is the side an invite symbol is drawn at: scannable at arm's length, small enough to sit beside the link it stands for. */
+  qr: 168,
   /** strip is one tile of a record's own photo strip: a picture you can pick out, not one you read. */
   strip: 96,
   /**
