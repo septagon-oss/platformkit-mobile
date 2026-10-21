@@ -2142,8 +2142,15 @@ export const activeFilters = (order: Order, e: Entry): number =>
   filterFields(e).filter((f) => (order.filters[f.name] ?? "") !== "").length;
 
 /** screenPath is where the router serves an entry's screens. */
-export const screenPath = (e: Entry): `/${string}/${string}` =>
+export const screenPath = (e: NamesResource): `/${string}/${string}` =>
   `/${encodeURIComponent(e.module)}/${encodeURIComponent(e.entity)}`;
+
+/**
+ * NamesResource is the two words a resource is known by: a catalogue entry carries them and
+ * so does an address read back out of a link, which is the other half of every route this
+ * file spells. Nothing else about an entry is read here, so the words travel alone.
+ */
+export type NamesResource = Pick<Entry, "module" | "entity">;
 
 /**
  * writePath is where an entry's writes are answered: POST, PATCH, PUT and

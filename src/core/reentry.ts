@@ -59,6 +59,16 @@ export type ScreenKind = "list" | "detail" | "form" | "command" | "deck";
 export type RecordAddress = `/${string}/${string}/${string}`;
 
 /**
+ * rowAt spells one record's route from the two words an address carries and its id. It is
+ * the only spelling of a row's route: `address` calls it for a detail, and a link read back
+ * out of a URL arrives at the same href through it. Each part is percent-encoded once, so
+ * an id that arrived encoded is decoded first and ends up encoded exactly as it started.
+ */
+export function rowAt(module: string, entity: string, id: string): RecordAddress {
+  return `${screenPath({ module, entity })}/${encodeURIComponent(id)}`;
+}
+
+/**
  * address spells one screen's route, once, in the words the router uses:
  * `screenPath` for a list (which for a singleton is the record itself), the row
  * for a detail, `new` or the row's `edit` for a sheet, and `run/<verb>` — at the
@@ -79,7 +89,7 @@ export function address(kind: ScreenKind, e: Entry, id?: string, verb?: string):
     case "deck":
       return `${at}/review`;
     case "detail":
-      return `${at}/${row ?? ""}`;
+      return rowAt(e.module, e.entity, id ?? "");
     case "form":
       return row === undefined ? `${at}/new` : `${at}/${row}/edit`;
     case "command":

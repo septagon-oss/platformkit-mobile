@@ -8,6 +8,7 @@ const routes = [
     statuses: [202],
     json: false,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.appAccessRequest({
         client,
@@ -25,6 +26,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.appConnection({
         client,
@@ -42,6 +44,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.appOperationOutcome({
         client,
@@ -59,6 +62,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.appResources({
         client,
@@ -76,6 +80,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.appStream({
         client,
@@ -93,6 +98,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.appSummary({
         client,
@@ -110,6 +116,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.auditEventList({
         client,
@@ -127,6 +134,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.auditEventRead({
         client,
@@ -144,6 +152,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authChallengePasskeyBegin({
         client,
@@ -161,6 +170,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authChallengePasskeyVerify({
         client,
@@ -178,6 +188,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authChallengeVerify({
         client,
@@ -195,6 +206,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authFactorList({
         client,
@@ -212,6 +224,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authFactorPasskeyBegin({
         client,
@@ -229,6 +242,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authFactorPasskeyFinish({
         client,
@@ -246,6 +260,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authRecoveryCodesRotate({
         client,
@@ -263,6 +278,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authFactorTotpBegin({
         client,
@@ -280,6 +296,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authFactorTotpFinish({
         client,
@@ -297,6 +314,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authFactorWithdraw({
         client,
@@ -314,6 +332,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authLogin({
         client,
@@ -331,6 +350,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authLoginPasskeyBegin({
         client,
@@ -348,6 +368,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authLoginPasskeyVerify({
         client,
@@ -365,6 +386,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authLogout({
         client,
@@ -382,6 +404,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authMe({
         client,
@@ -399,6 +422,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authOidcCallback({
         client,
@@ -416,6 +440,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authOidcStart({
         client,
@@ -433,6 +458,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authPasswordChange({
         client,
@@ -450,6 +476,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authPasswordReset({
         client,
@@ -467,6 +494,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authRoleList({
         client,
@@ -484,6 +512,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authRoleSet({
         client,
@@ -501,6 +530,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authSamlCallback({
         client,
@@ -518,6 +548,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authSamlMetadata({
         client,
@@ -535,6 +566,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authSamlStart({
         client,
@@ -552,6 +584,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authSessionList({
         client,
@@ -569,6 +602,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authSessionRevokeAll({
         client,
@@ -586,6 +620,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authSessionRevoke({
         client,
@@ -603,6 +638,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authPasskeySignInSet({
         client,
@@ -620,6 +656,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authTokenList({
         client,
@@ -637,6 +674,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authTokenIssue({
         client,
@@ -654,6 +692,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authTokenRevokeSelf({
         client,
@@ -671,6 +710,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authTokenRevoke({
         client,
@@ -688,6 +728,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingPlanList({
         client,
@@ -705,6 +746,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingPlanRead({
         client,
@@ -722,6 +764,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingSubscriptionRead({
         client,
@@ -739,6 +782,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingSubscriptionCancel({
         client,
@@ -756,6 +800,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingSubscriptionSubscribe({
         client,
@@ -773,6 +818,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.changeProposalList({
         client,
@@ -790,6 +836,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.changeProposalPropose({
         client,
@@ -807,6 +854,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.changeProposalRead({
         client,
@@ -824,6 +872,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.changeProposalApply({
         client,
@@ -841,6 +890,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.changeProposalReview({
         client,
@@ -858,6 +908,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.changeProposalWithdraw({
         client,
@@ -875,6 +926,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentList({
         client,
@@ -892,6 +944,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentCreate({
         client,
@@ -909,6 +962,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentDelete({
         client,
@@ -926,6 +980,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentRead({
         client,
@@ -943,6 +998,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentUpdate({
         client,
@@ -960,6 +1016,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentArchive({
         client,
@@ -977,6 +1034,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentPublish({
         client,
@@ -994,6 +1052,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentRestore({
         client,
@@ -1011,6 +1070,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentReviewTranslation({
         client,
@@ -1028,6 +1088,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentSuggestTranslation({
         client,
@@ -1045,6 +1106,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentTranslate({
         client,
@@ -1062,6 +1124,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentUnpublish({
         client,
@@ -1079,6 +1142,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentUntranslate({
         client,
@@ -1096,6 +1160,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentVersions({
         client,
@@ -1113,6 +1178,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileList({
         client,
@@ -1130,6 +1196,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: true,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileUpload({
         client,
@@ -1147,6 +1214,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileErase({
         client,
@@ -1164,6 +1232,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileDelete({
         client,
@@ -1181,6 +1250,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileRead({
         client,
@@ -1198,6 +1268,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileAltCommand({
         client,
@@ -1215,6 +1286,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileAlt({
         client,
@@ -1232,6 +1304,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileContent({
         client,
@@ -1249,6 +1322,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileContentHead({
         client,
@@ -1266,6 +1340,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileGrant({
         client,
@@ -1283,6 +1358,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileRelease({
         client,
@@ -1300,6 +1376,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileRetain({
         client,
@@ -1317,6 +1394,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFileUses({
         client,
@@ -1334,6 +1412,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileQuotaRead({
         client,
@@ -1351,6 +1430,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.notificationNotificationList({
         client,
@@ -1368,6 +1448,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.notificationDeviceList({
         client,
@@ -1385,6 +1466,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.notificationDeviceRegister({
         client,
@@ -1402,6 +1484,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.notificationDeviceRemove({
         client,
@@ -1419,6 +1502,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: true,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.notificationNotificationRead({
         client,
@@ -1436,6 +1520,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingPlanCreate({
         client,
@@ -1453,6 +1538,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingPlanDelete({
         client,
@@ -1470,6 +1556,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.billingPlanUpdate({
         client,
@@ -1487,6 +1574,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantList({
         client,
@@ -1504,6 +1592,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantCreate({
         client,
@@ -1521,6 +1610,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantRead({
         client,
@@ -1538,6 +1628,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantDelete({
         client,
@@ -1555,6 +1646,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantAddHost({
         client,
@@ -1572,6 +1664,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantRemoveHost({
         client,
@@ -1589,6 +1682,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantInvite({
         client,
@@ -1606,6 +1700,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantSetLocale({
         client,
@@ -1623,6 +1718,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantSetOidc({
         client,
@@ -1640,6 +1736,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantClearOidc({
         client,
@@ -1657,6 +1754,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantReactivate({
         client,
@@ -1674,6 +1772,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantRename({
         client,
@@ -1691,6 +1790,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantSetSaml({
         client,
@@ -1708,6 +1808,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantClearSaml({
         client,
@@ -1725,6 +1826,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.tenantTenantSuspend({
         client,
@@ -1742,6 +1844,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authMailDelivery({
         client,
@@ -1759,6 +1862,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authPasswordForgot({
         client,
@@ -1776,6 +1880,7 @@ const routes = [
     statuses: [202],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authRegister({
         client,
@@ -1793,6 +1898,7 @@ const routes = [
     statuses: [202],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authResendVerification({
         client,
@@ -1810,6 +1916,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.authVerifyEmail({
         client,
@@ -1827,6 +1934,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.contentContentPublic({
         client,
@@ -1844,6 +1952,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFilePublic({
         client,
@@ -1861,6 +1970,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.fileFilePublicHead({
         client,
@@ -1878,6 +1988,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.siteSettingsPublic({
         client,
@@ -1895,6 +2006,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupMappingsList({
         client,
@@ -1912,6 +2024,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupMappingWrite({
         client,
@@ -1929,6 +2042,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.siteSettingsRead({
         client,
@@ -1946,6 +2060,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.siteSettingsSave({
         client,
@@ -1963,6 +2078,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskList({
         client,
@@ -1980,6 +2096,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskCreate({
         client,
@@ -1997,6 +2114,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskDelete({
         client,
@@ -2014,6 +2132,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskRead({
         client,
@@ -2031,6 +2150,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskUpdate({
         client,
@@ -2048,6 +2168,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskAssign({
         client,
@@ -2065,6 +2186,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskCheckSla({
         client,
@@ -2082,6 +2204,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.taskTaskResolve({
         client,
@@ -2099,6 +2222,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userInvitationCreate({
         client,
@@ -2116,6 +2240,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserList({
         client,
@@ -2133,6 +2258,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserCreate({
         client,
@@ -2150,6 +2276,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserDelete({
         client,
@@ -2167,6 +2294,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserRead({
         client,
@@ -2184,6 +2312,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserUpdate({
         client,
@@ -2201,6 +2330,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserApproveRegistration({
         client,
@@ -2218,6 +2348,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserDeactivate({
         client,
@@ -2235,6 +2366,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserHandle({
         client,
@@ -2252,6 +2384,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserRoles({
         client,
@@ -2269,6 +2402,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.userUserSetPassword({
         client,
@@ -2286,6 +2420,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookDeliveryList({
         client,
@@ -2303,6 +2438,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookDeliveryRead({
         client,
@@ -2320,6 +2456,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookDeliveryReplay({
         client,
@@ -2337,6 +2474,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointList({
         client,
@@ -2354,6 +2492,7 @@ const routes = [
     statuses: [201],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointCreate({
         client,
@@ -2371,6 +2510,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointDelete({
         client,
@@ -2388,6 +2528,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointRead({
         client,
@@ -2405,6 +2546,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointUpdate({
         client,
@@ -2422,6 +2564,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointDisable({
         client,
@@ -2439,6 +2582,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointEnable({
         client,
@@ -2456,6 +2600,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointRotate({
         client,
@@ -2473,6 +2618,7 @@ const routes = [
     statuses: [200],
     json: true,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.webhookEndpointTarget({
         client,
@@ -2490,6 +2636,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupsList({
         client,
@@ -2507,6 +2654,7 @@ const routes = [
     statuses: [201],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupCreate({
         client,
@@ -2524,6 +2672,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupDelete({
         client,
@@ -2541,6 +2690,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupGet({
         client,
@@ -2558,6 +2708,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupPatch({
         client,
@@ -2575,6 +2726,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimGroupReplace({
         client,
@@ -2592,6 +2744,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimResourceTypesList({
         client,
@@ -2609,6 +2762,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimResourceTypeGet({
         client,
@@ -2626,6 +2780,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimSchemasList({
         client,
@@ -2643,6 +2798,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimSchemaGet({
         client,
@@ -2660,6 +2816,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimServiceProviderConfig({
         client,
@@ -2677,6 +2834,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimUsersList({
         client,
@@ -2694,6 +2852,7 @@ const routes = [
     statuses: [201],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimUserCreate({
         client,
@@ -2711,6 +2870,7 @@ const routes = [
     statuses: [204],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimUserDelete({
         client,
@@ -2728,6 +2888,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimUserGet({
         client,
@@ -2745,6 +2906,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimUserPatch({
         client,
@@ -2762,6 +2924,7 @@ const routes = [
     statuses: [200],
     json: false,
     multipart: false,
+    holder: false,
     run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
       const result = await sdk.scimUserReplace({
         client,

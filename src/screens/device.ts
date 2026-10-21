@@ -1,12 +1,13 @@
 // device.ts is the composition root's list of what this app keeps on the phone:
 // the one database file, the one maker of idempotency keys, the one network
-// listener. It sits in the screens layer because that is where an effect becomes
+// listener and the one push surface. It sits in the screens layer because that is where an effect becomes
 // a prop — a route may hand these to `Shell`, but may not reach an effect itself.
 // Nothing here opens anything: the kit opens a table only when a command asks it
 // to, and a host that supplies no store has no queue and no cache at all.
 import { randomUUID } from "expo-crypto";
 import { deviceStore } from "../effects/native-store";
 import { createReach, type Reach } from "../effects/native-reach";
+import { createPush, type PushBridge } from "./push";
 import type { OutboxStore } from "../effects/outbox";
 import type { RecentsStore } from "../effects/recents";
 import type { ReadStore } from "../effects/read-cache";
@@ -21,6 +22,8 @@ export interface Device {
   };
   readonly mint: () => string;
   readonly reach: Reach;
+  /** push is the platform's notification surface, asked by the session that owns an address. */
+  readonly push: PushBridge;
 }
 
 /**
@@ -37,4 +40,5 @@ export const device: Device = Object.freeze({
   }),
   mint: randomUUID,
   reach: createReach(),
+  push: createPush(),
 });

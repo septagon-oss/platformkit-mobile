@@ -149,13 +149,16 @@ function knownIDs(root: string): {
  * routeFiles are the screens a journey can be about: every route file under
  * app/. A layout is exempt because it draws no screen of its own — it composes
  * the navigators and names the modal headers, and the screen it draws belongs
- * to the child route's claim.
+ * to the child route's claim. A `+`-prefixed file is exempt for the same
+ * reason and a plainer one: expo-router reads a `+`-prefixed file as its own
+ * configuration (`+html`, `+native-intent`) and leaves it out of the route tree,
+ * so no journey could ever land on it.
  */
 export function routeFiles(root: string): string[] {
   const at = path.join(root, APP);
   if (!existsSync(at)) return [];
   return files(at)
-    .filter((f) => f.endsWith(".tsx") && path.basename(f) !== "_layout.tsx")
+    .filter((f) => f.endsWith(".tsx") && !/^[+_]/.test(path.basename(f)))
     .map((f) => path.relative(root, f).split(path.sep).join("/"))
     .sort();
 }

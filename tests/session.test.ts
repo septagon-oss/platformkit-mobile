@@ -100,6 +100,58 @@ test("clearing failure is reported and does not claim the saved session is gone"
   assert.deepEqual(await sessions.load(), oldSession);
 });
 
+test("a sign-out forgets the record its own session wrote and keeps the server", async () => {
+  const { storage } = memory();
+  const sessions = createSessionStore(storage);
+  await sessions.save(oldSession);
+  await sessions.forget({ baseURL: oldSession.baseURL, token: oldSession.token });
+  assert.deepEqual(await sessions.load(), { baseURL: oldSession.baseURL });
+});
+
+test("a sign-out that arrives after a newer sign-in leaves that sign-in's record standing", async () => {
+  // The slow half of signing out is the server's answer about this phone's row, and a person
+  // who signs into another workspace while it is away must still find that sign-in the next
+  // time they open the app. An ending session has no claim on a key it never signed with.
+  const { storage } = memory();
+  const sessions = createSessionStore(storage);
+  await sessions.save(oldSession);
+  await sessions.save(nextSession);
+  await sessions.forget({ baseURL: oldSession.baseURL, token: oldSession.token });
+  assert.deepEqual(await sessions.load(), nextSession);
+});
+
+test("a sign-out leaves the key a re-sign-in at the same server wrote in its place", async () => {
+  const { storage } = memory();
+  const sessions = createSessionStore(storage);
+  const again = { ...oldSession, token: "pk_live_again", tokenId: nextSession.tokenId };
+  await sessions.save(oldSession);
+  await sessions.save(again);
+  await sessions.forget({ baseURL: oldSession.baseURL, token: oldSession.token });
+  assert.deepEqual(await sessions.load(), again);
+});
+
+test("a sign-out holding no key leaves a key it never spent", async () => {
+  const { storage } = memory();
+  const sessions = createSessionStore(storage);
+  await sessions.save(nextSession);
+  await sessions.forget({ baseURL: nextSession.baseURL, token: undefined });
+  assert.deepEqual(await sessions.load(), nextSession);
+});
+
+test("a record naming no server is nobody's, and the address a sign-out keeps replaces it", async () => {
+  const { values, storage } = memory();
+  values.set("platformkit.session", "not a record");
+  await createSessionStore(storage).forget({ baseURL: oldSession.baseURL, token: undefined });
+  assert.deepEqual(await createSessionStore(storage).load(), { baseURL: oldSession.baseURL });
+});
+
+test("a sign-out at no address keeps a record naming nothing rather than an empty address", async () => {
+  const { values, storage } = memory();
+  values.set("platformkit.session", "not a record");
+  await createSessionStore(storage).forget({ baseURL: "", token: undefined });
+  assert.deepEqual(JSON.parse(values.get("platformkit.session")!), { version: 2 });
+});
+
 test("malformed or unsupported records never become authenticated sessions", async () => {
   for (const record of [
     "not json",
