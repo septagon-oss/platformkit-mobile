@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 273,
-   "cases": 1282,
-   "ms": 2417334,
-   "testsMs": 92983.99999999993,
+   "files": 274,
+   "cases": 1284,
+   "ms": 2443548,
+   "testsMs": 93386.99999999993,
    "runners": {
-    "jest": 95,
+    "jest": 96,
     "node": 178
    },
    "unreachable": 0
@@ -4034,6 +4034,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/the-deck-address-matches-the-deck-route-file-not-a-record.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The deck's address is a static segment beside a record's `[id]`, so a spelling that names no route file still reaches a screen: the record whose id is that word. Expo Router's own matcher, over the app's real route files, must send `address(\"deck\", \u2026)` to the file that draws the deck and `rowAt` to the file that draws a record. The root layout is left out of the context: it sets no route option, and loading it would start the whole shell.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26214,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the queue button's address matches the route file that draws the deck",
+    "a card's record address matches the route file that draws a record"
+   ],
+   "tests": [
+    {
+     "title": "the queue button's address matches the route file that draws the deck",
+     "ms": 21,
+     "measured": false
+    },
+    {
+     "title": "a card's record address matches the route file that draws a record",
+     "ms": 382,
+     "measured": false
+    }
+   ],
+   "loaded": 133,
+   "coveredProdLines": 2070,
+   "onlyProdLines": null,
+   "testsMs": 403
   },
   {
    "file": "tests/screens/useFeedback.test.tsx",

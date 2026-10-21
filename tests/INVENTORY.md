@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `dda362045` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `77a9c6f01` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 273 | 1282 | 93.0 s | 2417 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 274 | 1284 | 93.4 s | 2444 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 144 | 478 | 57.0 s | 3579 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 513
+* keep: 514
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 513 — 215 `tests/*.test.ts` (node), 239 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1989; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2417 s, composition 3579 s, journey 0 s
+* files inventoried: 514 — 215 `tests/*.test.ts` (node), 240 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1991; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2444 s, composition 3579 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -140,6 +140,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/deck-motion.test.tsx | jest | behaviour | 7 | 87960 | 19 |  | not measured | — | 0 | keep | The production pan bridges only a current, armed single-pointer release and ticks at most once per drag. |
 | tests/screens/nativeImage.test.tsx | jest | behaviour | 9 | 20607 | 76 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) replaced and unmounted image sources cannot report into the active scope |
 | tests/screens/refusal-words-never-quote-the-wire.test.tsx | jest | behaviour | 25 | 24619 | 4149 | 1 | not measured | — | 0 | keep | A phone reads a refusal in its own words. The classifier decides which sentence a refusal is, but a decided sentence only counts once it is the one drawn, so t… |
+| tests/screens/the-deck-address-matches-the-deck-route-file-not-a-record.test.tsx | jest | behaviour | 2 | 26214 | 403 |  | not measured | — | 0 | keep | The deck's address is a static segment beside a record's `[id]`, so a spelling that names no route file still reaches a screen: the record whose id is that wor… |
 | tests/screens/useFeedback.test.tsx | jest | behaviour | 3 | 22923 | 18 | 8 | 1 of 3 | src/screens/StateFeedback.tsx | 0 | keep | (no first comment; first test title) each mounted form samples its explicit clock once, independently of another form |
 | tests/screens/viewer-denial-abandons-loader.test.tsx | jest | behaviour | 4 | 19683 | 1112 | 0 | 0 of 4 | — | 0 | keep | Once the media read is denied, the viewer stops showing the item it covered: no progress bar, no retry, no caption. A later authorized response carrying the sa… |
 | tests/screens/viewer-recovery-retains-loader.test.tsx | jest | behaviour | 1 | 20708 | 737 | 0 | 0 of 1 | — | 0 | keep | Recovery keeps what is already true: the loader stays while it is genuinely loading, and a selection the viewer abandoned stays abandoned until its own read su… |
