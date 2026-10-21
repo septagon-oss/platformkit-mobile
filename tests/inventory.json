@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 143,
-   "cases": 476,
-   "ms": 3532632,
-   "testsMs": 56322,
+   "files": 144,
+   "cases": 478,
+   "ms": 3578846,
+   "testsMs": 56968,
    "runners": {
-    "jest": 143
+    "jest": 144
    },
    "unreachable": 0
   },
@@ -21891,6 +21891,41 @@
    "coveredProdLines": 2193,
    "onlyProdLines": null,
    "testsMs": 23
+  },
+  {
+   "file": "tests/screens/a-deck-opens-at-the-routes-reentry-spells.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The deck's two doors are routes `reentry` spells: the list's queue button opens the deck at `address(\"deck\", \u2026)`, and a card the person taps opens its record at `rowAt`, the one spelling of a row's route, so an id that needs encoding reaches the same record a list row opens.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 46214,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the list's queue button opens the deck at the address reentry spells for it",
+    "a tapped card opens its record at the row route a list row opens"
+   ],
+   "tests": [
+    {
+     "title": "the list's queue button opens the deck at the address reentry spells for it",
+     "ms": 212,
+     "measured": false
+    },
+    {
+     "title": "a tapped card opens its record at the row route a list row opens",
+     "ms": 434,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2801,
+   "onlyProdLines": null,
+   "testsMs": 646
   },
   {
    "file": "tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx",

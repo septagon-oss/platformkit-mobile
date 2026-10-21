@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `838f23ac1` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `dda362045` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 273 | 1282 | 93.0 s | 2417 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 143 | 476 | 56.3 s | 3533 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 144 | 478 | 57.0 s | 3579 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 512
+* keep: 513
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 512 — 215 `tests/*.test.ts` (node), 238 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1987; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2417 s, composition 3533 s, journey 0 s
+* files inventoried: 513 — 215 `tests/*.test.ts` (node), 239 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 1989; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2417 s, composition 3579 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -417,6 +417,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-caught-up-deck-plays-the-products-finish-once-under-normal-motion.test.tsx | jest | composition | 2 | 43947 | 807 |  | not measured | — | 0 | keep | A deck screen that reaches its end through a command this phone sent plays the product's finishing renderer, supplied once to the shell, inside the end state; … |
 | tests/screens/a-complete-translation-save-keeps-the-source.test.tsx | jest | composition | 2 | 20586 | 188 |  | not measured | — | 0 | keep | Content-Language names the requested locale; _i18n may instead name the source of a fallback. A translator's edit in that locale must preserve the source in bo… |
 | tests/screens/a-completed-delete-survives-local-recents-failure.test.tsx | jest | composition | 3 | 27889 | 23 |  | not measured | — | 0 | keep | A server-confirmed delete stays completed when this device cannot clean up its reading history. A local cache error cannot turn that answer into an uncertain m… |
+| tests/screens/a-deck-opens-at-the-routes-reentry-spells.test.tsx | jest | composition | 2 | 46214 | 646 |  | not measured | — | 0 | keep | The deck's two doors are routes `reentry` spells: the list's queue button opens the deck at `address("deck", …)`, and a card the person taps opens its record a… |
 | tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx | jest | composition | 1 | 27490 | 66 |  | not measured | — | 0 | keep | A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering. |
 | tests/screens/a-delete-that-left-this-phone-takes-its-door-with-it.test.tsx | jest | composition | 2 | 33376 | 14 |  | not measured | — | 0 | keep | "Recently opened" is a door onto a record, so a record this phone deleted leaves the list: a section that kept its row would draw a door onto a 404. The delete… |
 | tests/screens/a-device-is-registered-with-the-credential-its-door-answers-to.test.tsx | jest | composition | 1 | 20870 | 104 |  | not measured | — | 0 | keep | A device is registered, and taken back, with the credential its door answers to. The pinned API document says which one each door takes (`x-platformkit-auth`):… |
