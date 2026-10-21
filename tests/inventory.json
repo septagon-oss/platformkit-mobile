@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 128,
-   "cases": 439,
-   "ms": 3064754,
-   "testsMs": 51811,
+   "files": 129,
+   "cases": 441,
+   "ms": 3108701,
+   "testsMs": 52618,
    "runners": {
-    "jest": 128
+    "jest": 129
    },
    "unreachable": 0
   },
@@ -21499,6 +21499,41 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/a-caught-up-deck-plays-the-products-finish-once-under-normal-motion.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A deck screen that reaches its end through a command this phone sent plays the product's finishing renderer, supplied once to the shell, inside the end state; the renderer's end stops it and leaves the same caught-up title and counts. A person who asked for less motion is shown the end with no renderer, and the finish that arrival owed is spent: turning motion on afterwards does not play it late.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 43947,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "normal motion plays the product's finish inside the end and its end leaves the same counts",
+    "reduced motion shows the end with no finish and turning motion on does not play it late"
+   ],
+   "tests": [
+    {
+     "title": "normal motion plays the product's finish inside the end and its end leaves the same counts",
+     "ms": 760,
+     "measured": false
+    },
+    {
+     "title": "reduced motion shows the end with no finish and turning motion on does not play it late",
+     "ms": 47,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2681,
+   "onlyProdLines": null,
+   "testsMs": 807
   },
   {
    "file": "tests/screens/a-complete-translation-save-keeps-the-source.test.tsx",
