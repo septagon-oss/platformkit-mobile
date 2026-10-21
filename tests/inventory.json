@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 275,
-   "cases": 1289,
-   "ms": 2444382,
-   "testsMs": 93402.89999999994,
+   "files": 276,
+   "cases": 1304,
+   "ms": 2505216,
+   "testsMs": 93406.89999999994,
    "runners": {
-    "jest": 96,
+    "jest": 97,
     "node": 179
    },
    "unreachable": 0
@@ -9623,6 +9623,119 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/the-decide-pack-reaches-no-transport-and-writes-no-colour.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 15,
+   "rule": "The decide pack is props in and elements out: it reaches no transport or secure storage (`src/effects/`) and draws no colour of its own (the palette is `src/ui/theme.tsx`).",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 60834,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "has screens to read",
+    "ask.tsx imports no transport or secure storage",
+    "invite.tsx imports no transport or secure storage",
+    "questions.tsx imports no transport or secure storage",
+    "read.ts imports no transport or secure storage",
+    "results.tsx imports no transport or secure storage",
+    "vote.tsx imports no transport or secure storage",
+    "wire.ts imports no transport or secure storage",
+    "ask.tsx writes no colour of its own",
+    "invite.tsx writes no colour of its own",
+    "questions.tsx writes no colour of its own",
+    "read.ts writes no colour of its own",
+    "results.tsx writes no colour of its own",
+    "vote.tsx writes no colour of its own",
+    "wire.ts writes no colour of its own"
+   ],
+   "tests": [
+    {
+     "title": "has screens to read",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "ask.tsx imports no transport or secure storage",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "invite.tsx imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "questions.tsx imports no transport or secure storage",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "read.ts imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "results.tsx imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "vote.tsx imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "wire.ts imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "ask.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "invite.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "questions.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "read.ts writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "results.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "vote.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "wire.ts writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    }
+   ],
+   "loaded": 129,
+   "coveredProdLines": 1947,
+   "onlyProdLines": null,
+   "testsMs": 4
   },
   {
    "file": "tests/ui/the-deck-draws-its-finishing-renderer-only-under-normal-motion.test.tsx",
