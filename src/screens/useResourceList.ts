@@ -28,6 +28,7 @@ import { systemClock } from "./clock";
 import { listQuery, PER_PAGE } from "../effects/api";
 import { answered } from "../effects/read-cache";
 import { useShell } from "../shell";
+import { reviewDeck } from "../core/deck";
 
 // The API's own ceiling on one request; a list that has grown past it re-reads
 // the first pages only, which is what a person has scrolled through anyway.
@@ -45,6 +46,44 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
   const [visit, setVisit] = useState(0);
   const [rows, setRows] = useState<readonly Row[]>([]);
   const [total, setTotal] = useState(0);
+  const [queue, setQueue] = useState<{ total?: number; loading: boolean; error: string }>({
+    loading: true,
+    error: "",
+  });
+  const deck = reviewDeck(entry);
+  const queueGeneration = useRef(0);
+  const loadQueue = useCallback(async () => {
+    if (!deck) return;
+    const started = ++queueGeneration.current;
+    setQueue({ loading: true, error: "" });
+    try {
+      const page = await api.list(entry, {
+        offset: 0,
+        limit: 1,
+        sort: deck.order,
+        filters: deck.queue,
+      });
+      if (!Number.isSafeInteger(page.total) || page.total < 0)
+        throw new Error("invalid queue total");
+      if (queueGeneration.current === started)
+        setQueue({ total: page.total, loading: false, error: "" });
+    } catch (error) {
+      if (queueGeneration.current === started)
+        setQueue({
+          loading: false,
+          error: refusalOf(error, "read", failureSubject(entry), copy).text,
+        });
+    }
+  }, [api, entry, deck, copy]);
+  useEffect(() => {
+    void (async () => {
+      await loadQueue();
+    })();
+    const started = queueGeneration.current;
+    return () => {
+      if (queueGeneration.current === started) queueGeneration.current = started + 1;
+    };
+  }, [loadQueue, visit]);
   // When this phone last received the rows on screen, and nothing when the
   // server sent them: where what is on screen came from is the person's to know.
   const [savedAt, setSavedAt] = useState<string | undefined>(undefined);
@@ -163,6 +202,8 @@ export function useResourceList(entry: Entry, format: Formatting, clock: Clock =
   }, [busy, load]);
 
   return {
+    queue,
+    loadQueue,
     visit,
     rows,
     total,

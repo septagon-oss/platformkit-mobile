@@ -565,6 +565,8 @@ export type {
   ContentWritable,
   CreateBody,
   CreateBodyWritable,
+  DeckDirectionPresentation,
+  DeckPresentation,
   Delete,
   DeleteWritable,
   Delivery,

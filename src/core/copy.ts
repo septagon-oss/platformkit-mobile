@@ -6,6 +6,18 @@ export type Language = "en" | "pt";
 const identity = Symbol("Copy");
 
 interface Words {
+  readonly review: {
+    readonly title: string;
+    readonly open: (count: string) => string;
+    readonly later: string;
+    readonly deferred: (count: string) => string;
+    readonly unavailable: string;
+    readonly encouraged: string;
+    readonly caughtUp: string;
+    readonly complete: string;
+    readonly changed: string;
+    readonly checkFailed: string;
+  };
   readonly kit: KitWords;
   readonly choice: { readonly placeholder: string; readonly cancel: string; readonly hint: string };
   readonly dateTime: {
@@ -109,6 +121,18 @@ const notSetEn = "Not set";
 const notSetPt = "Não definido";
 
 const en: Words = {
+  review: {
+    title: "Review",
+    open: (count) => `Review ${count}`,
+    later: "Review later",
+    deferred: (count) => `${count} left for later`,
+    unavailable: "No review actions are available.",
+    encouraged: "Nice — 5 reviewed.",
+    caughtUp: "All caught up",
+    complete: "Review complete",
+    changed: "The queue changed. Reviewing the items loaded.",
+    checkFailed: "Couldn't check the queue. Try again.",
+  },
   kit: kitEnglish,
   choice: { placeholder: "Choose", cancel: "Cancel", hint: "Opens the choices" },
   dateTime: {
@@ -196,6 +220,18 @@ const en: Words = {
 };
 
 const pt: Words = {
+  review: {
+    title: "Rever",
+    open: (count) => `Rever ${count}`,
+    later: "Rever mais tarde",
+    deferred: (count) => `${count} para mais tarde`,
+    unavailable: "Não há ações de revisão disponíveis.",
+    encouraged: "Boa — 5 itens revistos.",
+    caughtUp: "Tudo em dia",
+    complete: "Revisão concluída",
+    changed: "A fila mudou. A rever os itens carregados.",
+    checkFailed: "Não foi possível verificar a fila. Tente novamente.",
+  },
   kit: kitPortuguese,
   choice: { placeholder: "Escolher", cancel: "Cancelar", hint: "Abre as opções" },
   dateTime: {
@@ -289,6 +325,7 @@ function bundle(language: Language, words: Words): Copy {
     [identity]: true as const,
     language,
     kit: Object.freeze(words.kit),
+    review: Object.freeze(words.review),
     choice: Object.freeze(words.choice),
     dateTime: Object.freeze(words.dateTime),
     value: Object.freeze(words.value),

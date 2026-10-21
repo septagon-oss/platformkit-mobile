@@ -42,11 +42,11 @@ export interface Remembered {
   readonly email: string;
 }
 
-/** ScreenKind is which of the four generated screens an address is. It is named here rather
+/** ScreenKind is which generated screen an address is. It is named here rather
  * than taken from `src/renderers.ts` because the core names no component type; `ResourceRoute`
- * passes its own `kind: keyof Renderer` into `address`, so a fifth renderer kind that this
+ * passes its own `kind: keyof Renderer` into `address`, so a renderer kind that this
  * union does not name stops the build rather than drawing a blank address. */
-export type ScreenKind = "list" | "detail" | "form" | "command";
+export type ScreenKind = "list" | "detail" | "form" | "command" | "deck";
 
 /**
  * RecordAddress is one record's route in the shape the router accepts it: the resource's
@@ -86,6 +86,8 @@ export function address(kind: ScreenKind, e: Entry, id?: string, verb?: string):
   switch (kind) {
     case "list":
       return at;
+    case "deck":
+      return `${at}/review`;
     case "detail":
       return rowAt(e.module, e.entity, id ?? "");
     case "form":

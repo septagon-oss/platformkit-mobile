@@ -8,7 +8,7 @@
 // most three, so Cancel goes first there and is never the button that is cut.
 // Where the sheet's module is not in the build — every host the kit tests itself
 // in is one — the same question becomes the alert rather than refusing to ask.
-import { ActionSheetIOS, Alert, Platform } from "react-native";
+import { ActionSheetIOS, Alert, Platform, type AlertButton } from "react-native";
 import type { Mode } from "./tokens";
 
 export interface Choice {
@@ -19,6 +19,7 @@ export interface Choice {
 
 /** Wording is what a question says beyond its title and its answers. */
 export interface Wording {
+  readonly onCancel?: () => void;
   /** message is the sentence under the title: what the answer does, in the API document's words when it has them. */
   readonly message?: string;
   /** cancel is the way out; "Cancel" unless staying is a thing of its own, like "Keep editing". */
@@ -44,7 +45,11 @@ export function choose(
           destructiveButtonIndex: destructive.length > 0 ? destructive : null,
           userInterfaceStyle: mode,
         },
-        (index) => choices[index]?.onPress(),
+        (index) => {
+          const choice = choices[index];
+          if (choice) choice.onPress();
+          else wording.onCancel?.();
+        },
       );
       return;
     } catch {
@@ -54,14 +59,17 @@ export function choose(
       // down with it.
     }
   }
-  Alert.alert(title, wording.message, [
-    { text: cancel, style: "cancel" },
+  const buttons: AlertButton[] = [
+    { text: cancel, style: "cancel", ...(wording.onCancel ? { onPress: wording.onCancel } : {}) },
     ...choices.map((c) => ({
       text: c.label,
       onPress: c.onPress,
       style: c.destructive ? ("destructive" as const) : ("default" as const),
     })),
-  ]);
+  ];
+  if (wording.onCancel) {
+    Alert.alert(title, wording.message, buttons, { onDismiss: wording.onCancel, cancelable: true });
+  } else Alert.alert(title, wording.message, buttons);
 }
 
 /**

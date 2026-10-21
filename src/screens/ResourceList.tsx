@@ -112,6 +112,9 @@ export function ResourceList({ entry }: ScreenProps) {
         onMore={list.loadMore}
         onRefresh={list.refresh}
         onRowRun={row.run}
+        queue={list.queue}
+        onReview={() => router.push(`${at}/review`)}
+        onQueueRetry={list.loadQueue}
         {...(RowSwipe ? { renderRowAction: RowSwipe } : {})}
         {...(mayCreate ? { onNew: add } : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}

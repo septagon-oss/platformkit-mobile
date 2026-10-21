@@ -11,6 +11,7 @@ import type {
 import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
 import { drawnIcon, pictureDoor, type Pictures } from "./pictures";
 import { issuePath } from "./responses";
+import { readDeck, type Deck } from "./catalogDeck";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
 // Required wire members remain required; JSON itself never contains undefined.
@@ -117,6 +118,7 @@ export type FieldVisibility = "shown" | "detail" | "hidden";
  * document declared.
  */
 export interface EntryHints {
+  readonly deck?: Deck;
   readonly singular?: string;
   readonly plural?: string;
   readonly icon?: string;
@@ -513,6 +515,10 @@ function hintEntry(
     return label === undefined ? undefined : { label };
   })();
   const hints: EntryHints = {
+    ...(() => {
+      const deck = readDeck(raw.deck, fields, sortable, commands, HINT_TONES, `${at}.deck`, notice);
+      return deck === undefined ? {} : { deck };
+    })(),
     ...(singular === undefined ? {} : { singular }),
     ...(plural === undefined ? {} : { plural }),
     ...(icon === undefined ? {} : { icon }),

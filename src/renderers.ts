@@ -7,6 +7,7 @@ import type { Operations } from "./generated/operations.gen";
 import type { FinishingProps } from "./ui/organisms/ResourceDetail";
 import type { CoverMotionProps } from "./ui/organisms/RecordCover";
 import type { ZoomSlotProps } from "./ui/organisms/PhotoViewer";
+import type { DeckMotionProps } from "./ui/organisms/ResourceDeck";
 import type { RowActionProps } from "./ui/organisms/DataList";
 
 export interface ScreenProps {
@@ -17,6 +18,7 @@ export interface ScreenProps {
 }
 
 export interface Renderer {
+  readonly deck?: ComponentType<ScreenProps>;
   readonly list?: ComponentType<ScreenProps>;
   readonly detail?: ComponentType<ScreenProps>;
   readonly form?: ComponentType<ScreenProps>;
@@ -38,6 +40,7 @@ export type Renderers = Readonly<Record<string, Renderer>>;
  * rather than under a finger.
  */
 export interface MediaRenderers {
+  readonly deck?: ComponentType<DeckMotionProps>;
   readonly zoom?: ComponentType<ZoomSlotProps>;
   readonly coverMotion?: ComponentType<CoverMotionProps>;
   readonly finishing?: ComponentType<FinishingProps>;

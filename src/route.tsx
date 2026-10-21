@@ -1,7 +1,7 @@
 // route.tsx is what every resource route does: read the two names from the
 // path, find the entry in the catalog, pick the renderer pack's screen or the
 // generated one, and send an anonymous visitor to sign in. It is the whole of
-// the composition a route file would otherwise repeat four times.
+// the composition each resource route would otherwise repeat.
 import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback } from "react";
 import { View } from "react-native";
@@ -12,6 +12,7 @@ import type { Renderer } from "./renderers";
 import { ResourceCommand } from "./screens/ResourceCommand";
 import { ResourceDetail } from "./screens/ResourceDetail";
 import { ResourceForm } from "./screens/ResourceForm";
+import { ResourceDeck } from "./screens/ResourceDeck";
 import { ResourceList } from "./screens/ResourceList";
 import { Singleton } from "./screens/Singleton";
 import { useFeedback } from "./screens/useFeedback";
@@ -31,6 +32,7 @@ import { useStyles } from "./ui/theme";
 export { systemHref } from "./core/arrival";
 
 const generated: Required<Renderer> = {
+  deck: ResourceDeck,
   list: ResourceList,
   detail: ResourceDetail,
   form: ResourceForm,

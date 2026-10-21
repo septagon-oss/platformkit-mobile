@@ -285,34 +285,34 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 264,
-   "cases": 1237,
-   "ms": 2194675,
-   "testsMs": 83245.29999999993,
+   "files": 274,
+   "cases": 1284,
+   "ms": 2443548,
+   "testsMs": 93386.99999999993,
    "runners": {
-    "jest": 92,
-    "node": 172
+    "jest": 96,
+    "node": 178
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 136,
-   "cases": 441,
-   "ms": 3275835,
-   "testsMs": 48854,
+   "files": 144,
+   "cases": 478,
+   "ms": 3578846,
+   "testsMs": 56968,
    "runners": {
-    "jest": 136
+    "jest": 144
    },
    "unreachable": 0
   },
   "journey": {
-   "files": 58,
-   "cases": 50,
+   "files": 59,
+   "cases": 51,
    "ms": 0,
    "testsMs": 0,
    "runners": {
     "browser": 43,
-    "maestro": 15
+    "maestro": 16
    },
    "unreachable": 43
   }
@@ -3600,6 +3600,71 @@
    "testsMs": 445
   },
   {
+   "file": "tests/screens/deck-motion.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 7,
+   "rule": "The production pan bridges only a current, armed single-pointer release and ticks at most once per drag.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 87960,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "crossing, retreating and crossing again ticks once and only release selects the current direction",
+    "a short gesture never bridges a choice",
+    "a cancelled gesture never bridges a choice",
+    "a extra-pointer gesture never bridges a choice",
+    "a resized gesture never bridges a choice",
+    "reduced motion retains the threshold tick and the same release action",
+    "changing motion preference cancels the drag that was already armed"
+   ],
+   "tests": [
+    {
+     "title": "crossing, retreating and crossing again ticks once and only release selects the current direction",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "a short gesture never bridges a choice",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a cancelled gesture never bridges a choice",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a extra-pointer gesture never bridges a choice",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "a resized gesture never bridges a choice",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "reduced motion retains the threshold tick and the same release action",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "changing motion preference cancels the drag that was already armed",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 131,
+   "coveredProdLines": 2016,
+   "onlyProdLines": null,
+   "testsMs": 19
+  },
+  {
    "file": "tests/screens/nativeImage.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -3969,6 +4034,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/the-deck-address-matches-the-deck-route-file-not-a-record.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The deck's address is a static segment beside a record's `[id]`, so a spelling that names no route file still reaches a screen: the record whose id is that word. Expo Router's own matcher, over the app's real route files, must send `address(\"deck\", \u2026)` to the file that draws the deck and `rowAt` to the file that draws a record. The root layout is left out of the context: it sets no route option, and loading it would start the whole shell.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26214,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the queue button's address matches the route file that draws the deck",
+    "a card's record address matches the route file that draws a record"
+   ],
+   "tests": [
+    {
+     "title": "the queue button's address matches the route file that draws the deck",
+     "ms": 21,
+     "measured": false
+    },
+    {
+     "title": "a card's record address matches the route file that draws a record",
+     "ms": 382,
+     "measured": false
+    }
+   ],
+   "loaded": 133,
+   "coveredProdLines": 2070,
+   "onlyProdLines": null,
+   "testsMs": 403
   },
   {
    "file": "tests/screens/useFeedback.test.tsx",
@@ -5662,6 +5762,53 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/deck.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "The still stack exposes the same named choices as its visible controls, with one readable card and truthful end states.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 81962,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the still stack exposes one card and the ordered declared choices without requiring a motion renderer",
+    "busy cards announce their lock and retain their text and persistent refusal reason",
+    "a failed picture leaves a titled card that still offers the same decisions",
+    "empty and finite-pass ends remain distinct and Portuguese copy covers the local skip and end"
+   ],
+   "tests": [
+    {
+     "title": "the still stack exposes one card and the ordered declared choices without requiring a motion renderer",
+     "ms": 21,
+     "measured": false
+    },
+    {
+     "title": "busy cards announce their lock and retain their text and persistent refusal reason",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "a failed picture leaves a titled card that still offers the same decisions",
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "empty and finite-pass ends remain distinct and Portuguese copy covers the local skip and end",
+     "ms": 13,
+     "measured": false
+    }
+   ],
+   "loaded": 131,
+   "coveredProdLines": 2199,
+   "onlyProdLines": null,
+   "testsMs": 68
   },
   {
    "file": "tests/ui/dialog-busy-backdrop.test.tsx",
@@ -9478,6 +9625,47 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/the-deck-draws-its-finishing-renderer-only-under-normal-motion.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The caught-up deck hands its finishing renderer the arrived tone and the person's motion only when the derived model asks for a finish: normal motion mounts it inside the end state and its end reaches the screen's finish call; reduced motion, or a product with no renderer, draws the same still title and counts with no renderer mounted.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 32472,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "normal motion mounts the finishing renderer in the end state and its end reaches the finish call",
+    "reduced motion draws the same caught-up title and counts with no finishing renderer",
+    "a product with no finishing renderer keeps the caught-up end whole under normal motion"
+   ],
+   "tests": [
+    {
+     "title": "normal motion mounts the finishing renderer in the end state and its end reaches the finish call",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "reduced motion draws the same caught-up title and counts with no finishing renderer",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "a product with no finishing renderer keeps the caught-up end whole under normal motion",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 131,
+   "coveredProdLines": 2165,
+   "onlyProdLines": null,
+   "testsMs": 28
+  },
+  {
    "file": "tests/ui/the-worn-accent-keeps-every-pair-the-registry-measures.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -9764,6 +9952,35 @@
    "coveredProdLines": 0,
    "onlyProdLines": null,
    "testsMs": 2.1
+  },
+  {
+   "file": "tests/a-closed-deck-pass-never-reuses-its-operation-numbers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A pass the deck closes after a held or unknown choice never hands its operation numbers to the next pass. The screen remembers what it already asked to confirm and already sent by number alone, so a restarted pass that reused one would skip its confirmation or swallow its command.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 701,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a pass restarted after a held or unknown choice uses operation numbers the closed pass never issued"
+   ],
+   "tests": [
+    {
+     "title": "a pass restarted after a held or unknown choice uses operation numbers the closed pass never issued",
+     "ms": 1.987116,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 5172,
+   "onlyProdLines": null,
+   "testsMs": 2
   },
   {
    "file": "tests/a-command-says-what-it-runs-on-and-what-it-does.test.ts",
@@ -11599,6 +11816,35 @@
    "testsMs": 10.7
   },
   {
+   "file": "tests/a-withdrawn-deck-keeps-no-row-and-takes-no-input.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A deck whose read is withdrawn (no access, gone, signed out, off the plan) shows none of the rows it held and takes no further input: no choice, page, answer, refresh, retry or resume reopens it, whether the read failed while the pass was loading or while it was checking for more.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1883,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a deck whose read is withdrawn holds none of its rows and ignores every later input"
+   ],
+   "tests": [
+    {
+     "title": "a deck whose read is withdrawn holds none of its rows and ignores every later input",
+     "ms": 2.715764,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 5183,
+   "onlyProdLines": null,
+   "testsMs": 2.7
+  },
+  {
    "file": "tests/activity-actor-snapshot.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -11891,6 +12137,53 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/an-unanswered-final-count-withholds-the-finish-until-a-retry-finds-none.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "A final count nothing answered ends the pass with a retry and nothing more: the choices made stay in the history, the finishing moment is neither played nor spent, and the deck makes no \"caught up\" claim. Only a retried count that finds the queue empty plays the finish, once; a retried count that still finds rows ends the pass with no retry left to offer; and a count for the failed operation that lands after the retry changes nothing.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 3174,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a final count nothing answered offers retry and keeps the finish for a retried count that finds none",
+    "a retried final count that still finds rows ends the pass with no retry, no finish and no caught-up claim",
+    "a retried final count nothing answers again offers the same retry over the same history",
+    "a final count failure the person cannot retry offers no retry and a retry changes nothing"
+   ],
+   "tests": [
+    {
+     "title": "a final count nothing answered offers retry and keeps the finish for a retried count that finds none",
+     "ms": 9.506756,
+     "measured": false
+    },
+    {
+     "title": "a retried final count that still finds rows ends the pass with no retry, no finish and no caught-up claim",
+     "ms": 0.64274,
+     "measured": false
+    },
+    {
+     "title": "a retried final count nothing answers again offers the same retry over the same history",
+     "ms": 0.537806,
+     "measured": false
+    },
+    {
+     "title": "a final count failure the person cannot retry offers no retry and a retry changes nothing",
+     "ms": 0.505456,
+     "measured": false
+    }
+   ],
+   "loaded": 36,
+   "coveredProdLines": 13124,
+   "onlyProdLines": null,
+   "testsMs": 11.2
   },
   {
    "file": "tests/api.test.ts",
@@ -12962,14 +13255,180 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/deck-gesture.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "Measured card geometry owns direction arbitration, inclusive thresholds, overlay and capped tilt.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 10221,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a third of card width and a quarter of height arm at exact equality",
+    "normalized ties choose horizontal and unavailable candidates never fall back to another axis",
+    "tilt is capped and reduced motion preserves decisions while removing tilt",
+    "unmeasured, nonfinite and overflowed geometry is neutral",
+    "the real Worklets compiler serializes the helper without a remote closure and an isolated runtime can call it"
+   ],
+   "tests": [
+    {
+     "title": "a third of card width and a quarter of height arm at exact equality",
+     "ms": 1.935029,
+     "measured": false
+    },
+    {
+     "title": "normalized ties choose horizontal and unavailable candidates never fall back to another axis",
+     "ms": 1.38432,
+     "measured": false
+    },
+    {
+     "title": "tilt is capped and reduced motion preserves decisions while removing tilt",
+     "ms": 0.211882,
+     "measured": false
+    },
+    {
+     "title": "unmeasured, nonfinite and overflowed geometry is neutral",
+     "ms": 2.415668,
+     "measured": false
+    },
+    {
+     "title": "the real Worklets compiler serializes the helper without a remote closure and an isolated runtime can call it",
+     "ms": 9564.550744,
+     "measured": false
+    }
+   ],
+   "loaded": 1,
+   "coveredProdLines": 71,
+   "onlyProdLines": null,
+   "testsMs": 9570.5
+  },
+  {
+   "file": "tests/deck.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 15,
+   "rule": "A finite pass counts confirmed choices, keeps deferred skips rewindable, and never credits an unanswered write.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1514,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "capture freezes the first total and advances by raw page length before allowing choices",
+    "skip and rewind preserve a finite active order and share the history-derived denominator",
+    "a confirmed command is an undo barrier and duplicate acceptance cannot credit twice",
+    "confirmation locks every choice until cancellation or its single matching answer",
+    "refusal restores the same card without history and blocks its intent until a live revalidation",
+    "held and unknown results keep the card locked and never become choices",
+    "a resolved held or unknown choice offers a fresh capture without crediting the old intent",
+    "skip-only decks finish their pass without claiming the server queue is empty",
+    "only a live empty total after a confirmed command earns a single finishing moment",
+    "revalidation removes missing active cards without credit and cannot rewind a missing deferred card",
+    "encouragement survives rewind and obsolete operation or session callbacks have no effect",
+    "missing identities and invalid totals fail capture instead of fabricating an empty pass",
+    "catalog normalization resolves defaulted row commands and refuses an invalid deck atomically",
+    "toolbar uses the queue's own count, suppresses empty or unauthorized choices, and preserves valid skip-only decks",
+    "a deck loads only its three drawn covers or thumbnail fallbacks, preserving the outgoing card during settlement"
+   ],
+   "tests": [
+    {
+     "title": "capture freezes the first total and advances by raw page length before allowing choices",
+     "ms": 2.797863,
+     "measured": false
+    },
+    {
+     "title": "skip and rewind preserve a finite active order and share the history-derived denominator",
+     "ms": 8.876744,
+     "measured": false
+    },
+    {
+     "title": "a confirmed command is an undo barrier and duplicate acceptance cannot credit twice",
+     "ms": 0.311376,
+     "measured": false
+    },
+    {
+     "title": "confirmation locks every choice until cancellation or its single matching answer",
+     "ms": 0.236768,
+     "measured": false
+    },
+    {
+     "title": "refusal restores the same card without history and blocks its intent until a live revalidation",
+     "ms": 0.487852,
+     "measured": false
+    },
+    {
+     "title": "held and unknown results keep the card locked and never become choices",
+     "ms": 0.359033,
+     "measured": false
+    },
+    {
+     "title": "a resolved held or unknown choice offers a fresh capture without crediting the old intent",
+     "ms": 0.702649,
+     "measured": false
+    },
+    {
+     "title": "skip-only decks finish their pass without claiming the server queue is empty",
+     "ms": 1.007764,
+     "measured": false
+    },
+    {
+     "title": "only a live empty total after a confirmed command earns a single finishing moment",
+     "ms": 0.513169,
+     "measured": false
+    },
+    {
+     "title": "revalidation removes missing active cards without credit and cannot rewind a missing deferred card",
+     "ms": 0.815398,
+     "measured": false
+    },
+    {
+     "title": "encouragement survives rewind and obsolete operation or session callbacks have no effect",
+     "ms": 0.297621,
+     "measured": false
+    },
+    {
+     "title": "missing identities and invalid totals fail capture instead of fabricating an empty pass",
+     "ms": 0.556288,
+     "measured": false
+    },
+    {
+     "title": "catalog normalization resolves defaulted row commands and refuses an invalid deck atomically",
+     "ms": 4.357598,
+     "measured": false
+    },
+    {
+     "title": "toolbar uses the queue's own count, suppresses empty or unauthorized choices, and preserves valid skip-only decks",
+     "ms": 1.483724,
+     "measured": false
+    },
+    {
+     "title": "a deck loads only its three drawn covers or thumbnail fallbacks, preserving the outgoing card during settlement",
+     "ms": 3.136349,
+     "measured": false
+    }
+   ],
+   "loaded": 36,
+   "coveredProdLines": 13324,
+   "onlyProdLines": null,
+   "testsMs": 25.9
+  },
+  {
    "file": "tests/delete-selectors-match-the-dialog-answer.test.ts",
    "runner": "node",
    "layer": "behaviour",
-   "cases": 6,
-   "ms": 440,
-   "testsMs": 36.9,
+   "cases": 8,
+   "ms": 468,
+   "testsMs": 34.3,
    "loaded": 1,
-   "coveredProdLines": 475,
+   "coveredProdLines": 703,
    "onlyProdLines": 0,
    "onlyToolLines": 0,
    "onlyFiles": [],
@@ -12978,8 +13437,10 @@
    "rule": "Maestro text selectors are regex source, not JavaScript regex literals. Its YamlCommandReader preserves the scalar and StringUtils.toRegexSafe compiles it unchanged. In particular, slash wrappers are literal characters. Keep the raw YAML value when checking the answer; stripping slashes would hide a broken tap.",
    "titles": [
     "create delete selector matches the dialog answer as raw regex source",
+    "deck delete selector matches the dialog answer as raw regex source",
     "detail delete selector matches the dialog answer as raw regex source",
     "edit delete selector matches the dialog answer as raw regex source",
+    "first-journey delete selector matches the dialog answer as raw regex source",
     "list delete selector matches the dialog answer as raw regex source",
     "record delete selector matches the dialog answer as raw regex source",
     "verb delete selector matches the dialog answer as raw regex source"
@@ -12992,7 +13453,13 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 12.477187,
+     "measured": false
+    },
+    {
+     "title": "deck delete selector matches the dialog answer as raw regex source",
+     "ms": 4.593516,
+     "measured": false
     },
     {
      "title": "detail delete selector matches the dialog answer as raw regex source",
@@ -13001,7 +13468,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.150998,
+     "measured": false
     },
     {
      "title": "edit delete selector matches the dialog answer as raw regex source",
@@ -13010,7 +13478,13 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.258507,
+     "measured": false
+    },
+    {
+     "title": "first-journey delete selector matches the dialog answer as raw regex source",
+     "ms": 3.526442,
+     "measured": false
     },
     {
      "title": "list delete selector matches the dialog answer as raw regex source",
@@ -13019,7 +13493,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.905003,
+     "measured": false
     },
     {
      "title": "record delete selector matches the dialog answer as raw regex source",
@@ -13028,7 +13503,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 3.529849,
+     "measured": false
     },
     {
      "title": "verb delete selector matches the dialog answer as raw regex source",
@@ -13037,7 +13513,8 @@
      "onlyProdLines": 0,
      "onlyToolLines": 0,
      "onlyFiles": [],
-     "measured": true
+     "ms": 2.810178,
+     "measured": false
     }
    ],
    "verdict": "keep",
@@ -13047,7 +13524,8 @@
    "testsTotal": 6,
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
-   "runsNowhere": false
+   "runsNowhere": false,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node"
   },
   {
    "file": "tests/derive.test.ts",
@@ -20754,6 +21232,47 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-deck-finishing-moment-plays-only-under-normal-motion.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The deck draws its finishing moment only where motion is normal: an empty live count after a confirmed command asks for it once, normal motion plays it until it ends, and reduced motion keeps the still \"caught up\" state with the same counts. An unanswered final count asks for no finish in either motion; its retried count that finds the queue empty does.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2744,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an empty live count after a command plays the finish under normal motion until it ends",
+    "reduced motion keeps the still caught-up state with the same counts and no finish",
+    "an unanswered final count asks for no finish in either motion and its empty retry plays it"
+   ],
+   "tests": [
+    {
+     "title": "an empty live count after a command plays the finish under normal motion until it ends",
+     "ms": 10.306275,
+     "measured": false
+    },
+    {
+     "title": "reduced motion keeps the still caught-up state with the same counts and no finish",
+     "ms": 2.160226,
+     "measured": false
+    },
+    {
+     "title": "an unanswered final count asks for no finish in either motion and its empty retry plays it",
+     "ms": 1.497851,
+     "measured": false
+    }
+   ],
+   "loaded": 36,
+   "coveredProdLines": 13124,
+   "onlyProdLines": null,
+   "testsMs": 14
+  },
+  {
    "file": "tests/the-delete-warning-a-journey-reads-takes-the-drawn-sentence-whole.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -21298,6 +21817,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/screens/a-caught-up-deck-plays-the-products-finish-once-under-normal-motion.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A deck screen that reaches its end through a command this phone sent plays the product's finishing renderer, supplied once to the shell, inside the end state; the renderer's end stops it and leaves the same caught-up title and counts. A person who asked for less motion is shown the end with no renderer, and the finish that arrival owed is spent: turning motion on afterwards does not play it late.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 43947,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "normal motion plays the product's finish inside the end and its end leaves the same counts",
+    "reduced motion shows the end with no finish and turning motion on does not play it late"
+   ],
+   "tests": [
+    {
+     "title": "normal motion plays the product's finish inside the end and its end leaves the same counts",
+     "ms": 760,
+     "measured": false
+    },
+    {
+     "title": "reduced motion shows the end with no finish and turning motion on does not play it late",
+     "ms": 47,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2681,
+   "onlyProdLines": null,
+   "testsMs": 807
+  },
+  {
    "file": "tests/screens/a-complete-translation-save-keeps-the-source.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -21372,6 +21926,41 @@
    "coveredProdLines": 2193,
    "onlyProdLines": null,
    "testsMs": 23
+  },
+  {
+   "file": "tests/screens/a-deck-opens-at-the-routes-reentry-spells.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The deck's two doors are routes `reentry` spells: the list's queue button opens the deck at `address(\"deck\", \u2026)`, and a card the person taps opens its record at `rowAt`, the one spelling of a row's route, so an id that needs encoding reaches the same record a list row opens.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 46214,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the list's queue button opens the deck at the address reentry spells for it",
+    "a tapped card opens its record at the row route a list row opens"
+   ],
+   "tests": [
+    {
+     "title": "the list's queue button opens the deck at the address reentry spells for it",
+     "ms": 212,
+     "measured": false
+    },
+    {
+     "title": "a tapped card opens its record at the row route a list row opens",
+     "ms": 434,
+     "measured": false
+    }
+   ],
+   "loaded": 168,
+   "coveredProdLines": 2801,
+   "onlyProdLines": null,
+   "testsMs": 646
   },
   {
    "file": "tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx",
@@ -22339,6 +22928,99 @@
    "testsMs": 27
   },
   {
+   "file": "tests/screens/a-resolved-hold-offers-a-new-pass.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A deck choice the phone held ends its session when the outbox resolves the write, and the deck's contract (docs/review-deck.md, the held row) is \"closed / restart offered\": the person is offered a new pass that reads the queue again, never left with every control disabled.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 33210,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a held choice the outbox later sends offers a new pass that reads the queue again"
+   ],
+   "tests": [
+    {
+     "title": "a held choice the outbox later sends offers a new pass that reads the queue again",
+     "ms": 1388,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2672,
+   "onlyProdLines": null,
+   "testsMs": 1388
+  },
+  {
+   "file": "tests/screens/a-restarted-pass-counts-only-its-own-choices.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "When the outbox resolves a held deck choice, the deck closes and its Refresh starts a new pass (docs/review-deck.md, the held row). Disappearance is not acceptance: the new pass reads the queue from the server, counts only the choices made in it, and sends its own command once.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 28754,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a pass restarted after a held choice resolves counts only its own choices and sends its command once"
+   ],
+   "tests": [
+    {
+     "title": "a pass restarted after a held choice resolves counts only its own choices and sends its command once",
+     "ms": 1063,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2728,
+   "onlyProdLines": null,
+   "testsMs": 1063
+  },
+  {
+   "file": "tests/screens/a-retryable-queue-read-offers-retry-and-reads-again.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A queue read that fails for a reason the person can retry (the server unavailable) keeps the deck screen open instead of taking the pass away: the refusal carries a retry, nothing is drawn as a card or claimed as the end, and a retry reads the queue again \u2014 a first page then draws its first card, and a final count that finds nothing says \"caught up\". No command is sent along the way.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 40878,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a queue read answered 503 while loading offers retry and a retry that succeeds draws the first card",
+    "a final count answered 503 offers retry and claims no end until a retry finds the queue empty"
+   ],
+   "tests": [
+    {
+     "title": "a queue read answered 503 while loading offers retry and a retry that succeeds draws the first card",
+     "ms": 951,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 503 offers retry and claims no end until a retry finds the queue empty",
+     "ms": 67,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2695,
+   "onlyProdLines": null,
+   "testsMs": 1018
+  },
+  {
    "file": "tests/screens/a-reused-device-row-survives-a-third-sign-in.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -22921,6 +23603,77 @@
    "coveredProdLines": 1669,
    "onlyProdLines": null,
    "testsMs": 38
+  },
+  {
+   "file": "tests/screens/a-withdrawn-queue-read-draws-no-card-and-sends-nothing.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 8,
+   "rule": "A queue read the server withdraws (signed out, off the plan, no access, gone) leaves the deck screen holding nothing it read: no card, no progress, no end counts and no retry \u2014 only the refusal and the way back \u2014 whether the read failed while loading or while checking for more.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30124,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a queue read answered 401 while loading draws no card and offers only the way back",
+    "a queue read answered 402 while loading draws no card and offers only the way back",
+    "a queue read answered 403 while loading draws no card and offers only the way back",
+    "a queue read answered 404 while loading draws no card and offers only the way back",
+    "a final count answered 401 takes away the pass it held and claims no end",
+    "a final count answered 402 takes away the pass it held and claims no end",
+    "a final count answered 403 takes away the pass it held and claims no end",
+    "a final count answered 404 takes away the pass it held and claims no end"
+   ],
+   "tests": [
+    {
+     "title": "a queue read answered 401 while loading draws no card and offers only the way back",
+     "ms": 30,
+     "measured": false
+    },
+    {
+     "title": "a queue read answered 402 while loading draws no card and offers only the way back",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "a queue read answered 403 while loading draws no card and offers only the way back",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a queue read answered 404 while loading draws no card and offers only the way back",
+     "ms": 12,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 401 takes away the pass it held and claims no end",
+     "ms": 607,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 402 takes away the pass it held and claims no end",
+     "ms": 56,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 403 takes away the pass it held and claims no end",
+     "ms": 50,
+     "measured": false
+    },
+    {
+     "title": "a final count answered 404 takes away the pass it held and claims no end",
+     "ms": 52,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2676,
+   "onlyProdLines": null,
+   "testsMs": 832
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",
@@ -23753,6 +24506,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/screens/an-unanswered-queue-read-offers-retry-and-reads-again.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A queue read nothing answers (the transport rejected, or the deadline passed with no status) is the phone's commonest failure, and it keeps the deck screen open exactly as a server refusal the person can retry does: the connection sentence carries a retry, nothing is drawn as a card or claimed as the end, and a retry reads the queue again \u2014 a first page then draws its first card, and a final count that finds nothing says \"caught up\". No command is sent along the way.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 53344,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a queue read the transport rejects while loading offers retry and a retry that connects draws the first card",
+    "a final count that passes its deadline offers retry and claims no end until a retry finds the queue empty"
+   ],
+   "tests": [
+    {
+     "title": "a queue read the transport rejects while loading offers retry and a retry that connects draws the first card",
+     "ms": 1454,
+     "measured": false
+    },
+    {
+     "title": "a final count that passes its deadline offers retry and claims no end until a retry finds the queue empty",
+     "ms": 79,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2687,
+   "onlyProdLines": null,
+   "testsMs": 1533
+  },
+  {
    "file": "tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -24421,6 +25209,143 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/deck.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 19,
+   "rule": "The deck hook serializes input, reads its declared queue and counts only a direct validated command acceptance.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26540,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "all queue pages are captured before choices and accepted commands submit once without an invented body",
+    "button and named card action both enter the same confirmation and cancellation sends nothing",
+    "definitive 403 refusal restores the same card with safe words and no choice credit",
+    "definitive 404 refusal restores the same card with safe words and no choice credit",
+    "definitive 409 refusal restores the same card with safe words and no choice credit",
+    "definitive 422 refusal restores the same card with safe words and no choice credit",
+    "unconfirmed 0 result locks the card without offering another send",
+    "unconfirmed 200 result locks the card without offering another send",
+    "unconfirmed 408 result locks the card without offering another send",
+    "unconfirmed 429 result locks the card without offering another send",
+    "unconfirmed 503 result locks the card without offering another send",
+    "a defaulted command sends no argument and a local skip and rewind send no command",
+    "the list's Review count comes from the declared queue rather than the ordinary list total",
+    "a callback from a left deck cannot put a card into a replacement declaration's session",
+    "a success body naming another row remains unknown and earns no accepted-write feedback",
+    "a real outbox hold and later disappearance never masquerade as a direct command acceptance",
+    "an existing unknown outbox write blocks every direction before the first card can be acted on",
+    "a queued release for the former top cannot choose the next card",
+    "leaving a failed final count offers a read retry without another command or a queue-empty claim"
+   ],
+   "tests": [
+    {
+     "title": "all queue pages are captured before choices and accepted commands submit once without an invented body",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "button and named card action both enter the same confirmation and cancellation sends nothing",
+     "ms": 549,
+     "measured": false
+    },
+    {
+     "title": "definitive 403 refusal restores the same card with safe words and no choice credit",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "definitive 404 refusal restores the same card with safe words and no choice credit",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "definitive 409 refusal restores the same card with safe words and no choice credit",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "definitive 422 refusal restores the same card with safe words and no choice credit",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "unconfirmed 0 result locks the card without offering another send",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "unconfirmed 200 result locks the card without offering another send",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "unconfirmed 408 result locks the card without offering another send",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "unconfirmed 429 result locks the card without offering another send",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "unconfirmed 503 result locks the card without offering another send",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a defaulted command sends no argument and a local skip and rewind send no command",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "the list's Review count comes from the declared queue rather than the ordinary list total",
+     "ms": 140,
+     "measured": false
+    },
+    {
+     "title": "a callback from a left deck cannot put a card into a replacement declaration's session",
+     "ms": 60,
+     "measured": false
+    },
+    {
+     "title": "a success body naming another row remains unknown and earns no accepted-write feedback",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "a real outbox hold and later disappearance never masquerade as a direct command acceptance",
+     "ms": 18,
+     "measured": false
+    },
+    {
+     "title": "an existing unknown outbox write blocks every direction before the first card can be acted on",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "a queued release for the former top cannot choose the next card",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "leaving a failed final count offers a read retry without another command or a queue-empty claim",
+     "ms": 5,
+     "measured": false
+    }
+   ],
+   "loaded": 170,
+   "coveredProdLines": 3062,
+   "onlyProdLines": null,
+   "testsMs": 827
   },
   {
    "file": "tests/screens/editing-a-translation-keeps-the-source-language.test.tsx",
@@ -28493,6 +29418,23 @@
    "tier": "nightly",
    "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
    "runsNowhere": false
+  },
+  {
+   "file": "e2e/flows/deck.yaml",
+   "runner": "maestro",
+   "layer": "journey",
+   "cases": 1,
+   "rule": "A draft supplies a real queue member. A down swipe defers a card locally and Rewind restores it; closing the pass leaves that draft available to read.",
+   "ruleSource": "first comment",
+   "tier": "nightly",
+   "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.maestro",
+   "claims": [
+    "app/[module]/[entity]/review.tsx"
+   ],
+   "steps": 1
   },
   {
    "file": "e2e/flows/deep-link.yaml",

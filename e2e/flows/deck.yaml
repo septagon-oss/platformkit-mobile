@@ -1,0 +1,76 @@
+# A draft supplies a real queue member. A down swipe defers a card locally and
+# Rewind restores it; closing the pass leaves that draft available to read.
+# screen: app/[module]/[entity]/review.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+  DECK_MODULE: content
+  DECK_ENTITY: content
+  TITLE_FIELD: title
+  SLUG_FIELD: slug
+  REWIND: rewind
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "open-${DECK_MODULE}-${DECK_ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- tapOn:
+    id: "input-${TITLE_FIELD}"
+- inputText: ${TITLE} deck
+- tapOn:
+    id: "input-${SLUG_FIELD}"
+- inputText: ${TITLE} deck
+- hideKeyboard
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- back
+- extendedWaitUntil:
+    visible:
+      id: "review-queue"
+    timeout: 15000
+- tapOn:
+    id: "review-queue"
+- extendedWaitUntil:
+    visible:
+      id: "deck-card"
+    timeout: 15000
+- assertVisible: "0 of [0-9]+"
+- swipe:
+    start: 50%, 40%
+    end: 50%, 80%
+    duration: 500
+- extendedWaitUntil:
+    visible:
+      id: "deck-${REWIND}"
+    timeout: 15000
+- assertVisible: "1 of [0-9]+"
+- tapOn:
+    id: "deck-${REWIND}"
+- extendedWaitUntil:
+    visible: "0 of [0-9]+"
+    timeout: 15000
+- takeScreenshot: deck-restored
+- tapOn:
+    id: "deck-back"
+- tapOn: ${TITLE} deck
+- tapOn:
+    id: "record-menu"
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: (?i)^Delete [^‘’?]+$
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} deck

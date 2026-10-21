@@ -28,6 +28,7 @@ import {
   commandSections,
   commandTitle,
   commandWording,
+  commandConfirmation,
   failureSubject,
   label,
   offered,
@@ -38,7 +39,9 @@ import {
   type Row,
 } from "../core/derive";
 import { keyed } from "../effects/api";
-import { refusalFields, refusalOf, screenCopy } from "./failure";
+import { outcomeOf } from "../effects/outbox";
+import type { PendingWrite } from "../core/outbox";
+import { failureFacts, refusalFields, refusalOf, screenCopy } from "./failure";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
 import { useTheme } from "../ui/theme";
@@ -230,71 +233,85 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
   return { blocks, held, errors, detail, phase, wording, change, fieldRefused, run, cancel: leave };
 }
 
+export type CommandOutcome =
+  | { readonly kind: "accepted"; readonly row: Row; readonly success: string }
+  | { readonly kind: "held"; readonly item: PendingWrite }
+  | { readonly kind: "refused" | "unknown"; readonly text: string; readonly status: number };
+
 /**
- * useCommandSend is one command's submit, shared by every door that runs one: the hold, the
- * idempotency key, the write count, the felt tick and the filing.
- *
- * The caller is handed the success sentence rather than printing it, because only the caller
- * knows who is left standing to say it: the record a sheet dismissed files it for the address the
- * person lands on, a row that stayed on the screen says it there. A command this phone is holding
- * has not run, so nothing is filed and the hold's own sentence is shown where it was asked. A
- * refusal is a report and not a question — the platform's alert with its one answer, because
- * there is no form on screen to put it under.
+ * useCommandOutcome submits a no-input command through the outbox and returns its classified result.
+ * Optional receipt guards validate the row and current session before feedback; told files before wrote.
+ * Held, refused and unknown outcomes produce no success feedback or automatic resubmission.
  */
-function useCommandSend(entry: Entry) {
+export function useCommandOutcome(entry: Entry) {
   const { api, wrote, celebrate, outbox } = useShell();
   return useCallback(
-    async (c: Command, id: string | undefined, told: (success: string) => void) => {
-      const { title, success } = commandWording(c, "", screenCopy());
+    async (
+      c: Command,
+      id: string | undefined,
+      receipt?: {
+        readonly accept?: (row: Row) => boolean;
+        readonly current?: () => boolean;
+        readonly told?: (success: string) => void;
+      },
+    ): Promise<CommandOutcome> => {
+      const copy = screenCopy();
+      const { title, success } = commandWording(c, "", copy);
+      const identity = api.bearer()?.id;
       try {
-        // A command that takes no argument sends no argument at all, key or
-        // no key: the key rides after the argument slot it does not use.
         const live = (idem?: string) =>
           idem === undefined
             ? api.command(entry, id, c.verb)
             : api.command(entry, id, c.verb, undefined, { idempotencyKey: idem });
-        // A command is the write most worth holding: it is the one the person
-        // cannot repeat by retyping a field, and the server that never heard it
-        // never ran it.
         const answer = outbox
           ? await outbox.submit(
-              {
-                kind: "command",
-                resourceKey: key(entry),
-                path: commandPath(entry, c.verb, id),
-              },
+              { kind: "command", resourceKey: key(entry), path: commandPath(entry, c.verb, id) },
               live,
             )
           : { sent: true as const, row: await live() };
-        if (answer.sent) {
-          // The record the command ran on is what says what it did — unless the
-          // thing that ran it never left the screen, which is the caller's
-          // decision and the only reason this line is a callback. A command
-          // about the whole list has no record to land on, and one the phone is
-          // holding has not run.
-          told(success);
-          // The record decides what this write did to its own state; this one files only
-          // the fact that the person, standing here, asked for it.
+        if (!answer.sent) return { kind: "held", item: answer.item };
+        if (receipt?.accept && !receipt.accept(answer.row))
+          return { kind: "unknown", text: copy.failure.uncertain, status: 200 };
+        if (api.bearer()?.id === identity && (receipt?.current?.() ?? true)) {
+          receipt?.told?.(success);
           if (id) celebrate(address("detail", entry, id));
           wrote(key(entry));
-        } else {
-          const words = screenCopy();
-          Alert.alert(title, words.state.holding(words.state.held.title));
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
+            () => undefined,
+          );
         }
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } catch (e) {
-        // A report, not a question: the platform's alert with its one OK,
-        // because there is no form on screen to put the refusal under.
-        // The report is the classified sentence, so an unanswered command
-        // says nothing is known rather than claiming the command failed.
-        Alert.alert(
-          title,
-          refusalOf(e, "command", failureSubject(entry, title), screenCopy()).text ||
-            screenCopy().failure.commandFailed(title),
-        );
+        return { kind: "accepted", row: answer.row, success };
+      } catch (error) {
+        const facts = failureFacts(error);
+        const unknown = outcomeOf(error) !== "refused";
+        return {
+          kind: unknown ? "unknown" : "refused",
+          status: facts.status,
+          text: unknown
+            ? copy.failure.uncertain
+            : refusalOf(error, "command", failureSubject(entry, title), copy).text ||
+              copy.failure.commandFailed(title),
+        };
       }
     },
     [api, entry, wrote, celebrate, outbox],
+  );
+}
+
+/** useCommandSend adapts shared command outcomes to the existing alert and receipt surfaces. */
+function useCommandSend(entry: Entry) {
+  const send = useCommandOutcome(entry);
+  return useCallback(
+    async (c: Command, id: string | undefined, told: (success: string) => void) => {
+      const answer = await send(c, id, { told });
+      if (answer.kind === "accepted") return;
+      const copy = screenCopy();
+      Alert.alert(
+        commandTitle(c),
+        answer.kind === "held" ? copy.state.holding(copy.state.held.title) : answer.text,
+      );
+    },
+    [send],
   );
 }
 
@@ -373,10 +390,10 @@ export function useRowCommand(entry: Entry) {
           running.current.delete(at);
         });
       };
-      const { title, button, consequence } = commandWording(c, "", screenCopy());
+      const { title, button, consequence, required } = commandConfirmation(c, screenCopy());
       // Either declaration opens the question: that the act hurts, or that its author said what
       // it does. They are independent facts on the wire and neither is guessed here.
-      if (c.hints?.destructive === true || consequence !== "") {
+      if (required) {
         confirm(
           title,
           { label: button, destructive: c.hints?.destructive === true, onPress: start },

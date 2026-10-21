@@ -1,11 +1,11 @@
 {
   "schema": "platformkit.openapi-source.v1",
   "fixture": "testdata/openapi.json",
-  "sha256": "562707090f4720b316f997ee22d9bb0dddbae5b8b0f3a396adf3ab5420e6cbad",
+  "sha256": "e9256fc6aa4212e51246de379568cc546453a3865ec835cfa3e854be0fe7ffdc",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "aa35944f576e143190ea67ba12bf812dd1b4cc0c",
+    "commit": "5f993d8ca10ae3f15de18a30547ae8ee369a3222",
     "path": "apps/platformkit/testdata/openapi.json",
-    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/aa35944f576e143190ea67ba12bf812dd1b4cc0c/apps/platformkit/testdata/openapi.json"
+    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/5f993d8ca10ae3f15de18a30547ae8ee369a3222/apps/platformkit/testdata/openapi.json"
   }
 }
