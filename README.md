@@ -1192,9 +1192,10 @@ around it; a decorative figure is nothing to open and nothing a person listening
 about at all, and a ready one is invited by name.
 `MarkdownProse` is the only file that names a Markdown library — `src/ui/` draws what it
 is handed and knows no library, no transport and no file byte. The parser behind that face
-is `markdown-it@14.3.1`, held by one `overrides` entry: the face asks for `^10`, whose
-`linkify-it` carries two high filings with no release inside its reach, and 14.3.1 is the
-first release that answers every filing the registry names against either package.
+is `markdown-it@14.3.3`, held by one `overrides` entry: the face asks for `^10`, whose
+`linkify-it` carries two high filings with no release inside its reach. The parser's
+14.3.3 patch also fixes quadratic parsing of multiline link reference definitions
+([GHSA-gfr2-rv44-r23c](https://github.com/advisories/GHSA-gfr2-rv44-r23c)).
 A generated record reads its own rich text field: `derive.richBody` answers which field is
 one and `RichTextBody` supplies the reading — each figure's `file/file` row for the frame
 to reserve, and the bytes at the file's own content address, prepared by `fileResource`
