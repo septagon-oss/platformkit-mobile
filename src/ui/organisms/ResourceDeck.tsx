@@ -51,6 +51,12 @@ export interface Props {
   readonly onRetry: () => void;
   readonly onBack: () => void;
   readonly focusRef?: React.Ref<View>;
+  /**
+   * header is what the owner of this deck's screen draws above the queue: a question, a roster,
+   * a count of who has answered. The organism draws it and keeps no rule about it — props in,
+   * elements out — because a second deck screen would be a second implementation of the deck.
+   */
+  readonly header?: React.ReactNode;
 }
 
 /** ResourceDeck draws a still, fully actionable pass; optional renderers add ink without owning decisions. */
@@ -71,6 +77,7 @@ export function ResourceDeck(props: Props) {
     onRetry,
     onBack,
     focusRef,
+    header,
   } = props;
   const s = useStyles(styles);
   const t = useTheme();
@@ -92,6 +99,7 @@ export function ResourceDeck(props: Props) {
   return (
     <Screen testID="resource-deck">
       <View style={s.page}>
+        {header}
         {model.progress ? <ProgressMeter model={model.progress} testID="deck-progress" /> : null}
         <Text role="caption" accessibilityLiveRegion="polite" testID="deck-encouragement">
           {model.encouragement}

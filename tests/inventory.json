@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 274,
-   "cases": 1284,
-   "ms": 2443548,
-   "testsMs": 93386.99999999993,
+   "files": 276,
+   "cases": 1304,
+   "ms": 2505216,
+   "testsMs": 93406.89999999994,
    "runners": {
-    "jest": 96,
-    "node": 178
+    "jest": 97,
+    "node": 179
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 144,
-   "cases": 478,
-   "ms": 3578846,
-   "testsMs": 56968,
+   "files": 147,
+   "cases": 483,
+   "ms": 3682006,
+   "testsMs": 57351,
    "runners": {
-    "jest": 144
+    "jest": 147
    },
    "unreachable": 0
   },
@@ -9625,6 +9625,119 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/the-decide-pack-reaches-no-transport-and-writes-no-colour.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 15,
+   "rule": "The decide pack is props in and elements out: it reaches no transport or secure storage (`src/effects/`) and draws no colour of its own (the palette is `src/ui/theme.tsx`).",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 60834,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "has screens to read",
+    "ask.tsx imports no transport or secure storage",
+    "invite.tsx imports no transport or secure storage",
+    "questions.tsx imports no transport or secure storage",
+    "read.ts imports no transport or secure storage",
+    "results.tsx imports no transport or secure storage",
+    "vote.tsx imports no transport or secure storage",
+    "wire.ts imports no transport or secure storage",
+    "ask.tsx writes no colour of its own",
+    "invite.tsx writes no colour of its own",
+    "questions.tsx writes no colour of its own",
+    "read.ts writes no colour of its own",
+    "results.tsx writes no colour of its own",
+    "vote.tsx writes no colour of its own",
+    "wire.ts writes no colour of its own"
+   ],
+   "tests": [
+    {
+     "title": "has screens to read",
+     "ms": 2,
+     "measured": false
+    },
+    {
+     "title": "ask.tsx imports no transport or secure storage",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "invite.tsx imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "questions.tsx imports no transport or secure storage",
+     "ms": 1,
+     "measured": false
+    },
+    {
+     "title": "read.ts imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "results.tsx imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "vote.tsx imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "wire.ts imports no transport or secure storage",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "ask.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "invite.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "questions.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "read.ts writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "results.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "vote.tsx writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    },
+    {
+     "title": "wire.ts writes no colour of its own",
+     "ms": 0,
+     "measured": false
+    }
+   ],
+   "loaded": 129,
+   "coveredProdLines": 1947,
+   "onlyProdLines": null,
+   "testsMs": 4
+  },
+  {
    "file": "tests/ui/the-deck-draws-its-finishing-renderer-only-under-normal-motion.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -11843,6 +11956,59 @@
    "coveredProdLines": 5183,
    "onlyProdLines": null,
    "testsMs": 2.7
+  },
+  {
+   "file": "tests/a_command_fills_the_arguments_its_row_supplies.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "A rest command may declare that the server binds one of its arguments from the row the command runs on (`kit/rest`'s RowBindings): the vote commands on a ballot carry `{questionId: \"questionId\", ifRevision: \"voteRevision\"}`. A server-side screen fills those from the row it drew the button beside; a deck holds the same row as data. The three rules below are the whole of what the phone does with that declaration \u2014 read it, fill it, and refuse rather than send a body whose argument was guessed.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 834,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "an entry keeps the argument pairs its command declared, and drops the one naming no field",
+    "the notice names the binding that was dropped, and the entry survives it",
+    "the bound arguments are filled from the row the card holds",
+    "a row that cannot answer a bound argument sends nothing at all",
+    "a command that declares no binding is sent with no body, as it always was"
+   ],
+   "tests": [
+    {
+     "title": "an entry keeps the argument pairs its command declared, and drops the one naming no field",
+     "ms": 13.542754,
+     "measured": false
+    },
+    {
+     "title": "the notice names the binding that was dropped, and the entry survives it",
+     "ms": 0.851284,
+     "measured": false
+    },
+    {
+     "title": "the bound arguments are filled from the row the card holds",
+     "ms": 0.911807,
+     "measured": false
+    },
+    {
+     "title": "a row that cannot answer a bound argument sends nothing at all",
+     "ms": 0.45962,
+     "measured": false
+    },
+    {
+     "title": "a command that declares no binding is sent with no body, as it always was",
+     "ms": 0.11905,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 4895,
+   "onlyProdLines": null,
+   "testsMs": 15.9
   },
   {
    "file": "tests/activity-actor-snapshot.test.ts",
@@ -22237,6 +22403,41 @@
    "testsMs": 15
   },
   {
+   "file": "tests/screens/a-match-is-announced-once-and-only-when-it-is-new.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A match moment interrupts once per match: what the deck found before this person sat down is not news to them, and a match they have already answered to does not come back \u2014 but the next one still does.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 30316,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a match the deck found before this person opened it is never announced to them",
+    "the match after a dismissed one is announced, and it names the option that is new"
+   ],
+   "tests": [
+    {
+     "title": "a match the deck found before this person opened it is never announced to them",
+     "ms": 80,
+     "measured": false
+    },
+    {
+     "title": "the match after a dismissed one is announced, and it names the option that is new",
+     "ms": 170,
+     "measured": false
+    }
+   ],
+   "loaded": 161,
+   "coveredProdLines": 2385,
+   "onlyProdLines": null,
+   "testsMs": 250
+  },
+  {
    "file": "tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -23674,6 +23875,70 @@
    "coveredProdLines": 2676,
    "onlyProdLines": null,
    "testsMs": 832
+  },
+  {
+   "file": "tests/screens/a_decide_result_keeps_the_ranking_and_prints_the_meters_own_number.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A Decide result is the ranking the module made, not one the phone remade. Three rules, each of which a screen could silently break: the options appear in the order the read gave them (score order, tie-break and all, so the phone never ranks a second time); the number beside a bar is the bar's own model's number, so the two cannot disagree; and the weighted score stays inside the module \u2014 a person reads a count of voters, never an arithmetic weight. A door that is not on the entry is drawn nowhere: the close command belongs to whoever the catalogue printed it for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 46644,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the options stand in the order the read gave them, with the tally beside each",
+    "a question whose entry prints no close command is offered no close"
+   ],
+   "tests": [
+    {
+     "title": "the options stand in the order the read gave them, with the tally beside each",
+     "ms": 35,
+     "measured": false
+    },
+    {
+     "title": "a question whose entry prints no close command is offered no close",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 163,
+   "coveredProdLines": 2429,
+   "onlyProdLines": null,
+   "testsMs": 37
+  },
+  {
+   "file": "tests/screens/a_match_dismissed_is_not_announced_again.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A match is announced once: the person who dismisses \"It's a match!\" and keeps voting is not shown the same match again when the next read still holds it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26200,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a match the person dismissed does not come back on the next read"
+   ],
+   "tests": [
+    {
+     "title": "a match the person dismissed does not come back on the next read",
+     "ms": 96,
+     "measured": false
+    }
+   ],
+   "loaded": 161,
+   "coveredProdLines": 2383,
+   "onlyProdLines": null,
+   "testsMs": 96
   },
   {
    "file": "tests/screens/activity-catalog-withdrawal-inflight.test.tsx",

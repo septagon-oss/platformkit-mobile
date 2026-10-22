@@ -55,6 +55,14 @@ export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentatio
 export type Command = View<Omit<WireCommand, "fields" | "presentation">> & {
   readonly fields: readonly Field[];
   readonly hints?: CommandHints;
+  /**
+   * bindings says which argument of this command the server fills from which field of the row
+   * the command runs on (`kit/rest`'s RowBindings): `{questionId: "questionId"}` means the body
+   * member `questionId` carries that row's `questionId`. A server-side renderer draws the button
+   * beside the row it binds from; a phone holds the same row, so it fills the same pair — see
+   * `boundArguments`. A pair naming a field this entry does not print is dropped as a defect.
+   */
+  readonly bindings?: Readonly<Record<string, string>>;
 };
 
 /**
@@ -298,6 +306,10 @@ const looseField = zField.extend({ presentation: z.unknown().optional() });
 const looseCommand = zCommand.extend({
   fields: z.array(looseField).nullish(),
   presentation: z.unknown().optional(),
+  // `bindings` is a kernel member this build's document does not print yet, so it enters as
+  // `unknown` and commandBindings below decides its shape: a mistyped binding may cost the one
+  // argument it names, never the entry, the same way `renderer` and `presentation` are read.
+  bindings: z.unknown().optional(),
 });
 
 const catalogSchema = zCatalog.extend({
@@ -716,6 +728,33 @@ function hintCommand(raw: unknown, at: string, notice: HintNotice): CommandHints
   return Object.keys(hints).length === 0 ? undefined : hints;
 }
 
+/**
+ * commandBindings keeps the argument-to-field pairs of one command that name a field of this
+ * entry. A pair naming anything else could only ever be filled with a guess, so it is dropped
+ * and names itself once; the command keeps every other argument it declared.
+ */
+function commandBindings(
+  raw: unknown,
+  fields: readonly { readonly name: string }[],
+  at: string,
+  notice: HintNotice,
+): Readonly<Record<string, string>> | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (!isRecord(raw)) {
+    notice(at, "is not an object: no argument of this command is filled from the row");
+    return undefined;
+  }
+  const kept: Record<string, string> = {};
+  for (const [argument, field] of Object.entries(raw)) {
+    if (typeof field !== "string" || !fields.some((f) => f.name === field)) {
+      notice(`${at}.${argument}`, "names no field of this entry: it is not filled from the row");
+      continue;
+    }
+    kept[argument] = field;
+  }
+  return Object.keys(kept).length === 0 ? undefined : kept;
+}
+
 /** rendererRef reads which pack an entry asks for, or says that it asks for none. */
 function rendererRef(v: unknown): RendererRef | undefined {
   if (!isRecord(v)) return undefined;
@@ -806,11 +845,18 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
   // them: a verb no command of this entry answers is no hint at all, and the resolution happens
   // here, once, rather than at every surface that offers the verb.
   const commandsRead = (commands ?? []).map(
-    ({ fields: arguments_, path, presentation: commandHint, ...command }, i) => {
+    ({ fields: arguments_, path, presentation: commandHint, bindings, ...command }, i) => {
       const hint = hintCommand(commandHint, `${at}.commands[${i}].presentation`, notice);
+      const bound = commandBindings(
+        bindings,
+        fields ?? [],
+        `${at}.commands[${i}].bindings`,
+        notice,
+      );
       return {
         ...command,
         ...(hint === undefined ? {} : { hints: hint }),
+        ...(bound === undefined ? {} : { bindings: bound }),
         ...(path === undefined ? {} : { path: absolute(path, `${at}.commands[${i}].path`) }),
         fields: (arguments_ ?? []).map((f, n) =>
           field(f, `${at}.commands[${i}].fields[${n}]`, [], notice),

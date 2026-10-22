@@ -2363,6 +2363,25 @@ export function accountPointers(entries: readonly Entry[], userId?: string): rea
 }
 
 /**
+ * personPointers resolves bare person ids against the installation's directory, the way
+ * accountPointers resolves the one person this session belongs to. A projection that answers an
+ * array of person ids prints no pointer beside them, so nothing downstream could tell which
+ * resource they live in; this names it once. Without a readable directory the ids stay what the
+ * server said, which a screen draws as no faces rather than as guesses.
+ */
+export function personPointers(
+  entries: readonly Entry[],
+  ids: readonly string[],
+): readonly Pointer[] {
+  const user = entries.find((e) => `${e.module}/${e.entity}` === directory);
+  if (user === undefined || user.operations?.includes("read") === false) return [];
+  return [...new Set(ids.filter((id) => id !== ""))].map((id) => ({
+    resource: directory,
+    id,
+  }));
+}
+
+/**
  * firstName is the one word a greeting may use.
  *
  * An address is not a name: a display name holding `@` greets nobody, because

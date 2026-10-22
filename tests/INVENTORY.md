@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `77a9c6f01` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `f40f82039` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 274 | 1284 | 93.4 s | 2444 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 144 | 478 | 57.0 s | 3579 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 276 | 1304 | 93.4 s | 2505 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 147 | 483 | 57.4 s | 3682 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 514
+* keep: 519
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 514 — 215 `tests/*.test.ts` (node), 240 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 1991; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2444 s, composition 3579 s, journey 0 s
+* files inventoried: 519 — 216 `tests/*.test.ts` (node), 244 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2016; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2505 s, composition 3682 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -223,6 +223,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/tag-comma-refusal.test.tsx | jest | behaviour | 4 | 18008 | 66 | 0 | 0 of 4 | — | 0 | keep | (no first comment; first test title) a tag containing a comma is refused even when splitting leaves one or no words: alpha, |
 | tests/ui/tag-correction-after-chip-removal.test.tsx | jest | behaviour | 2 | 18269 | 61 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) correcting a refused draft after removing chips preserves only intended tags with return |
 | tests/ui/tag-draft-correction.test.tsx | jest | behaviour | 1 | 18095 | 29 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) correcting a refused tag replaces the draft without storing its accepted prefix |
+| tests/ui/the-decide-pack-reaches-no-transport-and-writes-no-colour.test.tsx | jest | behaviour | 15 | 60834 | 4 |  | not measured | — | 0 | keep | The decide pack is props in and elements out: it reaches no transport or secure storage (`src/effects/`) and draws no colour of its own (the palette is `src/ui… |
 | tests/ui/the-deck-draws-its-finishing-renderer-only-under-normal-motion.test.tsx | jest | behaviour | 3 | 32472 | 28 |  | not measured | — | 0 | keep | The caught-up deck hands its finishing renderer the arrived tone and the person's motion only when the derived model asks for a finish: normal motion mounts it… |
 | tests/ui/the-worn-accent-keeps-every-pair-the-registry-measures.test.tsx | jest | behaviour | 18 | 40182 | 64 |  | not measured | — | 0 | keep | The theme's promise is measured, not asserted: `contrastPairs` names every role the theme hands a component and the minimum it reaches on the surface it is dra… |
 | tests/ui/theme.test.tsx | jest | behaviour | 3 | 17888 | 39 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a client palette reaches shared components in both modes with its resolved native faces |
@@ -258,6 +259,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
 | tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts | node | behaviour | 2 | 1007 | 10.7 |  | not measured | — | 0 | keep | A whole-row replace carries what nobody typed exactly as the read returned it. The body builder is `writeControls`, and two of its promises have no case of the… |
 | tests/a-withdrawn-deck-keeps-no-row-and-takes-no-input.test.ts | node | behaviour | 1 | 1883 | 2.7 |  | not measured | — | 0 | keep | A deck whose read is withdrawn (no access, gone, signed out, off the plan) shows none of the rows it held and takes no further input: no choice, page, answer, … |
+| tests/a_command_fills_the_arguments_its_row_supplies.test.ts | node | behaviour | 5 | 834 | 15.9 |  | not measured | — | 0 | keep | A rest command may declare that the server binds one of its arguments from the row the command runs on (`kit/rest`'s RowBindings): the vote commands on a ballo… |
 | tests/activity-actor-snapshot.test.ts | node | behaviour | 2 | 748 | 15.5 | 0 | 0 of 2 | — | 0 | keep | An activity row may name its actor only from the directory snapshot read with it. Once that snapshot is withdrawn the row says a name is unavailable — never th… |
 | tests/activity-audit-snapshot.test.ts | node | behaviour | 2 | 799 | 15.9 | 1 | 0 of 2 | — | 0 | keep | An audit trail answers redaction and denial differently: a redacted change keeps its row and loses its value, a denied trail loses the row, the private value a… |
 | tests/activity-denial-precedes-validation.test.ts | node | behaviour | 1 | 770 | 9.6 | 0 | 0 of 1 | — | 0 | keep | A denied activity read withdraws even malformed cached events and pending pagination. Clearing the denial restores validation, not permission to display an inv… |
@@ -427,6 +429,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
 | tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx | jest | composition | 2 | 52235 | 161 |  | not measured | — | 0 | keep | A registration refusal from an ended session cannot decide whether the next workspace registers this phone. Each completed sign-in must read its own platform a… |
 | tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx | jest | composition | 3 | 21149 | 15 |  | not measured | — | 0 | keep | A malformed destructive hint must keep the confirmation between a row action and its write. Follow served catalogue bytes through derivation and the command ho… |
+| tests/screens/a-match-is-announced-once-and-only-when-it-is-new.test.tsx | jest | composition | 2 | 30316 | 250 |  | not measured | — | 0 | keep | A match moment interrupts once per match: what the deck found before this person sat down is not news to them, and a match they have already answered to does n… |
 | tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx | jest | composition | 3 | 26306 | 168 |  | not measured | — | 0 | keep | A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation… |
 | tests/screens/a-new-sign-in-keeps-the-device-row-the-server-reuses.test.tsx | jest | composition | 1 | 31163 | 133 |  | not measured | — | 0 | keep | The server reuses a device row for the same tenant, platform, token and person. An older sign-out cannot remove the address a newer completed sign-in now holds… |
 | tests/screens/a-phone-is-addressable-when-the-person-says-so.test.tsx | jest | composition | 16 | 28232 | 304 |  | not measured | — | 0 | keep | A phone is addressable when the person says so, for as long as the sign-in that said it lasts. Held against the real shell, the real transport and the real pus… |
@@ -464,6 +467,8 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-translatable-record-follows-the-device-language.test.tsx | jest | composition | 2 | 25311 | 611 |  | not measured | — | 0 | keep | A translatable record is requested in the device language. A source-language fallback is identified in Portuguese rather than silently shown as translated cont… |
 | tests/screens/a-window-names-each-resource-its-rows-point-at.test.tsx | jest | composition | 7 | 21179 | 38 |  | not measured | — | 0 | keep | A window of rows points at records it does not hold: it reads each pointed-at resource once, whatever the number of rows, and names every value that page answe… |
 | tests/screens/a-withdrawn-queue-read-draws-no-card-and-sends-nothing.test.tsx | jest | composition | 8 | 30124 | 832 |  | not measured | — | 0 | keep | A queue read the server withdraws (signed out, off the plan, no access, gone) leaves the deck screen holding nothing it read: no card, no progress, no end coun… |
+| tests/screens/a_decide_result_keeps_the_ranking_and_prints_the_meters_own_number.test.tsx | jest | composition | 2 | 46644 | 37 |  | not measured | — | 0 | keep | A Decide result is the ranking the module made, not one the phone remade. Three rules, each of which a screen could silently break: the options appear in the o… |
+| tests/screens/a_match_dismissed_is_not_announced_again.test.tsx | jest | composition | 1 | 26200 | 96 |  | not measured | — | 0 | keep | A match is announced once: the person who dismisses "It's a match!" and keeps voting is not shown the same match again when the next read still holds it. |
 | tests/screens/activity-catalog-withdrawal-inflight.test.tsx | jest | composition | 2 | 23253 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light a late actor lookup cannot restore identity after catalog withdrawal |
 | tests/screens/activity-directory-catalog-withdrawal.test.tsx | jest | composition | 2 | 23238 | 128 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) light catalog withdrawal removes cached actor details while retaining readable history |
 | tests/screens/activity-directory-denial.test.tsx | jest | composition | 6 | 25736 | 401 | 0 | 0 of 5 | — | 0 | keep | A directory refusal empties the actor names a trail shows, and a response to a request the screen no longer wants cannot put them back: the detail keeps its ow… |

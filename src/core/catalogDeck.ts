@@ -78,12 +78,19 @@ export function readDeck(
     }
     if (value.skip !== undefined && value.skip !== false) return refuse(path);
     const command = commands.find((c) => c.verb === value.command);
+    // A direction runs a command whose arguments the phone can supply: one with a declared
+    // default, or one the server binds from the row the card already holds (boundArguments
+    // fills it at the moment of the intent). An argument neither of them reaches is a command
+    // the deck cannot run, and the list stays the screen for it.
+    const unsupplyable = (f: Field) =>
+      (typeof f.default !== "string" || f.default === "") &&
+      command?.bindings?.[f.name] === undefined;
     if (
       !word(value.command) ||
       !command ||
       command.collection ||
       command.hints?.system ||
-      command.fields.some((f) => typeof f.default !== "string" || f.default === "")
+      command.fields.some(unsupplyable)
     )
       return refuse(`${path}.command`);
     if (

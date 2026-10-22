@@ -19,6 +19,49 @@ interface Words {
     readonly checkFailed: string;
   };
   readonly kit: KitWords;
+  /**
+   * decide is the vocabulary of a question people answer together: the ask, the ballot's faces,
+   * the ranking and the invitation. No word here names a question, an option or a person — the
+   * module prints those, and the phone formats them.
+   */
+  readonly decide: {
+    readonly ask: string;
+    readonly questionTitle: string;
+    readonly option: string;
+    readonly optionTitle: string;
+    readonly optionAdd: string;
+    readonly optionPhoto: string;
+    readonly optionPhotoCamera: string;
+    readonly optionPhotoLibrary: string;
+    readonly photoRefused: string;
+    readonly moveUp: string;
+    readonly moveDown: string;
+    readonly remove: string;
+    readonly voted: (who: string) => string;
+    readonly noVotersYet: string;
+    readonly inbox: string;
+    readonly results: string;
+    readonly winner: string;
+    readonly tied: string;
+    readonly votes: (count: string) => string;
+    readonly skipped: (count: string) => string;
+    readonly matched: string;
+    readonly seeResults: string;
+    readonly vote: string;
+    readonly close: string;
+    readonly closeConsequence: string;
+    readonly closed: string;
+    readonly closedAt: (instant: string) => string;
+    readonly invite: string;
+    readonly inviteIssue: string;
+    readonly inviteLink: string;
+    readonly inviteQr: string;
+    readonly inviteExpires: (instant: string) => string;
+    readonly inviteRevoke: string;
+    readonly inviteRevoked: string;
+    readonly participants: string;
+    readonly participantAdd: string;
+  };
   readonly choice: { readonly placeholder: string; readonly cancel: string; readonly hint: string };
   readonly dateTime: {
     readonly set: string;
@@ -134,6 +177,44 @@ const en: Words = {
     checkFailed: "Couldn't check the queue. Try again.",
   },
   kit: kitEnglish,
+  decide: {
+    ask: "Ask a question",
+    questionTitle: "Question",
+    option: "Option",
+    optionTitle: "Option title",
+    optionAdd: "Add an option",
+    optionPhoto: "Add a photo",
+    optionPhotoCamera: "Take a photo",
+    optionPhotoLibrary: "Choose a photo",
+    photoRefused: "This phone would not let a photo be taken. The option is kept without one.",
+    moveUp: "Move up",
+    moveDown: "Move down",
+    remove: "Remove",
+    voted: (who) => `${who} have voted`,
+    noVotersYet: "Nobody has voted yet.",
+    inbox: "Options to decide",
+    results: "Results",
+    winner: "Winning",
+    tied: "Tied",
+    votes: (count) => `${count} votes`,
+    skipped: (count) => `${count} skipped`,
+    matched: "It's a match!",
+    seeResults: "See results",
+    vote: "Vote on it",
+    close: "Close voting",
+    closeConsequence: "Nobody else can vote, and the result stands.",
+    closed: "Voting has closed.",
+    closedAt: (instant) => `Closed ${instant}`,
+    invite: "Invite",
+    inviteIssue: "Make an invite link",
+    inviteLink: "Invite link",
+    inviteQr: "Scan to join",
+    inviteExpires: (instant) => `Anyone with this link can join until ${instant}.`,
+    inviteRevoke: "Stop the link",
+    inviteRevoked: "This link no longer opens the question.",
+    participants: "Who can vote",
+    participantAdd: "Invite a person",
+  },
   choice: { placeholder: "Choose", cancel: "Cancel", hint: "Opens the choices" },
   dateTime: {
     set: "Set",
@@ -233,6 +314,44 @@ const pt: Words = {
     checkFailed: "Não foi possível verificar a fila. Tente novamente.",
   },
   kit: kitPortuguese,
+  decide: {
+    ask: "Fazer uma pergunta",
+    questionTitle: "Pergunta",
+    option: "Opção",
+    optionTitle: "Título da opção",
+    optionAdd: "Adicionar uma opção",
+    optionPhoto: "Adicionar uma fotografia",
+    optionPhotoCamera: "Tirar uma fotografia",
+    optionPhotoLibrary: "Escolher uma fotografia",
+    photoRefused: "Este telefone não permitiu tirar uma fotografia. A opção fica sem ela.",
+    moveUp: "Subir",
+    moveDown: "Descer",
+    remove: "Remover",
+    voted: (who) => `${who} votaram`,
+    noVotersYet: "Ainda ninguém votou.",
+    inbox: "Opções para decidir",
+    results: "Resultados",
+    winner: "À frente",
+    tied: "Empatadas",
+    votes: (count) => `${count} votos`,
+    skipped: (count) => `${count} ignoradas`,
+    matched: "É uma escolha comum!",
+    seeResults: "Ver resultados",
+    vote: "Votar",
+    close: "Encerrar a votação",
+    closeConsequence: "Ninguém mais poderá votar e o resultado permanece.",
+    closed: "A votação terminou.",
+    closedAt: (instant) => `Encerrada ${instant}`,
+    invite: "Convidar",
+    inviteIssue: "Criar um link de convite",
+    inviteLink: "Link de convite",
+    inviteQr: "Ler para participar",
+    inviteExpires: (instant) => `Quem tiver este link pode participar até ${instant}.`,
+    inviteRevoke: "Cancelar o link",
+    inviteRevoked: "Este link já não abre a pergunta.",
+    participants: "Quem pode votar",
+    participantAdd: "Convidar uma pessoa",
+  },
   choice: { placeholder: "Escolher", cancel: "Cancelar", hint: "Abre as opções" },
   dateTime: {
     set: "Definir",
@@ -325,6 +444,7 @@ function bundle(language: Language, words: Words): Copy {
     [identity]: true as const,
     language,
     kit: Object.freeze(words.kit),
+    decide: Object.freeze(words.decide),
     review: Object.freeze(words.review),
     choice: Object.freeze(words.choice),
     dateTime: Object.freeze(words.dateTime),

@@ -12,7 +12,7 @@ import { ResourceDeck as DeckView } from "../ui/organisms/ResourceDeck";
 import { extent } from "../ui/scale";
 import { useFeedback } from "./useFeedback";
 import { usePictures } from "./usePictures";
-import { useResourceDeck } from "./useResourceDeck";
+import { useResourceDeck, type DeckReceipt } from "./useResourceDeck";
 
 export function ResourceDeck({ entry }: ScreenProps) {
   const { api, baseURL, identity } = useShell();
@@ -39,11 +39,26 @@ export function ResourceDeck({ entry }: ScreenProps) {
   return <DeckSession key={binding} entry={entry} deck={deck} />;
 }
 
-function DeckSession({ entry, deck }: ScreenProps & { readonly deck: Deck }) {
+/**
+ * DeckSession is one pass through a declared deck: the machine, its pictures and its organism.
+ * A renderer pack that owns a deck composes this rather than a copy of it, and may hand two things
+ * the generated screen has no use for — a `header` drawn above the queue, and a `receipt` saying
+ * what makes this deck's commands answer and what their rows supply.
+ */
+export function DeckSession({
+  entry,
+  deck,
+  header,
+  receipt,
+}: ScreenProps & {
+  readonly deck: Deck;
+  readonly header?: React.ReactNode;
+  readonly receipt?: DeckReceipt;
+}) {
   const feedback = useFeedback();
   const { media } = useShell();
   const router = useRouter();
-  const session = useResourceDeck(entry, deck, feedback.copy, !!media?.deck);
+  const session = useResourceDeck(entry, deck, feedback.copy, !!media?.deck, receipt);
   const { state, finishEnd } = session;
   const presentation = { ...feedback, weekStartsOn: 1 as const };
   const model = deriveDeck(entry, state, presentation, { files: {}, states: {} });
@@ -107,6 +122,7 @@ function DeckSession({ entry, deck }: ScreenProps & { readonly deck: Deck }) {
         onRefresh={session.refresh}
         onRetry={session.retry}
         onBack={() => (router.canGoBack() ? router.back() : router.replace(screenPath(entry)))}
+        {...(header === undefined ? {} : { header })}
       />
     </>
   );

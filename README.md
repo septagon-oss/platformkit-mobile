@@ -283,10 +283,10 @@ from 12:00, evening from 17:00) and the person's first word — an address is ne
 so `joao@acme.test` is greeted "Good morning" and nothing else. A card counts the total
 when the body answered one and the highlight when it answered only that; its label is the
 entry's declared plural or the declared `presentation.highlight.label`, and its secondary
-line is drawn only when both numbers arrived *and* the catalogue named the second one.
+line is drawn only when both numbers arrived _and_ the catalogue named the second one.
 The counts body carries integers and dates and no word, so the phone writes none: an
 absent number stays absent — no card, no row count, and never a `0` nobody answered. The
-body is the workspace's *now*, so Home asks it on opening, on a pull, and on coming back
+body is the workspace's _now_, so Home asks it on opening, on a pull, and on coming back
 after this app wrote to a resource those counts count: a number that outlived a record
 this phone created is a claim about a moment that has passed.
 
@@ -1005,6 +1005,32 @@ both the generated detail and a pack's own screen,
 `fakeApi(operations)` with `answering`/`recorded` in `tests/fakes/shell.ts` so
 the next screen is tested over a transport and its validators rather than a
 stub, and the exported example itself.
+
+**A product's own pack** — `src/packs/decide.tsx` is the Decide module's screens, keyed
+`decide/questions` and `decide/card` and passed to `Shell` beside the generated ones: opening a
+question asks for its title and its options in one sheet and posts the whole draft to the service
+that opens it, because the entry is mounted read-only and holds no create; voting is the deck, the
+`decide/card` entry's own declared directions, with the question a person is voting on named beside
+the card and a match announced once per match rather than once per screen; the result is the
+ranking as the module ranked it, with the tally, the faces and the winner and no local sort; and the
+invite sheet holds the roster, the link the minting call printed and its expiry, with no credential
+read back after it was minted. **Reused** — `DeckSession` (the deck's own session, exported so a
+product's deck screen is the same screen), `useResourceList` and the `ResourceList`/`ResourceForm`
+organisms, `useCommandOutcome`, `useOperation`, `usePictures`/`useDirectoryPeople` for faces and
+cover photos, `deriveMeter` for the bar and the percentage beside it, `avatarStack`, `rowCommands`,
+`nameKey`, `timeText`, the atoms and molecules and the `Screen` template, and the copy table's
+`choice`/`state`/`fields` phrases. **Added** — `command.bindings` in the entry and
+`boundArguments`, which fill a command's server-bound arguments from the row the command runs on and
+send no body at all when the row cannot answer for one (the vote commands carry
+`{questionId: "questionId", ifRevision: "voteRevision"}`); `readDeck` accepting such a command, which
+it used to refuse as unaskable; `DeckReceipt.accepted` and a deck `header` slot, so a deck can name
+what it is a deck of without reaching for a screen ref; `personPointers`, which points bare voter ids
+at the directory only when the catalogue offers it readably; and the Decide vocabulary in the copy
+table, English and Portuguese, because every string on these screens is the kit's. **Made
+reusable** — `DeckSession` exported from `src/screens/`, which is what let a product's deck reuse the
+mechanism instead of copying it, and `src/packs/` as the place a product's pack lives, linted by the
+same import rule as the example pack: it reads through the shell's `Api` and never touches
+`effects/`.
 
 ### Shared feedback
 
@@ -2391,7 +2417,7 @@ the two changed flows, which belong to `make e2e-android`.
 ## Opened by a link, and reached by a notification
 
 A link in an e-mail, a link another app opens, and the address a notification carries are one
-question — *where does this person want to be* — and this phone answers it once, in
+question — _where does this person want to be_ — and this phone answers it once, in
 `src/core/arrival.ts`. The surface is the kernel's own: `app`, the root its generated shell is
 mounted on, then the two words of a resource, then at most one record. `platformkit://app/note/notes/7`
 and `https://platformkit.example/app/note/notes/7` answer the same href, because the host is
@@ -2430,7 +2456,7 @@ same scope: a workspace that answered no to this phone's address is not asked ag
 session, and a no that answers late is still the ended session's, never a reason for the
 workspace signing in now to keep silent. And because the server keys a device on tenant,
 platform, token and recipient, a newer sign-in that reuses an older session's token holds
-*that* row from the moment its ask lands, whichever answer reaches the phone first: the live
+_that_ row from the moment its ask lands, whichever answer reaches the phone first: the live
 session is the one that may give it back, so an older sign-out — whether its own answer came
 home first or last — leaves the address the person at the phone is signed in with untouched, and
 asks for a row of its own only behind an ask for that same address. The registration's answer
@@ -2439,7 +2465,7 @@ arrives: its own sign-out removes the row or hands it to the next registering co
 Each sign-out waits for its own registration and at most one matching address already being
 registered, without chasing later sign-ins. A server that will
 not carry this device, a phone with no push service and a person who says not now all
-leave the session standing and say one sentence. Sign-out asks for the row back *before*
+leave the session standing and say one sentence. Sign-out asks for the row back _before_
 it spends the key, waiting for a registration of that address still on the wire, because only
 that key reaches the row, and it says so when the ask did not answer — while the key may still be
 live, the key is what is said. The key it forgets here is only the record that sign-in
@@ -2473,7 +2499,7 @@ platform's answers rather than mock the library; and `scripts/check_flows.ts`'s 
 `+`-prefixed files, so a router configuration file is never asked for a journey that cannot land
 on it.
 
-*Verified* — the reading of a link, the door it arrives at, and a device row's hold on the
+_Verified_ — the reading of a link, the door it arrives at, and a device row's hold on the
 sign-in that wrote it run under `npm test`, in both halves. `e2e/flows/deep-link.yaml` never ran:
 it needs `make e2e-android`, an emulator, `maestro` and a signed-in kernel, and this delivery had
 none of them, so the link and the notification tap are proven through expo-router's own reading
