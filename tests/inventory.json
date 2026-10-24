@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 281,
-   "cases": 1338,
-   "ms": 2544605,
-   "testsMs": 93614.39999999994,
+   "files": 288,
+   "cases": 1347,
+   "ms": 2547072,
+   "testsMs": 93637.49999999993,
    "runners": {
-    "jest": 98,
-    "node": 183
+    "jest": 100,
+    "node": 188
    },
    "unreachable": 0
   },
@@ -4561,6 +4561,62 @@
    "coveredProdLines": 1916,
    "onlyProdLines": null,
    "testsMs": 631
+  },
+  {
+   "file": "tests/ui/a-resolved-form-keeps-the-servers-field-order.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The form organism keeps the policy's create order through the production grouping adapter.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
+   "ms": null,
+   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/ui/a-resolved-form-keeps-the-servers-field-order.test.tsx can measure them after the behavior is corrected.",
+   "titles": [
+    "a resolved create form draws its fields in the order the server named"
+   ],
+   "tests": [
+    {
+     "title": "a resolved create form draws its fields in the order the server named",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
+   "file": "tests/ui/a-resolved-record-keeps-hidden-fields-off-the-screen.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The policy's record visibility applies even when the server sends no legacy field hint.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
+   "ms": null,
+   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/ui/a-resolved-record-keeps-hidden-fields-off-the-screen.test.tsx can measure them after the behavior is corrected.",
+   "titles": [
+    "a record never draws a field the supported policy keeps off records"
+   ],
+   "tests": [
+    {
+     "title": "a record never draws a field the supported policy keeps off records",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/ui/a-row-offers-its-command-without-a-finger.test.tsx",
@@ -10895,6 +10951,34 @@
    "testsMs": 34
   },
   {
+   "file": "tests/a-generated-catalog-read-accepts-the-served-policy.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "Both catalogue consumers accept the same unmodified response from the pinned server.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
+   "ms": null,
+   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-generated-catalog-read-accepts-the-served-policy.test.ts can measure them after the behavior is corrected.",
+   "titles": [
+    "a generated catalogue read accepts the served resolved policy"
+   ],
+   "tests": [
+    {
+     "title": "a generated catalogue read accepts the served resolved policy",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -11524,6 +11608,40 @@
    "testsMs": 15.9
   },
   {
+   "file": "tests/a-policy-with-an-unknown-reader-field-falls-back-whole.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "Every field a policy reader names must exist before any part of the policy is adopted.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
+   "ms": null,
+   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-policy-with-an-unknown-reader-field-falls-back-whole.test.ts can measure them after the behavior is corrected.",
+   "titles": [
+    "a policy whose status names no field falls back for the whole entry",
+    "a policy whose preview names no field falls back for the whole entry"
+   ],
+   "tests": [
+    {
+     "title": "a policy whose status names no field falls back for the whole entry",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "a policy whose preview names no field falls back for the whole entry",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/a-record-opens-on-its-picture.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -11789,6 +11907,40 @@
    "testsMs": 1.4
   },
   {
+   "file": "tests/a-resolved-sort-list-keeps-its-declared-queries.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "An empty sort declaration means none; a populated declaration supplies the exact offered queries.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
+   "ms": null,
+   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-resolved-sort-list-keeps-its-declared-queries.test.ts can measure them after the behavior is corrected.",
+   "titles": [
+    "an empty resolved sort list offers no invented timestamp order",
+    "a resolved sort list preserves each declared query and its own label"
+   ],
+   "tests": [
+    {
+     "title": "an empty resolved sort list offers no invented timestamp order",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "a resolved sort list preserves each declared query and its own label",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
    "file": "tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -11883,6 +12035,35 @@
    "testsMs": 13.8
   },
   {
+   "file": "tests/a-served-catalogue-that-names-no-record-preview-draws-none.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "What the pinned server document says about a record's summary line, and what the record draws. `testdata/catalog.json` is the kernel's own golden at the pinned commit (its bytes hash to the file `ui/screens/testdata/catalog.json` prints at 988e95c), and every entry in it carries a `resolved` block whose `titles.preview` is empty: the server named no summary line for a record. An empty preview is an answer, so the phone draws none rather than asking its old heuristic for a text field to put under the title.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2467,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the served catalogue names no record preview and the record draws none"
+   ],
+   "tests": [
+    {
+     "title": "the served catalogue names no record preview and the record draws none",
+     "ms": 23.05963,
+     "measured": false
+    }
+   ],
+   "loaded": 38,
+   "coveredProdLines": 13635,
+   "onlyProdLines": null,
+   "testsMs": 23.1
+  },
+  {
    "file": "tests/a-small-picture-uses-its-stored-frame.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -11974,6 +12155,34 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-supported-policy-keeps-its-empty-preview.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "An explicit empty preview is an answer, so a supported policy never asks the legacy heuristic.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
+   "ms": null,
+   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-supported-policy-keeps-its-empty-preview.test.ts can measure them after the behavior is corrected.",
+   "titles": [
+    "a supported policy with no preview draws no inferred record summary"
+   ],
+   "tests": [
+    {
+     "title": "a supported policy with no preview draws no inferred record summary",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts",

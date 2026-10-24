@@ -42,6 +42,9 @@ import {
   policySortFields,
   policyStatus,
   policyTitleFields,
+  policyOnList,
+  policyOnRecord,
+  policySorts,
 } from "./derivePolicy";
 import { deriveMeter } from "./progress";
 import type { PendingWrite } from "./outbox";
@@ -366,6 +369,16 @@ const nameLike: readonly string[] = ["title", "name", "displayName"];
 const neverShown = (f: Field): boolean => f.hints?.visibility === "hidden";
 
 /**
+ * offRecord is the field the server kept off its own record (`fields[].onRecord:
+ * false`). It is `hidden`'s declared cousin, one screen narrower: the value stays in
+ * the schema and the write, and no block of the record draws it. A pointer the same
+ * block names — this record's title, its pill or its summary line — is the sharper
+ * instruction and still reads the field, because naming a fact at the top of a record
+ * is drawing it there, not drawing it twice.
+ */
+const offRecord = (f: Field): boolean => policyOnRecord(f) === false;
+
+/**
  * namedBy is the chain that decides what a record is called, spelled once and
  * asked of the fields the asking screen draws: the field the entry names, then a
  * field *called* title/name/displayName, then the first readable string that is
@@ -516,7 +529,7 @@ const rowContent = (f: Field): boolean =>
  * id, always the row's own name — is `listColumns`'s, not a field's.
  */
 export const onList = (f: Field): boolean =>
-  rowContent(f) && (f.hints?.visibility !== undefined || f.hideList !== true);
+  policyOnList(f) ?? (rowContent(f) && (f.hints?.visibility !== undefined || f.hideList !== true));
 
 /**
  * rowFields are the fields a row is made of: what the schema puts on a list, in
@@ -621,7 +634,13 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
  * a row with nothing worth reading under its name shows nothing rather than a dash.
  */
 export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | undefined {
+  // Under a supported block the pointer is the server's answer, and its empty name is
+  // part of that answer: the kernel prints "" for an entry with nothing to summarise,
+  // so the record draws no line rather than asking this file's heuristic for a text
+  // field to put under the title. Only an entry with no block falls through to the
+  // hint and the default chain below.
   const declared = policyPreview(e) ?? e.hints?.previewField;
+  if (e.resolved && declared === "") return undefined;
   // A rich text body is never the summary line, declared or default: a printed line under
   // a name can only print the Markdown the server stored, and that syntax is not part of
   // what a person is told (`richBody`). Such a body is read by the medium that draws it —
@@ -1122,6 +1141,7 @@ function shownFields(e: Entry, row: Row, keep: (f: Field) => boolean): readonly 
   return e.fields.filter(
     (f) =>
       !neverShown(f) &&
+      !offRecord(f) &&
       f.type !== "picture" &&
       !drawn.has(f.name) &&
       !informationFields.includes(f.name) &&
@@ -1187,13 +1207,19 @@ function informationHeld(e: Entry, row: Row): readonly Field[] {
   const drawn = headerDrawn(e);
   const stamps = informationFields.flatMap((name) =>
     e.fields.filter(
-      (f) => f.name === name && f.type !== "picture" && !neverShown(f) && hasValue(f, row[f.name]),
+      (f) =>
+        f.name === name &&
+        f.type !== "picture" &&
+        !neverShown(f) &&
+        !offRecord(f) &&
+        hasValue(f, row[f.name]),
     ),
   );
   const kept = e.fields.filter(
     (f) =>
       f.hints?.visibility === "detail" &&
       !neverShown(f) &&
+      !offRecord(f) &&
       f.type !== "picture" &&
       !drawn.has(f.name) &&
       !informationFields.includes(f.name) &&
@@ -1706,13 +1732,18 @@ export function formSections(
 ): readonly FormBlock[] {
   const controls = formControls(e, row, create, names);
   const identity = primary(e)?.name;
+  // Under a supported block the order inside a block is the server's: `layout.create`
+  // and `layout.update` already name the fields in the order they ask for them, and
+  // ranking them again here would draw an order neither client agreed on.
+  const order = (own: readonly Control[]): readonly Control[] =>
+    e.resolved === undefined ? orderControls(own, identity) : own;
   const filed = (c: Control) => c.field.hints?.section;
   const declared = e.hints?.sections ?? [];
   const blocks: FormBlock[] = declared.flatMap((section) => {
     const own = controls.filter((c) => filed(c) === section.key);
     return own.length === 0
       ? []
-      : [{ key: section.key, label: section.label, controls: orderControls(own, identity) }];
+      : [{ key: section.key, label: section.label, controls: order(own) }];
   });
   const rest = controls.filter((c) => !declared.some((s) => s.key === filed(c)));
   return rest.length === 0
@@ -1722,7 +1753,7 @@ export function formSections(
         {
           key: "",
           label: declared.length === 0 ? "" : overview,
-          controls: orderControls(rest, identity),
+          controls: order(rest),
         },
       ];
 }
@@ -2084,24 +2115,42 @@ export interface Order {
 export const noOrder: Order = { sort: "", filters: {} };
 
 /**
+ * offerable is whether a sort row may name this field at all. Three kinds never are:
+ * `bool`, `list` and `uuid` have no honest direction word — "false, then true" is
+ * nobody's order — and the two stamps are said by "Newest first" and "Oldest first"
+ * instead. A field the document calls plumbing is never offered either: a sort row
+ * *names* the field, and naming plumbing in a sheet is naming it on screen.
+ */
+const offerable = (f: Field): boolean =>
+  !neverShown(f) &&
+  !informationFields.includes(f.name) &&
+  f.type !== "bool" &&
+  f.type !== "list" &&
+  f.type !== "uuid" &&
+  f.type !== "picture";
+
+/**
+ * directionWords is the pair of order words a field type takes, ascending first: the
+ * phone's own copy, never the server's, because "low to high" is the phone's sentence
+ * about the order it performs on the value the server sent.
+ */
+const directionWords = (
+  type: Field["type"],
+  kit: Formatting["copy"]["kit"],
+): readonly [(word: string) => string, (word: string) => string] =>
+  type === "time"
+    ? [kit.sortSoon, kit.sortLate]
+    : type === "int" || type === "float"
+      ? [kit.sortLow, kit.sortHigh]
+      : [kit.sortAZ, kit.sortZA];
+
+/**
  * sortFields are the fields a list can be ordered by, in the order its sheet lists
- * them: the entry's declared `sortable`, else the field it leads rows with plus the
- * date fields it declares.
- *
- * Three kinds are never offered, declared or not. `bool`, `list` and `uuid` have no
- * honest direction word — "false, then true" is nobody's order — and the two stamps
- * are said by "Newest first" and "Oldest first" already, which are the first two
- * rows of every sheet. A field the document calls plumbing is never offered either:
- * a sort row *names* the field, and naming plumbing in a sheet is naming it on screen.
+ * them: the fields behind the orders the server declared, else the entry's declared
+ * `sortable`, else the field it leads rows with plus the date fields it declares.
+ * `sortOptions` is the sheet, and it says the two stamps in the phone's own words.
  */
 export function sortFields(e: Entry): readonly Field[] {
-  const offerable = (f: Field): boolean =>
-    !neverShown(f) &&
-    !informationFields.includes(f.name) &&
-    f.type !== "bool" &&
-    f.type !== "list" &&
-    f.type !== "uuid" &&
-    f.type !== "picture";
   const laid = policySortFields(e);
   if (laid) return laid.filter(offerable);
   const declared = e.hints?.sortable;
@@ -2113,11 +2162,17 @@ export function sortFields(e: Entry): readonly Field[] {
 }
 
 /**
- * sortOptions are the orders a list offers: newest, oldest, then each field the
- * sheet offers, once per direction. The values are the wire's and do not move — ""
- * is newest, `createdAt` oldest, a field name ascending and `-name` descending,
- * which is what `effects/api.ts` sends as `sort`. The *words* come from the copy
- * table and from the field's type: a deadline is "soonest first", a rank is "low to
+ * sortOptions are the orders a list offers. Under a supported block they are the orders
+ * the server declared, in its order, each carrying its own `query` and the words it
+ * resolved for it — with the two rows of phone chrome that say the same thing better:
+ * "Newest first" and "Oldest first", offered whenever the declaration names one of the
+ * two stamps, in place of a row that names a stamp. Nothing the server left out is
+ * invented, so a list whose block declares one order offers one order. With no block,
+ * the sheet is the phone's own: newest, oldest, then each field `sortFields` offers,
+ * once per direction. The values are the wire's and do not move — "" is newest,
+ * `createdAt` oldest, a field name ascending and `-name` descending, which is what
+ * `effects/api.ts` sends as `sort`. The *words* for the phone's own rows come from the
+ * copy table and the field's type: a deadline is "soonest first", a rank is "low to
  * high", a title is "A–Z", and none of them is said in English on a Portuguese phone.
  *
  * A closed set sorts A–Z because the kernel sorts the stored value, not the label the
@@ -2129,18 +2184,25 @@ export function sortOptions(
   format: Formatting,
 ): readonly { readonly value: string; readonly label: string }[] {
   const kit = format.copy.kit;
-  const out = [
+  const newest = [
     { value: "", label: kit.sortNewest },
     { value: "createdAt", label: kit.sortOldest },
   ];
+  const laid = policySorts(e);
+  if (laid !== undefined)
+    return [
+      ...(laid.some((s) => informationFields.includes(s.field.name)) ? newest : []),
+      ...laid
+        .filter((s) => offerable(s.field))
+        .map((s) => ({
+          value: s.query,
+          label: directionWords(s.field.type, kit)[s.desc ? 1 : 0]!(s.label),
+        })),
+    ];
+  const out = [...newest];
   for (const f of sortFields(e)) {
     const word = fieldLabel(f);
-    const pair =
-      f.type === "time"
-        ? [kit.sortSoon, kit.sortLate]
-        : f.type === "int" || f.type === "float"
-          ? [kit.sortLow, kit.sortHigh]
-          : [kit.sortAZ, kit.sortZA];
+    const pair = directionWords(f.type, kit);
     out.push({ value: f.name, label: pair[0]!(word) });
     out.push({ value: "-" + f.name, label: pair[1]!(word) });
   }

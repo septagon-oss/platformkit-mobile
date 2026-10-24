@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `f1f03b27d` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `e729430f5` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 281 | 1338 | 93.6 s | 2545 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 288 | 1347 | 93.6 s | 2547 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 147 | 483 | 57.4 s | 3682 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 524
+* keep: 531
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 524 — 220 `tests/*.test.ts` (node), 245 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2050; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2545 s, composition 3682 s, journey 0 s
+* files inventoried: 531 — 225 `tests/*.test.ts` (node), 247 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2059; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2547 s, composition 3682 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -151,6 +151,8 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/a-pill-crosses-from-the-colour-it-wore.test.tsx | jest | behaviour | 3 | 15145 | 18 |  | not measured | — | 0 | keep | A pill whose state moved while it was on screen crosses from the pair it wore to the pair it reached: the pair it left is laid over the pill, fully on, hidden … |
 | tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx | jest | behaviour | 1 | 30398 | 7 |  | not measured | — | 0 | keep | A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared compo… |
 | tests/ui/a-record-that-just-finished-names-its-own-state.test.tsx | jest | behaviour | 8 | 27266 | 631 |  | not measured | — | 0 | keep | What the record owes the person when their own write moved its state into one the entry calls finished: one line, in the record's own words, drawn whether or n… |
+| tests/ui/a-resolved-form-keeps-the-servers-field-order.test.tsx | jest | behaviour | 1 |  |  |  | not measured | — | 0 | keep | The form organism keeps the policy's create order through the production grouping adapter. |
+| tests/ui/a-resolved-record-keeps-hidden-fields-off-the-screen.test.tsx | jest | behaviour | 1 |  |  |  | not measured | — | 0 | keep | The policy's record visibility applies even when the server sends no legacy field hint. |
 | tests/ui/a-row-offers-its-command-without-a-finger.test.tsx | jest | behaviour | 6 | 20500 | 102 |  | not measured | — | 0 | keep | Nothing a swipe can do may be swipe-only. The command a row's swipe runs is offered to a reader as a named action of the row itself, the row's own name keeps t… |
 | tests/ui/a-workspaces-accent-enters-the-theme-without-a-hand-edited-token.test.tsx | jest | behaviour | 10 | 21472 | 32 |  | not measured | — | 0 | keep | A workspace's accent arrives as a value, never as a token: the generated palette stays the only writer of colour in the repository, and `accentPalette` copies … |
 | tests/ui/agenda-appointment-lines.test.tsx | jest | behaviour | 3 | 19211 | 106 | 0 | 0 of 3 | — | 0 | keep | An appointment is its name and, beneath it, when it is. Welding the two into one control label gave every entry the same long centred line of text, and a headi… |
@@ -243,6 +245,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-form-asks-only-what-a-person-can-answer.test.ts | node | behaviour | 15 | 1149 | 32.1 | 17 | 1 of 15 | — | 0 | keep | A form asks only what a person can answer (0085). Three rules decide what a sheet holds and in what order it holds it, and all three are answers of the core: t… |
 | tests/a-form-keeps-what-the-person-typed.test.ts | node | behaviour | 12 | 1833 | 22.2 |  | not measured | — | 0 | keep | A form keeps what the person typed, and says exactly what to fix (0085). Four rules decide that, and all four are answers of the core: what the sheet may refus… |
 | tests/a-form-reads-the-violations-a-refusal-names.test.ts | node | behaviour | 3 | 1387 | 34 |  | not measured | — | 0 | keep | A refused write names its fields in `violations` when the server prints them, and in the older `errors` list when it does not; one refusal is never shown twice… |
+| tests/a-generated-catalog-read-accepts-the-served-policy.test.ts | node | behaviour | 1 |  |  |  | not measured | — | 0 | keep | Both catalogue consumers accept the same unmodified response from the pinned server. |
 | tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts | node | behaviour | 3 | 856 | 13.9 |  | not measured | — | 0 | keep | A box nobody can type into that points at another record draws that record's name — or the word for a pointer with no name — and the whole-row replace still se… |
 | tests/a-keep-reason-names-siblings-the-table-holds.test.ts | node | behaviour | 2 | 304 | 3.7 |  | not measured | — | 0 | keep | A keep reason is what root reads before a prune (0088), so what it points at has to be there to read: every tests/ or e2e/ test path a verdictReason names is a… |
 | tests/a-link-to-a-record-opens-that-record.test.ts | node | behaviour | 9 | 4771 | 11.7 |  | not measured | — | 0 | keep | One link, one reading: what a person taps in an e-mail, what another app opens, and what a notification carries all answer the same route, because one rule (`s… |
@@ -251,14 +254,18 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts | node | behaviour | 1 | 17605 | 13529.9 |  | not measured | — | 0 | keep | The notification tap compiles against the same route declarations Expo generates when this app starts. The check is scoped to the handler, independent of other… |
 | tests/a-person-reads-one-colour-wherever-they-appear.test.ts | node | behaviour | 3 | 962 | 52.5 |  | not measured | — | 0 | keep | A person's disc colour is a function of their id alone: the same id reads the same tone in a directory row, in a field that points at them, as an activity acto… |
 | tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts | node | behaviour | 7 | 868 | 15.9 |  | not measured | — | 0 | keep | A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one … |
+| tests/a-policy-with-an-unknown-reader-field-falls-back-whole.test.ts | node | behaviour | 2 |  |  |  | not measured | — | 0 | keep | Every field a policy reader names must exist before any part of the policy is adopted. |
 | tests/a-record-opens-on-its-picture.test.ts | node | behaviour | 8 | 4428 | 30.3 |  | not measured | — | 0 | keep | A record with a picture opens on it: the field `coverField` names is the picture, and a field declared `present: "images"` is a gallery of them. Three rules de… |
 | tests/a-record-opens-on-what-it-is.test.ts | node | behaviour | 10 | 1225 | 51.7 | 2 | 0 of 10 | — | 0 | keep | A record opens on what it is, not on how it is stored (0085). The whole of the hierarchy is one pure function of the entry and the row — `recordHeader`, `recor… |
 | tests/a-released-swipe-reaches-its-command-from-the-ui-runtime.test.ts | node | behaviour | 2 | 8286 | 4807.2 |  | not measured | — | 0 | keep | A native row's drag is read and released on the UI runtime: the gesture callbacks are worklets, and whatever they call synchronously must be callable there. Th… |
 | tests/a-remembered-record-opens-one-record-whatever-its-id-holds.test.ts | node | behaviour | 1 | 1733 | 1.4 |  | not measured | — | 0 | keep | A remembered open's address is typed `RecordAddress`, but a template literal's `${string}` matches a slash, a question mark and a hash: the type cannot say "th… |
+| tests/a-resolved-sort-list-keeps-its-declared-queries.test.ts | node | behaviour | 2 |  |  |  | not measured | — | 0 | keep | An empty sort declaration means none; a populated declaration supplies the exact offered queries. |
 | tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts | node | behaviour | 5 | 1021 | 36.1 |  | not measured | — | 0 | keep | A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are writ… |
 | tests/a-save-carries-what-the-person-wrote.test.ts | node | behaviour | 3 | 947 | 13.8 |  | not measured | — | 0 | keep | What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading … |
+| tests/a-served-catalogue-that-names-no-record-preview-draws-none.test.ts | node | behaviour | 1 | 2467 | 23.1 |  | not measured | — | 0 | keep | What the pinned server document says about a record's summary line, and what the record draws. `testdata/catalog.json` is the kernel's own golden at the pinned… |
 | tests/a-small-picture-uses-its-stored-frame.test.ts | node | behaviour | 2 | 1918 | 2.8 |  | not measured | — | 0 | keep | (no first comment; first test title) a 256px picture uses the original when no smaller declared variant exists |
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
+| tests/a-supported-policy-keeps-its-empty-preview.test.ts | node | behaviour | 1 |  |  |  | not measured | — | 0 | keep | An explicit empty preview is an answer, so a supported policy never asks the legacy heuristic. |
 | tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts | node | behaviour | 2 | 1007 | 10.7 |  | not measured | — | 0 | keep | A whole-row replace carries what nobody typed exactly as the read returned it. The body builder is `writeControls`, and two of its promises have no case of the… |
 | tests/a-withdrawn-deck-keeps-no-row-and-takes-no-input.test.ts | node | behaviour | 1 | 1883 | 2.7 |  | not measured | — | 0 | keep | A deck whose read is withdrawn (no access, gone, signed out, off the plan) shows none of the rows it held and takes no further input: no choice, page, answer, … |
 | tests/a_command_fills_the_arguments_its_row_supplies.test.ts | node | behaviour | 5 | 834 | 15.9 |  | not measured | — | 0 | keep | A rest command may declare that the server binds one of its arguments from the row the command runs on (`kit/rest`'s RowBindings): the vote commands on a ballo… |

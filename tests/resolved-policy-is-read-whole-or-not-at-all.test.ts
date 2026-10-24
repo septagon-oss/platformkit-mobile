@@ -62,11 +62,11 @@ test("a supported block decides the title, the missing word, the columns, the fo
     formControls(entry, { id: "i1" }, false).map((c) => c.field.name),
     ["reference"],
   );
+  // The sheet is the block's: its queries, in its order, with no direction the block
+  // did not state and no timestamp row for a block that names no timestamp order.
   assert.deepEqual(
-    sortOptions(entry, feedback)
-      .map((o) => o.value)
-      .slice(2),
-    ["total", "-total", "reference", "-reference"],
+    sortOptions(entry, feedback).map((o) => o.value),
+    ["total", "-total", "reference"],
   );
 });
 

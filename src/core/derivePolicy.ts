@@ -60,3 +60,29 @@ export const policySortFields = (e: Entry): readonly Field[] | undefined => {
 /** policyStatus and policyPreview are the field names the server picked; "" is none. */
 export const policyStatus = (e: Entry): string | undefined => e.resolved?.titles.status;
 export const policyPreview = (e: Entry): string | undefined => e.resolved?.titles.preview;
+
+/** policyDrawn is where the server says a field may be drawn: a column of a list, a row of a record. */
+export const policyOnList = (f: Field): boolean | undefined => f.policy?.onList;
+export const policyOnRecord = (f: Field): boolean | undefined => f.policy?.onRecord;
+
+/** PolicySort is one order the server declared: its wire query, its own words, the field it reads. */
+export type PolicySort = {
+  readonly query: string;
+  readonly label: string;
+  readonly field: Field;
+  readonly desc: boolean;
+};
+
+/**
+ * policySorts are the orders the server offers, in the order it offers them, each with
+ * the words it resolved for it. An order whose field the entry does not have is dropped:
+ * a query nobody can read is not an offer.
+ */
+export const policySorts = (e: Entry): readonly PolicySort[] | undefined =>
+  e.resolved &&
+  (e.resolved.list.sorts ?? []).flatMap((s) => {
+    const field = e.fields.find((f) => f.name === s.field);
+    return field === undefined
+      ? []
+      : [{ query: s.query, label: s.label, field, desc: s.desc === true }];
+  });

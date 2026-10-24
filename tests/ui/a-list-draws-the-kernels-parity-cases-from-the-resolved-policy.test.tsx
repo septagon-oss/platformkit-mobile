@@ -62,8 +62,11 @@ describe("a list drawn from the resolved policy", () => {
 
   test("the sort sheet offers the orders the policy lists, and not an identifier", async () => {
     await drawn("absent-hints", "sort");
-    expect(screen.getByText("Title, A–Z", said)).toBeTruthy();
+    // The words after the comma are the phone's; the words before it are the case's own:
+    // this fixture states each sort as a query only, and its block completes the label
+    // with the field's name, so the sheet says the field's name in the phone's sentence.
+    expect(screen.getByText("title, A–Z", said)).toBeTruthy();
     expect(screen.getByText("Newest first", said)).toBeTruthy();
-    expect(screen.queryByText("Id, A–Z", said)).toBeNull();
+    expect(screen.queryByText("id, A–Z", said)).toBeNull();
   });
 });

@@ -874,24 +874,42 @@ as "Enter a hour.".
 A catalogue entry may carry `resolved`, the presentation policy the server settled for the
 request's language. `readPolicy` (`src/core/catalogPolicy.ts`) accepts a block only whole:
 a `policyVersion` no newer than `SUPPORTED_POLICY_VERSION`, every member the readers use
-present and typed by the generated schema, and every field it names a field of the entry
-(and every field of the entry described). An absent block is an older server and says
-nothing; a newer, malformed or inconsistent one is named once through the catalogue's
-`notice` and the *entry* is then drawn exactly as before, never half by each rule. Under a
-supported block `src/core/derivePolicy.ts` answers for `noun`, `nounPhrase`, `fieldLabel`,
-`enumLabel`, `enumTone`, the missing and yes/no words of `display`, `label`/`primary`/
-`rowPrimary` (candidates, then the identifier, then the empty title), `listColumns`,
-`formControls`' order, `sortFields`/`sortOptions`, `statusField`, `listPreview` and
-`finishedValues`. Instants and relative time stay the phone's own device formatting.
+present and typed by the generated schema, and every field *name* the block states a field
+of the entry — its title candidates, its pill, its summary line, its picture and its summary
+list, every part of its layout, its sorts and its filters — with every field of the entry
+described in return. The empty name is skipped: the kernel prints `""` for the member it
+left unset on purpose, which is an answer rather than a pointer. An absent block is an older
+server and says nothing; a newer, malformed or inconsistent one is named once through the
+catalogue's `notice` and the *entry* is then drawn exactly as before, never half by each
+rule. Under a supported block `src/core/derivePolicy.ts` answers for `noun`, `nounPhrase`,
+`fieldLabel`, `enumLabel`, `enumTone`, the missing and yes/no words of `display`,
+`label`/`primary`/`rowPrimary` (candidates, then the identifier, then the empty title),
+`listColumns`, `onList` and `onRecord`, `formControls`' order and the order `formSections`
+draws inside a block (the block's own, not this file's rank), `sortFields`/`sortOptions`,
+`statusField`, `listPreview` and `finishedValues`. Where a list-membership question has two
+answers in one block, the layout list wins: `layout.columns`/`create`/`update` say what that
+screen holds, and `fields[].onList`/`onRecord` answer it for the fields no list names. An empty `titles.preview` or `titles.status`
+is the server saying no summary line and no pill, so the record draws neither rather than
+asking this file's heuristic for a text field or an enum to put there. A sort sheet under a
+block is the block's declaration — its queries, in its order, under the words it resolved —
+with the phone's "Newest first" and "Oldest first" said in place of a declared order on one
+of the two stamps. Instants and relative time stay the phone's own device formatting.
 A refusal's `violations` name the form's fields; `errors` is read only when they name none.
 `tests/parity` holds the kernel's reviewed cases byte for byte, `npm run check:parity` proves
 them against `parity.source.json`, and the phone's models are held to each.
 
-**Limits.** Not yet readers: `commands[]` confirmation copy, `deck`, `list.filters`,
-`layout.sections`/`overview`/`information`, `summary`, `titles.summary` (the row's cells still
-follow `summaryFields`), `reading.precision`, `writeControls`' extra fields, `identity.icon`/`group`/
-`description`,
-`titles.cover`/`thumbnail` (they stay on today's derivation under a supported block). The pinned
+**Limits.** Not yet readers: `commands[]` confirmation copy, `deck`, `list.filters` (its
+options and kinds; a block naming a filter's field is still checked against the entry),
+`layout.sections`/`overview`/`information` (a form still groups by the legacy `sections`
+hint, and the record's blocks by it), `summary`, `titles.summary` (the row's cells still
+follow `summaryFields`), `reading.precision`, `writeControls`' extra fields,
+`identity.icon`/`group`/`description`, `titles.cover`/`thumbnail` (they stay on today's
+derivation under a supported block), `fields[].editable` (`layout.create`/`update` already
+own who is asked and in what order, so a second answer would only be able to disagree) and
+`list.defaultSort` (the phone keeps its own newest-first default). Because `defaultSort` is
+unread, a block whose declared orders name none the phone can put back to the default (the
+wire's `""`) offers no order group at all: the list stays in the server's own order rather
+than opening a sheet a person cannot leave. The pinned
 OpenAPI types some resolved members as objects the served golden prints as `null`, so the
 phone reads the block with those members loosened and the strict `appResources` operation is
 checked on the golden without its resolved blocks.

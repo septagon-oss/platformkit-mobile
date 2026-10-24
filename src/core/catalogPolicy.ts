@@ -51,16 +51,37 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 type Notice = (at: string, why: string) => void;
 
-/** referencedNames is every field name a block's layout, titles and sorts refer to. */
+/**
+ * referencedNames is every field name the adopted block states, read or not: its
+ * title candidates and the field it calls a record by, its summary line, its
+ * picture and its summary list, every part of its layout, its sorts and its
+ * filters. A pointer into the schema is a pointer into *this* entry, so a name
+ * none of the entry's fields answers means the block was resolved against a
+ * different schema than the one served beside it, and no part of it can be
+ * trusted. Only the empty name is skipped: the kernel prints "" for the member it
+ * deliberately left unset (no summary line, no pill, no cover), which is an answer
+ * rather than a pointer.
+ */
 function referencedNames(p: Pick<Shape, "titles" | "layout" | "list">): readonly string[] {
+  const filled = (names: readonly string[] | null | undefined): readonly string[] =>
+    (names ?? []).filter((n) => n !== "");
   return [
-    ...(p.titles.listCandidates ?? []),
-    ...(p.titles.recordCandidates ?? []),
-    ...(p.layout.columns ?? []),
-    ...(p.layout.create ?? []),
-    ...(p.layout.update ?? []),
-    ...(p.list.sorts ?? []).map((s) => s.field),
-  ];
+    ...filled(p.titles.listCandidates),
+    ...filled(p.titles.recordCandidates),
+    ...filled(p.titles.summary),
+    p.titles.status,
+    p.titles.preview,
+    p.titles.cover,
+    p.titles.thumbnail,
+    ...filled(p.layout.columns),
+    ...filled(p.layout.create),
+    ...filled(p.layout.update),
+    ...filled(p.layout.overview),
+    ...filled(p.layout.information),
+    ...filled((p.layout.sections ?? []).flatMap((s) => s.fields ?? [])),
+    ...filled(p.list.sorts?.map((s) => s.field)),
+    ...filled(p.list.filters?.map((f) => f.field)),
+  ].filter((n) => n !== "");
 }
 
 /**
@@ -70,9 +91,11 @@ function referencedNames(p: Pick<Shape, "titles" | "layout" | "list">): readonly
  * enhancement of the entry, not part of its document shape.
  *
  * Supported means a whole `policyVersion` no newer than SUPPORTED_POLICY_VERSION,
- * every member the readers use present and typed, and every field the block names
- * a field of the entry, with each field of the entry described by the block.
- * Members this build does not know are ignored.
+ * every member the readers use present and typed, and every field name the block
+ * states a field of the entry, with each field of the entry described by the
+ * block. Members this build does not know are ignored; members it does not read
+ * are still checked, because one entry is read one way and a block that points
+ * anywhere else was not resolved for this entry.
  */
 export function readPolicy(
   raw: unknown,
