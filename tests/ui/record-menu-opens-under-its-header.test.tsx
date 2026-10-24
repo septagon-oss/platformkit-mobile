@@ -13,8 +13,9 @@ import { parseCatalog } from "../../src/core/catalog";
 import { deriveDisclosure } from "../../src/core/derive";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ThemeProvider } from "../../src/ui/theme";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const none = () => undefined;
 const row = { id: "1", title: "Buy milk", status: "open", rank: 2, pinned: true, tags: ["a"] };

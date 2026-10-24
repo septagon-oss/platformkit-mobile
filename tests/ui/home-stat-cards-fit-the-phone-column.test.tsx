@@ -16,8 +16,9 @@ import { Home } from "../../src/ui/organisms/Home";
 import { space } from "../../src/ui/scale";
 import { ThemeProvider } from "../../src/ui/theme";
 import { feedback } from "../fakes/presentation";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
 const none = () => undefined;
 

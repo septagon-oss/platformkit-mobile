@@ -15,8 +15,9 @@ import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ThemeProvider } from "../../src/ui/theme";
 import { palette } from "../../src/ui/tokens";
 import { feedback } from "../fakes/presentation";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const none = () => undefined;
 const copy = deriveCopy("en");

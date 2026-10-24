@@ -869,6 +869,42 @@ and the English article rule chooses its article from a label's first letter rat
 meaning, so a field labelled `URL` is asked for as "Enter an uRL." and one labelled `Hour`
 as "Enter a hour.".
 
+### The server's resolved policy
+
+A catalogue entry may carry `resolved`, the presentation policy the server settled for the
+request's language. `readPolicy` (`src/core/catalogPolicy.ts`) accepts a block only whole:
+a `policyVersion` no newer than `SUPPORTED_POLICY_VERSION`, every member the readers use
+present and typed by the generated schema, and every field it names a field of the entry
+(and every field of the entry described). An absent block is an older server and says
+nothing; a newer, malformed or inconsistent one is named once through the catalogue's
+`notice` and the *entry* is then drawn exactly as before, never half by each rule. Under a
+supported block `src/core/derivePolicy.ts` answers for `noun`, `nounPhrase`, `fieldLabel`,
+`enumLabel`, `enumTone`, the missing and yes/no words of `display`, `label`/`primary`/
+`rowPrimary` (candidates, then the identifier, then the empty title), `listColumns`,
+`formControls`' order, `sortFields`/`sortOptions`, `statusField`, `listPreview` and
+`finishedValues`. Instants and relative time stay the phone's own device formatting.
+A refusal's `violations` name the form's fields; `errors` is read only when they name none.
+`tests/parity` holds the kernel's reviewed cases byte for byte, `npm run check:parity` proves
+them against `parity.source.json`, and the phone's models are held to each.
+
+**Limits.** Not yet readers: `commands[]` confirmation copy, `deck`, `list.filters`,
+`layout.sections`/`overview`/`information`, `summary`, `titles.summary` (the row's cells still
+follow `summaryFields`), `reading.precision`, `writeControls`' extra fields, `identity.icon`/`group`/
+`description`,
+`titles.cover`/`thumbnail` (they stay on today's derivation under a supported block). The pinned
+OpenAPI types some resolved members as objects the served golden prints as `null`, so the
+phone reads the block with those members loosened and the strict `appResources` operation is
+checked on the golden without its resolved blocks.
+
+**Reused** — `parseCatalog`'s `notice` fallback, `View<>`, the generated `zResolved*` schemas,
+`verifySource`'s source-record idiom, `fieldLabel`, `enumLabel`, `label`, `sortOptions` and
+`formControls` as the readers' callers, and `problem()` in `src/effects/api.ts`. **Added** —
+`catalogPolicy.ts`, `derivePolicy.ts`, `scripts/parity.ts` and `tests/parity`, because nothing
+read `resolved`, nothing held Go's canonical-JSON hash, and the kernel's cases live in another
+repository. **Made reusable** — `readPolicy` and the `Policy`/`PolicyField` types for the
+remaining readers listed above, `tests/fakes/policy.ts` and `parityEntry` for any test that
+needs a supported entry.
+
 ## Design
 
 Every PlatformKit phone app is composed from this directory, so the kit is why

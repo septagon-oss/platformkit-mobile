@@ -123,12 +123,14 @@ export const zDeckDirectionPresentation = z.object({
   label: z.string().optional(),
   skip: z.boolean().optional(),
   tone: z.string().optional(),
+  undo: z.string().optional(),
 });
 
 export const zDeckPresentation = z.object({
   directions: z.record(z.string(), zDeckDirectionPresentation),
   order: z.string(),
   queue: z.array(z.string()).nullish(),
+  undoable: z.boolean().optional(),
 });
 
 export const zDelete = z.object({
@@ -222,6 +224,14 @@ export const zEraseBody = z.object({
   subject: z.uuid(),
 });
 
+export const zErasure = z.object({
+  $schema: z.url().readonly().optional(),
+  alreadyErased: z.boolean().optional(),
+  at: z.iso.datetime({ offset: true }),
+  modules: z.array(z.string()).nullable(),
+  subject: z.string(),
+});
+
 export const zErasureReceipt = z.object({
   $schema: z.url().readonly().optional(),
   at: z.iso.datetime({ offset: true }),
@@ -253,6 +263,12 @@ export const zEvent = z.object({
   sourceLine: z.number().int().optional(),
   traceId: z.uuid().optional(),
   traceparent: z.string().optional(),
+});
+
+export const zExportForBody = z.object({
+  $schema: z.url().readonly().optional(),
+  reason: z.string().max(500).optional(),
+  subject: z.uuid().optional(),
 });
 
 export const zFactor = z.object({
@@ -301,6 +317,7 @@ export const zFile = z.object({
   id: z.string().readonly().optional(),
   kind: z.string().max(32).optional(),
   name: z.string().min(1).max(255),
+  sealed: z.boolean().readonly().optional(),
   sha256: z.string().readonly().optional(),
   size: z.number().int().readonly().optional(),
   unusedSince: z.iso.datetime({ offset: true }).readonly().optional(),
@@ -410,6 +427,15 @@ export const zIssuedToken = z.object({
   token: z.string(),
 });
 
+export const zLink = z.object({
+  $schema: z.url().readonly().optional(),
+  expiresAt: z.iso.datetime({ offset: true }),
+  file: z.uuid(),
+  request: z.string(),
+  subject: z.string(),
+  token: z.string(),
+});
+
 export const zLoginInputBody = z.object({
   $schema: z.url().readonly().optional(),
   email: z.email().max(320),
@@ -453,12 +479,16 @@ export const zField = z.object({
 });
 
 export const zCommand = z.object({
+  bindings: z.record(z.string(), z.string()).optional(),
   collection: z.boolean().optional(),
   description: z.string().optional(),
   fields: z.array(zField).nullish(),
+  hasResult: z.boolean().optional(),
+  output: z.array(zField).nullish(),
   path: z.string().optional(),
   presentation: zCommandPresentation.optional(),
   summary: z.string().optional(),
+  undo: z.string().optional(),
   verb: z.string(),
 });
 
@@ -566,6 +596,11 @@ export const zOperation = z.object({
   op: z.string().optional(),
   path: z.string().optional(),
   value: z.unknown().optional(),
+});
+
+export const zOwnExportBody = z.object({
+  $schema: z.url().readonly().optional(),
+  reason: z.string().max(500).optional(),
 });
 
 export const zPage = z.object({
@@ -685,6 +720,12 @@ export const zPatchInputBody = z.object({
   schemas: z.array(z.string()).nullable(),
 });
 
+export const zPersonEraseBody = z.object({
+  $schema: z.url().readonly().optional(),
+  confirm: z.string().max(320).optional(),
+  subject: z.uuid().optional(),
+});
+
 export const zPictures = z.object({
   composedSource: z.string().optional(),
   source: z.string(),
@@ -721,16 +762,6 @@ export const zPlanPatch = z.object({
   interval: z.enum(["month", "year"]).optional(),
   name: z.string().min(1).max(120).optional(),
   priceCents: z.number().int().min(0).optional(),
-});
-
-export const zProblem = z.object({
-  $schema: z.url().readonly().optional(),
-  detail: z.string().optional(),
-  errors: z.array(z.string()).nullish(),
-  instance: z.string().optional(),
-  status: z.number().int(),
-  title: z.string(),
-  type: z.string(),
 });
 
 export const zProposal = z.object({
@@ -822,6 +853,23 @@ export const zRename = z.object({
   name: z.string().min(1).max(200),
 });
 
+export const zRequest = z.object({
+  $schema: z.url().readonly().optional(),
+  bundle: z.uuid(),
+  bundleDigest: z.string().optional(),
+  createdAt: z.iso.datetime({ offset: true }),
+  detail: z.string().optional(),
+  id: z.uuid(),
+  kind: z.string(),
+  linkExpires: z.iso.datetime({ offset: true }).optional(),
+  reason: z.string().optional(),
+  requester: z.uuid(),
+  revision: z.number().int(),
+  state: z.string(),
+  subject: z.uuid(),
+  updatedAt: z.iso.datetime({ offset: true }),
+});
+
 export const zResendVerificationInputBody = z.object({
   $schema: z.url().readonly().optional(),
   email: z.email().min(1).max(320),
@@ -836,6 +884,169 @@ export const zResetInputBody = z.object({
 export const zResolveBody = z.object({
   $schema: z.url().readonly().optional(),
   resolution: z.string().max(4000).optional(),
+});
+
+export const zResolvedConfirmation = z.object({
+  body: z.string(),
+  confirmLabel: z.string(),
+  title: z.string(),
+});
+
+export const zResolvedCommand = z.object({
+  confirmation: zResolvedConfirmation,
+  destructive: z.boolean(),
+  label: z.string(),
+  primary: z.boolean(),
+  successMessage: z.string(),
+  system: z.boolean(),
+  verb: z.string(),
+  visible: z.boolean(),
+});
+
+export const zResolvedDeckDirection = z.object({
+  command: z.string(),
+  icon: z.string(),
+  label: z.string(),
+  skip: z.boolean(),
+  tone: z.string(),
+  undo: z.string(),
+});
+
+export const zResolvedDeck = z.object({
+  directions: z.record(z.string(), zResolvedDeckDirection),
+  order: z.string(),
+  queue: z.array(z.string()).nullable(),
+  undoable: z.boolean(),
+});
+
+export const zResolvedEditable = z.object({
+  create: z.boolean(),
+  update: z.boolean(),
+});
+
+export const zResolvedGroup = z.object({
+  key: z.string(),
+  label: z.string(),
+});
+
+export const zResolvedIdentity = z.object({
+  description: z.string(),
+  emptyDescription: z.string(),
+  group: zResolvedGroup,
+  icon: z.string(),
+  order: z.number().int(),
+  plural: z.string(),
+  singular: z.string(),
+});
+
+export const zResolvedMoney = z.object({
+  currencyField: z.string(),
+  scale: z.number().int(),
+});
+
+export const zResolvedOption = z.object({
+  done: z.boolean(),
+  label: z.string(),
+  tone: z.string(),
+  value: z.string(),
+});
+
+export const zResolvedFilter = z.object({
+  field: z.string(),
+  kind: z.string(),
+  label: z.string(),
+  values: z.array(zResolvedOption).nullable(),
+});
+
+export const zResolvedReference = z.object({
+  resource: z.string(),
+});
+
+export const zResolvedSection = z.object({
+  fields: z.array(z.string()).nullable(),
+  key: z.string(),
+  label: z.string(),
+});
+
+export const zResolvedLayout = z.object({
+  columns: z.array(z.string()).nullable(),
+  create: z.array(z.string()).nullable(),
+  information: z.array(z.string()).nullable(),
+  overview: z.array(z.string()).nullable(),
+  sections: z.array(zResolvedSection).nullable(),
+  update: z.array(z.string()).nullable(),
+});
+
+export const zResolvedSortOption = z.object({
+  desc: z.boolean(),
+  field: z.string(),
+  label: z.string(),
+  query: z.string(),
+});
+
+export const zResolvedList = z.object({
+  defaultSort: z.string(),
+  filters: z.array(zResolvedFilter).nullable(),
+  sorts: z.array(zResolvedSortOption).nullable(),
+});
+
+export const zResolvedSummary = z.object({
+  highlight: zEntryHighlight,
+  trendField: z.string(),
+});
+
+export const zResolvedTime = z.object({
+  kind: z.string(),
+  relative: z.boolean(),
+});
+
+export const zResolvedReading = z.object({
+  false: z.string(),
+  format: z.string(),
+  missing: z.string(),
+  money: zResolvedMoney,
+  precision: z.number().int().nullable(),
+  time: zResolvedTime,
+  true: z.string(),
+});
+
+export const zResolvedField = z.object({
+  control: z.string(),
+  editable: zResolvedEditable,
+  help: z.string(),
+  kind: z.string(),
+  label: z.string(),
+  name: z.string(),
+  onList: z.boolean(),
+  onRecord: z.boolean(),
+  options: z.array(zResolvedOption).nullable(),
+  reading: zResolvedReading,
+  reference: zResolvedReference,
+  section: z.string(),
+});
+
+export const zResolvedTitles = z.object({
+  cover: z.string(),
+  emptyTitle: z.string(),
+  listCandidates: z.array(z.string()).nullable(),
+  preview: z.string(),
+  recordCandidates: z.array(z.string()).nullable(),
+  status: z.string(),
+  summary: z.array(z.string()).nullable(),
+  thumbnail: z.string(),
+});
+
+export const zResolved = z.object({
+  commands: z.array(zResolvedCommand).nullable(),
+  deck: zResolvedDeck,
+  fields: z.array(zResolvedField).nullable(),
+  identity: zResolvedIdentity,
+  language: z.string(),
+  layout: zResolvedLayout,
+  list: zResolvedList,
+  policyVersion: z.number().int(),
+  summary: zResolvedSummary,
+  titles: zResolvedTitles,
 });
 
 export const zResourceGroup = z.object({
@@ -874,6 +1085,7 @@ export const zEntry = z.object({
   operations: z.array(z.string()).nullish(),
   path: z.string(),
   presentation: zEntryPresentation.optional(),
+  resolved: zResolved.optional(),
   screen: z.string().optional(),
   singleton: z.boolean().optional(),
   writable: z.boolean(),
@@ -1311,6 +1523,23 @@ export const zVersionPage = z.object({
   next: z.number().int(),
 });
 
+export const zViolation = z.object({
+  code: z.string(),
+  location: z.string(),
+  message: z.string(),
+});
+
+export const zProblem = z.object({
+  $schema: z.url().readonly().optional(),
+  detail: z.string().optional(),
+  errors: z.array(z.string()).nullish(),
+  instance: z.string().optional(),
+  status: z.number().int(),
+  title: z.string(),
+  type: z.string(),
+  violations: z.array(zViolation).nullish(),
+});
+
 export const zAccessBodyWritable = z.object({
   path: z.string().max(512).optional(),
   permission: z.string().max(64),
@@ -1401,6 +1630,13 @@ export const zEraseBodyWritable = z.object({
   subject: z.uuid(),
 });
 
+export const zErasureWritable = z.object({
+  alreadyErased: z.boolean().optional(),
+  at: z.iso.datetime({ offset: true }),
+  modules: z.array(z.string()).nullable(),
+  subject: z.string(),
+});
+
 export const zErasureReceiptWritable = z.object({
   at: z.iso.datetime({ offset: true }),
   bytes: z.number().int(),
@@ -1430,6 +1666,11 @@ export const zEventWritable = z.object({
   sourceLine: z.number().int().optional(),
   traceId: z.uuid().optional(),
   traceparent: z.string().optional(),
+});
+
+export const zExportForBodyWritable = z.object({
+  reason: z.string().max(500).optional(),
+  subject: z.uuid().optional(),
 });
 
 export const zFactorWritable = z.object({
@@ -1555,6 +1796,14 @@ export const zIssuedTokenWritable = z.object({
   token: z.string(),
 });
 
+export const zLinkWritable = z.object({
+  expiresAt: z.iso.datetime({ offset: true }),
+  file: z.uuid(),
+  request: z.string(),
+  subject: z.string(),
+  token: z.string(),
+});
+
 export const zLoginInputBodyWritable = z.object({
   email: z.email().max(320),
   password: z.string().max(256),
@@ -1602,6 +1851,10 @@ export const zOidcSettingsWritable = z.object({
   registration: z.string().optional(),
   roles: z.array(z.string()).nullish(),
   secretRef: z.string().max(64),
+});
+
+export const zOwnExportBodyWritable = z.object({
+  reason: z.string().max(500).optional(),
 });
 
 export const zPageWritable = z.object({
@@ -1706,6 +1959,11 @@ export const zPatchInputBodyWritable = z.object({
   schemas: z.array(z.string()).nullable(),
 });
 
+export const zPersonEraseBodyWritable = z.object({
+  confirm: z.string().max(320).optional(),
+  subject: z.uuid().optional(),
+});
+
 export const zPlanWritable = z.object({
   active: z.boolean(),
   code: z.string().min(1).max(60),
@@ -1730,6 +1988,7 @@ export const zProblemWritable = z.object({
   status: z.number().int(),
   title: z.string(),
   type: z.string(),
+  violations: z.array(zViolation).nullish(),
 });
 
 export const zProposalWritable = z.object({
@@ -1783,6 +2042,22 @@ export const zRegisterDeviceInputBodyWritable = z.object({
 
 export const zRenameWritable = z.object({
   name: z.string().min(1).max(200),
+});
+
+export const zRequestWritable = z.object({
+  bundle: z.uuid(),
+  bundleDigest: z.string().optional(),
+  createdAt: z.iso.datetime({ offset: true }),
+  detail: z.string().optional(),
+  id: z.uuid(),
+  kind: z.string(),
+  linkExpires: z.iso.datetime({ offset: true }).optional(),
+  reason: z.string().optional(),
+  requester: z.uuid(),
+  revision: z.number().int(),
+  state: z.string(),
+  subject: z.uuid(),
+  updatedAt: z.iso.datetime({ offset: true }),
 });
 
 export const zResendVerificationInputBodyWritable = z.object({
@@ -3201,6 +3476,10 @@ export const zFileFilePublicHeadQuery = z.object({
   w: z.number().int().optional(),
 });
 
+export const zSubjectExportBundlePath = z.object({
+  token: z.string().regex(/^[0-9a-f]{64}$/),
+});
+
 /**
  * OK
  */
@@ -3224,6 +3503,74 @@ export const zSiteSettingsSaveBody = zSiteSettingsWritable;
  * OK
  */
 export const zSiteSettingsSaveResponse = zSiteSettings;
+
+export const zSubjectEraseRequestBody = zPersonEraseBodyWritable;
+
+export const zSubjectEraseRequestHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+/**
+ * OK
+ */
+export const zSubjectEraseRequestResponse = zErasure;
+
+export const zSubjectExportRequestMineBody = zOwnExportBodyWritable;
+
+export const zSubjectExportRequestMineHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+/**
+ * Accepted
+ */
+export const zSubjectExportRequestMineResponse = zRequest;
+
+export const zSubjectExportRequestForBody = zExportForBodyWritable;
+
+export const zSubjectExportRequestForHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+/**
+ * Accepted
+ */
+export const zSubjectExportRequestForResponse = zRequest;
+
+export const zSubjectExportLinkForHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+export const zSubjectExportLinkForPath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zSubjectExportLinkForResponse = zLink;
+
+export const zSubjectExportReadMinePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zSubjectExportReadMineResponse = zRequest;
+
+export const zSubjectExportLinkMineHeaders = z.object({
+  "Idempotency-Key": z.string().optional(),
+});
+
+export const zSubjectExportLinkMinePath = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * OK
+ */
+export const zSubjectExportLinkMineResponse = zLink;
 
 export const zTaskTaskListQuery = z.object({
   limit: z.number().int().min(1).max(200).optional().default(50),

@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 276,
-   "cases": 1304,
-   "ms": 2505216,
-   "testsMs": 93406.89999999994,
+   "files": 281,
+   "cases": 1338,
+   "ms": 2544605,
+   "testsMs": 93614.39999999994,
    "runners": {
-    "jest": 97,
-    "node": 179
+    "jest": 98,
+    "node": 183
    },
    "unreachable": 0
   },
@@ -4344,6 +4344,47 @@
    "coveredProdLines": 1950,
    "onlyProdLines": null,
    "testsMs": 24
+  },
+  {
+   "file": "tests/ui/a-list-draws-the-kernels-parity-cases-from-the-resolved-policy.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The list organism draws the kernel's reviewed parity cases from the policy each states: the record's title, the words of its cells and the sort sheet's rows are the ones the case says every client shows.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 34658,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a Portuguese task is titled and its yes read in the server's words",
+    "a note with nothing in it is titled by its identifier, and a false is the server's No",
+    "the sort sheet offers the orders the policy lists, and not an identifier"
+   ],
+   "tests": [
+    {
+     "title": "a Portuguese task is titled and its yes read in the server's words",
+     "ms": 25,
+     "measured": false
+    },
+    {
+     "title": "a note with nothing in it is titled by its identifier, and a false is the server's No",
+     "ms": 19,
+     "measured": false
+    },
+    {
+     "title": "the sort sheet offers the orders the policy lists, and not an identifier",
+     "ms": 21,
+     "measured": false
+    }
+   ],
+   "loaded": 133,
+   "coveredProdLines": 2092,
+   "onlyProdLines": null,
+   "testsMs": 65
   },
   {
    "file": "tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx",
@@ -10811,6 +10852,47 @@
    "coveredProdLines": 8706,
    "onlyProdLines": null,
    "testsMs": 22.2
+  },
+  {
+   "file": "tests/a-form-reads-the-violations-a-refusal-names.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "A refused write names its fields in `violations` when the server prints them, and in the older `errors` list when it does not; one refusal is never shown twice by reading both.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1387,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "violations name the fields a refusal is about, without the body prefix",
+    "the errors list stays the fallback when violations name no field",
+    "violations win over errors and the two are never merged"
+   ],
+   "tests": [
+    {
+     "title": "violations name the fields a refusal is about, without the body prefix",
+     "ms": 31.405735,
+     "measured": false
+    },
+    {
+     "title": "the errors list stays the fallback when violations name no field",
+     "ms": 1.770313,
+     "measured": false
+    },
+    {
+     "title": "violations win over errors and the two are never merged",
+     "ms": 0.820968,
+     "measured": false
+    }
+   ],
+   "loaded": 56,
+   "coveredProdLines": 21133,
+   "onlyProdLines": null,
+   "testsMs": 34
   },
   {
    "file": "tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts",
@@ -19917,6 +19999,71 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/resolved-policy-is-read-whole-or-not-at-all.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 7,
+   "rule": "A catalogue entry whose server resolved a supported policy is read through that policy in every reader; an absent, newer or malformed block leaves the entry drawn as it always was, and says so once.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2007,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a supported block names the resource, its fields and its closed set in the server's words",
+    "a supported block decides the title, the missing word, the columns, the form and the sort sheet",
+    "a catalogue with no resolved block draws as it always did and says nothing",
+    "a block newer than this build reads, or with no whole version, costs the entry its policy",
+    "a block missing a member a reader needs costs the whole entry, not the one reader",
+    "a block naming a field the entry does not hold, or leaving one undescribed, is refused",
+    "a block carrying members this build does not know is still supported"
+   ],
+   "tests": [
+    {
+     "title": "a supported block names the resource, its fields and its closed set in the server's words",
+     "ms": 16.111008,
+     "measured": false
+    },
+    {
+     "title": "a supported block decides the title, the missing word, the columns, the form and the sort sheet",
+     "ms": 1.720982,
+     "measured": false
+    },
+    {
+     "title": "a catalogue with no resolved block draws as it always did and says nothing",
+     "ms": 0.369753,
+     "measured": false
+    },
+    {
+     "title": "a block newer than this build reads, or with no whole version, costs the entry its policy",
+     "ms": 0.855692,
+     "measured": false
+    },
+    {
+     "title": "a block missing a member a reader needs costs the whole entry, not the one reader",
+     "ms": 1.391062,
+     "measured": false
+    },
+    {
+     "title": "a block naming a field the entry does not hold, or leaving one undescribed, is refused",
+     "ms": 0.525522,
+     "measured": false
+    },
+    {
+     "title": "a block carrying members this build does not know is still supported",
+     "ms": 0.341751,
+     "measured": false
+    }
+   ],
+   "loaded": 38,
+   "coveredProdLines": 13573,
+   "onlyProdLines": null,
+   "testsMs": 21.3
+  },
+  {
    "file": "tests/restored-token-revocation.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -21515,6 +21662,53 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/the-kernels-parity-copies-keep-their-bytes-and-hashes.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "tests/parity holds the kernel's reviewed cases; a copy edited to make a test pass, or a fixture whose recorded hash is not the hash of what it holds, is refused by name.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 360,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the committed copies are the kernel's and their hashes hold",
+    "a fixture changed after it was copied is refused for its bytes and for its hash",
+    "a file the manifest does not record is refused",
+    "the kernel's rule sorts keys, drops space, keeps markup unescaped and refuses fractions"
+   ],
+   "tests": [
+    {
+     "title": "the committed copies are the kernel's and their hashes hold",
+     "ms": 4.578425,
+     "measured": false
+    },
+    {
+     "title": "a fixture changed after it was copied is refused for its bytes and for its hash",
+     "ms": 51.099928,
+     "measured": false
+    },
+    {
+     "title": "a file the manifest does not record is refused",
+     "ms": 3.620985,
+     "measured": false
+    },
+    {
+     "title": "the kernel's rule sorts keys, drops space, keeps markup unescaped and refuses fractions",
+     "ms": 0.887812,
+     "measured": false
+    }
+   ],
+   "loaded": 1,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 60.2
+  },
+  {
    "file": "tests/the-language-a-sheet-writes-is-the-one-the-server-named.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -21572,6 +21766,131 @@
    "coveredProdLines": 9969,
    "onlyProdLines": null,
    "testsMs": 13
+  },
+  {
+   "file": "tests/the-phone-agrees-with-the-kernels-parity-fixtures.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 17,
+   "rule": "Each of the kernel's reviewed parity cases is drawn by the phone's production models through the resolved policy the case states, and the titles, cells, labels, tones, columns, form order and sort order the phone reaches are the ones the case says every client must reach.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 977,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the phone reaches the kernel's absent-hints case in en",
+    "the phone reaches the kernel's blank-identity case in en",
+    "the phone reaches the kernel's command-owned-create-fields case in en",
+    "the phone reaches the kernel's commands-only case in en",
+    "the phone reaches the kernel's deck-directions case in en",
+    "the phone reaches the kernel's empty-declarations case in en",
+    "the phone reaches the kernel's en-task case in en",
+    "the phone reaches the kernel's enum-fallbacks case in en",
+    "the phone reaches the kernel's hidden-fields case in en",
+    "the phone reaches the kernel's malformed-hint case in en",
+    "the phone reaches the kernel's null-and-false case in en",
+    "the phone reaches the kernel's pictures-cover-thumbnail case in en",
+    "the phone reaches the kernel's plural-mass-noun case in en",
+    "the phone reaches the kernel's pt-task case in pt-PT",
+    "the phone reaches the kernel's read-only-resource case in en",
+    "the phone reaches the kernel's singleton-update-surface case in en",
+    "the phone reaches the kernel's singleton case in en"
+   ],
+   "tests": [
+    {
+     "title": "the phone reaches the kernel's absent-hints case in en",
+     "ms": 16.957663,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's blank-identity case in en",
+     "ms": 0.816059,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's command-owned-create-fields case in en",
+     "ms": 0.408295,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's commands-only case in en",
+     "ms": 0.206993,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's deck-directions case in en",
+     "ms": 0.248259,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's empty-declarations case in en",
+     "ms": 0.269018,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's en-task case in en",
+     "ms": 0.403677,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's enum-fallbacks case in en",
+     "ms": 1.542442,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's hidden-fields case in en",
+     "ms": 0.417532,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's malformed-hint case in en",
+     "ms": 0.265902,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's null-and-false case in en",
+     "ms": 3.742679,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's pictures-cover-thumbnail case in en",
+     "ms": 0.390632,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's plural-mass-noun case in en",
+     "ms": 0.195061,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's pt-task case in pt-PT",
+     "ms": 0.421068,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's read-only-resource case in en",
+     "ms": 0.281862,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's singleton-update-surface case in en",
+     "ms": 0.242589,
+     "measured": false
+    },
+    {
+     "title": "the phone reaches the kernel's singleton case in en",
+     "ms": 0.211531,
+     "measured": false
+    }
+   ],
+   "loaded": 38,
+   "coveredProdLines": 13624,
+   "onlyProdLines": null,
+   "testsMs": 27
   },
   {
    "file": "tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts",

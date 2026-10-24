@@ -10,9 +10,12 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog } from "../src/core/catalog";
 import { onList } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  );
 
 /** noteField reads one field of the golden note back with the tags this case sets. */
 function noteField(hideList: boolean | undefined, visibility: string | undefined) {

@@ -18,6 +18,7 @@ import { readFileSync } from "node:fs";
 import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
+import { unresolved } from "./fakes/unresolved";
 
 const mockSaved = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -30,7 +31,7 @@ jest.mock("expo-secure-store", () => ({
   },
 }));
 
-const catalog = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalog = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const identity = { ...loginIdentity, permissions: ["note.read"] };
 const sessionCookie = "platformkit_session=browser-session";
 const bearer = "pk_live_token_for_this_phone";

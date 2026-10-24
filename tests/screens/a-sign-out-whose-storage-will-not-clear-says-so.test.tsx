@@ -10,6 +10,7 @@ import { act, render } from "@testing-library/react-native";
 import { readFileSync } from "node:fs";
 import React from "react";
 import { Shell, useShell, type ShellValue } from "../../src/shell";
+import { unresolved } from "../fakes/unresolved";
 
 const NOT_CLEARED =
   "The saved sign-in could not be cleared. Please try again before closing the app.";
@@ -30,7 +31,7 @@ jest.mock("expo-secure-store", () => ({
 }));
 
 const SERVER = "https://acme.test";
-const catalog = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalog = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const REMOVE =
   "POST /api/v1/notification/notifications/devices/70000000-0000-4000-8000-0000000000d4/remove";
 const LOGOUT = "POST /api/v1/auth/logout";

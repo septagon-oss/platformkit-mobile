@@ -18,12 +18,13 @@ import {
   type FormWords,
 } from "../src/core/derive";
 import { feedback } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const ID = "3f2a8c1d-4b5e-4a6b-9c8d-1e2f3a4b5c6d";
 
 /** served is the golden's note with a frozen pointer at a person, as the kernel spells its task's assignee. */
 function served(): Entry {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   const note = doc.resources[0];
   note.immutable = ["status", "assigneeId"];
   note.fields.push({
@@ -67,7 +68,7 @@ for (const [said, names] of [
 }
 
 test("a box a person can type into keeps the identifier it must send", () => {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   doc.resources[0].fields.push({
     name: "assigneeId",
     type: "uuid",

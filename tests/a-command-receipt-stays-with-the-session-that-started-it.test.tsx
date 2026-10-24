@@ -15,6 +15,7 @@ import {
   logoutResponse,
   revokeResponse,
 } from "./fakes/wire";
+import { unresolved } from "./fakes/unresolved";
 
 const mockSaved = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -29,7 +30,7 @@ jest.mock("expo-secure-store", () => ({
 jest.mock("expo-router", () => require("./fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactNavigation);
 
-const catalog = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalog = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const firstCatalog = {
   ...catalog,
   resources: [

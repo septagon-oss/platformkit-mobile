@@ -13,6 +13,7 @@ import { Shell, useShell, type ShellValue } from "../src/shell";
 import { WILDCARD } from "../src/core/scopes";
 import { reset } from "./fakes/router";
 import { issuedTokenResponse, loginIdentity } from "./fakes/wire";
+import { unresolved } from "./fakes/unresolved";
 
 jest.mock("expo-router", () => require("./fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactNavigation);
@@ -28,7 +29,7 @@ jest.mock("expo-secure-store", () => ({
   },
 }));
 
-const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalogDoc: unknown = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 /** The permission one of this app's own modules names and no route of the kit's asks with. */
 const ownPermission = "agenda:publish";
 

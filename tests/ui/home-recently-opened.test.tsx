@@ -12,8 +12,9 @@ import type { Recent, RecentDoor } from "../../src/core/recents";
 import { Home } from "../../src/ui/organisms/Home";
 import { ThemeProvider } from "../../src/ui/theme";
 import { feedback } from "../fakes/presentation";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
 const hello = greeting({ name: "Ana Rita" }, presentation);

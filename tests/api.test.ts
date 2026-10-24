@@ -6,6 +6,7 @@ import { acceptLanguage, ApiError, createApi } from "../src/effects/api";
 import { parseCatalog } from "../src/core/catalog";
 import { deriveCopy, failureSubject, formControls, values } from "../src/core/derive";
 import { refusalOf } from "../src/screens/failure";
+import { unresolved } from "./fakes/unresolved";
 
 type Call = { url: string; init: RequestInit };
 function fakeFetch(
@@ -510,7 +511,11 @@ test("an entry that names no write address is written where it always was", asyn
   ]);
   const api = createApi("https://acme.test", fetch);
   const note = parseCatalog(
-    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+    unresolved(
+      JSON.parse(
+        readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"),
+      ),
+    ),
   ).resources[0]!;
   await api.create(note, { title: "x" });
   await api.update(note, "1", { title: "x" });

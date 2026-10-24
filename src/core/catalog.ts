@@ -12,6 +12,9 @@ import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
 import { drawnIcon, pictureDoor, type Pictures } from "./pictures";
 import { issuePath } from "./responses";
 import { readDeck, type Deck } from "./catalogDeck";
+import { readPolicy, type Policy, type PolicyField } from "./catalogPolicy";
+
+export { SUPPORTED_POLICY_VERSION, type Policy, type PolicyField } from "./catalogPolicy";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
 // Required wire members remain required; JSON itself never contains undefined.
@@ -50,9 +53,11 @@ export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentatio
   readonly enum?: readonly string[];
   readonly keys?: readonly MapKey[] | null;
   readonly hints?: FieldHints;
+  /** How the server resolved this field; present exactly when its entry carries `resolved`. */
+  readonly policy?: PolicyField;
 };
 
-export type Command = View<Omit<WireCommand, "fields" | "presentation">> & {
+export type Command = View<Omit<WireCommand, "fields" | "presentation" | "output">> & {
   readonly fields: readonly Field[];
   readonly hints?: CommandHints;
   /**
@@ -90,7 +95,10 @@ export interface RendererRef {
 }
 
 export type Entry = View<
-  Omit<WireEntry, "fields" | "commands" | "immutable" | "singleton" | "operations" | "presentation">
+  Omit<
+    WireEntry,
+    "fields" | "commands" | "immutable" | "singleton" | "operations" | "presentation" | "resolved"
+  >
 > & {
   readonly fields: readonly Field[];
   readonly commands: readonly Command[];
@@ -104,6 +112,8 @@ export type Entry = View<
   // so that a malformed name costs a pack and not a screen.
   readonly renderer?: RendererRef;
   readonly hints?: EntryHints;
+  /** The server's resolved policy, present only when this build supports the block. */
+  readonly resolved?: Policy;
 };
 
 /**
@@ -310,6 +320,8 @@ const looseCommand = zCommand.extend({
   // `unknown` and commandBindings below decides its shape: a mistyped binding may cost the one
   // argument it names, never the entry, the same way `renderer` and `presentation` are read.
   bindings: z.unknown().optional(),
+  // The phone reads no command result, so the declaration is not carried.
+  output: z.unknown().optional(),
 });
 
 const catalogSchema = zCatalog.extend({
@@ -320,6 +332,7 @@ const catalogSchema = zCatalog.extend({
         operations: z.array(z.string()).nullish(),
         renderer: z.unknown().optional(),
         presentation: z.unknown().optional(),
+        resolved: z.unknown().optional(),
         fields: z.array(looseField).nullable(),
         commands: z.array(looseCommand).nullish(),
       }),
@@ -838,14 +851,34 @@ function readSections(presentation: unknown, at: string, notice: HintNotice): re
 }
 
 function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
-  const { fields, commands, immutable, operations, renderer, singleton, presentation, ...rest } = v;
+  const {
+    fields,
+    commands,
+    immutable,
+    operations,
+    renderer,
+    singleton,
+    presentation,
+    resolved,
+    ...rest
+  } = v;
   const pack = rendererRef(renderer);
   const blocks = readSections(presentation, `${at}.presentation`, notice);
   // The commands are read before the entry's own hints because one of those hints names one of
   // them: a verb no command of this entry answers is no hint at all, and the resolution happens
   // here, once, rather than at every surface that offers the verb.
   const commandsRead = (commands ?? []).map(
-    ({ fields: arguments_, path, presentation: commandHint, bindings, ...command }, i) => {
+    (
+      {
+        fields: arguments_,
+        path,
+        presentation: commandHint,
+        bindings,
+        output: _output,
+        ...command
+      },
+      i,
+    ) => {
       const hint = hintCommand(commandHint, `${at}.commands[${i}].presentation`, notice);
       const bound = commandBindings(
         bindings,
@@ -864,14 +897,22 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       };
     },
   );
-  const fieldsRead = (fields ?? []).map((f, i) =>
-    field(
+  const policy = readPolicy(
+    resolved,
+    `${at}.resolved`,
+    (fields ?? []).map((f) => f.name),
+    notice,
+  );
+  const fieldsRead = (fields ?? []).map((f, i) => {
+    const read = field(
       f,
       `${at}.fields[${i}]`,
       blocks.map((b) => b.key),
       notice,
-    ),
-  );
+    );
+    const described = policy?.fields.find((p) => p.name === read.name);
+    return described === undefined ? read : { ...read, policy: described };
+  });
   const hints = hintEntry(
     presentation,
     `${at}.presentation`,
@@ -888,6 +929,7 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       ? {}
       : { writePath: absolute(v.write_path, `${at}.write_path`) }),
     fields: fieldsRead,
+    ...(policy === undefined ? {} : { resolved: policy }),
     ...(hints === undefined ? {} : { hints }),
     immutable: immutable ?? [],
     // A nil operation set prints as null and is the absent set: kit/rest reads

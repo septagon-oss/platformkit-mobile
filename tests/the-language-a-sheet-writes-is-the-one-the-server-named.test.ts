@@ -16,9 +16,12 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { parseCatalog, type Entry } from "../src/core/catalog";
 import { formControls, writeLanguage, type Row } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
 const bytes = (name: string) =>
-  JSON.parse(readFileSync(new URL(`../testdata/${name}`, import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL(`../testdata/${name}`, import.meta.url).pathname, "utf8")),
+  );
 
 /**
  * note is the served catalogue document through the parser a screen uses, with its body

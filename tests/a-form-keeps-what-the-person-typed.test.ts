@@ -31,12 +31,15 @@ import {
   type Control,
   type Row,
 } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
 const kit = deriveCopy("en").kit;
 const pt = deriveCopy("pt").kit;
 
 const bytes = (name: string) =>
-  JSON.parse(readFileSync(new URL(`../testdata/${name}`, import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL(`../testdata/${name}`, import.meta.url).pathname, "utf8")),
+  );
 
 /**
  * note is the served catalogue document, mutated as a case says, through the parser a

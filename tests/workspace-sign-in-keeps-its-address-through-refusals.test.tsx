@@ -14,6 +14,7 @@ import { SignIn } from "../src/screens/SignIn";
 import { WorkspaceTheme } from "../src/screens/WorkspaceTheme";
 import { useTheme } from "../src/ui/theme";
 import { palette } from "../src/ui/tokens";
+import { unresolved } from "./fakes/unresolved";
 
 jest.mock("expo-router", () => require("./fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactNavigation);
@@ -26,7 +27,7 @@ jest.mock("expo-secure-store", () => ({
   },
 }));
 
-const catalog: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalog: unknown = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,

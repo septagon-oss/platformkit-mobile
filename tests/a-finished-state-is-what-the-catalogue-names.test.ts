@@ -23,9 +23,12 @@ import {
   writePath,
 } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8")),
+  );
 const pictures = () =>
   JSON.parse(readFileSync(new URL("../testdata/catalog.pictures.json", import.meta.url), "utf8"));
 

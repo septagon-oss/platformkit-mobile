@@ -10,8 +10,9 @@ import { parseCatalog } from "../../src/core/catalog";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ThemeProvider } from "../../src/ui/theme";
 import { feedback } from "../fakes/presentation";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const none = () => undefined;
 
 test("a record page given no picture door draws its header block and no cover", async () => {

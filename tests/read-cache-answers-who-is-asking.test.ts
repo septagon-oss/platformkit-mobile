@@ -12,10 +12,11 @@ import type { Scope } from "../src/core/outbox";
 import { listQuery, rowAddress } from "../src/effects/api";
 import { answered, createReadCache } from "../src/effects/read-cache";
 import { clock, fakeReadStore } from "./fakes/store";
+import { unresolved } from "./fakes/unresolved";
 
-const note = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))).resources.find(
-  (entry) => entry.entity === "note",
-)!;
+const note = parseCatalog(
+  unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))),
+).resources.find((entry) => entry.entity === "note")!;
 const offline = new TypeError("Network request failed");
 const ada: Scope = { server: "https://acme.test", userId: "ada" };
 const bea: Scope = { server: "https://acme.test", userId: "bea" };

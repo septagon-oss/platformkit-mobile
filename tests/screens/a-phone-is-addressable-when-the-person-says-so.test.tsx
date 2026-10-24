@@ -13,6 +13,7 @@ import { Shell, useShell, type ShellValue } from "../../src/shell";
 import { PushTravel } from "../../src/screens/PushTravel";
 import { router } from "../fakes/router";
 import { createPush } from "../../src/screens/push";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock("expo-router", () => require("../fakes/router").expoRouter);
 jest.mock("expo-secure-store", () => ({
@@ -21,7 +22,7 @@ jest.mock("expo-secure-store", () => ({
   deleteItemAsync: async () => undefined,
 }));
 
-const catalog = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalog = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const REGISTER = "POST /api/v1/notification/notifications/devices";
 const REMOVE =
   "POST /api/v1/notification/notifications/devices/70000000-0000-4000-8000-000000000001/remove";

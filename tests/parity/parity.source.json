@@ -1,0 +1,29 @@
+{
+  "schema": "platformkit.parity-source.v1",
+  "upstream": {
+    "repository": "https://github.com/septagon-oss/platformkit",
+    "commit": "988e95c1ebf6d2ddc3a78cd514cc40a43f5bab90",
+    "path": "ui/screens/testdata/parity",
+    "command": "git -C platformkit archive 988e95c1ebf6d2ddc3a78cd514cc40a43f5bab90 ui/screens/testdata/parity"
+  },
+  "files": {
+    "README.md": "fb3a8af66e88ff64ec0d5150dfe085a252b498c2a8eda1b7740def67d4a06a4b",
+    "absent-hints.json": "9768c0083e06e43fb9f1c3745c5436d64d93a7951e710dd7e372c0d14d697dee",
+    "blank-identity.json": "382e6d115559bcf9237335b4fa6131d14413a99d990d059a228e1bacfb8d9bec",
+    "command-owned-create-fields.json": "eb9eb4f377ced98336b4aa45ae12ec93e14c525133bcf38abaed683b69dd525c",
+    "commands-only.json": "247d184d248316f4f7976c1c977b040c0580c35db59bcf0ad6d58282f27894d6",
+    "deck-directions.json": "7591b55435ec4e14d510ffb403044f56b6165e3719c8b1075c497f52e1453a27",
+    "empty-declarations.json": "5bfa8fddd96513dbe55de9479dae12f98efcc307f62ac538eb100834ef6da291",
+    "en-task.json": "60faca72acb27313e5e5e820fd46da4b8277114d73c74555bfee11efc8573c58",
+    "enum-fallbacks.json": "4b5a835cf084068b94695e45473ef3033c240f1a8f419a7c596a88a84450ef6b",
+    "hidden-fields.json": "021a7f8ad2e2d9dc84e247254f4e5bc540fd407fcf14b6a5ee87149dbaa00d21",
+    "malformed-hint.json": "69a5dbcddff01f50d01e809793ad1bdc369cdb9dc603bc5411ea1da8e56f581e",
+    "null-and-false.json": "bdbc4b6cce6c3e527cb078842091ba669ef72b3610980d8772fd5ea952c72ef8",
+    "pictures-cover-thumbnail.json": "16c33e0fca9ce16d1d54957812481665fb6b9e2e0358259661ad209712921ca0",
+    "plural-mass-noun.json": "50fa1279b11b633a29ac5116317c671592aae7988ad63fd99d215ab7ac76878a",
+    "pt-task.json": "9174fb89325a1f5269031060bd5788c3a542e8fb57984b9c5f15ce9293c257c7",
+    "read-only-resource.json": "5b26d8596fffcdafa2c373190d2b2d8516ce528e9673a40dee9a43bb23c22a3a",
+    "singleton-update-surface.json": "75785577941eb2886944b162e52c32a32ca66b41521691b24de0eeeb84bc8bbd",
+    "singleton.json": "1afdf94031f381bcd17e5bdf46865408e6fd5fc821a68c184c3b5b562ba4aeae"
+  }
+}

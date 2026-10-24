@@ -10,8 +10,9 @@ import { parseCatalog } from "../../src/core/catalog";
 import { heldWrite, heldWriteView } from "../../src/core/outbox";
 import { Home } from "../../src/ui/organisms/Home";
 import { ThemeProvider } from "../../src/ui/theme";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const inTheme = (el: React.ReactElement) =>
   render(<ThemeProvider mode="light">{el}</ThemeProvider>);

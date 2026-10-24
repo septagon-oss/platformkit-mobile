@@ -12,6 +12,7 @@ import { readFileSync } from "node:fs";
 import React from "react";
 import { Shell, useShell, type ShellValue } from "../../src/shell";
 import { createPush } from "../../src/screens/push";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock("expo-router", () => require("../fakes/router").expoRouter);
 jest.mock("expo-secure-store", () => ({
@@ -20,7 +21,7 @@ jest.mock("expo-secure-store", () => ({
   deleteItemAsync: async () => undefined,
 }));
 
-const catalog = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalog = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const document = JSON.parse(readFileSync("testdata/openapi.json", "utf8")) as {
   paths: Record<string, Record<string, { "x-platformkit-auth"?: { kind?: string } }>>;
 };

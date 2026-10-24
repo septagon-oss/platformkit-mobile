@@ -25,6 +25,8 @@ export const declaredGrants: readonly DeclaredGrant[] = [
   { permission: "role:manage", operator: false, surface: "app" },
   { permission: "scim:provision", operator: false, surface: "app" },
   { permission: "site:manage", operator: false, surface: "app" },
+  { permission: "subject:erase", operator: false, surface: "app" },
+  { permission: "subject:export", operator: false, surface: "app" },
   { permission: "task:read", operator: false, surface: "app" },
   { permission: "task:update", operator: false, surface: "app" },
   { permission: "tenant:manage", operator: true, surface: "ops" },

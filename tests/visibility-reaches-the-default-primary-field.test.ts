@@ -11,9 +11,12 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog } from "../src/core/catalog";
 import { deriveCopy, label, listColumns, primary } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  );
 const untitled = deriveCopy("en").kit.untitled;
 
 function noteWith(visibility: string) {

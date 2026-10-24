@@ -31,6 +31,18 @@ import type { DataCell } from "./collections";
 import type { Status } from "./shared";
 import { deckCanRefresh, deckCanRewind, deckChoices, reviewDeck, type DeckState } from "./deck";
 import { deckDirections, type DeckDirection } from "./catalogDeck";
+import {
+  policyColumns,
+  policyEmptyTitle,
+  policyForm,
+  policyNoun,
+  policyOption,
+  policyPreview,
+  policyReading,
+  policySortFields,
+  policyStatus,
+  policyTitleFields,
+} from "./derivePolicy";
 import { deriveMeter } from "./progress";
 import type { PendingWrite } from "./outbox";
 import {
@@ -128,10 +140,12 @@ export interface Noun {
 }
 
 export function noun(e: Entry): Noun {
-  return {
-    singular: e.hints?.singular ?? humanize(e.entity),
-    plural: e.hints?.plural ?? humanize(plural(e.entity)),
-  };
+  return (
+    policyNoun(e) ?? {
+      singular: e.hints?.singular ?? humanize(e.entity),
+      plural: e.hints?.plural ?? humanize(plural(e.entity)),
+    }
+  );
 }
 
 /**
@@ -146,6 +160,7 @@ export function noun(e: Entry): Noun {
  */
 export function nounPhrase(e: Entry): Noun {
   const named = noun(e);
+  if (e.resolved) return named;
   return {
     singular: e.hints?.singular ?? named.singular.toLowerCase(),
     plural: e.hints?.plural ?? named.plural.toLowerCase(),
@@ -309,20 +324,21 @@ export function display(f: Field, v: unknown, format: Formatting, names?: Names)
   if (f.type === "picture") return "";
   const person = personValue(f, v, format, names);
   if (person) return person.description || "—";
+  const reading = policyReading(f);
   if (f.type === "bool")
     return v === true
-      ? format.copy.value.yes
+      ? (reading?.true ?? format.copy.value.yes)
       : v === false
-        ? format.copy.value.no
-        : format.copy.value.notSet;
+        ? (reading?.false ?? format.copy.value.no)
+        : (reading?.missing ?? format.copy.value.notSet);
   if (f.type === "time") {
     const at = timeValue(v);
-    return at ? presentedInstant(at, format).shown : text(v) || "—";
+    return at ? presentedInstant(at, format).shown : text(v) || (reading?.missing ?? "—");
   }
   if ((f.type === "int" || f.type === "float") && typeof v === "number" && Number.isFinite(v))
     return new Intl.NumberFormat(format.locale, { maximumSignificantDigits: 21 }).format(v);
   const out = text(v);
-  if (!out) return "—";
+  if (!out) return reading?.missing ?? "—";
   // A value that points at another record is never read back as the identifier
   // stored for it: it is the other record's name, or the one word saying there is
   // one. `names` is what this screen resolved; the word is what it could not, and
@@ -378,6 +394,8 @@ function namedBy(e: Entry, fields: readonly Field[]): Field | undefined {
  * below) instead of quoting an identifier nobody chose to look at.
  */
 export function primary(e: Entry): Field | undefined {
+  const titled = policyTitleFields(e, "record");
+  if (titled) return titled[0];
   return namedBy(
     e,
     e.fields.filter((f) => !neverShown(f) && f.type !== "picture"),
@@ -400,6 +418,8 @@ export function label(
   where: "record" | "row" = "record",
   names?: Names,
 ): string {
+  const titled = policyTitleFields(e, where);
+  if (titled) return policyTitle(e, titled, row, names) || policyEmptyTitle(e)!;
   const at = where === "record" ? primary(e) : rowPrimary(e);
   // A record called by a pointer is called by the name of what it points at, not
   // by the identifier stored for it; with no name resolved it is untitled rather
@@ -414,12 +434,22 @@ export function label(
   return held || untitled(noun(e).singular);
 }
 
+/** policyTitle is the first candidate the row holds words for, else its identifier, else nothing. */
+function policyTitle(e: Entry, candidates: readonly Field[], row: Row, names?: Names): string {
+  const held = (f: Field): string =>
+    points(f)
+      ? (names?.[nameKey(pointedAt(f) ?? "", text(row[f.name]))] ?? "")
+      : text(row[f.name]).trim();
+  return candidates.map(held).find((v) => v !== "") ?? text(row.id).trim();
+}
+
 /** referencedName is the words a referenced record answers with, or "" when it answers none: `namedBy`'s chain and no other, so a person named by the document is named the one way, and an invited person with nothing in that field is nameless rather than called by an email address. */
 export const referencedName = (target: Entry, row: Row): string =>
   label(target, row, () => "", "row");
 
 /** fieldLabel is a field's own word for itself: what the author wrote, else its name read as words. */
-export const fieldLabel = (f: Field): string => f.hints?.label ?? humanize(f.name);
+export const fieldLabel = (f: Field): string =>
+  f.policy?.label ?? f.hints?.label ?? humanize(f.name);
 
 /**
  * enumLabel is one value of a closed set as a person reads it. A declared label
@@ -427,7 +457,7 @@ export const fieldLabel = (f: Field): string => f.hints?.label ?? humanize(f.nam
  * document that labels two of five values loses nothing.
  */
 export const enumLabel = (f: Field, value: string): string =>
-  f.hints?.enumLabels?.[value] ?? humanize(value);
+  policyOption(f, value)?.label ?? f.hints?.enumLabels?.[value] ?? humanize(value);
 
 /**
  * enumTone is how one value of a closed set should read: which of its values is
@@ -436,7 +466,9 @@ export const enumLabel = (f: Field, value: string): string =>
  * build ships, so no atom maps a word it cannot draw.
  */
 export const enumTone = (f: Field, value: string): HintTone =>
-  f.hints?.enumTones?.[value] ?? "neutral";
+  (policyOption(f, value)?.tone as HintTone | undefined) ??
+  f.hints?.enumTones?.[value] ??
+  "neutral";
 
 /** badgeTone is the atom's name for a hint tone: the kernel says `success`, the kit says `ok`. */
 export const badgeTone = (tone: HintTone): "ok" | "warning" | "danger" | "info" | "neutral" =>
@@ -450,12 +482,12 @@ export const badgeTone = (tone: HintTone): "ok" | "warning" | "danger" | "info" 
  * pill either. The declaration is read here and drawn by whoever draws the pill
  * (T-0323).
  */
-export const statusField = (e: Entry): Field | undefined =>
-  e.hints?.statusField === undefined
+export const statusField = (e: Entry): Field | undefined => {
+  const declared = policyStatus(e) ?? e.hints?.statusField;
+  return declared === undefined || declared === ""
     ? undefined
-    : e.fields.find(
-        (f) => f.name === e.hints?.statusField && f.type !== "picture" && !neverShown(f),
-      );
+    : e.fields.find((f) => f.name === declared && f.type !== "picture" && !neverShown(f));
+};
 
 /**
  * rowContent is a field's own answer about what a row may *say*: silence about its
@@ -502,11 +534,15 @@ const rowFields = (e: Entry): readonly Field[] =>
  * way for the same reason (`ui/resource/resource.go`: `known(onList(…))`).
  */
 export function rowPrimary(e: Entry): Field | undefined {
+  const titled = policyTitleFields(e, "row");
+  if (titled) return titled[0];
   return namedBy(e, rowFields(e));
 }
 
 /** listColumns: the field the list names rows by first, then every other field it draws; never the id. */
 export function listColumns(e: Entry): readonly Field[] {
+  const laid = policyColumns(e);
+  if (laid) return laid.filter((f) => f.name !== "id" && f.type !== "picture");
   const drawn = rowFields(e);
   const named = rowPrimary(e);
   return named === undefined ? drawn : [named, ...drawn.filter((f) => f.name !== named.name)];
@@ -585,13 +621,13 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
  * a row with nothing worth reading under its name shows nothing rather than a dash.
  */
 export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | undefined {
-  const declared = e.hints?.previewField;
+  const declared = policyPreview(e) ?? e.hints?.previewField;
   // A rich text body is never the summary line, declared or default: a printed line under
   // a name can only print the Markdown the server stored, and that syntax is not part of
   // what a person is told (`richBody`). Such a body is read by the medium that draws it —
   // the record's own reader, where a heading is a heading — which is what keeps the
   // reader on the page for an entry that hints nothing at all.
-  if (declared !== undefined)
+  if (declared !== undefined && declared !== "")
     return printed(e.fields.find((f) => f.name === declared && rowContent(f)));
   const named = rowPrimary(e);
   const speaks = where === "row" ? onList : rowContent;
@@ -778,8 +814,12 @@ export function statusPill(e: Entry, row: Row, format: Formatting): RecordPill |
  * declared. A tone never answers it: `enumTones` says what finished wears, not what is finished,
  * and the two tables are the kernel's own orthogonal pair.
  */
-export const finishedValues = (e: Entry): readonly string[] =>
-  statusField(e)?.hints?.doneValues ?? [];
+export const finishedValues = (e: Entry): readonly string[] => {
+  const status = statusField(e);
+  return status?.policy
+    ? (status.policy.options ?? []).filter((o) => o.done).map((o) => o.value)
+    : (status?.hints?.doneValues ?? []);
+};
 
 /**
  * isFinished says whether this row's state is one the entry calls finished.
@@ -1538,7 +1578,7 @@ export function formControls(
   names?: Names,
 ): readonly Control[] {
   const out: Control[] = [];
-  for (const f of e.fields) {
+  for (const f of policyForm(e, create) ?? e.fields) {
     if (f.readOnly || f.type === "picture") continue;
     // A field the author hid is plumbing: it stays in the schema, the JSON and
     // the PATCH, but not in the sheet. A *required* field is the exception —
@@ -2062,6 +2102,8 @@ export function sortFields(e: Entry): readonly Field[] {
     f.type !== "list" &&
     f.type !== "uuid" &&
     f.type !== "picture";
+  const laid = policySortFields(e);
+  if (laid) return laid.filter(offerable);
   const declared = e.hints?.sortable;
   if (declared !== undefined)
     return declared.flatMap((name) => e.fields.filter((f) => f.name === name && offerable(f)));

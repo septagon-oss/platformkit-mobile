@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { parseCatalog } from "../../src/core/catalog";
+import { unresolved } from "./unresolved";
 
 export function deckDocument() {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   const entry = doc.resources[0];
   entry.commands = [
     { verb: "accept", summary: "Accept", presentation: { label: "Accept" } },

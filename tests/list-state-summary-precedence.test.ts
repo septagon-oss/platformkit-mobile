@@ -7,10 +7,11 @@ import test from "node:test";
 import { parseCatalog } from "../src/core/catalog";
 import { listCells, listRow } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 test("a declared state leaves two summary slots for other facts wherever its name occurs", () => {
   for (let position = 0; position <= 3; position++) {
-    const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+    const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
     const resource = doc.resources[0];
     resource.fields.push({ name: "phase", type: "string", enum: ["waiting", "ready"] });
     const summary = ["status", "pinned", "rank"];

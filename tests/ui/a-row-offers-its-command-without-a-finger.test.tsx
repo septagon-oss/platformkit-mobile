@@ -12,9 +12,10 @@ import { noOrder } from "../../src/core/derive";
 import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { presentation } from "../fakes/presentation";
 import { RowSwipe } from "../fakes/gesture";
+import { unresolved } from "../fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync("testdata/catalog.json", "utf8")) as Record<string, unknown>;
+  unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))) as Record<string, unknown>;
 
 /** the golden's note, with the record verb its rows would run, and the words it says about it. */
 function entry(): Entry {

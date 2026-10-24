@@ -6,6 +6,7 @@ import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 import type { SignInStep } from "../src/effects/api";
+import { unresolved } from "./fakes/unresolved";
 
 const mockSaved = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -15,7 +16,7 @@ jest.mock("expo-secure-store", () => ({
   },
 }));
 
-const catalog = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalog = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const laterPath = "/api/v1/note/later-notes";
 const laterCatalog = {
   ...catalog,

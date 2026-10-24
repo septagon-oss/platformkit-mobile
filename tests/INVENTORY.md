@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `f40f82039` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `f1f03b27d` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 276 | 1304 | 93.4 s | 2505 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 281 | 1338 | 93.6 s | 2545 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 147 | 483 | 57.4 s | 3682 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 519
+* keep: 524
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 519 — 216 `tests/*.test.ts` (node), 244 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2016; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2505 s, composition 3682 s, journey 0 s
+* files inventoried: 524 — 220 `tests/*.test.ts` (node), 245 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2050; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2545 s, composition 3682 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -146,6 +146,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/viewer-recovery-retains-loader.test.tsx | jest | behaviour | 1 | 20708 | 737 | 0 | 0 of 1 | — | 0 | keep | Recovery keeps what is already true: the loader stays while it is genuinely loading, and a selection the viewer abandoned stays abandoned until its own read su… |
 | tests/screens/viewer-revoked-selection.test.tsx | jest | behaviour | 4 | 19774 | 756 | 0 | 0 of 4 | — | 0 | keep | Losing the selected image loses it: the viewer shows its unavailable state rather than the next item, and an id that becomes authorized again is shown only thr… |
 | tests/the-device-table-keeps-one-row-for-each-workspace-it-was-pointed-at.test.tsx | jest | behaviour | 3 | 36894 | 24 |  | not measured | — | 0 | keep | What this phone remembers of the workspaces it was pointed at is a SQLite table, and this is where its own statements run: one row per server, replaced in plac… |
+| tests/ui/a-list-draws-the-kernels-parity-cases-from-the-resolved-policy.test.tsx | jest | behaviour | 3 | 34658 | 65 |  | not measured | — | 0 | keep | The list organism draws the kernel's reviewed parity cases from the policy each states: the record's title, the words of its cells and the sort sheet's rows ar… |
 | tests/ui/a-model-that-asks-for-motion-rises-its-picture.test.tsx | jest | behaviour | 2 | 24193 | 18 |  | not measured | — | 0 | keep | The entrance of an empty screen's picture is the model's to ask for, not the atom's to guess: a state derived on a device that asks for motion rises once, for … |
 | tests/ui/a-pill-crosses-from-the-colour-it-wore.test.tsx | jest | behaviour | 3 | 15145 | 18 |  | not measured | — | 0 | keep | A pill whose state moved while it was on screen crosses from the pair it wore to the pair it reached: the pair it left is laid over the pill, fully on, hidden … |
 | tests/ui/a-record-page-without-a-picture-door-draws-no-cover.test.tsx | jest | behaviour | 1 | 30398 | 7 |  | not measured | — | 0 | keep | A record page handed no picture door is today's record page: no cover, no gallery, no name standing on a photo and no scroll stream asked for. The shared compo… |
@@ -241,6 +242,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-flow-whose-words-cannot-match-an-element-is-refused-by-name.test.ts | node | behaviour | 2 | 309 | 8.5 | 0 | 1 of 2 | — | 0 | keep | Maestro reads a text selector as regex source, not as a JavaScript literal: its YAML reader keeps the scalar whole and StringUtils.toRegexSafe compiles what it… |
 | tests/a-form-asks-only-what-a-person-can-answer.test.ts | node | behaviour | 15 | 1149 | 32.1 | 17 | 1 of 15 | — | 0 | keep | A form asks only what a person can answer (0085). Three rules decide what a sheet holds and in what order it holds it, and all three are answers of the core: t… |
 | tests/a-form-keeps-what-the-person-typed.test.ts | node | behaviour | 12 | 1833 | 22.2 |  | not measured | — | 0 | keep | A form keeps what the person typed, and says exactly what to fix (0085). Four rules decide that, and all four are answers of the core: what the sheet may refus… |
+| tests/a-form-reads-the-violations-a-refusal-names.test.ts | node | behaviour | 3 | 1387 | 34 |  | not measured | — | 0 | keep | A refused write names its fields in `violations` when the server prints them, and in the older `errors` list when it does not; one refusal is never shown twice… |
 | tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts | node | behaviour | 3 | 856 | 13.9 |  | not measured | — | 0 | keep | A box nobody can type into that points at another record draws that record's name — or the word for a pointer with no name — and the whole-row replace still se… |
 | tests/a-keep-reason-names-siblings-the-table-holds.test.ts | node | behaviour | 2 | 304 | 3.7 |  | not measured | — | 0 | keep | A keep reason is what root reads before a prune (0088), so what it points at has to be there to read: every tests/ or e2e/ test path a verdictReason names is a… |
 | tests/a-link-to-a-record-opens-that-record.test.ts | node | behaviour | 9 | 4771 | 11.7 |  | not measured | — | 0 | keep | One link, one reading: what a person taps in an e-mail, what another app opens, and what a notification carries all answer the same route, because one rule (`s… |
@@ -373,6 +375,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/refusal-copy-follows-device-locale.test.ts | node | behaviour | 2 | 973 | 3.4 | 2 | 1 of 2 | — | 0 | keep | Refusals without a catalogue noun still follow the device at the screen boundary. Explicit core locales must work without consulting that device. |
 | tests/refusal-nouns-speak-the-phones-language.test.ts | node | behaviour | 2 | 1023 | 2.7 | 0 | 0 of 2 | — | 0 | keep | A refusal that names no catalogue resource — a named operation's read, the catalogue load itself — still names *something*: "this record", "this workspace". Th… |
 | tests/request.test.ts | node | behaviour | 10 | 1163 | 129.4 | 3 | 1 of 10 | — | 0 | keep | (no first comment; first test title) a custom write with a lost response is recovered through its persisted read without replay |
+| tests/resolved-policy-is-read-whole-or-not-at-all.test.ts | node | behaviour | 7 | 2007 | 21.3 |  | not measured | — | 0 | keep | A catalogue entry whose server resolved a supported policy is read through that policy in every reader; an absent, newer or malformed block leaves the entry dr… |
 | tests/restored-token-revocation.test.ts | node | behaviour | 2 | 1023 | 53.2 |  | not measured | — | 0 | keep | What survives a restart on this phone is the key alone — the session that signed in is held in memory for as long as the key it minted is held and never writte… |
 | tests/richtext-field-is-prose.test.ts | node | behaviour | 1 | 692 | 1.1 | 0 | 0 of 1 | — | 0 | keep | A `widget:richtext` field held a one-line text box on the phone (2026-10-09, the owner writing content): kind() had no richtext branch, so a body fell through … |
 | tests/row-primary-command.test.ts | node | behaviour | 10 | 1009 | 14.2 |  | not measured | — | 0 | keep | The row's command is the entry's declaration, read: which verb a swipe may run, and what an author's mistake costs. Every case is served bytes through the ship… |
@@ -402,7 +405,9 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/the-deck-finishing-moment-plays-only-under-normal-motion.test.ts | node | behaviour | 3 | 2744 | 14 |  | not measured | — | 0 | keep | The deck draws its finishing moment only where motion is normal: an empty live count after a confirmed command asks for it once, normal motion plays it until i… |
 | tests/the-delete-warning-a-journey-reads-takes-the-drawn-sentence-whole.test.ts | node | behaviour | 1 | 303 | 3.7 | 0 | 0 of 1 | — | 0 | keep | Maestro reads an assertVisible text as regex source and matches it against the whole of an element's text, the same reading that takes the delete answer's tapO… |
 | tests/the-delete-warning-is-read-where-the-question-shows-it.test.ts | node | behaviour | 1 | 263 | 2.8 | 0 | 0 of 1 | — | 0 | keep | The delete warning is the question's words: `kit.deleteWarning` is what `useResourceDetail.remove()` passes to `confirm` as the dialog's message, and no screen… |
+| tests/the-kernels-parity-copies-keep-their-bytes-and-hashes.test.ts | node | behaviour | 4 | 360 | 60.2 |  | not measured | — | 0 | keep | tests/parity holds the kernel's reviewed cases; a copy edited to make a test pass, or a fixture whose recorded hash is not the hash of what it holds, is refuse… |
 | tests/the-language-a-sheet-writes-is-the-one-the-server-named.test.ts | node | behaviour | 6 | 902 | 13 |  | not measured | — | 0 | keep | A record's words arrive in some language, and the server says which — in `_i18n`, naming the translatable fields it served and the language each one's words ar… |
+| tests/the-phone-agrees-with-the-kernels-parity-fixtures.test.ts | node | behaviour | 17 | 977 | 27 |  | not measured | — | 0 | keep | Each of the kernel's reviewed parity cases is drawn by the phone's production models through the resolved policy the case states, and the titles, cells, labels… |
 | tests/the-push-tier-scope-adds-work-and-refuses-no-change.test.ts | node | behaviour | 2 | 1185 | 847.6 |  | not measured | — | 0 | keep | The push tier is a faster first answer, never a second gate: `npm run check` is the required check, and the scope step only chooses which of its files to run f… |
 | tests/viewer-lost-selection.test.ts | node | behaviour | 1 | 765 | 9.5 | 0 | 0 of 1 | — | 0 | keep | The viewer shows the image a person opened, or none. An item removed from the list or newly marked decorative clears the selection with its own refusal instead… |
 | tests/viewer-snapshot-isolation.test.ts | node | behaviour | 1 | 742 | 5.3 | 0 | 0 of 1 | — | 0 | keep | Each viewer model belongs to the input it came from: a later caller edit or a later withdrawal cannot reach into a model already derived, so a screen holding a… |
