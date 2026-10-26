@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 279,
-   "cases": 1326,
-   "ms": 2508251,
-   "testsMs": 93495.09999999992,
+   "files": 280,
+   "cases": 1329,
+   "ms": 2510041,
+   "testsMs": 93507.49999999993,
    "runners": {
     "jest": 97,
-    "node": 182
+    "node": 183
    },
    "unreachable": 0
   },
@@ -10212,6 +10212,47 @@
    "coveredProdLines": 13391,
    "onlyProdLines": null,
    "testsMs": 17.3
+  },
+  {
+   "file": "tests/a-copy-row-wears-no-shade-the-row-had-to-guess.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "Rules this file holds about one row of a person's copies when the row says nothing. Shading a copy is a declaration read against a value, never a guess: a served row that prints no availability at all \u2014 the field absent, or present and empty of an answer \u2014 is the ordinary row this entry always drew, with its own preview line under its name. And the shade costs a copy nothing it had: the same name, the same cells and the same state pill, so the person can still open the copy and still take it away.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1790,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a copy whose row prints no availability keeps its own line and wears no shade",
+    "the grey costs a copy nothing it had",
+    "nothing but the two kinds of gone shades a row, and each keeps its own sentence"
+   ],
+   "tests": [
+    {
+     "title": "a copy whose row prints no availability keeps its own line and wears no shade",
+     "ms": 10.792013,
+     "measured": false
+    },
+    {
+     "title": "the grey costs a copy nothing it had",
+     "ms": 0.76804,
+     "measured": false
+    },
+    {
+     "title": "nothing but the two kinds of gone shades a row, and each keeps its own sentence",
+     "ms": 0.845544,
+     "measured": false
+    }
+   ],
+   "loaded": 37,
+   "coveredProdLines": 13399,
+   "onlyProdLines": null,
+   "testsMs": 12.4
   },
   {
    "file": "tests/a-declared-visibility-and-hide-list-agree-on-every-column.test.ts",

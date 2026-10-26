@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `c9271c609` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `59c39ebd6` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 279 | 1326 | 93.5 s | 2508 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 280 | 1329 | 93.5 s | 2510 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 150 | 496 | 58.0 s | 3758 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 525
+* keep: 526
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 525 — 219 `tests/*.test.ts` (node), 247 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2051; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2508 s, composition 3758 s, journey 0 s
+* files inventoried: 526 — 220 `tests/*.test.ts` (node), 247 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2054; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2510 s, composition 3758 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -232,6 +232,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-closed-deck-pass-never-reuses-its-operation-numbers.test.ts | node | behaviour | 1 | 701 | 2 |  | not measured | — | 0 | keep | A pass the deck closes after a held or unknown choice never hands its operation numbers to the next pass. The screen remembers what it already asked to confirm… |
 | tests/a-command-says-what-it-runs-on-and-what-it-does.test.ts | node | behaviour | 5 | 1373 | 15.4 |  | not measured | — | 0 | keep | What a person is told about one command, said once for the dialog, the sheet and the sentence said afterwards. The title is the command's own word and the answ… |
 | tests/a-copy-row-says-what-became-of-the-record-it-was-taken-from.test.ts | node | behaviour | 7 | 974 | 17.3 |  | not measured | — | 0 | keep | Rules this file holds about one row of a person's saved copies. The entry that holds copies prints one field saying what its source still is, and the kit reads… |
+| tests/a-copy-row-wears-no-shade-the-row-had-to-guess.test.ts | node | behaviour | 3 | 1790 | 12.4 |  | not measured | — | 0 | keep | Rules this file holds about one row of a person's copies when the row says nothing. Shading a copy is a declaration read against a value, never a guess: a serv… |
 | tests/a-declared-visibility-and-hide-list-agree-on-every-column.test.ts | node | behaviour | 1 | 1082 | 17.8 | 0 | 0 of 1 | — | 0 | keep | A list's columns answer one question of a field, however the two tags combine: a declared visibility wins over `hideList` both ways (`shown` reclaims the colum… |
 | tests/a-delete-journey-taps-the-answer-the-question-offers.test.ts | node | behaviour | 2 | 314 | 5.3 | 0 | 0 of 2 | — | 0 | keep | Tapping the menu's Delete row opens a question the journey must answer: the delete is the run's own tidying, and a flow that leaves the question standing fails… |
 | tests/a-fact-the-header-drew-is-not-a-row-below-it.test.ts | node | behaviour | 1 | 1080 | 18.1 | 0 | 0 of 1 | — | 0 | keep | A fact is drawn once, at the highest place that draws it (0085; README "How a record opens": "A field that a higher place drew is not a row anywhere below it",… |
