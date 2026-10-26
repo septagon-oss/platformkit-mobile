@@ -106,9 +106,12 @@ export function readChoice(
     return undefined;
   }
   const appearance = readAppearance(v.control, `${at}.control`, notice);
-  const card = v.cardinality;
-  const many = isRecord(v.choice) ? card === "many" : false;
-  if (isRecord(v.choice) && card !== "one" && card !== "many")
+  const choice = v.choice;
+  // The cardinality, the empty policy, the maximum and the groups all sit inside `choice`
+  // (`kit/entity/present.ResolvedChoice`); the resolved field says only which surface draws it.
+  const card = isRecord(choice) ? choice.cardinality : undefined;
+  const many = card === "many";
+  if (isRecord(choice) && card !== "one" && card !== "many")
     notice(`${at}.choice.cardinality`, `is ${JSON.stringify(card)}: one answer is asked for`);
   const answers = readAnswers(v.options, `${at}.options`, notice);
   if (answers.length === 0) {
@@ -118,7 +121,6 @@ export function readChoice(
     );
     return undefined;
   }
-  const choice = v.choice;
   const empty = isRecord(choice) ? readEmpty(choice.empty, `${at}.choice.empty`, notice) : {};
   const maximum = isRecord(choice)
     ? readMaximum(choice.maximum, `${at}.choice.maximum`, notice)

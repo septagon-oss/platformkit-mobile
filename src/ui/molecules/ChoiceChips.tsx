@@ -1,18 +1,15 @@
 // ChoiceChips is a finite choice as a wrapping line of answers: the word a person reads is the
-// word they tap. With `swatch` the answer's own colour stands where its mark would, which is
-// the only difference the kernel's `swatch` appearance asks for — the same answers, the same
-// line, the same roles (decision recorded in the task's notes: a swatch is a chip whose artwork
-// is a colour, not a fourth layout).
+// word they tap. With `swatch` the answer's own colour is drawn beside its word, which is all
+// the kernel's `swatch` appearance asks for beyond chips: the same answers, the same line, the
+// same roles. A swatch is a chip whose artwork is a colour, not a fourth layout.
 //
 // ChoiceTiles is not this: a tile is a card whose picture is the answer, and ten chips wrap
 // into a wall the eye cannot read down.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { pickChoice, type ChoiceGroupModel } from "../../core/derive";
+import { pickChoice } from "../../core/derive";
 import { Button } from "../atoms/Button";
-import { Text } from "../atoms/Text";
 import { kitStyles } from "../layout";
-import { testable } from "../props";
 import { hit } from "../scale";
 import { useStyles, type Theme } from "../theme";
 import { ChoiceFooting, ChoiceLegend, type ChoiceSurfaceProps } from "./ChoiceSurface";

@@ -1,0 +1,16 @@
+{
+  "schema": "platformkit.catalog-capture.v1",
+  "fixture": "testdata/catalog.choices.json",
+  "sha256": "26ae0162078f3dc05ddfa83df58ded22d587dc4bb05697bba6a52556c4a75329",
+  "upstream": {
+    "repository": "https://github.com/septagon-oss/platformkit",
+    "commit": "9d25f502f8e6f2403f4072e36429f5c090e8e1cb",
+    "path": "ui/screens/testdata/catalog-choices.json",
+    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/9d25f502f8e6f2403f4072e36429f5c090e8e1cb/ui/screens/testdata/catalog-choices.json"
+  },
+  "capture": {
+    "method": "The kernel renders this document from the declared ChoiceSets of its own reference composition (kit/entity/present); the copy is the file at the named commit, byte for byte. It is the only capture in this repository that carries a resolved finite choice. Cases this capture does not carry - a single-answer choice, a malformed word - are built from its bytes in the test that needs them, the way every other catalogue case here is built.",
+    "result": "4 entries, one field each, one answer set each: the same question drawn tiles, chips, swatch and figure.",
+    "scope": "A declared choice with many answers, a maximum of two that replaces the oldest, an empty policy that refuses, a No preference answer and colour artwork per answer. It carries no single-answer choice, which is why the phone declares one beside it."
+  }
+}

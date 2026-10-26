@@ -55,6 +55,12 @@ export interface ChoiceGroup {
   readonly maximum?: { readonly count: number; readonly replacesOldest?: true };
   readonly answerless?: true;
   readonly reason?: string;
+  /**
+   * artwork is the compiled figure the figure appearance draws, and `pickChoice` is the only
+   * reader of `maximum`, `exclusive` and this member's marks: a molecule draws what the model
+   * says and decides nothing about what a tap means.
+   */
+  readonly artwork?: { readonly svg: string; readonly answers: readonly string[] };
 }
 export function deriveChoices(input: ChoiceGroup, p: Presentation) {
   return build(p, (v: Validation) => {
@@ -92,6 +98,7 @@ export function deriveChoices(input: ChoiceGroup, p: Presentation) {
         ? {}
         : { full: true as const }),
       ...(input.reason === undefined ? {} : { reason: input.reason }),
+      ...(input.artwork === undefined ? {} : { artwork: input.artwork }),
       clearLabel: p.copy.kit.clear,
       canClear: !input.required && held.length > 0,
       ...(held.some((id) => !input.choices.some((c) => c.id === id && c.enabled))
@@ -137,7 +144,12 @@ export function pickChoice(model: ChoiceGroupModel, id: string): readonly string
   if (target === undefined || !target.enabled) return model.selectedIds;
   if (target.selected && !model.many) return model.selectedIds;
   if (target.exclusive === true) return target.selected ? [] : [id];
-  const without = model.selectedIds.filter((held) => held !== id && held !== model.exclusiveId);
+  // A single answer is replaced, not appended to; a many-answer set keeps what it holds and
+  // drops only the answer being taken back and the exclusive one, which never stands beside
+  // another.
+  const without = model.many
+    ? model.selectedIds.filter((held) => held !== id && held !== model.exclusiveId)
+    : [];
   if (target.selected) return without;
   const next = [...without, id];
   const maximum = model.maximum;
