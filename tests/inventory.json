@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 278,
-   "cases": 1329,
-   "ms": 2526510,
-   "testsMs": 93521.49999999993,
+   "files": 279,
+   "cases": 1331,
+   "ms": 2527889,
+   "testsMs": 93567.59999999992,
    "runners": {
     "jest": 98,
-    "node": 180
+    "node": 181
    },
    "unreachable": 0
   },
@@ -12031,6 +12031,41 @@
    "coveredProdLines": 9992,
    "onlyProdLines": null,
    "testsMs": 13.8
+  },
+  {
+   "file": "tests/a-served-choice-capture-is-read-by-both-catalog-reads.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The phone reads a catalogue two ways: the shell's own read, which decides the presentation hints by hand, and the strict generated read of the pinned HTTP document. A server that resolves a finite choice answers both, so the capture that carries one is held to both \u2014 and to what the shell's read must then say: the field's appearance is the one the server named. The goldens in catalog-golden-contract.test.ts carry no resolved section at all, so nothing else in this suite would notice a pin move to a document whose strict read refuses the resolved answers a real server prints.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1379,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the choice capture is a catalogue both catalog reads accept",
+    "the shell's read keeps the four appearances the server named"
+   ],
+   "tests": [
+    {
+     "title": "the choice capture is a catalogue both catalog reads accept",
+     "ms": 44.283964,
+     "measured": false
+    },
+    {
+     "title": "the shell's read keeps the four appearances the server named",
+     "ms": 1.788278,
+     "measured": false
+    }
+   ],
+   "loaded": 55,
+   "coveredProdLines": 20997,
+   "onlyProdLines": null,
+   "testsMs": 46.1
   },
   {
    "file": "tests/a-small-picture-uses-its-stored-frame.test.ts",
