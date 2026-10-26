@@ -14,7 +14,11 @@ export function MoreFilters({
   return (
     <DetailSheet {...surface}>
       {filters.map((filter) => (
-        <ChoiceChips key={filter.id} model={filter} onChange={(id) => onChange(filter.id, id)} />
+        <ChoiceChips
+          key={filter.id}
+          model={filter}
+          onChange={(ids) => onChange(filter.id, ids[0])}
+        />
       ))}
     </DetailSheet>
   );

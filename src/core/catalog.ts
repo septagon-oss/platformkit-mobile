@@ -12,6 +12,7 @@ import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
 import { drawnIcon, pictureDoor, type Pictures } from "./pictures";
 import { issuePath } from "./responses";
 import { readDeck, type Deck } from "./catalogDeck";
+import { readResolved, type FieldChoice } from "./choice";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
 // Required wire members remain required; JSON itself never contains undefined.
@@ -50,6 +51,13 @@ export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentatio
   readonly enum?: readonly string[];
   readonly keys?: readonly MapKey[] | null;
   readonly hints?: FieldHints;
+  /**
+   * choice is the field's finite choice as the server resolved it (`./choice`): which surface
+   * draws it, its answers in order, its cardinality, maximum and empty policy. Absent means the
+   * entry's resolved section named no choice for this field, which is what a server older than
+   * the section says about every field, and what this build then reads from the schema alone.
+   */
+  readonly choice?: FieldChoice;
 };
 
 export type Command = View<Omit<WireCommand, "fields" | "presentation">> & {
@@ -320,6 +328,10 @@ const catalogSchema = zCatalog.extend({
         operations: z.array(z.string()).nullish(),
         renderer: z.unknown().optional(),
         presentation: z.unknown().optional(),
+        // `resolved` is the server's own reading of the entry, decided at mount time. It enters
+        // as `unknown` for the same reason `presentation` does: it is presentation, so a member
+        // this build cannot read costs that member and not the screen.
+        resolved: z.unknown().optional(),
         fields: z.array(looseField).nullable(),
         commands: z.array(looseCommand).nullish(),
       }),
@@ -838,7 +850,17 @@ function readSections(presentation: unknown, at: string, notice: HintNotice): re
 }
 
 function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
-  const { fields, commands, immutable, operations, renderer, singleton, presentation, ...rest } = v;
+  const {
+    fields,
+    commands,
+    immutable,
+    operations,
+    renderer,
+    singleton,
+    presentation,
+    resolved,
+    ...rest
+  } = v;
   const pack = rendererRef(renderer);
   const blocks = readSections(presentation, `${at}.presentation`, notice);
   // The commands are read before the entry's own hints because one of those hints names one of
@@ -864,7 +886,7 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       };
     },
   );
-  const fieldsRead = (fields ?? []).map((f, i) =>
+  const schemaFields = (fields ?? []).map((f, i) =>
     field(
       f,
       `${at}.fields[${i}]`,
@@ -872,6 +894,21 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       notice,
     ),
   );
+  // The resolved section is read once per entry and joined to the schema by field name: the
+  // section answers a field the entry does not have is not a reading of anything, and a field
+  // the section does not name keeps the reading above.
+  const choices = readResolved(
+    resolved,
+    `${at}.resolved`,
+    (fields ?? []).map((f) => f.name),
+    notice,
+  );
+  const fieldsRead = schemaFields.map((f) => {
+    const choice = Object.prototype.hasOwnProperty.call(choices, f.name)
+      ? choices[f.name]
+      : undefined;
+    return choice === undefined ? f : { ...f, choice };
+  });
   const hints = hintEntry(
     presentation,
     `${at}.presentation`,

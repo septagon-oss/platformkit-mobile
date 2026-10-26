@@ -1000,7 +1000,7 @@ function KitSamples({
     case "selection-control":
       return <SelectionControl model={k.selection} onChange={send} />;
     case "choice-chips":
-      return <ChoiceChips model={k.choices} onChange={choice} />;
+      return <ChoiceChips model={k.choices} onChange={(ids) => choice(ids[0])} />;
     case "choice-rows":
       return <ChoiceRows model={k.choices} onChange={choice} />;
     case "action-bar":
