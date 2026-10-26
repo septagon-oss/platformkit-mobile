@@ -912,7 +912,8 @@ asks beyond chips; a picture or a file answer is read as no artwork and says so.
 marks are not re-stroked when an answer is chosen — the chosen state is carried by the answer
 control beside it. No screen yet offers these appearances: a form's many-answer value plumbing
 (a `string[]` on the write, and the same on the read) is the next change, and until it lands the
-appearances are drawn by tests and the gallery rather than by a live form.
+appearances are drawn by their tests alone. `src/ui/gallery.tsx` shows `ChoiceChips` as it did; `ChoiceTiles` and
+`ChoiceFigure` are not in the gallery yet.
 
 ## Design
 
