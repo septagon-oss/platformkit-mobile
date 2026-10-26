@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `f40f82039` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `808acc357` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 276 | 1304 | 93.4 s | 2505 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 38 | 244 | 47.3 s | 75 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 279 | 1331 | 93.6 s | 2528 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 147 | 483 | 57.4 s | 3682 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 519
+* keep: 523
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 519 — 216 `tests/*.test.ts` (node), 244 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2016; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2505 s, composition 3682 s, journey 0 s
+* files inventoried: 523 — 219 `tests/*.test.ts` (node), 245 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2058; cases in files no runner reaches: 35
+* isolated wall time: contract 75 s, behaviour 2528 s, composition 3682 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -100,6 +100,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/catalog-fallback-validation.test.ts | node | contract | 3 | 1071 | 51.4 |  | not measured | — | 0 | keep | Presentation fallback preserves the resource contract: a bad hint can cost its label, but never its fields, commands or validation of required members. The gen… |
 | tests/catalog-golden-contract.test.ts | node | contract | 3 | 1288 | 65.8 | 0 | 0 of 3 | — | 0 | keep | The catalogue goldens copied from the kernel are answers the pinned HTTP document must accept: the shell's own catalog read and the strict generated appResourc… |
 | tests/catalog-operation-contract.test.ts | node | contract | 2 | 1255 | 52.1 | 0 | 0 of 2 | — | 0 | keep | The bound catalog operation must honor its generated return type even when the shell's compatibility adapter accepts an unstamped legacy catalog. |
+| tests/catalog-resolved-choice.test.ts | node | contract | 15 | 780 | 28.3 |  | not measured | — | 0 | keep | The server decides what a finite choice draws and what its answers are; the phone reads that decision from the entry's `resolved` section and re-derives none o… |
 | tests/catalog.test.ts | node | contract | 26 | 1013 | 346.6 | 9 | 5 of 26 | — | 0 | keep | (no first comment; first test title) the golden catalog parses |
 | tests/every-test-file-carries-a-row-a-layer-and-a-tier.test.ts | node | contract | 15 | 620 | 303.6 |  | not measured | — | 0 | keep | The suite is only evidence if a reader can find out what it holds. Three rules keep tests/inventory.json answering that question: every file a runner reaches h… |
 | tests/factor-person-provisioning.test.ts | node | contract | 1 | 585 | 271.7 |  | not measured | — | 0 | keep | The device harness creates the person who answers the second factor, and the kernel it serves accepts that person.  At the commit testdata/openapi.source.json … |
@@ -160,6 +161,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/chart-legend.test.tsx | jest | behaviour | 1 | 20063 | 130 | 0 | 0 of 1 | — | 0 | keep | Two series drawn in two inks are only two series once the screen says which ink is which: the plot's key stands beside the plot, one entry per series, and the … |
 | tests/ui/chart-measured-plot.test.tsx | jest | behaviour | 8 | 19778 | 116 | 89 | 0 of 8 | — | 0 | keep | A bar chart says how much, measured against what. Two drawings make that a readable claim rather than a shape: the line every column stands on, and the numbers… |
 | tests/ui/chart-observation-first.test.tsx | jest | behaviour | 1 | 19716 | 18 | 0 | 0 of 1 | — | 0 | keep | What a chart was drawn for is the first thing on it. A person arriving at a plot at a phone's width reads the one observation the series holds before the axis,… |
+| tests/ui/choice-appearances-ask-in-their-own-roles.test.tsx | jest | behaviour | 16 | 19311 | 85 |  | not measured | — | 0 | keep | What a person sees of a finite choice is decided by the server and drawn by one of three molecules. These cases hold the two things every appearance owes whoev… |
 | tests/ui/choice-reset-shares-its-line.test.tsx | jest | behaviour | 1 | 19731 | 9 | 0 | 0 of 1 | — | 0 | keep | A reset is a word about the choice it clears. Given its own full-width row it joins the column of actions below the chips, where a person scanning for the next… |
 | tests/ui/chooser.test.tsx | jest | behaviour | 2 | 19790 | 89 | 25 | 1 of 2 | — | 0 | keep | (no first comment; first test title) on iOS a question is the action sheet: the sentence under the title, the destructive answer marked, the way out apart |
 | tests/ui/chosen-button-ink.test.tsx | jest | behaviour | 8 | 19270 | 27 | 0 | 0 of 8 | — | 0 | keep | Measure the actual label and surface together: the same chosen state may be filled on the main screen and outlined when composed as a companion. |
@@ -255,6 +257,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-remembered-record-opens-one-record-whatever-its-id-holds.test.ts | node | behaviour | 1 | 1733 | 1.4 |  | not measured | — | 0 | keep | A remembered open's address is typed `RecordAddress`, but a template literal's `${string}` matches a slash, a question mark and a hash: the type cannot say "th… |
 | tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts | node | behaviour | 5 | 1021 | 36.1 |  | not measured | — | 0 | keep | A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are writ… |
 | tests/a-save-carries-what-the-person-wrote.test.ts | node | behaviour | 3 | 947 | 13.8 |  | not measured | — | 0 | keep | What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading … |
+| tests/a-served-choice-capture-is-read-by-both-catalog-reads.test.ts | node | behaviour | 2 | 1379 | 46.1 |  | not measured | — | 0 | keep | The phone reads a catalogue two ways: the shell's own read, which decides the presentation hints by hand, and the strict generated read of the pinned HTTP docu… |
 | tests/a-small-picture-uses-its-stored-frame.test.ts | node | behaviour | 2 | 1918 | 2.8 |  | not measured | — | 0 | keep | (no first comment; first test title) a 256px picture uses the original when no smaller declared variant exists |
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
 | tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts | node | behaviour | 2 | 1007 | 10.7 |  | not measured | — | 0 | keep | A whole-row replace carries what nobody typed exactly as the read returned it. The body builder is `writeControls`, and two of its promises have no case of the… |
@@ -272,6 +275,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/cart-total-currency.test.ts | node | behaviour | 1 | 854 | 4.6 | 0 | 0 of 1 | — | 0 | keep | A cart total is money a renderer shows and a checkout charges: it has to carry the cart's own currency, never a default, and computing it must not edit the lin… |
 | tests/catalog-hints.test.ts | node | behaviour | 19 | 1195 | 73.6 | 8 | 2 of 15 | — | 0 | keep | The presentation contract, read: what a hint changes, what it never changes, and what an author's mistake costs. Every case is served bytes through the shipped… |
 | tests/catalog-list-time-cell.test.ts | node | behaviour | 2 | 896 | 20.5 | 0 | 0 of 2 | — | 0 | keep | A collection row's cell carries both spellings of an instant — the distance the eye reads and the whole local date-time a screen reader says — because a row is… |
+| tests/choice-holds-its-answers.test.ts | node | behaviour | 9 | 1983 | 29.6 |  | not measured | — | 0 | keep | A finite choice answers one question, and the catalogue decides whether that question takes one answer or an ordered set of them. These cases hold the two shap… |
 | tests/color.test.ts | node | behaviour | 6 | 346 | 6.2 | 106 | 5 of 6 | src/core/color.ts | 0 | keep | The arithmetic every derived colour and every measured ratio comes through. Each expectation is a number the standard or a hand computes, not the output of the… |
 | tests/component-suite-gate.test.ts | node | behaviour | 2 | 401 | 71.4 | 0 | 0 of 2 | — | 0 | keep | The repository's required check has to keep running both suites: these pins read package.json and jest.config.js and refuse a script, a testMatch or a worker p… |
 | tests/control-plane-write-address.test.ts | node | behaviour | 2 | 1280 | 69.5 | 34 | 1 of 2 | — | 0 | keep | A resource read in the workspace and written on the control plane is written where the document says and read where it always was, with the row encoded into ev… |
