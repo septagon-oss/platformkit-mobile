@@ -66,6 +66,10 @@ export const galleryPages = {
       "product-card/sold-out",
       "product-card/loading",
       "action-bar/multiple",
+      // The card's own options, asked on the two surfaces that carry artwork: the same
+      // question the card above narrows, drawn as a card per answer and as one picture.
+      "choice-tiles/default",
+      "choice-figure/default",
     ],
   },
   sheet: {

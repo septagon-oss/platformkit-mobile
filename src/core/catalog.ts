@@ -13,6 +13,7 @@ import { drawnIcon, pictureDoor, type Pictures } from "./pictures";
 import type { SavedDeclaration } from "./saved";
 import { issuePath } from "./responses";
 import { readDeck, type Deck } from "./catalogDeck";
+import { applyChoices, type FieldChoice } from "./choice";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
 // Required wire members remain required; JSON itself never contains undefined.
@@ -51,6 +52,12 @@ export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentatio
   readonly enum?: readonly string[];
   readonly keys?: readonly MapKey[] | null;
   readonly hints?: FieldHints;
+  /**
+   * choice is the field's finite choice as the server resolved it (`./choice`): the surface that
+   * draws it, its answers in order, its cardinality, maximum and empty policy. Absent — which is
+   * what a server older than the section says about every field — leaves the schema's own reading.
+   */
+  readonly choice?: FieldChoice;
 };
 
 export type Command = View<Omit<WireCommand, "fields" | "presentation">> & {
@@ -338,6 +345,10 @@ const catalogSchema = zCatalog.extend({
         operations: z.array(z.string()).nullish(),
         renderer: z.unknown().optional(),
         presentation: z.unknown().optional(),
+        // `resolved` is the server's own reading of the entry, decided at mount time. It enters as
+        // `unknown` for the reason `presentation` does: it is presentation, so a member this build
+        // cannot read costs that member and not the screen.
+        resolved: z.unknown().optional(),
         fields: z.array(looseField).nullable(),
         commands: z.array(looseCommand).nullish(),
       }),
@@ -896,9 +907,20 @@ function readSections(presentation: unknown, at: string, notice: HintNotice): re
 }
 
 function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
-  const { fields, commands, immutable, operations, renderer, singleton, presentation, ...rest } = v;
+  const {
+    fields,
+    commands,
+    immutable,
+    operations,
+    renderer,
+    singleton,
+    presentation,
+    resolved,
+    ...rest
+  } = v;
   const pack = rendererRef(renderer);
-  const blocks = readSections(presentation, `${at}.presentation`, notice);
+  const blocks = readSections(presentation, `${at}.presentation`, notice),
+    blockKeys = blocks.map((b) => b.key);
   // The commands are read before the entry's own hints because one of those hints names one of
   // them: a verb no command of this entry answers is no hint at all, and the resolution happens
   // here, once, rather than at every surface that offers the verb.
@@ -922,13 +944,11 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       };
     },
   );
-  const fieldsRead = (fields ?? []).map((f, i) =>
-    field(
-      f,
-      `${at}.fields[${i}]`,
-      blocks.map((b) => b.key),
-      notice,
-    ),
+  const fieldsRead = applyChoices(
+    (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`, blockKeys, notice)),
+    resolved,
+    `${at}.resolved`,
+    notice,
   );
   const hints = hintEntry(
     presentation,

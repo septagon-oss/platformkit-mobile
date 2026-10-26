@@ -275,31 +275,31 @@
  },
  "totals": {
   "contract": {
-   "files": 37,
-   "cases": 229,
-   "ms": 74421,
-   "testsMs": 47263.40000000001,
+   "files": 38,
+   "cases": 244,
+   "ms": 75201,
+   "testsMs": 47291.700000000004,
    "runners": {
-    "node": 37
+    "node": 38
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 280,
-   "cases": 1329,
-   "ms": 2510041,
-   "testsMs": 93507.49999999993,
+   "files": 283,
+   "cases": 1356,
+   "ms": 2533793,
+   "testsMs": 93708.8999999999,
    "runners": {
-    "jest": 97,
-    "node": 183
+    "jest": 98,
+    "node": 185
    },
    "unreachable": 0
   },
   "composition": {
    "files": 150,
    "cases": 496,
-   "ms": 3757565,
-   "testsMs": 58003,
+   "ms": 3768842,
+   "testsMs": 57971,
    "runners": {
     "jest": 150
    },
@@ -960,6 +960,119 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/catalog-resolved-choice.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 15,
+   "rule": "The server decides what a finite choice draws and what its answers are; the phone reads that decision from the entry's `resolved` section and re-derives none of it. These cases hold both halves: what a well-formed section becomes, and that a malformed one costs the member that is wrong \u2014 never the field, the entry or the screen \u2014 while naming itself once.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 780,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the copy is the bytes the record names, at the commit it names",
+    "the same question drawn four ways arrives as four appearances",
+    "an answer's colour, a maximum that replaces and an empty the server refuses are all read",
+    "the figure appearance carries the compiled artwork and the answers its marks name",
+    "a field the section names as a plain field keeps the reading its schema gives it",
+    "an appearance this build cannot draw is drawn as chips and says so once",
+    "a cardinality that is neither word asks for one answer and says so",
+    "a figure whose artwork is missing says so and keeps its answers",
+    "an answer list that reads empty costs the choice and not the field",
+    "a choice naming a field the entry does not have is not read",
+    "a server with no resolved section says nothing and is answered in full",
+    "a resolved section that is not an object costs every reading and names itself once",
+    "a colour is the one artwork this build draws, and any other says so",
+    "a hint that is wrong about one answer leaves the rest of the choice standing",
+    "a document whose resolved section is malformed in another way is still parsed"
+   ],
+   "tests": [
+    {
+     "title": "the copy is the bytes the record names, at the commit it names",
+     "ms": 6.613927,
+     "measured": false
+    },
+    {
+     "title": "the same question drawn four ways arrives as four appearances",
+     "ms": 11.341966,
+     "measured": false
+    },
+    {
+     "title": "an answer's colour, a maximum that replaces and an empty the server refuses are all read",
+     "ms": 0.718069,
+     "measured": false
+    },
+    {
+     "title": "the figure appearance carries the compiled artwork and the answers its marks name",
+     "ms": 0.695597,
+     "measured": false
+    },
+    {
+     "title": "a field the section names as a plain field keeps the reading its schema gives it",
+     "ms": 0.673336,
+     "measured": false
+    },
+    {
+     "title": "an appearance this build cannot draw is drawn as chips and says so once",
+     "ms": 0.703191,
+     "measured": false
+    },
+    {
+     "title": "a cardinality that is neither word asks for one answer and says so",
+     "ms": 0.627201,
+     "measured": false
+    },
+    {
+     "title": "a figure whose artwork is missing says so and keeps its answers",
+     "ms": 0.622081,
+     "measured": false
+    },
+    {
+     "title": "an answer list that reads empty costs the choice and not the field",
+     "ms": 0.677523,
+     "measured": false
+    },
+    {
+     "title": "a choice naming a field the entry does not have is not read",
+     "ms": 0.698703,
+     "measured": false
+    },
+    {
+     "title": "a server with no resolved section says nothing and is answered in full",
+     "ms": 0.603146,
+     "measured": false
+    },
+    {
+     "title": "a resolved section that is not an object costs every reading and names itself once",
+     "ms": 0.621871,
+     "measured": false
+    },
+    {
+     "title": "a colour is the one artwork this build draws, and any other says so",
+     "ms": 0.624305,
+     "measured": false
+    },
+    {
+     "title": "a hint that is wrong about one answer leaves the rest of the choice standing",
+     "ms": 0.629735,
+     "measured": false
+    },
+    {
+     "title": "a document whose resolved section is malformed in another way is still parsed",
+     "ms": 2.497131,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 5186,
+   "onlyProdLines": null,
+   "testsMs": 28.3
   },
   {
    "file": "tests/catalog.test.ts",
@@ -5322,6 +5435,125 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/choice-appearances-ask-in-their-own-roles.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 16,
+   "rule": "What a person sees of a finite choice is decided by the server and drawn by one of three molecules. These cases hold the two things every appearance owes whoever is using the phone: each answer is a control whose role says whether one answer or many are being asked for, and whose name is the answer's own word; and the thing they tap is big enough to aim at. Both are checked for both cardinalities, over the answers of the pinned capture.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19311,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "tiles: one answer is asked as radios, each named by its answer",
+    "tiles: many answers are asked as checkboxes, each named by its answer",
+    "tiles: every answer is big enough for a finger and says what the question is",
+    "chips: one answer is asked as radios, each named by its answer",
+    "chips: many answers are asked as checkboxes, each named by its answer",
+    "chips: every answer is big enough for a finger and says what the question is",
+    "swatch: one answer is asked as radios, each named by its answer",
+    "swatch: many answers are asked as checkboxes, each named by its answer",
+    "swatch: every answer is big enough for a finger and says what the question is",
+    "figure: one answer is asked as radios, each named by its answer",
+    "figure: many answers are asked as checkboxes, each named by its answer",
+    "figure: every answer is big enough for a finger and says what the question is",
+    "every change is handed back whole, and each one is felt once",
+    "the sentence the server refuses an empty answer with is drawn while none is held",
+    "a swatch draws the colour the answer was declared with, beside its word",
+    "the figure appearance draws the compiled artwork and keeps its answers readable"
+   ],
+   "tests": [
+    {
+     "title": "tiles: one answer is asked as radios, each named by its answer",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "tiles: many answers are asked as checkboxes, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "tiles: every answer is big enough for a finger and says what the question is",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "chips: one answer is asked as radios, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "chips: many answers are asked as checkboxes, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "chips: every answer is big enough for a finger and says what the question is",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "swatch: one answer is asked as radios, each named by its answer",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "swatch: many answers are asked as checkboxes, each named by its answer",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "swatch: every answer is big enough for a finger and says what the question is",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "figure: one answer is asked as radios, each named by its answer",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "figure: many answers are asked as checkboxes, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "figure: every answer is big enough for a finger and says what the question is",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "every change is handed back whole, and each one is felt once",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "the sentence the server refuses an empty answer with is drawn while none is held",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "a swatch draws the colour the answer was declared with, beside its word",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "the figure appearance draws the compiled artwork and keeps its answers readable",
+     "ms": 4,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 2129,
+   "onlyProdLines": null,
+   "testsMs": 85
   },
   {
    "file": "tests/ui/choice-reset-shares-its-line.test.tsx",
@@ -10160,7 +10392,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 974,
+   "ms": 1615,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "a copy whose source has gone is greyed and says the record went",
@@ -10174,44 +10406,44 @@
    "tests": [
     {
      "title": "a copy whose source has gone is greyed and says the record went",
-     "ms": 13.420035,
+     "ms": 15.90595,
      "measured": false
     },
     {
      "title": "a copy whose provider is down says down and not gone",
-     "ms": 0.586065,
+     "ms": 1.011663,
      "measured": false
     },
     {
      "title": "a copy whose source is there keeps the line its entry writes about itself",
-     "ms": 0.680048,
+     "ms": 1.078336,
      "measured": false
     },
     {
      "title": "a field answering none of the three spellings says nothing about the source",
-     "ms": 1.021349,
+     "ms": 1.70174,
      "measured": false
     },
     {
      "title": "an entry that declares no availability field greys no row and says nothing",
-     "ms": 0.456895,
+     "ms": 0.672044,
      "measured": false
     },
     {
      "title": "an availability field naming no field of its own entry is refused by name",
-     "ms": 0.59498,
+     "ms": 0.833663,
      "measured": false
     },
     {
      "title": "the greyed row is still the row of the copy this person kept",
-     "ms": 0.496488,
+     "ms": 0.565938,
      "measured": false
     }
    ],
-   "loaded": 37,
-   "coveredProdLines": 13391,
+   "loaded": 38,
+   "coveredProdLines": 13728,
    "onlyProdLines": null,
-   "testsMs": 17.3
+   "testsMs": 21.8
   },
   {
    "file": "tests/a-copy-row-wears-no-shade-the-row-had-to-guess.test.ts",
@@ -10225,7 +10457,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 1790,
+   "ms": 1260,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "a copy whose row prints no availability keeps its own line and wears no shade",
@@ -10235,24 +10467,24 @@
    "tests": [
     {
      "title": "a copy whose row prints no availability keeps its own line and wears no shade",
-     "ms": 10.792013,
+     "ms": 11.548494,
      "measured": false
     },
     {
      "title": "the grey costs a copy nothing it had",
-     "ms": 0.76804,
+     "ms": 0.787608,
      "measured": false
     },
     {
      "title": "nothing but the two kinds of gone shades a row, and each keeps its own sentence",
-     "ms": 0.845544,
+     "ms": 0.789391,
      "measured": false
     }
    ],
-   "loaded": 37,
-   "coveredProdLines": 13399,
+   "loaded": 38,
+   "coveredProdLines": 13741,
    "onlyProdLines": null,
-   "testsMs": 12.4
+   "testsMs": 13.1
   },
   {
    "file": "tests/a-declared-visibility-and-hide-list-agree-on-every-column.test.ts",
@@ -11918,7 +12150,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 938,
+   "ms": 1330,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "a source declaring its words and its list is savable and owes no notice",
@@ -11935,59 +12167,94 @@
    "tests": [
     {
      "title": "a source declaring its words and its list is savable and owes no notice",
-     "ms": 9.799116,
+     "ms": 11.47581,
      "measured": false
     },
     {
      "title": "the kernel's `listTitle` changes nothing about what the heart prints",
-     "ms": 0.338816,
+     "ms": 0.575765,
      "measured": false
     },
     {
      "title": "each member the kit requires is named when the document leaves it out",
-     "ms": 0.995992,
+     "ms": 1.33448,
      "measured": false
     },
     {
      "title": "a declaration missing two members says both",
-     "ms": 0.373881,
+     "ms": 0.339829,
      "measured": false
     },
     {
      "title": "a member that is not a word, or a word of nothing, is named as one",
-     "ms": 0.84343,
+     "ms": 0.921856,
      "measured": false
     },
     {
      "title": "a saved declaration on an entry that says nothing about being saved is silence",
-     "ms": 0.331253,
+     "ms": 0.384681,
      "measured": false
     },
     {
      "title": "a declaration pointing at no entry of this catalogue names what it pointed at",
-     "ms": 0.320813,
+     "ms": 0.328789,
      "measured": false
     },
     {
      "title": "the entry that holds the copies must take the keep about the collection",
-     "ms": 0.248389,
+     "ms": 0.261323,
      "measured": false
     },
     {
      "title": "and it must take the removal about one record",
-     "ms": 0.44834,
+     "ms": 0.307369,
      "measured": false
     },
     {
      "title": "neither keeping write is ever offered as a form, a question or a swipe",
-     "ms": 0.490828,
+     "ms": 0.584682,
      "measured": false
     }
    ],
-   "loaded": 37,
-   "coveredProdLines": 13315,
+   "loaded": 38,
+   "coveredProdLines": 13657,
    "onlyProdLines": null,
-   "testsMs": 14.2
+   "testsMs": 16.5
+  },
+  {
+   "file": "tests/a-served-choice-capture-is-read-by-both-catalog-reads.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The phone reads a catalogue two ways: the shell's own read, which decides the presentation hints by hand, and the strict generated read of the pinned HTTP document. A server that resolves a finite choice answers both, so the capture that carries one is held to both \u2014 and to what the shell's read must then say: the field's appearance is the one the server named. The goldens in catalog-golden-contract.test.ts carry no resolved section at all, so nothing else in this suite would notice a pin move to a document whose strict read refuses the resolved answers a real server prints.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1379,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the choice capture is a catalogue both catalog reads accept",
+    "the shell's read keeps the four appearances the server named"
+   ],
+   "tests": [
+    {
+     "title": "the choice capture is a catalogue both catalog reads accept",
+     "ms": 44.283964,
+     "measured": false
+    },
+    {
+     "title": "the shell's read keeps the four appearances the server named",
+     "ms": 1.788278,
+     "measured": false
+    }
+   ],
+   "loaded": 55,
+   "coveredProdLines": 20997,
+   "onlyProdLines": null,
+   "testsMs": 46.1
   },
   {
    "file": "tests/a-small-picture-uses-its-stored-frame.test.ts",
@@ -13284,6 +13551,83 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/choice-holds-its-answers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 9,
+   "rule": "A finite choice answers one question, and the catalogue decides whether that question takes one answer or an ordered set of them. These cases hold the two shapes and the three rules that decide what a tap does: the exclusive \"No preference\" answer stands alone, a declared maximum either gives up its oldest answer or refuses the tap, and a tap that changes nothing writes nothing. Every case is built from the pinned capture's own answers.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1983,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "one answer is a word and many are an ordered set",
+    "a group that spells its answer the wrong way for its cardinality is refused by name",
+    "tapping an answer in a many-answer choice adds it, and tapping it again lets it go",
+    "tapping an answer in a single-answer choice replaces it, and tapping the held answer changes nothing",
+    "the exclusive answer stands alone, and any other answer lets it go",
+    "a maximum that replaces gives up its oldest answer, and one without the word refuses the tap",
+    "an empty answer the server refuses is unsatisfied with its own sentence",
+    "an answer that is no longer offered is said, and the question stays unsatisfied",
+    "a question with nothing held and nothing required is answered by holding nothing"
+   ],
+   "tests": [
+    {
+     "title": "one answer is a word and many are an ordered set",
+     "ms": 16.04033,
+     "measured": false
+    },
+    {
+     "title": "a group that spells its answer the wrong way for its cardinality is refused by name",
+     "ms": 1.327456,
+     "measured": false
+    },
+    {
+     "title": "tapping an answer in a many-answer choice adds it, and tapping it again lets it go",
+     "ms": 2.101639,
+     "measured": false
+    },
+    {
+     "title": "tapping an answer in a single-answer choice replaces it, and tapping the held answer changes nothing",
+     "ms": 1.002826,
+     "measured": false
+    },
+    {
+     "title": "the exclusive answer stands alone, and any other answer lets it go",
+     "ms": 4.474689,
+     "measured": false
+    },
+    {
+     "title": "a maximum that replaces gives up its oldest answer, and one without the word refuses the tap",
+     "ms": 1.58327,
+     "measured": false
+    },
+    {
+     "title": "an empty answer the server refuses is unsatisfied with its own sentence",
+     "ms": 1.705145,
+     "measured": false
+    },
+    {
+     "title": "an answer that is no longer offered is said, and the question stays unsatisfied",
+     "ms": 0.494695,
+     "measured": false
+    },
+    {
+     "title": "a question with nothing held and nothing required is answered by holding nothing",
+     "ms": 0.823965,
+     "measured": false
+    }
+   ],
+   "loaded": 37,
+   "coveredProdLines": 13537,
+   "onlyProdLines": null,
+   "testsMs": 29.6
   },
   {
    "file": "tests/color.test.ts",
@@ -20356,7 +20700,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 1123,
+   "ms": 1699,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "a declared source names the entry that holds its copies and the two verbs that move one",
@@ -20368,34 +20712,34 @@
    "tests": [
     {
      "title": "a declared source names the entry that holds its copies and the two verbs that move one",
-     "ms": 11.332743,
+     "ms": 17.594064,
      "measured": false
     },
     {
      "title": "a keep with no network waits on this phone and goes with its own body and key when it returns",
-     "ms": 38.588032,
+     "ms": 57.916684,
      "measured": false
     },
     {
      "title": "a keep the server refuses is the answer to this write: it is said and never queued",
-     "ms": 3.022121,
+     "ms": 5.91596,
      "measured": false
     },
     {
      "title": "a removal is never queued: with no answer to take it, this phone keeps the copy",
-     "ms": 2.196183,
+     "ms": 3.914025,
      "measured": false
     },
     {
      "title": "probe tells a kept copy from an absent one from nobody having said",
-     "ms": 1.604287,
+     "ms": 4.546595,
      "measured": false
     }
    ],
-   "loaded": 61,
-   "coveredProdLines": 21743,
+   "loaded": 62,
+   "coveredProdLines": 22085,
    "onlyProdLines": null,
-   "testsMs": 56.7
+   "testsMs": 89.9
   },
   {
    "file": "tests/scale.test.ts",
@@ -22347,7 +22691,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 25367,
+   "ms": 31234,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a copy whose source has gone is greyed, says so, and still opens",
@@ -22357,24 +22701,24 @@
    "tests": [
     {
      "title": "a copy whose source has gone is greyed, says so, and still opens",
-     "ms": 150,
+     "ms": 127,
      "measured": false
     },
     {
      "title": "a copy whose provider is down says it is down rather than gone",
-     "ms": 36,
+     "ms": 31,
      "measured": false
     },
     {
      "title": "a copy whose source is there says nothing about availability",
-     "ms": 32,
+     "ms": 35,
      "measured": false
     }
    ],
-   "loaded": 167,
-   "coveredProdLines": 2548,
+   "loaded": 171,
+   "coveredProdLines": 2571,
    "onlyProdLines": null,
-   "testsMs": 218
+   "testsMs": 193
   },
   {
    "file": "tests/screens/a-deck-opens-at-the-routes-reentry-spells.test.tsx",
@@ -22551,7 +22895,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 24025,
+   "ms": 28142,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a declaration pointing at no entry of this catalogue says where it pointed",
@@ -22561,7 +22905,7 @@
    "tests": [
     {
      "title": "a declaration pointing at no entry of this catalogue says where it pointed",
-     "ms": 59,
+     "ms": 58,
      "measured": false
     },
     {
@@ -22571,12 +22915,12 @@
     },
     {
      "title": "an entry that declares nothing about being saved is silence, not a defect",
-     "ms": 53,
+     "ms": 54,
      "measured": false
     }
    ],
-   "loaded": 154,
-   "coveredProdLines": 2316,
+   "loaded": 158,
+   "coveredProdLines": 2339,
    "onlyProdLines": null,
    "testsMs": 167
   },
@@ -26907,7 +27251,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 26167,
+   "ms": 27460,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "no control is drawn until somebody has answered whether a copy is kept",
@@ -26931,34 +27275,34 @@
     },
     {
      "title": "the pressed state follows the answer, and the keep quotes the version this phone read",
-     "ms": 59,
-     "measured": false
-    },
-    {
-     "title": "a press the server refused leaves the heart where it was and says why under it",
-     "ms": 16,
-     "measured": false
-    },
-    {
-     "title": "a save the network never took says the phone is holding it and never looks kept",
-     "ms": 57,
-     "measured": false
-    },
-    {
-     "title": "one record pressed twice while its write is out was pressed once",
      "ms": 58,
      "measured": false
     },
     {
+     "title": "a press the server refused leaves the heart where it was and says why under it",
+     "ms": 17,
+     "measured": false
+    },
+    {
+     "title": "a save the network never took says the phone is holding it and never looks kept",
+     "ms": 55,
+     "measured": false
+    },
+    {
+     "title": "one record pressed twice while its write is out was pressed once",
+     "ms": 57,
+     "measured": false
+    },
+    {
      "title": "a copy this person keeps opens as the kept heart, and a press takes it away by its revision",
-     "ms": 13,
+     "ms": 9,
      "measured": false
     }
    ],
-   "loaded": 153,
-   "coveredProdLines": 2376,
+   "loaded": 157,
+   "coveredProdLines": 2399,
    "onlyProdLines": null,
-   "testsMs": 267
+   "testsMs": 260
   },
   {
    "file": "tests/screens/the-notification-offer-is-one-sentence-and-two-answers.test.tsx",

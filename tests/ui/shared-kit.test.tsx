@@ -68,7 +68,9 @@ test("controlled choice, clear and quantity emit only eligible changed targets",
   await fireEvent.press(screen.getByRole("radio", { name: "Two" }));
   expect(change).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole("button", { name: "Clear" }));
-  expect(change.mock.calls).toEqual([[undefined]]);
+  // Clearing hands back no answers at all — the same empty the phone holds for a question
+  // whose answers were all let go, whatever its cardinality.
+  expect(change.mock.calls).toEqual([[[]]]);
   await screen.unmount();
   const quantity = ok(
     deriveQuantity(
