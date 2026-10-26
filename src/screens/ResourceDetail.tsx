@@ -35,6 +35,7 @@ import { useActivity } from "./useActivity";
 import { RichTextBody } from "./RichTextBody";
 import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
+import { useSaveToggle } from "./useSaveToggle";
 import { visiblePictures, eventPictures } from "../core/derive";
 import { extent } from "../ui/scale";
 import { usePictures } from "./usePictures";
@@ -57,6 +58,9 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
   const offline =
     detail.savedAt === undefined ? undefined : deriveOffline(detail.savedAt, presentation);
   const { run, busy } = useCommandRun(entry, id);
+  // Keeping a copy is asked and answered here, and reaches the record as a model: the
+  // organism draws the control and decides nothing about whether one exists.
+  const save = useSaveToggle(entry, id, detail.row);
   const router = useRouter();
   // Edit and Delete are separate doors: a resource may mount PATCH without
   // DELETE, and a caller who may amend a row may not be one who may erase it.
@@ -274,6 +278,7 @@ export function ResourceDetail({ entry, id }: ScreenProps) {
             }
           : {})}
         {...(commands.length > 0 ? { actions: { commands, running: busy, onRun: run } } : {})}
+        {...(save.model === undefined ? {} : { save: { model: save.model, onPress: save.press } })}
         {...(canDelete ? { onDelete: detail.remove } : {})}
         {...(media.enabled ? { files: media.files } : {})}
         {...(onOpenPhoto === undefined ? {} : { onOpenPhoto })}

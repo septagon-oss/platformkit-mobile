@@ -138,6 +138,9 @@ export function shellValue(api: Api, over: Partial<ShellValue> = {}): ShellValue
     // No store, so no remembered opens either: a screen that shows them draws no section,
     // which is what a device without a database is.
     recents: undefined,
+    // No saved read composed: this build draws no heart anywhere, which is what an app
+    // without that one line at its root is.
+    saved: undefined,
     // No store, so no remembered workspaces either: the connect step draws the field alone,
     // which is what a device without a database is.
     workspaces: undefined,

@@ -10,6 +10,7 @@ import type {
 } from "../generated/types.gen";
 import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
 import { drawnIcon, pictureDoor, type Pictures } from "./pictures";
+import type { SavedDeclaration } from "./saved";
 import { issuePath } from "./responses";
 import { readDeck, type Deck } from "./catalogDeck";
 
@@ -161,6 +162,20 @@ export interface EntryHints {
    * Absent means no row of this entry swipes.
    */
   readonly primaryCommand?: string;
+  /**
+   * saved declares this entry a source of saved copies — the words a heart prints and the
+   * entry that holds the person's copies of it. Every member is required, so a declaration
+   * missing one is dropped whole rather than drawn half a control; `core/saved.ts` reads
+   * `listEntry` against the mounted catalogue and answers whether a heart is drawable.
+   */
+  readonly saved?: SavedDeclaration;
+  /**
+   * availabilityField names the field of this entry whose value says whether the source of
+   * a copy is still there — "available", "unavailable" or "temporary", spelled by
+   * `core/saved.ts` alone. A pointer at a field this entry does not print costs the
+   * shading: an unshaded list is a correct list that cannot yet grey a row.
+   */
+  readonly availabilityField?: string;
 }
 
 export interface FieldHints {
@@ -526,6 +541,27 @@ function hintEntry(
     const label = hintWord(declared, "label", `${at}.highlight`, "a word", notice);
     return label === undefined ? undefined : { label };
   })();
+  // A saved declaration is all five members or nothing: the four words are what a control
+  // prints and `listEntry` is where its write goes, so a half-declaration could only draw
+  // a heart that leads nowhere. Each malformed member says for itself.
+  const saved = ((): SavedDeclaration | undefined => {
+    if (raw.saved === undefined || raw.saved === null) return undefined;
+    if (!isRecord(raw.saved)) {
+      notice(`${at}.saved`, "is not a hint object: nothing is savable");
+      return undefined;
+    }
+    const atSaved = `${at}.saved`;
+    // An absent member is silence to `hintWord` and an incomplete declaration here: the
+    // five are checked together, because a control missing one of them has nowhere to go.
+    const words = {
+      save: hintWord(raw.saved, "save", atSaved, "a word", notice) ?? "",
+      saved: hintWord(raw.saved, "saved", atSaved, "a word", notice) ?? "",
+      remove: hintWord(raw.saved, "remove", atSaved, "a word", notice) ?? "",
+      listTitle: hintWord(raw.saved, "listTitle", atSaved, "a word", notice) ?? "",
+      listEntry: hintWord(raw.saved, "listEntry", atSaved, 'a "module/entity"', notice) ?? "",
+    };
+    return Object.values(words).every((word) => word.trim() !== "") ? words : undefined;
+  })();
   const hints: EntryHints = {
     ...(() => {
       const deck = readDeck(raw.deck, fields, sortable, commands, HINT_TONES, `${at}.deck`, notice);
@@ -544,6 +580,11 @@ function hintEntry(
     ...(highlight === undefined ? {} : { highlight }),
     ...(sections.length === 0 ? {} : { sections }),
     ...(primaryCommand === undefined ? {} : { primaryCommand }),
+    ...(saved === undefined ? {} : { saved }),
+    ...(() => {
+      const field = pointer("availabilityField");
+      return field === undefined ? {} : { availabilityField: field };
+    })(),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;
 }

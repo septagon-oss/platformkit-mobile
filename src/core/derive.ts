@@ -25,6 +25,7 @@ import {
 // is "Open" in a cell there and in a cell here.
 import { proseSpoken } from "./prose";
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
+import { isKeeping } from "./saved";
 import { copyLanguage, type Copy, type Language } from "./copy";
 import type { EntrySubject } from "./failure";
 import type { DataCell } from "./collections";
@@ -1749,7 +1750,6 @@ export function commandConfirmation(command: Command, copy: Copy) {
   };
 }
 
-/** rowCommands are the commands about one record; collectionCommands are about the list. */
 /**
  * offered excludes what the catalogue marks `system`: a command the kernel runs
  * for its own reasons is never a choice a person is given. `commandOf` and
@@ -1759,11 +1759,16 @@ export function commandConfirmation(command: Command, copy: Copy) {
  */
 export const offered = (c: Command): boolean => c.hints?.system !== true;
 
-/** rowCommands are the commands about one record; collectionCommands are about the list. */
+/**
+ * rowCommands are the commands about one record; collectionCommands are about the list.
+ * Neither offers one of the two keeping writes: `isKeeping` says why — a person never types
+ * a source or a revision, so a form asking for either would be a second, false door onto
+ * the act the heart does. They stay resolvable by `commandOf`, like a system command.
+ */
 export const rowCommands = (e: Entry): readonly Command[] =>
-  e.commands.filter((c) => !c.collection && offered(c));
+  e.commands.filter((c) => !c.collection && offered(c) && !isKeeping(c));
 export const collectionCommands = (e: Entry): readonly Command[] =>
-  e.commands.filter((c) => c.collection === true && offered(c));
+  e.commands.filter((c) => c.collection === true && offered(c) && !isKeeping(c));
 
 /**
  * CommandScope is the address a command was opened at, which is the whole of

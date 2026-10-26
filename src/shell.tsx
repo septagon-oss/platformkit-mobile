@@ -36,6 +36,7 @@ import type { Session as Saved } from "./effects/session";
 import { createOutbox, type Outbox, type OutboxStore } from "./effects/outbox";
 import { createReadCache, type ReadCache, type ReadStore } from "./effects/read-cache";
 import { createRecents, type Recents, type RecentsStore } from "./effects/recents";
+import { createSaved, type SavedFinder, type SavedPort } from "./effects/saved";
 import { createWorkspaces, type Workspaces, type WorkspaceStore } from "./effects/workspaces";
 import { unknownWorkspace, workspaceOf, type Workspace } from "./core/workspace";
 import { hostLabel } from "./core/derive";
@@ -71,6 +72,13 @@ export interface ShellValue {
    * ships no table for them. It is read by the screen that shows a person their own recent opens.
    */
   readonly recents: Recents | undefined;
+  /**
+   * saved is one person's copies of other modules' records, as the screens in front of them
+   * can act on it, or nothing where this build composes no way to ask. A heart is drawn only
+   * where a port arrives *and* the record's own entry declares itself savable: an app that
+   * composes nothing draws no control rather than a control that answers nothing.
+   */
+  readonly saved: SavedPort | undefined;
   /**
    * workspaces is what this device remembers of the places it has seen a workspace answer
    * on, or nothing where this build ships no table for them. Name, host and mark only: a
@@ -227,6 +235,13 @@ interface Props {
      */
     readonly workspaces?: WorkspaceStore;
   };
+  /**
+   * saved is the read that says whether this person already keeps one record. The kit holds
+   * no list of copies of its own — the server owns that list — so all a host supplies is the
+   * one read its own server answers, and the composition is this one line. A host that
+   * supplies nothing keeps everything else it had and draws no heart anywhere.
+   */
+  readonly saved?: SavedFinder;
   /** clock is what stamps a held write; the queue's order never comes from it. */
   readonly clock?: Clock;
   /** mint names an idempotency key: expo-crypto's randomUUID on a device. */
@@ -328,6 +343,7 @@ export function Shell({
   clock,
   mint,
   reach,
+  saved: finder,
   push,
   children,
   tokenName = KEY_NAME,
@@ -645,6 +661,19 @@ export function Shell({
           })
         : undefined,
     [recentTable, baseURL, userId, clock],
+  );
+
+  const saved = useMemo(
+    () =>
+      finder &&
+      createSaved({
+        // The transport and the queue are this composition's; the address is the host's.
+        request: (method, path, validate, body, options) =>
+          api.request(method, path, validate, body, options),
+        outbox,
+        find: finder,
+      }),
+    [finder, api, outbox],
   );
 
   const workspaceTable = store?.workspaces;
@@ -1095,6 +1124,7 @@ export function Shell({
       outbox: outboxValue,
       reads,
       recents,
+      saved,
       workspaces,
       workspace,
       lookUp,
@@ -1351,6 +1381,7 @@ export function Shell({
       outboxValue,
       reads,
       recents,
+      saved,
       workspaces,
       workspace,
       lookUp,

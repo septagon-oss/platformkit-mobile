@@ -86,6 +86,13 @@ export const kitEnglish = {
   // a user id on a screen is a fact about the store, quoted to a person who cannot
   // look anything up with it.
   nameUnavailable: "Name unavailable",
+  // What a copy this person keeps says when the record it was taken from has gone. The two
+  // sentences are the provider's difference, not the kit's: a look that no longer exists
+  // and a shop that is down are one greyed row and two answers, and collapsing them would
+  // tell a person to stop wanting something they can still have tomorrow. The heart's own
+  // words are never here — the catalogue declares them.
+  savedUnavailable: "No longer available.",
+  savedTemporary: "Temporarily unavailable.",
   // A delete, asked in the words 0085 sets down: the record by its own name, the
   // warning plain, and an answer that names what it does. "Permanently" is not
   // claimed: a soft-deleting resource is recoverable by an administrator.
@@ -485,6 +492,8 @@ export const kitPortuguese: KitWords = {
   recordInformationHolds: "O identificador do registo e os momentos em que mudou.",
   recordInformationContent: "o identificador e as datas",
   nameUnavailable: "Nome indisponível",
+  savedUnavailable: "Já não está disponível.",
+  savedTemporary: "Temporariamente indisponível.",
   deleteQuestion: (title: string) => `Eliminar ‘${title}’?`,
   deleteWarning: "Não é possível anular esta ação na aplicação.",
   deleteAction: (singular: string) => `Eliminar ${singular}`,
