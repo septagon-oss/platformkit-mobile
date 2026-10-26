@@ -36,6 +36,10 @@ export const kitCaseIds = [
   "choice-chips/selected",
   "choice-chips/disabled-option",
   "choice-chips/required",
+  // The same question the chips above ask, drawn on the two surfaces that carry artwork: a
+  // card per answer, and one compiled picture with the answers named under it.
+  "choice-tiles/default",
+  "choice-figure/default",
   // The same choice group as a sheet's rows, which is what a sort or a filters sheet
   // is made of; the chips above it wrap, and a sheet is read down a column.
   "choice-rows/default",
@@ -251,6 +255,44 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
             ? { selectedId: "first" }
             : {}),
     };
+    // A choice drawn on the surfaces that wear artwork. The two colours are what the server
+    // was told to hold for these answers (`kit/entity.ChoicePicture`), which is data about
+    // the answer and not a colour this file styles with: the page's palette stays in
+    // `src/ui/theme.tsx`, and a swatch or a tile draws the colour its answer arrived with.
+    const answerSet = (figure: boolean) => ({
+      id: "option",
+      label: pt ? "Opção" : "Option",
+      choices: [
+        {
+          id: "first",
+          label: c.variantIndividual,
+          enabled: true,
+          picture: { colour: "#112233" },
+        },
+        {
+          id: "second",
+          label: c.variantTwoAdults,
+          enabled: true,
+          picture: { colour: "#AABBCC" },
+        },
+      ],
+      required: true,
+      many: true,
+      maximum: { count: 2, replacesOldest: true as const },
+      ...(held.choice
+        ? { selectedIds: [held.choice] }
+        : state === "selected"
+          ? { selectedIds: ["second"] }
+          : { selectedIds: ["first"] }),
+      ...(figure
+        ? {
+            artwork: {
+              svg: '<svg height="80" viewBox="0 0 100 80" width="100" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="40" data-choice="first" r="14"></circle><rect data-choice="second" height="28" width="28" x="56" y="26"></rect></svg>',
+              answers: ["first", "second"],
+            },
+          }
+        : {}),
+    });
     const quantity = {
       value: held.quantity ?? (state === "max" ? 10 : state === "invalid" ? 7 : 6),
       min: 2,
@@ -513,6 +555,8 @@ export function kitExamples(p: Presentation, caseId: string, held: GallerySelect
     return {
       actions: v.take(deriveActions({ label: c.actions, actions: [action, secondary] }, p)),
       choices: v.take(deriveChoices(choice, p)),
+      tiles: v.take(deriveChoices(answerSet(false), p)),
+      figure: v.take(deriveChoices(answerSet(true), p)),
       selection: v.take(
         deriveSelection(
           {
