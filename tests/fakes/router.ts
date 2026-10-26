@@ -7,9 +7,19 @@ import { jest } from "@jest/globals";
 import React from "react";
 import { Text } from "react-native";
 
+/**
+ * router is the navigator as a screen leaves the record it drew: `push` for a record, a sheet
+ * or a command's own page, and `replace` for the swap a sign-out or a landing makes. Both are
+ * remembered in `navigations`, so "did the app take the person there" is answered the same way
+ * whichever door the screen used.
+ */
 export const router = {
-  push: jest.fn<(href: string) => void>(),
-  replace: jest.fn<(href: string) => void>(),
+  push: jest.fn<(href: string) => void>((href) => {
+    navigations.push(href);
+  }),
+  replace: jest.fn<(href: string) => void>((href) => {
+    navigations.push(href);
+  }),
   back: jest.fn<() => void>(),
   canGoBack: jest.fn<() => boolean>(() => true),
 };
@@ -33,9 +43,10 @@ export const setParams = (next: Record<string, string | undefined>): void => {
   params = next;
 };
 
-/** navigations is every href a Redirect was given, oldest first. "Did the app take the
- * person back to where they were" is only answerable if the fake remembers being asked;
- * Redirect still draws what it was given, so what a test reads is what it read before. */
+/** navigations is every href the phone was given — a push, a replace or a Redirect — oldest
+ * first. "Did the app take the person back to where they were" is only answerable if the fake
+ * remembers being asked; Redirect still draws what it was given, so what a test reads is what
+ * it read before. */
 export const navigations: string[] = [];
 
 export function reset(): void {

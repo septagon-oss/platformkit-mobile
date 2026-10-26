@@ -99,6 +99,13 @@ export interface DataRow {
   readonly summary?: string;
   readonly cells: readonly DataCell[];
   readonly status?: Status;
+  /**
+   * tone is the row's own voice, and `muted` is the only shade a derived row wears: the
+   * record this row is a copy of has gone, or the provider that holds it is down, and the
+   * row's `summary` says which. The row still presses, speaks and opens: a copy this
+   * person kept is theirs to read and theirs to take away. Absent is an ordinary row.
+   */
+  readonly tone?: "muted";
   readonly selectable: boolean;
   readonly selectionReason?: string;
   readonly open?: Action;

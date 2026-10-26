@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 276,
-   "cases": 1304,
-   "ms": 2505216,
-   "testsMs": 93406.89999999994,
+   "files": 278,
+   "cases": 1316,
+   "ms": 2507313,
+   "testsMs": 93480.89999999992,
    "runners": {
     "jest": 97,
-    "node": 179
+    "node": 181
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 147,
-   "cases": 483,
-   "ms": 3682006,
-   "testsMs": 57351,
+   "files": 149,
+   "cases": 493,
+   "ms": 3733540,
+   "testsMs": 57836,
    "runners": {
-    "jest": 147
+    "jest": 149
    },
    "unreachable": 0
   },
@@ -10147,6 +10147,71 @@
    "coveredProdLines": 8909,
    "onlyProdLines": null,
    "testsMs": 15.4
+  },
+  {
+   "file": "tests/a-copy-row-says-what-became-of-the-record-it-was-taken-from.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 7,
+   "rule": "Rules this file holds about one row of a person's saved copies. The entry that holds copies prints one field saying what its source still is, and the kit reads exactly that field: a copy whose source has gone wears the theme's muted ink and says which kind of gone it is, a copy whose provider is down says down rather than gone, and a copy whose source is there is an ordinary row that keeps the line the entry writes about itself. A value that is none of the three spellings is not read as a copy whose source went, and an entry that declares no such field greys nothing at all: shading is a declaration, never a guess about a row that answered oddly.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 974,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a copy whose source has gone is greyed and says the record went",
+    "a copy whose provider is down says down and not gone",
+    "a copy whose source is there keeps the line its entry writes about itself",
+    "a field answering none of the three spellings says nothing about the source",
+    "an entry that declares no availability field greys no row and says nothing",
+    "an availability field naming no field of its own entry is refused by name",
+    "the greyed row is still the row of the copy this person kept"
+   ],
+   "tests": [
+    {
+     "title": "a copy whose source has gone is greyed and says the record went",
+     "ms": 13.420035,
+     "measured": false
+    },
+    {
+     "title": "a copy whose provider is down says down and not gone",
+     "ms": 0.586065,
+     "measured": false
+    },
+    {
+     "title": "a copy whose source is there keeps the line its entry writes about itself",
+     "ms": 0.680048,
+     "measured": false
+    },
+    {
+     "title": "a field answering none of the three spellings says nothing about the source",
+     "ms": 1.021349,
+     "measured": false
+    },
+    {
+     "title": "an entry that declares no availability field greys no row and says nothing",
+     "ms": 0.456895,
+     "measured": false
+    },
+    {
+     "title": "an availability field naming no field of its own entry is refused by name",
+     "ms": 0.59498,
+     "measured": false
+    },
+    {
+     "title": "the greyed row is still the row of the copy this person kept",
+     "ms": 0.496488,
+     "measured": false
+    }
+   ],
+   "loaded": 37,
+   "coveredProdLines": 13391,
+   "onlyProdLines": null,
+   "testsMs": 17.3
   },
   {
    "file": "tests/a-declared-visibility-and-hide-list-agree-on-every-column.test.ts",
@@ -20156,6 +20221,59 @@
    "testsMs": 13.8
   },
   {
+   "file": "tests/saved-write-goes-when-the-network-comes-back.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "Rules this file holds about one person's saved copy. A keep is a write like any other: made without a network it joins this phone's queue and goes when the network returns, carrying the same document and the same idempotency key it was asked to send the first time. A refusal is the server's answer to that write and is never queued, and a removal is never queued at all, because the queue cannot tell a 204 from a write whose fate is unknowable. `probe` answers kept, absent or nobody-has-said, and a read that failed is never read as \"this person keeps nothing\".",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1123,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a declared source names the entry that holds its copies and the two verbs that move one",
+    "a keep with no network waits on this phone and goes with its own body and key when it returns",
+    "a keep the server refuses is the answer to this write: it is said and never queued",
+    "a removal is never queued: with no answer to take it, this phone keeps the copy",
+    "probe tells a kept copy from an absent one from nobody having said"
+   ],
+   "tests": [
+    {
+     "title": "a declared source names the entry that holds its copies and the two verbs that move one",
+     "ms": 11.332743,
+     "measured": false
+    },
+    {
+     "title": "a keep with no network waits on this phone and goes with its own body and key when it returns",
+     "ms": 38.588032,
+     "measured": false
+    },
+    {
+     "title": "a keep the server refuses is the answer to this write: it is said and never queued",
+     "ms": 3.022121,
+     "measured": false
+    },
+    {
+     "title": "a removal is never queued: with no answer to take it, this phone keeps the copy",
+     "ms": 2.196183,
+     "measured": false
+    },
+    {
+     "title": "probe tells a kept copy from an absent one from nobody having said",
+     "ms": 1.604287,
+     "measured": false
+    }
+   ],
+   "loaded": 61,
+   "coveredProdLines": 21743,
+   "onlyProdLines": null,
+   "testsMs": 56.7
+  },
+  {
    "file": "tests/scale.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -22092,6 +22210,47 @@
    "coveredProdLines": 2193,
    "onlyProdLines": null,
    "testsMs": 23
+  },
+  {
+   "file": "tests/screens/a-copy-whose-source-went-is-greyed-and-says-which.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "Rules this file holds about a person's list of saved copies. A copy whose source has gone is still the copy this person kept: it stays in the list, still opens, and still says which kind of gone it is \u2014 \"this record has gone\" and \"this provider is down\" are two answers and never one sentence. The grey is the theme's muted ink and the sentence is the kit's copy table, both read through the entry's own `availabilityField`, and a copy whose source is there says nothing about availability at all.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 25367,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a copy whose source has gone is greyed, says so, and still opens",
+    "a copy whose provider is down says it is down rather than gone",
+    "a copy whose source is there says nothing about availability"
+   ],
+   "tests": [
+    {
+     "title": "a copy whose source has gone is greyed, says so, and still opens",
+     "ms": 150,
+     "measured": false
+    },
+    {
+     "title": "a copy whose provider is down says it is down rather than gone",
+     "ms": 36,
+     "measured": false
+    },
+    {
+     "title": "a copy whose source is there says nothing about availability",
+     "ms": 32,
+     "measured": false
+    }
+   ],
+   "loaded": 167,
+   "coveredProdLines": 2548,
+   "onlyProdLines": null,
+   "testsMs": 218
   },
   {
    "file": "tests/screens/a-deck-opens-at-the-routes-reentry-spells.test.tsx",
@@ -26570,6 +26729,71 @@
    "coveredProdLines": 1374,
    "onlyProdLines": null,
    "testsMs": 16
+  },
+  {
+   "file": "tests/screens/the-heart-waits-for-the-answer-before-it-says-so.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 7,
+   "rule": "Rules this file holds about the heart on a record. Nothing is drawn before the server answers whether this person keeps a copy \u2014 `unknown` is not \"not kept\", and a heart that says a copy is absent when nobody has said so is a control that lies about the person's own things. Nothing is optimistic: the pressed state follows the answer, a refusal leaves the control exactly where it was with the refusal said under it, and a write the network never took says where the change is in the queue's own words. One record pressed twice while its write is out was pressed once.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 26167,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "no control is drawn until somebody has answered whether a copy is kept",
+    "a build that composes no saved read draws no heart anywhere",
+    "the pressed state follows the answer, and the keep quotes the version this phone read",
+    "a press the server refused leaves the heart where it was and says why under it",
+    "a save the network never took says the phone is holding it and never looks kept",
+    "one record pressed twice while its write is out was pressed once",
+    "a copy this person keeps opens as the kept heart, and a press takes it away by its revision"
+   ],
+   "tests": [
+    {
+     "title": "no control is drawn until somebody has answered whether a copy is kept",
+     "ms": 61,
+     "measured": false
+    },
+    {
+     "title": "a build that composes no saved read draws no heart anywhere",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "the pressed state follows the answer, and the keep quotes the version this phone read",
+     "ms": 59,
+     "measured": false
+    },
+    {
+     "title": "a press the server refused leaves the heart where it was and says why under it",
+     "ms": 16,
+     "measured": false
+    },
+    {
+     "title": "a save the network never took says the phone is holding it and never looks kept",
+     "ms": 57,
+     "measured": false
+    },
+    {
+     "title": "one record pressed twice while its write is out was pressed once",
+     "ms": 58,
+     "measured": false
+    },
+    {
+     "title": "a copy this person keeps opens as the kept heart, and a press takes it away by its revision",
+     "ms": 13,
+     "measured": false
+    }
+   ],
+   "loaded": 153,
+   "coveredProdLines": 2376,
+   "onlyProdLines": null,
+   "testsMs": 267
   },
   {
    "file": "tests/screens/the-notification-offer-is-one-sentence-and-two-answers.test.tsx",
