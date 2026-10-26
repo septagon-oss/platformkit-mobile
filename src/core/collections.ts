@@ -78,7 +78,9 @@ export function deriveChoices(input: ChoiceGroup, p: Presentation) {
         ...c,
         label: c.count === undefined ? c.label : `${c.label} (${countText(c.count, p)})`,
         selected: held.includes(c.id),
-        change: c.enabled && !held.includes(c.id),
+        // A single answer cannot be taken back by tapping it — tapping the question's answer
+        // again is the same answer. A set of answers can: that is how one leaves a set.
+        change: c.enabled && (!held.includes(c.id) || input.many === true),
       };
     });
     const exclusive = input.choices.find((c) => c.exclusive)?.id;

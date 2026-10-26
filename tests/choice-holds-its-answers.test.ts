@@ -37,7 +37,7 @@ const held = (
           ...(a.exclusive === undefined ? {} : { exclusive: a.exclusive }),
         })),
         required: choice.answerless === undefined,
-        ...(choice.many ? { many: true, selectedIds } : { selectedId: selectedIds[0] }),
+        ...(choice.many ? { many: true as const, selectedIds } : { selectedId: selectedIds[0]! }),
         ...(choice.maximum === undefined ? {} : { maximum: choice.maximum }),
         ...(choice.answerless === undefined ? {} : { answerless: true }),
         ...(choice.reason === undefined ? {} : { reason: choice.reason }),

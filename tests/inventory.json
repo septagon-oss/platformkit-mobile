@@ -275,23 +275,23 @@
  },
  "totals": {
   "contract": {
-   "files": 37,
-   "cases": 229,
-   "ms": 74421,
-   "testsMs": 47263.40000000001,
+   "files": 38,
+   "cases": 244,
+   "ms": 75201,
+   "testsMs": 47291.700000000004,
    "runners": {
-    "node": 37
+    "node": 38
    },
    "unreachable": 0
   },
   "behaviour": {
-   "files": 276,
-   "cases": 1304,
-   "ms": 2505216,
-   "testsMs": 93406.89999999994,
+   "files": 278,
+   "cases": 1329,
+   "ms": 2526510,
+   "testsMs": 93521.49999999993,
    "runners": {
-    "jest": 97,
-    "node": 179
+    "jest": 98,
+    "node": 180
    },
    "unreachable": 0
   },
@@ -960,6 +960,119 @@
    "tier": "push",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/catalog-resolved-choice.test.ts",
+   "runner": "node",
+   "layer": "contract",
+   "cases": 15,
+   "rule": "The server decides what a finite choice draws and what its answers are; the phone reads that decision from the entry's `resolved` section and re-derives none of it. These cases hold both halves: what a well-formed section becomes, and that a malformed one costs the member that is wrong \u2014 never the field, the entry or the screen \u2014 while naming itself once.",
+   "ruleSource": "first comment",
+   "tier": "push",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 780,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the copy is the bytes the record names, at the commit it names",
+    "the same question drawn four ways arrives as four appearances",
+    "an answer's colour, a maximum that replaces and an empty the server refuses are all read",
+    "the figure appearance carries the compiled artwork and the answers its marks name",
+    "a field the section names as a plain field keeps the reading its schema gives it",
+    "an appearance this build cannot draw is drawn as chips and says so once",
+    "a cardinality that is neither word asks for one answer and says so",
+    "a figure whose artwork is missing says so and keeps its answers",
+    "an answer list that reads empty costs the choice and not the field",
+    "a choice naming a field the entry does not have is not read",
+    "a server with no resolved section says nothing and is answered in full",
+    "a resolved section that is not an object costs every reading and names itself once",
+    "a colour is the one artwork this build draws, and any other says so",
+    "a hint that is wrong about one answer leaves the rest of the choice standing",
+    "a document whose resolved section is malformed in another way is still parsed"
+   ],
+   "tests": [
+    {
+     "title": "the copy is the bytes the record names, at the commit it names",
+     "ms": 6.613927,
+     "measured": false
+    },
+    {
+     "title": "the same question drawn four ways arrives as four appearances",
+     "ms": 11.341966,
+     "measured": false
+    },
+    {
+     "title": "an answer's colour, a maximum that replaces and an empty the server refuses are all read",
+     "ms": 0.718069,
+     "measured": false
+    },
+    {
+     "title": "the figure appearance carries the compiled artwork and the answers its marks name",
+     "ms": 0.695597,
+     "measured": false
+    },
+    {
+     "title": "a field the section names as a plain field keeps the reading its schema gives it",
+     "ms": 0.673336,
+     "measured": false
+    },
+    {
+     "title": "an appearance this build cannot draw is drawn as chips and says so once",
+     "ms": 0.703191,
+     "measured": false
+    },
+    {
+     "title": "a cardinality that is neither word asks for one answer and says so",
+     "ms": 0.627201,
+     "measured": false
+    },
+    {
+     "title": "a figure whose artwork is missing says so and keeps its answers",
+     "ms": 0.622081,
+     "measured": false
+    },
+    {
+     "title": "an answer list that reads empty costs the choice and not the field",
+     "ms": 0.677523,
+     "measured": false
+    },
+    {
+     "title": "a choice naming a field the entry does not have is not read",
+     "ms": 0.698703,
+     "measured": false
+    },
+    {
+     "title": "a server with no resolved section says nothing and is answered in full",
+     "ms": 0.603146,
+     "measured": false
+    },
+    {
+     "title": "a resolved section that is not an object costs every reading and names itself once",
+     "ms": 0.621871,
+     "measured": false
+    },
+    {
+     "title": "a colour is the one artwork this build draws, and any other says so",
+     "ms": 0.624305,
+     "measured": false
+    },
+    {
+     "title": "a hint that is wrong about one answer leaves the rest of the choice standing",
+     "ms": 0.629735,
+     "measured": false
+    },
+    {
+     "title": "a document whose resolved section is malformed in another way is still parsed",
+     "ms": 2.497131,
+     "measured": false
+    }
+   ],
+   "loaded": 6,
+   "coveredProdLines": 5186,
+   "onlyProdLines": null,
+   "testsMs": 28.3
   },
   {
    "file": "tests/catalog.test.ts",
@@ -5322,6 +5435,125 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/choice-appearances-ask-in-their-own-roles.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 16,
+   "rule": "What a person sees of a finite choice is decided by the server and drawn by one of three molecules. These cases hold the two things every appearance owes whoever is using the phone: each answer is a control whose role says whether one answer or many are being asked for, and whose name is the answer's own word; and the thing they tap is big enough to aim at. Both are checked for both cardinalities, over the answers of the pinned capture.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19311,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "tiles: one answer is asked as radios, each named by its answer",
+    "tiles: many answers are asked as checkboxes, each named by its answer",
+    "tiles: every answer is big enough for a finger and says what the question is",
+    "chips: one answer is asked as radios, each named by its answer",
+    "chips: many answers are asked as checkboxes, each named by its answer",
+    "chips: every answer is big enough for a finger and says what the question is",
+    "swatch: one answer is asked as radios, each named by its answer",
+    "swatch: many answers are asked as checkboxes, each named by its answer",
+    "swatch: every answer is big enough for a finger and says what the question is",
+    "figure: one answer is asked as radios, each named by its answer",
+    "figure: many answers are asked as checkboxes, each named by its answer",
+    "figure: every answer is big enough for a finger and says what the question is",
+    "every change is handed back whole, and each one is felt once",
+    "the sentence the server refuses an empty answer with is drawn while none is held",
+    "a swatch draws the colour the answer was declared with, beside its word",
+    "the figure appearance draws the compiled artwork and keeps its answers readable"
+   ],
+   "tests": [
+    {
+     "title": "tiles: one answer is asked as radios, each named by its answer",
+     "ms": 10,
+     "measured": false
+    },
+    {
+     "title": "tiles: many answers are asked as checkboxes, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "tiles: every answer is big enough for a finger and says what the question is",
+     "ms": 5,
+     "measured": false
+    },
+    {
+     "title": "chips: one answer is asked as radios, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "chips: many answers are asked as checkboxes, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "chips: every answer is big enough for a finger and says what the question is",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "swatch: one answer is asked as radios, each named by its answer",
+     "ms": 3,
+     "measured": false
+    },
+    {
+     "title": "swatch: many answers are asked as checkboxes, each named by its answer",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "swatch: every answer is big enough for a finger and says what the question is",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "figure: one answer is asked as radios, each named by its answer",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "figure: many answers are asked as checkboxes, each named by its answer",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "figure: every answer is big enough for a finger and says what the question is",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "every change is handed back whole, and each one is felt once",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "the sentence the server refuses an empty answer with is drawn while none is held",
+     "ms": 7,
+     "measured": false
+    },
+    {
+     "title": "a swatch draws the colour the answer was declared with, beside its word",
+     "ms": 4,
+     "measured": false
+    },
+    {
+     "title": "the figure appearance draws the compiled artwork and keeps its answers readable",
+     "ms": 4,
+     "measured": false
+    }
+   ],
+   "loaded": 134,
+   "coveredProdLines": 2129,
+   "onlyProdLines": null,
+   "testsMs": 85
   },
   {
    "file": "tests/ui/choice-reset-shares-its-line.test.tsx",
@@ -13095,6 +13327,83 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/choice-holds-its-answers.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 9,
+   "rule": "A finite choice answers one question, and the catalogue decides whether that question takes one answer or an ordered set of them. These cases hold the two shapes and the three rules that decide what a tap does: the exclusive \"No preference\" answer stands alone, a declared maximum either gives up its oldest answer or refuses the tap, and a tap that changes nothing writes nothing. Every case is built from the pinned capture's own answers.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1983,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "one answer is a word and many are an ordered set",
+    "a group that spells its answer the wrong way for its cardinality is refused by name",
+    "tapping an answer in a many-answer choice adds it, and tapping it again lets it go",
+    "tapping an answer in a single-answer choice replaces it, and tapping the held answer changes nothing",
+    "the exclusive answer stands alone, and any other answer lets it go",
+    "a maximum that replaces gives up its oldest answer, and one without the word refuses the tap",
+    "an empty answer the server refuses is unsatisfied with its own sentence",
+    "an answer that is no longer offered is said, and the question stays unsatisfied",
+    "a question with nothing held and nothing required is answered by holding nothing"
+   ],
+   "tests": [
+    {
+     "title": "one answer is a word and many are an ordered set",
+     "ms": 16.04033,
+     "measured": false
+    },
+    {
+     "title": "a group that spells its answer the wrong way for its cardinality is refused by name",
+     "ms": 1.327456,
+     "measured": false
+    },
+    {
+     "title": "tapping an answer in a many-answer choice adds it, and tapping it again lets it go",
+     "ms": 2.101639,
+     "measured": false
+    },
+    {
+     "title": "tapping an answer in a single-answer choice replaces it, and tapping the held answer changes nothing",
+     "ms": 1.002826,
+     "measured": false
+    },
+    {
+     "title": "the exclusive answer stands alone, and any other answer lets it go",
+     "ms": 4.474689,
+     "measured": false
+    },
+    {
+     "title": "a maximum that replaces gives up its oldest answer, and one without the word refuses the tap",
+     "ms": 1.58327,
+     "measured": false
+    },
+    {
+     "title": "an empty answer the server refuses is unsatisfied with its own sentence",
+     "ms": 1.705145,
+     "measured": false
+    },
+    {
+     "title": "an answer that is no longer offered is said, and the question stays unsatisfied",
+     "ms": 0.494695,
+     "measured": false
+    },
+    {
+     "title": "a question with nothing held and nothing required is answered by holding nothing",
+     "ms": 0.823965,
+     "measured": false
+    }
+   ],
+   "loaded": 37,
+   "coveredProdLines": 13537,
+   "onlyProdLines": null,
+   "testsMs": 29.6
   },
   {
    "file": "tests/color.test.ts",

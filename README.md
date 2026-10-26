@@ -869,6 +869,51 @@ and the English article rule chooses its article from a label's first letter rat
 meaning, so a field labelled `URL` is asked for as "Enter an uRL." and one labelled `Hour`
 as "Enter a hour.".
 
+### How a finite choice is drawn
+
+A field with a declared `ChoiceSet` is drawn the way the server says, not the way the phone
+guesses: every catalogue entry carries a `resolved` section whose field names the surface
+(`tiles`, `chips`, `figure`, `swatch`), the answers in order, the cardinality, the maximum, the
+empty policy and the compiled artwork. Three molecules draw the four appearances — `ChoiceTiles`
+(a card per answer, its picture the largest thing on it), `ChoiceChips` (a wrapping line of
+words, and the same line with an answer's colour beside its word for `swatch`) and
+`ChoiceFigure` (the compiled picture above the answers that name it) — and one `ChoiceSurface`
+draws the question's name, its reset and its refusals around them. Each answer is a radio or a
+checkbox carrying its own label, at least `hit` points tall; a change is felt through the `onTick`
+the screen that owns `expo-haptics` supplies, because a molecule reaches no transport.
+
+**Reused** — `Button`, `Text`, `Notice`, `kitStyles` and `chosenState` for the answers and their
+chosen state; `hit` from `src/ui/scale.ts` for the touch target and `Motion` for reduced motion;
+`deriveChoices` and `ChoiceGroupModel` as the one semantics of a choice, grown to the second
+cardinality rather than copied; `HintNotice` as the only channel a malformed hint reaches a
+developer by; the pinned-fixture and provenance shape of `testdata/catalog.pictures.json`.
+**Added** — `src/core/choice.ts`, because the `resolved` section is a fact nothing in this kit read
+(its member was stripped by zod in silence) and its fallbacks are the parser's, not a component's;
+`ChoiceTiles`, `ChoiceFigure` and `ChoiceSurface`, because no existing molecule drew a card, a
+compiled artwork or the lines that stand around every appearance; `pickChoice`, because "what a
+tap does to the held answers" — the exclusive answer, the replace-oldest maximum — was a rule no
+existing owner carried.
+**Made reusable** — `Field.choice` as the phone's reading of any declared choice, so a screen,
+a form or a filter reads the same semantics instead of the schema's `enum` alone; `pickChoice`
+for any surface that lets a person hold several answers; `ChoiceSurfaceProps` (`model`,
+`onChange(ids)`, `onTick`) as the contract a fifth appearance would join; and
+`testdata/catalog.choices.json`, the first served capture in this kit that carries a resolved
+choice at all.
+
+**Limits** — the HTTP document stays pinned where it was: at the commit that merged the kernel's
+choice work, `apps/platformkit/testdata/openapi.json` declares thirteen `Resolved*` pointer members
+required and non-nullable while the served catalogue at the same commit prints `null` for them in
+131 places, so regenerating `src/generated` there would make the generated strict read refuse a
+real server's answer — which `tests/catalog-golden-contract.test.ts` reports the moment it is
+tried. The reading is therefore hand-declared here, exactly as the `presentation` hints are, and
+moves to the generated types when the kernel marks those members nullable. A `swatch` is drawn as
+a chip whose artwork is the answer's declared colour, because that is all the kernel's fourth word
+asks beyond chips; a picture or a file answer is read as no artwork and says so. The figure's own
+marks are not re-stroked when an answer is chosen — the chosen state is carried by the answer
+control beside it. No screen yet offers these appearances: a form's many-answer value plumbing
+(a `string[]` on the write, and the same on the read) is the next change, and until it lands the
+appearances are drawn by tests and the gallery rather than by a live form.
+
 ## Design
 
 Every PlatformKit phone app is composed from this directory, so the kit is why
