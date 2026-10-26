@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `808acc357` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `970bd86cb` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 38 | 244 | 47.3 s | 75 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 279 | 1331 | 93.6 s | 2528 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 147 | 483 | 57.4 s | 3682 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 283 | 1356 | 93.7 s | 2534 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 150 | 496 | 58.0 s | 3769 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 523
+* keep: 530
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 523 — 219 `tests/*.test.ts` (node), 245 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2058; cases in files no runner reaches: 35
-* isolated wall time: contract 75 s, behaviour 2528 s, composition 3682 s, journey 0 s
+* files inventoried: 530 — 223 `tests/*.test.ts` (node), 248 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2096; cases in files no runner reaches: 35
+* isolated wall time: contract 75 s, behaviour 2534 s, composition 3769 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -233,6 +233,8 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-build-claims-only-the-host-it-serves.test.ts | node | behaviour | 3 | 283 | 2.1 |  | not measured | — | 0 | keep | What a build may claim about a link: the private scheme always, and a verified HTTPS host only when the build names one itself. Android fetches /.well-known/as… |
 | tests/a-closed-deck-pass-never-reuses-its-operation-numbers.test.ts | node | behaviour | 1 | 701 | 2 |  | not measured | — | 0 | keep | A pass the deck closes after a held or unknown choice never hands its operation numbers to the next pass. The screen remembers what it already asked to confirm… |
 | tests/a-command-says-what-it-runs-on-and-what-it-does.test.ts | node | behaviour | 5 | 1373 | 15.4 |  | not measured | — | 0 | keep | What a person is told about one command, said once for the dialog, the sheet and the sentence said afterwards. The title is the command's own word and the answ… |
+| tests/a-copy-row-says-what-became-of-the-record-it-was-taken-from.test.ts | node | behaviour | 7 | 1615 | 21.8 |  | not measured | — | 0 | keep | Rules this file holds about one row of a person's saved copies. The entry that holds copies prints one field saying what its source still is, and the kit reads… |
+| tests/a-copy-row-wears-no-shade-the-row-had-to-guess.test.ts | node | behaviour | 3 | 1260 | 13.1 |  | not measured | — | 0 | keep | Rules this file holds about one row of a person's copies when the row says nothing. Shading a copy is a declaration read against a value, never a guess: a serv… |
 | tests/a-declared-visibility-and-hide-list-agree-on-every-column.test.ts | node | behaviour | 1 | 1082 | 17.8 | 0 | 0 of 1 | — | 0 | keep | A list's columns answer one question of a field, however the two tags combine: a declared visibility wins over `hideList` both ways (`shown` reclaims the colum… |
 | tests/a-delete-journey-taps-the-answer-the-question-offers.test.ts | node | behaviour | 2 | 314 | 5.3 | 0 | 0 of 2 | — | 0 | keep | Tapping the menu's Delete row opens a question the journey must answer: the delete is the run's own tidying, and a flow that leaves the question standing fails… |
 | tests/a-fact-the-header-drew-is-not-a-row-below-it.test.ts | node | behaviour | 1 | 1080 | 18.1 | 0 | 0 of 1 | — | 0 | keep | A fact is drawn once, at the highest place that draws it (0085; README "How a record opens": "A field that a higher place drew is not a row anywhere below it",… |
@@ -257,6 +259,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-remembered-record-opens-one-record-whatever-its-id-holds.test.ts | node | behaviour | 1 | 1733 | 1.4 |  | not measured | — | 0 | keep | A remembered open's address is typed `RecordAddress`, but a template literal's `${string}` matches a slash, a question mark and a hash: the type cannot say "th… |
 | tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts | node | behaviour | 5 | 1021 | 36.1 |  | not measured | — | 0 | keep | A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are writ… |
 | tests/a-save-carries-what-the-person-wrote.test.ts | node | behaviour | 3 | 947 | 13.8 |  | not measured | — | 0 | keep | What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading … |
+| tests/a-saved-declaration-names-the-member-it-is-missing.test.ts | node | behaviour | 10 | 1330 | 16.5 |  | not measured | — | 0 | keep | Rules this file holds about what a source entry must say to be savable. A saved declaration is read whole or not at all, and every member the kit cannot carry … |
 | tests/a-served-choice-capture-is-read-by-both-catalog-reads.test.ts | node | behaviour | 2 | 1379 | 46.1 |  | not measured | — | 0 | keep | The phone reads a catalogue two ways: the shell's own read, which decides the presentation hints by hand, and the strict generated read of the pinned HTTP docu… |
 | tests/a-small-picture-uses-its-stored-frame.test.ts | node | behaviour | 2 | 1918 | 2.8 |  | not measured | — | 0 | keep | (no first comment; first test title) a 256px picture uses the original when no smaller declared variant exists |
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
@@ -381,6 +384,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/richtext-field-is-prose.test.ts | node | behaviour | 1 | 692 | 1.1 | 0 | 0 of 1 | — | 0 | keep | A `widget:richtext` field held a one-line text box on the phone (2026-10-09, the owner writing content): kind() had no richtext branch, so a body fell through … |
 | tests/row-primary-command.test.ts | node | behaviour | 10 | 1009 | 14.2 |  | not measured | — | 0 | keep | The row's command is the entry's declaration, read: which verb a swipe may run, and what an author's mistake costs. Every case is served bytes through the ship… |
 | tests/row-swipe.test.ts | node | behaviour | 10 | 2736 | 13.8 |  | not measured | — | 0 | keep | Where a drag has got, and which command a row would run: the one arithmetic a swiped surface makes, and the one resolution of the entry's declared verb. Both a… |
+| tests/saved-write-goes-when-the-network-comes-back.test.ts | node | behaviour | 5 | 1699 | 89.9 |  | not measured | — | 0 | keep | Rules this file holds about one person's saved copy. A keep is a write like any other: made without a network it joins this phone's queue and goes when the net… |
 | tests/scale.test.ts | node | behaviour | 2 | 344 | 7.9 | 0 | 0 of 2 | — | 0 | keep | A distance is written once, in src/ui/scale.ts. This reads every other presentation source and refuses a nonzero numeric literal where a style or a prop asks f… |
 | tests/secret-scan-exemption-target.test.ts | node | behaviour | 1 | 356 | 1.5 | 0 | 0 of 1 | — | 0 | keep | The history scan's exemption is matched against the secret a rule captured, not against the line that holds it. gitleaks reads `regexTarget = "line"` as "swall… |
 | tests/secret-scan-fixture-allowlist.test.ts | node | behaviour | 6 | 348 | 4.2 | 0 | 0 of 6 | — | 0 | keep | What the history scan is told to swallow, held to its size. `scripts/gitleaks.sh` reads every commit, so a credential-shaped string a test introduces stays und… |
@@ -424,11 +428,13 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-caught-up-deck-plays-the-products-finish-once-under-normal-motion.test.tsx | jest | composition | 2 | 43947 | 807 |  | not measured | — | 0 | keep | A deck screen that reaches its end through a command this phone sent plays the product's finishing renderer, supplied once to the shell, inside the end state; … |
 | tests/screens/a-complete-translation-save-keeps-the-source.test.tsx | jest | composition | 2 | 20586 | 188 |  | not measured | — | 0 | keep | Content-Language names the requested locale; _i18n may instead name the source of a fallback. A translator's edit in that locale must preserve the source in bo… |
 | tests/screens/a-completed-delete-survives-local-recents-failure.test.tsx | jest | composition | 3 | 27889 | 23 |  | not measured | — | 0 | keep | A server-confirmed delete stays completed when this device cannot clean up its reading history. A local cache error cannot turn that answer into an uncertain m… |
+| tests/screens/a-copy-whose-source-went-is-greyed-and-says-which.test.tsx | jest | composition | 3 | 31234 | 193 |  | not measured | — | 0 | keep | Rules this file holds about a person's list of saved copies. A copy whose source has gone is still the copy this person kept: it stays in the list, still opens… |
 | tests/screens/a-deck-opens-at-the-routes-reentry-spells.test.tsx | jest | composition | 2 | 46214 | 646 |  | not measured | — | 0 | keep | The deck's two doors are routes `reentry` spells: the list's queue button opens the deck at `address("deck", …)`, and a card the person taps opens its record a… |
 | tests/screens/a-default-richtext-record-renders-its-whole-body.test.tsx | jest | composition | 1 | 27490 | 66 |  | not measured | — | 0 | keep | A richtext declaration renders its body natively under the catalog's default presentation. Choosing it as a record preview must not remove its rich rendering. |
 | tests/screens/a-delete-that-left-this-phone-takes-its-door-with-it.test.tsx | jest | composition | 2 | 33376 | 14 |  | not measured | — | 0 | keep | "Recently opened" is a door onto a record, so a record this phone deleted leaves the list: a section that kept its row would draw a door onto a 404. The delete… |
 | tests/screens/a-device-is-registered-with-the-credential-its-door-answers-to.test.tsx | jest | composition | 1 | 20870 | 104 |  | not measured | — | 0 | keep | A device is registered, and taken back, with the credential its door answers to. The pinned API document says which one each door takes (`x-platformkit-auth`):… |
 | tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
+| tests/screens/a-dropped-saved-declaration-says-which-member-it-lacked.test.tsx | jest | composition | 3 | 28142 | 167 |  | not measured | — | 0 | keep | Rules this file holds about the heart's absence. A saved declaration the phone cannot carry costs the control and says which member it could not carry — throug… |
 | tests/screens/a-finished-line-speaks-only-for-the-write-that-finished-it.test.tsx | jest | composition | 2 | 29837 | 1343 |  | not measured | — | 0 | keep | The finished line ("Note done", `record-finished`) is about the state the record holds and the write this phone made. When a later write takes the record back … |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
 | tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx | jest | composition | 2 | 52235 | 161 |  | not measured | — | 0 | keep | A registration refusal from an ended session cannot decide whether the next workspace registers this phone. Each completed sign-in must read its own platform a… |
@@ -517,6 +523,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/sign-out-asks-before-held-writes-go.test.tsx | jest | composition | 1 | 23996 | 304 |  | not measured | — | 0 | keep | Signing out clears what this phone is holding, so every way out asks first while a write is held — including the one a catalog that could not be read offers, w… |
 | tests/screens/singleton-cancelled-refusal.test.tsx | jest | composition | 1 | 21526 | 37 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) cancelling a refused singleton draft allows the next valid edit to save |
 | tests/screens/singleton-preserves-hidden-values.test.tsx | jest | composition | 2 | 16760 | 16 |  | not measured | — | 0 | keep | (no first comment; first test title) a singleton PUT preserves hidden list commas when only its title changes |
+| tests/screens/the-heart-waits-for-the-answer-before-it-says-so.test.tsx | jest | composition | 7 | 27460 | 260 |  | not measured | — | 0 | keep | Rules this file holds about the heart on a record. Nothing is drawn before the server answers whether this person keeps a copy — `unknown` is not "not kept", a… |
 | tests/screens/the-notification-offer-is-one-sentence-and-two-answers.test.tsx | jest | composition | 3 | 22137 | 23 |  | not measured | — | 0 | keep | The notification question is one block on the page: the sentence the copy table owns, the one primary answer that opens the platform's prompt, and a secondary … |
 | tests/screens/typed-write-names-the-write-the-queue-holds.test.tsx | jest | composition | 4 | 24424 | 72 |  | not measured | — | 0 | keep | A sheet's own typed call carries the idempotency key the queue minted for the write — not only the later replay does. The attempt the transport refused may hav… |
 | tests/screens/useActivity.test.tsx | jest | composition | 14 | 23788 | 364 | 0 | 0 of 14 | — | 0 | keep | (no first comment; first test title) session denial clears actor names and history through a pending reload until fresh content arrives |

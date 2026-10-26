@@ -52,6 +52,7 @@ import { LoadMore } from "./molecules/LoadMore";
 import { Row } from "./molecules/Row";
 import { Section } from "./molecules/Section";
 import { HeldWriteRow } from "./molecules/HeldWriteRow";
+import { SaveButton } from "./molecules/SaveButton";
 import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
@@ -666,6 +667,26 @@ function Samples({
           }}
           onRetry={none}
           onDiscard={none}
+        />
+      </Section>
+
+      {/* Both words are the catalogue's: a saved declaration is the only source of what the
+          heart says. The four states are the ones a record can be in — nobody has answered
+          yet is drawn as nothing at all, so it has no specimen here. */}
+      <Section title="A copy this person keeps">
+        <SaveButton model={{ label: "Save", kept: false }} onPress={none} />
+        <SaveButton model={{ label: "Saved", kept: true }} onPress={none} />
+        <SaveButton
+          model={{ label: "Saved", kept: true, busy: true, disabled: true }}
+          onPress={none}
+        />
+        <SaveButton
+          model={{
+            label: "Save",
+            kept: false,
+            note: "Held on this phone: it goes when the network returns",
+          }}
+          onPress={none}
         />
       </Section>
 

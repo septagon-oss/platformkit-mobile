@@ -10,6 +10,7 @@ import type {
 } from "../generated/types.gen";
 import { zCatalog, zCommand, zEntry, zField } from "../generated/zod.gen";
 import { drawnIcon, pictureDoor, type Pictures } from "./pictures";
+import type { SavedDeclaration } from "./saved";
 import { issuePath } from "./responses";
 import { readDeck, type Deck } from "./catalogDeck";
 import { applyChoices, type FieldChoice } from "./choice";
@@ -168,6 +169,23 @@ export interface EntryHints {
    * Absent means no row of this entry swipes.
    */
   readonly primaryCommand?: string;
+  /**
+   * saved declares this entry a source of saved copies — the words a heart prints, the word
+   * that names the removal when it is refused, and the entry that holds the person's copies
+   * of it. Every member is required, so a declaration missing one is dropped whole rather
+   * than drawn half a control, and each missing member says which it is; `core/saved.ts`
+   * reads `listEntry` against the mounted catalogue and answers whether a heart is drawable.
+   * The kernel's `listTitle` is no member of this kit: it names a page the composition owns,
+   * which this phone already names from that entry's own words.
+   */
+  readonly saved?: SavedDeclaration;
+  /**
+   * availabilityField names the field of this entry whose value says whether the source of
+   * a copy is still there — "available", "unavailable" or "temporary", spelled by
+   * `core/saved.ts` alone. A pointer at a field this entry does not print costs the
+   * shading: an unshaded list is a correct list that cannot yet grey a row.
+   */
+  readonly availabilityField?: string;
 }
 
 export interface FieldHints {
@@ -537,6 +555,41 @@ function hintEntry(
     const label = hintWord(declared, "label", `${at}.highlight`, "a word", notice);
     return label === undefined ? undefined : { label };
   })();
+  // A saved declaration is the four members a keeping control cannot do without, or nothing:
+  // the two words the heart prints, the word that names the removal when it is refused, and
+  // the entry the copy lives on, so a half-declaration could only draw a control that leads
+  // nowhere. Every member that is missing, blank or not a word says for itself: an author
+  // reading a refused heart has to be told which word their document left out. The kernel's
+  // fifth word (`listTitle`) is not read here — see `SavedDeclaration`.
+  const saved = ((): SavedDeclaration | undefined => {
+    if (raw.saved === undefined || raw.saved === null) return undefined;
+    if (!isRecord(raw.saved)) {
+      notice(`${at}.saved`, "is not a hint object: nothing is savable");
+      return undefined;
+    }
+    const declared = raw.saved;
+    const atSaved = `${at}.saved`;
+    const word = (member: string, what: string): string | undefined => {
+      const value = declared[member];
+      if (value === undefined) {
+        notice(`${atSaved}.${member}`, `declares no ${what}: nothing is savable`);
+        return undefined;
+      }
+      if (typeof value !== "string" || value.trim() === "") {
+        notice(`${atSaved}.${member}`, `is not ${what}: nothing is savable`);
+        return undefined;
+      }
+      return value;
+    };
+    // Asked for one at a time, so a document missing two of them says both.
+    const keep = word("save", "word to keep a copy with");
+    const kept = word("saved", "word to name a copy kept");
+    const away = word("remove", "word to name the copy taken away");
+    const listEntry = word("listEntry", '"module/entity" of the entry holding the copies');
+    return keep === undefined || kept === undefined || away === undefined || listEntry === undefined
+      ? undefined
+      : { save: keep, saved: kept, remove: away, listEntry };
+  })();
   const hints: EntryHints = {
     ...(() => {
       const deck = readDeck(raw.deck, fields, sortable, commands, HINT_TONES, `${at}.deck`, notice);
@@ -555,6 +608,11 @@ function hintEntry(
     ...(highlight === undefined ? {} : { highlight }),
     ...(sections.length === 0 ? {} : { sections }),
     ...(primaryCommand === undefined ? {} : { primaryCommand }),
+    ...(saved === undefined ? {} : { saved }),
+    ...(() => {
+      const field = pointer("availabilityField");
+      return field === undefined ? {} : { availabilityField: field };
+    })(),
   };
   return Object.keys(hints).length === 0 ? undefined : hints;
 }

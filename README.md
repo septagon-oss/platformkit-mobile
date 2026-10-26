@@ -694,6 +694,69 @@ reading it changes in place, and asks nothing of a caller that has no preference
 nothing; `travelTo`/`travelled` on the shell, which carry one frame under one address and never a row;
 and `record-finished` as the id a journey and a screen reader both find the sentence by.
 
+#### A record can be kept
+
+A person keeps a copy of a record so the copy outlives the record. The server owns that copy and
+this phone holds no table of it: `probe` asks whether one is kept, `keep` asks for one, and
+`remove` takes one away (`src/core/saved.ts` over `src/effects/saved.ts`). Nothing about the copy
+is device-local, because a copy is the same person's on the web, and a phone with its own list
+would answer differently for the same account.
+
+Two declarations decide whether the heart exists, and both have to hold. A **source entry**
+declares `presentation.saved` — the word to keep a copy with, the word for a copy kept, the word
+that names the copy taken away, and `listEntry`, the "module/entity" of the entry that holds this
+person's copies of it. The kernel's fifth word, `listTitle`, names a page a composition owns; this
+kit names that page from the entry's own `presentation.plural`, so it neither reads the word nor
+gates the control on it. A **saved entry** declares `presentation.availabilityField`, the one field
+whose value says whether the source of a copy is still there. Every member that is missing, blank
+or not a word names itself through the `HintNotice` the catalogue read was given, and
+`savable` — which is the only reader of the declaration, and resolves `listEntry` against the
+mounted catalogue — says itself through `Api.notice`. A heart that went missing with no line to
+follow is a defect no author can find.
+
+Neither write is ever offered as a form, a question or a swipe, because the two arguments they
+take (`source`, `expectedRevision`) are what the screen already holds; `rowCommands` and
+`collectionCommands` withhold them by the argument each carries, never by a resource key, and
+`commandOf` still resolves both. The heart is the one door onto the act, and it lies about nobody:
+`unknown` — nobody has answered yet — draws no control at all, the pressed state follows the
+server's answer, a refusal leaves the control where it was and says why under it, and a save the
+network never took says the phone is holding it in the queue's own words. A removal quotes the
+revision its row arrived with, and is never queued: an offline phone cannot take a copy away, and
+writes nothing while it pretends to.
+
+A copy of a record that has gone stays in the list, still opens, and says which kind of gone it
+is. `presentation.availabilityField` is read by `listRow`, so the generated list of the saved entry
+draws that row in the theme's muted ink with the kit's sentence under its name: "No longer
+available." and "Temporarily unavailable." are two answers — one says the record is gone, the other
+that the provider is down — and a copy whose source is there says nothing about availability and
+keeps the line its own entry writes.
+
+**Reused** — `createOutbox.submit` and its `sent: false` answer for a save the network never took,
+`commandPath` for both write addresses, `useResourceList`/`ListScreen`/`Row` for the window of
+copies, `refusalOf` and `screenCopy` for every refusal sentence, `copy.state.holding` for the held
+save, `Button`/`Icon`/`Text`/`Section`/`testable`/`chosenState`/`useTheme`, the catalogue's own
+`hintWord`/`pointer` readers, and `heldScope`, untouched. **Added** — `src/core/saved.ts`
+(`AVAILABILITY`, `savedAvailability`, `savedRef`, `saveBody`, `unsaveBody`, `sourceRef`,
+`expectedSourceVersion`, `isKeeping`, `savable`, `savedCopy`), because the three availability
+spellings and the two bodies existed nowhere in the phone and a screen inventing either would be a
+claim about a server it has not met; `src/effects/saved.ts` (`SavedPort`, `SavedFinder`,
+`SavedDeps`, `createSaved`, `KeptAnswer`), because every other port either holds a device-local
+table or a queued write, and neither can answer whether this person keeps this record;
+`src/screens/useSaveToggle.ts`, `src/ui/molecules/SaveButton.tsx`, `presentation.saved` and
+`presentation.availabilityField` on an entry's hints, `Row`'s `muted` tone (greyed, pressable,
+still offering its action), `Icon`'s `heart`/`heartFilled`, two sentences in both languages, and
+`Api.notice`, the transport's own once-per-defect line, which a declaration resolved later than the
+read now shares. **Made reusable** — `SavedFinder` as the one composition seam, so either shape the
+kernel may publish (a find read of its own, or the answer carried on the source's own read) lands
+in one adapter body and touches no component; `Shell`'s optional `saved` prop, which is that one
+line at the app root; `Api.notice`; and the ids `saved-heart` and `saved-heart-pressed`.
+
+**Limits** — the kit draws no list of copies of its own: the declaration's `listEntry` is an
+ordinary catalogue entry and the generated list screen is the person's list, so `listTitle` is the
+product's word for a door no composition in this repository mounts. No server in this build answers
+any of it: no pinned document declares a savable entry, so every case runs over a catalogue a test
+mounted, and the journey that presses the heart needs a server that mounts the two commands first.
+
 ### How a form asks
 
 Three questions decide what a sheet holds, and all three are answered in

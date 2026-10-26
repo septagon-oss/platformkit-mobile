@@ -228,6 +228,7 @@ export function DataList({
                   }
                 : {})}
             cells={row.cells}
+            {...(row.tone ? { tone: row.tone } : {})}
             {...(row.summary ? { summary: row.summary } : {})}
             {...(row.cells.some((cell) => cell.field)
               ? {

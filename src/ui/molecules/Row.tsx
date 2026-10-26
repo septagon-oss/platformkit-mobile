@@ -24,8 +24,13 @@ interface Props {
   /** trailing is the row's reserved right column: the number, pill or tick a scan reads down. */
   readonly trailing?: ReactNode;
   readonly onPress?: () => void;
-  /** tone says what pressing the row does: a destructive row is red and opens nothing. */
-  readonly tone?: "primary" | "destructive";
+  /**
+   * tone says what pressing the row does: a destructive row is red and opens nothing, and a
+   * muted row is one whose subject has gone away — it wears the theme's muted ink and says
+   * which in its summary, and it still opens and still offers its action, because a copy
+   * this person kept is still theirs to read and still theirs to take away.
+   */
+  readonly tone?: "primary" | "destructive" | "muted";
   /** busy is a row whose press is under way: the chevron becomes a spinner and the press is off. */
   readonly busy?: boolean;
   /** selected is the row a filter or a single choice stands on, not a row being pressed. */
@@ -86,7 +91,7 @@ export function Row({
   const t = useTheme();
   const s = useStyles(styles);
   const [hovered, setHovered] = useState(false);
-  const opens = (leads ?? true) && tone === "primary" && !!onPress;
+  const opens = (leads ?? true) && tone !== "destructive" && !!onPress;
   return (
     <Pressable
       style={({ pressed }) => [
@@ -133,7 +138,7 @@ export function Row({
         ) : null}
         <Text
           weight="semibold"
-          tone={tone === "destructive" ? "danger" : "primary"}
+          tone={tone === "destructive" ? "danger" : tone === "muted" ? "muted" : "primary"}
           numberOfLines={2}
         >
           {title}
