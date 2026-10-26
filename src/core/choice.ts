@@ -85,6 +85,28 @@ const word = (v: unknown): string | undefined =>
   typeof v === "string" && v !== "" ? v : undefined;
 
 /**
+ * applyChoices reads the section and joins what it names onto the entry's own fields, by name.
+ * A choice naming a field the entry does not have is no reading of anything, so it is dropped and
+ * says so; a field the section does not name keeps the reading its schema gave it.
+ */
+export function applyChoices<T extends { readonly name: string }>(
+  fields: readonly T[],
+  resolved: unknown,
+  at: string,
+  notice: HintNotice,
+): readonly (T & { readonly choice?: FieldChoice })[] {
+  const choices = readResolved(
+    resolved,
+    at,
+    fields.map((f) => f.name),
+    notice,
+  );
+  return fields.map((f) =>
+    Object.prototype.hasOwnProperty.call(choices, f.name) ? { ...f, choice: choices[f.name] } : f,
+  );
+}
+
+/**
  * readChoice reads one resolved field's choice, or says that this field names none.
  *
  * A field whose `kind` is not a choice names none: the section resolves every field of the
@@ -153,7 +175,7 @@ export function readChoice(
  * reading of anything, so it is dropped and says so. An entry with no section (a server too old
  * to print one) answers with nothing and says nothing.
  */
-export function readResolved(
+function readResolved(
   v: unknown,
   at: string,
   names: readonly string[],
