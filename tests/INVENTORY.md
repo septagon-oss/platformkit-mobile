@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `f127f26eb` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `c9271c609` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 278 | 1316 | 93.5 s | 2507 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 149 | 493 | 57.8 s | 3734 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 279 | 1326 | 93.5 s | 2508 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 150 | 496 | 58.0 s | 3758 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 523
+* keep: 525
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 523 — 218 `tests/*.test.ts` (node), 246 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2038; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2507 s, composition 3734 s, journey 0 s
+* files inventoried: 525 — 219 `tests/*.test.ts` (node), 247 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2051; cases in files no runner reaches: 35
+* isolated wall time: contract 74 s, behaviour 2508 s, composition 3758 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -256,6 +256,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-remembered-record-opens-one-record-whatever-its-id-holds.test.ts | node | behaviour | 1 | 1733 | 1.4 |  | not measured | — | 0 | keep | A remembered open's address is typed `RecordAddress`, but a template literal's `${string}` matches a slash, a question mark and a hash: the type cannot say "th… |
 | tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts | node | behaviour | 5 | 1021 | 36.1 |  | not measured | — | 0 | keep | A record with a translatable field is read through a door that names a language, and the tag the answer prints is the language the words on the screen are writ… |
 | tests/a-save-carries-what-the-person-wrote.test.ts | node | behaviour | 3 | 947 | 13.8 |  | not measured | — | 0 | keep | What a Save sends is what this person wrote, and the record's own address never takes a language's words. Three answers are owed here: a create has no reading … |
+| tests/a-saved-declaration-names-the-member-it-is-missing.test.ts | node | behaviour | 10 | 938 | 14.2 |  | not measured | — | 0 | keep | Rules this file holds about what a source entry must say to be savable. A saved declaration is read whole or not at all, and every member the kit cannot carry … |
 | tests/a-small-picture-uses-its-stored-frame.test.ts | node | behaviour | 2 | 1918 | 2.8 |  | not measured | — | 0 | keep | (no first comment; first test title) a 256px picture uses the original when no smaller declared variant exists |
 | tests/a-state-the-pill-says-is-not-a-cell-beside-it.test.ts | node | behaviour | 3 | 1264 | 25.9 | 0 | 0 of 3 | — | 0 | keep | A fact is drawn once, at the place that owes it. The record already holds that rule: what its header drew (the primary field, the declared state, the preview) … |
 | tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts | node | behaviour | 2 | 1007 | 10.7 |  | not measured | — | 0 | keep | A whole-row replace carries what nobody typed exactly as the read returned it. The body builder is `writeControls`, and two of its promises have no case of the… |
@@ -428,6 +429,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-delete-that-left-this-phone-takes-its-door-with-it.test.tsx | jest | composition | 2 | 33376 | 14 |  | not measured | — | 0 | keep | "Recently opened" is a door onto a record, so a record this phone deleted leaves the list: a section that kept its row would draw a door onto a 404. The delete… |
 | tests/screens/a-device-is-registered-with-the-credential-its-door-answers-to.test.tsx | jest | composition | 1 | 20870 | 104 |  | not measured | — | 0 | keep | A device is registered, and taken back, with the credential its door answers to. The pinned API document says which one each door takes (`x-platformkit-auth`):… |
 | tests/screens/a-dialog-command-says-what-it-did-on-the-record-it-ran-on.test.tsx | jest | composition | 2 | 17372 | 45 |  | not measured | — | 0 | keep | A command with no argument is a question in the platform's dialog, and when it is asked from a record's own screen the record is what hears the answer: the sen… |
+| tests/screens/a-dropped-saved-declaration-says-which-member-it-lacked.test.tsx | jest | composition | 3 | 24025 | 167 |  | not measured | — | 0 | keep | Rules this file holds about the heart's absence. A saved declaration the phone cannot carry costs the control and says which member it could not carry — throug… |
 | tests/screens/a-finished-line-speaks-only-for-the-write-that-finished-it.test.tsx | jest | composition | 2 | 29837 | 1343 |  | not measured | — | 0 | keep | The finished line ("Note done", `record-finished`) is about the state the record holds and the write this phone made. When a later write takes the record back … |
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
 | tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx | jest | composition | 2 | 52235 | 161 |  | not measured | — | 0 | keep | A registration refusal from an ended session cannot decide whether the next workspace registers this phone. Each completed sign-in must read its own platform a… |

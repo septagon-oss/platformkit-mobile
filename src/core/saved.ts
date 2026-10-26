@@ -83,18 +83,25 @@ export const expectedSourceVersion = (row: Readonly<Record<string, unknown>>): s
 };
 
 /**
- * SavedDeclaration is what a source entry says about being saved: the four words the kit
- * prints (to keep, already kept, take away, and the name of the list that holds them) and
- * `listEntry`, the "module/entity" of the entry that holds this person's copies. All five
- * are required: a heart with no word to print, or pointing at no list, is a control that
- * lies. The words arrive in the reader's language with the catalogue read, which is why
- * none of them lives in the kit's own table of sentences.
+ * SavedDeclaration is what a source entry says about being saved: the two words the heart
+ * prints (to keep, already kept), the word for taking the copy away, and `listEntry`, the
+ * "module/entity" of the entry that holds this person's copies. All four are required: a
+ * control with no word to print, or a keep with nowhere to go, is a control that lies, and
+ * each member the catalogue withholds now says for itself at its own document path.
+ *
+ * The kernel's `contracts.Words` carries a fifth word, `listTitle`, which is deliberately
+ * not a member here: it names the page a composition owns, and this kit names every list
+ * from that entry's own declared words (`presentation.plural`), so gating a heart on a word
+ * no phone prints would refuse the control for a fact the screen never needed. `remove` is
+ * kept because a refusal of the removal has to name the act it refused.
+ *
+ * The words arrive in the reader's language with the catalogue read, which is why none of
+ * them lives in the kit's own table of sentences.
  */
 export interface SavedDeclaration {
   readonly save: string;
   readonly saved: string;
   readonly remove: string;
-  readonly listTitle: string;
   readonly listEntry: string;
 }
 
@@ -171,11 +178,13 @@ export const isKeeping = (c: Command): boolean =>
  * savable reads one entry as a source of saved copies.
  *
  * `mounted` is the catalogue this app holds, because the declaration points at another
- * entry: a declaration naming nothing the server prints is a defect and says so. The
- * saved entry must offer `save` about the collection (a keep carries a source, not a row
- * id) and `unsave` about one record — the two shapes the kit's own writes take. Anything
- * else answers nothing and costs the heart alone: the entry keeps its list, its detail
- * and every other hint it declared.
+ * entry: a declaration naming nothing the server prints is a defect and says so at
+ * `presentation.saved.listEntry`, the path the catalogue itself was read with. The saved
+ * entry must offer `save` about the collection (a keep carries a source, not a row id) and
+ * `unsave` about one record — the two shapes the kit's own writes take. Anything else
+ * answers nothing and costs the heart alone: the entry keeps its list, its detail and every
+ * other hint it declared. A caller that can reach a developer passes the notice sink; a
+ * caller that cannot (a test, a read of a document it will not draw) leaves the default.
  */
 export function savable(
   source: Entry,
@@ -187,7 +196,10 @@ export function savable(
   const at = `presentation.saved.listEntry`;
   const list = mounted.find((e) => key(e) === words.listEntry);
   if (list === undefined) {
-    notice(at, "names no entry the mounted catalogue prints: no heart is drawn");
+    notice(
+      at,
+      `names "${words.listEntry}", which no entry of this catalogue prints: no heart is drawn`,
+    );
     return undefined;
   }
   const keep = list.commands.find((c) => c.verb === savingVerb);

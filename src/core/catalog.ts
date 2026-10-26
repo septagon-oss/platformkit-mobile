@@ -163,10 +163,13 @@ export interface EntryHints {
    */
   readonly primaryCommand?: string;
   /**
-   * saved declares this entry a source of saved copies — the words a heart prints and the
-   * entry that holds the person's copies of it. Every member is required, so a declaration
-   * missing one is dropped whole rather than drawn half a control; `core/saved.ts` reads
-   * `listEntry` against the mounted catalogue and answers whether a heart is drawable.
+   * saved declares this entry a source of saved copies — the words a heart prints, the word
+   * that names the removal when it is refused, and the entry that holds the person's copies
+   * of it. Every member is required, so a declaration missing one is dropped whole rather
+   * than drawn half a control, and each missing member says which it is; `core/saved.ts`
+   * reads `listEntry` against the mounted catalogue and answers whether a heart is drawable.
+   * The kernel's `listTitle` is no member of this kit: it names a page the composition owns,
+   * which this phone already names from that entry's own words.
    */
   readonly saved?: SavedDeclaration;
   /**
@@ -541,26 +544,40 @@ function hintEntry(
     const label = hintWord(declared, "label", `${at}.highlight`, "a word", notice);
     return label === undefined ? undefined : { label };
   })();
-  // A saved declaration is all five members or nothing: the four words are what a control
-  // prints and `listEntry` is where its write goes, so a half-declaration could only draw
-  // a heart that leads nowhere. Each malformed member says for itself.
+  // A saved declaration is the four members a keeping control cannot do without, or nothing:
+  // the two words the heart prints, the word that names the removal when it is refused, and
+  // the entry the copy lives on, so a half-declaration could only draw a control that leads
+  // nowhere. Every member that is missing, blank or not a word says for itself: an author
+  // reading a refused heart has to be told which word their document left out. The kernel's
+  // fifth word (`listTitle`) is not read here — see `SavedDeclaration`.
   const saved = ((): SavedDeclaration | undefined => {
     if (raw.saved === undefined || raw.saved === null) return undefined;
     if (!isRecord(raw.saved)) {
       notice(`${at}.saved`, "is not a hint object: nothing is savable");
       return undefined;
     }
+    const declared = raw.saved;
     const atSaved = `${at}.saved`;
-    // An absent member is silence to `hintWord` and an incomplete declaration here: the
-    // five are checked together, because a control missing one of them has nowhere to go.
-    const words = {
-      save: hintWord(raw.saved, "save", atSaved, "a word", notice) ?? "",
-      saved: hintWord(raw.saved, "saved", atSaved, "a word", notice) ?? "",
-      remove: hintWord(raw.saved, "remove", atSaved, "a word", notice) ?? "",
-      listTitle: hintWord(raw.saved, "listTitle", atSaved, "a word", notice) ?? "",
-      listEntry: hintWord(raw.saved, "listEntry", atSaved, 'a "module/entity"', notice) ?? "",
+    const word = (member: string, what: string): string | undefined => {
+      const value = declared[member];
+      if (value === undefined) {
+        notice(`${atSaved}.${member}`, `declares no ${what}: nothing is savable`);
+        return undefined;
+      }
+      if (typeof value !== "string" || value.trim() === "") {
+        notice(`${atSaved}.${member}`, `is not ${what}: nothing is savable`);
+        return undefined;
+      }
+      return value;
     };
-    return Object.values(words).every((word) => word.trim() !== "") ? words : undefined;
+    // Asked for one at a time, so a document missing two of them says both.
+    const keep = word("save", "word to keep a copy with");
+    const kept = word("saved", "word to name a copy kept");
+    const away = word("remove", "word to name the copy taken away");
+    const listEntry = word("listEntry", '"module/entity" of the entry holding the copies');
+    return keep === undefined || kept === undefined || away === undefined || listEntry === undefined
+      ? undefined
+      : { save: keep, saved: kept, remove: away, listEntry };
   })();
   const hints: EntryHints = {
     ...(() => {

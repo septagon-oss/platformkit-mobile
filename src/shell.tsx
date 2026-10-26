@@ -240,6 +240,11 @@ interface Props {
    * no list of copies of its own — the server owns that list — so all a host supplies is the
    * one read its own server answers, and the composition is this one line. A host that
    * supplies nothing keeps everything else it had and draws no heart anywhere.
+   *
+   * Like every other member the composition root supplies, it is passed by reference and
+   * given once: a read built inside a render is a new read on every pass, and every open
+   * record would then ask its question again. The app root keeps the one function it passes,
+   * the way it keeps the `mint` and `reach` it hands to this same prop list.
    */
   readonly saved?: SavedFinder;
   /** clock is what stamps a held write; the queue's order never comes from it. */

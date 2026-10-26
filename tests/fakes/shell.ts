@@ -47,6 +47,9 @@ export function fakeApi(operations: Partial<Operations> = {}): FakeApi {
     answerFactor: jest.fn<Api["answerFactor"]>(async () => bearer),
     logout: jest.fn<Api["logout"]>(async () => ({ revoked: true, live: false })),
     catalog: jest.fn<Api["catalog"]>(async () => catalog),
+    // A hint the fake's catalogue carries badly would say so here, where a test can read it
+    // instead of hunting a control that was never drawn.
+    notice: jest.fn<Api["notice"]>(() => {}),
     list: jest.fn<Api["list"]>(async () => ({ items: [], total: 0 })),
     get,
     // A row this fake remembers was never answered by anyone, so it arrived in no language: a

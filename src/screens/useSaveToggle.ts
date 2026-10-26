@@ -54,11 +54,16 @@ export function useSaveToggle(
   id: string | undefined,
   row: Row | undefined,
 ): SaveToggle {
-  const { saved, state, wrote } = useShell();
+  const { api, saved, state, wrote } = useShell();
   const copy = screenCopy();
+  // The declaration is read against the whole mounted catalogue, which the catalogue read
+  // itself cannot do: a saved hint naming no such entry, or pointing at one that carries
+  // neither keeping write, costs the heart, and the transport's own notice line is what says
+  // which. A heart that simply never appears is a defect nobody can find.
   const pair = useMemo(
-    () => (state.catalog === undefined ? undefined : savable(entry, state.catalog.resources)),
-    [entry, state.catalog],
+    () =>
+      state.catalog === undefined ? undefined : savable(entry, state.catalog.resources, api.notice),
+    [entry, state.catalog, api],
   );
   const [keeping, setKeeping] = useState<Keeping>({
     answer: { state: "unknown" },
@@ -124,10 +129,15 @@ export function useSaveToggle(
       await ask();
     } catch (e) {
       if (alive.current) {
+        // The sentence names the act the person asked for: a refused removal is not a refused
+        // keep, and it is named with the removal's own declared word.
         const said = refusalOf(
           e,
           keeping.answer.state === "kept" ? "delete" : "command",
-          failureSubject(pair.source, pair.words.save),
+          failureSubject(
+            pair.source,
+            keeping.answer.state === "kept" ? pair.words.remove : pair.words.save,
+          ),
           copy,
         );
         setKeeping((was) => ({ ...was, note: notice(said.verdict) }));

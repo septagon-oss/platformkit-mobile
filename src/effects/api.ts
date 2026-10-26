@@ -330,6 +330,14 @@ export interface Api {
    */
   logout(): Promise<SignOut>;
   catalog(notice?: HintNotice): Promise<Catalog>;
+  /**
+   * notice is where a declaration this phone could not carry says itself: the same line, the
+   * same once-per-(path, reason) for this connection as a hint the catalogue read itself
+   * refused. A rule read later than the read — `savable` resolving a saved declaration
+   * against the whole mounted catalogue is the one today — would otherwise be a control that
+   * went missing with no trace, and only this transport owns the console.
+   */
+  readonly notice: HintNotice;
   /** list is a window of rows, in an order, through equality filters spelled field:value. */
   list(e: Entry, q?: Window): Promise<Page>;
   get(e: Entry, id: string): Promise<Record<string, unknown>>;
@@ -1135,6 +1143,7 @@ export function createApi(
         throw e;
       }
     },
+    notice: warnOnce,
     async catalog(notice: HintNotice = warnOnce) {
       // Legacy compatibility belongs to the normalized core view. The public
       // generated operation must keep its stricter wire response validator.

@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 278,
-   "cases": 1316,
-   "ms": 2507313,
-   "testsMs": 93480.89999999992,
+   "files": 279,
+   "cases": 1326,
+   "ms": 2508251,
+   "testsMs": 93495.09999999992,
    "runners": {
     "jest": 97,
-    "node": 181
+    "node": 182
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 149,
-   "cases": 493,
-   "ms": 3733540,
-   "testsMs": 57836,
+   "files": 150,
+   "cases": 496,
+   "ms": 3757565,
+   "testsMs": 58003,
    "runners": {
-    "jest": 149
+    "jest": 150
    },
    "unreachable": 0
   },
@@ -11866,6 +11866,89 @@
    "testsMs": 13.8
   },
   {
+   "file": "tests/a-saved-declaration-names-the-member-it-is-missing.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 10,
+   "rule": "Rules this file holds about what a source entry must say to be savable. A saved declaration is read whole or not at all, and every member the kit cannot carry is named at its own document path \u2014 missing, blank or not a word \u2014 because a heart that simply never appears is a defect no author can find. The kernel's `listTitle` is not one of those members: it names a page the composition owns, which this phone already names from that entry's own declared words, so requiring it would refuse the control over a word no phone prints. The declaration points at the entry that holds the copies, and that entry has to carry both keeping writes in the two shapes the kit's writes take.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 938,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a source declaring its words and its list is savable and owes no notice",
+    "the kernel's `listTitle` changes nothing about what the heart prints",
+    "each member the kit requires is named when the document leaves it out",
+    "a declaration missing two members says both",
+    "a member that is not a word, or a word of nothing, is named as one",
+    "a saved declaration on an entry that says nothing about being saved is silence",
+    "a declaration pointing at no entry of this catalogue names what it pointed at",
+    "the entry that holds the copies must take the keep about the collection",
+    "and it must take the removal about one record",
+    "neither keeping write is ever offered as a form, a question or a swipe"
+   ],
+   "tests": [
+    {
+     "title": "a source declaring its words and its list is savable and owes no notice",
+     "ms": 9.799116,
+     "measured": false
+    },
+    {
+     "title": "the kernel's `listTitle` changes nothing about what the heart prints",
+     "ms": 0.338816,
+     "measured": false
+    },
+    {
+     "title": "each member the kit requires is named when the document leaves it out",
+     "ms": 0.995992,
+     "measured": false
+    },
+    {
+     "title": "a declaration missing two members says both",
+     "ms": 0.373881,
+     "measured": false
+    },
+    {
+     "title": "a member that is not a word, or a word of nothing, is named as one",
+     "ms": 0.84343,
+     "measured": false
+    },
+    {
+     "title": "a saved declaration on an entry that says nothing about being saved is silence",
+     "ms": 0.331253,
+     "measured": false
+    },
+    {
+     "title": "a declaration pointing at no entry of this catalogue names what it pointed at",
+     "ms": 0.320813,
+     "measured": false
+    },
+    {
+     "title": "the entry that holds the copies must take the keep about the collection",
+     "ms": 0.248389,
+     "measured": false
+    },
+    {
+     "title": "and it must take the removal about one record",
+     "ms": 0.44834,
+     "measured": false
+    },
+    {
+     "title": "neither keeping write is ever offered as a form, a question or a swipe",
+     "ms": 0.490828,
+     "measured": false
+    }
+   ],
+   "loaded": 37,
+   "coveredProdLines": 13315,
+   "onlyProdLines": null,
+   "testsMs": 14.2
+  },
+  {
    "file": "tests/a-small-picture-uses-its-stored-frame.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -22414,6 +22497,47 @@
    "coveredProdLines": 1289,
    "onlyProdLines": null,
    "testsMs": 45
+  },
+  {
+   "file": "tests/screens/a-dropped-saved-declaration-says-which-member-it-lacked.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "Rules this file holds about the heart's absence. A saved declaration the phone cannot carry costs the control and says which member it could not carry \u2014 through the same notice line a hint the catalogue read itself refused takes, so a heart that never appears leaves a trace an author can read. A record whose entry declares nothing is the ordinary case and says nothing at all: silence is the answer to \"this is not a savable thing\", and a warning on every record would teach nobody to read the warning.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 24025,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a declaration pointing at no entry of this catalogue says where it pointed",
+    "a heart that is drawable says nothing about itself",
+    "an entry that declares nothing about being saved is silence, not a defect"
+   ],
+   "tests": [
+    {
+     "title": "a declaration pointing at no entry of this catalogue says where it pointed",
+     "ms": 59,
+     "measured": false
+    },
+    {
+     "title": "a heart that is drawable says nothing about itself",
+     "ms": 55,
+     "measured": false
+    },
+    {
+     "title": "an entry that declares nothing about being saved is silence, not a defect",
+     "ms": 53,
+     "measured": false
+    }
+   ],
+   "loaded": 154,
+   "coveredProdLines": 2316,
+   "onlyProdLines": null,
+   "testsMs": 167
   },
   {
    "file": "tests/screens/a-finished-line-speaks-only-for-the-write-that-finished-it.test.tsx",
