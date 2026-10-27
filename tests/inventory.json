@@ -869,7 +869,7 @@
    "onlyFiles": [],
    "onlyLines": [],
    "flakyRuns": [],
-   "rule": "The catalogue goldens copied from the kernel are answers the pinned HTTP document must accept: the shell's own catalog read and the strict generated appResources operation both take each of them, so refreshing one pin to a shape the other refuses fails here rather than on a phone.",
+   "rule": "The catalogue goldens copied from the kernel are answers the pinned HTTP document must accept: the shell's own catalog read, the strict generated appResources operation and the generated catalogue schema all take each of them as served, so refreshing one pin to a shape the other refuses fails here rather than on a phone.",
    "titles": [
     "the catalog.json golden is a catalogue both catalog reads accept",
     "the catalog.control-plane.json golden is a catalogue both catalog reads accept",

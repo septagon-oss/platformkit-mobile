@@ -1836,7 +1836,7 @@ export type ResolveBody = {
 
 export type Resolved = {
   commands: Array<ResolvedCommand> | null;
-  deck: ResolvedDeck;
+  deck?: ResolvedDeck;
   fields: Array<ResolvedField> | null;
   identity: ResolvedIdentity;
   language: string;
@@ -1848,7 +1848,7 @@ export type Resolved = {
 };
 
 export type ResolvedCommand = {
-  confirmation: ResolvedConfirmation;
+  confirmation?: ResolvedConfirmation;
   destructive: boolean;
   label: string;
   primary: boolean;
@@ -1898,7 +1898,7 @@ export type ResolvedField = {
   onRecord: boolean;
   options: Array<ResolvedOption> | null;
   reading: ResolvedReading;
-  reference: ResolvedReference;
+  reference?: ResolvedReference;
   section: string;
 };
 
@@ -1917,7 +1917,7 @@ export type ResolvedGroup = {
 export type ResolvedIdentity = {
   description: string;
   emptyDescription: string;
-  group: ResolvedGroup;
+  group?: ResolvedGroup;
   icon: string;
   order: number;
   plural: string;
@@ -1955,9 +1955,9 @@ export type ResolvedReading = {
   false: string;
   format: string;
   missing: string;
-  money: ResolvedMoney;
+  money?: ResolvedMoney;
   precision: number | null;
-  time: ResolvedTime;
+  time?: ResolvedTime;
   true: string;
 };
 
@@ -1979,7 +1979,7 @@ export type ResolvedSortOption = {
 };
 
 export type ResolvedSummary = {
-  highlight: EntryHighlight;
+  highlight?: EntryHighlight;
   trendField: string;
 };
 

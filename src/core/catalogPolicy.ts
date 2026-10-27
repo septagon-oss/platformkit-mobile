@@ -21,18 +21,24 @@ import { issuePath } from "./responses";
  */
 export const SUPPORTED_POLICY_VERSION = 1;
 
-// The server prints `null` for the members of a resolved object that are not set
-// (a field's money, time and reference, an identity's group), where the generated
-// schema requires an object. Money and group are not read, so they enter as `unknown`.
+// The contract prints a member the server left unset by saying nothing: `group`,
+// `reference`, `money` and `time` are members of an object, absent rather than
+// filled with a null. A server older than that prints `null` for the same absence,
+// which reads the same way, so this shape admits both and a kernel that has not
+// moved yet still gives this phone a policy. Money and group are read by nothing,
+// so they enter as `unknown`.
 const policyShape = zResolved
   .pick({ policyVersion: true, titles: true, layout: true, list: true })
   .extend({
-    identity: zResolvedIdentity.extend({ group: z.unknown() }),
+    identity: zResolvedIdentity.extend({ group: z.nullish(z.unknown()) }),
     fields: z
       .array(
         zResolvedField.extend({
-          reference: zResolvedReference.nullable(),
-          reading: zResolvedReading.extend({ money: z.unknown(), time: zResolvedTime.nullable() }),
+          reference: zResolvedReference.nullish(),
+          reading: zResolvedReading.extend({
+            money: z.nullish(z.unknown()),
+            time: zResolvedTime.nullish(),
+          }),
         }),
       )
       .nullable(),

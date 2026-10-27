@@ -893,7 +893,7 @@ export const zResolvedConfirmation = z.object({
 });
 
 export const zResolvedCommand = z.object({
-  confirmation: zResolvedConfirmation,
+  confirmation: zResolvedConfirmation.optional(),
   destructive: z.boolean(),
   label: z.string(),
   primary: z.boolean(),
@@ -932,7 +932,7 @@ export const zResolvedGroup = z.object({
 export const zResolvedIdentity = z.object({
   description: z.string(),
   emptyDescription: z.string(),
-  group: zResolvedGroup,
+  group: zResolvedGroup.optional(),
   icon: z.string(),
   order: z.number().int(),
   plural: z.string(),
@@ -991,7 +991,7 @@ export const zResolvedList = z.object({
 });
 
 export const zResolvedSummary = z.object({
-  highlight: zEntryHighlight,
+  highlight: zEntryHighlight.optional(),
   trendField: z.string(),
 });
 
@@ -1004,9 +1004,9 @@ export const zResolvedReading = z.object({
   false: z.string(),
   format: z.string(),
   missing: z.string(),
-  money: zResolvedMoney,
+  money: zResolvedMoney.optional(),
   precision: z.number().int().nullable(),
-  time: zResolvedTime,
+  time: zResolvedTime.optional(),
   true: z.string(),
 });
 
@@ -1021,7 +1021,7 @@ export const zResolvedField = z.object({
   onRecord: z.boolean(),
   options: z.array(zResolvedOption).nullable(),
   reading: zResolvedReading,
-  reference: zResolvedReference,
+  reference: zResolvedReference.optional(),
   section: z.string(),
 });
 
@@ -1038,7 +1038,7 @@ export const zResolvedTitles = z.object({
 
 export const zResolved = z.object({
   commands: z.array(zResolvedCommand).nullable(),
-  deck: zResolvedDeck,
+  deck: zResolvedDeck.optional(),
   fields: z.array(zResolvedField).nullable(),
   identity: zResolvedIdentity,
   language: z.string(),

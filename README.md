@@ -909,10 +909,12 @@ own who is asked and in what order, so a second answer would only be able to dis
 `list.defaultSort` (the phone keeps its own newest-first default). Because `defaultSort` is
 unread, a block whose declared orders name none the phone can put back to the default (the
 wire's `""`) offers no order group at all: the list stays in the server's own order rather
-than opening a sheet a person cannot leave. The pinned
-OpenAPI types some resolved members as objects the served golden prints as `null`, so the
-phone reads the block with those members loosened and the strict `appResources` operation is
-checked on the golden without its resolved blocks.
+than opening a sheet a person cannot leave. A member the server leaves unset is printed by
+saying nothing, so the pin names the kernel commit that prints an unset `resolved` member
+absent; the strict `appResources` operation then takes the golden with its resolved blocks
+in. `readPolicy` still admits a `null` for `identity.group`, `reference`, `reading.money`
+and `reading.time`, because a server older than that commit writes `null` for the same
+absence and the entry keeps the policy it was given either way.
 
 **Reused** — `parseCatalog`'s `notice` fallback, `View<>`, the generated `zResolved*` schemas,
 `verifySource`'s source-record idiom, `fieldLabel`, `enumLabel`, `label`, `sortOptions` and

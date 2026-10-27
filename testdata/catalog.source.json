@@ -1,12 +1,12 @@
 {
   "schema": "platformkit.catalog-source.v1",
   "fixture": "testdata/catalog.json",
-  "sha256": "7f306700fd408d85d16dcdef9ab306905b5d9d43f7909026438caf43ff854be1",
+  "sha256": "27095b20a53554329ab6161df1511e7b435e35d0accefbe65f439eaa23a6d3e7",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "988e95c1ebf6d2ddc3a78cd514cc40a43f5bab90",
-    "tag": "988e95c1ebf6d2ddc3a78cd514cc40a43f5bab90",
+    "commit": "d2f02143692090fb37b029d48f5f681508bf6b08",
+    "tag": "d2f02143692090fb37b029d48f5f681508bf6b08",
     "path": "ui/screens/testdata/catalog.json",
-    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/988e95c1ebf6d2ddc3a78cd514cc40a43f5bab90/ui/screens/testdata/catalog.json"
+    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/d2f02143692090fb37b029d48f5f681508bf6b08/ui/screens/testdata/catalog.json"
   }
 }
