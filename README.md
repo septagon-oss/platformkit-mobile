@@ -2927,3 +2927,59 @@ proved by `tests/package.test.ts` against a packed tarball), a gate case that pr
 even the barrel enters a door through its index, and `ActionModel` as the drawn
 action's own name; the next delivery that splits a core file inherits both the shape
 and the refusal.
+
+## A pack is one declaration
+
+A custom screen belongs to a renderer pack, and a pack is now one statement rather
+than a key guessed at and an operation named beside it:
+
+```tsx
+export const taskPack = definePack({
+  key: "task/task",
+  read: "taskTaskRead",
+  input: ({ id }) => (id === undefined ? undefined : { path: { id } }),
+  detail: TaskDetail,
+});
+```
+
+`key` is checked against `entryReads` (`src/generated/entries.gen.ts`), the map
+`npm run api` derives from the pinned document: for every `module/entity` it answers a
+read of, the operations that answer it. So a key spelled past the document, a read that
+answers another key, a `POST` offered as a screen's data and a row that draws a field
+the declared body lacks are four compile errors — the last one is what `useOperation`
+already proved, and the first three needed a map to be provable at all. `input` is
+required: an operation may need a query or a body besides the id, and a default that
+sent only the id would ask a confident wrong question of those operations. An `input` of
+`undefined` asks for nothing, which is how a record screen with no id yet renders.
+
+A declared screen is handed what it used to fetch for itself: `read` (a `ReadState`
+whose `failure` carries the verdict behind `error`, so a refusal that draws no sentence
+is still a fact a screen can act on), `present(field, value)` — the field's word, its
+value and its shade as **this** entry's resolved policy reads them, from
+`core/present`'s `presentFor` — `feedback`, and `actions`, the entry's own row commands
+and the run that runs them. `definePack` returns a one-key record, so a composition
+root writes `{ ...taskPack, ...invoicePack }` into `Shell`'s `renderers`; the
+dispatcher and `Renderers` are unchanged, and a pack that reads a projection rather than
+a documented operation stays writable as a plain record. `entry.renderer.name` and
+`SHELL_VERSION` are kept, deprecated and listed in the changelog: a declared pack needs
+neither, because its key is checked at compile time.
+
+**Reused** — `scripts/api.ts`'s generation pass and its byte-for-byte `check:api`
+(which took the new file as one more name in the tree it already compares),
+`useOperation`, `useCommandRun` and `useFeedback` for the read, the writes and the
+device's own formatting, `core/command`'s `rowCommands` for the verbs a row offers,
+`core/present`'s `fieldLabel`, `enumLabel`, `saidValue`, `enumTone` and `badgeTone` for
+every word and shade `present` says, `core/failure`'s `FailureVerdict` for what a
+refusal is made of, and the existing layer gate, publish gate and test inventory for the
+new door's three proofs. **Added** — `src/pack.ts` and `src/generated/entries.gen.ts`,
+because the tree held no relation from a key to an operation to check a declaration
+against: `OperationName` was one flat union of 170 names and `Renderers` was
+`Record<string, Renderer>`, so the key and the read could only ever agree by convention,
+and `presentFor`, because the six free functions that read a field existed with no
+binding to an entry, which is why the example pack called `humanize` for every label —
+a second implementation of a rule the policy already carried. **Made reusable** —
+`entryReads`/`EntryKey`/`OperationFor` as the generated key inventory a write map or a
+collection/item split can join, `presentFor` as a pure function over an entry and a
+formatting that runs with no React, `ReadState.failure` as the structured half of every
+read the kit publishes, and `@…/pack` as the one door a product imports to declare a
+screen — all four proved by the suites that already run.
