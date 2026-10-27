@@ -975,13 +975,20 @@ wire's `""`) offers no order group at all: the list stays in the server's own or
 than opening a sheet a person cannot leave. A member the server leaves unset is printed by
 saying nothing, so the pin names the kernel commit that prints an unset `resolved` member
 absent; the strict `appResources` operation then takes the golden with its resolved blocks
-in. `readPolicy` still admits a `null` for `identity.group`, `reference`, `reading.money`
-and `reading.time`, because a server older than that commit writes `null` for the same
-absence and the entry keeps the policy it was given either way. The section has a second reader with a
-different fallback: `src/core/choice.ts` reads each field's finite choice out of the same block
-field by field, so a block this file refuses whole still answers the choice questions it states
-on its own. One reader of the section, answering both questions behind one fallback, is the open
-question.
+in. `readPolicy` still admits a `null` for `identity.group`, `reference`, `reading.money` and
+`reading.time`, because a server older than that commit writes `null` for the same absence and the
+entry keeps the policy it was given either way. The four kernel copies this repository holds name
+two commits of it: the golden, the HTTP document and the parity fixtures at that commit, and
+`testdata/catalog.choices.json` at the kernel's later re-print of that document (`087b984b`), whose
+copy prints a command's unset `confirmation` by saying nothing — the copy this kit held before was
+older than that and the generated read refused it. Two members
+(`resolved.fields[].figure` and `reading.precision`) are still printed `null` there, and the
+`ResolvedReading.precision` the document generates is nullable while `figure` is unknown to it, so
+neither costs a read.
+The section has a second reader with a different fallback: `src/core/choice.ts` reads each field's
+finite choice out of the same block field by field, so a block this file refuses whole still answers
+the choice questions it states on its own. One reader of the section, answering both questions behind
+one fallback, is the open question.
 
 **Reused** — `parseCatalog`'s `notice` fallback, `View<>`, the generated `zResolved*` schemas,
 `verifySource`'s source-record idiom, `fieldLabel`, `enumLabel`, `label`, `sortOptions` and

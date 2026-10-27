@@ -32,11 +32,14 @@ test("the copy is the bytes the record names, at the commit it names", () => {
     record.sha256,
     createHash("sha256").update(bytes("catalog.choices.json")).digest("hex"),
   );
-  assert.equal(record.upstream.commit, "9d25f502f8e6f2403f4072e36429f5c090e8e1cb");
+  // The commit this copy was taken from prints an unset `resolved` member by saying nothing, which
+  // is what the phone's strict generated read of a served catalogue needs (README, "The server's
+  // resolved policy"); an older capture printed those absences as `null` and was refused.
+  assert.equal(record.upstream.commit, "087b984bd56b5313ddd279317f1eabdbdf84e0b2");
   assert.equal(record.upstream.path, "ui/screens/testdata/catalog-choices.json");
   assert.match(
     record.upstream.command,
-    /raw\.githubusercontent\.com\/septagon-oss\/platformkit\/9d25f502f8e6f2403f4072e36429f5c090e8e1cb\/ui\/screens\/testdata\/catalog-choices\.json$/,
+    /raw\.githubusercontent\.com\/septagon-oss\/platformkit\/087b984bd56b5313ddd279317f1eabdbdf84e0b2\/ui\/screens\/testdata\/catalog-choices\.json$/,
   );
 });
 
