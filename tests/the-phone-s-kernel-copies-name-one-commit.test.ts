@@ -31,7 +31,7 @@ test("the phone's three kernel copies name one commit of one repository", () => 
     );
     assert.equal(up.repository, KERNEL, `${name}: copied from somewhere other than the kernel`);
     assert.ok(
-      (up.command ?? "").includes(up.commit),
+      (up.command ?? "").includes(up.commit as string),
       `${name}: its command fetches different bytes than the record names`,
     );
     assert.ok((up.path ?? "").length > 0, `${name}: the record names no file it was copied from`);
