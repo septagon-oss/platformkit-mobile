@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `cac3e6000` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `bfba0141a` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 39 | 245 | 47.3 s | 76 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 295 | 1399 | 94.1 s | 2619 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 296 | 1406 | 94.1 s | 2619 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 150 | 496 | 58.0 s | 3769 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 543
+* keep: 544
 * merge: 0
 * delete: 0
 
@@ -46,8 +46,8 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 543 — 233 `tests/*.test.ts` (node), 251 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2140; cases in files no runner reaches: 35
+* files inventoried: 544 — 234 `tests/*.test.ts` (node), 251 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2147; cases in files no runner reaches: 35
 * isolated wall time: contract 76 s, behaviour 2619 s, composition 3769 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
@@ -282,6 +282,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/activity-scope-isolation.test.ts | node | behaviour | 2 | 780 | 15 | 0 | 0 of 2 | — | 0 | keep | Two callers derive activity at the same time over equal event ids. Each row keeps the actor named by its own caller's snapshot, and one caller's withdrawal may… |
 | tests/activity.test.ts | node | behaviour | 8 | 798 | 15.3 | 22 | 2 of 8 | — | 0 | keep | What a trail shows is derived from events the server owns: an event belongs to a record when its id appears anywhere in the payload, its name's last segment is… |
 | tests/an-unanswered-final-count-withholds-the-finish-until-a-retry-finds-none.test.ts | node | behaviour | 4 | 3174 | 11.2 |  | not measured | — | 0 | keep | A final count nothing answered ends the pass with a retry and nothing more: the choices made stay in the history, the finishing moment is neither played nor sp… |
+| tests/an-unreadable-resolved-section-is-announced-once-for-the-entry.test.ts | node | behaviour | 7 | 593 | 13.6 |  | not measured | — | 0 | keep | One entry's `resolved` section has two readers: the policy (`./catalogPolicy`), which adopts the block whole or not at all, and the finite choice (`./choice`),… |
 | tests/api.test.ts | node | behaviour | 31 | 2483 | 427 | 28 | 2 of 25 | — | 0 | keep | (no first comment; first test title) sign-in mints a key with the session and sends only the key after it |
 | tests/calendar-withdrawal.test.ts | node | behaviour | 3 | 1311 | 408.1 | 1 | 0 of 3 | — | 0 | keep | Denied calendar content leaves every projection — day, week, agenda — with an explicit recovery, and each projection keeps its own bounds: an event that ended … |
 | tests/cart-quote-withdrawal.test.ts | node | behaviour | 2 | 856 | 29.2 | 0 | 0 of 2 | — | 0 | keep | Checkout exists only for the quote a person is looking at. A withdrawn quote loses the button, a fresh quote restores only its own revision, and a quote still … |

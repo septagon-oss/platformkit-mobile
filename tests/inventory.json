@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 295,
-   "cases": 1399,
-   "ms": 2618696,
-   "testsMs": 94064.69999999992,
+   "files": 296,
+   "cases": 1406,
+   "ms": 2619289,
+   "testsMs": 94078.29999999993,
    "runners": {
     "jest": 101,
-    "node": 194
+    "node": 195
    },
    "unreachable": 0
   },
@@ -13132,6 +13132,71 @@
    "coveredProdLines": 13124,
    "onlyProdLines": null,
    "testsMs": 11.2
+  },
+  {
+   "file": "tests/an-unreadable-resolved-section-is-announced-once-for-the-entry.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 7,
+   "rule": "One entry's `resolved` section has two readers: the policy (`./catalogPolicy`), which adopts the block whole or not at all, and the finite choice (`./choice`), which joins each field's answers by name. A section neither can read is one broken member, so what this case holds is the saying: the entry refuses its policy exactly once, no reader says the same thing twice, nothing is said about another entry, and the entry is drawn as it was before the section existed. The shapes are the spellings of \"no readable section\" a server or a bad re-pin can print.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 593,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a resolved section printed as a word is refused in one sentence and draws as today",
+    "a resolved section printed as a list is refused in one sentence and draws as today",
+    "a resolved section printed as a number is refused in one sentence and draws as today",
+    "a resolved section printed as null is refused in one sentence and draws as today",
+    "a resolved section printed as an empty object is refused in one sentence and draws as today",
+    "a resolved section the server left off says nothing",
+    "a resolved section whose members neither reader adopts is announced once per path"
+   ],
+   "tests": [
+    {
+     "title": "a resolved section printed as a word is refused in one sentence and draws as today",
+     "ms": 8.435276,
+     "measured": false
+    },
+    {
+     "title": "a resolved section printed as a list is refused in one sentence and draws as today",
+     "ms": 0.288002,
+     "measured": false
+    },
+    {
+     "title": "a resolved section printed as a number is refused in one sentence and draws as today",
+     "ms": 0.159264,
+     "measured": false
+    },
+    {
+     "title": "a resolved section printed as null is refused in one sentence and draws as today",
+     "ms": 0.135801,
+     "measured": false
+    },
+    {
+     "title": "a resolved section printed as an empty object is refused in one sentence and draws as today",
+     "ms": 0.114922,
+     "measured": false
+    },
+    {
+     "title": "a resolved section the server left off says nothing",
+     "ms": 0.188949,
+     "measured": false
+    },
+    {
+     "title": "a resolved section whose members neither reader adopts is announced once per path",
+     "ms": 4.303667,
+     "measured": false
+    }
+   ],
+   "loaded": 7,
+   "coveredProdLines": 5523,
+   "onlyProdLines": null,
+   "testsMs": 13.6
   },
   {
    "file": "tests/api.test.ts",
