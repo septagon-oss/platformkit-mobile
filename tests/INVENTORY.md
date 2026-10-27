@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `7174871b0` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `db0ee0195` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 39 | 245 | 47.3 s | 76 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 298 | 1409 | 97.1 s | 2625 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 299 | 1411 | 97.1 s | 2648 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 150 | 496 | 58.0 s | 3769 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 546
+* keep: 547
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 546 — 236 `tests/*.test.ts` (node), 251 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2150; cases in files no runner reaches: 35
-* isolated wall time: contract 76 s, behaviour 2625 s, composition 3769 s, journey 0 s
+* files inventoried: 547 — 236 `tests/*.test.ts` (node), 252 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2152; cases in files no runner reaches: 35
+* isolated wall time: contract 76 s, behaviour 2648 s, composition 3769 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -218,6 +218,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/shared-kit.test.tsx | jest | behaviour | 16 | 21202 | 1768 | 14 | 1 of 16 | — | 0 | keep | (no first comment; first test title) busy actions suppress press and native accessibility activation until new props are ready |
 | tests/ui/sheet-header-row.test.tsx | jest | behaviour | 1 | 19663 | 903 | 0 | 0 of 1 | — | 0 | keep | A sheet that opens with a full-width Close band tells the person to leave before it has shown them what it holds. Its header is one row: the title takes the co… |
 | tests/ui/sheet-on-desk.test.tsx | jest | behaviour | 2 | 20268 | 877 | 0 | 0 of 2 | — | 0 | keep | A capture of the sheet page at 1440 named what the kit's own surface does in a browser: "a narrow, full-height beige column floats between white margins; its c… |
+| tests/ui/sign-in-elsewhere-speaks-the-sessions-language.test.tsx | jest | behaviour | 2 | 23214 | 10 |  | not measured | — | 0 | keep | The way out to another server is one sentence of the copy table drawn by two surfaces: the route dispatcher's Notice and this organism. src/ui is outside the c… |
 | tests/ui/sign-in-form-submits-what-it-shows.test.tsx | jest | behaviour | 3 | 23056 | 38 |  | not measured | — | 0 | keep | What the sign-in form shows without being asked for is what it submits: a returning address resent from the refusal's Retry, a server address the caller suppli… |
 | tests/ui/slot-withdrawal.test.tsx | jest | behaviour | 4 | 19448 | 100 | 0 | 0 of 4 | — | 0 | keep | A slot whose availability was withdrawn cannot be selected, kept selected or confirmed until a usable snapshot returns and echoes its own version. |
 | tests/ui/stepper-recovery.test.tsx | jest | behaviour | 4 | 19595 | 236 | 0 | 0 of 4 | — | 0 | keep | A step write with an unknown outcome keeps what the person typed and offers reconciliation only: no second submit, no advance, no discarded draft. |
