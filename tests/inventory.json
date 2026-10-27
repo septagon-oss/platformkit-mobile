@@ -287,8 +287,8 @@
   "behaviour": {
    "files": 288,
    "cases": 1347,
-   "ms": 2546649,
-   "testsMs": 93642.69999999992,
+   "ms": 2590119,
+   "testsMs": 93762.69999999994,
    "runners": {
     "jest": 100,
     "node": 188
@@ -4573,22 +4573,23 @@
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
-   "ms": null,
-   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/ui/a-resolved-form-keeps-the-servers-field-order.test.tsx can measure them after the behavior is corrected.",
+   "verdictReason": "States the rule above: under a supported block the order inside a block is the server's, so a rendered form lists its controls in `layout.create`'s order rather than re-ranking them. Its cost comes from a passing run; its exclusive-line column belongs to the pass named under measured.jest.",
+   "ms": 19530,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a resolved create form draws its fields in the order the server named"
    ],
    "tests": [
     {
      "title": "a resolved create form draws its fields in the order the server named",
-     "ms": null,
+     "ms": 13,
      "measured": false
     }
    ],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "loaded": 136,
+   "coveredProdLines": 2160,
+   "onlyProdLines": null,
+   "testsMs": 13
   },
   {
    "file": "tests/ui/a-resolved-record-keeps-hidden-fields-off-the-screen.test.tsx",
@@ -4601,22 +4602,23 @@
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
-   "ms": null,
-   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/ui/a-resolved-record-keeps-hidden-fields-off-the-screen.test.tsx can measure them after the behavior is corrected.",
+   "verdictReason": "States the rule above: a field the block keeps off the record, or the whole block off the list, is drawn in neither place. Its cost comes from a passing run; its exclusive-line column belongs to the pass named under measured.jest.",
+   "ms": 20896,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a record never draws a field the supported policy keeps off records"
    ],
    "tests": [
     {
      "title": "a record never draws a field the supported policy keeps off records",
-     "ms": null,
+     "ms": 22,
      "measured": false
     }
    ],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "loaded": 133,
+   "coveredProdLines": 2093,
+   "onlyProdLines": null,
+   "testsMs": 22
   },
   {
    "file": "tests/ui/a-row-offers-its-command-without-a-finger.test.tsx",
@@ -10961,22 +10963,23 @@
    "reach": "npm test (node half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
-   "ms": null,
-   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-generated-catalog-read-accepts-the-served-policy.test.ts can measure them after the behavior is corrected.",
+   "verdictReason": "States the rule above: the strict generated appResources read accepts the kernel's golden with every resolved block in it, which is the pair the pin must agree on. Its cost comes from a passing run; its exclusive-line column belongs to the pass named under measured.node.",
+   "ms": 1065,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "a generated catalogue read accepts the served resolved policy"
    ],
    "tests": [
     {
      "title": "a generated catalogue read accepts the served resolved policy",
-     "ms": null,
+     "ms": 49.921489,
      "measured": false
     }
    ],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "loaded": 56,
+   "coveredProdLines": 21465,
+   "onlyProdLines": null,
+   "testsMs": 49.9
   },
   {
    "file": "tests/a-greyed-pointer-box-sends-the-identifier-it-was-read-with.test.ts",
@@ -11618,9 +11621,9 @@
    "reach": "npm test (node half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
-   "ms": null,
-   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-policy-with-an-unknown-reader-field-falls-back-whole.test.ts can measure them after the behavior is corrected.",
+   "verdictReason": "States the rule above: a block that points at a field the entry does not hold costs the whole entry its block, said once, rather than leaving the entry read half from the server and half from the phone. Its cost comes from a passing run; its exclusive-line column belongs to the pass named under measured.node.",
+   "ms": 1006,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "a policy whose status names no field falls back for the whole entry",
     "a policy whose preview names no field falls back for the whole entry"
@@ -11628,18 +11631,19 @@
    "tests": [
     {
      "title": "a policy whose status names no field falls back for the whole entry",
-     "ms": null,
+     "ms": 17.499588,
      "measured": false
     },
     {
      "title": "a policy whose preview names no field falls back for the whole entry",
-     "ms": null,
+     "ms": 0.802004,
      "measured": false
     }
    ],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "loaded": 38,
+   "coveredProdLines": 13640,
+   "onlyProdLines": null,
+   "testsMs": 18.3
   },
   {
    "file": "tests/a-record-opens-on-its-picture.test.ts",
@@ -11917,9 +11921,9 @@
    "reach": "npm test (node half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
-   "ms": null,
-   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-resolved-sort-list-keeps-its-declared-queries.test.ts can measure them after the behavior is corrected.",
+   "verdictReason": "States the rule above: under a supported block the sort sheet is the declared queries, in the block's order and under the block's words, and an empty declaration invents none. Its cost comes from a passing run; its exclusive-line column belongs to the pass named under measured.node.",
+   "ms": 973,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "an empty resolved sort list offers no invented timestamp order",
     "a resolved sort list preserves each declared query and its own label"
@@ -11927,18 +11931,19 @@
    "tests": [
     {
      "title": "an empty resolved sort list offers no invented timestamp order",
-     "ms": null,
+     "ms": 14.978065,
      "measured": false
     },
     {
      "title": "a resolved sort list preserves each declared query and its own label",
-     "ms": null,
+     "ms": 1.803926,
      "measured": false
     }
    ],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "loaded": 38,
+   "coveredProdLines": 13609,
+   "onlyProdLines": null,
+   "testsMs": 16.8
   },
   {
    "file": "tests/a-row-read-in-a-language-keeps-the-language-the-answer-named.test.ts",
