@@ -9,7 +9,7 @@
 // worse than no picture.
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { timeText } from "../../core/derive";
+import { timeText } from "../../core/present";
 import { encodeQr } from "../../core/qr";
 import { refusalOf } from "../../screens/failure";
 import { useFeedback } from "../../screens/useFeedback";

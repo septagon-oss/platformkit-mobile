@@ -23,12 +23,54 @@ const examplePack = [
   },
 ];
 
-const forbid = (files, patterns) => ({
+const DOORS = ["list", "record", "form", "command", "present"];
+
+// doorParts is the same entry repeated in every layer's list for the same reason
+// examplePack is: a layer-specific rule replaces no-restricted-imports rather than
+// adding to it, so a door boundary written once would be read by the one layer that
+// wrote it. A door's index.ts is the only path into src/core/<door>: the bare door
+// matches no pattern here, so `../core/list` stays free while `../core/list/rows` is
+// refused — from a screen, from a pack, from another core file, and from a sibling
+// door, which reaches the rule through the door. The `./<door>` and `../<door>` forms
+// are what a file in src/core writes, so the deprecated barrel enters a door too.
+const doorParts = DOORS.flatMap((door) => [
+  {
+    group: [
+      `**/core/${door}/**`, `./${door}/**`, `../${door}/**`,
+      `@septagon-oss/platformkit-mobile/core/${door}/**`,
+      `!**/core/${door}/index`, `!**/core/${door}/index.ts`,
+      `./${door}/index`, `./${door}/index.ts`,
+      `../${door}/index`, `../${door}/index.ts`,
+      `@septagon-oss/platformkit-mobile/core/${door}/index`,
+      `@septagon-oss/platformkit-mobile/core/${door}/index.ts`,
+    ],
+    message: `core/${door}'s part files are the door's own: import core/${door}.`,
+  },
+]);
+
+// galleryFixtures is the kit's own gallery material — the examples, the scenes and
+// the pages that draw them. No door carries it, and no product file reaches it:
+// src/ui/gallery.tsx is the one production file that may import it, and it does so
+// from the module beside src/core, not through a door.
+const galleryFixtures = {
+  group: [
+    "**/kitGallery", "**/kitGallery.ts", "**/kitScenes", "**/kitScenes.ts",
+    "**/stateGallery", "**/stateGallery.ts", "**/galleryPages", "**/galleryPages.ts",
+  ],
+  message: "the kit's gallery fixtures belong to the gallery: a door and a product file draw from the doors.",
+};
+
+// The three shared entries (the tools ban, the example pack, the doors) ride on every
+// layer, and the gallery fixtures on every layer but the gallery itself.
+const forbid = (files, patterns, { fixtures = true, ignores } = {}) => ({
   files,
+  ...(ignores ? { ignores } : {}),
   rules: {
     "no-restricted-imports": ["error", { patterns: [
       { group: [...builtinModules, "node:*", "**/scripts/**", "@septagon-oss/platformkit-mobile/tools/**"], message: "build tools run in Node; native runtime code consumes their generated source." },
       ...examplePack,
+      ...doorParts,
+      ...(fixtures ? [galleryFixtures] : []),
       ...patterns,
     ] }],
     // no-restricted-imports does not see import(); this does.
@@ -95,11 +137,17 @@ export default [
   forbid(["src/core/**"], [
     { group: [...generatedEffects, ...react, "**/effects/**", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "core is plain functions; it imports nothing outside src/core." },
   ]),
+  // The barrel still publishes the kit's gallery fixtures for the compatibility
+  // window, and galleryPages.ts builds its pages out of them: both are the gallery's
+  // own share of src/core, so the fixture ban names them and the door ban still
+  // applies — even the barrel enters a door through its index.
+  forbid(["src/core/derive.ts", "src/core/galleryPages.ts"], [], { fixtures: false }),
   forbid(["src/effects/**"], [
     { group: ["react", "react-native", "react-native/*", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "effects know the network and the store, not React or the UI." },
     { group: expoButSecureStore, message: "effects may use the secure store and nothing else of Expo." },
   ]),
-  forbid(["src/ui/**"], uiBoundary),
+  forbid(["src/ui/**"], uiBoundary, { ignores: ["src/ui/gallery.tsx"] }),
+  forbid(["src/ui/gallery.tsx"], uiBoundary, { fixtures: false }),
   uiLayer(["src/ui/atoms/**"], ["molecules", "templates", "organisms"]),
   uiLayer(["src/ui/molecules/**"], ["templates", "organisms"]),
   uiLayer(["src/ui/templates/**"], ["organisms"]),

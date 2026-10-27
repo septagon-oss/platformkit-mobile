@@ -11,7 +11,7 @@ import {
   type AccessibilityRole,
   type ViewStyle,
 } from "react-native";
-import type { Motion } from "../../core/derive";
+import type { Motion } from "../../core/present";
 import { chosenState, currentInSet, testable } from "../props";
 import { controlInk, useStyles, useTheme, type Theme } from "../theme";
 import { useVerbStage } from "../verb";

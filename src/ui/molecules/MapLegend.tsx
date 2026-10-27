@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { MapLegendModel } from "../../core/derive";
+import type { MapLegendModel } from "../../core/map";
 import { Badge } from "../atoms/Badge";
 import { Text } from "../atoms/Text";
 import { kitStyles } from "../layout";

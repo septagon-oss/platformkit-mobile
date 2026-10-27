@@ -6,7 +6,7 @@ import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback } from "react";
 import { View } from "react-native";
 import { packKey, shellReady, type Entry } from "./core/catalog";
-import { humanize, noun } from "./core/derive";
+import { humanize, noun } from "./core/present";
 import { address } from "./core/reentry";
 import type { Renderer } from "./renderers";
 import { ResourceCommand } from "./screens/ResourceCommand";

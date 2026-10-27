@@ -9,7 +9,7 @@ import React, { type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import type { Entry } from "../../core/catalog";
-import { noun, homeMedia, type AvatarModel, type Feedback } from "../../core/derive";
+import { noun, homeMedia, type AvatarModel, type Feedback } from "../../core/present";
 import type { HeldWriteView } from "../../core/outbox";
 import { recentKey, type RecentDoor } from "../../core/recents";
 import type { StatCardModel } from "../../core/summary";

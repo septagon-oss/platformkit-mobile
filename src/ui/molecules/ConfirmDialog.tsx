@@ -4,7 +4,7 @@
 // decision surface, not a detail surface: DetailSheet stays for the record.
 import React from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
-import type { Motion } from "../../core/derive";
+import type { Motion } from "../../core/present";
 import { testable } from "../props";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";

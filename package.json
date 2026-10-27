@@ -6,6 +6,11 @@
   "exports": {
     "./core/catalog": "./src/core/catalog.ts",
     "./core/derive": "./src/core/derive.ts",
+    "./core/list": "./src/core/list/index.ts",
+    "./core/record": "./src/core/record/index.ts",
+    "./core/form": "./src/core/form/index.ts",
+    "./core/command": "./src/core/command/index.ts",
+    "./core/present": "./src/core/present/index.ts",
     "./core/gesture": "./src/core/gesture.ts",
     "./effects/api": "./src/effects/api.ts",
     "./core/outbox": "./src/core/outbox.ts",

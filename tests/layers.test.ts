@@ -247,3 +247,59 @@ test("an example pack is composed by no route and reads its data through useOper
     assert.deepEqual(await boundaries("src/examples/probe.tsx", source), [], source);
   }
 });
+
+test("a core door exposes its index and nothing under it", async () => {
+  // src/core is five doors: list, record, form, command, present. A consumer — a
+  // screen, a pack, the deprecated barrel, or a sibling door — enters through the
+  // index, so a rule reads one way from one path and a door may regroup its own part
+  // files without telling anyone.
+  for (const [file, source] of [
+    ["src/screens/Probe.tsx", 'export { listRow } from "../core/list/rows";'],
+    ["src/screens/Probe.tsx", 'export { values } from "../../core/form/values";'],
+    [
+      "src/screens/Probe.tsx",
+      'export { values } from "@septagon-oss/platformkit-mobile/core/form/values";',
+    ],
+    ["src/ui/organisms/Probe.tsx", 'export { controlPointers } from "../../core/form/values";'],
+    ["src/core/form/values.ts", 'export { listRow } from "../list/rows";'],
+    ["src/core/derive.ts", 'export { listRow } from "./list/rows";'],
+  ]) {
+    assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source!}`);
+  }
+  for (const [file, source] of [
+    ["src/screens/Probe.tsx", 'export { listRow } from "../core/list";'],
+    ["src/core/form/values.ts", 'export { Control } from "./controls";'],
+    ["src/core/form/values.ts", 'export { label } from "../present";'],
+    ["src/core/derive.ts", 'export { listRow } from "./list";'],
+    ["src/screens/Probe.tsx", 'export { deriveDeck } from "../core/derive";'],
+    ["src/screens/Probe.tsx", 'export { noun } from "../core/record";'],
+  ]) {
+    assert.deepEqual(await boundaries(file!, source!), [], `${file}: ${source}`);
+  }
+});
+
+test("the kit's gallery fixtures stay out of the doors and out of the product", async () => {
+  // stateGallery, kitGallery, kitScenes and galleryPages are what src/ui/gallery.tsx
+  // draws. A door that carried them would ship the kit's examples inside the surface
+  // a product imports.
+  for (const [file, source] of [
+    ["src/core/list/rows.ts", 'export { kitExamples } from "../kitGallery";'],
+    ["src/screens/Probe.tsx", 'export { sceneFor } from "../core/kitScenes";'],
+    ["src/ui/organisms/Probe.tsx", 'export { stateExamples } from "../../core/stateGallery";'],
+    ["src/shell.tsx", 'export { galleryPage } from "./core/galleryPages";'],
+  ]) {
+    assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source!}`);
+  }
+  assert.deepEqual(
+    await boundaries("src/ui/gallery.tsx", 'export { kitExamples } from "../core/kitGallery";'),
+    [],
+  );
+  assert.deepEqual(
+    await boundaries(
+      "src/core/derive.ts",
+      'export { kitExamples } from "./kitGallery";\nexport { listRow } from "./list/rows";',
+    ).then((messages) => messages.length),
+    1,
+    "the barrel publishes the fixtures for the window and still may not read a door's part",
+  );
+});

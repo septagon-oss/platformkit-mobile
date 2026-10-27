@@ -15,7 +15,7 @@
 // it goes live, and where there is no connection the transport refuses it and this phone
 // writes nothing at all.
 import { key } from "../core/catalog";
-import { commandPath } from "../core/derive";
+import { commandPath } from "../core/command";
 import { saveBody, savedRef, unsaveBody, type Savable, type SavedRef } from "../core/saved";
 import type { NewWrite } from "../core/outbox";
 import type { Api } from "./api";

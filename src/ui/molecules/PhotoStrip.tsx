@@ -3,7 +3,8 @@
 // person scans the row and stops on the one they came for.
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import type { Feedback, RecordStrip } from "../../core/derive";
+import type { Feedback } from "../../core/present";
+import type { RecordStrip } from "../../core/record";
 import { Notice } from "../atoms/Notice";
 import { Text } from "../atoms/Text";
 import { useStyles, type Theme } from "../theme";

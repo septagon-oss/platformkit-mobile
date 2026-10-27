@@ -9,20 +9,18 @@ import { doors, key } from "../core/catalog";
 import {
   deriveDisclosure,
   deriveEventActivity,
-  deriveOffline,
-  deriveViewer,
   finishedWord,
   headerCover,
-  noun,
   pointerTargets,
   recordHeader,
   statusTone,
   recordMedia,
-  rowCommands,
   statusPill,
   screenPath,
-  type Presentation,
-} from "../core/derive";
+} from "../core/record";
+import { deriveOffline, noun, type Presentation } from "../core/present";
+import { deriveViewer } from "../core/media";
+import { rowCommands } from "../core/command";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { PhotoViewer, type ZoomSlotProps } from "../ui/organisms/PhotoViewer";
@@ -36,7 +34,8 @@ import { RichTextBody } from "./RichTextBody";
 import { useCommandRun } from "./useCommand";
 import { useResourceDetail } from "./useResourceDetail";
 import { useSaveToggle } from "./useSaveToggle";
-import { visiblePictures, eventPictures } from "../core/derive";
+import { visiblePictures } from "../core/present";
+import { eventPictures } from "../core/record";
 import { extent } from "../ui/scale";
 import { usePictures } from "./usePictures";
 import { useRecordPeople } from "./useReferenceNames";

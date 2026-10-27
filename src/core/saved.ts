@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { Command, Entry, HintNotice } from "./catalog";
 import type { Copy } from "./copy";
-import type { Row } from "./derive";
+import type { Row } from "./record";
 import { key } from "./catalog";
 
 /**

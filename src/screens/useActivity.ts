@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { about, type Event } from "../core/activity";
 import { ApiError } from "../effects/api";
 import { key, type Entry } from "../core/catalog";
-import { text, personRecord, type People, type EventTrail } from "../core/derive";
+import { text, personRecord, type People } from "../core/present";
+import { type EventTrail } from "../core/record";
 import { screenCopy } from "./failure";
 import { useShell } from "../shell";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { AgendaModel } from "../../core/derive";
+import type { AgendaModel } from "../../core/calendar";
 import { ActionControl } from "../atoms/ActionControl";
 import { Text } from "../atoms/Text";
 import { ModelState } from "../molecules/ModelState";

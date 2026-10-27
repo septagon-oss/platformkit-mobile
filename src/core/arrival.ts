@@ -18,7 +18,7 @@
 // - a host never decides anything. The tenant's address is where the person signed in
 //   from, and an app link is claimed for it at build time, not read back out of the path.
 
-import { screenPath } from "./derive";
+import { screenPath } from "./record";
 import { rowAt, type RecordAddress } from "./reentry";
 
 /** The surface every in-app address sits under: the kernel's `httpx.AppRoot`. */

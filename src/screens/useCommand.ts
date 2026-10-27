@@ -21,8 +21,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { key, type Command, type Entry } from "../core/catalog";
 import { address } from "../core/reentry";
+import { changedFields, problems, values } from "../core/form";
 import {
-  changedFields,
   commandOf,
   commandPath,
   commandSections,
@@ -30,14 +30,11 @@ import {
   commandWording,
   commandConfirmation,
   failureSubject,
-  label,
   offered,
-  problems,
-  screenPath,
-  values,
   type CommandWording,
-  type Row,
-} from "../core/derive";
+} from "../core/command";
+import { label } from "../core/present";
+import { screenPath, type Row } from "../core/record";
 import { keyed, type Api } from "../effects/api";
 import { outcomeOf } from "../effects/outbox";
 import type { PendingWrite } from "../core/outbox";

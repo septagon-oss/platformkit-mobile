@@ -19,6 +19,21 @@ for the version being released.
 
 ## 0.3.0 (unreleased)
 
+- The derivation layer has five doors. `./core/list` (which fields a page draws, in
+  what order, under which filters), `./core/record` (what one record shows and where
+  its address is), `./core/form` (what a person types and what the phone sends),
+  `./core/command` (what a person may do here and where the request goes, with the
+  failure the server answered) and `./core/present` (how a value, a word, a tone and
+  a state read) are new subpaths, and the layer gate now refuses anything but a
+  door's own `index.ts` under a door. `./core/derive` stays, publishing every name it
+  always published, and is `@deprecated`: import the door your rule lives in. Two
+  names that met inside the barrel are told apart — `Control` is a field's editor
+  (`./core/form`), and the drawn action it was also called is `ActionModel`
+  (`./core/shared`), with the old name kept as a deprecated alias. Nothing is removed
+  in this release; the release that removes `./core/derive`, the alias and
+  `Notice`'s `retry` re-export lists them in its own entry.
+
+
 - A record can be kept. A source entry declares `presentation.saved` (the word to keep a copy
   with, the word for a copy kept, the word that names it taken away, and `listEntry`, the entry
   holding this person's copies), the entry holding the copies declares

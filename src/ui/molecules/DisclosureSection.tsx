@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { DisclosureModel } from "../../core/derive";
+import type { DisclosureModel } from "../../core/record";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 import { kitStyles } from "../layout";

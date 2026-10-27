@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { SlotPickerModel } from "../../core/derive";
+import type { SlotPickerModel } from "../../core/form";
 import { Button } from "../atoms/Button";
 import { Notice } from "../atoms/Notice";
 import { ModelState } from "../molecules/ModelState";

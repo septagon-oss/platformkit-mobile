@@ -9,7 +9,7 @@
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { parse, SvgAst } from "react-native-svg";
-import { pickChoice } from "../../core/derive";
+import { pickChoice } from "../../core/list";
 import { kitStyles } from "../layout";
 import { testable } from "../props";
 import { hit } from "../scale";

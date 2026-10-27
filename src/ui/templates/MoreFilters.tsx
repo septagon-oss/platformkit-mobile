@@ -1,5 +1,5 @@
 import React from "react";
-import type { ChoiceGroupModel } from "../../core/derive";
+import type { ChoiceGroupModel } from "../../core/list";
 import { ChoiceChips } from "../molecules/ChoiceChips";
 import { DetailSheet } from "./DetailSheet";
 import type { DetailSurfaceProps } from "./DetailSurface";

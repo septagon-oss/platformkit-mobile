@@ -9,17 +9,17 @@ import React, {
 } from "react";
 import { useWindowDimensions } from "react-native";
 import { offers } from "../core/catalog";
+import { enrichmentFailure } from "../core/command";
 import {
-  enrichmentFailure,
   fileMeta,
   noMeta,
   pictureId,
   composedReference,
   type FileMeta,
-  type ImageSlotProps,
   type PictureStates,
-  type Row,
-} from "../core/derive";
+} from "../core/present";
+import { type ImageSlotProps } from "../core/media";
+import { type Row } from "../core/record";
 import { variantWidth } from "../core/prose";
 import { fileResource } from "../effects/files";
 import type { PictureResource } from "../effects/media";

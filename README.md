@@ -2891,3 +2891,32 @@ word outside the set, or by the empty string, is refused whole, as every other
 invalid state input is. The entrance is a 300 ms fade-and-rise on first appearance
 and nothing at all under reduced motion, and it is a prop like every other motion
 in the kit: `useFeedback` remains the only place the device is asked.
+
+## The core has five doors
+
+`src/core` is entered through five doors — `core/list`, `core/record`, `core/form`,
+`core/command` and `core/present` — and each door's `index.ts` is the only path into
+it. The gate in `eslint.config.mjs` refuses a part file (`../core/list/rows`) from
+anyone, including a sibling door and the deprecated barrel, and the same gate keeps
+the kit's gallery fixtures out of every door and every product file: they belong to
+`src/ui/gallery.tsx`, which reads them from their own modules. `src/core/derive.ts`
+publishes every name it always published and is marked `@deprecated`, so a client's
+import keeps answering while its owner repoints at the door the rule lives in. Two
+names that met inside the barrel are told apart: `Control` is a field's editor
+(`core/form`), and the drawn action that shared the name is `ActionModel`
+(`core/shared`), the name the barrel already used for it.
+
+**Reused** — the layer gate (`eslint.config.mjs`'s `forbid`/`uiLayer` and
+`tests/layers.test.ts`'s `boundaries`), the fixture-skipping source scan of
+`tests/core-asks-no-device.test.ts`, `tests/package.test.ts`'s TypeScript AST walk,
+`tests/fakes/presentation.ts`, and the copy table (`src/core/copy.ts`, `kitCopy.ts`)
+carry the partition, the gate's cases and the published subpaths.
+**Added** — the five door directories, `src/core/internals.ts`, the per-door boundary
+and the fixture ban, because `derive.ts` was one 2,757-line barrel whose `export *`
+list handed a screen that wanted a table the cart, the chart and the gallery fixtures
+with it, and no existing file held a partition to reuse.
+**Made reusable** — a published door path per derivation surface (38 subpaths, each
+proved by `tests/package.test.ts` against a packed tarball), a gate case that proves
+even the barrel enters a door through its index, and `ActionModel` as the drawn
+action's own name; the next delivery that splits a core file inherits both the shape
+and the refusal.

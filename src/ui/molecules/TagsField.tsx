@@ -10,7 +10,7 @@
 // meaning of one word is not the sheet's to guess.
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import { entryHoldsSeparator, splitList } from "../../core/derive";
+import { entryHoldsSeparator, splitList } from "../../core/form";
 import type { KitWords } from "../../core/kitCopy";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";

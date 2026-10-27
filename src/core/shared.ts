@@ -34,10 +34,17 @@ export interface ContentModel {
   readonly refreshing: boolean;
   readonly writable: boolean;
 }
-export interface Control extends Action {
+/** ActionModel is a drawn action: an atom that can be off, or be busy. */
+export interface ActionModel extends Action {
   readonly enabled: boolean;
   readonly busy: boolean;
 }
+
+/**
+ * @deprecated use ActionModel: a drawn action, not a field's editor. The kit models
+ * named a drawn action `Control` before the doors separated it from a field's editor.
+ */
+export type Control = ActionModel;
 
 class Refusal {
   constructor(readonly issues: readonly Issue[]) {}
@@ -107,7 +114,7 @@ export function build<T>(p: Presentation, derive: (v: Validation) => T): Result<
     throw error;
   }
 }
-export function action(a: Action, v: Validation, path: string, blocked?: string): Control {
+export function action(a: Action, v: Validation, path: string, blocked?: string): ActionModel {
   v.text(a.id, `${path}.id`);
   v.text(a.label, `${path}.label`);
   v.need(["ready", "disabled", "busy"].includes(a.state), `${path}.state`);
@@ -126,7 +133,7 @@ export function actions(
   v: Validation,
   path: string,
   blocked?: string,
-): readonly Control[] {
+): readonly ActionModel[] {
   v.ids(values, path);
   v.need(values.filter((a) => a.tone === "primary").length <= 1, path);
   return values.map((a, i) => action(a, v, `${path}.${i}`, blocked));
@@ -163,7 +170,7 @@ export function pageControl(
   v: Validation,
   enabled: boolean,
   label = v.p.copy.kit.more,
-): Control | undefined {
+): ActionModel | undefined {
   v.need(typeof page.more === "boolean" && typeof page.loading === "boolean", "page");
   if (!page.more) return;
   return action(

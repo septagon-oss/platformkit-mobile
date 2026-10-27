@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { PricingModel } from "../../core/derive";
+import type { PricingModel } from "../../core/pricing";
 import { ActionControl } from "../atoms/ActionControl";
 import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";

@@ -6,7 +6,7 @@ import { Stack } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useMemo } from "react";
 import { doors } from "../core/catalog";
-import { noun, type Clock } from "../core/derive";
+import { noun, type Clock } from "../core/present";
 import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceDetail } from "../ui/organisms/ResourceDetail";

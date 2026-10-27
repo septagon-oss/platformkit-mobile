@@ -9,7 +9,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import type { SurfaceModel } from "../../core/derive";
+import type { SurfaceModel } from "../../core/record";
 import { ActionControl } from "../atoms/ActionControl";
 import { Text } from "../atoms/Text";
 import { ActionBar } from "../molecules/ActionBar";

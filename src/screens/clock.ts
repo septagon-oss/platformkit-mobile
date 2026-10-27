@@ -1,6 +1,6 @@
 // Screens sample time, then give the UI an explicit value. No shared mutable clock.
 import { useState } from "react";
-import { instantValue, type Clock } from "../core/derive";
+import { instantValue, type Clock } from "../core/present";
 
 export const systemClock: Clock = { now: () => new Date().toISOString() };
 

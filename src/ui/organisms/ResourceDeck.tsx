@@ -1,12 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import {
-  deriveDeck,
-  type DeckCardModel,
-  type Motion,
-  type Presentation,
-  type RecordPictures,
-} from "../../core/derive";
+import { deriveDeck, type DeckCardModel, type RecordPictures } from "../../core/record";
+import { type Motion, type Presentation } from "../../core/present";
 import type { Entry } from "../../core/catalog";
 import type { DeckState, DeckTransition } from "../../core/deck";
 import { Badge } from "../atoms/Badge";

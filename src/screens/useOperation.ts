@@ -13,7 +13,7 @@
 // fourth is refused); converting the three into one is its own change, and a
 // pack screen that has just run a command re-reads by calling `reload()`.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { recordSubject } from "../core/derive";
+import { recordSubject } from "../core/command";
 import { useShell } from "../shell";
 import { refusalOf, screenCopy } from "./failure";
 import type { OperationData, OperationInput, OperationName, ReadState } from "../renderers";

@@ -3,7 +3,7 @@
 // join that produced these values is the caller's, not this molecule's.
 import React from "react";
 import { Pressable, StyleSheet } from "react-native";
-import type { SparklineModel, StatModel } from "../../core/derive";
+import type { SparklineModel, StatModel } from "../../core/charts";
 import { Text } from "../atoms/Text";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";

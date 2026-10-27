@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { ImageSlotProps, MediaHeroModel } from "../../core/derive";
+import type { ImageSlotProps, MediaHeroModel } from "../../core/media";
 import { ActionControl } from "../atoms/ActionControl";
 import { Button } from "../atoms/Button";
 import { Notice } from "../atoms/Notice";

@@ -4,7 +4,7 @@
 // filter is what left the list empty.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { Announcement, IllustrationName, Motion } from "../../core/derive";
+import type { Announcement, IllustrationName, Motion } from "../../core/present";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 import { Button } from "./Button";

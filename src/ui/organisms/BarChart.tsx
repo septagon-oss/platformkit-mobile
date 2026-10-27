@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { BarModel } from "../../core/derive";
+import type { BarModel } from "../../core/charts";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 import { ChoiceChips } from "../molecules/ChoiceChips";

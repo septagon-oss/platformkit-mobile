@@ -6,7 +6,7 @@
 // treatment (`kitStyles.selected`).
 import React from "react";
 import { Pressable, StyleSheet, View, type AccessibilityState } from "react-native";
-import { pickChoice, type ChoiceGroupModel } from "../../core/derive";
+import { pickChoice, type ChoiceGroupModel } from "../../core/list";
 import { kitStyles } from "../layout";
 import { Text } from "../atoms/Text";
 import { testable } from "../props";

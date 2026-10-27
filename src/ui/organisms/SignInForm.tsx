@@ -4,7 +4,7 @@
 // cleared. Before the form is wanted it shows the shell's two other states in
 // the same frame: a saved sign-in being restored, and one that could not be
 // opened, so a product need not draw those screens itself.
-import type { Feedback } from "../../core/derive";
+import type { Feedback } from "../../core/present";
 import type { Remembered, Workspace } from "../../core/workspace";
 import React, { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";

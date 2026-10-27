@@ -6,7 +6,9 @@
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { screenPath, personPointers, nameKey, rowCommands, timeText } from "../../core/derive";
+import { screenPath, personPointers } from "../../core/record";
+import { nameKey, timeText } from "../../core/present";
+import { rowCommands } from "../../core/command";
 import { avatarStack, type Person } from "../../core/pictures";
 import { deriveMeter } from "../../core/progress";
 import type { ScreenProps } from "../../renderers";

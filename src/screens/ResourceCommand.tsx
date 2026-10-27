@@ -13,10 +13,10 @@ import {
   commandScope,
   commandTitle,
   otherScope,
-  screenPath,
-  type Clock,
   type CommandScope,
-} from "../core/derive";
+} from "../core/command";
+import { screenPath } from "../core/record";
+import { type Clock } from "../core/present";
 import type { ScreenProps } from "../renderers";
 import { Notice } from "../ui/atoms/Notice";
 import { Button } from "../ui/atoms/Button";

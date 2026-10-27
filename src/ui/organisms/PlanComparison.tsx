@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { PlanComparisonModel } from "../../core/derive";
+import type { PlanComparisonModel } from "../../core/pricing";
 import { Text } from "../atoms/Text";
 import { kitStyles } from "../layout";
 import { useStyles } from "../theme";

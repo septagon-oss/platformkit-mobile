@@ -8,7 +8,7 @@
 import React, { type ComponentType } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets, type EdgeInsets } from "react-native-safe-area-context";
-import type { StateModel } from "../../core/derive";
+import type { StateModel } from "../../core/present";
 import { StateView, type Props as StateViewProps } from "./StateView";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";

@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, View } from "react-native";
-import type { DayStripModel } from "../../core/derive";
+import type { DayStripModel } from "../../core/calendar";
 import { Button } from "../atoms/Button";
 import { kitStyles } from "../layout";
 import { useStyles, useTheme } from "../theme";

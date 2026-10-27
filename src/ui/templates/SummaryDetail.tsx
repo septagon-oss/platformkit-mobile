@@ -1,5 +1,5 @@
 import React from "react";
-import type { DisclosureModel } from "../../core/derive";
+import type { DisclosureModel } from "../../core/record";
 import { DisclosureSection } from "../molecules/DisclosureSection";
 /** Use a sibling sheet/page for a third level; this layout permits two levels. */
 export function SummaryDetail({

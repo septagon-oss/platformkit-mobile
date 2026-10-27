@@ -1,14 +1,8 @@
 import React, { useRef, type ComponentType, type ReactNode } from "react";
 import { View, type LayoutRectangle } from "react-native";
-import type {
-  DataListModel,
-  Motion,
-  Names,
-  People,
-  PictureStates,
-  Order,
-  RowAction,
-} from "../../core/derive";
+import type { DataListModel, Order } from "../../core/list";
+import type { Motion, Names, People, PictureStates } from "../../core/present";
+import type { RowAction } from "../../core/command";
 import { ActionControl } from "../atoms/ActionControl";
 import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";

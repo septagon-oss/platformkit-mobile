@@ -1,6 +1,6 @@
 // LoadMore is the foot of a list that has more: how many, as a button, or a
 // spinner while they come.
-import type { Feedback } from "../../core/derive";
+import type { Feedback } from "../../core/present";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button } from "../atoms/Button";

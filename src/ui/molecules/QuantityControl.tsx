@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { QuantityModel } from "../../core/derive";
+import type { QuantityModel } from "../../core/commerce";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 import { Notice } from "../atoms/Notice";

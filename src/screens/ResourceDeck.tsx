@@ -4,7 +4,7 @@ import { Stack, useRouter } from "expo-router";
 import type { ScreenProps } from "../renderers";
 import { reviewDeck } from "../core/deck";
 import type { Deck } from "../core/catalogDeck";
-import { deriveDeck, screenPath } from "../core/derive";
+import { deriveDeck, screenPath } from "../core/record";
 import { useShell } from "../shell";
 import { Notice } from "../ui/atoms/Notice";
 import { Screen } from "../ui/templates/Screen";

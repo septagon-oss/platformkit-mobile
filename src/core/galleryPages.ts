@@ -8,7 +8,7 @@
 // the testID and a review's --pages argument all read it, so it changes only
 // with all three.
 import { kitCaseIds } from "./kitGallery";
-import { humanize } from "./derive";
+import { humanize } from "./present";
 import { type Presentation } from "./presentation";
 import { build, type Validation } from "./shared";
 

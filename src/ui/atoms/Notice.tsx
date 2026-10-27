@@ -3,7 +3,7 @@
 // may offer one action, which is how "retry" is offered everywhere.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { Announcement, Motion } from "../../core/derive";
+import type { Announcement, Motion } from "../../core/present";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Button, type ButtonTone } from "./Button";
@@ -39,6 +39,10 @@ interface Props {
 }
 
 // Retain the old export path; the required copy now comes from the caller.
+/**
+ * @deprecated import retry from core/present: this atom draws a notice, it does not
+ * own the state that says whether trying again is worth it.
+ */
 export { retry } from "../../core/derive";
 
 const icons: Record<NoticeTone, IconName> = {

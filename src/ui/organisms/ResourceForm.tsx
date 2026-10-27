@@ -7,14 +7,8 @@
 // phase this renders.
 import React, { useEffect, useRef, useState } from "react";
 import { findNodeHandle, type ScrollView, type TextInput } from "react-native";
-import {
-  type Feedback,
-  timeText,
-  timeValue,
-  timeWire,
-  type Control,
-  FormBlock,
-} from "../../core/derive";
+import { type Feedback, timeText } from "../../core/present";
+import { timeValue, timeWire, type Control, FormBlock } from "../../core/form";
 import {
   figureLine,
   insertLine,

@@ -9,7 +9,7 @@
 // `contentId`. So a record's activity is found by looking for its id anywhere
 // in the payload, which is true of both shapes and of any module that follows
 // either.
-import { humanize } from "./derive";
+import { humanize } from "./present";
 
 export interface Event {
   readonly id: string;

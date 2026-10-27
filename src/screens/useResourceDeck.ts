@@ -4,16 +4,9 @@ import type { Entry } from "../core/catalog";
 import { deckEvent, deckWindow, startDeck, type DeckInput, type DeckState } from "../core/deck";
 import type { Deck } from "../core/catalogDeck";
 import { boundArguments } from "../core/bindings";
-import {
-  commandWording,
-  commandConfirmation,
-  deckAcceptedRow,
-  deckCommand,
-  deckHeldWrite,
-  failureSubject,
-  type Copy,
-  type Row,
-} from "../core/derive";
+import { commandWording, commandConfirmation, failureSubject } from "../core/command";
+import { deckAcceptedRow, deckCommand, deckHeldWrite, type Row } from "../core/record";
+import { type Copy } from "../core/present";
 import { type PendingWrite } from "../core/outbox";
 import { PER_PAGE } from "../effects/api";
 import { useShell } from "../shell";

@@ -5,7 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import type { IconSize } from "../scale";
 import { testable } from "../props";
-import type { Status } from "../../core/derive";
+import type { Status } from "../../core/shared";
 import { statusInk, useTheme } from "../theme";
 import { toneColor, type Tone } from "./Text";
 

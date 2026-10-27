@@ -7,7 +7,7 @@
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import React, { useLayoutEffect, useRef } from "react";
 import { Platform, Pressable, StyleSheet, View } from "react-native";
-import type { Copy } from "../../core/derive";
+import type { Copy } from "../../core/present";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Button } from "./Button";
