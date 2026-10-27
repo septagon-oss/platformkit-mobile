@@ -7,29 +7,27 @@ another language reads the same files.
 
 ```jsonc
 {
-  "name": "enum-fallbacks", // = file name without .json
+  "name": "enum-fallbacks",              // = file name without .json
   "provenance": {
-    "author": "name of the reviewer", // non-empty
-    "date": "2026-10-23", // YYYY-MM-DD, UTC
-    "inputHash": "sha256:…", // of "input", see below
-    "expectedHash": "sha256:…", // of "expected"
+    "author": "name of the reviewer",    // non-empty
+    "date": "2026-10-23",                // YYYY-MM-DD, UTC
+    "inputHash": "sha256:…",             // of "input", see below
+    "expectedHash": "sha256:…"           // of "expected"
   },
   "input": {
-    "language": "pt-PT", // the tag the strings were resolved for
-    "schema": {}, // entity.Schema, wire form
-    "hints": {}, // entity.EntryHints (Go field names)
-    "immutable": [],
-    "singleton": false,
-    "commandsOnly": false,
-    "operations": ["list", "read"], // absent = all five
-    "commands": [], // present.CommandInput: the commands the viewer may call
-    "translations": { "present.true": "Sim" }, // the Text seam, key -> words
-    "rows": [{ "id": "r1" }], // record values as the API returns them
+    "language": "pt-PT",                 // the tag the strings were resolved for
+    "schema": { },                       // entity.Schema, wire form
+    "hints": { },                        // entity.EntryHints (Go field names)
+    "immutable": [], "singleton": false, "commandsOnly": false,
+    "operations": ["list", "read"],      // absent = all five
+    "commands": [ ],                     // present.CommandInput: the commands the viewer may call
+    "translations": { "present.true": "Sim" },  // the Text seam, key -> words
+    "rows": [ { "id": "r1" } ]           // record values as the API returns them
   },
   "expected": {
-    "resolved": {}, // the part of present.Resolved the case is about
-    "rows": { "<id>": { "listTitle": "…", "recordTitle": "…", "cells": { "<field>": "text" } } },
-  },
+    "resolved": { },                     // the part of present.Resolved the case is about
+    "rows": { "<id>": { "listTitle": "…", "recordTitle": "…", "cells": { "<field>": "text" } } }
+  }
 }
 ```
 

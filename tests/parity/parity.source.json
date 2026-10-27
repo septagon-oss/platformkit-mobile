@@ -2,28 +2,28 @@
   "schema": "platformkit.parity-source.v1",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "988e95c1ebf6d2ddc3a78cd514cc40a43f5bab90",
+    "commit": "d2f02143692090fb37b029d48f5f681508bf6b08",
     "path": "ui/screens/testdata/parity",
-    "command": "git -C platformkit archive 988e95c1ebf6d2ddc3a78cd514cc40a43f5bab90 ui/screens/testdata/parity"
+    "command": "git -C platformkit archive d2f02143692090fb37b029d48f5f681508bf6b08 ui/screens/testdata/parity"
   },
   "files": {
-    "README.md": "fb3a8af66e88ff64ec0d5150dfe085a252b498c2a8eda1b7740def67d4a06a4b",
-    "absent-hints.json": "9768c0083e06e43fb9f1c3745c5436d64d93a7951e710dd7e372c0d14d697dee",
-    "blank-identity.json": "382e6d115559bcf9237335b4fa6131d14413a99d990d059a228e1bacfb8d9bec",
-    "command-owned-create-fields.json": "eb9eb4f377ced98336b4aa45ae12ec93e14c525133bcf38abaed683b69dd525c",
-    "commands-only.json": "247d184d248316f4f7976c1c977b040c0580c35db59bcf0ad6d58282f27894d6",
-    "deck-directions.json": "7591b55435ec4e14d510ffb403044f56b6165e3719c8b1075c497f52e1453a27",
-    "empty-declarations.json": "5bfa8fddd96513dbe55de9479dae12f98efcc307f62ac538eb100834ef6da291",
-    "en-task.json": "60faca72acb27313e5e5e820fd46da4b8277114d73c74555bfee11efc8573c58",
-    "enum-fallbacks.json": "4b5a835cf084068b94695e45473ef3033c240f1a8f419a7c596a88a84450ef6b",
-    "hidden-fields.json": "021a7f8ad2e2d9dc84e247254f4e5bc540fd407fcf14b6a5ee87149dbaa00d21",
-    "malformed-hint.json": "69a5dbcddff01f50d01e809793ad1bdc369cdb9dc603bc5411ea1da8e56f581e",
-    "null-and-false.json": "bdbc4b6cce6c3e527cb078842091ba669ef72b3610980d8772fd5ea952c72ef8",
-    "pictures-cover-thumbnail.json": "16c33e0fca9ce16d1d54957812481665fb6b9e2e0358259661ad209712921ca0",
-    "plural-mass-noun.json": "50fa1279b11b633a29ac5116317c671592aae7988ad63fd99d215ab7ac76878a",
-    "pt-task.json": "9174fb89325a1f5269031060bd5788c3a542e8fb57984b9c5f15ce9293c257c7",
-    "read-only-resource.json": "5b26d8596fffcdafa2c373190d2b2d8516ce528e9673a40dee9a43bb23c22a3a",
-    "singleton-update-surface.json": "75785577941eb2886944b162e52c32a32ca66b41521691b24de0eeeb84bc8bbd",
-    "singleton.json": "1afdf94031f381bcd17e5bdf46865408e6fd5fc821a68c184c3b5b562ba4aeae"
+    "README.md": "b57fdd86cb7248204f2044b9341d2ba90553f6b8cddd6ae0e1bc990dc08d7c32",
+    "absent-hints.json": "536374f19eca1bd66cff4e4c169d4d55d936ce1a308cb48298f9a994736491d3",
+    "blank-identity.json": "1a6ced583246b56aef44dd95a157dd88797d154b9efdd0bed26a8df18450ae81",
+    "command-owned-create-fields.json": "8a06098627962cc22157fddd67ecfdc520b4a980af5ec50d80f355a3a7bce9d5",
+    "commands-only.json": "cf021fb038e302ee1cb0ecdb06842579cb6d1e1eda72ae5ae24fa3df77e22711",
+    "deck-directions.json": "319c157c2434a5afb6a1322829d94956c650d19f6c3c698ff909f967d44999a5",
+    "empty-declarations.json": "c313c0433a5a9e853473d59953c79f2ebaad004fab72bbfae5b6e30a4fb96473",
+    "en-task.json": "0f4314d7bf8be8c2ae690311347023109c5c91397b7e7a75e102d234beb30b4c",
+    "enum-fallbacks.json": "b31a7e2f3406c977d492ad5f8a133c986c5aba229883a9a697c645d07fa88d9f",
+    "hidden-fields.json": "4977e61d5c3c67436b2a480e6df179c41ee05905fddb3e4f25320e95b3bf34ec",
+    "malformed-hint.json": "e3a24a63f2f7c2d4ba00cbebf30d7541387290d58c99ace76425a4a1a383fa22",
+    "null-and-false.json": "365025510cac0f597b77a45f508b8996e6f9a20229771ddae1b5e56c4c25ea28",
+    "pictures-cover-thumbnail.json": "c6c38ed755baa2867d80147f7a6339d57e97f0a8757fc1d13d0f557c2a41da29",
+    "plural-mass-noun.json": "f9936c8628bd1ef80d2c5e0be3b1db8dc22a1dbf85b89737e350e0e8c1e29739",
+    "pt-task.json": "de7f91a29f26e019d7fd083de3baea9a1dd6a892a646e39cc03625e52832d2ca",
+    "read-only-resource.json": "98a9aba066716e59778c5856e9f5c1feb2ef587a383ea9539107e26a46644b27",
+    "singleton-update-surface.json": "5096f19e2f19741564b45fc24613ba1e38beec5ab11aa1f778f2070c04b4dcc7",
+    "singleton.json": "e7474e96d573e52e76bf8b4399d9d3e561d17863052c0a1f2f44f06b1adf14f8"
   }
 }
