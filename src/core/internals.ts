@@ -3,6 +3,15 @@
  * surface may draw and what a field's name means before it is spelled out. It is not a
  * door - nothing outside src/core imports it, and every name it holds stays private to
  * the doors.
+ *
+ * It reaches the doors through their indexes, and four of those indexes read a rule
+ * back from here, so the two halves are one cycle. Three things keep that cycle
+ * loadable in any import order and each is a rule, not an accident: every name that
+ * crosses it is read inside a function body, never while a module is still evaluating;
+ * no module in src/core is ever star-re-exported from a module inside the cycle, which
+ * would copy names out of a half-built module (this is why `derive.ts` star-exports the
+ * doors and nothing in a door star-exports `derive.ts`); and a rule that has to be
+ * applied while a module is being read belongs to the door that reads it, not here.
  */
 import { Entry, Field } from "./catalog";
 import { type Formatting } from "./presentation";

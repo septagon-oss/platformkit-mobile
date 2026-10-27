@@ -43,7 +43,7 @@ interface Props {
  * @deprecated import retry from core/present: this atom draws a notice, it does not
  * own the state that says whether trying again is worth it.
  */
-export { retry } from "../../core/derive";
+export { retry } from "../../core/present";
 
 const icons: Record<NoticeTone, IconName> = {
   danger: "warning",
