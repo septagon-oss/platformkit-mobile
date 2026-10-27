@@ -173,7 +173,10 @@ export function readChoice(
  * readResolved reads one entry's resolved section and hands back its choices by field name.
  * `names` is the entry's own field list: a choice naming a field the entry does not have is no
  * reading of anything, so it is dropped and says so. An entry with no section (a server too old
- * to print one) answers with nothing and says nothing.
+ * to print one) answers with nothing and says nothing — and a section that is not an object is no
+ * section at all, so it answers with nothing here too: the entry already said so at that path when
+ * it read the section as a whole (`./catalogPolicy`), and one broken member said twice is a defect
+ * a developer reads as two.
  */
 function readResolved(
   v: unknown,
@@ -182,10 +185,7 @@ function readResolved(
   notice: HintNotice,
 ): Readonly<Record<string, FieldChoice>> {
   if (v === undefined || v === null) return {};
-  if (!isRecord(v)) {
-    notice(at, "is not an object: every field keeps the reading its schema gives it");
-    return {};
-  }
+  if (!isRecord(v)) return {};
   const fields = v.fields;
   if (!Array.isArray(fields)) {
     if (v.fields !== undefined)

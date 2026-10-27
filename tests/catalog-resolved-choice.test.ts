@@ -125,7 +125,11 @@ test("an answer list that reads empty costs the choice and not the field", () =>
   const field = parseCatalog(doc, (at) => notices.push(at)).resources[0]!.fields[0]!;
   assert.equal(field.choice, undefined);
   assert.equal(field.name, "shapes");
+  // An answer that reads as nothing makes the list read as empty, which is a member the section
+  // cannot be trusted on: the entry's whole policy is refused at its own path first, then each
+  // unusable answer of this field is named.
   assert.deepEqual(notices, [
+    "resources[0].resolved",
     "resources[0].resolved.fields[0].options[0]",
     "resources[0].resolved.fields[0].options",
   ]);
@@ -137,7 +141,9 @@ test("a choice naming a field the entry does not have is not read", () => {
   doc.resources[0].resolved.fields[0].name = "phantom";
   const field = parseCatalog(doc, (at) => notices.push(at)).resources[0]!.fields[0]!;
   assert.equal(field.choice, undefined);
-  assert.deepEqual(notices, ["resources[0].resolved.fields[0].name"]);
+  // The same phantom name is two answers: the section is refused whole because it points outside
+  // this entry, and this field's choice is dropped because no field of it carries that name.
+  assert.deepEqual(notices, ["resources[0].resolved", "resources[0].resolved.fields[0].name"]);
 });
 
 test("a server with no resolved section says nothing and is answered in full", () => {

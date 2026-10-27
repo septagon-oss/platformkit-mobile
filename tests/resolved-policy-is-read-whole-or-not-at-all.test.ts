@@ -1,5 +1,6 @@
 // A catalogue entry whose server resolved a supported policy is read through that policy in every
-// reader; an absent, newer or malformed block leaves the entry drawn as it always was, and says so once.
+// reader; an absent, newer or malformed block leaves the entry drawn as it always was, and each
+// reader of the section says so once about the part it reads.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { parseCatalog } from "../src/core/catalog";
@@ -70,10 +71,22 @@ test("a supported block decides the title, the missing word, the columns, the fo
   );
 });
 
+// A section this build cannot read is refused by each reader of it, so one broken block is
+// answered twice: once by the policy and once by the finite-choice reader (`./choice`). What the
+// rule holds is that each says so once, and that nothing else was said.
+const POLICY_REFUSAL = /: the entry is drawn without the server's policy$/;
+
 const readsAsToday = (doc: unknown, why: RegExp) => {
   const { entry, notices } = read(doc);
-  assert.equal(notices.length, 1, notices.join("\n"));
-  assert.match(notices[0]!, why);
+  assert.equal(new Set(notices).size, notices.length, notices.join("\n"));
+  assert.deepEqual(
+    notices.filter((n) => !n.startsWith("resources[0].resolved")),
+    [],
+    "a broken section leaves nothing but its own entry to answer for",
+  );
+  const refusals = notices.filter((n) => POLICY_REFUSAL.test(n));
+  assert.equal(refusals.length, 1, notices.join("\n"));
+  assert.match(refusals[0]!, why);
   assert.equal(entry.resolved, undefined);
   assert.equal(
     entry.fields.some((f) => f.policy !== undefined),

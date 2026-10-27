@@ -20780,7 +20780,7 @@
    "runner": "node",
    "layer": "behaviour",
    "cases": 7,
-   "rule": "A catalogue entry whose server resolved a supported policy is read through that policy in every reader; an absent, newer or malformed block leaves the entry drawn as it always was, and says so once.",
+   "rule": "A catalogue entry whose server resolved a supported policy is read through that policy in every reader; an absent, newer or malformed block leaves the entry drawn as it always was, and each reader of the section says so once about the part it reads.",
    "ruleSource": "first comment",
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",

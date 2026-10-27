@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `07f79b14c` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `cac3e6000` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
