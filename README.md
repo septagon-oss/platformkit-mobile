@@ -1708,7 +1708,7 @@ locally either way.
 ## Verify a change
 
 The repository CI runs `npm run check` on pull requests and main pushes.
-`npm run check` runs eleven gates in order, and stops at the first that fails:
+`npm run check` runs twelve gates in order, and stops at the first that fails:
 `check:api` (offline generated source comparison),
 `check:sdk` (`EXPO_OFFLINE=1 expo install --check`: every installed native
 package against the ranges the pinned `expo` bundles, read from
@@ -1745,7 +1745,10 @@ review-named files or of files no runner reaches — see _Which tests run where_
 below), `check:publish` (the manifest names a package the registry can hold and the
 changelog carries the entry this version's release is documented by) and
 `check:source` (the manifest and lockfile install from the
-registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
+registry alone) and `check:parity` (every file under `tests/parity` hashes to the byte the kernel commit
+named in its `parity.source.json` wrote, and each fixture's own two hashes are the ones its `input` and
+`expected` members compute to under the kernel's canonical-JSON rule — see _The server's resolved policy_).
+[fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the
 lockfile and their config plugins, the Android recipe, the bundler
 configuration and the design export. When a change moves it, run
