@@ -211,6 +211,27 @@ test("generated schemas are pure but generated transports stay behind effect bou
   );
 });
 
+test("the pack door belongs to the declarer, and the generated key map to the contract", async () => {
+  // src/pack.ts is where a product declares a pack: a read, a policy binding and the
+  // screens that draw them. A core function that declared one would know React, and a
+  // UI layer that declared one would own a read — both are props those layers are handed.
+  // The generated key map is reached only by the two files that name a key or a read.
+  for (const [file, source] of [
+    ["src/core/probe.ts", 'export { definePack } from "../pack";'],
+    ["src/core/probe.ts", 'export { entryReads } from "../generated/entries.gen";'],
+    ["src/ui/atoms/Probe.tsx", 'export { definePack } from "../pack";'],
+    ["src/ui/atoms/Probe.tsx", 'export { entryReads } from "../../generated/entries.gen";'],
+  ]) {
+    assert.ok((await boundaries(file!, source!)).length > 0, `${file}: ${source}`);
+  }
+  for (const [file, source] of [
+    ["src/pack.ts", 'export { entryReads } from "./generated/entries.gen";'],
+    ["src/renderers.ts", 'export type { EntryKey } from "./generated/entries.gen";'],
+  ]) {
+    assert.deepEqual(await boundaries(file!, source!), [], source!);
+  }
+});
+
 test("an example pack is composed by no route and reads its data through useOperation", async () => {
   // src/examples holds the kit's example of a renderer pack. Nothing composes
   // it — a product's own pack lives with the product — and it reaches the pinned

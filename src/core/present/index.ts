@@ -5,6 +5,7 @@
  */
 export * from "./media";
 export * from "./people";
+export * from "./present";
 export * from "./tones";
 export * from "./words";
 export * from "../presentation";

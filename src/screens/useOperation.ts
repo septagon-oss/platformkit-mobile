@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { recordSubject } from "../core/command";
 import { useShell } from "../shell";
 import { refusalOf, screenCopy } from "./failure";
+import type { FailureVerdict } from "../core/failure";
 import type { OperationData, OperationInput, OperationName, ReadState } from "../renderers";
 
 /**
@@ -39,6 +40,7 @@ export function useOperation<K extends OperationName>(
     requested: boolean;
     data: OperationData<K> | undefined;
     error: string;
+    failure?: FailureVerdict | undefined;
   }>({ requested: false, data: undefined, error: "" });
   const generation = useRef(0);
   // alive is useCommandForm's, for the same two reasons: a refusal that arrives
@@ -78,7 +80,7 @@ export function useOperation<K extends OperationName>(
       setState({ requested: false, data: undefined, error: "" });
       return;
     }
-    setState((was) => ({ ...was, requested: true, error: "" }));
+    setState((was) => ({ ...was, requested: true, error: "", failure: undefined }));
     const read = api.operations[question.name] as Reader<K>;
     try {
       const result = await read(question.input);
@@ -88,11 +90,16 @@ export function useOperation<K extends OperationName>(
       if (!settle()) return;
       // A refusal withdraws the row: a stale value under a fresh refusal would
       // read as the server having agreed a thing it refused. A named operation
-      // carries no entry to name, so the sentence names the record it read.
+      // carries no entry to name, so the sentence names the record it read. The
+      // verdict travels beside the sentence, because a refusal that draws no
+      // sentence, or one whose next step is not a retry, is a fact `error` alone
+      // cannot carry.
+      const refusal = refusalOf(e, "read", recordSubject, screenCopy());
       setState({
         requested: false,
         data: undefined,
-        error: refusalOf(e, "read", recordSubject, screenCopy()).text,
+        error: refusal.text,
+        failure: refusal.verdict,
       });
     }
   }, [api]);
@@ -103,5 +110,11 @@ export function useOperation<K extends OperationName>(
     })();
   }, [load, asked]);
 
-  return { requested: state.requested, data: state.data, error: state.error, reload: load };
+  return {
+    requested: state.requested,
+    data: state.data,
+    error: state.error,
+    failure: state.failure,
+    reload: load,
+  };
 }

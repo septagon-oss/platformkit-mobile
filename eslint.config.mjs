@@ -118,6 +118,7 @@ const coreBoundary = [
       "**/shell",
       "**/shell.tsx",
       "**/screens/**",
+      "**/pack",
     ],
     message: "core is plain functions; it imports nothing outside src/core.",
   },
@@ -131,6 +132,9 @@ const uiBoundary = [{
     "**/shell",
     "**/shell.tsx",
     "**/renderers",
+    // The pack door is the declarer's, not the drawer's: a UI layer that declared a pack
+    // would own a read and a policy binding, which are props this layer is handed.
+    "**/pack",
     "expo-router",
     "expo-secure-store",
     "expo-haptics",
