@@ -287,8 +287,8 @@
   "behaviour": {
    "files": 288,
    "cases": 1347,
-   "ms": 2547072,
-   "testsMs": 93637.49999999993,
+   "ms": 2546649,
+   "testsMs": 93642.69999999992,
    "runners": {
     "jest": 100,
     "node": 188
@@ -12035,7 +12035,7 @@
    "testsMs": 13.8
   },
   {
-   "file": "tests/a-served-catalogue-that-names-no-record-preview-draws-none.test.ts",
+   "file": "tests/a-served-catalogue-that-names-no-summary-line-draws-none.test.ts",
    "runner": "node",
    "layer": "behaviour",
    "cases": 1,
@@ -12046,7 +12046,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
-   "ms": 2467,
+   "ms": 1081,
    "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "the served catalogue names no record preview and the record draws none"
@@ -12054,14 +12054,14 @@
    "tests": [
     {
      "title": "the served catalogue names no record preview and the record draws none",
-     "ms": 23.05963,
+     "ms": 14.858233,
      "measured": false
     }
    ],
    "loaded": 38,
-   "coveredProdLines": 13635,
+   "coveredProdLines": 13646,
    "onlyProdLines": null,
-   "testsMs": 23.1
+   "testsMs": 14.9
   },
   {
    "file": "tests/a-small-picture-uses-its-stored-frame.test.ts",
@@ -12157,7 +12157,7 @@
    "runsNowhere": false
   },
   {
-   "file": "tests/a-supported-policy-keeps-its-empty-preview.test.ts",
+   "file": "tests/a-supported-policy-keeps-its-blank-summary-blank.test.ts",
    "runner": "node",
    "layer": "behaviour",
    "cases": 1,
@@ -12167,22 +12167,23 @@
    "reach": "npm test (node half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "Pins the behavior stated above with an independent counterexample. Cases and titles are observed from the failing node or Jest execution; no passing run, timing or coverage measurement is claimed.",
-   "ms": null,
-   "exclusiveNotMeasured": "The cases currently fail. Timings and coverage remain unmeasured; npm run inventory -- --measure tests/a-supported-policy-keeps-its-empty-preview.test.ts can measure them after the behavior is corrected.",
+   "verdictReason": "Pins the behavior stated above with an independent counterexample: a supported block whose `titles.preview` is empty, which is the server answering that no field lines a record rather than saying nothing. Its cost comes from a passing run; its exclusive-line column belongs to the pass named under measured.node.",
+   "ms": 963,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
    "titles": [
     "a supported policy with no preview draws no inferred record summary"
    ],
    "tests": [
     {
      "title": "a supported policy with no preview draws no inferred record summary",
-     "ms": null,
+     "ms": 13.386431,
      "measured": false
     }
    ],
-   "loaded": null,
-   "coveredProdLines": null,
-   "onlyProdLines": null
+   "loaded": 38,
+   "coveredProdLines": 13626,
+   "onlyProdLines": null,
+   "testsMs": 13.4
   },
   {
    "file": "tests/a-whole-row-replace-carries-what-nobody-typed-as-read.test.ts",

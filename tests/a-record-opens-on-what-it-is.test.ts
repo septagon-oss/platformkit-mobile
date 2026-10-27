@@ -175,7 +175,7 @@ test("a field that names no block lands in the overview, after the declared ones
 test("an un-hinted entry gets a title, no pill, and one flat overview", () => {
   // The phone's own derivation, so the entry is served without a resolved policy: the
   // served block names no summary line for this resource, and where it speaks the
-  // record draws what it names (`a-served-catalogue-that-names-no-record-preview-draws-none`).
+  // record draws what it names (`a-served-catalogue-that-names-no-summary-line-draws-none`).
   const parsed = parseCatalog(unresolved(bytes("catalog.json"))).resources[0]!;
   const row = {
     id: "1",
