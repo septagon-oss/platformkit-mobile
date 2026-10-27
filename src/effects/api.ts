@@ -33,7 +33,8 @@ import {
   CatalogError,
 } from "../core/catalog";
 import { row, page, identity, trail, issuedToken, issuePath } from "../core/responses";
-import { commandPath, writePath } from "../core/derive";
+import { commandPath } from "../core/command";
+import { writePath } from "../core/form";
 import { keyRefusal } from "../core/outbox";
 import { composedReference, pictureTemplate } from "../core/pictures";
 import { factorRequired, unrecognisedCaller } from "../core/signInOutcome";

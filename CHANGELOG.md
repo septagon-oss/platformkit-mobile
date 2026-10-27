@@ -19,6 +19,33 @@ for the version being released.
 
 ## 0.3.0 (unreleased)
 
+- The derivation layer has five doors. `./core/list` (which fields a page draws, in
+  what order, under which filters), `./core/record` (what one record shows and where
+  its address is), `./core/form` (what a person types and what the phone sends),
+  `./core/command` (what a person may do here and where the request goes, with the
+  failure the server answered) and `./core/present` (how a value, a word, a tone and
+  a state read) are new subpaths, and the layer gate now refuses anything but a
+  door's own `index.ts` under a door. `./core/derive` stays, publishing every name it
+  always published, and is `@deprecated`: import the door your rule lives in. Two
+  names that met inside the barrel are told apart — `Control` is a field's editor
+  (`./core/form`), and the drawn action it was also called is `ActionModel`
+  (`./core/shared`), with the old name kept as a deprecated alias. Nothing is removed
+  in this release; the release that removes `./core/derive`, the alias and
+  `Notice`'s `retry` re-export lists them in its own entry.
+
+- Every sentence a person reads is a key in the copy table. Two published rules change shape
+  for it: `verbRefusal(verb, copy)` takes the bundle its caller already holds, and
+  `since(at, now, format, words)` takes the distance words with it. `Copy.failure` gains
+  `cannotCreateHere`, `cannotEditHere`, `cannotDeleteHere`, `notAvailableHere`, `entryMissing`,
+  `commandNotRun` and `signInElsewhere`, and `KitWords` gains `listItemType`; the distances are
+  the kit's own `justNow`/`minuteAgo`/`minutesAgo`/`hourAgo`/`hoursAgo`/`yesterday`/`daysAgo`,
+  which a phone already spelled for a recent instant. A sheet that refused a verb, a field that
+  held a list item of the wrong type, an activity line's "how long ago" and the question that
+  throws a command's arguments away answered in English whatever the person spoke. The rule is
+  kept by a lint with its allow list in its own file
+  (`tests/copy-names-every-sentence-a-person-reads.test.ts`).
+
+
 - A record can be kept. A source entry declares `presentation.saved` (the word to keep a copy
   with, the word for a copy kept, the word that names it taken away, and `listEntry`, the entry
   holding this person's copies), the entry holding the copies declares

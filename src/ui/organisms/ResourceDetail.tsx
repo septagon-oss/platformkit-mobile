@@ -15,25 +15,29 @@ import type { Motion } from "../../core/presentation";
 import {
   failureSubject,
   failureTone,
-  nounPhrase,
-  recordCover,
-  recordHeader,
-  recordInformation,
-  recordSections,
   refusalAction,
-  richBody,
-  translationNote,
-  type DetailItem,
-  type DisclosureModel,
+  type FailureVerdict,
+} from "../../core/command";
+import {
+  nounPhrase,
   type FileMeta,
   type Names,
   type People,
   type PictureStates,
   type Feedback,
-  type FailureVerdict,
-  type Row as Item,
   type StateModel,
-} from "../../core/derive";
+} from "../../core/present";
+import {
+  recordCover,
+  recordHeader,
+  recordInformation,
+  recordSections,
+  richBody,
+  translationNote,
+  type DetailItem,
+  type DisclosureModel,
+  type Row as Item,
+} from "../../core/record";
 import { Notice } from "../atoms/Notice";
 import { Badge, type BadgeTone } from "../atoms/Badge";
 import { Text } from "../atoms/Text";

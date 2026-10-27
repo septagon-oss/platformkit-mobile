@@ -1,4 +1,4 @@
-import { avatar, avatarStack, rowMedia } from "../core/derive";
+import { avatar, avatarStack, rowMedia } from "../core/present";
 import { Avatar } from "./molecules/Avatar";
 import { AvatarStack } from "./molecules/AvatarStack";
 import { RowMedia } from "./molecules/RowMedia";
@@ -9,25 +9,20 @@ import { RowMedia } from "./molecules/RowMedia";
 // screen lives in this file rather than in core.
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View, useWindowDimensions, type ViewStyle } from "react-native";
+import { kitCaseIds, kitExamples, type GallerySelection } from "../core/kitGallery";
+import { posterFor, type ImageSlotProps, type PosterMark } from "../core/media";
+import { sceneFor, sceneNames } from "../core/kitScenes";
 import {
-  kitCaseIds,
-  kitExamples,
-  posterFor,
-  sceneFor,
-  sceneNames,
-  type GallerySelection,
-  type ImageSlotProps,
-  type PosterMark,
   deriveCopy,
   deriveFeedback,
   humanize,
-  stateExamples,
   timeText,
   type Feedback,
   type Language,
-  type MapCanvasProps,
   type Presentation,
-} from "../core/derive";
+} from "../core/present";
+import { stateExamples } from "../core/stateGallery";
+import { type MapCanvasProps } from "../core/map";
 import {
   deriveGalleryPage,
   groupHeading,

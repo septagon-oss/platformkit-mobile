@@ -8,7 +8,7 @@ import {
   type Feedback,
   type Formatting,
   type Motion,
-} from "../core/derive";
+} from "../core/present";
 import { systemClock } from "./clock";
 import { screenCopy } from "./failure";
 

@@ -18,7 +18,8 @@
 import { Stack } from "expo-router";
 import React, { useMemo } from "react";
 import { View } from "react-native";
-import { humanize, rowCommands, timeText, type Feedback } from "../core/derive";
+import { humanize, timeText, type Feedback } from "../core/present";
+import { rowCommands } from "../core/command";
 import type { OperationData, OperationName, Renderer, ScreenProps } from "../renderers";
 import { useCommandRun } from "../screens/useCommand";
 import { useFeedback } from "../screens/useFeedback";

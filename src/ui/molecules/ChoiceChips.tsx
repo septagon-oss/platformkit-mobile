@@ -7,7 +7,7 @@
 // into a wall the eye cannot read down.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { pickChoice } from "../../core/derive";
+import { pickChoice } from "../../core/list";
 import { Button } from "../atoms/Button";
 import { kitStyles } from "../layout";
 import { hit } from "../scale";

@@ -11,7 +11,7 @@ import { useFeedback } from "./useFeedback";
 import { useSignOut } from "./useSignOut";
 import { WorkspaceMark } from "./WorkspaceMark";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { workspaceName } from "../core/derive";
+import { workspaceName } from "../core/present";
 import { rememberedFace, type Remembered } from "../core/workspace";
 import { useShell } from "../shell";
 import { ApiError } from "../effects/api";

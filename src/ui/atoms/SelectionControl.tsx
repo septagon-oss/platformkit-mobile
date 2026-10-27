@@ -1,5 +1,5 @@
 import React from "react";
-import type { SelectionModel } from "../../core/derive";
+import type { SelectionModel } from "../../core/list";
 import { Button } from "./Button";
 export function SelectionControl({
   model,

@@ -6,7 +6,7 @@
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import { ActionSheetIOS, Platform, Pressable, StyleSheet, View } from "react-native";
-import type { Copy } from "../../core/derive";
+import type { Copy } from "../../core/present";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Icon } from "./Icon";

@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { ActivityModel } from "../../core/derive";
+import type { ActivityModel } from "../../core/record";
 import { ActionControl } from "../atoms/ActionControl";
 import { Button } from "../atoms/Button";
 import { Notice } from "../atoms/Notice";

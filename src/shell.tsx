@@ -39,7 +39,7 @@ import { createRecents, type Recents, type RecentsStore } from "./effects/recent
 import { createSaved, type SavedFinder, type SavedPort } from "./effects/saved";
 import { createWorkspaces, type Workspaces, type WorkspaceStore } from "./effects/workspaces";
 import { unknownWorkspace, workspaceOf, type Workspace } from "./core/workspace";
-import { hostLabel } from "./core/derive";
+import { hostLabel } from "./core/present";
 import { sessions } from "./effects/native-session";
 import type { Reach } from "./effects/native-reach";
 import { PUSH_PLATFORM, type PushBridge } from "./screens/push";

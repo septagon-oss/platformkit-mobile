@@ -19,16 +19,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
 import {
   changedFields,
-  failureSubject,
   firstProblem,
   formSections,
   problems,
   values,
-  verbRefusal,
   writeControls,
   writePath,
-  type Row,
-} from "../core/derive";
+} from "../core/form";
+import { failureSubject, verbRefusal } from "../core/command";
+import { type Row } from "../core/record";
 import { keyed } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
@@ -183,7 +182,7 @@ export function useSingleton(entry: Entry) {
     // write stays the server's answer. A singleton's PUT is an update of its one
     // row, and a resource that mounts no update has no address for it.
     if (!offers(entry, "update")) {
-      setDetail(verbRefusal("update"));
+      setDetail(verbRefusal("update", copy));
       return;
     }
     // A form over a row that was never read has nothing to replace: a PUT of what

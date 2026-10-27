@@ -8,7 +8,7 @@
 // the eye cannot read down a column, which is what a sheet exists to fix.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { ChoiceGroupModel } from "../../core/derive";
+import type { ChoiceGroupModel } from "../../core/list";
 import { Notice } from "../atoms/Notice";
 import { Text } from "../atoms/Text";
 import { Row } from "./Row";

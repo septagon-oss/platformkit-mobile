@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, View } from "react-native";
-import type { ViewerModel } from "../../core/derive";
+import type { ViewerModel } from "../../core/media";
 import { Button } from "../atoms/Button";
 import { Notice } from "../atoms/Notice";
 import { Text } from "../atoms/Text";

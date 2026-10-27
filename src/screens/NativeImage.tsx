@@ -2,7 +2,7 @@ import { clearImageMemory } from "../effects/native-images";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Image } from "expo-image";
 import { parse, SvgAst } from "react-native-svg";
-import type { ImageSlotProps } from "../core/derive";
+import type { ImageSlotProps } from "../core/media";
 import type { PictureResource } from "../effects/media";
 export function NativeImage({
   model,

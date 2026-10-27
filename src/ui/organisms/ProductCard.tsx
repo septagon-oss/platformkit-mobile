@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { ProductCardModel } from "../../core/derive";
+import type { ProductCardModel } from "../../core/commerce";
 import { ActionControl } from "../atoms/ActionControl";
 import { Badge } from "../atoms/Badge";
 import { Price } from "../atoms/Price";

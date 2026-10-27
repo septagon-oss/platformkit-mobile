@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { AvatarStackModel } from "../../core/derive";
+import type { AvatarStackModel } from "../../core/present";
 import { Text } from "../atoms/Text";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";

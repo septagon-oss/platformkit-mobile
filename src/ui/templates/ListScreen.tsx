@@ -2,7 +2,7 @@
 // large title, pull to refresh, the foot that loads more, the empty state,
 // and skeleton rows before the first page. What a row is comes from the
 // caller.
-import type { Feedback } from "../../core/derive";
+import type { Feedback } from "../../core/present";
 import React, { Fragment, type ReactElement, type ReactNode } from "react";
 import { FlatList, RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
 import { Skeleton } from "../atoms/Skeleton";

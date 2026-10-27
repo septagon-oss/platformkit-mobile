@@ -6,7 +6,8 @@
 // states, its order and its pull.
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useMemo } from "react";
-import { noun, pointerTargets, screenPath, visiblePictures } from "../../core/derive";
+import { noun, visiblePictures } from "../../core/present";
+import { pointerTargets, screenPath } from "../../core/record";
 import { rowAt } from "../../core/reentry";
 import type { ScreenProps } from "../../renderers";
 import { useFeedback } from "../../screens/useFeedback";

@@ -1,6 +1,6 @@
 // The reference gallery samples its clock and native preferences at composition.
 import React from "react";
-import { deriveCopy, type Clock, type Presentation } from "../core/derive";
+import { deriveCopy, type Clock, type Presentation } from "../core/present";
 import { Gallery as GalleryView } from "../ui/gallery";
 import { screenCopy } from "./failure";
 import { useFeedback } from "./useFeedback";

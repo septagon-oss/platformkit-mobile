@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { PriceModel } from "../../core/derive";
+import type { PriceModel } from "../../core/commerce";
 import { Text } from "./Text";
 export function Price({ model }: { readonly model: PriceModel }) {
   return (

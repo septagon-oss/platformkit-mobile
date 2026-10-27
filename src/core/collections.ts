@@ -1,5 +1,5 @@
 import type { AvatarModel, RowMediaModel } from "./pictures";
-import type { Order } from "./derive";
+import type { Order } from "./list";
 import type { ChoicePicture } from "./choice";
 import type { Field } from "./catalog";
 import type { Action } from "./feedback";

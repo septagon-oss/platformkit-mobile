@@ -6,7 +6,7 @@ import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback } from "react";
 import { View } from "react-native";
 import { packKey, shellReady, type Entry } from "./core/catalog";
-import { humanize, noun } from "./core/derive";
+import { humanize, noun } from "./core/present";
 import { address } from "./core/reentry";
 import type { Renderer } from "./renderers";
 import { ResourceCommand } from "./screens/ResourceCommand";
@@ -16,6 +16,7 @@ import { ResourceDeck } from "./screens/ResourceDeck";
 import { ResourceList } from "./screens/ResourceList";
 import { Singleton } from "./screens/Singleton";
 import { useFeedback } from "./screens/useFeedback";
+import { screenCopy } from "./screens/failure";
 import { useShell } from "./shell";
 import { Button } from "./ui/atoms/Button";
 import { Notice as NoticeView, retry } from "./ui/atoms/Notice";
@@ -49,6 +50,7 @@ interface Props {
 
 export function ResourceRoute({ kind, withID = false, withVerb = false }: Props) {
   const { state, renderers, entry, saw } = useShell();
+  const copy = screenCopy();
   const params = useLocalSearchParams<{
     module: string;
     entity: string;
@@ -87,7 +89,7 @@ export function ResourceRoute({ kind, withID = false, withVerb = false }: Props)
   if (!module || !entity) return <Redirect href="/" />;
 
   const found = entry(module, entity);
-  if (!found) return <Notice text={`${module}/${entity} is not in this installation.`} />;
+  if (!found) return <Notice text={copy.failure.entryMissing(`${module}/${entity}`)} />;
 
   // A tenant has one of a singleton, at the entry's own path, so its list
   // route is the record itself: a list of one row with a New button on it
@@ -211,7 +213,7 @@ export function Notice({
         {...(onRetry ? { action: retry(feedback, onRetry) } : {})}
       />
       {onSignIn ? (
-        <Button label="Sign in to another server" tone="secondary" onPress={onSignIn} />
+        <Button label={feedback.copy.failure.signInElsewhere} tone="secondary" onPress={onSignIn} />
       ) : null}
     </Screen>
   );

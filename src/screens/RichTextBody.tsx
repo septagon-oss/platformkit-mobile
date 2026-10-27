@@ -15,7 +15,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useWindowDimensions } from "react-native";
 import { key } from "../core/catalog";
-import type { Presentation, Row } from "../core/derive";
+import type { Presentation } from "../core/present";
+import type { Row } from "../core/record";
 import type { MediaItem } from "../core/media";
 import { deriveProse, proseBlocks, variantWidth, type ProseFigure } from "../core/prose";
 import { rowAddress } from "../effects/api";

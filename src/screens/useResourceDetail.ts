@@ -15,20 +15,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { key, offers, type Entry } from "../core/catalog";
 import {
   failureSubject,
+  verbRefusal,
+  type FailureContext,
+  type FailureVerdict,
+} from "../core/command";
+import {
   instantValue,
-  isFinished,
   label,
   nounPhrase,
   presentedTime,
-  screenPath,
-  verbRefusal,
-  writePath,
   type Clock,
-  type FailureContext,
-  type FailureVerdict,
   type Formatting,
-  type Row,
-} from "../core/derive";
+} from "../core/present";
+import { isFinished, screenPath, type Row } from "../core/record";
+import { writePath } from "../core/form";
 import { address } from "../core/reentry";
 import { keyed, rowAddress } from "../effects/api";
 import { answered } from "../effects/read-cache";
@@ -217,7 +217,7 @@ export function useResourceDetail(
     // answers a caller who may not write. A resource with no delete has no
     // address to send one to, so the question is never even asked.
     if (!offers(entry, "delete")) {
-      setError(verbRefusal("delete"));
+      setError(verbRefusal("delete", copy));
       return;
     }
     setMenu(false);

@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { SlotOptionModel } from "../../core/derive";
+import type { SlotOptionModel } from "../../core/form";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 export function SlotOption({

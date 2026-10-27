@@ -9,7 +9,7 @@ import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceForm as ResourceFormView } from "../ui/organisms/ResourceForm";
 import { useResourceForm } from "./useResourceForm";
-import { label, type Clock } from "../core/derive";
+import { label, type Clock } from "../core/present";
 import { systemClock, useInitialDate } from "./clock";
 import { useShell } from "../shell";
 import { choose } from "../ui/chooser";

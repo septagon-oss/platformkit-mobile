@@ -11,7 +11,7 @@ import {
   illustrations,
   type IllustrationName,
   type Motion,
-} from "../../core/derive";
+} from "../../core/present";
 import { testable } from "../props";
 import { useTheme } from "../theme";
 

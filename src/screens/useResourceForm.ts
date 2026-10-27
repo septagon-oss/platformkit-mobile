@@ -17,19 +17,16 @@ import {
   changedFields,
   controlPointers,
   formControls,
-  failureSubject,
   firstProblem,
   formSections,
-  noun,
   problems,
   saveBody,
-  screenPath,
-  text,
-  verbRefusal,
   writeLanguage,
   writePath,
-  type Row,
-} from "../core/derive";
+} from "../core/form";
+import { failureSubject, verbRefusal } from "../core/command";
+import { noun, text } from "../core/present";
+import { screenPath, type Row } from "../core/record";
 import { keyed, langQuery } from "../effects/api";
 import { useShell } from "../shell";
 import { confirm } from "../ui/chooser";
@@ -250,7 +247,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     // resource does not mount has no address to POST to, and nothing is sent to
     // find out.
     if (!offers(entry, create ? "create" : "update")) {
-      setDetail(verbRefusal(create ? "create" : "update"));
+      setDetail(verbRefusal(create ? "create" : "update", copy));
       return;
     }
     const refused = problems(controls, held, copy.kit);

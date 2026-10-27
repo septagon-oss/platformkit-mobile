@@ -5,7 +5,7 @@ import {
   type MapCanvasProps,
   type MapModel,
   type Viewport,
-} from "../../core/derive";
+} from "../../core/map";
 import { GroupedListScreen } from "../templates/ListScreen";
 import { ActionControl } from "../atoms/ActionControl";
 import { Button } from "../atoms/Button";

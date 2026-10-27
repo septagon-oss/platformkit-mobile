@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
-import type { SparklineModel } from "../../core/derive";
+import type { SparklineModel } from "../../core/charts";
 import { Text } from "../atoms/Text";
 import { useTheme } from "../theme";
 export interface Props {

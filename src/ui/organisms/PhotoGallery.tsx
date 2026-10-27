@@ -1,5 +1,5 @@
 import React from "react";
-import type { MediaModel } from "../../core/derive";
+import type { MediaModel } from "../../core/media";
 import { ActionControl } from "../atoms/ActionControl";
 import { Text } from "../atoms/Text";
 import { MediaHero, type ImageRenderer } from "../molecules/MediaHero";

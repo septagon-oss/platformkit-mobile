@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { StatModel } from "../../core/derive";
+import type { StatModel } from "../../core/charts";
 import { Badge } from "../atoms/Badge";
 import { Text } from "../atoms/Text";
 import { kitStyles } from "../layout";

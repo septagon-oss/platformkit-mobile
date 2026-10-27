@@ -10,7 +10,8 @@
 import React from "react";
 import { StyleSheet, View, type LayoutRectangle } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
-import type { Feedback, Motion, RecordCover as CoverModel, RecordHeader } from "../../core/derive";
+import type { Feedback, Motion } from "../../core/present";
+import type { RecordCover as CoverModel, RecordHeader } from "../../core/record";
 import { Badge } from "../atoms/Badge";
 import { Notice } from "../atoms/Notice";
 import { Skeleton } from "../atoms/Skeleton";

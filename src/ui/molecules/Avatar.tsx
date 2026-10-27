@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { AvatarModel } from "../../core/derive";
+import type { AvatarModel } from "../../core/present";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { testable } from "../props";

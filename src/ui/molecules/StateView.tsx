@@ -1,6 +1,6 @@
 // A model selects existing atoms. Actions report intent to the owning screen.
 import React from "react";
-import type { StateModel } from "../../core/derive";
+import type { StateModel } from "../../core/present";
 import { EmptyState } from "../atoms/EmptyState";
 import { Notice, type Action } from "../atoms/Notice";
 import { Skeleton } from "../atoms/Skeleton";

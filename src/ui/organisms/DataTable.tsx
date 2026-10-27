@@ -7,7 +7,7 @@
 // focusable element that says its column names and its values aloud.
 import React from "react";
 import { StyleSheet, View, type AccessibilityRole } from "react-native";
-import type { TableModel } from "../../core/derive";
+import type { TableModel } from "../../core/table";
 import { Text } from "../atoms/Text";
 import { useStyles, type Theme } from "../theme";
 

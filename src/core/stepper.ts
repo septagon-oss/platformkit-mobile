@@ -1,7 +1,7 @@
 import type { Action } from "./feedback";
 import { deriveCopy } from "./copy";
 import type { Issue, Presentation, Result } from "./presentation";
-import { action, build, type Control, type Validation } from "./shared";
+import { action, build, type ActionModel, type Validation } from "./shared";
 export interface Problem {
   readonly fieldId: string;
   readonly message: string;
@@ -63,7 +63,7 @@ export function deriveStepper(input: StepperInput, p: Presentation) {
     const editable = input.phase === "editing" || input.phase === "failed";
     const done = input.steps.filter((s) => s.completion !== "incomplete").length;
     const skipped = input.steps.filter((s) => s.completion === "skipped").length;
-    const make = (id: string, label: string, available: boolean, busy = false): Control =>
+    const make = (id: string, label: string, available: boolean, busy = false): ActionModel =>
       action(
         {
           id,

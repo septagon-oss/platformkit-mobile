@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, View } from "react-native";
-import { calendarTargets, type CalendarModel, type WeekModel } from "../../core/derive";
+import { calendarTargets, type CalendarModel, type WeekModel } from "../../core/calendar";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 import { Badge } from "../atoms/Badge";

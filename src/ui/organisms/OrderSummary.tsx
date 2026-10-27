@@ -1,5 +1,5 @@
 import React from "react";
-import type { SummaryModel } from "../../core/derive";
+import type { SummaryModel } from "../../core/commerce";
 import { Notice } from "../atoms/Notice";
 import { DetailRow } from "../molecules/DetailRow";
 import { Section } from "../molecules/Section";

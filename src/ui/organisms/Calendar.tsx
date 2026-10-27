@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { CalendarModel } from "../../core/derive";
+import type { CalendarModel } from "../../core/calendar";
 import { Button } from "../atoms/Button";
 import { Notice } from "../atoms/Notice";
 import { DayStrip } from "../molecules/DayStrip";

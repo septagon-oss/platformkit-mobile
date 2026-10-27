@@ -7,7 +7,7 @@
 // read is derive's (`workspaceName`), which this file feeds rather than restates.
 import { z } from "zod";
 import type { Connection } from "../generated/types.gen";
-import { hostLabel } from "./derive";
+import { hostLabel } from "./present";
 
 /**
  * ACCENT is the one spelling a brand accent arrives in: six hex digits behind a hash, in

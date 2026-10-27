@@ -9,7 +9,7 @@
 // about the workspace.
 import React, { useState } from "react";
 import { workspaceMarkURI, type Workspace } from "../core/workspace";
-import type { ImageSlotProps } from "../core/derive";
+import type { ImageSlotProps } from "../core/media";
 import type { ImageResource } from "../effects/media";
 import { useShell } from "../shell";
 import { NativeImage } from "./NativeImage";

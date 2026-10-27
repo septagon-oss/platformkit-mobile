@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
-import type { ChartModel } from "../../core/derive";
+import type { ChartModel } from "../../core/charts";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
 import { ChoiceChips } from "../molecules/ChoiceChips";

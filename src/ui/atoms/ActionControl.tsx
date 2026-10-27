@@ -1,12 +1,12 @@
 import React, { useLayoutEffect, useRef } from "react";
-import type { ActionModel as Control } from "../../core/derive";
+import type { ActionModel } from "../../core/shared";
 import { Button } from "./Button";
 export function ActionControl({
   model,
   onAction,
   testID,
 }: {
-  readonly model: Control;
+  readonly model: ActionModel;
   readonly onAction?: (id: string) => void;
   readonly testID?: string | undefined;
 }) {

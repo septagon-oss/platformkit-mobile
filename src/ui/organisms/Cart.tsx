@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { CartModel } from "../../core/derive";
+import type { CartModel } from "../../core/commerce";
 import { ActionControl } from "../atoms/ActionControl";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";

@@ -1,6 +1,6 @@
 import React from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
-import type { BuyBarModel } from "../../core/derive";
+import type { BuyBarModel } from "../../core/commerce";
 import { Price } from "../atoms/Price";
 import { Text } from "../atoms/Text";
 import { ActionBar } from "../molecules/ActionBar";

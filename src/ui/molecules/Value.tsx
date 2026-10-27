@@ -20,9 +20,9 @@ import {
   enumTone,
   fieldLabel,
   points,
-  splitList,
   text,
-} from "../../core/derive";
+} from "../../core/present";
+import { splitList } from "../../core/form";
 import { AvatarStack } from "./AvatarStack";
 import type { ImageRenderer } from "./MediaHero";
 import { Badge } from "../atoms/Badge";

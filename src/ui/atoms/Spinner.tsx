@@ -1,7 +1,7 @@
 // Spinner is waiting, in the accent colour, centred when it is the whole screen.
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import type { Motion } from "../../core/derive";
+import type { Motion } from "../../core/present";
 import { testable } from "../props";
 import { useStyles, useTheme, type Theme } from "../theme";
 import { Icon } from "./Icon";

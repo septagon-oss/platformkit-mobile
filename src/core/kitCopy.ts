@@ -245,6 +245,9 @@ export const kitEnglish = {
   fieldChoiceRequired: (field: string) => `Choose ${englishArticle(field)}${lowerFirst(field)}.`,
   fieldNumber: "Enter a valid number.",
   fieldTime: "Enter a valid date and time.",
+  // A comma-joined list whose items do not spell their own type: the sentence is a
+  // fragment, because the sheet reads it after the field's own label.
+  listItemType: "contains a value that does not match its item type",
   // What a sheet asks before it throws away what a person wrote, and what a write
   // that landed says. Both outlive their own screen — the question is asked of a
   // dismissal and the sentence is read by the record the write moved to — so both
@@ -582,6 +585,7 @@ export const kitPortuguese: KitWords = {
   fieldChoiceRequired: (field: string) => `Campo obrigatório: ${field}.`,
   fieldNumber: "Introduza um número válido.",
   fieldTime: "Introduza uma data e hora válidas.",
+  listItemType: "contém um valor que não corresponde ao tipo dos seus itens",
   discardChanges: "Descartar alterações?",
   discardUnsaved: "As suas alterações não foram guardadas.",
   keepEditing: "Continuar a editar",

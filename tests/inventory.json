@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 296,
-   "cases": 1406,
-   "ms": 2619289,
-   "testsMs": 94078.29999999993,
+   "files": 299,
+   "cases": 1411,
+   "ms": 2648212,
+   "testsMs": 97131.49999999993,
    "runners": {
-    "jest": 101,
-    "node": 195
+    "jest": 102,
+    "node": 197
    },
    "unreachable": 0
   },
@@ -9394,6 +9394,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/ui/sign-in-elsewhere-speaks-the-sessions-language.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "The way out to another server is one sentence of the copy table drawn by two surfaces: the route dispatcher's Notice and this organism. src/ui is outside the copy walk's scope - that walk covers src/core and the two product files, and this file's other sentences belong to the brief that prices them - so what proves the table reaches this control is the control. A session that arrived speaking Portuguese reads Portuguese here; an English session reads English. A sentence written into the organism would answer a person who never spoke it.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 23214,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the way out to another server is asked in the language the session arrived with",
+    "the same control asks in English when the session reads English"
+   ],
+   "tests": [
+    {
+     "title": "the way out to another server is asked in the language the session arrived with",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "the same control asks in English when the session reads English",
+     "ms": 2,
+     "measured": false
+    }
+   ],
+   "loaded": 161,
+   "coveredProdLines": 2133,
+   "onlyProdLines": null,
+   "testsMs": 10
+  },
+  {
    "file": "tests/ui/sign-in-form-submits-what-it-shows.test.tsx",
    "runner": "jest",
    "layer": "behaviour",
@@ -14209,6 +14244,35 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/copy-names-every-sentence-a-person-reads.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A sentence a person reads is a key in the copy table, so that the same screen answers in the language the session arrived with. `src/core/copy.ts` and `src/core/kitCopy.ts` are the mechanism \u2014 every rule in them reads `copy.words` \u2014 and the table carries English and Portuguese. A sentence written into a derivation instead answers in English whatever the person speaks, so it belongs to the table and nowhere else. The rule is walked as a syntax tree rather than scanned line by line, because a comment can otherwise hide a string, and because the machine position that makes a literal a protocol fact and not a sentence is a fact about the node's surroundings.  A sentence is two word-runs with a space between them: what a person reads.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2100,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "every sentence a person reads is a key in the copy table, not a literal in the code"
+   ],
+   "tests": [
+    {
+     "title": "every sentence a person reads is a key in the copy table, not a literal in the code",
+     "ms": 551.63571,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 551.6
   },
   {
    "file": "tests/core-asks-no-device.test.ts",
@@ -22438,6 +22502,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/the-core-barrel-imports-nothing-outside-the-core.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "src/core is plain functions: it takes a locale, a zone, an instant and a catalogue document, and returns what a screen draws. React, an organism, a transport and the shell belong to layers above it, and the import direction that keeps them out is one ESLint entry over `src/core/**`. That entry is replaced, not extended, by any entry that names a core file more narrowly \u2014 a layer-specific rule overwrites `no-restricted-imports` rather than adding to it \u2014 so an exemption written for one rule (the kit's gallery fixtures) has to carry the layer's own patterns with it, or the file it names stops belonging to the layer.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 3609,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "every file under src/core, the deprecated barrel and the gallery pages included, imports nothing outside the core",
+    "a core file that may read the kit's gallery fixtures still may not read a door's part file"
+   ],
+   "tests": [
+    {
+     "title": "every file under src/core, the deprecated barrel and the gallery pages included, imports nothing outside the core",
+     "ms": 2476.599779,
+     "measured": false
+    },
+    {
+     "title": "a core file that may read the kit's gallery fixtures still may not read a door's part file",
+     "ms": 15.006894,
+     "measured": false
+    }
+   ],
+   "loaded": 0,
+   "coveredProdLines": 0,
+   "onlyProdLines": null,
+   "testsMs": 2491.6
   },
   {
    "file": "tests/the-deck-finishing-moment-plays-only-under-normal-motion.test.ts",

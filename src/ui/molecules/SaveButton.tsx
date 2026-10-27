@@ -9,7 +9,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button } from "../atoms/Button";
 import { Text } from "../atoms/Text";
-import type { Motion } from "../../core/derive";
+import type { Motion } from "../../core/present";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 

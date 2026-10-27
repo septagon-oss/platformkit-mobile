@@ -9,7 +9,8 @@
 // `contentId`. So a record's activity is found by looking for its id anywhere
 // in the payload, which is true of both shapes and of any module that follows
 // either.
-import { humanize } from "./derive";
+import { humanize } from "./present";
+import { withCount } from "./copy";
 
 export interface Event {
   readonly id: string;
@@ -52,25 +53,35 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 /**
+ * SinceWords is the kit's distance words - the same ones the phone spells a recent
+ * instant with, so one count is spelled one way wherever a person meets it. They
+ * arrive from the caller's copy because they are read aloud: the coarse count a
+ * trail shows answers in the language the session arrived with.
+ */
+export interface SinceWords {
+  readonly justNow: string;
+  readonly minuteAgo: string;
+  readonly minutesAgo: string;
+  readonly hourAgo: string;
+  readonly hoursAgo: string;
+  readonly yesterday: string;
+  readonly daysAgo: string;
+}
+
+/**
  * since is how long ago something happened, in the coarsest unit that is still
  * true. Anything older than a week is a date, because "37 days ago" is a
- * number nobody converts.
+ * number nobody converts. `format` renders that date and `words` spells the
+ * distances, both supplied by the caller: this rule names no language.
  */
-export function since(at: Date, now: Date, format: (d: Date) => string): string {
+export function since(at: Date, now: Date, format: (d: Date) => string, words: SinceWords): string {
   const ms = now.getTime() - at.getTime();
   if (ms < 0) return format(at);
-  if (ms < MINUTE) return "just now";
-  if (ms < HOUR) {
-    const m = Math.floor(ms / MINUTE);
-    return m === 1 ? "a minute ago" : `${m} minutes ago`;
-  }
-  if (ms < DAY) {
-    const h = Math.floor(ms / HOUR);
-    return h === 1 ? "an hour ago" : `${h} hours ago`;
-  }
-  if (ms < 7 * DAY) {
-    const d = Math.floor(ms / DAY);
-    return d === 1 ? "yesterday" : `${d} days ago`;
-  }
+  if (ms < MINUTE) return words.justNow;
+  const counted = (one: string, many: string, count: number) =>
+    count === 1 ? one : withCount(many, count);
+  if (ms < HOUR) return counted(words.minuteAgo, words.minutesAgo, Math.floor(ms / MINUTE));
+  if (ms < DAY) return counted(words.hourAgo, words.hoursAgo, Math.floor(ms / HOUR));
+  if (ms < 7 * DAY) return counted(words.yesterday, words.daysAgo, Math.floor(ms / DAY));
   return format(at);
 }

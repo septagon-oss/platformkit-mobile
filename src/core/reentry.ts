@@ -7,7 +7,7 @@
 // invented here, and two sign-ins at two servers are two identities even for one
 // user id.
 import type { Entry } from "./catalog";
-import { screenPath } from "./derive";
+import { screenPath } from "./record";
 
 /** Who is who the server said a session belongs to, in one string. */
 export type Who = string;

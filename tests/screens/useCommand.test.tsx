@@ -4,6 +4,7 @@ import { Alert } from "react-native";
 import { commandTitle, humanize } from "../../src/core/derive";
 import { ApiError } from "../../src/effects/api";
 import { useCommandAsk, useCommandForm } from "../../src/screens/useCommand";
+import { screenCopy } from "../../src/screens/failure";
 import { confirm } from "../../src/ui/chooser";
 import { navigation, prevent, reset, router } from "../fakes/router";
 import { fakeApi, note, shell, shellValue } from "../fakes/shell";
@@ -129,11 +130,16 @@ describe("useCommandForm", () => {
     const action = { type: "POP" };
     prevent.ask!({ data: { action } });
     const [title, choice, , wording] = asked.mock.calls[0]!;
-    expect(title).toBe("Discard this?");
-    expect(choice).toMatchObject({ label: "Discard", destructive: true });
+    // The question is the copy table's — the one every protected form asks, beside the
+    // button that reads `discard` from the same table — and so is the sentence saying
+    // the command has not run. A literal here would pass over a sheet that answers
+    // only in English.
+    const copy = screenCopy();
+    expect(title).toBe(copy.kit.discardChanges);
+    expect(choice).toMatchObject({ label: copy.kit.discard, destructive: true });
     expect(wording).toEqual({
-      message: `The ${commandTitle(publish).toLowerCase()} has not run.`,
-      cancel: "Keep editing",
+      message: copy.failure.commandNotRun(commandTitle(publish).toLowerCase()),
+      cancel: copy.kit.keepEditing,
     });
     choice.onPress();
     expect(navigation.dispatch).toHaveBeenCalledWith(action);

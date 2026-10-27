@@ -10,7 +10,7 @@
 // is going away will never be shown again.
 import React, { useEffect, useState } from "react";
 import { Animated, StyleSheet, View } from "react-native";
-import { deriveState } from "../core/derive";
+import { deriveState } from "../core/present";
 import { Snackbar } from "../ui/molecules/Snackbar";
 import { StateFeedback } from "./StateFeedback";
 import { useFeedback } from "./useFeedback";

@@ -11,7 +11,7 @@
 // body: a command whose argument was guessed is a command a person cannot tell was guessed, and
 // a stale expected revision is exactly the argument the server refuses on the caller's behalf.
 import type { Command } from "./catalog";
-import type { Row } from "./derive";
+import type { Row } from "./record";
 
 /**
  * boundArguments returns the body a command's bound arguments give it, or nothing when there are

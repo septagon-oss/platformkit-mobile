@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { RowMediaModel } from "../../core/derive";
+import type { RowMediaModel } from "../../core/present";
 import { Icon } from "../atoms/Icon";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";

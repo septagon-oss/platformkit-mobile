@@ -7,16 +7,15 @@ import { useFeedback } from "./useFeedback";
 import { useSignOut } from "./useSignOut";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { key, type Entry } from "../core/catalog";
+import { screenPath, accountPointers } from "../core/record";
 import {
-  screenPath,
   accountPerson,
-  accountPointers,
   avatar,
   greeting,
   nameKey,
   workspaceName,
   type Presentation,
-} from "../core/derive";
+} from "../core/present";
 import { rowCounts, statCards } from "../core/summary";
 import { recentHref, type Recent, type RecentDoor } from "../core/recents";
 import { heldWriteView } from "../core/outbox";

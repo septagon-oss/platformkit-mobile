@@ -1,7 +1,7 @@
 // One loading region. Motion is supplied by the screen, never discovered by an atom.
 import React, { useEffect, useState } from "react";
 import { Animated, StyleSheet, View } from "react-native";
-import type { Motion, SkeletonVariant } from "../../core/derive";
+import type { Motion, SkeletonVariant } from "../../core/present";
 import { testable } from "../props";
 import { useStyles, type Theme } from "../theme";
 

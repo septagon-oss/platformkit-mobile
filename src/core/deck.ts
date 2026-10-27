@@ -1,6 +1,6 @@
 import { offers, type Entry } from "./catalog";
 import { deckDirections, type Deck, type DeckDirection } from "./catalogDeck";
-import type { Row } from "./derive";
+import type { Row } from "./record";
 
 export type DeckPhase =
   | "loading"

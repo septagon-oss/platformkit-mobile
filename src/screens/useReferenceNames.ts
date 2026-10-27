@@ -1,15 +1,9 @@
 // Reference reads retain authorized name/portrait projections, never full person rows.
 import { useEffect, useMemo, useState } from "react";
 import { key, type Entry } from "../core/catalog";
-import {
-  nameKey,
-  enrichmentFailure,
-  personRecord,
-  referenceWordFor,
-  type Names,
-  type People,
-  type Pointer,
-} from "../core/derive";
+import { nameKey, personRecord, referenceWordFor, type Names, type People } from "../core/present";
+import { enrichmentFailure } from "../core/command";
+import { type Pointer } from "../core/record";
 import type { Api } from "../effects/api";
 import { useShell } from "../shell";
 import { failureFacts, screenCopy } from "./failure";

@@ -10,7 +10,7 @@
 import { deriveSparkline, deriveStat } from "./charts";
 import type { ChartInput, SparklineModel, StatModel } from "./charts";
 import { key, type Entry } from "./catalog";
-import { noun } from "./derive";
+import { noun } from "./present";
 import type { Presentation } from "./presentation";
 import type { Summary, SummaryEntry, Trend } from "../generated/types.gen";
 

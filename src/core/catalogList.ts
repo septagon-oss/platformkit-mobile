@@ -1,22 +1,9 @@
 import { entryIcon, type PictureStates } from "./pictures";
 import type { IllustrationName } from "./illustrations";
 import type { Entry } from "./catalog";
-import {
-  activeFilters,
-  enumLabel,
-  fieldLabel,
-  filtered,
-  filterFields,
-  listRow,
-  noun,
-  nounPhrase,
-  readPhase,
-  sortOptions,
-  text,
-  type Names,
-  type Order,
-  type Row,
-} from "./derive";
+import { activeFilters, filtered, filterFields, listRow, sortOptions, type Order } from "./list";
+import { enumLabel, fieldLabel, noun, nounPhrase, readPhase, text, type Names } from "./present";
+import { type Row } from "./record";
 import {
   deriveDataList,
   deriveActions,

@@ -11,7 +11,7 @@
 // the first kind gets one.
 import React from "react";
 import type { Command } from "../../core/catalog";
-import { commandTitle } from "../../core/derive";
+import { commandTitle } from "../../core/command";
 import { Row } from "../molecules/Row";
 import { Section } from "../molecules/Section";
 

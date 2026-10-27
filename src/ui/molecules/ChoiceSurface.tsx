@@ -3,7 +3,7 @@
 // to it, and the footing where a refusal is said. The answers themselves are each molecule's.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { ChoiceGroupModel } from "../../core/derive";
+import type { ChoiceGroupModel } from "../../core/list";
 import { Button } from "../atoms/Button";
 import { Notice } from "../atoms/Notice";
 import { Text } from "../atoms/Text";

@@ -1,5 +1,6 @@
 import React from "react";
-import type { ContentModel, StateModel } from "../../core/derive";
+import type { ContentModel } from "../../core/shared";
+import type { StateModel } from "../../core/present";
 import { StateView } from "./StateView";
 export function ModelState({
   model,

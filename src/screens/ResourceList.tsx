@@ -4,13 +4,9 @@ import { Stack, useRouter } from "expo-router";
 import { useFeedback } from "./useFeedback";
 import React, { useCallback, useMemo } from "react";
 import { doors, type Command } from "../core/catalog";
-import {
-  collectionCommands,
-  noun,
-  pointerTargets,
-  screenPath,
-  visiblePictures,
-} from "../core/derive";
+import { collectionCommands } from "../core/command";
+import { noun, visiblePictures } from "../core/present";
+import { pointerTargets, screenPath } from "../core/record";
 import { rowAt } from "../core/reentry";
 import type { ScreenProps } from "../renderers";
 import type { LayoutRectangle } from "react-native";

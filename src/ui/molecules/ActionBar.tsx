@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import type { ActionBarModel } from "../../core/derive";
+import type { ActionBarModel } from "../../core/list";
 import { ActionControl } from "../atoms/ActionControl";
 import { testable } from "../props";
 import { kitStyles } from "../layout";
