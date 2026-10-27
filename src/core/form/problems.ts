@@ -21,6 +21,8 @@ export interface FormWords {
   readonly fieldNumber: string;
   /** A box that takes an instant, holding something that is not one. */
   readonly fieldTime: string;
+  /** A comma-joined list holding an item its field's item type cannot store. */
+  readonly listItemType: string;
 }
 
 /**
@@ -59,7 +61,7 @@ export function problems(
     // act on is about the comma, not about a type nobody wrote wrong.
     if (c.kind === "list" && valueHoldsSeparator(raw)) out[c.field.name] = words.commaInValue;
     else if (c.kind === "list" && listValues(c.field, raw) === undefined)
-      out[c.field.name] = "contains a value that does not match its item type";
+      out[c.field.name] = words.listItemType;
   }
   return out;
 }

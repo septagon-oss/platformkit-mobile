@@ -182,7 +182,7 @@ export function useSingleton(entry: Entry) {
     // write stays the server's answer. A singleton's PUT is an update of its one
     // row, and a resource that mounts no update has no address for it.
     if (!offers(entry, "update")) {
-      setDetail(verbRefusal("update"));
+      setDetail(verbRefusal("update", copy));
       return;
     }
     // A form over a row that was never read has nothing to replace: a PUT of what

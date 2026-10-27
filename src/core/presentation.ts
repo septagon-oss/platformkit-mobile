@@ -1,4 +1,4 @@
-import type { Copy } from "./copy";
+import { withCount, type Copy } from "./copy";
 
 export type Motion = "normal" | "reduced";
 export type Instant = string;
@@ -293,17 +293,16 @@ function relativeWords(p: Formatting): (value: number, unit: DistanceUnit) => st
     return (value, unit) => f.format(value, unit);
   }
   const k = p.copy.kit;
-  const n = (words: string, count: number) => words.replace("{n}", String(count));
   return (value, unit) => {
     const count = Math.abs(value);
     if (unit === "day") {
       if (value === 1) return k.tomorrow;
       if (value === -1) return k.yesterday;
       if (value === -2) return k.twoDaysAgo;
-      return n(k.daysAgo, count);
+      return withCount(k.daysAgo, count);
     }
-    if (unit === "hour") return count === 1 ? k.hourAgo : n(k.hoursAgo, count);
-    return count === 1 ? k.minuteAgo : n(k.minutesAgo, count);
+    if (unit === "hour") return count === 1 ? k.hourAgo : withCount(k.hoursAgo, count);
+    return count === 1 ? k.minuteAgo : withCount(k.minutesAgo, count);
   };
 }
 

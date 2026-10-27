@@ -708,10 +708,22 @@ test("doors draws a door only where writable and operations both say so", () => 
   );
 });
 
-test("a verb that is not offered is refused in the resource's own words", () => {
+test("a verb that is not offered is refused in the language the phone reads in", () => {
   // The words name what will not happen, not who refused: a person reading them
-  // has no use for the server's vocabulary.
-  assert.match(verbRefusal("create"), /^This record cannot be created here\.$/);
-  assert.match(verbRefusal("update"), /^This record cannot be edited here\.$/);
-  assert.match(verbRefusal("delete"), /^This record cannot be deleted here\.$/);
+  // has no use for the server's vocabulary. They come from the copy table, so the
+  // same refusal reads in Portuguese on a Portuguese phone.
+  const english = deriveCopy("en");
+  assert.equal(verbRefusal("create", english), english.failure.cannotCreateHere);
+  assert.equal(verbRefusal("update", english), english.failure.cannotEditHere);
+  assert.equal(verbRefusal("delete", english), english.failure.cannotDeleteHere);
+  assert.equal(verbRefusal("read", english), english.failure.notAvailableHere);
+  assert.match(verbRefusal("create", english), /^This record cannot be created here\.$/);
+  assert.match(verbRefusal("update", english), /^This record cannot be edited here\.$/);
+  assert.match(verbRefusal("delete", english), /^This record cannot be deleted here\.$/);
+  const portuguese = deriveCopy("pt");
+  assert.equal(
+    verbRefusal("delete", portuguese),
+    "Este registo não pode ser eliminado aqui.",
+    "a refusal written in the code would answer in English whatever the person speaks",
+  );
 });

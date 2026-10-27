@@ -44,6 +44,7 @@ const words: FormWords = {
   fieldChoiceRequired: (field) => `Choose ${field}.`,
   fieldNumber: "number",
   fieldTime: "time",
+  listItemType: "item type",
 };
 
 for (const [said, names] of [

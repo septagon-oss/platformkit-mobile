@@ -142,10 +142,12 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
   }, [router]);
 
   // An argument somebody typed is not thrown away by a swipe. The guard is off
-  // while the command runs, because the dismissal is then this hook's own.
+  // while the command runs, because the dismissal is then this hook's own. The two
+  // sentences are the table's: the question is the one every protected form asks and
+  // the message says what has not happened yet, in the language the sheet is drawn in.
   usePreventRemove(phase === "editing" && dirty, ({ data }) => {
     confirm(
-      "Discard this?",
+      copy.kit.discardChanges,
       {
         label: copy.kit.discard,
         destructive: true,
@@ -156,7 +158,7 @@ export function useCommandForm(entry: Entry, id: string | undefined, c: Command)
       },
       mode,
       {
-        message: `The ${commandTitle(c).toLowerCase()} has not run.`,
+        message: copy.failure.commandNotRun(commandTitle(c).toLowerCase()),
         cancel: copy.kit.keepEditing,
       },
     );

@@ -45,19 +45,27 @@ test("a subject is the module and entity an event is about", () => {
 
 test("how long ago is the coarsest unit that is still true, and a date past a week", () => {
   const now = new Date("2026-09-07T12:00:00Z");
-  const ago = (ms: number) => since(new Date(now.getTime() - ms), now, () => "a date");
-  assert.equal(ago(5_000), "just now");
-  assert.equal(ago(60_000), "a minute ago");
+  // The words are the kit's, held by the caller: `since` counts and never spells.
+  const kit = deriveCopy("en").kit;
+  const ago = (ms: number) => since(new Date(now.getTime() - ms), now, () => "a date", kit);
+  assert.equal(ago(5_000), kit.justNow);
+  assert.equal(ago(60_000), kit.minuteAgo);
   assert.equal(ago(5 * 60_000), "5 minutes ago");
-  assert.equal(ago(60 * 60_000), "an hour ago");
+  assert.equal(ago(60 * 60_000), kit.hourAgo);
   assert.equal(ago(3 * 60 * 60_000), "3 hours ago");
-  assert.equal(ago(25 * 60 * 60_000), "yesterday");
+  assert.equal(ago(25 * 60 * 60_000), kit.yesterday);
   assert.equal(ago(3 * 24 * 60 * 60_000), "3 days ago");
   assert.equal(ago(8 * 24 * 60 * 60_000), "a date");
   // A clock that is behind the server's is a date, not a negative count.
   assert.equal(
-    since(new Date(now.getTime() + 60_000), now, () => "a date"),
+    since(new Date(now.getTime() + 60_000), now, () => "a date", kit),
     "a date",
+  );
+  // Portuguese counts the same distances in its own words.
+  const pt = deriveCopy("pt").kit;
+  assert.equal(
+    since(new Date(now.getTime() - 5 * 60_000), now, () => "a date", pt),
+    "há 5 minutos",
   );
 });
 

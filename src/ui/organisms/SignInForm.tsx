@@ -187,7 +187,7 @@ export function SignInForm({
           testID="sign-in-failed-notice"
         />
         <Button
-          label="Sign in to another server"
+          label={feedback.copy.failure.signInElsewhere}
           tone="secondary"
           onPress={onClear}
           testID="sign-in-elsewhere"

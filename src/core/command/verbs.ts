@@ -1,5 +1,6 @@
 /** verbs: which command a row or a collection offers, and where the request goes. */
 import { Command, CrudVerb, Entry } from "../catalog";
+import { type Copy } from "../copy";
 import { isKeeping } from "../saved";
 import { printed, rowPlaceholder } from "../internals";
 
@@ -65,16 +66,17 @@ export const commandOf = (e: Entry, verb: string, at: CommandScope): Command | u
  * resource does not mount. The door for such a verb is never drawn, so this is
  * the sentence for a sheet reached by a link or a stale notification rather
  * than for a choice somebody was offered — and the request itself is refused
- * before it is built, because the address it would go to is not there.
+ * before it is built, because the address it would go to is not there. The
+ * four sentences are the table's, so the refusal reads in the caller's language.
  */
-export const verbRefusal = (verb: CrudVerb): string =>
+export const verbRefusal = (verb: CrudVerb, copy: Copy): string =>
   verb === "create"
-    ? "This record cannot be created here."
+    ? copy.failure.cannotCreateHere
     : verb === "update"
-      ? "This record cannot be edited here."
+      ? copy.failure.cannotEditHere
       : verb === "delete"
-        ? "This record cannot be deleted here."
-        : "This is not available here.";
+        ? copy.failure.cannotDeleteHere
+        : copy.failure.notAvailableHere;
 
 /**
  * commandPath is where a command is POSTed. The kernel prints an address only

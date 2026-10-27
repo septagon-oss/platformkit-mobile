@@ -217,7 +217,7 @@ export function useResourceDetail(
     // answers a caller who may not write. A resource with no delete has no
     // address to send one to, so the question is never even asked.
     if (!offers(entry, "delete")) {
-      setError(verbRefusal("delete"));
+      setError(verbRefusal("delete", copy));
       return;
     }
     setMenu(false);

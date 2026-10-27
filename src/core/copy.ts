@@ -3,6 +3,15 @@ import { kitEnglish, kitPortuguese, type KitWords } from "./kitCopy";
 // Bundles are immutable values, so two callers never change each other's language.
 export type Language = "en" | "pt";
 
+/**
+ * withCount fills the count placeholder the table spells as `{n}`. A rule that
+ * holds a count says how many and the table says in what order the number sits -
+ * every count and distance word in the kit carries the placeholder, in both
+ * languages - so no rule composes a sentence out of English fragments.
+ */
+export const withCount = (words: string, count: number): string =>
+  words.replace("{n}", String(count));
+
 const identity = Symbol("Copy");
 
 interface Words {
@@ -118,6 +127,17 @@ interface Words {
      * these words, so the table holds them; a Portuguese phone reads Portuguese. */
     readonly thisRecord: string;
     readonly thisWorkspace: string;
+    /** The four refusals of a verb the resource does not mount. The door for such a verb is never drawn, so these are for a sheet a link or a stale notification opened. */
+    readonly cannotCreateHere: string;
+    readonly cannotEditHere: string;
+    readonly cannotDeleteHere: string;
+    readonly notAvailableHere: string;
+    /** entryMissing is a route whose entry this installation's catalogue does not carry. */
+    readonly entryMissing: (path: string) => string;
+    /** commandNotRun is what the question that throws away a command's arguments says about the command itself: it has not run, so nothing happened. */
+    readonly commandNotRun: (title: string) => string;
+    /** signInElsewhere is the way out when the saved server, not the person, is what is wrong. */
+    readonly signInElsewhere: string;
   };
   /** A disclosure control names what it holds, not how it behaves: "Expand" describes
    * the control, "Show loading, empty and unavailable examples" describes the screen. */
@@ -269,6 +289,13 @@ const en: Words = {
     loadCatalog: "We couldn't open this workspace.",
     thisRecord: "this record",
     thisWorkspace: "this workspace",
+    cannotCreateHere: "This record cannot be created here.",
+    cannotEditHere: "This record cannot be edited here.",
+    cannotDeleteHere: "This record cannot be deleted here.",
+    notAvailableHere: "This is not available here.",
+    entryMissing: (path) => `${path} is not in this installation.`,
+    commandNotRun: (title) => `The ${title} has not run.`,
+    signInElsewhere: "Sign in to another server",
   },
   disclosure: {
     reveal: (what) => `Show ${what}`,
@@ -408,6 +435,13 @@ const pt: Words = {
     loadCatalog: "Não foi possível abrir esta área de trabalho.",
     thisRecord: "este registo",
     thisWorkspace: "esta área de trabalho",
+    cannotCreateHere: "Este registo não pode ser criado aqui.",
+    cannotEditHere: "Este registo não pode ser editado aqui.",
+    cannotDeleteHere: "Este registo não pode ser eliminado aqui.",
+    notAvailableHere: "Isto não está disponível aqui.",
+    entryMissing: (path) => `${path} não está nesta instalação.`,
+    commandNotRun: (title) => `O ${title} ainda não foi executado.`,
+    signInElsewhere: "Iniciar sessão noutro servidor",
   },
   disclosure: {
     reveal: (what) => `Mostrar ${what}`,

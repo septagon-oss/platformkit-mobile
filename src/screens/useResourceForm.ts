@@ -247,7 +247,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     // resource does not mount has no address to POST to, and nothing is sent to
     // find out.
     if (!offers(entry, create ? "create" : "update")) {
-      setDetail(verbRefusal(create ? "create" : "update"));
+      setDetail(verbRefusal(create ? "create" : "update", copy));
       return;
     }
     const refused = problems(controls, held, copy.kit);
