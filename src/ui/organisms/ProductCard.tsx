@@ -53,7 +53,7 @@ export function ProductCard({
                 <ChoiceChips
                   key={group.id}
                   model={group}
-                  onChange={(id) => onOption(group.id, id)}
+                  onChange={(ids) => onOption(group.id, ids[0])}
                 />
               ))
             : null}

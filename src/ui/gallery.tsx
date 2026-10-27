@@ -52,6 +52,7 @@ import { LoadMore } from "./molecules/LoadMore";
 import { Row } from "./molecules/Row";
 import { Section } from "./molecules/Section";
 import { HeldWriteRow } from "./molecules/HeldWriteRow";
+import { SaveButton } from "./molecules/SaveButton";
 import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
@@ -67,6 +68,8 @@ import { SelectionControl } from "./atoms/SelectionControl";
 import { Price } from "./atoms/Price";
 import { ActionBar } from "./molecules/ActionBar";
 import { ChoiceChips } from "./molecules/ChoiceChips";
+import { ChoiceFigure } from "./molecules/ChoiceFigure";
+import { ChoiceTiles } from "./molecules/ChoiceTiles";
 import { ChoiceRows } from "./molecules/ChoiceRows";
 import { DisclosureSection } from "./molecules/DisclosureSection";
 import { DayStrip } from "./molecules/DayStrip";
@@ -667,6 +670,26 @@ function Samples({
         />
       </Section>
 
+      {/* Both words are the catalogue's: a saved declaration is the only source of what the
+          heart says. The four states are the ones a record can be in — nobody has answered
+          yet is drawn as nothing at all, so it has no specimen here. */}
+      <Section title="A copy this person keeps">
+        <SaveButton model={{ label: "Save", kept: false }} onPress={none} />
+        <SaveButton model={{ label: "Saved", kept: true }} onPress={none} />
+        <SaveButton
+          model={{ label: "Saved", kept: true, busy: true, disabled: true }}
+          onPress={none}
+        />
+        <SaveButton
+          model={{
+            label: "Save",
+            kept: false,
+            note: "Held on this phone: it goes when the network returns",
+          }}
+          onPress={none}
+        />
+      </Section>
+
       <Section title="People and row pictures">
         <Avatar model={avatar({ id: "a", label: "Ana María Silva", name: "Ana María Silva" })} />
         <Avatar model={avatar({ id: "c", label: feedback.copy.kit.nameUnavailable })} />
@@ -1000,7 +1023,11 @@ function KitSamples({
     case "selection-control":
       return <SelectionControl model={k.selection} onChange={send} />;
     case "choice-chips":
-      return <ChoiceChips model={k.choices} onChange={choice} />;
+      return <ChoiceChips model={k.choices} onChange={(ids) => choice(ids[0])} />;
+    case "choice-tiles":
+      return <ChoiceTiles model={k.tiles} onChange={(ids) => choice(ids[0])} />;
+    case "choice-figure":
+      return <ChoiceFigure model={k.figure} onChange={(ids) => choice(ids[0])} />;
     case "choice-rows":
       return <ChoiceRows model={k.choices} onChange={choice} />;
     case "action-bar":

@@ -694,6 +694,69 @@ reading it changes in place, and asks nothing of a caller that has no preference
 nothing; `travelTo`/`travelled` on the shell, which carry one frame under one address and never a row;
 and `record-finished` as the id a journey and a screen reader both find the sentence by.
 
+#### A record can be kept
+
+A person keeps a copy of a record so the copy outlives the record. The server owns that copy and
+this phone holds no table of it: `probe` asks whether one is kept, `keep` asks for one, and
+`remove` takes one away (`src/core/saved.ts` over `src/effects/saved.ts`). Nothing about the copy
+is device-local, because a copy is the same person's on the web, and a phone with its own list
+would answer differently for the same account.
+
+Two declarations decide whether the heart exists, and both have to hold. A **source entry**
+declares `presentation.saved` — the word to keep a copy with, the word for a copy kept, the word
+that names the copy taken away, and `listEntry`, the "module/entity" of the entry that holds this
+person's copies of it. The kernel's fifth word, `listTitle`, names a page a composition owns; this
+kit names that page from the entry's own `presentation.plural`, so it neither reads the word nor
+gates the control on it. A **saved entry** declares `presentation.availabilityField`, the one field
+whose value says whether the source of a copy is still there. Every member that is missing, blank
+or not a word names itself through the `HintNotice` the catalogue read was given, and
+`savable` — which is the only reader of the declaration, and resolves `listEntry` against the
+mounted catalogue — says itself through `Api.notice`. A heart that went missing with no line to
+follow is a defect no author can find.
+
+Neither write is ever offered as a form, a question or a swipe, because the two arguments they
+take (`source`, `expectedRevision`) are what the screen already holds; `rowCommands` and
+`collectionCommands` withhold them by the argument each carries, never by a resource key, and
+`commandOf` still resolves both. The heart is the one door onto the act, and it lies about nobody:
+`unknown` — nobody has answered yet — draws no control at all, the pressed state follows the
+server's answer, a refusal leaves the control where it was and says why under it, and a save the
+network never took says the phone is holding it in the queue's own words. A removal quotes the
+revision its row arrived with, and is never queued: an offline phone cannot take a copy away, and
+writes nothing while it pretends to.
+
+A copy of a record that has gone stays in the list, still opens, and says which kind of gone it
+is. `presentation.availabilityField` is read by `listRow`, so the generated list of the saved entry
+draws that row in the theme's muted ink with the kit's sentence under its name: "No longer
+available." and "Temporarily unavailable." are two answers — one says the record is gone, the other
+that the provider is down — and a copy whose source is there says nothing about availability and
+keeps the line its own entry writes.
+
+**Reused** — `createOutbox.submit` and its `sent: false` answer for a save the network never took,
+`commandPath` for both write addresses, `useResourceList`/`ListScreen`/`Row` for the window of
+copies, `refusalOf` and `screenCopy` for every refusal sentence, `copy.state.holding` for the held
+save, `Button`/`Icon`/`Text`/`Section`/`testable`/`chosenState`/`useTheme`, the catalogue's own
+`hintWord`/`pointer` readers, and `heldScope`, untouched. **Added** — `src/core/saved.ts`
+(`AVAILABILITY`, `savedAvailability`, `savedRef`, `saveBody`, `unsaveBody`, `sourceRef`,
+`expectedSourceVersion`, `isKeeping`, `savable`, `savedCopy`), because the three availability
+spellings and the two bodies existed nowhere in the phone and a screen inventing either would be a
+claim about a server it has not met; `src/effects/saved.ts` (`SavedPort`, `SavedFinder`,
+`SavedDeps`, `createSaved`, `KeptAnswer`), because every other port either holds a device-local
+table or a queued write, and neither can answer whether this person keeps this record;
+`src/screens/useSaveToggle.ts`, `src/ui/molecules/SaveButton.tsx`, `presentation.saved` and
+`presentation.availabilityField` on an entry's hints, `Row`'s `muted` tone (greyed, pressable,
+still offering its action), `Icon`'s `heart`/`heartFilled`, two sentences in both languages, and
+`Api.notice`, the transport's own once-per-defect line, which a declaration resolved later than the
+read now shares. **Made reusable** — `SavedFinder` as the one composition seam, so either shape the
+kernel may publish (a find read of its own, or the answer carried on the source's own read) lands
+in one adapter body and touches no component; `Shell`'s optional `saved` prop, which is that one
+line at the app root; `Api.notice`; and the ids `saved-heart` and `saved-heart-pressed`.
+
+**Limits** — the kit draws no list of copies of its own: the declaration's `listEntry` is an
+ordinary catalogue entry and the generated list screen is the person's list, so `listTitle` is the
+product's word for a door no composition in this repository mounts. No server in this build answers
+any of it: no pinned document declares a savable entry, so every case runs over a catalogue a test
+mounted, and the journey that presses the heart needs a server that mounts the two commands first.
+
 ### How a form asks
 
 Three questions decide what a sheet holds, and all three are answered in
@@ -914,7 +977,11 @@ saying nothing, so the pin names the kernel commit that prints an unset `resolve
 absent; the strict `appResources` operation then takes the golden with its resolved blocks
 in. `readPolicy` still admits a `null` for `identity.group`, `reference`, `reading.money`
 and `reading.time`, because a server older than that commit writes `null` for the same
-absence and the entry keeps the policy it was given either way.
+absence and the entry keeps the policy it was given either way. The section has a second reader with a
+different fallback: `src/core/choice.ts` reads each field's finite choice out of the same block
+field by field, so a block this file refuses whole still answers the choice questions it states
+on its own. One reader of the section, answering both questions behind one fallback, is the open
+question.
 
 **Reused** — `parseCatalog`'s `notice` fallback, `View<>`, the generated `zResolved*` schemas,
 `verifySource`'s source-record idiom, `fieldLabel`, `enumLabel`, `label`, `sortOptions` and
@@ -924,6 +991,49 @@ read `resolved`, nothing held Go's canonical-JSON hash, and the kernel's cases l
 repository. **Made reusable** — `readPolicy` and the `Policy`/`PolicyField` types for the
 remaining readers listed above, `tests/fakes/policy.ts` and `parityEntry` for any test that
 needs a supported entry.
+
+### How a finite choice is drawn
+
+A field with a declared `ChoiceSet` is drawn the way the server says, not the way the phone
+guesses: every catalogue entry carries a `resolved` section whose field names the surface
+(`tiles`, `chips`, `figure`, `swatch`), the answers in order, the cardinality, the maximum, the
+empty policy and the compiled artwork. Three molecules draw the four appearances — `ChoiceTiles`
+(a card per answer, its picture the largest thing on it), `ChoiceChips` (a wrapping line of
+words, and the same line with an answer's colour beside its word for `swatch`) and
+`ChoiceFigure` (the compiled picture above the answers that name it) — and one `ChoiceSurface`
+draws the question's name, its reset and its refusals around them. Each answer is a radio or a
+checkbox carrying its own label, at least `hit` points tall; a change is felt through the `onTick`
+the screen that owns `expo-haptics` supplies, because a molecule reaches no transport.
+
+**Reused** — `Button`, `Text`, `Notice`, `kitStyles` and `chosenState` for the answers and their
+chosen state; `hit` from `src/ui/scale.ts` for the touch target and `Motion` for reduced motion;
+`deriveChoices` and `ChoiceGroupModel` as the one semantics of a choice, grown to the second
+cardinality rather than copied; `HintNotice` as the only channel a malformed hint reaches a
+developer by; the pinned-fixture and provenance shape of `testdata/catalog.pictures.json`.
+**Added** — `src/core/choice.ts`, because the `resolved` section is a fact nothing in this kit read
+(its member was stripped by zod in silence) and its fallbacks are the parser's, not a component's;
+`ChoiceTiles`, `ChoiceFigure` and `ChoiceSurface`, because no existing molecule drew a card, a
+compiled artwork or the lines that stand around every appearance; `pickChoice`, because "what a
+tap does to the held answers" — the exclusive answer, the replace-oldest maximum — was a rule no
+existing owner carried.
+**Made reusable** — `Field.choice` as the phone's reading of any declared choice, so a screen,
+a form or a filter reads the same semantics instead of the schema's `enum` alone; `pickChoice`
+for any surface that lets a person hold several answers; `ChoiceSurfaceProps` (`model`,
+`onChange(ids)`, `onTick`) as the contract a fifth appearance would join; and
+`testdata/catalog.choices.json`, the first served capture in this kit that carries a resolved
+choice at all.
+
+**Limits** — the reading is hand-declared here, exactly as the `presentation` hints are: `resolved`
+enters the catalogue schema as `unknown` because it is presentation, and the two members these
+surfaces ask for beyond the generated `ResolvedField` — `choice` and `figure` — are named in
+`src/core/choice.ts`, not in `src/generated`. A `swatch` is drawn as
+a chip whose artwork is the answer's declared colour, because that is all the kernel's fourth word
+asks beyond chips; a picture or a file answer is read as no artwork and says so. The figure's own
+marks are not re-stroked when an answer is chosen — the chosen state is carried by the answer
+control beside it. No screen yet offers these appearances: a form's many-answer value plumbing
+(a `string[]` on the write, and the same on the read) is the next change, and until it lands the
+appearances are drawn by their tests and by the gallery: the home page's card options are asked
+again as `choice-tiles/default` and `choice-figure/default`, the same question on each surface.
 
 ## Design
 

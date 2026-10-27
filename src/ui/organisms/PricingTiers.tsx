@@ -28,7 +28,8 @@ export function PricingTiers({ model, onPeriod, onSelect, onAction, onRetry }: P
     <View style={s.stack}>
       <ChoiceChips
         model={model.periods}
-        onChange={(id) => {
+        onChange={(ids) => {
+          const id = ids[0];
           if (id) onPeriod(id);
         }}
       />

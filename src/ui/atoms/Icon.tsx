@@ -58,6 +58,10 @@ const glyphs = {
   rewind: "play-back",
   circle: "ellipse-outline",
   image: "image-outline",
+  // A person's own copy. The pressed state changes the glyph's fill and not its colour, so
+  // the two spellings are named apart rather than drawn in two colours under one name.
+  heart: "heart-outline",
+  heartFilled: "heart",
 } as const;
 
 export type IconName = keyof typeof glyphs;

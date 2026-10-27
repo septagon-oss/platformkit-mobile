@@ -64,7 +64,8 @@ export function AreaChart({
       {model.ranges.choices.length ? (
         <ChoiceChips
           model={model.ranges}
-          onChange={(id) => {
+          onChange={(ids) => {
+            const id = ids[0];
             if (id) onRange(id);
           }}
         />

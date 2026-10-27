@@ -19,6 +19,25 @@ for the version being released.
 
 ## 0.3.0 (unreleased)
 
+- A record can be kept. A source entry declares `presentation.saved` (the word to keep a copy
+  with, the word for a copy kept, the word that names it taken away, and `listEntry`, the entry
+  holding this person's copies), the entry holding the copies declares
+  `presentation.availabilityField`, and every member the kit cannot carries names itself through the
+  notice sink the catalogue read was given. `./core/saved` is a new subpath — `AVAILABILITY`,
+  `savedAvailability`, `savedRef`, `saveBody`, `unsaveBody`, `sourceRef`, `expectedSourceVersion`,
+  `isKeeping`, `savable`, `savedCopy` — and `./effects/saved` a second, holding `SavedPort`,
+  `SavedFinder`, `SavedDeps`, `KeptAnswer` and `createSaved`: a keep that finds no network joins the
+  existing queue with its own body and idempotency key, and a removal is never queued at all.
+  `Shell` takes an optional `saved` read and draws no heart anywhere without it; `useSaveToggle`
+  asks on mount and on focus, one press per record, and never optimistically; `SaveButton` is the
+  heart, in the gallery. `listRow` now reads the availability field, so a copy whose source went is
+  drawn in the theme's muted ink with "No longer available." under its name, a copy whose provider
+  is down says "Temporarily unavailable.", both still openable, and neither is ever collapsed into
+  the other. The two keeping writes are withheld from every form, question and swipe by the argument
+  each carries. `Api` gained `notice`, `Row` a `muted` tone, `Icon` `heart`/`heartFilled`,
+  `Presentation.kit` two sentences in both languages, and the ids `saved-heart` and
+  `saved-heart-pressed`.
+
 - A list row can be swiped to run the command its entry names. The author says which
   with `hints.primaryCommand` — a verb the entry offers for a record, one the server
   declared, that asks for no value — and the kit reads it once at mount and says nothing

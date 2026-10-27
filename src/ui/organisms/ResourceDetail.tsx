@@ -47,6 +47,7 @@ import type { ImageRenderer } from "../molecules/MediaHero";
 import { PhotoStrip } from "../molecules/PhotoStrip";
 import { Value } from "../molecules/Value";
 import { Row } from "../molecules/Row";
+import { SaveButton, type SaveButtonModel } from "../molecules/SaveButton";
 import { Section } from "../molecules/Section";
 import { SummaryDetail } from "../templates/SummaryDetail";
 import { Screen } from "../templates/Screen";
@@ -111,6 +112,13 @@ export interface Props {
   readonly activity?: ActivityProps;
   /** actions are the lifecycle commands this caller may run on the record. */
   readonly actions?: ActionsProps;
+  /**
+   * save is this record's own keeping control: the state the screen read from the server, and
+   * the press that asks for the act. Absent means nothing is kept of this record here — the
+   * entry declares nothing, this build composes no read of a person's copies, or nobody has
+   * answered yet — and the record is drawn with no control at all rather than an inert one.
+   */
+  readonly save?: { readonly model: SaveButtonModel; readonly onPress: () => void };
   /**
    * richText draws one rich text body as the phone reads it. The screen supplies it, and
    * with it the Markdown face and the figure loader this layer cannot own. `fallback` is
@@ -179,6 +187,7 @@ export function ResourceDetail({
   information,
   activity,
   actions,
+  save,
   richText,
   files,
   onOpenPhoto,
@@ -306,6 +315,14 @@ export function ResourceDetail({
                   onPress={onDelete}
                   testID="delete"
                 />
+              </Section>
+            ) : null}
+            {/* Keeping a copy is an act on this record, so it is drawn on the record: one
+              labelled control above its fields, never a bare glyph in the header competing
+              with the word Edit. */}
+            {row && save ? (
+              <Section>
+                <SaveButton model={save.model} onPress={save.onPress} />
               </Section>
             ) : null}
             {blocks.map((block) => (

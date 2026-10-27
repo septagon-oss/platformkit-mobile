@@ -2,15 +2,6 @@
   "schema": 1,
   "reviews": [
     {
-      "ghsa": "GHSA-vfj7-8cjw-p6xm",
-      "package": "braces",
-      "severity": "high",
-      "versions": ["3.0.3"],
-      "reviewedAt": "2026-10-05",
-      "reviewBy": "2027-01-15",
-      "reason": "The filing covers braces <=3.0.3 and names no first patched release, and 3.0.3 is what the registry publishes as latest, so there is no version to take: the only dependent, micromatch@4.0.8 (also latest), requires braces ^3.0.3. The chains are all Node build and test tooling — metro-file-map > micromatch, reached through @expo/metro > @expo/metro-config > expo and through metro > @react-native/community-cli-plugin > react-native, and jest-haste-map, @jest/core, @jest/transform, jest-config and jest-message-util > micromatch — and no module of braces appears in the exported Hermes bundles, so nothing this repository ships runs it. What the filing describes is unguarded recursion in the AST walkers: a deeply nested brace pattern exhausts the call stack and ends the Node process with a RangeError, and every pattern these callers hand the matcher is a glob this repository or its developer writes — metro's recrawl globs, the testMatch this repository's jest.config.js sets, the coverage globs its Jest preset supplies, and the path argument a jest run is given — while the file paths they test are subjects, which braces never parses, so neither a served catalog nor a device can supply a pattern. Re-review when upstream releases a fixed braces, when micromatch drops the dependency, or by this date."
-    },
-    {
       "ghsa": "GHSA-86w9-cpqp-85rv",
       "package": "node-forge",
       "severity": "high",
@@ -18,6 +9,15 @@
       "reviewedAt": "2026-10-02",
       "reviewBy": "2027-01-15",
       "reason": "The filing covers every published release of node-forge, and 1.4.0 is the newest, so no version of the pinned expo resolves without it: expo > @expo/cli > node-forge and expo > @expo/cli > @expo/code-signing-certificates > node-forge. Both callers are Node build tooling — the CLI's macOS keychain code signing and the dev code-signing certificate generator — and no module of node-forge appears in the exported Android, iOS or web bundle, so nothing this repository ships runs it. What the filing describes is a signature-verification defect (RSA PKCS#1 v1.5 verification accepting extra nested DigestAlgorithm elements) reached when the CLI reads a code-signing certificate or request, which in that flow comes from the developer's own machine rather than a remote party. Re-review when upstream releases a fixed node-forge, when the Expo CLI drops the dependency, or by this date."
+    },
+    {
+      "ghsa": "GHSA-mrhx-c7xc-m3w5",
+      "package": "zod",
+      "severity": "high",
+      "versions": ["3.25.76", "4.6.6"],
+      "reviewedAt": "2026-10-23",
+      "reviewBy": "2027-01-15",
+      "reason": "The filing covers zod <4.6.6. This repository's own zod, the copy src/core/responses.ts, src/core/workspace.ts and src/packs/decide/wire.ts import, is 4.6.6, the first patched release, and both exported Hermes bundles carry only that copy: the source maps of `expo export --source-maps` list 94 of its modules in each and none from expo/node_modules/zod. 3.25.76 is the copy expo > @expo/cli resolves (^3.25.76), and it is the newest 3.x, so no release of the pinned expo resolves without it. The CLI requires it only in its development server, build/src/start/server/DevToolsPlugin.schema.js and createMCPDevToolsExtensionSchema.js, which validate the dev-tools plugin descriptors of the packages a developer installed; `expo export` does not reach them, and nothing a device or a served catalog sends is parsed there. What the filing describes is an array schema with no length bound collecting one issue per failing element until memory runs out; the CLI's arrays are the command and parameter lists inside descriptors this repository's own dependencies ship. Re-review when expo moves @expo/cli to zod 4.6.6 or later."
     }
   ]
 }

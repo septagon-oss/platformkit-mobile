@@ -1,5 +1,6 @@
 import type { AvatarModel, RowMediaModel } from "./pictures";
 import type { Order } from "./derive";
+import type { ChoicePicture } from "./choice";
 import type { Field } from "./catalog";
 import type { Action } from "./feedback";
 import type { Presentation } from "./presentation";
@@ -25,6 +26,13 @@ export interface Choice {
   readonly count?: number;
   readonly enabled: boolean;
   readonly reason?: string;
+  /**
+   * picture and exclusive are the answer's own artwork and its exclusivity, as the resolved
+   * choice declares them (`./choice`). A group built from a filter or a sort says neither.
+   */
+  readonly picture?: ChoicePicture;
+  readonly group?: string;
+  readonly exclusive?: true;
 }
 export interface ChoiceGroup {
   readonly id: string;
@@ -32,12 +40,34 @@ export interface ChoiceGroup {
   readonly choices: readonly Choice[];
   readonly selectedId?: string;
   readonly required: boolean;
+  /**
+   * many is the cardinality the catalogue declares. With it, the held answers are the ordered
+   * list in `selectedIds` and every answer is a checkbox; without it the held answer is
+   * `selectedId` and every answer is a radio — the two shapes a `ChoiceSet` can have, not two
+   * ways of spelling one.
+   */
+  readonly many?: boolean;
+  readonly selectedIds?: readonly string[];
+  /**
+   * maximum and answerless are the declared limits on how many answers are held; `reason` is
+   * the sentence the server declares for the empty answer it refuses.
+   */
+  readonly maximum?: { readonly count: number; readonly replacesOldest?: true };
+  readonly answerless?: true;
+  readonly reason?: string;
+  /**
+   * artwork is the compiled figure the figure appearance draws, and `pickChoice` is the only
+   * reader of `maximum`, `exclusive` and this member's marks: a molecule draws what the model
+   * says and decides nothing about what a tap means.
+   */
+  readonly artwork?: { readonly svg: string; readonly answers: readonly string[] };
 }
 export function deriveChoices(input: ChoiceGroup, p: Presentation) {
   return build(p, (v: Validation) => {
     v.text(input.id, "id");
     v.text(input.label, "label");
     v.ids(input.choices, "choices");
+    const held = heldAnswers(input, v);
     const choices = input.choices.map((c, i) => {
       v.text(c.label, `choices.${i}.label`);
       v.need(typeof c.enabled === "boolean", `choices.${i}.enabled`);
@@ -47,23 +77,86 @@ export function deriveChoices(input: ChoiceGroup, p: Presentation) {
       return {
         ...c,
         label: c.count === undefined ? c.label : `${c.label} (${countText(c.count, p)})`,
-        selected: input.selectedId === c.id,
-        change: c.enabled && c.id !== input.selectedId,
+        selected: held.includes(c.id),
+        // A single answer cannot be taken back by tapping it — tapping the question's answer
+        // again is the same answer. A set of answers can: that is how one leaves a set.
+        change: c.enabled && (!held.includes(c.id) || input.many === true),
       };
     });
-    const valid = choices.some((c) => c.selected && c.enabled);
+    const exclusive = input.choices.find((c) => c.exclusive)?.id;
+    const valid =
+      held.length > 0
+        ? choices.some((c) => c.selected && c.enabled)
+        : input.answerless === true || !input.required;
     return {
       id: input.id,
       label: input.label,
+      many: input.many === true,
       choices,
+      selectedIds: held,
+      exclusiveId: exclusive,
+      maximum: input.maximum,
+      ...(input.maximum === undefined || held.length < input.maximum.count
+        ? {}
+        : { full: true as const }),
+      ...(input.reason === undefined ? {} : { reason: input.reason }),
+      ...(input.artwork === undefined ? {} : { artwork: input.artwork }),
       clearLabel: p.copy.kit.clear,
-      canClear: !input.required && input.selectedId !== undefined,
-      ...(input.selectedId !== undefined && !valid
+      canClear: !input.required && held.length > 0,
+      ...(held.some((id) => !input.choices.some((c) => c.id === id && c.enabled))
         ? { issue: issue(p, "selectedId", "unavailable") }
         : {}),
-      satisfied: valid || (!input.required && input.selectedId === undefined),
+      satisfied: valid,
     };
   });
+}
+
+/**
+ * heldAnswers is the ordered answers a person holds, in the shape the cardinality declares:
+ * one answer is `selectedId`, many are `selectedIds`. A list that repeats an id, or a
+ * single-answer group that arrives with a list, is refused by the name of the member — the
+ * server refuses both too (`kit/entity`: "JSON null, unknown IDs and duplicate IDs refuse
+ * without partial answers"), and a screen must not silently choose one reading.
+ */
+function heldAnswers(input: ChoiceGroup, v: Validation): readonly string[] {
+  if (input.many !== true) {
+    v.need(input.selectedIds === undefined, "selectedIds");
+    return input.selectedId === undefined ? [] : [input.selectedId];
+  }
+  const ids = input.selectedIds ?? [];
+  v.need(input.selectedId === undefined, "selectedId");
+  v.need(
+    ids.every((id) => typeof id === "string"),
+    "selectedIds",
+  );
+  v.need(new Set(ids).size === ids.length, "selectedIds");
+  return ids;
+}
+
+/**
+ * pickChoice is what tapping an answer does to the held answers — the one place that rule is
+ * written, so no surface restates it. Tapping a held answer lets it go when many are asked for
+ * and does nothing when one is; the exclusive answer ("No preference") stands alone, so taking
+ * it drops every other answer and taking any answer drops it; a full choice with a declared
+ * `replace-oldest` gives up its oldest answer, and one without the word refuses the tap by
+ * returning the answers unchanged.
+ */
+export function pickChoice(model: ChoiceGroupModel, id: string): readonly string[] {
+  const target = model.choices.find((c) => c.id === id);
+  if (target === undefined || !target.enabled) return model.selectedIds;
+  if (target.selected && !model.many) return model.selectedIds;
+  if (target.exclusive === true) return target.selected ? [] : [id];
+  // A single answer is replaced, not appended to; a many-answer set keeps what it holds and
+  // drops only the answer being taken back and the exclusive one, which never stands beside
+  // another.
+  const without = model.many
+    ? model.selectedIds.filter((held) => held !== id && held !== model.exclusiveId)
+    : [];
+  if (target.selected) return without;
+  const next = [...without, id];
+  const maximum = model.maximum;
+  if (maximum === undefined || next.length <= maximum.count) return next;
+  return maximum.replacesOldest === true ? next.slice(next.length - maximum.count) : without;
 }
 export type ChoiceGroupModel = Extract<ReturnType<typeof deriveChoices>, { ok: true }>["value"];
 export interface SelectionInput {
@@ -99,6 +192,13 @@ export interface DataRow {
   readonly summary?: string;
   readonly cells: readonly DataCell[];
   readonly status?: Status;
+  /**
+   * tone is the row's own voice, and `muted` is the only shade a derived row wears: the
+   * record this row is a copy of has gone, or the provider that holds it is down, and the
+   * row's `summary` says which. The row still presses, speaks and opens: a copy this
+   * person kept is theirs to read and theirs to take away. Absent is an ordinary row.
+   */
+  readonly tone?: "muted";
   readonly selectable: boolean;
   readonly selectionReason?: string;
   readonly open?: Action;

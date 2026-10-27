@@ -25,6 +25,7 @@ import {
 // is "Open" in a cell there and in a cell here.
 import { proseSpoken } from "./prose";
 import type { Command, CrudVerb, Entry, Field, HintTone } from "./catalog";
+import { isKeeping, savedCopy } from "./saved";
 import { copyLanguage, type Copy, type Language } from "./copy";
 import type { EntrySubject } from "./failure";
 import type { DataCell } from "./collections";
@@ -710,6 +711,14 @@ export interface ListRow {
   readonly status?: Status;
   readonly media?: RowMediaModel;
   readonly cells: readonly DataCell[];
+  /**
+   * tone is the row's own voice, and `muted` is the only shade a derived row wears: the
+   * record this row is a copy of has gone, or the provider that holds it is down. The
+   * sentence that says which arrives as the row's `summary`, from `savedCopy`, and the
+   * row presses, speaks and opens exactly as it did — a copy this person kept is still
+   * theirs. Absent is an ordinary row: nothing guesses the shade.
+   */
+  readonly tone?: "muted";
 }
 
 /**
@@ -731,6 +740,11 @@ export function listRow(
   const preview = listPreview(e, "row");
   const pill = statusPill(e, row, format);
   const media = rowMedia(e, row, images, states);
+  // What this row's source still is, read from the field the entry itself declared.
+  // A copy of something that went says so in place of its own line: the fact a person
+  // needs off a list of copies is what they can no longer reach, not what the copy
+  // holds. An entry that declares no availability field answers nothing here.
+  const source = savedCopy(e, row, format.copy);
   return {
     title: label(e, row, untitled, "row", names),
     ...(`${e.module}/${e.entity}` === directory
@@ -738,9 +752,12 @@ export function listRow(
       : media.kind === "none"
         ? {}
         : { media }),
-    ...(preview && hasValue(preview, row[preview.name])
-      ? { summary: display(preview, row[preview.name], format, names) }
-      : {}),
+    ...(source ? { tone: "muted" as const } : {}),
+    ...(source
+      ? { summary: source.summary }
+      : preview && hasValue(preview, row[preview.name])
+        ? { summary: display(preview, row[preview.name], format, names) }
+        : {}),
     ...(pill ? { status: { ...pill, symbol: "none" as const } } : {}),
     cells: listCells(e)
       .filter((field) => hasValue(field, row[field.name]))
@@ -1820,7 +1837,6 @@ export function commandConfirmation(command: Command, copy: Copy) {
   };
 }
 
-/** rowCommands are the commands about one record; collectionCommands are about the list. */
 /**
  * offered excludes what the catalogue marks `system`: a command the kernel runs
  * for its own reasons is never a choice a person is given. `commandOf` and
@@ -1830,11 +1846,16 @@ export function commandConfirmation(command: Command, copy: Copy) {
  */
 export const offered = (c: Command): boolean => c.hints?.system !== true;
 
-/** rowCommands are the commands about one record; collectionCommands are about the list. */
+/**
+ * rowCommands are the commands about one record; collectionCommands are about the list.
+ * Neither offers one of the two keeping writes: `isKeeping` says why — a person never types
+ * a source or a revision, so a form asking for either would be a second, false door onto
+ * the act the heart does. They stay resolvable by `commandOf`, like a system command.
+ */
 export const rowCommands = (e: Entry): readonly Command[] =>
-  e.commands.filter((c) => !c.collection && offered(c));
+  e.commands.filter((c) => !c.collection && offered(c) && !isKeeping(c));
 export const collectionCommands = (e: Entry): readonly Command[] =>
-  e.commands.filter((c) => c.collection === true && offered(c));
+  e.commands.filter((c) => c.collection === true && offered(c) && !isKeeping(c));
 
 /**
  * CommandScope is the address a command was opened at, which is the whole of
