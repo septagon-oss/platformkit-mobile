@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `bdbfc50f0` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `1172abdd1` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -23,14 +23,14 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
-| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 37 | 229 | 47.3 s | 74 s | 0 |
+| contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 38 | 230 | 47.3 s | 75 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 288 | 1347 | 93.8 s | 2590 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 147 | 483 | 57.4 s | 3682 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 531
+* keep: 532
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 531 — 225 `tests/*.test.ts` (node), 247 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2059; cases in files no runner reaches: 35
-* isolated wall time: contract 74 s, behaviour 2590 s, composition 3682 s, journey 0 s
+* files inventoried: 532 — 226 `tests/*.test.ts` (node), 247 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2060; cases in files no runner reaches: 35
+* isolated wall time: contract 75 s, behaviour 2590 s, composition 3682 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -125,6 +125,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/sign-out-revokes-key.test.ts | node | contract | 1 | 955 | 41.7 |  | not measured | — | 0 | keep | Signing out stops the key on the server, not only on the phone.  At the commit testdata/openapi.source.json pins, auth-token-revoke is declared httpx.SignedIn(… |
 | tests/source.test.ts | node | contract | 7 | 1664 | 1367.3 | 0 | 3 of 7 | scripts/source.ts | 0 | keep | These are disposable Git fixtures owned and removed by the test harness. Their dependency metadata is intentionally small; npm installation is exercised separa… |
 | tests/the-connection-documents-face-becomes-one-workspace.test.ts | node | contract | 9 | 1876 | 6 |  | not measured | — | 0 | keep | One connection document is read as three things: what the place is called, what colour it wears and what mark it hands out. The name a person may paint comes o… |
+| tests/the-phone-s-kernel-copies-name-one-commit.test.ts | node | contract | 1 | 319 | 2.6 |  | not measured | — | 0 | keep | The three copies this repository draws from the kernel — the catalogue golden every screen derives from, the served HTTP document `src/generated` is generated … |
 | tests/tokens.test.ts | node | contract | 8 | 848 | 535.4 | 88 | 3 of 8 | scripts/tokens.ts, src/ui/tokens.ts | 0 | keep | (no first comment; first test title) the generated palette is what the fixture renders to |
 
 ### behaviour
