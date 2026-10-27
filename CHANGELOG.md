@@ -33,6 +33,18 @@ for the version being released.
   in this release; the release that removes `./core/derive`, the alias and
   `Notice`'s `retry` re-export lists them in its own entry.
 
+- Every sentence a person reads is a key in the copy table. Two published rules change shape
+  for it: `verbRefusal(verb, copy)` takes the bundle its caller already holds, and
+  `since(at, now, format, words)` takes the distance words with it. `Copy.failure` gains
+  `cannotCreateHere`, `cannotEditHere`, `cannotDeleteHere`, `notAvailableHere`, `entryMissing`,
+  `commandNotRun` and `signInElsewhere`, and `KitWords` gains `listItemType`; the distances are
+  the kit's own `justNow`/`minuteAgo`/`minutesAgo`/`hourAgo`/`hoursAgo`/`yesterday`/`daysAgo`,
+  which a phone already spelled for a recent instant. A sheet that refused a verb, a field that
+  held a list item of the wrong type, an activity line's "how long ago" and the question that
+  throws a command's arguments away answered in English whatever the person spoke. The rule is
+  kept by a lint with its allow list in its own file
+  (`tests/copy-names-every-sentence-a-person-reads.test.ts`).
+
 
 - A record can be kept. A source entry declares `presentation.saved` (the word to keep a copy
   with, the word for a copy kept, the word that names it taken away, and `listEntry`, the entry
