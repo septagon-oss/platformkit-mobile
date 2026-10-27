@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `bfba0141a` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `7174871b0` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 39 | 245 | 47.3 s | 76 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 296 | 1406 | 94.1 s | 2619 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 298 | 1409 | 97.1 s | 2625 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 150 | 496 | 58.0 s | 3769 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 544
+* keep: 546
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 544 — 234 `tests/*.test.ts` (node), 251 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2147; cases in files no runner reaches: 35
-* isolated wall time: contract 76 s, behaviour 2619 s, composition 3769 s, journey 0 s
+* files inventoried: 546 — 236 `tests/*.test.ts` (node), 251 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2150; cases in files no runner reaches: 35
+* isolated wall time: contract 76 s, behaviour 2625 s, composition 3769 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -293,6 +293,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/color.test.ts | node | behaviour | 6 | 346 | 6.2 | 106 | 5 of 6 | src/core/color.ts | 0 | keep | The arithmetic every derived colour and every measured ratio comes through. Each expectation is a number the standard or a hand computes, not the output of the… |
 | tests/component-suite-gate.test.ts | node | behaviour | 2 | 401 | 71.4 | 0 | 0 of 2 | — | 0 | keep | The repository's required check has to keep running both suites: these pins read package.json and jest.config.js and refuse a script, a testMatch or a worker p… |
 | tests/control-plane-write-address.test.ts | node | behaviour | 2 | 1280 | 69.5 | 34 | 1 of 2 | — | 0 | keep | A resource read in the workspace and written on the control plane is written where the document says and read where it always was, with the row encoded into ev… |
+| tests/copy-names-every-sentence-a-person-reads.test.ts | node | behaviour | 1 | 2100 | 551.6 |  | not measured | — | 0 | keep | A sentence a person reads is a key in the copy table, so that the same screen answers in the language the session arrived with. `src/core/copy.ts` and `src/cor… |
 | tests/core-asks-no-device.test.ts | node | behaviour | 1 | 288 | 8.3 | 0 | 0 of 1 | — | 0 | keep | The core derives from what it is handed: a locale, a zone, an instant. Reading the phone's own language, hours or clock inside a derivation would make one row … |
 | tests/core-component-families.test.ts | node | behaviour | 1 | 779 | 3.3 | 0 | 0 of 1 | — | 0 | keep | Every component family the shared mobile specification names has a public core factory, so a product that composes a family reaches the same derivation its com… |
 | tests/data-list-count.test.ts | node | behaviour | 3 | 846 | 19.5 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) a list whose records have not arrived draws no count of them |
@@ -419,6 +420,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/test-file-first-comment.test.ts | node | behaviour | 1 | 290 | 2.9 | 0 | 0 of 1 | — | 0 | keep | A reader learns what a test file protects from its name and its first comment: these files hold the shared-kit, state and activity rules other files were folde… |
 | tests/test-name-grammar.test.ts | node | behaviour | 1 | 258 | 2.8 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) test files are named for behavior instead of a review phase |
 | tests/test-title-grammar.test.ts | node | behaviour | 1 | 269 | 11.8 | 0 | 0 of 1 | — | 0 | keep | (no first comment; first test title) test titles are named for behavior instead of the task that wrote them |
+| tests/the-core-barrel-imports-nothing-outside-the-core.test.ts | node | behaviour | 2 | 3609 | 2491.6 |  | not measured | — | 0 | keep | src/core is plain functions: it takes a locale, a zone, an instant and a catalogue document, and returns what a screen draws. React, an organism, a transport a… |
 | tests/the-deck-finishing-moment-plays-only-under-normal-motion.test.ts | node | behaviour | 3 | 2744 | 14 |  | not measured | — | 0 | keep | The deck draws its finishing moment only where motion is normal: an empty live count after a confirmed command asks for it once, normal motion plays it until i… |
 | tests/the-delete-warning-a-journey-reads-takes-the-drawn-sentence-whole.test.ts | node | behaviour | 1 | 303 | 3.7 | 0 | 0 of 1 | — | 0 | keep | Maestro reads an assertVisible text as regex source and matches it against the whole of an element's text, the same reading that takes the delete answer's tapO… |
 | tests/the-delete-warning-is-read-where-the-question-shows-it.test.ts | node | behaviour | 1 | 263 | 2.8 | 0 | 0 of 1 | — | 0 | keep | The delete warning is the question's words: `kit.deleteWarning` is what `useResourceDetail.remove()` passes to `confirm` as the dialog's message, and no screen… |
