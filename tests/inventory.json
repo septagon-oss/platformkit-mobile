@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 299,
-   "cases": 1411,
-   "ms": 2648212,
-   "testsMs": 97131.49999999993,
+   "files": 300,
+   "cases": 1417,
+   "ms": 2651613,
+   "testsMs": 97151.49999999993,
    "runners": {
     "jest": 102,
-    "node": 197
+    "node": 198
    },
    "unreachable": 0
   },
@@ -19478,6 +19478,65 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/present-reads-one-fields-word-value-and-shade.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 6,
+   "rule": "`present` is what a declared pack screen is handed in place of calling the six free readings of `core/present` itself, so the rule it carries has to hold on its own, with no React and no screen in front of it. Three things are decided here: the word and the shade come from the resolved policy of the *one entry* the function was bound to, a value that policy says nothing about keeps today's humanising and no shade at all, and a name the entry carries no field for is answered with the name's own words rather than a guess at what the person meant.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 3401,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a value the policy labels wears the server's word and the shade it gave that value",
+    "a value the policy leaves unlabelled keeps today's words and no shade",
+    "a name the entry carries no field for is answered with the name's own words",
+    "a field handed over directly reads the same as that field named",
+    "present is bound to one entry and reads no other entry's fields",
+    "an instant says its whole date-time aloud while the cell keeps its own words"
+   ],
+   "tests": [
+    {
+     "title": "a value the policy labels wears the server's word and the shade it gave that value",
+     "ms": 13.672398,
+     "measured": false
+    },
+    {
+     "title": "a value the policy leaves unlabelled keeps today's words and no shade",
+     "ms": 1.526313,
+     "measured": false
+    },
+    {
+     "title": "a name the entry carries no field for is answered with the name's own words",
+     "ms": 0.418965,
+     "measured": false
+    },
+    {
+     "title": "a field handed over directly reads the same as that field named",
+     "ms": 0.430046,
+     "measured": false
+    },
+    {
+     "title": "present is bound to one entry and reads no other entry's fields",
+     "ms": 0.340761,
+     "measured": false
+    },
+    {
+     "title": "an instant says its whole date-time aloud while the cell keeps its own words",
+     "ms": 3.630625,
+     "measured": false
+    }
+   ],
+   "loaded": 63,
+   "coveredProdLines": 14674,
+   "onlyProdLines": null,
+   "testsMs": 20
   },
   {
    "file": "tests/pricing-offer-unit.test.ts",
