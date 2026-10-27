@@ -51,7 +51,9 @@ const doorParts = DOORS.flatMap((door) => [
 // galleryFixtures is the kit's own gallery material — the examples, the scenes and
 // the pages that draw them. No door carries it, and no product file reaches it:
 // src/ui/gallery.tsx is the one production file that may import it, and it does so
-// from the module beside src/core, not through a door.
+// from the module beside src/core, not through a door. The deprecated barrel still
+// publishes a copy of them, so a product file can reach them that way for the window;
+// that path closes with the barrel.
 const galleryFixtures = {
   group: [
     "**/kitGallery", "**/kitGallery.ts", "**/kitScenes", "**/kitScenes.ts",
@@ -101,6 +103,26 @@ const generatedEffects = [
   "!**/generated/zod.gen", "!**/generated/zod.gen.ts",
   "!**/generated/types.gen", "!**/generated/types.gen.ts",
 ];
+// coreBoundary is what makes src/core the layer it is: plain functions over a locale, a zone, an
+// instant and a catalogue document, with React, an organism, a transport and the shell above it.
+// Any entry that names a core file more narrowly carries these patterns with it, because in flat
+// config a layer-specific entry replaces the one over `src/core/**` rather than adding to it — see
+// the comment on forbid.
+const coreBoundary = [
+  {
+    group: [
+      ...generatedEffects,
+      ...react,
+      "**/effects/**",
+      "**/ui/**",
+      "**/shell",
+      "**/shell.tsx",
+      "**/screens/**",
+    ],
+    message: "core is plain functions; it imports nothing outside src/core.",
+  },
+];
+
 const uiBoundary = [{
   group: [
     ...generatedEffects,
@@ -134,14 +156,13 @@ export default [
   ...expo,
   { ignores: ["node_modules/", ".expo/", "dist/", "android/", "ios/", "e2e/out/"] },
   forbid(["src/**", "app/**"], []),
-  forbid(["src/core/**"], [
-    { group: [...generatedEffects, ...react, "**/effects/**", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "core is plain functions; it imports nothing outside src/core." },
-  ]),
+  forbid(["src/core/**"], coreBoundary),
   // The barrel still publishes the kit's gallery fixtures for the compatibility
   // window, and galleryPages.ts builds its pages out of them: both are the gallery's
-  // own share of src/core, so the fixture ban names them and the door ban still
-  // applies — even the barrel enters a door through its index.
-  forbid(["src/core/derive.ts", "src/core/galleryPages.ts"], [], { fixtures: false }),
+  // own share of src/core, so the fixture ban names them and nothing else is given
+  // up — the layer's own patterns ride along, and the door ban still applies, so
+  // even the barrel enters a door through its index.
+  forbid(["src/core/derive.ts", "src/core/galleryPages.ts"], coreBoundary, { fixtures: false }),
   forbid(["src/effects/**"], [
     { group: ["react", "react-native", "react-native/*", "**/ui/**", "**/shell", "**/shell.tsx", "**/screens/**"], message: "effects know the network and the store, not React or the UI." },
     { group: expoButSecureStore, message: "effects may use the secure store and nothing else of Expo." },
