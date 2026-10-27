@@ -20,8 +20,9 @@ import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
 import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { SignInForm } from "../../src/ui/organisms/SignInForm";
 import { ThemeProvider } from "../../src/ui/theme";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const inTheme = (el: React.ReactElement) =>
   render(<ThemeProvider mode="light">{el}</ThemeProvider>);
@@ -224,7 +225,7 @@ describe("ResourceForm", () => {
   });
 
   test("a list field a person owes is announced as owed", async () => {
-    const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+    const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
     const fields = doc.resources.find((r: { entity: string }) => r.entity === "note").fields;
     fields.find((f: { name: string }) => f.name === "tags").required = true;
     const owed = parseCatalog(doc).resources.find((r) => r.entity === "note")!;

@@ -16,10 +16,11 @@ import type { Order } from "../../src/core/derive";
 import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { ThemeProvider } from "../../src/ui/theme";
 import { presentation } from "../fakes/presentation";
+import { unresolved } from "../fakes/unresolved";
 
-const note = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))).resources.find(
-  (r) => r.entity === "note",
-)!;
+const note = parseCatalog(
+  unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))),
+).resources.find((r) => r.entity === "note")!;
 const rows = [{ id: "1", title: "Buy milk", status: "open" }];
 const none = () => undefined;
 

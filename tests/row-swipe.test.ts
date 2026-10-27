@@ -9,9 +9,12 @@ import { parseCatalog, type Entry } from "../src/core/catalog";
 import { readSwipe } from "../src/core/gesture";
 import { rowAction, rowSwipeTone } from "../src/core/derive";
 import { feedback } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  );
 
 /**
  * One surface's width, in the density-independent lengths src/ui/scale.ts writes. The reading is

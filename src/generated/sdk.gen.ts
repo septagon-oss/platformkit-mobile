@@ -360,6 +360,27 @@ import type {
   SiteSettingsSaveData,
   SiteSettingsSaveErrors,
   SiteSettingsSaveResponses,
+  SubjectEraseRequestData,
+  SubjectEraseRequestErrors,
+  SubjectEraseRequestResponses,
+  SubjectExportBundleData,
+  SubjectExportBundleErrors,
+  SubjectExportBundleResponses,
+  SubjectExportLinkForData,
+  SubjectExportLinkForErrors,
+  SubjectExportLinkForResponses,
+  SubjectExportLinkMineData,
+  SubjectExportLinkMineErrors,
+  SubjectExportLinkMineResponses,
+  SubjectExportReadMineData,
+  SubjectExportReadMineErrors,
+  SubjectExportReadMineResponses,
+  SubjectExportRequestForData,
+  SubjectExportRequestForErrors,
+  SubjectExportRequestForResponses,
+  SubjectExportRequestMineData,
+  SubjectExportRequestMineErrors,
+  SubjectExportRequestMineResponses,
   TaskTaskAssignData,
   TaskTaskAssignErrors,
   TaskTaskAssignResponses,
@@ -610,6 +631,12 @@ import {
   zScimUsersListResponse,
   zSiteSettingsReadResponse,
   zSiteSettingsSaveResponse,
+  zSubjectEraseRequestResponse,
+  zSubjectExportLinkForResponse,
+  zSubjectExportLinkMineResponse,
+  zSubjectExportReadMineResponse,
+  zSubjectExportRequestForResponse,
+  zSubjectExportRequestMineResponse,
   zTaskTaskAssignResponse,
   zTaskTaskCheckSlaResponse,
   zTaskTaskCreateResponse,
@@ -2515,6 +2542,19 @@ export const siteSettingsPublic = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Download an exported bundle
+ *
+ * The bytes of one person's export, opened by the single-use token that was minted for it. An expired, used or forged token gets the same answer, and the answer is the one a stranger gets.
+ */
+export const subjectExportBundle = <ThrowOnError extends boolean = false>(
+  options: Options<SubjectExportBundleData, ThrowOnError>,
+): RequestResult<SubjectExportBundleResponses, SubjectExportBundleErrors, ThrowOnError> =>
+  options.client.get<SubjectExportBundleResponses, SubjectExportBundleErrors, ThrowOnError>({
+    url: "/api/v1/public/subject/bundles/{token}",
+    ...options,
+  });
+
+/**
  * Which role each group brings
  */
 export const scimGroupMappingsList = <ThrowOnError extends boolean = false>(
@@ -2572,6 +2612,110 @@ export const siteSettingsSave = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * Erase a person's data
+ *
+ * Asks every owner of a person's rows for its own, in module-name order, and files the receipt. The confirm field is that person's address, repeated: an irreversible act gets the one-keystroke refusal. A refused erasure writes nothing at all, including the request row.
+ */
+export const subjectEraseRequest = <ThrowOnError extends boolean = false>(
+  options: Options<SubjectEraseRequestData, ThrowOnError>,
+): RequestResult<SubjectEraseRequestResponses, SubjectEraseRequestErrors, ThrowOnError> =>
+  options.client.post<SubjectEraseRequestResponses, SubjectEraseRequestErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSubjectEraseRequestResponse.parseAsync(data),
+    url: "/api/v1/subject/erasures",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Ask for a copy of your own data
+ *
+ * Files one export request for the signed-in person and answers it immediately with the request row: the bundle is produced by the worker, and this row is how you ask where it got to. No permission is asked for, because a person's copy is not a grant.
+ */
+export const subjectExportRequestMine = <ThrowOnError extends boolean = false>(
+  options: Options<SubjectExportRequestMineData, ThrowOnError>,
+): RequestResult<SubjectExportRequestMineResponses, SubjectExportRequestMineErrors, ThrowOnError> =>
+  options.client.post<
+    SubjectExportRequestMineResponses,
+    SubjectExportRequestMineErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zSubjectExportRequestMineResponse.parseAsync(data),
+    url: "/api/v1/subject/exports",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Ask for a copy of anybody's data
+ *
+ * The operator's door: the same request, filed about a person named in the body. Guarded by subject:export, because producing somebody else's bundle is producing a copy of their rows.
+ */
+export const subjectExportRequestFor = <ThrowOnError extends boolean = false>(
+  options: Options<SubjectExportRequestForData, ThrowOnError>,
+): RequestResult<SubjectExportRequestForResponses, SubjectExportRequestForErrors, ThrowOnError> =>
+  options.client.post<
+    SubjectExportRequestForResponses,
+    SubjectExportRequestForErrors,
+    ThrowOnError
+  >({
+    responseValidator: async (data) => await zSubjectExportRequestForResponse.parseAsync(data),
+    url: "/api/v1/subject/exports/for",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Mint a download link for any export
+ *
+ * The operator's share of the same door: a link for a request the caller did not file. Guarded by subject:export, and the mint is auditable because the trail records every write here.
+ */
+export const subjectExportLinkFor = <ThrowOnError extends boolean = false>(
+  options: Options<SubjectExportLinkForData, ThrowOnError>,
+): RequestResult<SubjectExportLinkForResponses, SubjectExportLinkForErrors, ThrowOnError> =>
+  options.client.post<SubjectExportLinkForResponses, SubjectExportLinkForErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSubjectExportLinkForResponse.parseAsync(data),
+    url: "/api/v1/subject/exports/for/{id}/link",
+    ...options,
+  });
+
+/**
+ * Read one of your own export requests
+ *
+ * The request's state, its bundle's digest, and when a link to it would die. Somebody else's request is not found, which is the answer that does not confirm the row exists.
+ */
+export const subjectExportReadMine = <ThrowOnError extends boolean = false>(
+  options: Options<SubjectExportReadMineData, ThrowOnError>,
+): RequestResult<SubjectExportReadMineResponses, SubjectExportReadMineErrors, ThrowOnError> =>
+  options.client.get<SubjectExportReadMineResponses, SubjectExportReadMineErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSubjectExportReadMineResponse.parseAsync(data),
+    url: "/api/v1/subject/exports/{id}",
+    ...options,
+  });
+
+/**
+ * Mint a download link for your own export
+ *
+ * Opens the seven-day, single-use door onto a bundle that is ready. Somebody else's request is not found. The token appears in this response and in no row, log or event, so this is the one answer that carries it.
+ */
+export const subjectExportLinkMine = <ThrowOnError extends boolean = false>(
+  options: Options<SubjectExportLinkMineData, ThrowOnError>,
+): RequestResult<SubjectExportLinkMineResponses, SubjectExportLinkMineErrors, ThrowOnError> =>
+  options.client.post<SubjectExportLinkMineResponses, SubjectExportLinkMineErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSubjectExportLinkMineResponse.parseAsync(data),
+    url: "/api/v1/subject/exports/{id}/link",
+    ...options,
   });
 
 /**

@@ -10,6 +10,7 @@ import { Shell, useShell } from "../../src/shell";
 import { ThemeProvider } from "../../src/ui/theme";
 import { reset } from "../fakes/router";
 import { loginIdentity, pageResponse } from "../fakes/wire";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock(
   "expo-router",
@@ -63,7 +64,7 @@ function Record() {
 }
 
 async function read() {
-  const catalog = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const catalog = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   const resource = catalog.resources.find((e: { entity: string }) => e.entity === "note");
   resource.presentation = { ...resource.presentation, previewField: "status" };
   const body = resource.fields.find((f: { name: string }) => f.name === "body");

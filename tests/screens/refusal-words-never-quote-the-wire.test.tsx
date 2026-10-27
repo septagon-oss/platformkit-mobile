@@ -37,8 +37,9 @@ import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
 import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { ThemeProvider } from "../../src/ui/theme";
 import { presentation as fixture } from "../fakes/presentation";
+import { unresolved } from "../fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const row = { id: "note-1", title: "Buy milk", status: "open", rank: 2, pinned: false, tags: [] };
 const none = () => undefined;

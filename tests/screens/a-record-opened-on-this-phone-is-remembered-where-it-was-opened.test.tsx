@@ -14,6 +14,7 @@ import { ThemeProvider } from "../../src/ui/theme";
 import { header, reset } from "../fakes/router";
 import { fakeApi, shell, shellValue } from "../fakes/shell";
 import { clock, fakeRecentsStore } from "../fakes/store";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock("../../src/shell", () => ({
   useShell: () => jest.requireActual<typeof import("../fakes/shell")>("../fakes/shell").shell.value,
@@ -30,7 +31,7 @@ jest.mock("expo-image", () => ({
   Image: jest.requireActual<typeof import("../fakes/image")>("../fakes/image").ExpoImage,
 }));
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const AT = "2026-10-06T10:00:00.000Z";
 

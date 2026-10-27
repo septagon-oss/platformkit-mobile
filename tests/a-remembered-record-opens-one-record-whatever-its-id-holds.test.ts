@@ -9,8 +9,9 @@ import { parseCatalog } from "../src/core/catalog";
 import { recentHref, type RecentDoor } from "../src/core/recents";
 import { address, type RecordAddress } from "../src/core/reentry";
 import { screenPath } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 
 const door = (recordId: string): RecentDoor => ({

@@ -11,7 +11,8 @@ import { createRecents } from "../src/effects/recents";
 import { RECENT_KEEP, RECENT_SHOWN, recentFrom, recentHref, recentKey } from "../src/core/recents";
 import { address } from "../src/core/reentry";
 import { clock, fakeRecentsStore } from "./fakes/store";
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+import { unresolved } from "./fakes/unresolved";
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 
 const ADA = { server: "https://acme.test", userId: "ada" };
 const BEA = { server: "https://acme.test", userId: "bea" };

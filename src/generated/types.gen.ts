@@ -125,12 +125,18 @@ export type ClearOutputBody = {
 };
 
 export type Command = {
+  bindings?: {
+    [key: string]: string;
+  };
   collection?: boolean;
   description?: string;
   fields?: Array<Field> | null;
+  hasResult?: boolean;
+  output?: Array<Field> | null;
   path?: string;
   presentation?: CommandPresentation;
   summary?: string;
+  undo?: string;
   verb: string;
 };
 
@@ -296,6 +302,7 @@ export type DeckDirectionPresentation = {
   label?: string;
   skip?: boolean;
   tone?: string;
+  undo?: string;
 };
 
 export type DeckPresentation = {
@@ -304,6 +311,7 @@ export type DeckPresentation = {
   };
   order: string;
   queue?: Array<string> | null;
+  undoable?: boolean;
 };
 
 export type Delete = {
@@ -482,6 +490,7 @@ export type Entry = {
   operations?: Array<string> | null;
   path: string;
   presentation?: EntryPresentation;
+  resolved?: Resolved;
   screen?: string;
   singleton?: boolean;
   writable: boolean;
@@ -533,6 +542,17 @@ export type EraseBody = {
   /**
    * The subject whose files are being erased
    */
+  subject: string;
+};
+
+export type Erasure = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  alreadyErased?: boolean;
+  at: string;
+  modules: Array<string> | null;
   subject: string;
 };
 
@@ -615,6 +635,21 @@ export type Event = {
    * The W3C trace context of the call that caused this
    */
   traceparent?: string;
+};
+
+export type ExportForBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Why, recorded on the request
+   */
+  reason?: string;
+  /**
+   * The person whose copy is wanted
+   */
+  subject?: string;
 };
 
 export type Factor = {
@@ -716,6 +751,10 @@ export type File = {
    * The name the file was uploaded under
    */
   name: string;
+  /**
+   * Whether only the module that stored it serves its bytes
+   */
+  readonly sealed?: boolean;
   /**
    * SHA-256 of the content, hex
    */
@@ -977,6 +1016,21 @@ export type IssuedToken = {
   token: string;
 };
 
+export type Link = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  expiresAt: string;
+  file: string;
+  request: string;
+  subject: string;
+  /**
+   * The one time this token exists outside the database. Mint hands it to one caller and the table holds only its hash.
+   */
+  token: string;
+};
+
 export type ListOutputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1173,6 +1227,17 @@ export type Operation = {
   op?: string;
   path?: string;
   value?: unknown;
+};
+
+export type OwnExportBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Why you are asking, in your words. Recorded, and it buys nothing.
+   */
+  reason?: string;
 };
 
 export type Page = {
@@ -1432,6 +1497,21 @@ export type PatchInputBody = {
   schemas: Array<string> | null;
 };
 
+export type PersonEraseBody = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * That person's email address, repeated. The erasure checks it against the row, so an ask that does not repeat it writes nothing
+   */
+  confirm?: string;
+  /**
+   * The person to stop holding data about. Nothing is erased when nobody is named
+   */
+  subject?: string;
+};
+
 export type Pictures = {
   composedSource?: string;
   source: string;
@@ -1515,6 +1595,7 @@ export type Problem = {
   status: number;
   title: string;
   type: string;
+  violations?: Array<Violation> | null;
 };
 
 export type Proposal = {
@@ -1696,6 +1777,26 @@ export type Rename = {
   name: string;
 };
 
+export type Request = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  bundle: string;
+  bundleDigest?: string;
+  createdAt: string;
+  detail?: string;
+  id: string;
+  kind: string;
+  linkExpires?: string;
+  reason?: string;
+  requester: string;
+  revision: number;
+  state: string;
+  subject: string;
+  updatedAt: string;
+};
+
 export type ResendVerificationInputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1731,6 +1832,171 @@ export type ResolveBody = {
    * How the task was resolved
    */
   resolution?: string;
+};
+
+export type Resolved = {
+  commands: Array<ResolvedCommand> | null;
+  deck?: ResolvedDeck;
+  fields: Array<ResolvedField> | null;
+  identity: ResolvedIdentity;
+  language: string;
+  layout: ResolvedLayout;
+  list: ResolvedList;
+  policyVersion: number;
+  summary: ResolvedSummary;
+  titles: ResolvedTitles;
+};
+
+export type ResolvedCommand = {
+  confirmation?: ResolvedConfirmation;
+  destructive: boolean;
+  label: string;
+  primary: boolean;
+  successMessage: string;
+  system: boolean;
+  verb: string;
+  visible: boolean;
+};
+
+export type ResolvedConfirmation = {
+  body: string;
+  confirmLabel: string;
+  title: string;
+};
+
+export type ResolvedDeck = {
+  directions: {
+    [key: string]: ResolvedDeckDirection;
+  };
+  order: string;
+  queue: Array<string> | null;
+  undoable: boolean;
+};
+
+export type ResolvedDeckDirection = {
+  command: string;
+  icon: string;
+  label: string;
+  skip: boolean;
+  tone: string;
+  undo: string;
+};
+
+export type ResolvedEditable = {
+  create: boolean;
+  update: boolean;
+};
+
+export type ResolvedField = {
+  control: string;
+  editable: ResolvedEditable;
+  help: string;
+  kind: string;
+  label: string;
+  name: string;
+  onList: boolean;
+  onRecord: boolean;
+  options: Array<ResolvedOption> | null;
+  reading: ResolvedReading;
+  reference?: ResolvedReference;
+  section: string;
+};
+
+export type ResolvedFilter = {
+  field: string;
+  kind: string;
+  label: string;
+  values: Array<ResolvedOption> | null;
+};
+
+export type ResolvedGroup = {
+  key: string;
+  label: string;
+};
+
+export type ResolvedIdentity = {
+  description: string;
+  emptyDescription: string;
+  group?: ResolvedGroup;
+  icon: string;
+  order: number;
+  plural: string;
+  singular: string;
+};
+
+export type ResolvedLayout = {
+  columns: Array<string> | null;
+  create: Array<string> | null;
+  information: Array<string> | null;
+  overview: Array<string> | null;
+  sections: Array<ResolvedSection> | null;
+  update: Array<string> | null;
+};
+
+export type ResolvedList = {
+  defaultSort: string;
+  filters: Array<ResolvedFilter> | null;
+  sorts: Array<ResolvedSortOption> | null;
+};
+
+export type ResolvedMoney = {
+  currencyField: string;
+  scale: number;
+};
+
+export type ResolvedOption = {
+  done: boolean;
+  label: string;
+  tone: string;
+  value: string;
+};
+
+export type ResolvedReading = {
+  false: string;
+  format: string;
+  missing: string;
+  money?: ResolvedMoney;
+  precision: number | null;
+  time?: ResolvedTime;
+  true: string;
+};
+
+export type ResolvedReference = {
+  resource: string;
+};
+
+export type ResolvedSection = {
+  fields: Array<string> | null;
+  key: string;
+  label: string;
+};
+
+export type ResolvedSortOption = {
+  desc: boolean;
+  field: string;
+  label: string;
+  query: string;
+};
+
+export type ResolvedSummary = {
+  highlight?: EntryHighlight;
+  trendField: string;
+};
+
+export type ResolvedTime = {
+  kind: string;
+  relative: boolean;
+};
+
+export type ResolvedTitles = {
+  cover: string;
+  emptyTitle: string;
+  listCandidates: Array<string> | null;
+  preview: string;
+  recordCandidates: Array<string> | null;
+  status: string;
+  summary: Array<string> | null;
+  thumbnail: string;
 };
 
 export type ResourceGroup = {
@@ -2502,6 +2768,12 @@ export type VersionPage = {
   next: number;
 };
 
+export type Violation = {
+  code: string;
+  location: string;
+  message: string;
+};
+
 export type AccessBodyWritable = {
   /**
    * The address the caller was refused at, as a path within this application
@@ -2697,6 +2969,13 @@ export type EraseBodyWritable = {
   subject: string;
 };
 
+export type ErasureWritable = {
+  alreadyErased?: boolean;
+  at: string;
+  modules: Array<string> | null;
+  subject: string;
+};
+
 export type ErasureReceiptWritable = {
   at: string;
   bytes: number;
@@ -2768,6 +3047,17 @@ export type EventWritable = {
    * The W3C trace context of the call that caused this
    */
   traceparent?: string;
+};
+
+export type ExportForBodyWritable = {
+  /**
+   * Why, recorded on the request
+   */
+  reason?: string;
+  /**
+   * The person whose copy is wanted
+   */
+  subject?: string;
 };
 
 export type FactorWritable = {
@@ -2965,6 +3255,17 @@ export type IssuedTokenWritable = {
   token: string;
 };
 
+export type LinkWritable = {
+  expiresAt: string;
+  file: string;
+  request: string;
+  subject: string;
+  /**
+   * The one time this token exists outside the database. Mint hands it to one caller and the table holds only its hash.
+   */
+  token: string;
+};
+
 export type ListOutputBodyWritable = {
   items: Array<TenantWritable> | null;
   total: number;
@@ -3073,6 +3374,13 @@ export type OidcSettingsWritable = {
    * Where the client secret is kept — an environment variable's name, never the secret
    */
   secretRef: string;
+};
+
+export type OwnExportBodyWritable = {
+  /**
+   * Why you are asking, in your words. Recorded, and it buys nothing.
+   */
+  reason?: string;
 };
 
 export type PageWritable = {
@@ -3256,6 +3564,17 @@ export type PatchInputBodyWritable = {
   schemas: Array<string> | null;
 };
 
+export type PersonEraseBodyWritable = {
+  /**
+   * That person's email address, repeated. The erasure checks it against the row, so an ask that does not repeat it writes nothing
+   */
+  confirm?: string;
+  /**
+   * The person to stop holding data about. Nothing is erased when nobody is named
+   */
+  subject?: string;
+};
+
 export type PlanWritable = {
   /**
    * Whether this plan accepts new subscriptions
@@ -3294,6 +3613,7 @@ export type ProblemWritable = {
   status: number;
   title: string;
   type: string;
+  violations?: Array<Violation> | null;
 };
 
 export type ProposalWritable = {
@@ -3369,6 +3689,22 @@ export type RenameWritable = {
    * Display name
    */
   name: string;
+};
+
+export type RequestWritable = {
+  bundle: string;
+  bundleDigest?: string;
+  createdAt: string;
+  detail?: string;
+  id: string;
+  kind: string;
+  linkExpires?: string;
+  reason?: string;
+  requester: string;
+  revision: number;
+  state: string;
+  subject: string;
+  updatedAt: string;
 };
 
 export type ResendVerificationInputBodyWritable = {
@@ -8957,6 +9293,46 @@ export type SiteSettingsPublicResponses = {
   200: unknown;
 };
 
+export type SubjectExportBundleData = {
+  body?: never;
+  path: {
+    /**
+     * The single-use token this link was minted with
+     */
+    token: string;
+  };
+  query?: never;
+  url: "/api/v1/public/subject/bundles/{token}";
+};
+
+export type SubjectExportBundleErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type SubjectExportBundleError = SubjectExportBundleErrors[keyof SubjectExportBundleErrors];
+
+export type SubjectExportBundleResponses = {
+  /**
+   * OK
+   */
+  200: unknown;
+};
+
 export type ScimGroupMappingsListData = {
   body?: never;
   path?: never;
@@ -9104,6 +9480,284 @@ export type SiteSettingsSaveResponses = {
 };
 
 export type SiteSettingsSaveResponse = SiteSettingsSaveResponses[keyof SiteSettingsSaveResponses];
+
+export type SubjectEraseRequestData = {
+  body?: PersonEraseBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/v1/subject/erasures";
+};
+
+export type SubjectEraseRequestErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type SubjectEraseRequestError = SubjectEraseRequestErrors[keyof SubjectEraseRequestErrors];
+
+export type SubjectEraseRequestResponses = {
+  /**
+   * OK
+   */
+  200: Erasure;
+};
+
+export type SubjectEraseRequestResponse =
+  SubjectEraseRequestResponses[keyof SubjectEraseRequestResponses];
+
+export type SubjectExportRequestMineData = {
+  body?: OwnExportBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/v1/subject/exports";
+};
+
+export type SubjectExportRequestMineErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type SubjectExportRequestMineError =
+  SubjectExportRequestMineErrors[keyof SubjectExportRequestMineErrors];
+
+export type SubjectExportRequestMineResponses = {
+  /**
+   * Accepted
+   */
+  202: Request;
+};
+
+export type SubjectExportRequestMineResponse =
+  SubjectExportRequestMineResponses[keyof SubjectExportRequestMineResponses];
+
+export type SubjectExportRequestForData = {
+  body?: ExportForBodyWritable;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/v1/subject/exports/for";
+};
+
+export type SubjectExportRequestForErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type SubjectExportRequestForError =
+  SubjectExportRequestForErrors[keyof SubjectExportRequestForErrors];
+
+export type SubjectExportRequestForResponses = {
+  /**
+   * Accepted
+   */
+  202: Request;
+};
+
+export type SubjectExportRequestForResponse =
+  SubjectExportRequestForResponses[keyof SubjectExportRequestForResponses];
+
+export type SubjectExportLinkForData = {
+  body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path: {
+    /**
+     * The export request's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/subject/exports/for/{id}/link";
+};
+
+export type SubjectExportLinkForErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type SubjectExportLinkForError =
+  SubjectExportLinkForErrors[keyof SubjectExportLinkForErrors];
+
+export type SubjectExportLinkForResponses = {
+  /**
+   * OK
+   */
+  200: Link;
+};
+
+export type SubjectExportLinkForResponse =
+  SubjectExportLinkForResponses[keyof SubjectExportLinkForResponses];
+
+export type SubjectExportReadMineData = {
+  body?: never;
+  path: {
+    /**
+     * The export request's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/subject/exports/{id}";
+};
+
+export type SubjectExportReadMineErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type SubjectExportReadMineError =
+  SubjectExportReadMineErrors[keyof SubjectExportReadMineErrors];
+
+export type SubjectExportReadMineResponses = {
+  /**
+   * OK
+   */
+  200: Request;
+};
+
+export type SubjectExportReadMineResponse =
+  SubjectExportReadMineResponses[keyof SubjectExportReadMineResponses];
+
+export type SubjectExportLinkMineData = {
+  body?: never;
+  headers?: {
+    /**
+     * Replays this write for 24 hours. A retry with byte-identical request and body gets the answer the first attempt was given; the same key with another body, path or query is refused 422, and the same key while the first attempt is still running is refused 409. Optional: a write without a key receives a new operation identity. Unresolved and approval-pending identities remain spent after answer expiry until their owner completes them. A keyed body is bounded to 1048576 bytes; a larger write is refused 413 rather than made unremembered. A UUID is the usual value.
+     */
+    "Idempotency-Key"?: string;
+  };
+  path: {
+    /**
+     * The export request's id
+     */
+    id: string;
+  };
+  query?: never;
+  url: "/api/v1/subject/exports/{id}/link";
+};
+
+export type SubjectExportLinkMineErrors = {
+  /**
+   * Not Found
+   */
+  404: Problem;
+  /**
+   * Unprocessable Entity
+   */
+  422: Problem;
+  /**
+   * Internal Server Error
+   */
+  500: Problem;
+  /**
+   * Service Unavailable
+   */
+  503: Problem;
+};
+
+export type SubjectExportLinkMineError =
+  SubjectExportLinkMineErrors[keyof SubjectExportLinkMineErrors];
+
+export type SubjectExportLinkMineResponses = {
+  /**
+   * OK
+   */
+  200: Link;
+};
+
+export type SubjectExportLinkMineResponse =
+  SubjectExportLinkMineResponses[keyof SubjectExportLinkMineResponses];
 
 export type TaskTaskListData = {
   body?: never;

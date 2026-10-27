@@ -15,9 +15,12 @@ import {
 import { rowCounts, statCards, cardLimit } from "../src/core/summary";
 import type { Summary } from "../src/generated/types.gen";
 import { presentation } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const catalog = parseCatalog(
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  ),
 );
 const note: Entry = catalog.resources.find((e) => e.entity === "note")!;
 
@@ -275,7 +278,11 @@ test("the row's count and the card's number are one formatting of one integer", 
 
 test("a highlight enters through the catalogue and a broken one says so", () => {
   const golden = () =>
-    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+    unresolved(
+      JSON.parse(
+        readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"),
+      ),
+    );
   const served = (hints: unknown) => {
     const doc = golden();
     doc.resources[0].presentation = { ...(doc.resources[0].presentation ?? {}), highlight: hints };

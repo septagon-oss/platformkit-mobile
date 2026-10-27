@@ -334,6 +334,9 @@ export function bindOperations(
     siteSettingsPublic: (
       options: Omit<types.SiteSettingsPublicData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.siteSettingsPublic({ ...options, client, throwOnError: true })),
+    subjectExportBundle: (
+      options: Omit<types.SubjectExportBundleData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.subjectExportBundle({ ...options, client, throwOnError: true })),
     scimGroupMappingsList: (
       options: Omit<types.ScimGroupMappingsListData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.scimGroupMappingsList({ ...options, client, throwOnError: true })),
@@ -346,6 +349,26 @@ export function bindOperations(
     siteSettingsSave: (
       options: Omit<types.SiteSettingsSaveData, "url"> & { signal?: AbortSignal },
     ) => invoke((client) => sdk.siteSettingsSave({ ...options, client, throwOnError: true })),
+    subjectEraseRequest: (
+      options: Omit<types.SubjectEraseRequestData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.subjectEraseRequest({ ...options, client, throwOnError: true })),
+    subjectExportRequestMine: (
+      options: Omit<types.SubjectExportRequestMineData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.subjectExportRequestMine({ ...options, client, throwOnError: true })),
+    subjectExportRequestFor: (
+      options: Omit<types.SubjectExportRequestForData, "url"> & { signal?: AbortSignal },
+    ) =>
+      invoke((client) => sdk.subjectExportRequestFor({ ...options, client, throwOnError: true })),
+    subjectExportLinkFor: (
+      options: Omit<types.SubjectExportLinkForData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.subjectExportLinkFor({ ...options, client, throwOnError: true })),
+    subjectExportReadMine: (
+      options: Omit<types.SubjectExportReadMineData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.subjectExportReadMine({ ...options, client, throwOnError: true })),
+    subjectExportLinkMine: (
+      options: Omit<types.SubjectExportLinkMineData, "url"> & { signal?: AbortSignal },
+    ) => invoke((client) => sdk.subjectExportLinkMine({ ...options, client, throwOnError: true })),
     taskTaskList: (options: Omit<types.TaskTaskListData, "url"> & { signal?: AbortSignal }) =>
       invoke((client) => sdk.taskTaskList({ ...options, client, throwOnError: true })),
     taskTaskCreate: (options: Omit<types.TaskTaskCreateData, "url"> & { signal?: AbortSignal }) =>

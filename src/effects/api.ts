@@ -466,6 +466,56 @@ interface SessionFrame {
   cookie?: string | undefined;
 }
 
+/** The body prefix PlatformKit puts on request-body locations; the form names fields without it. */
+const bodyLocation = (location: string): string => location.replace(/^body\./, "");
+
+/**
+ * violationFields reads a problem document's `violations`: each carries the field's location and the
+ * message for the person. A violation with no location or no message names no field and is skipped.
+ */
+function violationFields(violations: unknown): [string, string][] {
+  const fields: [string, string][] = [];
+  for (const v of Array.isArray(violations) ? violations : []) {
+    if (
+      !v ||
+      typeof v !== "object" ||
+      typeof v.location !== "string" ||
+      typeof v.message !== "string"
+    )
+      continue;
+    const name = bodyLocation(v.location);
+    if (name && v.message) fields.push([name, v.message]);
+  }
+  return fields;
+}
+
+/**
+ * errorFields reads the older `errors` list, strings of "location: message" or Huma's objects. It is
+ * the fallback for a server that prints no `violations`.
+ */
+function errorFields(errors: unknown): [string, string][] {
+  const fields: [string, string][] = [];
+  for (const entry of Array.isArray(errors) ? errors : []) {
+    let name = "";
+    let message = "";
+    if (typeof entry === "string") {
+      const i = entry.indexOf(": ");
+      if (i > 0) {
+        name = entry.slice(0, i);
+        message = entry.slice(i + 2);
+      }
+    } else if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+      if (typeof entry.location === "string" && typeof entry.message === "string") {
+        name = entry.location;
+        message = entry.message;
+      }
+    }
+    name = bodyLocation(name);
+    if (name && message) fields.push([name, message]);
+  }
+  return fields;
+}
+
 /**
  * createApi is one connection to one server, carrying one key: every request the
  * shell makes, over the transport it is given. The defaults are this kit's own
@@ -672,26 +722,8 @@ export function createApi(
       const body = p as Record<string, unknown>;
       if (typeof body.detail === "string") detail = body.detail.replace(/^crud: invalid: /, "");
       if (typeof body.type === "string") type = body.type;
-      for (const entry of Array.isArray(body.errors) ? body.errors : []) {
-        let name = "";
-        let message = "";
-        if (typeof entry === "string") {
-          const i = entry.indexOf(": ");
-          if (i > 0) {
-            name = entry.slice(0, i);
-            message = entry.slice(i + 2);
-          }
-        } else if (entry && typeof entry === "object" && !Array.isArray(entry)) {
-          if (typeof entry.location === "string" && typeof entry.message === "string") {
-            name = entry.location;
-            message = entry.message;
-          }
-        }
-        // PlatformKit prefixes body locations in its string errors. Huma's
-        // object form uses the same paths; preserve nested and non-body paths.
-        name = name.replace(/^body\./, "");
-        if (name && message) fields.push([name, message]);
-      }
+      const violated = violationFields(body.violations);
+      fields.push(...(violated.length > 0 ? violated : errorFields(body.errors)));
     } catch {
       // not a problem document; the status is what there is to say
     }

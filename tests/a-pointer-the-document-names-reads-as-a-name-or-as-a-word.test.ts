@@ -7,6 +7,7 @@
 // monospaced shape: `id` is still an identifier.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { unresolved } from "./fakes/unresolved";
 import test from "node:test";
 import { parseCatalog, type Entry } from "../src/core/catalog";
 import {
@@ -34,7 +35,7 @@ const ID = "3f2a8c1d-4b5e-4a6b-9c8d-1e2f3a4b5c6d";
  */
 /** declared is the same record with a row that says which pointer it draws. */
 function declared(): Entry {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   doc.resources[0].presentation = { summaryFields: ["siteId"] };
   mutate(doc);
   const resources = parseCatalog(doc).resources;
@@ -63,7 +64,7 @@ function mutate(doc: Record<string, unknown>) {
 }
 
 function served(immutable: boolean): { readonly entry: Entry; readonly lines: readonly string[] } {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   if (immutable) doc.resources[0].immutable = ["status", "assigneeId"];
   const lines: string[] = [];
   mutate(doc);
@@ -140,7 +141,7 @@ test("a pointer with nothing in it is no fact at all, and a plain identifier kee
 });
 
 test("a record called by a pointer is called by the name of what it points at", () => {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   const entry = doc.resources[0];
   entry.presentation = { primaryField: "assigneeId" };
   entry.fields.push({
@@ -204,7 +205,7 @@ test("a screen asks for the records the medium it draws points at", () => {
 });
 
 test("a referenced record is named by the chain that names every record", () => {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   doc.resources[0].presentation = { primaryField: "title" };
   const entry: Entry = parseCatalog(doc).resources[0]!;
   assert.equal(referencedName(entry, { title: "Replace the gasket" }), "Replace the gasket");

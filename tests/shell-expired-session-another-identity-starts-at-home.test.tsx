@@ -15,6 +15,7 @@ import SignInRoute from "../app/sign-in";
 import { ResourceRoute } from "../src/route";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 import { navigations, reset, setParams } from "./fakes/router";
+import { unresolved } from "./fakes/unresolved";
 
 const mockStore = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -27,7 +28,7 @@ jest.mock("expo-router", () => require("./fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactNavigation);
 
 const KEY = "platformkit.session";
-const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalogDoc: unknown = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const saved = {
   version: 2,
   baseURL: "https://acme.test",

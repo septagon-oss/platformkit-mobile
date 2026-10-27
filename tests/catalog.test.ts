@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { unresolved } from "./fakes/unresolved";
 import {
   check,
   lookupLatest,
@@ -22,7 +23,13 @@ import {
 } from "../src/core/catalog";
 
 const fixture = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    unresolved(
+      JSON.parse(
+        readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"),
+      ),
+    ),
+  );
 
 test("the golden catalog parses", () => {
   const c = parseCatalog(fixture());
@@ -260,7 +267,7 @@ test("the shell version is a whole number the screens may depend on", () => {
 // The commit testdata/catalog.source.json records. It is written here as a literal on
 // purpose: a re-pin should be a diff somebody reads, and a fixture that moved under a
 // test that only ever re-read it would report agreement about bytes nobody fetched.
-const PINNED = "5f993d8ca10ae3f15de18a30547ae8ee369a3222";
+const PINNED = "d2f02143692090fb37b029d48f5f681508bf6b08";
 
 const PIN_SHORT = PINNED.slice(0, 8);
 

@@ -38,9 +38,12 @@ import {
   values,
 } from "../src/core/derive";
 import { feedback } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  );
 
 /** One entry of the served golden, as the author described it, plus what the parse said. */
 function served(mutate: (entry: Record<string, unknown>) => void): {
@@ -419,7 +422,7 @@ const hintsRecord = () =>
 
 /** A field with its reading decisions taken away: the shape the pinned document gives it. */
 const unread = (f: Field): Omit<Field, "hints"> => {
-  const { hints: _reading, ...rest } = f;
+  const { hints: _reading, policy: _policy, ...rest } = f;
   return rest;
 };
 

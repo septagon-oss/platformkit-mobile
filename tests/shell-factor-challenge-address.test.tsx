@@ -10,6 +10,7 @@ import { readFileSync } from "node:fs";
 import React from "react";
 import { FACTOR_REQUIRED_DETAIL } from "../src/core/signInOutcome";
 import { Shell, useShell, type ShellValue } from "../src/shell";
+import { unresolved } from "./fakes/unresolved";
 
 const mockSaved = new Map<string, string>();
 jest.mock("expo-secure-store", () => ({
@@ -19,7 +20,7 @@ jest.mock("expo-secure-store", () => ({
   },
 }));
 
-const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalogDoc: unknown = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const savedRecord = () =>
   JSON.parse(mockSaved.get("platformkit.session") ?? "{}") as Record<string, unknown>;
 

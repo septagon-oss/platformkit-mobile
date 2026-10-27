@@ -50,6 +50,7 @@ import {
 
 import { doors, offers, type Entry } from "../src/core/catalog";
 import { commandPath, verbRefusal, writePath } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
 /** The words a sheet hands `problems`: a refusal is a line of the copy table, not a string written here. */
 const kit = deriveCopy("en").kit;
@@ -58,7 +59,9 @@ const kit = deriveCopy("en").kit;
 process.env.TZ = "UTC";
 
 const note = parseCatalog(
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  ),
 ).resources[0]!;
 const row = {
   id: "1",

@@ -6,6 +6,7 @@ import React from "react";
 import { Text } from "react-native";
 import { Shell, useShell, type ShellValue } from "../src/shell";
 import type { SignInStep } from "../src/effects/api";
+import { unresolved } from "./fakes/unresolved";
 
 // The secure store, in memory: what a saved sign-in is restored from and
 // written to. The factory only closes over it; nothing reads it until a test
@@ -19,7 +20,7 @@ jest.mock("expo-secure-store", () => ({
 }));
 
 const KEY = "platformkit.session";
-const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalogDoc: unknown = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const saved = {
   version: 2,
   baseURL: "https://saved.test",

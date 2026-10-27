@@ -12,6 +12,7 @@ import { ResourceList } from "../../src/screens/ResourceList";
 import { ThemeProvider } from "../../src/ui/theme";
 import { reset } from "../fakes/router";
 import { fakeApi, shell, shellValue, type FakeApi } from "../fakes/shell";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock(
   "expo-router",
@@ -30,7 +31,7 @@ const task = { id: "71c2e9d4-0b3a-4f6e-8d25-c4a1b7e3f950", title: "Inspect the e
 
 /** served mounts the directory and lets the note's rows name their assignee in a cell. */
 function served(): { readonly entry: Entry } {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   doc.resources[0].fields.push({
     name: "assigneeId",
     type: "uuid",

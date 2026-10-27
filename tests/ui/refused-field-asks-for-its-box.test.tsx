@@ -17,6 +17,7 @@ import { formSections } from "../../src/core/derive";
 import { ResourceForm } from "../../src/ui/organisms/ResourceForm";
 import { ThemeProvider } from "../../src/ui/theme";
 import { feedback } from "../fakes/presentation";
+import { unresolved } from "../fakes/unresolved";
 
 /** Every box the stub was asked to focus, in the order it was asked. */
 const focused: string[] = [];
@@ -59,7 +60,7 @@ jest.mock("../../src/ui/atoms/TextField", () => {
   };
 });
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const blocks = formSections(note, undefined, true, feedback.copy.kit.overview);
 const none = () => undefined;

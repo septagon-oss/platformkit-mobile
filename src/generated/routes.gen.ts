@@ -2002,6 +2002,24 @@ const routes = [
   },
   {
     method: "GET",
+    pattern: new RegExp("^/api/v1/public/subject/bundles/[^/]+$"),
+    statuses: [200],
+    json: false,
+    multipart: false,
+    holder: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.subjectExportBundle({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.subjectExportBundle<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
     pattern: new RegExp("^/api/v1/scim/group-mappings$"),
     statuses: [200],
     json: false,
@@ -2069,6 +2087,114 @@ const routes = [
         throwOnError: true,
         ...(signal === undefined ? {} : { signal }),
       } as unknown as Parameters<typeof sdk.siteSettingsSave<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/subject/erasures$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    holder: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.subjectEraseRequest({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.subjectEraseRequest<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/subject/exports$"),
+    statuses: [202],
+    json: true,
+    multipart: false,
+    holder: true,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.subjectExportRequestMine({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.subjectExportRequestMine<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/subject/exports/for$"),
+    statuses: [202],
+    json: true,
+    multipart: false,
+    holder: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.subjectExportRequestFor({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.subjectExportRequestFor<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/subject/exports/for/[^/]+/link$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    holder: false,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.subjectExportLinkFor({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.subjectExportLinkFor<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "GET",
+    pattern: new RegExp("^/api/v1/subject/exports/[^/]+$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    holder: true,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.subjectExportReadMine({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.subjectExportReadMine<true>>[0]);
+      return result;
+    },
+  },
+  {
+    method: "POST",
+    pattern: new RegExp("^/api/v1/subject/exports/[^/]+/link$"),
+    statuses: [200],
+    json: true,
+    multipart: false,
+    holder: true,
+    run: async (client: Client, url: string, body?: unknown, signal?: AbortSignal) => {
+      const result = await sdk.subjectExportLinkMine({
+        client,
+        url,
+        ...(body === undefined ? {} : { body }),
+        throwOnError: true,
+        ...(signal === undefined ? {} : { signal }),
+      } as unknown as Parameters<typeof sdk.subjectExportLinkMine<true>>[0]);
       return result;
     },
   },

@@ -234,19 +234,27 @@ export function deriveCatalogList(input: CatalogListInput, p: Presentation) {
       value: option.value,
       enabled: true,
     }));
+    // The kit's order group must be able to put the list back to the order it reads by
+    // default, which the wire spells "". A policy whose declared orders name no such row
+    // therefore offers no order group here rather than one a person could enter but never
+    // leave: the list stays in the order the server reads it by, which is the answer
+    // `list.defaultSort` would have named (README Limits).
+    const orderGroup = sortChoices.some((c) => c.value === "")
+      ? {
+          id: "sort",
+          label: p.copy.kit.sort,
+          choices: sortChoices,
+          selectedId: sortChoices.find((c) => c.value === input.order.sort)?.id ?? "missing",
+          required: true,
+        }
+      : undefined;
     const result = v.take(
       deriveDataList(
         {
           content,
           order: input.order,
           filters,
-          sort: {
-            id: "sort",
-            label: p.copy.kit.sort,
-            choices: sortChoices,
-            selectedId: sortChoices.find((c) => c.value === input.order.sort)?.id ?? "missing",
-            required: true,
-          },
+          ...(orderGroup === undefined ? {} : { sort: orderGroup }),
           views: [],
           viewDirty: false,
           selection: "none",

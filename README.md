@@ -932,6 +932,73 @@ and the English article rule chooses its article from a label's first letter rat
 meaning, so a field labelled `URL` is asked for as "Enter an uRL." and one labelled `Hour`
 as "Enter a hour.".
 
+### The server's resolved policy
+
+A catalogue entry may carry `resolved`, the presentation policy the server settled for the
+request's language. `readPolicy` (`src/core/catalogPolicy.ts`) accepts a block only whole:
+a `policyVersion` no newer than `SUPPORTED_POLICY_VERSION`, every member the readers use
+present and typed by the generated schema, and every field *name* the block states a field
+of the entry — its title candidates, its pill, its summary line, its picture and its summary
+list, every part of its layout, its sorts and its filters — with every field of the entry
+described in return. The empty name is skipped: the kernel prints `""` for the member it
+left unset on purpose, which is an answer rather than a pointer. An absent block is an older
+server and says nothing; a newer, malformed or inconsistent one is named once through the
+catalogue's `notice` and the *entry* is then drawn exactly as before, never half by each
+rule. Under a supported block `src/core/derivePolicy.ts` answers for `noun`, `nounPhrase`,
+`fieldLabel`, `enumLabel`, `enumTone`, the missing and yes/no words of `display`,
+`label`/`primary`/`rowPrimary` (candidates, then the identifier, then the empty title),
+`listColumns`, `onList` and `onRecord`, `formControls`' order and the order `formSections`
+draws inside a block (the block's own, not this file's rank), `sortFields`/`sortOptions`,
+`statusField`, `listPreview` and `finishedValues`. Where a list-membership question has two
+answers in one block, the layout list wins: `layout.columns`/`create`/`update` say what that
+screen holds, and `fields[].onList`/`onRecord` answer it for the fields no list names. An empty `titles.preview` or `titles.status`
+is the server saying no summary line and no pill, so the record draws neither rather than
+asking this file's heuristic for a text field or an enum to put there. A sort sheet under a
+block is the block's declaration — its queries, in its order, under the words it resolved —
+with the phone's "Newest first" and "Oldest first" said in place of a declared order on one
+of the two stamps. Instants and relative time stay the phone's own device formatting.
+A refusal's `violations` name the form's fields; `errors` is read only when they name none.
+`tests/parity` holds the kernel's reviewed cases byte for byte, `npm run check:parity` proves
+them against `parity.source.json`, and the phone's models are held to each.
+
+**Limits.** Not yet readers: `commands[]` confirmation copy, `deck`, `list.filters` (its
+options and kinds; a block naming a filter's field is still checked against the entry),
+`layout.sections`/`overview`/`information` (a form still groups by the legacy `sections`
+hint, and the record's blocks by it), `summary`, `titles.summary` (the row's cells still
+follow `summaryFields`), `reading.precision`, `writeControls`' extra fields,
+`identity.icon`/`group`/`description`, `titles.cover`/`thumbnail` (they stay on today's
+derivation under a supported block), `fields[].editable` (`layout.create`/`update` already
+own who is asked and in what order, so a second answer would only be able to disagree) and
+`list.defaultSort` (the phone keeps its own newest-first default). Because `defaultSort` is
+unread, a block whose declared orders name none the phone can put back to the default (the
+wire's `""`) offers no order group at all: the list stays in the server's own order rather
+than opening a sheet a person cannot leave. A member the server leaves unset is printed by
+saying nothing, so the pin names the kernel commit that prints an unset `resolved` member
+absent; the strict `appResources` operation then takes the golden with its resolved blocks
+in. `readPolicy` still admits a `null` for `identity.group`, `reference`, `reading.money` and
+`reading.time`, because a server older than that commit writes `null` for the same absence and the
+entry keeps the policy it was given either way. The four kernel copies this repository holds name
+two commits of it: the golden, the HTTP document and the parity fixtures at that commit, and
+`testdata/catalog.choices.json` at the kernel's later re-print of that document (`087b984b`), whose
+copy prints a command's unset `confirmation` by saying nothing — the copy this kit held before was
+older than that and the generated read refused it. Two members
+(`resolved.fields[].figure` and `reading.precision`) are still printed `null` there, and the
+`ResolvedReading.precision` the document generates is nullable while `figure` is unknown to it, so
+neither costs a read.
+The section has a second reader with a different fallback: `src/core/choice.ts` reads each field's
+finite choice out of the same block field by field, so a block this file refuses whole still answers
+the choice questions it states on its own. One reader of the section, answering both questions behind
+one fallback, is the open question.
+
+**Reused** — `parseCatalog`'s `notice` fallback, `View<>`, the generated `zResolved*` schemas,
+`verifySource`'s source-record idiom, `fieldLabel`, `enumLabel`, `label`, `sortOptions` and
+`formControls` as the readers' callers, and `problem()` in `src/effects/api.ts`. **Added** —
+`catalogPolicy.ts`, `derivePolicy.ts`, `scripts/parity.ts` and `tests/parity`, because nothing
+read `resolved`, nothing held Go's canonical-JSON hash, and the kernel's cases live in another
+repository. **Made reusable** — `readPolicy` and the `Policy`/`PolicyField` types for the
+remaining readers listed above, `tests/fakes/policy.ts` and `parityEntry` for any test that
+needs a supported entry.
+
 ### How a finite choice is drawn
 
 A field with a declared `ChoiceSet` is drawn the way the server says, not the way the phone
@@ -963,13 +1030,10 @@ for any surface that lets a person hold several answers; `ChoiceSurfaceProps` (`
 `testdata/catalog.choices.json`, the first served capture in this kit that carries a resolved
 choice at all.
 
-**Limits** — the HTTP document stays pinned where it was: at the commit that merged the kernel's
-choice work, `apps/platformkit/testdata/openapi.json` declares thirteen `Resolved*` pointer members
-required and non-nullable while the served catalogue at the same commit prints `null` for them in
-131 places, so regenerating `src/generated` there would make the generated strict read refuse a
-real server's answer — which `tests/catalog-golden-contract.test.ts` reports the moment it is
-tried. The reading is therefore hand-declared here, exactly as the `presentation` hints are, and
-moves to the generated types when the kernel marks those members nullable. A `swatch` is drawn as
+**Limits** — the reading is hand-declared here, exactly as the `presentation` hints are: `resolved`
+enters the catalogue schema as `unknown` because it is presentation, and the two members these
+surfaces ask for beyond the generated `ResolvedField` — `choice` and `figure` — are named in
+`src/core/choice.ts`, not in `src/generated`. A `swatch` is drawn as
 a chip whose artwork is the answer's declared colour, because that is all the kernel's fourth word
 asks beyond chips; a picture or a file answer is read as no artwork and says so. The figure's own
 marks are not re-stroked when an answer is chosen — the chosen state is carried by the answer
@@ -1644,7 +1708,7 @@ locally either way.
 ## Verify a change
 
 The repository CI runs `npm run check` on pull requests and main pushes.
-`npm run check` runs eleven gates in order, and stops at the first that fails:
+`npm run check` runs twelve gates in order, and stops at the first that fails:
 `check:api` (offline generated source comparison),
 `check:sdk` (`EXPO_OFFLINE=1 expo install --check`: every installed native
 package against the ranges the pinned `expo` bundles, read from
@@ -1681,7 +1745,10 @@ review-named files or of files no runner reaches — see _Which tests run where_
 below), `check:publish` (the manifest names a package the registry can hold and the
 changelog carries the entry this version's release is documented by) and
 `check:source` (the manifest and lockfile install from the
-registry alone). [fingerprint.json](fingerprint.json) is the hash of everything
+registry alone) and `check:parity` (every file under `tests/parity` hashes to the byte the kernel commit
+named in its `parity.source.json` wrote, and each fixture's own two hashes are the ones its `input` and
+`expected` members compute to under the kernel's canonical-JSON rule — see _The server's resolved policy_).
+[fingerprint.json](fingerprint.json) is the hash of everything
 a binary is built from: the app configuration, the native modules in the
 lockfile and their config plugins, the Android recipe, the bundler
 configuration and the design export. When a change moves it, run

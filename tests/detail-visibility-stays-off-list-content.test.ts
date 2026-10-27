@@ -5,12 +5,13 @@ import { parseCatalog, type FieldVisibility } from "../src/core/catalog";
 import { deriveCatalogList } from "../src/core/catalogList";
 import { noOrder, recordHeader, recordInformation } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const paragraph = "Read the inspection instructions on the record page.";
 
 function listAndRecord(visibility: FieldVisibility, hints: Record<string, unknown>) {
-  const document = JSON.parse(
-    readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8"),
+  const document = unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8")),
   );
   const resource = document.resources[0];
   const body = resource.fields.find((field: { name: string }) => field.name === "body");

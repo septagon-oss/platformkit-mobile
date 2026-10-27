@@ -13,10 +13,13 @@ import test from "node:test";
 import { parseCatalog, type Entry } from "../src/core/catalog";
 import { listCells, listRow } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const untitled = presentation.copy.kit.untitled;
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8")),
+  );
 const hinted = () =>
   JSON.parse(readFileSync(new URL("../testdata/catalog.hints.json", import.meta.url), "utf8"));
 

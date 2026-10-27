@@ -28,12 +28,15 @@ import {
   type Row,
 } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const untitled = presentation.copy.kit.untitled;
 const secret = "Integration-only identity";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  );
 
 /** noteWith declares one field's hint and any entry hint, and answers the entry the phone reads. */
 function noteWith(

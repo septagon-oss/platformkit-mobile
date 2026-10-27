@@ -7,8 +7,9 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog } from "../src/core/catalog";
 import { address, samePerson, who } from "../src/core/reentry";
+import { unresolved } from "./fakes/unresolved";
 
-const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+const catalog = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const note = catalog.resources.find((r) => r.entity === "note")!;
 const setting = catalog.resources.find((r) => r.entity === "setting")!;
 

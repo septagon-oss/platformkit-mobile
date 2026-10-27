@@ -14,6 +14,9 @@ import type { SavedDeclaration } from "./saved";
 import { issuePath } from "./responses";
 import { readDeck, type Deck } from "./catalogDeck";
 import { applyChoices, type FieldChoice } from "./choice";
+import { readPolicy, type Policy, type PolicyField } from "./catalogPolicy";
+
+export { SUPPORTED_POLICY_VERSION, type Policy, type PolicyField } from "./catalogPolicy";
 
 // Zod retains explicitly undefined optional properties on in-memory inputs.
 // Required wire members remain required; JSON itself never contains undefined.
@@ -52,6 +55,8 @@ export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentatio
   readonly enum?: readonly string[];
   readonly keys?: readonly MapKey[] | null;
   readonly hints?: FieldHints;
+  /** How the server resolved this field; present exactly when its entry carries `resolved`. */
+  readonly policy?: PolicyField;
   /**
    * choice is the field's finite choice as the server resolved it (`./choice`): the surface that
    * draws it, its answers in order, its cardinality, maximum and empty policy. Absent — which is
@@ -60,7 +65,7 @@ export type Field = View<Omit<WireField, "type" | "elem" | "enum" | "presentatio
   readonly choice?: FieldChoice;
 };
 
-export type Command = View<Omit<WireCommand, "fields" | "presentation">> & {
+export type Command = View<Omit<WireCommand, "fields" | "presentation" | "output">> & {
   readonly fields: readonly Field[];
   readonly hints?: CommandHints;
   /**
@@ -98,7 +103,10 @@ export interface RendererRef {
 }
 
 export type Entry = View<
-  Omit<WireEntry, "fields" | "commands" | "immutable" | "singleton" | "operations" | "presentation">
+  Omit<
+    WireEntry,
+    "fields" | "commands" | "immutable" | "singleton" | "operations" | "presentation" | "resolved"
+  >
 > & {
   readonly fields: readonly Field[];
   readonly commands: readonly Command[];
@@ -112,6 +120,8 @@ export type Entry = View<
   // so that a malformed name costs a pack and not a screen.
   readonly renderer?: RendererRef;
   readonly hints?: EntryHints;
+  /** The server's resolved policy, present only when this build supports the block. */
+  readonly resolved?: Policy;
 };
 
 /**
@@ -335,6 +345,8 @@ const looseCommand = zCommand.extend({
   // `unknown` and commandBindings below decides its shape: a mistyped binding may cost the one
   // argument it names, never the entry, the same way `renderer` and `presentation` are read.
   bindings: z.unknown().optional(),
+  // The phone reads no command result, so the declaration is not carried.
+  output: z.unknown().optional(),
 });
 
 const catalogSchema = zCatalog.extend({
@@ -925,7 +937,17 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
   // them: a verb no command of this entry answers is no hint at all, and the resolution happens
   // here, once, rather than at every surface that offers the verb.
   const commandsRead = (commands ?? []).map(
-    ({ fields: arguments_, path, presentation: commandHint, bindings, ...command }, i) => {
+    (
+      {
+        fields: arguments_,
+        path,
+        presentation: commandHint,
+        bindings,
+        output: _output,
+        ...command
+      },
+      i,
+    ) => {
       const hint = hintCommand(commandHint, `${at}.commands[${i}].presentation`, notice);
       const bound = commandBindings(
         bindings,
@@ -944,12 +966,22 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       };
     },
   );
+  const policy = readPolicy(
+    resolved,
+    `${at}.resolved`,
+    (fields ?? []).map((f) => f.name),
+    notice,
+  );
+  const described = policy?.fields ?? [];
   const fieldsRead = applyChoices(
     (fields ?? []).map((f, i) => field(f, `${at}.fields[${i}]`, blockKeys, notice)),
     resolved,
     `${at}.resolved`,
     notice,
-  );
+  ).map((read) => {
+    const answer = described.find((p) => p.name === read.name);
+    return answer === undefined ? read : { ...read, policy: answer };
+  });
   const hints = hintEntry(
     presentation,
     `${at}.presentation`,
@@ -966,6 +998,7 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
       ? {}
       : { writePath: absolute(v.write_path, `${at}.write_path`) }),
     fields: fieldsRead,
+    ...(policy === undefined ? {} : { resolved: policy }),
     ...(hints === undefined ? {} : { hints }),
     immutable: immutable ?? [],
     // A nil operation set prints as null and is the absent set: kit/rest reads

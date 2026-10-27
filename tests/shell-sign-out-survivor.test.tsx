@@ -18,6 +18,7 @@ import { SignIn } from "../src/screens/SignIn";
 import { kitEnglish } from "../src/core/kitCopy";
 import { reset } from "./fakes/router";
 import { issuedToken, issuedTokenResponse, loginIdentity } from "./fakes/wire";
+import { unresolved } from "./fakes/unresolved";
 
 jest.mock("expo-router", () => require("./fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("./fakes/router").reactNavigation);
@@ -33,7 +34,7 @@ jest.mock("expo-secure-store", () => ({
   },
 }));
 
-const catalogDoc: unknown = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const catalogDoc: unknown = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 const sessionCookie = "pk=the-sign-in-that-minted-it";
 const savedKey = {
   version: 2,

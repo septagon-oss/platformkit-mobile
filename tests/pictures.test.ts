@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
+import { unresolved } from "./fakes/unresolved";
 import { parseCatalog } from "../src/core/catalog";
 import {
   avatar,
@@ -22,7 +23,7 @@ import { feedback } from "./fakes/presentation";
 const FILE = "0d69a227-b007-43c1-865f-60f6c3b25a61";
 const OTHER = "2b146a3d-2cc4-4a6b-b008-227484fb602e";
 const source = "/api/v1/file/files/{id}/content";
-const golden = () => JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+const golden = () => unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
 function pictured() {
   const doc = golden();
   doc.pictures = { source, widths: [320, 640, 1280] };

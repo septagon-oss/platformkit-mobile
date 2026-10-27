@@ -25,9 +25,12 @@ import {
   type Order,
 } from "../src/core/derive";
 import { presentation } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8")),
+  );
 
 /** The served golden's note entry with the entry-level hints this case is about. */
 function plainEntry(hints: Record<string, unknown> = {}): Entry {

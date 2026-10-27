@@ -11,6 +11,7 @@ import { nameKey, type Names, type Pointer } from "../../src/core/derive";
 import { ApiError } from "../../src/effects/api";
 import { useRecordNames, useRecordPeople } from "../../src/screens/useReferenceNames";
 import { fakeApi, shell, shellValue, type FakeApi } from "../fakes/shell";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock("../../src/shell", () => ({ useShell: () => require("../fakes/shell").shell.value }));
 
@@ -23,7 +24,7 @@ const at = (id: string) => nameKey("user/user", id);
  * declared as a pointer at them — the shape the reference kernel serves.
  */
 function served(): { readonly catalog: Catalog; readonly user: Entry } {
-  const doc = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+  const doc = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
   doc.resources[0].fields.push({
     name: "assigneeId",
     type: "uuid",

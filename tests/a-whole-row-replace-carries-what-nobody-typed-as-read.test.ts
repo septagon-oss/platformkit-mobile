@@ -10,11 +10,12 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog, type Entry } from "../src/core/catalog";
 import { formControls, values, writeControls } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
 /** note is the served catalogue's first resource, which already freezes `status`. */
 function noteEntry(mutate: (resource: Record<string, unknown>) => void = () => undefined): Entry {
-  const doc = JSON.parse(
-    readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"),
+  const doc = unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
   );
   mutate(doc.resources[0]);
   return parseCatalog(doc).resources[0]!;

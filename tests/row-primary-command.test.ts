@@ -7,9 +7,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog, type Entry } from "../src/core/catalog";
+import { unresolved } from "./fakes/unresolved";
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  );
 
 /** The golden's first entry, as its author described it, plus what the parse said about that. */
 function served(mutate: (entry: Record<string, unknown>) => void): {

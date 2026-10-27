@@ -23,6 +23,7 @@ import {
   type Row,
 } from "../src/core/derive";
 import { feedback } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 process.env.TZ = "UTC";
 
@@ -172,7 +173,10 @@ test("a field that names no block lands in the overview, after the declared ones
 });
 
 test("an un-hinted entry gets a title, no pill, and one flat overview", () => {
-  const parsed = parseCatalog(bytes("catalog.json")).resources[0]!;
+  // The phone's own derivation, so the entry is served without a resolved policy: the
+  // served block names no summary line for this resource, and where it speaks the
+  // record draws what it names (`a-served-catalogue-that-names-no-summary-line-draws-none`).
+  const parsed = parseCatalog(unresolved(bytes("catalog.json"))).resources[0]!;
   const row = {
     id: "1",
     title: "Buy milk",

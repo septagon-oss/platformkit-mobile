@@ -14,6 +14,7 @@ import { Gallery } from "../../src/ui/gallery";
 import { ResourceDetail } from "../../src/ui/organisms/ResourceDetail";
 import { ResourceList } from "../../src/ui/organisms/ResourceList";
 import { ListScreen } from "../../src/ui/templates/ListScreen";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock("expo-haptics", () => ({
   notificationAsync: jest.fn(async () => undefined),
@@ -52,7 +53,7 @@ jest.mock(
 // test of a suite that mounts one pays that organism's first mount inside its own
 // five seconds, which is machine speed and not what the test asserts.
 const warmEntry = parseCatalog(
-  JSON.parse(readFileSync("testdata/catalog.json", "utf8")),
+  unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))),
 ).resources.find((r) => r.entity === "note")!;
 const warmRow = { id: "warm", title: "Warm", status: "open", rank: 1, pinned: false, tags: [] };
 const none = () => undefined;

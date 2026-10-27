@@ -8,8 +8,11 @@ import { parseCatalog } from "../../src/core/catalog";
 import { createApi, type Api } from "../../src/effects/api";
 import type { Operations } from "../../src/generated/operations.gen";
 import type { ShellValue } from "../../src/shell";
+import { unresolved } from "./unresolved";
 
-export const catalog = parseCatalog(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
+export const catalog = parseCatalog(
+  unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))),
+);
 export const note = catalog.resources.find((r) => r.entity === "note")!;
 export const setting = catalog.resources.find((r) => r.entity === "setting")!;
 

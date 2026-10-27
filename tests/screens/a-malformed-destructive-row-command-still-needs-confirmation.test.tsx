@@ -10,6 +10,7 @@ import { useRowCommand } from "../../src/screens/useCommand";
 import { confirm } from "../../src/ui/chooser";
 import { feedback } from "../fakes/presentation";
 import { fakeApi, shell, shellValue } from "../fakes/shell";
+import { unresolved } from "../fakes/unresolved";
 
 jest.mock("expo-router", () => require("../fakes/router").expoRouter);
 jest.mock("expo-router/react-navigation", () => require("../fakes/router").reactNavigation);
@@ -24,7 +25,7 @@ afterEach(() => {
 test.each([null, 0, "false"])(
   "a destructive declaration of %p never becomes an immediate row write",
   async (destructive) => {
-    const document = JSON.parse(readFileSync("testdata/catalog.json", "utf8"));
+    const document = unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8")));
     document.resources[0].presentation = { primaryCommand: "retire" };
     document.resources[0].commands = [
       {

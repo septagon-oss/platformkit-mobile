@@ -12,12 +12,15 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog, type Command } from "../src/core/catalog";
 import { commandTitle, commandWording, copyForLocale } from "../src/core/derive";
+import { unresolved } from "./fakes/unresolved";
 
 const english = copyForLocale("en");
 const portuguese = copyForLocale("pt-PT");
 
 const golden = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url).pathname, "utf8")),
+  );
 
 const served_verbs: Record<string, { summary: string; description: string }> = {
   archive: {

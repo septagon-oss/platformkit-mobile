@@ -32,6 +32,21 @@ import type { DataCell } from "./collections";
 import type { Status } from "./shared";
 import { deckCanRefresh, deckCanRewind, deckChoices, reviewDeck, type DeckState } from "./deck";
 import { deckDirections, type DeckDirection } from "./catalogDeck";
+import {
+  policyColumns,
+  policyEmptyTitle,
+  policyForm,
+  policyNoun,
+  policyOption,
+  policyPreview,
+  policyReading,
+  policySortFields,
+  policyStatus,
+  policyTitleFields,
+  policyOnList,
+  policyOnRecord,
+  policySorts,
+} from "./derivePolicy";
 import { deriveMeter } from "./progress";
 import type { PendingWrite } from "./outbox";
 import {
@@ -129,10 +144,12 @@ export interface Noun {
 }
 
 export function noun(e: Entry): Noun {
-  return {
-    singular: e.hints?.singular ?? humanize(e.entity),
-    plural: e.hints?.plural ?? humanize(plural(e.entity)),
-  };
+  return (
+    policyNoun(e) ?? {
+      singular: e.hints?.singular ?? humanize(e.entity),
+      plural: e.hints?.plural ?? humanize(plural(e.entity)),
+    }
+  );
 }
 
 /**
@@ -147,6 +164,7 @@ export function noun(e: Entry): Noun {
  */
 export function nounPhrase(e: Entry): Noun {
   const named = noun(e);
+  if (e.resolved) return named;
   return {
     singular: e.hints?.singular ?? named.singular.toLowerCase(),
     plural: e.hints?.plural ?? named.plural.toLowerCase(),
@@ -310,20 +328,21 @@ export function display(f: Field, v: unknown, format: Formatting, names?: Names)
   if (f.type === "picture") return "";
   const person = personValue(f, v, format, names);
   if (person) return person.description || "—";
+  const reading = policyReading(f);
   if (f.type === "bool")
     return v === true
-      ? format.copy.value.yes
+      ? (reading?.true ?? format.copy.value.yes)
       : v === false
-        ? format.copy.value.no
-        : format.copy.value.notSet;
+        ? (reading?.false ?? format.copy.value.no)
+        : (reading?.missing ?? format.copy.value.notSet);
   if (f.type === "time") {
     const at = timeValue(v);
-    return at ? presentedInstant(at, format).shown : text(v) || "—";
+    return at ? presentedInstant(at, format).shown : text(v) || (reading?.missing ?? "—");
   }
   if ((f.type === "int" || f.type === "float") && typeof v === "number" && Number.isFinite(v))
     return new Intl.NumberFormat(format.locale, { maximumSignificantDigits: 21 }).format(v);
   const out = text(v);
-  if (!out) return "—";
+  if (!out) return reading?.missing ?? "—";
   // A value that points at another record is never read back as the identifier
   // stored for it: it is the other record's name, or the one word saying there is
   // one. `names` is what this screen resolved; the word is what it could not, and
@@ -349,6 +368,16 @@ const nameLike: readonly string[] = ["title", "name", "displayName"];
  * author's slip is not worth this app.
  */
 const neverShown = (f: Field): boolean => f.hints?.visibility === "hidden";
+
+/**
+ * offRecord is the field the server kept off its own record (`fields[].onRecord:
+ * false`). It is `hidden`'s declared cousin, one screen narrower: the value stays in
+ * the schema and the write, and no block of the record draws it. A pointer the same
+ * block names — this record's title, its pill or its summary line — is the sharper
+ * instruction and still reads the field, because naming a fact at the top of a record
+ * is drawing it there, not drawing it twice.
+ */
+const offRecord = (f: Field): boolean => policyOnRecord(f) === false;
 
 /**
  * namedBy is the chain that decides what a record is called, spelled once and
@@ -379,6 +408,8 @@ function namedBy(e: Entry, fields: readonly Field[]): Field | undefined {
  * below) instead of quoting an identifier nobody chose to look at.
  */
 export function primary(e: Entry): Field | undefined {
+  const titled = policyTitleFields(e, "record");
+  if (titled) return titled[0];
   return namedBy(
     e,
     e.fields.filter((f) => !neverShown(f) && f.type !== "picture"),
@@ -401,6 +432,8 @@ export function label(
   where: "record" | "row" = "record",
   names?: Names,
 ): string {
+  const titled = policyTitleFields(e, where);
+  if (titled) return policyTitle(e, titled, row, names) || policyEmptyTitle(e)!;
   const at = where === "record" ? primary(e) : rowPrimary(e);
   // A record called by a pointer is called by the name of what it points at, not
   // by the identifier stored for it; with no name resolved it is untitled rather
@@ -415,12 +448,22 @@ export function label(
   return held || untitled(noun(e).singular);
 }
 
+/** policyTitle is the first candidate the row holds words for, else its identifier, else nothing. */
+function policyTitle(e: Entry, candidates: readonly Field[], row: Row, names?: Names): string {
+  const held = (f: Field): string =>
+    points(f)
+      ? (names?.[nameKey(pointedAt(f) ?? "", text(row[f.name]))] ?? "")
+      : text(row[f.name]).trim();
+  return candidates.map(held).find((v) => v !== "") ?? text(row.id).trim();
+}
+
 /** referencedName is the words a referenced record answers with, or "" when it answers none: `namedBy`'s chain and no other, so a person named by the document is named the one way, and an invited person with nothing in that field is nameless rather than called by an email address. */
 export const referencedName = (target: Entry, row: Row): string =>
   label(target, row, () => "", "row");
 
 /** fieldLabel is a field's own word for itself: what the author wrote, else its name read as words. */
-export const fieldLabel = (f: Field): string => f.hints?.label ?? humanize(f.name);
+export const fieldLabel = (f: Field): string =>
+  f.policy?.label ?? f.hints?.label ?? humanize(f.name);
 
 /**
  * enumLabel is one value of a closed set as a person reads it. A declared label
@@ -428,7 +471,7 @@ export const fieldLabel = (f: Field): string => f.hints?.label ?? humanize(f.nam
  * document that labels two of five values loses nothing.
  */
 export const enumLabel = (f: Field, value: string): string =>
-  f.hints?.enumLabels?.[value] ?? humanize(value);
+  policyOption(f, value)?.label ?? f.hints?.enumLabels?.[value] ?? humanize(value);
 
 /**
  * enumTone is how one value of a closed set should read: which of its values is
@@ -437,7 +480,9 @@ export const enumLabel = (f: Field, value: string): string =>
  * build ships, so no atom maps a word it cannot draw.
  */
 export const enumTone = (f: Field, value: string): HintTone =>
-  f.hints?.enumTones?.[value] ?? "neutral";
+  (policyOption(f, value)?.tone as HintTone | undefined) ??
+  f.hints?.enumTones?.[value] ??
+  "neutral";
 
 /** badgeTone is the atom's name for a hint tone: the kernel says `success`, the kit says `ok`. */
 export const badgeTone = (tone: HintTone): "ok" | "warning" | "danger" | "info" | "neutral" =>
@@ -451,12 +496,12 @@ export const badgeTone = (tone: HintTone): "ok" | "warning" | "danger" | "info" 
  * pill either. The declaration is read here and drawn by whoever draws the pill
  * (T-0323).
  */
-export const statusField = (e: Entry): Field | undefined =>
-  e.hints?.statusField === undefined
+export const statusField = (e: Entry): Field | undefined => {
+  const declared = policyStatus(e) ?? e.hints?.statusField;
+  return declared === undefined || declared === ""
     ? undefined
-    : e.fields.find(
-        (f) => f.name === e.hints?.statusField && f.type !== "picture" && !neverShown(f),
-      );
+    : e.fields.find((f) => f.name === declared && f.type !== "picture" && !neverShown(f));
+};
 
 /**
  * rowContent is a field's own answer about what a row may *say*: silence about its
@@ -485,7 +530,7 @@ const rowContent = (f: Field): boolean =>
  * id, always the row's own name — is `listColumns`'s, not a field's.
  */
 export const onList = (f: Field): boolean =>
-  rowContent(f) && (f.hints?.visibility !== undefined || f.hideList !== true);
+  policyOnList(f) ?? (rowContent(f) && (f.hints?.visibility !== undefined || f.hideList !== true));
 
 /**
  * rowFields are the fields a row is made of: what the schema puts on a list, in
@@ -503,11 +548,15 @@ const rowFields = (e: Entry): readonly Field[] =>
  * way for the same reason (`ui/resource/resource.go`: `known(onList(…))`).
  */
 export function rowPrimary(e: Entry): Field | undefined {
+  const titled = policyTitleFields(e, "row");
+  if (titled) return titled[0];
   return namedBy(e, rowFields(e));
 }
 
 /** listColumns: the field the list names rows by first, then every other field it draws; never the id. */
 export function listColumns(e: Entry): readonly Field[] {
+  const laid = policyColumns(e);
+  if (laid) return laid.filter((f) => f.name !== "id" && f.type !== "picture");
   const drawn = rowFields(e);
   const named = rowPrimary(e);
   return named === undefined ? drawn : [named, ...drawn.filter((f) => f.name !== named.name)];
@@ -586,13 +635,19 @@ export function listCells(e: Entry, limit = 2): readonly Field[] {
  * a row with nothing worth reading under its name shows nothing rather than a dash.
  */
 export function listPreview(e: Entry, where: "row" | "record" = "row"): Field | undefined {
-  const declared = e.hints?.previewField;
+  // Under a supported block the pointer is the server's answer, and its empty name is
+  // part of that answer: the kernel prints "" for an entry with nothing to summarise,
+  // so the record draws no line rather than asking this file's heuristic for a text
+  // field to put under the title. Only an entry with no block falls through to the
+  // hint and the default chain below.
+  const declared = policyPreview(e) ?? e.hints?.previewField;
+  if (e.resolved && declared === "") return undefined;
   // A rich text body is never the summary line, declared or default: a printed line under
   // a name can only print the Markdown the server stored, and that syntax is not part of
   // what a person is told (`richBody`). Such a body is read by the medium that draws it —
   // the record's own reader, where a heading is a heading — which is what keeps the
   // reader on the page for an entry that hints nothing at all.
-  if (declared !== undefined)
+  if (declared !== undefined && declared !== "")
     return printed(e.fields.find((f) => f.name === declared && rowContent(f)));
   const named = rowPrimary(e);
   const speaks = where === "row" ? onList : rowContent;
@@ -795,8 +850,12 @@ export function statusPill(e: Entry, row: Row, format: Formatting): RecordPill |
  * declared. A tone never answers it: `enumTones` says what finished wears, not what is finished,
  * and the two tables are the kernel's own orthogonal pair.
  */
-export const finishedValues = (e: Entry): readonly string[] =>
-  statusField(e)?.hints?.doneValues ?? [];
+export const finishedValues = (e: Entry): readonly string[] => {
+  const status = statusField(e);
+  return status?.policy
+    ? (status.policy.options ?? []).filter((o) => o.done).map((o) => o.value)
+    : (status?.hints?.doneValues ?? []);
+};
 
 /**
  * isFinished says whether this row's state is one the entry calls finished.
@@ -1099,6 +1158,7 @@ function shownFields(e: Entry, row: Row, keep: (f: Field) => boolean): readonly 
   return e.fields.filter(
     (f) =>
       !neverShown(f) &&
+      !offRecord(f) &&
       f.type !== "picture" &&
       !drawn.has(f.name) &&
       !informationFields.includes(f.name) &&
@@ -1164,13 +1224,19 @@ function informationHeld(e: Entry, row: Row): readonly Field[] {
   const drawn = headerDrawn(e);
   const stamps = informationFields.flatMap((name) =>
     e.fields.filter(
-      (f) => f.name === name && f.type !== "picture" && !neverShown(f) && hasValue(f, row[f.name]),
+      (f) =>
+        f.name === name &&
+        f.type !== "picture" &&
+        !neverShown(f) &&
+        !offRecord(f) &&
+        hasValue(f, row[f.name]),
     ),
   );
   const kept = e.fields.filter(
     (f) =>
       f.hints?.visibility === "detail" &&
       !neverShown(f) &&
+      !offRecord(f) &&
       f.type !== "picture" &&
       !drawn.has(f.name) &&
       !informationFields.includes(f.name) &&
@@ -1555,7 +1621,7 @@ export function formControls(
   names?: Names,
 ): readonly Control[] {
   const out: Control[] = [];
-  for (const f of e.fields) {
+  for (const f of policyForm(e, create) ?? e.fields) {
     if (f.readOnly || f.type === "picture") continue;
     // A field the author hid is plumbing: it stays in the schema, the JSON and
     // the PATCH, but not in the sheet. A *required* field is the exception —
@@ -1683,13 +1749,18 @@ export function formSections(
 ): readonly FormBlock[] {
   const controls = formControls(e, row, create, names);
   const identity = primary(e)?.name;
+  // Under a supported block the order inside a block is the server's: `layout.create`
+  // and `layout.update` already name the fields in the order they ask for them, and
+  // ranking them again here would draw an order neither client agreed on.
+  const order = (own: readonly Control[]): readonly Control[] =>
+    e.resolved === undefined ? orderControls(own, identity) : own;
   const filed = (c: Control) => c.field.hints?.section;
   const declared = e.hints?.sections ?? [];
   const blocks: FormBlock[] = declared.flatMap((section) => {
     const own = controls.filter((c) => filed(c) === section.key);
     return own.length === 0
       ? []
-      : [{ key: section.key, label: section.label, controls: orderControls(own, identity) }];
+      : [{ key: section.key, label: section.label, controls: order(own) }];
   });
   const rest = controls.filter((c) => !declared.some((s) => s.key === filed(c)));
   return rest.length === 0
@@ -1699,7 +1770,7 @@ export function formSections(
         {
           key: "",
           label: declared.length === 0 ? "" : overview,
-          controls: orderControls(rest, identity),
+          controls: order(rest),
         },
       ];
 }
@@ -2065,24 +2136,44 @@ export interface Order {
 export const noOrder: Order = { sort: "", filters: {} };
 
 /**
+ * offerable is whether a sort row may name this field at all. Three kinds never are:
+ * `bool`, `list` and `uuid` have no honest direction word — "false, then true" is
+ * nobody's order — and the two stamps are said by "Newest first" and "Oldest first"
+ * instead. A field the document calls plumbing is never offered either: a sort row
+ * *names* the field, and naming plumbing in a sheet is naming it on screen.
+ */
+const offerable = (f: Field): boolean =>
+  !neverShown(f) &&
+  !informationFields.includes(f.name) &&
+  f.type !== "bool" &&
+  f.type !== "list" &&
+  f.type !== "uuid" &&
+  f.type !== "picture";
+
+/**
+ * directionWords is the pair of order words a field type takes, ascending first: the
+ * phone's own copy, never the server's, because "low to high" is the phone's sentence
+ * about the order it performs on the value the server sent.
+ */
+const directionWords = (
+  type: Field["type"],
+  kit: Formatting["copy"]["kit"],
+): readonly [(word: string) => string, (word: string) => string] =>
+  type === "time"
+    ? [kit.sortSoon, kit.sortLate]
+    : type === "int" || type === "float"
+      ? [kit.sortLow, kit.sortHigh]
+      : [kit.sortAZ, kit.sortZA];
+
+/**
  * sortFields are the fields a list can be ordered by, in the order its sheet lists
- * them: the entry's declared `sortable`, else the field it leads rows with plus the
- * date fields it declares.
- *
- * Three kinds are never offered, declared or not. `bool`, `list` and `uuid` have no
- * honest direction word — "false, then true" is nobody's order — and the two stamps
- * are said by "Newest first" and "Oldest first" already, which are the first two
- * rows of every sheet. A field the document calls plumbing is never offered either:
- * a sort row *names* the field, and naming plumbing in a sheet is naming it on screen.
+ * them: the fields behind the orders the server declared, else the entry's declared
+ * `sortable`, else the field it leads rows with plus the date fields it declares.
+ * `sortOptions` is the sheet, and it says the two stamps in the phone's own words.
  */
 export function sortFields(e: Entry): readonly Field[] {
-  const offerable = (f: Field): boolean =>
-    !neverShown(f) &&
-    !informationFields.includes(f.name) &&
-    f.type !== "bool" &&
-    f.type !== "list" &&
-    f.type !== "uuid" &&
-    f.type !== "picture";
+  const laid = policySortFields(e);
+  if (laid) return laid.filter(offerable);
   const declared = e.hints?.sortable;
   if (declared !== undefined)
     return declared.flatMap((name) => e.fields.filter((f) => f.name === name && offerable(f)));
@@ -2092,11 +2183,17 @@ export function sortFields(e: Entry): readonly Field[] {
 }
 
 /**
- * sortOptions are the orders a list offers: newest, oldest, then each field the
- * sheet offers, once per direction. The values are the wire's and do not move — ""
- * is newest, `createdAt` oldest, a field name ascending and `-name` descending,
- * which is what `effects/api.ts` sends as `sort`. The *words* come from the copy
- * table and from the field's type: a deadline is "soonest first", a rank is "low to
+ * sortOptions are the orders a list offers. Under a supported block they are the orders
+ * the server declared, in its order, each carrying its own `query` and the words it
+ * resolved for it — with the two rows of phone chrome that say the same thing better:
+ * "Newest first" and "Oldest first", offered whenever the declaration names one of the
+ * two stamps, in place of a row that names a stamp. Nothing the server left out is
+ * invented, so a list whose block declares one order offers one order. With no block,
+ * the sheet is the phone's own: newest, oldest, then each field `sortFields` offers,
+ * once per direction. The values are the wire's and do not move — "" is newest,
+ * `createdAt` oldest, a field name ascending and `-name` descending, which is what
+ * `effects/api.ts` sends as `sort`. The *words* for the phone's own rows come from the
+ * copy table and the field's type: a deadline is "soonest first", a rank is "low to
  * high", a title is "A–Z", and none of them is said in English on a Portuguese phone.
  *
  * A closed set sorts A–Z because the kernel sorts the stored value, not the label the
@@ -2108,18 +2205,25 @@ export function sortOptions(
   format: Formatting,
 ): readonly { readonly value: string; readonly label: string }[] {
   const kit = format.copy.kit;
-  const out = [
+  const newest = [
     { value: "", label: kit.sortNewest },
     { value: "createdAt", label: kit.sortOldest },
   ];
+  const laid = policySorts(e);
+  if (laid !== undefined)
+    return [
+      ...(laid.some((s) => informationFields.includes(s.field.name)) ? newest : []),
+      ...laid
+        .filter((s) => offerable(s.field))
+        .map((s) => ({
+          value: s.query,
+          label: directionWords(s.field.type, kit)[s.desc ? 1 : 0]!(s.label),
+        })),
+    ];
+  const out = [...newest];
   for (const f of sortFields(e)) {
     const word = fieldLabel(f);
-    const pair =
-      f.type === "time"
-        ? [kit.sortSoon, kit.sortLate]
-        : f.type === "int" || f.type === "float"
-          ? [kit.sortLow, kit.sortHigh]
-          : [kit.sortAZ, kit.sortZA];
+    const pair = directionWords(f.type, kit);
     out.push({ value: f.name, label: pair[0]!(word) });
     out.push({ value: "-" + f.name, label: pair[1]!(word) });
   }
