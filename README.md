@@ -1246,6 +1246,44 @@ mechanism instead of copying it, and `src/packs/` as the place a product's pack 
 same import rule as the example pack: it reads through the shell's `Api` and never touches
 `effects/`.
 
+### A look the module composed
+
+**`src/packs/outfit.tsx`** is the outfit module's two screens — the wall of looks and one look — keyed
+`outfit/look` and passed to `Shell` beside the generated ones. The module ranks and composes; the
+phone draws what it answered. The wall shows the looks in the order the read ranked them, each named
+by the look's own name and captioned by the module's own pieces line, with the answers it was
+suggested with above them and one control below that asks for the next window; the look shows the
+flat-lay, its name, the season and style it was composed under, one line per piece with the colour
+that paints it, and the two doors — the next idea, and the person's own copy of this one. A look is
+addressed by the key the module keeps it under (its recipe plus the colours actually worn), which is
+why one look opened from the lookbook and from a suggestion is one record and two recolourings of one
+recipe are two. The window's position comes back in every answer: the next ask starts where the
+answered window ended, and a window the module ended leaves no door, not a disabled one. A body
+outside the module's shape is refused by the wire as a whole, so no look is ever drawn with a member
+missing. The questions, the pictures, the heart and the lookbook stay the kit's.
+
+**Reused** — `MasonryWall` (the two-column wall, its cells, its states and its foot control),
+`deriveMedia` and `deriveMediaHero`, `MediaHero`, `usePictures` (the composed flat-lay goes through
+the session's own picture door and the product's SVG surface), `useSaveToggle` and `SaveButton`
+untouched, `Screen`, `Stack.Screen`, `StateView`, `Text`, `Button`, `build`/`deriveState`/`readPhase`,
+`noun`, `rowAt` and `screenPath`, `sourceRef` and `expectedSourceVersion`, `refusalOf` and the copy
+table, and the `fakeApi` of `tests/fakes/shell.ts`. **Added** — the pack itself (`wire`, `read`,
+`model` and the two screens) because the module mounts no route, so no generated operation could
+carry its reads and `definePack` has no key to declare: it stays the plain `Renderers` record
+`src/pack.ts` names as the escape hatch; the wire, because nothing here validated the module's JSON
+and the shape is the module's; the `Swatch` atom, because a colour a person *reads* (a disc, named,
+never pressed) is not the fingertip-sized colour band that is part of a pressable answer, which stays
+inside `ChoiceChips` with the press it belongs to; `copy.outfit` in both languages, because a word a
+prop supplied could not be localised with the rest of the screen; and the flat-lay's frame in
+`ui/scale.ts`, because a composed reference names no stored file to probe and a screen may not guess
+an aspect from a name. **Made reusable** — `MasonryWall`'s `header` slot and `deriveMedia`'s
+`moreLabel` (a wall owns the only scroll view its page may have, and the sentence its foot prints is
+the collection's, not the organism's), `MediaHero`'s `ground` (a record's own colour, painted while
+its picture arrives), the `Swatch` atom exported with the rest of the atomic layer, and
+`tests/fakes/outfit.ts` — a fake that holds the *service's* decisions (key spelling, uppercase hex,
+the four-at-a-time window, where it ends) rather than a per-test guess — beside
+`tests/fakes/wall.tsx`, which draws every cell of the wall for any screen that counts them.
+
 ### Shared feedback
 
 **Reused** — `EmptyState`, `Notice`, `Skeleton`, `Spinner`, `Button`, `DateTimeRow`, native

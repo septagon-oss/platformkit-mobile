@@ -67,6 +67,14 @@ export const extent = {
    * the first fact is one thumb's reach below it.
    */
   cover: 300,
+  /**
+   * flatlay is the frame a composed look picture is drawn in: the flat-lay template's own authoring
+   * box, 300 wide by 340 tall. A composed reference names no stored file, so nothing can be probed
+   * for the picture's real sides and the screen states the frame it draws in instead of guessing an
+   * aspect from a name. Should the composed reference ever carry its frame, these two go away.
+   */
+  flatlay: 300,
+  flatlayHeight: 340,
   /** qr is the side an invite symbol is drawn at: scannable at arm's length, small enough to sit beside the link it stands for. */
   qr: 168,
   /** strip is one tile of a record's own photo strip: a picture you can pick out, not one you read. */

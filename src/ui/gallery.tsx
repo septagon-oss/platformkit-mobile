@@ -39,6 +39,7 @@ import { Icon, type IconName } from "./atoms/Icon";
 import { Notice } from "./atoms/Notice";
 import { Spinner } from "./atoms/Spinner";
 import { SwitchRow } from "./atoms/SwitchRow";
+import { Swatch } from "./atoms/Swatch";
 import { Text } from "./atoms/Text";
 import { TextField } from "./atoms/TextField";
 import { DetailRow } from "./molecules/DetailRow";
@@ -509,6 +510,7 @@ function Samples({
   const [words, setWords] = useState("");
   // A count the person can move while looking at it, so the roll is seen rather than described.
   const [places, setPlaces] = useState(4);
+  const t = useTheme();
   const none = () => undefined;
   return (
     <>
@@ -557,6 +559,12 @@ function Samples({
               <Icon key={n} name={n} label={n} />
             ),
           )}
+        </View>
+        <View style={s.wrap}>
+          {/* A colour the person reads rather than presses: the disc is the colour, the label is
+              which colour it is for a reader who cannot see the disc. */}
+          <Swatch colour={t.color.accentDefault} label="Accent" testID="gallery-swatch" />
+          <Swatch colour={t.color.surfaceMuted} label="Muted surface" side={t.extent.avatar} />
         </View>
       </Section>
 
