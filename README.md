@@ -1254,7 +1254,10 @@ phone draws what it answered. The wall shows the looks in the order the read ran
 by the look's own name and captioned by the module's own pieces line, with the answers it was
 suggested with above them and one control below that asks for the next window; the look shows the
 flat-lay, its name, the season and style it was composed under, one line per piece with the colour
-that paints it, and the two doors — the next idea, and the person's own copy of this one. A look is
+that paints it, and the two doors — the next idea, and the person's own copy of this one, the second
+drawn only where this build answers for a copy. A refresh that refused is a sentence above the look
+it refused, which stays on screen as the last copy this phone read, and no keep is offered against it
+while that sentence stands. A look is
 addressed by the key the module keeps it under (its recipe plus the colours actually worn), which is
 why one look opened from the lookbook and from a suggestion is one record and two recolourings of one
 recipe are two. The window's position comes back in every answer: the next ask starts where the
@@ -1266,13 +1269,16 @@ missing. The questions, the pictures, the heart and the lookbook stay the kit's.
 `deriveMedia` and `deriveMediaHero`, `MediaHero`, `usePictures` (the composed flat-lay goes through
 the session's own picture door and the product's SVG surface), `useSaveToggle` and `SaveButton`
 untouched, `Screen`, `Stack.Screen`, `StateView`, `Text`, `Button`, `build`/`deriveState`/`readPhase`,
-`noun`, `rowAt` and `screenPath`, `sourceRef` and `expectedSourceVersion`, `refusalOf` and the copy
+`noun`, `rowAt` and `screenPath`, `sourceRef` and `expectedSourceVersion` — which the pack never
+calls itself, they are `useSaveToggle`'s — `refusalOf` and the copy
 table, and the `fakeApi` of `tests/fakes/shell.ts`. **Added** — the pack itself (`wire`, `read`,
 `model` and the two screens) because the module mounts no route, so no generated operation could
 carry its reads and `definePack` has no key to declare: it stays the plain `Renderers` record
 `src/pack.ts` names as the escape hatch; the wire, because nothing here validated the module's JSON
-and the shape is the module's; the `Swatch` atom, because a colour a person *reads* (a disc, named,
-never pressed) is not the fingertip-sized colour band that is part of a pressable answer, which stays
+and the shape is the module's; the `Swatch` atom, because a colour a person *reads* (a disc, named
+where the disc is the only place that colour is said, and decoration where the word already stands
+beside it, never pressed) is not the fingertip-sized colour band that is part of a pressable answer,
+which stays
 inside `ChoiceChips` with the press it belongs to; `copy.outfit` in both languages, because a word a
 prop supplied could not be localised with the rest of the screen; and the flat-lay's frame in
 `ui/scale.ts`, because a composed reference names no stored file to probe and a screen may not guess
@@ -1280,8 +1286,10 @@ an aspect from a name. **Made reusable** — `MasonryWall`'s `header` slot and `
 `moreLabel` (a wall owns the only scroll view its page may have, and the sentence its foot prints is
 the collection's, not the organism's), `MediaHero`'s `ground` (a record's own colour, painted while
 its picture arrives), the `Swatch` atom exported with the rest of the atomic layer, and
-`tests/fakes/outfit.ts` — a fake that holds the *service's* decisions (key spelling, uppercase hex,
-the four-at-a-time window, where it ends) rather than a per-test guess — beside
+`tests/fakes/outfit.ts` — a fake that holds the *service's* decisions (the key grammar
+`of1:<recipe>:#HEX-#HEX-#HEX`, the uppercase hexes, the four-at-a-time window that rotates back to
+the front of the ranking rather than running short, and where it ends) rather than a per-test guess —
+beside
 `tests/fakes/wall.tsx`, which draws every cell of the wall for any screen that counts them.
 
 ### Shared feedback

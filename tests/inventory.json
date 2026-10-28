@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 163,
-   "cases": 526,
-   "ms": 4010086,
-   "testsMs": 59783,
+   "files": 164,
+   "cases": 530,
+   "ms": 4028969,
+   "testsMs": 59967,
    "runners": {
-    "jest": 163
+    "jest": 164
    },
    "unreachable": 0
   },
@@ -26891,36 +26891,48 @@
    "file": "tests/screens/an-idea-from-the-look-walks-the-wall-and-clears-its-own-address.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 2,
-   "rule": "\"Another idea\" on the look page leaves one instruction in the address of the wall; the wall reads it once, walks to the window after the one it holds, and clears its own address so a reload asks for what is on screen rather than for the idea someone asked for two screens ago.",
+   "cases": 4,
+   "rule": "\"Another idea\" on the look page leaves one instruction in the address of the wall; the wall reads it once, walks to the window after the one it holds, and clears its own address so a reload asks for what is on screen rather than for the idea someone asked for two screens ago. A wall that is mounted under the instruction \u2014 opened from a kept copy, with no wall behind it \u2014 takes the same step once it has a window to step from, and an instruction in no spelling the wall knows leaves the window where it was.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 19351,
+   "ms": 18999,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "the look's own door asks for one window further on and clears the address",
-    "the wall walks the window the address asked for, then holds no stale instruction"
+    "the wall walks the window the address asked for, then holds no stale instruction",
+    "a wall mounted under the instruction reads one window, then takes the step it was asked for",
+    "an instruction in no spelling the wall knows leaves the window where it is"
    ],
    "tests": [
     {
      "title": "the look's own door asks for one window further on and clears the address",
-     "ms": 25,
+     "ms": 26,
      "measured": false
     },
     {
      "title": "the wall walks the window the address asked for, then holds no stale instruction",
-     "ms": 93,
+     "ms": 97,
+     "measured": false
+    },
+    {
+     "title": "a wall mounted under the instruction reads one window, then takes the step it was asked for",
+     "ms": 22,
+     "measured": false
+    },
+    {
+     "title": "an instruction in no spelling the wall knows leaves the window where it is",
+     "ms": 12,
      "measured": false
     }
    ],
    "loaded": 200,
-   "coveredProdLines": 2761,
+   "coveredProdLines": 2763,
    "onlyProdLines": null,
-   "testsMs": 118
+   "testsMs": 157
   },
   {
    "file": "tests/screens/an-unanswered-queue-read-offers-retry-and-reads-again.test.tsx",
@@ -28236,6 +28248,35 @@
    "testsMs": 87
   },
   {
+   "file": "tests/screens/opening-one-look-asks-for-it-once.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Arriving at a look is one read of it. The mount that has not been shown yet asks nothing and the focus that shows the screen asks once, so the transport's own record of where it was sent is the measure: a page that read the same record on mount and again on focus would double every ask a person makes of the service, and the wall already counts one ask per screen it draws.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18970,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the page asks for the record its address names, once"
+   ],
+   "tests": [
+    {
+     "title": "the page asks for the record its address names, once",
+     "ms": 78,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2635,
+   "onlyProdLines": null,
+   "testsMs": 78
+  },
+  {
    "file": "tests/screens/record-command-at-collection-address.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -28835,7 +28876,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 18862,
+   "ms": 18994,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "every piece is drawn once, in order, with the colour that paints it",
@@ -28844,7 +28885,7 @@
    "tests": [
     {
      "title": "every piece is drawn once, in order, with the colour that paints it",
-     "ms": 25,
+     "ms": 26,
      "measured": false
     },
     {
@@ -28856,7 +28897,7 @@
    "loaded": 198,
    "coveredProdLines": 2644,
    "onlyProdLines": null,
-   "testsMs": 91
+   "testsMs": 92
   },
   {
    "file": "tests/screens/the-look-page-paints-its-frame-the-look-s-own-ground.test.tsx",
@@ -28891,25 +28932,26 @@
    "file": "tests/screens/the-look-window-ends-where-the-read-ended-and-refuses-without-emptying.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 3,
-   "rule": "The window of looks moves where the read said it had got to: the next ask starts after the window that was answered, a window the module ended leaves no door to the next one, and a window that refused leaves the looks already drawn where they were.",
+   "cases": 4,
+   "rule": "The window of looks moves where the read said it had got to: the next ask starts after the window that was answered, a window the module ended leaves no door to the next one, and a window that refused leaves the looks already drawn where they were. The ranking is cut round, not off the end: a window near the end of six looks rotates back to their front, so the next ask never hands back a short page of the leftovers.",
    "ruleSource": "first comment",
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 18765,
+   "ms": 18898,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "more ideas asks for the window after the one that was answered and joins it to the wall",
     "a window the module ended offers no way on, because there is none under these answers",
+    "the window past the last whole one rotates back to the front of the ranking and leaves no door",
     "a window that refused keeps the looks already drawn and says what went wrong"
    ],
    "tests": [
     {
      "title": "more ideas asks for the window after the one that was answered and joins it to the wall",
-     "ms": 136,
+     "ms": 133,
      "measured": false
     },
     {
@@ -28918,15 +28960,20 @@
      "measured": false
     },
     {
-     "title": "a window that refused keeps the looks already drawn and says what went wrong",
+     "title": "the window past the last whole one rotates back to the front of the ranking and leaves no door",
      "ms": 63,
+     "measured": false
+    },
+    {
+     "title": "a window that refused keeps the looks already drawn and says what went wrong",
+     "ms": 69,
      "measured": false
     }
    ],
    "loaded": 198,
    "coveredProdLines": 2713,
    "onlyProdLines": null,
-   "testsMs": 212
+   "testsMs": 278
   },
   {
    "file": "tests/screens/the-looks-wall-draws-the-looks-in-the-order-the-read-ranked-them.test.tsx",

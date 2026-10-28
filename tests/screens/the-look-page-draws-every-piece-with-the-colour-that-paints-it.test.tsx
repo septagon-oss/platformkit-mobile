@@ -47,6 +47,10 @@ describe("one look", () => {
     // drawn: the design prints no "Top:" label, and the line is the module's whole sentence.
     expect(tree).toContain("#C8643F");
     expect(tree).not.toContain("Top:");
+    // The line is spoken once. The disc beside it paints the colour and carries no name of its own,
+    // so a screen reader reads one sentence per garment rather than the same sentence twice.
+    expect(screen.getAllByTestId("outfit-look-piece")).toHaveLength(lines.length);
+    for (const line of lines) expect(screen.queryAllByLabelText(line)).toHaveLength(0);
     // The answers the look was composed under, printed as the module printed them.
     expect(tree).toContain("Autumn · Minimal");
   });

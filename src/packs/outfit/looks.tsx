@@ -26,8 +26,10 @@ import { deriveWall } from "./model";
  * OutfitLooks draws the window the module is holding.
  *
  * `?idea=1` in the address is one instruction from the look page: walk on by one window and replace
- * what is shown with it. It is read once, and the address is cleared the moment it is honoured, so a
- * reload cannot ask the same question twice.
+ * what is shown with it. It is honoured once, in that one spelling, and the address is cleared only
+ * when the wall really moved — so a wall mounted under the instruction reads its first window and
+ * then takes the step, instead of losing an ask nobody answered. Any other value in the address is
+ * not a step and is left alone.
  */
 export function OutfitLooks({
   entry,
@@ -65,12 +67,14 @@ export function OutfitLooks({
     [router, entry, wall.looks],
   );
   const next = wall.next;
-  const spent = useRef("");
+  const spent = useRef(false);
   useEffect(() => {
-    const idea = params.idea ?? "";
-    if (idea === "" || spent.current === idea) return;
-    spent.current = idea;
-    next("replace");
+    // Only the instruction this phone's own door leaves, in the one spelling it leaves it in; and it
+    // is spent when the wall moved, not when it was noticed, because a wall that has answered nothing
+    // yet has no window to step from.
+    if (params.idea !== "1" || spent.current) return;
+    if (!next("replace")) return;
+    spent.current = true;
     router.replace(screenPath(entry));
   }, [params.idea, next, router, entry]);
   const options = useMemo(

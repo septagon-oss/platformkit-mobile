@@ -1,7 +1,9 @@
 // Swatch is one colour a person reads: a disc filled with the colour itself and named with the word
 // the server gave it. It answers no press — the colour is a fact about the line beside it, not an act
-// — and it carries its name even where no eye can see the disc, because "Ivory straight trousers"
-// without the colour it is painted in names one garment out of four.
+// — and it carries its name wherever the disc is the only place that colour is said, because "Ivory
+// straight trousers" without the colour it is painted in names one garment out of four. Where the
+// word is already on screen beside the disc, the caller says so by giving the disc no label, and the
+// line is spoken once.
 //
 // The hairline edge is drawn on every disc rather than on the pale ones alone: which shade is too
 // pale to hold its own shape is a question about the page underneath, and one rule drawn uniformly
@@ -14,8 +16,8 @@ import { useStyles, useTheme, type Theme } from "../theme";
 interface Props {
   /** colour is the shade as its source spells it — a data colour, not one of the page's roles. */
   readonly colour: string;
-  /** label is the colour's own word, spoken in place of the disc. */
-  readonly label: string;
+  /** label is the colour's own word, spoken in place of the disc. Left out where that word already stands beside the disc: the colour is then decoration and says nothing twice. */
+  readonly label?: string;
   /** side is the disc's diameter; the default is the small disc a line of text carries. */
   readonly side?: number;
   readonly testID?: string;
@@ -28,8 +30,7 @@ export function Swatch({ colour, label, side, testID }: Props) {
   return (
     <View
       style={[s.disc, { width: disc, height: disc, backgroundColor: colour }]}
-      accessible
-      accessibilityLabel={label}
+      {...(label === undefined ? {} : { accessible: true, accessibilityLabel: label })}
       {...testable(testID)}
     />
   );

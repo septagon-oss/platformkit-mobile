@@ -1,6 +1,8 @@
 // The window of looks moves where the read said it had got to: the next ask starts after the window
 // that was answered, a window the module ended leaves no door to the next one, and a window that
-// refused leaves the looks already drawn where they were.
+// refused leaves the looks already drawn where they were. The ranking is cut round, not off the end:
+// a window near the end of six looks rotates back to their front, so the next ask never hands back a
+// short page of the leftovers.
 
 import { beforeEach, describe, expect, test, jest } from "@jest/globals";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
@@ -53,6 +55,18 @@ describe("the window of looks", () => {
     const view = await render(<OutfitLooks entry={looksEntry} />);
     await waitFor(() => expect(JSON.stringify(view.toJSON())).toContain("Market run"));
     // Not a disabled control: the door is not drawn at all.
+    expect(screen.queryByRole("button", { name: "More ideas" })).toBeNull();
+  });
+
+  test("the window past the last whole one rotates back to the front of the ranking and leaves no door", async () => {
+    await opened();
+    fireEvent.press(screen.getByRole("button", { name: "More ideas" }));
+    await waitFor(() => expect(screen.getAllByTestId("media-cell")).toHaveLength(6));
+    // Six looks, four at a time: the cut at skip=4 is Studio lines, Market run and then the front of
+    // the ranking again, not the two that happen to be left.
+    expect(screen.getByText("Studio lines")).toBeTruthy();
+    // One cell per look the two windows name between them, and the module said this window is the
+    // last one there is, so the foot holds no control at all.
     expect(screen.queryByRole("button", { name: "More ideas" })).toBeNull();
   });
 

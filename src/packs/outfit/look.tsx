@@ -96,7 +96,9 @@ export function OutfitLook({
             <View style={s.pieces}>
               {model.value.pieces.map((piece) => (
                 <View key={piece.id} style={[k.row, s.piece]} testID="outfit-look-piece">
-                  <Swatch colour={piece.hex} label={piece.line} />
+                  {/* The disc paints the line's colour and says nothing: the sentence beside it is
+                      the module's whole line and already carries that colour's own word. */}
+                  <Swatch colour={piece.hex} />
                   <Text>{piece.line}</Text>
                 </View>
               ))}

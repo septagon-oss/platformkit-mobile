@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `e4b8262d2` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `a8a8d2b57` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 39 | 245 | 47.3 s | 76 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 307 | 1455 | 97.3 s | 2659 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 163 | 526 | 59.8 s | 4010 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 164 | 530 | 60.0 s | 4029 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 568
+* keep: 569
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 568 — 244 `tests/*.test.ts` (node), 265 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2226; cases in files no runner reaches: 35
-* isolated wall time: contract 76 s, behaviour 2659 s, composition 4010 s, journey 0 s
+* files inventoried: 569 — 244 `tests/*.test.ts` (node), 266 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2230; cases in files no runner reaches: 35
+* isolated wall time: contract 76 s, behaviour 2659 s, composition 4029 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -522,7 +522,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/activity-obsolete-page-after-refusal.test.tsx | jest | composition | 6 | 19192 | 797 | 0 | 0 of 6 | — | 0 | keep | A page requested before a refusal must not repopulate the trail after it. The current refusal stands, and only a fresh read from the start restores history and… |
 | tests/screens/activity-route-lifetime.test.tsx | jest | composition | 4 | 20215 | 349 | 0 | 0 of 4 | — | 0 | keep | Leaving this route, or replacing the session inside it, ends the enrichment in flight. A directory response that lands afterwards cannot name a row in the new … |
 | tests/screens/activity-session-denial-detail.test.tsx | jest | composition | 2 | 18947 | 148 | 0 | 0 of 2 | — | 0 | keep | A 401 on the audit read is a refused request, not an empty page: the detail withdraws the history it had shown and offers no write the refused session could no… |
-| tests/screens/an-idea-from-the-look-walks-the-wall-and-clears-its-own-address.test.tsx | jest | composition | 2 | 19351 | 118 |  | not measured | — | 0 | keep | "Another idea" on the look page leaves one instruction in the address of the wall; the wall reads it once, walks to the window after the one it holds, and clea… |
+| tests/screens/an-idea-from-the-look-walks-the-wall-and-clears-its-own-address.test.tsx | jest | composition | 4 | 18999 | 157 |  | not measured | — | 0 | keep | "Another idea" on the look page leaves one instruction in the address of the wall; the wall reads it once, walks to the window after the one it holds, and clea… |
 | tests/screens/an-unanswered-queue-read-offers-retry-and-reads-again.test.tsx | jest | composition | 2 | 53344 | 1533 |  | not measured | — | 0 | keep | A queue read nothing answers (the transport rejected, or the deadline passed with no status) is the phone's commonest failure, and it keeps the deck screen ope… |
 | tests/screens/an-unchanged-translation-save-keeps-the-source.test.tsx | jest | composition | 2 | 21679 | 134 |  | not measured | — | 0 | keep | Saving without a changed translation must never copy its loaded words over the source, including when typing and undoing leaves the body exactly as it arrived. |
 | tests/screens/cancel-asks-once.test.tsx | jest | composition | 1 | 17839 | 11 |  | not measured | — | 0 | keep | A dirty sheet's Cancel asks "Discard changes?" once. The sheet has two doors that can ask it: the header's Cancel, which asks before it leaves, and the `usePre… |
@@ -544,6 +544,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/offline-detail-says-when-it-was-saved.test.tsx | jest | composition | 1 | 29273 | 44 |  | not measured | — | 0 | keep | A record the phone answered rather than the server is drawn with the same quiet line a list carries: what it is, and when this device last received it. One der… |
 | tests/screens/offline-list-says-when-it-was-saved.test.tsx | jest | composition | 1 | 26758 | 1127 |  | not measured | — | 0 | keep | A page answered from the phone rather than the server is drawn with a quiet line that says so and when it was saved: a person in a tunnel must be able to tell … |
 | tests/screens/offline-resource-reads.test.tsx | jest | composition | 2 | 22079 | 87 |  | not measured | — | 0 | keep | (no first comment; first test title) a resource list reopened offline shows its last successful page |
+| tests/screens/opening-one-look-asks-for-it-once.test.tsx | jest | composition | 1 | 18970 | 78 |  | not measured | — | 0 | keep | Arriving at a look is one read of it. The mount that has not been shown yet asks nothing and the focus that shows the screen asks once, so the transport's own … |
 | tests/screens/record-command-at-collection-address.test.tsx | jest | composition | 3 | 23933 | 64 | 0 | 0 of 3 | — | 0 | keep | A command is about one record or about the collection (src/core/catalog.ts: "{entry.path}/{id}/{verb}, or {entry.path}/{verb} when collection"). The collection… |
 | tests/screens/reference-name-resolves-or-says-linked.test.tsx | jest | composition | 14 | 17838 | 61 |  | not measured | — | 0 | keep | A screen that points at another record names it: one read per pointed-at record on a record's own screen, the word for a record it cannot name, and never the i… |
 | tests/screens/refused-richtext-file-keeps-the-reader.test.tsx | jest | composition | 1 | 24221 | 699 |  | not measured | — | 0 | keep | A tenant-scoped file read that answers 404 leaves a missing-image figure in the native body. The surrounding Markdown still renders, and no refused byte is ask… |
@@ -558,9 +559,9 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/singleton-preserves-hidden-values.test.tsx | jest | composition | 2 | 16760 | 16 |  | not measured | — | 0 | keep | (no first comment; first test title) a singleton PUT preserves hidden list commas when only its title changes |
 | tests/screens/the-answers-a-person-is-suggested-with-are-drawn-with-or-without-a-press.test.tsx | jest | composition | 2 | 18862 | 101 |  | not measured | — | 0 | keep | The answers a person is being suggested with are true information whether or not this installation mounted the questions: the colours, the season and the style… |
 | tests/screens/the-heart-waits-for-the-answer-before-it-says-so.test.tsx | jest | composition | 7 | 27460 | 260 |  | not measured | — | 0 | keep | Rules this file holds about the heart on a record. Nothing is drawn before the server answers whether this person keeps a copy — `unknown` is not "not kept", a… |
-| tests/screens/the-look-page-draws-every-piece-with-the-colour-that-paints-it.test.tsx | jest | composition | 2 | 18862 | 91 |  | not measured | — | 0 | keep | The look page draws what the module composed: the flat-lay, the look's own name, the two answers it was composed under, and one line per piece in the order the… |
+| tests/screens/the-look-page-draws-every-piece-with-the-colour-that-paints-it.test.tsx | jest | composition | 2 | 18994 | 92 |  | not measured | — | 0 | keep | The look page draws what the module composed: the flat-lay, the look's own name, the two answers it was composed under, and one line per piece in the order the… |
 | tests/screens/the-look-page-paints-its-frame-the-look-s-own-ground.test.tsx | jest | composition | 1 | 18717 | 25 |  | not measured | — | 0 | keep | A look is drawn from one read, and the frame it is drawn on is the look's own: the module paints `background` into the record, and `MediaHero`'s `ground` is wh… |
-| tests/screens/the-look-window-ends-where-the-read-ended-and-refuses-without-emptying.test.tsx | jest | composition | 3 | 18765 | 212 |  | not measured | — | 0 | keep | The window of looks moves where the read said it had got to: the next ask starts after the window that was answered, a window the module ended leaves no door t… |
+| tests/screens/the-look-window-ends-where-the-read-ended-and-refuses-without-emptying.test.tsx | jest | composition | 4 | 18898 | 278 |  | not measured | — | 0 | keep | The window of looks moves where the read said it had got to: the next ask starts after the window that was answered, a window the module ended leaves no door t… |
 | tests/screens/the-looks-wall-draws-the-looks-in-the-order-the-read-ranked-them.test.tsx | jest | composition | 1 | 19702 | 89 |  | not measured | — | 0 | keep | The wall of looks is the module's ranking, not one the phone made: the looks it answered for this window, in the order it answered them, each named by the look… |
 | tests/screens/the-notification-offer-is-one-sentence-and-two-answers.test.tsx | jest | composition | 3 | 22137 | 23 |  | not measured | — | 0 | keep | The notification question is one block on the page: the sentence the copy table owns, the one primary answer that opens the platform's prompt, and a secondary … |
 | tests/screens/typed-write-names-the-write-the-queue-holds.test.tsx | jest | composition | 4 | 24424 | 72 |  | not measured | — | 0 | keep | A sheet's own typed call carries the idempotency key the queue minted for the write — not only the later replay does. The attempt the transport refused may hav… |

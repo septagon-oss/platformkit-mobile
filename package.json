@@ -25,6 +25,7 @@
     "./effects/native-reach": "./src/effects/native-reach.ts",
     "./renderers": "./src/renderers.ts",
     "./pack": "./src/pack.ts",
+    "./packs/*": "./src/packs/*.tsx",
     "./route": "./src/route.tsx",
     "./shell": "./src/shell.tsx",
     "./examples/taskRenderers": "./src/examples/taskRenderers.tsx",

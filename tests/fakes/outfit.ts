@@ -1,9 +1,11 @@
 // The outfit service as a screen test sees it: one vocabulary — the owner's design — spelled the way
 // the module spells it, answering the two reads this kit asks. The decisions held here are the
-// service's rather than any one test's: the key spelling (`of1:<recipe>:<HEX-HEX-HEX>`), the
-// uppercase hexes, the four-at-a-time window, where the last window is, and the `c1.` picture
-// reference a key composes to. A screen tested against them is tested against the answers the
-// product will get.
+// service's rather than any one test's: the key grammar `of1:<recipe>:#HEX-#HEX-#HEX`, minted from
+// the three colours the design's slots wear over the recipe id `rNN-<words>`, the uppercase hexes,
+// the four-at-a-time window that rotates instead of running short, where that window ends, and the
+// `c1.` picture reference a key composes to. A screen tested against them is tested against the
+// answers the product will get.
+import { createHash } from "node:crypto";
 import type { Entry } from "../../src/core/catalog";
 import { composedReference } from "../../src/core/pictures";
 import type { LookWire, SuggestionWire } from "../../src/packs/outfit/wire";
@@ -30,15 +32,18 @@ interface Design {
   readonly recipe: string;
   readonly name: string;
   readonly piecesLine: string;
+  /** worn are the three palette colours this design's own slots take, in slot order: the colours a key is minted from, which are not the four a person reads — a garment the drawing keeps in its own material names no slot. */
+  readonly worn: readonly string[];
   readonly pieces: readonly (readonly [line: string, hex: string])[];
 }
 
 // The owner's four, then two more so a window has an end to be reached.
 const ranking: readonly Design[] = [
   {
-    recipe: "CITY-LAYERS",
+    recipe: "r01-city-layers",
     name: "City layers",
     piecesLine: "Coat · trousers · boots",
+    worn: ["#C8643F", "#EFE6D8", "#5B7DA8"],
     pieces: [
       ["Terracotta wool coat", "#C8643F"],
       ["Ivory straight trousers", "#EFE6D8"],
@@ -47,9 +52,10 @@ const ranking: readonly Design[] = [
     ],
   },
   {
-    recipe: "SOFT-WEEKEND",
+    recipe: "r02-soft-weekend",
     name: "Soft weekend",
     piecesLine: "Knit · jeans · sneakers",
+    worn: ["#EFE6D8", "#5B7DA8", "#C8643F"],
     pieces: [
       ["Ivory knit top", "#EFE6D8"],
       ["Denim jeans", "#5B7DA8"],
@@ -58,9 +64,10 @@ const ranking: readonly Design[] = [
     ],
   },
   {
-    recipe: "GALLERY-DAY",
+    recipe: "r03-gallery-day",
     name: "Gallery day",
     piecesLine: "Knit · skirt · boots",
+    worn: ["#5B7DA8", "#EFE6D8", "#C8643F"],
     pieces: [
       ["Denim knit top", "#5B7DA8"],
       ["Ivory midi skirt", "#EFE6D8"],
@@ -69,9 +76,10 @@ const ranking: readonly Design[] = [
     ],
   },
   {
-    recipe: "EVENING-WALK",
+    recipe: "r04-evening-walk",
     name: "Evening walk",
     piecesLine: "Coat · jeans · sneakers",
+    worn: ["#EFE6D8", "#5B7DA8", "#C8643F"],
     pieces: [
       ["Ivory wool coat", "#EFE6D8"],
       ["Denim jeans", "#5B7DA8"],
@@ -80,9 +88,10 @@ const ranking: readonly Design[] = [
     ],
   },
   {
-    recipe: "STUDIO-LINES",
+    recipe: "r05-studio-lines",
     name: "Studio lines",
     piecesLine: "Shirt · trousers · sneakers",
+    worn: ["#EFE6D8", "#5B7DA8", "#C8643F"],
     pieces: [
       ["Ivory poplin shirt", "#EFE6D8"],
       ["Denim trousers", "#5B7DA8"],
@@ -90,9 +99,10 @@ const ranking: readonly Design[] = [
     ],
   },
   {
-    recipe: "MARKET-RUN",
+    recipe: "r06-market-run",
     name: "Market run",
     piecesLine: "Knit · jeans · boots",
+    worn: ["#C8643F", "#5B7DA8", "#3A2E28"],
     pieces: [
       ["Terracotta knit top", "#C8643F"],
       ["Denim jeans", "#5B7DA8"],
@@ -104,15 +114,18 @@ const ranking: readonly Design[] = [
 /** page is how many looks the module answers at once — its own count, quoted from its contract. */
 export const page = 4;
 
-/** lookKeyOf spells one look's address: the recipe and the colours it wears, upper-cased as the module prints them. */
+/**
+ * lookKeyOf mints one look's address the way `outfit` does: `of1:`, the recipe id, and the three
+ * colours its slots wear, each still carrying the `#` that makes it a colour.
+ */
 export const lookKeyOf = (design: Design): string =>
-  `of1:${design.recipe}:${design.pieces
-    .slice(0, 3)
-    .map(([, hex]) => hex.replace("#", "").toUpperCase())
-    .join("-")}`;
+  `of1:${design.recipe}:${design.worn.join("-")}`;
 
 /** composedOf is the picture a look's key composes to: `c1.` and the key, base64url-encoded. */
 const composedOf = (key: string): string => `c1.${Buffer.from(key, "utf8").toString("base64url")}`;
+
+/** versionOf is the quote the module prints for one look: `of1-` and a digest of it, opaque here because it is opaque to this phone. */
+const versionOf = (key: string): string => `of1-${createHash("sha256").update(key).digest("hex")}`;
 
 /** lookOf is one look whole, in the shape the module answers with. */
 export const lookOf = (design: Design): LookWire => {
@@ -133,20 +146,27 @@ export const lookOf = (design: Design): LookWire => {
     background: "#ECE8E1",
     picture: composedOf(key),
     ref: { module: "outfit", kind: "look", key },
-    version: `v-${design.recipe.toLowerCase()}`,
+    version: versionOf(key),
   };
 };
 
-/** suggestionAt is the window that starts at `skip`: the looks there, the answers they were made from, and whether anything follows. */
+/**
+ * suggestionAt is the window that starts at `skip`, cut the way the module cuts one: `page` looks
+ * read round the ranking from that position, so a window near the end rotates back to the looks at
+ * its front rather than running short, and `ended` says the ranking holds nothing past this window.
+ */
 export const suggestionAt = (skip: number): SuggestionWire => {
-  const looks = ranking.slice(skip, skip + page).map(lookOf);
+  const last = ranking.length;
+  const looks: LookWire[] = [];
+  for (let at = 0; at < page && at < last; at += 1)
+    looks.push(lookOf(ranking[(skip + at) % last]!));
   return {
     looks,
     colours: answers,
     season: "Autumn",
     style: "Minimal",
     skip,
-    ended: skip + page >= ranking.length,
+    ended: skip + page >= last,
   };
 };
 

@@ -91,18 +91,19 @@ export interface LooksRead {
   readonly asking: boolean;
   /** more is whether a further window is owed. The module said so, or it did not. */
   readonly more: boolean;
-  /** next asks for the window one step on — appended to what is on screen, or replacing it. */
-  readonly next: (mode: "append" | "replace") => void;
+  /** next asks for the window one step on — appended to what is on screen, or replacing it — and says whether the wall moved. */
+  readonly next: (mode: "append" | "replace") => boolean;
   readonly retry: () => void;
 }
 
 /**
  * useOutfitLooks reads the wall one window at a time.
  *
- * It asks when the screen arrives and then only when the person asks it to. One read is in flight at
+ * It asks when the screen is shown and then only when the person asks it to. One read is in flight at
  * a time: a press while one is out changes nothing, and a refusal keeps the window already on screen
  * and says what refused. The step to the next window is the length of the window just answered, so
- * the phone never asserts how many looks the module pages out.
+ * the phone never asserts how many looks the module pages out — which is why `next` says whether it
+ * moved: before a window has arrived there is no length to step by.
  */
 export function useOutfitLooks(entry: Entry, ports: OutfitPorts = noPorts): LooksRead {
   const { api } = useShell();
@@ -153,13 +154,16 @@ export function useOutfitLooks(entry: Entry, ports: OutfitPorts = noPorts): Look
     }, []),
   );
   const next = useCallback(
-    (mode: "append" | "replace") => {
-      if (asking || answer === undefined || (mode === "append" && answer.ended)) return;
+    (mode: "append" | "replace"): boolean => {
+      // Nothing moves without an answer to step from: the next window starts where the one that
+      // arrived ended, and until one has, there is no position to leave from and no step taken.
+      if (asking || answer === undefined || (mode === "append" && answer.ended)) return false;
       setPending((was) => ({
         skip: answer.skip + answer.looks.length,
         append: mode === "append",
         seq: was.seq + 1,
       }));
+      return true;
     },
     [asking, answer],
   );
@@ -186,9 +190,11 @@ export interface LookRead {
 
 /**
  * useOutfitLook reads one look by the key it is kept under, asking on focus so a look redrawn after
- * a recolouring arrives as the record it is now. A refusal keeps the look already on screen and says
- * what refused; the key is not second-guessed here, because the vocabulary behind it is the
- * module's and a phone that refused to ask would be deciding what a source is on its own.
+ * a recolouring arrives as the record it is now. One ask is in flight at a time: the screen arrives
+ * without asking and the focus that shows it makes the first ask, so opening a look is one read and
+ * not two. A refusal keeps the look already on screen and says what refused; the key is not
+ * second-guessed here, because the vocabulary behind it is the module's and a phone that refused to
+ * ask would be deciding what a source is on its own.
  */
 export function useOutfitLook(ports: OutfitPorts, entry: Entry, key: string): LookRead {
   const { api } = useShell();
@@ -205,6 +211,9 @@ export function useOutfitLook(ports: OutfitPorts, entry: Entry, key: string): Lo
   const retry = useCallback(() => setAsked((was) => was + 1), []);
   const path = lookPath(ports, entry, key);
   useEffect(() => {
+    // The focus that shows this screen is what asks for the look; a mount that has never been shown
+    // yet asks nothing, so arriving at a look is one read rather than a mount and a focus apiece.
+    if (asked === 0) return;
     let live = true;
     const settled = (error: string) => {
       if (live) setHeard({ seq: asked, error });
