@@ -3,6 +3,7 @@
 // header keeps Cancel and offers no Save, because the write's door is the last step's verb.
 import { afterEach, beforeEach, expect, jest, test } from "@jest/globals";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { readFileSync } from "node:fs";
 import React from "react";
 import { type Catalog, type Entry, parseCatalog } from "../../src/core/catalog";
 import { ResourceForm } from "../../src/screens/ResourceForm";
@@ -114,4 +115,56 @@ test("the sheet refuses onward where the step owes an answer, and opens on the a
   await fireEvent.press(screen.getByRole("button", { name: "Back" }));
   await waitFor(() => expect(screen.getByText("Step 1 of 3")).toBeOnTheScreen());
   expect(screen.getByTestId("input-title")).toHaveProp("value", "Autumn notes");
+});
+
+/**
+ * captured is the kernel's own resolved note (`testdata/catalog.deck.json`), read with no change
+ * by this phone's catalogue door. Its record states one stepped form — the update form, one step
+ * asking all five editable fields, wearing "Save the note" — so what this case walks is the bytes
+ * a kernel printed, not a shape this repository wrote.
+ */
+const captured = (): { readonly entry: Entry; readonly catalog: Catalog } => {
+  const catalog = parseCatalog(
+    JSON.parse(readFileSync("testdata/catalog.deck.json", "utf8").toString()),
+    () => {},
+  );
+  return { entry: catalog.resources[0]!, catalog };
+};
+
+test("the stepped form the kernel printed is the walk its own step names", async () => {
+  const api = fakeApi();
+  api.get.mockResolvedValue({ id: "note-7", title: "Water the fig" });
+  const { entry, catalog } = captured();
+  shell.value = shellValue(api, {
+    entry: () => entry,
+    state: { phase: "ready", generation: 1, catalog },
+  });
+  await render(
+    <ThemeProvider mode="light">
+      <ResourceForm entry={entry} id="note-7" />
+    </ThemeProvider>,
+  );
+  // One stage, the server's own words, and no Next anywhere: the step is the last one, so the
+  // only door the rail offers is the write itself, named as the server named it.
+  await waitFor(() => expect(screen.getByText("Step 1 of 1")).toBeOnTheScreen());
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Save the note" })).toBeOnTheScreen(),
+  );
+  expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+  expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
+  expect(header.options?.headerRight).toBeUndefined();
+  // The row it read is in the boxes it draws, and the write it makes is a patch of what changed.
+  expect(screen.getByTestId("input-title")).toHaveProp("value", "Water the fig");
+  await fireEvent(screen.getByTestId("input-body"), "onChangeText", "Fig, north wall");
+  await fireEvent.press(screen.getByRole("button", { name: "Save the note" }));
+  await waitFor(() => expect(api.update).toHaveBeenCalledTimes(1));
+  // One request, and its body is the whole sheet's own answer — what `saveBody` makes of
+  // every control, walk or no walk: the edit, and the fields the step holds at their read
+  // values. The walk chooses when the write may happen, never what it contains.
+  expect(api.update.mock.calls[0]![2]).toEqual({
+    body: "Fig, north wall",
+    pinned: false,
+    tags: [],
+    title: "Water the fig",
+  });
 });

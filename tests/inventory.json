@@ -297,9 +297,9 @@
   },
   "composition": {
    "files": 152,
-   "cases": 502,
-   "ms": 3807827,
-   "testsMs": 58392,
+   "cases": 503,
+   "ms": 3816112,
+   "testsMs": 58513,
    "runners": {
     "jest": 152
    },
@@ -25393,7 +25393,7 @@
    "file": "tests/screens/a-stepped-sheet-draws-one-step-and-answers-at-its-own-verb.test.tsx",
    "runner": "jest",
    "layer": "composition",
-   "cases": 2,
+   "cases": 3,
    "rule": "The sheet a stepped entry opens draws one step at a time: the rail in the server's words, the progress line, only the step's own boxes, and the step's own verb as the way on. The header keeps Cancel and offers no Save, because the write's door is the last step's verb.",
    "ruleSource": "first comment",
    "tier": "merge",
@@ -25401,28 +25401,34 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 19121,
+   "ms": 24478,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "a stepped sheet draws the step it stands on, and the header names no Save",
-    "the sheet refuses onward where the step owes an answer, and opens on the answer given"
+    "the sheet refuses onward where the step owes an answer, and opens on the answer given",
+    "the stepped form the kernel printed is the walk its own step names"
    ],
    "tests": [
     {
      "title": "a stepped sheet draws the step it stands on, and the header names no Save",
-     "ms": 40,
+     "ms": 52,
      "measured": false
     },
     {
      "title": "the sheet refuses onward where the step owes an answer, and opens on the answer given",
-     "ms": 324,
+     "ms": 394,
+     "measured": false
+    },
+    {
+     "title": "the stepped form the kernel printed is the walk its own step names",
+     "ms": 31,
      "measured": false
     }
    ],
    "loaded": 195,
-   "coveredProdLines": 3027,
+   "coveredProdLines": 3134,
    "onlyProdLines": null,
-   "testsMs": 364
+   "testsMs": 477
   },
   {
    "file": "tests/screens/a-stepped-sheet-walks-one-section-at-a-time.test.tsx",
@@ -25436,7 +25442,7 @@
    "runsNowhere": false,
    "verdict": "keep",
    "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
-   "ms": 19864,
+   "ms": 22792,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
     "one step is on the screen at a time, and Next wears the step's own verb",
@@ -25447,7 +25453,7 @@
    "tests": [
     {
      "title": "one step is on the screen at a time, and Next wears the step's own verb",
-     "ms": 28,
+     "ms": 36,
      "measured": false
     },
     {
@@ -25469,7 +25475,7 @@
    "loaded": 187,
    "coveredProdLines": 3031,
    "onlyProdLines": null,
-   "testsMs": 57
+   "testsMs": 65
   },
   {
    "file": "tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx",

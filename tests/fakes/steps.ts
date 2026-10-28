@@ -1,12 +1,13 @@
-// The kernel's stepped create form, in the wire spelling a server prints.
-//
-// `kit/entity/present/form_steps_test.go` resolves the note entry with sections
-// `details` and `options` into three steps, and states the copy each step wears. Those
-// are the same bytes written out here — same keys, same field groups, same verbs — so an
-// assertion about this fake is an assertion about the kernel's own answer, and a phone
-// that walked a different three steps would fail it. The entry underneath is the
-// kernel's note record as the kernel resolved it (`testdata/catalog.deck.json`), which is
-// why the five editable names are the ones the capture itself lists.
+/* A stepped create form over the kernel's note record, in the member spelling a server prints.
+ *
+ * `testdata/catalog.deck.json` is the kernel's resolved capture and it states one stepped form —
+ * the note's update form, one step, all five editable fields, wearing "Save the note" — which the
+ * capture's own cases read unchanged, so the kernel's bytes are never only paraphrased here. What
+ * this file adds is the same member asked of the create form in three steps, for what one step
+ * cannot show: that a step asks its own fields and nothing else, that its verb names the answer it
+ * chose, and that a refusal lands the person back on the step that asked. The entry, the sections
+ * and the five editable names are the capture's; the three steps are this repository's declaration
+ * in that member shape. */
 import { readFileSync } from "node:fs";
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -15,7 +16,7 @@ type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-ex
 // directory, so one path names the file for both the Node suite and the device suite.
 const CAPTURE = "testdata/catalog.deck.json";
 
-/** createSteps is the kernel's three-step create form, member for member. */
+/** createSteps is a three-step create form over the capture's five editable fields. */
 export const createSteps = (): Json[] => [
   {
     key: "unsectioned",
@@ -46,15 +47,15 @@ export const createSteps = (): Json[] => [
   },
 ];
 
-/** stepSections is where the kernel filed those fields, as the resolved layout states it. */
+/** stepSections is where the capture files those fields, as its resolved layout states it. */
 export const stepSections = (): Json[] => [
   { key: "details", label: "Description", fields: ["body", "rank"] },
   { key: "options", label: "Options", fields: ["pinned", "tags"] },
 ];
 
 /**
- * steppedNote is one catalogue document: the kernel's note entry, its resolved block
- * stating a stepped create form and no update form — per-form opt-in, so the edit sheet
+ * steppedNote is one catalogue document: the capture's note entry, its resolved block
+ * stating a stepped create form in place of the update form it prints — per-form opt-in, so
  * of the same entry stays flat while its create sheet walks. `mutate` takes the entry as
  * the document holds it, which is how a case names the one member it is refusing.
  */

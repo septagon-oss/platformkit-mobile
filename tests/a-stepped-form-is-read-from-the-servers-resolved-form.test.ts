@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { parseCatalog } from "../src/core/catalog";
-import { steppedForm } from "../src/core/form";
+import { formControls, stepBlocks, steppedForm } from "../src/core/form";
 import { steppedNote } from "./fakes/steps";
 
 const read = (doc: unknown) => {
@@ -14,6 +14,9 @@ const read = (doc: unknown) => {
   const entry = parseCatalog(doc, (at, why) => notices.push(`${at} ${why}`)).resources[0]!;
   return { entry, notices };
 };
+const blocks = (
+  walk: readonly { key: string; label: string; controls: readonly { field: { name: string } }[] }[],
+) => walk.map((b) => [b.key, b.label, b.controls.map((c) => c.field.name)]);
 const golden = (name: string) =>
   JSON.parse(readFileSync(`testdata/${name}`, "utf8").toString()) as unknown;
 
@@ -30,6 +33,13 @@ test("the kernel's stepped bytes reach the one step its own document states", ()
   // The same entry's create sheet names no stepped form: per-form opt-in means the
   // person who starts a note is asked for it in one scroll.
   assert.equal(steppedForm(entry, true), undefined);
+  // One step is still the walk the sheet draws: its block holds every field that step asks,
+  // and nothing else is on the screen.
+  assert.deepEqual(blocks(stepBlocks(steps ?? [], formControls(entry, undefined, false))), [
+    // In the step's own order, not the entry's: the block asks what the step asks, when the
+    // step asks it.
+    ["unsectioned", "Details", ["title", "body", "rank", "pinned", "tags"]],
+  ]);
 });
 
 test("a stepped create form of three steps is read as three steps in its own order", () => {
