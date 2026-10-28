@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `2e7b83ab4` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `e4b8262d2` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 39 | 245 | 47.3 s | 76 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 306 | 1453 | 97.3 s | 2658 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 161 | 523 | 59.7 s | 3970 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 307 | 1455 | 97.3 s | 2659 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 163 | 526 | 59.8 s | 4010 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 565
+* keep: 568
 * merge: 0
 * delete: 0
 
@@ -46,9 +46,9 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 565 — 243 `tests/*.test.ts` (node), 263 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2221; cases in files no runner reaches: 35
-* isolated wall time: contract 76 s, behaviour 2658 s, composition 3970 s, journey 0 s
+* files inventoried: 568 — 244 `tests/*.test.ts` (node), 265 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2226; cases in files no runner reaches: 35
+* isolated wall time: contract 76 s, behaviour 2659 s, composition 4010 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
 * the forge's verdict per workflow, read from the last completed runs of main, is in `inventory.json` under `forge` — including that `mobile-e2e.yml` failed every run of main read: its host has no adb, emulator, maestro, psql or keytool. Until the runner image changes, no number of flows turns that job green.
@@ -258,6 +258,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/a-link-to-a-record-opens-that-record.test.ts | node | behaviour | 9 | 4771 | 11.7 |  | not measured | — | 0 | keep | One link, one reading: what a person taps in an e-mail, what another app opens, and what a notification carries all answer the same route, because one rule (`s… |
 | tests/a-list-orders-itself-and-narrows-itself.test.ts | node | behaviour | 14 | 1574 | 50 | 61 | 5 of 13 | — | 0 | keep | How a list is being read is two questions, and the kit asks them separately: in what order, and narrowed how. A sheet of orders words each one for the type of … |
 | tests/a-list-row-says-which-record-it-is-and-what-state-it-is-in.test.ts | node | behaviour | 13 | 1214 | 43.4 | 0 | 0 of 13 | — | 0 | keep | A list row says which record it is, what state that record is in, and what sets it apart — and nothing else. The four answers come from four declarations (the … |
+| tests/a-look-key-the-module-printed-opens-at-one-row.test.ts | node | behaviour | 2 | 1776 | 8.9 |  | not measured | — | 0 | keep | A look's key is its address, and the module mints it in its own grammar: the recipe id and the three colours its slots wear, each colour spelled with the `#` t… |
 | tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts | node | behaviour | 1 | 17605 | 13529.9 |  | not measured | — | 0 | keep | The notification tap compiles against the same route declarations Expo generates when this app starts. The check is scoped to the handler, independent of other… |
 | tests/a-person-reads-one-colour-wherever-they-appear.test.ts | node | behaviour | 3 | 962 | 52.5 |  | not measured | — | 0 | keep | A person's disc colour is a function of their id alone: the same id reads the same tone in a directory row, in a field that points at them, as an activity acto… |
 | tests/a-pointer-the-document-names-reads-as-a-name-or-as-a-word.test.ts | node | behaviour | 7 | 868 | 15.9 |  | not measured | — | 0 | keep | A value that points at another record is never read back as the identifier stored for it. It is the other record's name when this screen resolved one, and one … |
@@ -463,6 +464,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-landed-write-is-heard-where-it-lands.test.tsx | jest | composition | 2 | 15901 | 18 |  | not measured | — | 0 | keep | A landed write says so on the record the person lands on, and nowhere else. The sheet files its sentence under an address it spells itself; the record's hook a… |
 | tests/screens/a-late-push-refusal-belongs-to-the-session-that-sent-it.test.tsx | jest | composition | 2 | 52235 | 161 |  | not measured | — | 0 | keep | A registration refusal from an ended session cannot decide whether the next workspace registers this phone. Each completed sign-in must read its own platform a… |
 | tests/screens/a-look-the-module-answered-twice-is-one-cell-and-one-door.test.tsx | jest | composition | 1 | 18994 | 141 |  | not measured | — | 0 | keep | The ranking is the module's and it may move between two asks; the phone holds one cell per look. A window that arrives overlapping the one on screen — the same… |
+| tests/screens/a-look-whose-refresh-refused-says-what-refused.test.tsx | jest | composition | 2 | 21103 | 77 |  | not measured | — | 0 | keep | A look already on screen is a read that has not been asked about since the person arrived. When the read that refreshes it refuses, the wall of looks answers w… |
 | tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx | jest | composition | 3 | 21149 | 15 |  | not measured | — | 0 | keep | A malformed destructive hint must keep the confirmation between a row action and its write. Follow served catalogue bytes through derivation and the command ho… |
 | tests/screens/a-match-is-announced-once-and-only-when-it-is-new.test.tsx | jest | composition | 2 | 30316 | 250 |  | not measured | — | 0 | keep | A match moment interrupts once per match: what the deck found before this person sat down is not news to them, and a match they have already answered to does n… |
 | tests/screens/a-mixed-language-save-keeps-both-edits.test.tsx | jest | composition | 3 | 26306 | 168 |  | not measured | — | 0 | keep | A mixed-language Save refuses without sending either edit; reverting the translated field then lets the source edit save without copying the loaded translation… |
@@ -557,6 +559,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/the-answers-a-person-is-suggested-with-are-drawn-with-or-without-a-press.test.tsx | jest | composition | 2 | 18862 | 101 |  | not measured | — | 0 | keep | The answers a person is being suggested with are true information whether or not this installation mounted the questions: the colours, the season and the style… |
 | tests/screens/the-heart-waits-for-the-answer-before-it-says-so.test.tsx | jest | composition | 7 | 27460 | 260 |  | not measured | — | 0 | keep | Rules this file holds about the heart on a record. Nothing is drawn before the server answers whether this person keeps a copy — `unknown` is not "not kept", a… |
 | tests/screens/the-look-page-draws-every-piece-with-the-colour-that-paints-it.test.tsx | jest | composition | 2 | 18862 | 91 |  | not measured | — | 0 | keep | The look page draws what the module composed: the flat-lay, the look's own name, the two answers it was composed under, and one line per piece in the order the… |
+| tests/screens/the-look-page-paints-its-frame-the-look-s-own-ground.test.tsx | jest | composition | 1 | 18717 | 25 |  | not measured | — | 0 | keep | A look is drawn from one read, and the frame it is drawn on is the look's own: the module paints `background` into the record, and `MediaHero`'s `ground` is wh… |
 | tests/screens/the-look-window-ends-where-the-read-ended-and-refuses-without-emptying.test.tsx | jest | composition | 3 | 18765 | 212 |  | not measured | — | 0 | keep | The window of looks moves where the read said it had got to: the next ask starts after the window that was answered, a window the module ended leaves no door t… |
 | tests/screens/the-looks-wall-draws-the-looks-in-the-order-the-read-ranked-them.test.tsx | jest | composition | 1 | 19702 | 89 |  | not measured | — | 0 | keep | The wall of looks is the module's ranking, not one the phone made: the looks it answered for this window, in the order it answered them, each named by the look… |
 | tests/screens/the-notification-offer-is-one-sentence-and-two-answers.test.tsx | jest | composition | 3 | 22137 | 23 |  | not measured | — | 0 | keep | The notification question is one block on the page: the sentence the copy table owns, the one primary answer that opens the platform's prompt, and a secondary … |

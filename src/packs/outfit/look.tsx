@@ -1,7 +1,9 @@
 // OutfitLook is one look: the flat-lay at the width of the page, its name and the two answers it was
 // composed under, one line per piece in the order the module laid them out, and the two doors — the
 // next idea, and the person's own copy of this one. Nothing here re-describes a garment, re-orders a
-// piece or re-colours a swatch: the module composed the look and the page says what it composed.
+// piece or re-colours a swatch: the module composed the look and the page says what it composed. A
+// refresh that refused is drawn as a sentence above the look it refused, and the keep is withheld
+// while that sentence stands — a record the service would not confirm is not offered back as a fact.
 import { Stack, useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
@@ -22,7 +24,7 @@ import { StateView } from "../../ui/molecules/StateView";
 import { Screen } from "../../ui/templates/Screen";
 import { extent } from "../../ui/scale";
 import { useStyles, type Theme } from "../../ui/theme";
-import { deriveLook } from "./model";
+import { deriveLook, refusal } from "./model";
 import { lookRow } from "./address";
 import { noPorts, useOutfitLook, type OutfitPorts } from "./read";
 
@@ -47,10 +49,15 @@ export function OutfitLook({
       read.look === undefined
         ? undefined
         : deriveLook(
-            { look: read.look, pictures: media.enabled, states: media.states },
+            {
+              look: read.look,
+              error: read.error,
+              pictures: media.enabled,
+              states: media.states,
+            },
             { ...feedback, weekStartsOn: 1 },
           ),
-    [read.look, media.enabled, media.states, feedback],
+    [read.look, read.error, media.enabled, media.states, feedback],
   );
   const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
   const keeping = useSaveToggle(
@@ -70,6 +77,9 @@ export function OutfitLook({
           <Undrawn error={read.error} retry={read.retry} presentation={presentation} />
         ) : model?.ok ? (
           <>
+            {model.value.notice === undefined ? null : (
+              <StateView model={model.value.notice} onAction={() => read.retry()} />
+            )}
             <MediaHero
               model={model.value.hero}
               renderImage={media.renderImage}
@@ -99,7 +109,9 @@ export function OutfitLook({
                 motion={feedback.motion}
                 testID="outfit-another-idea"
               />
-              {keeping.model === undefined ? null : (
+              {/* A keep is offered against a record this phone has heard of: while a refused read
+                  stands over the look, the page asks rather than writing against it. */}
+              {keeping.model === undefined || read.error !== "" ? null : (
                 <SaveButton model={keeping.model} onPress={keeping.press} />
               )}
             </View>
@@ -124,24 +136,10 @@ function Undrawn({
   readonly retry: () => void;
   readonly presentation: Presentation;
 }) {
-  const model = deriveState(
+  const model =
     error === ""
-      ? { kind: "loading", skeleton: "detail" }
-      : {
-          kind: "error",
-          issue: { code: "read-failed", path: "look", recovery: "correctable", message: error },
-          action: {
-            intent: "retry-read",
-            control: {
-              id: "refresh",
-              label: presentation.copy.state.retry,
-              tone: "plain",
-              state: "ready",
-            },
-          },
-        },
-    presentation,
-  );
+      ? deriveState({ kind: "loading", skeleton: "detail" }, presentation)
+      : refusal(error, "look", presentation);
   return model.ok ? <StateView model={model.value} onAction={() => retry()} /> : null;
 }
 

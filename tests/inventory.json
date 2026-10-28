@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 306,
-   "cases": 1453,
-   "ms": 2657574,
-   "testsMs": 97281.59999999993,
+   "files": 307,
+   "cases": 1455,
+   "ms": 2659350,
+   "testsMs": 97290.49999999993,
    "runners": {
     "jest": 102,
-    "node": 204
+    "node": 205
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 161,
-   "cases": 523,
-   "ms": 3970266,
-   "testsMs": 59681,
+   "files": 163,
+   "cases": 526,
+   "ms": 4010086,
+   "testsMs": 59783,
    "runners": {
-    "jest": 161
+    "jest": 163
    },
    "unreachable": 0
   },
@@ -12001,6 +12001,41 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-look-key-the-module-printed-opens-at-one-row.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A look's key is its address, and the module mints it in its own grammar: the recipe id and the three colours its slots wear, each colour spelled with the `#` that makes it a colour. That key is what the phone puts in a path, so this checks the case the fake's keys do not exercise \u2014 a look key carrying three `#` characters \u2014 against the kit's own one spelling of a row's route: it stays one part of one path, arrives back as the same key, and never becomes a fragment.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1776,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a key the module printed is read whole, with the colours it wears",
+    "a key the module printed opens at one row, and its colours stay data"
+   ],
+   "tests": [
+    {
+     "title": "a key the module printed is read whole, with the colours it wears",
+     "ms": 5.855198,
+     "measured": false
+    },
+    {
+     "title": "a key the module printed opens at one row, and its colours stay data",
+     "ms": 3.077581,
+     "measured": false
+    }
+   ],
+   "loaded": 54,
+   "coveredProdLines": 13600,
+   "onlyProdLines": null,
+   "testsMs": 8.9
   },
   {
    "file": "tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts",
@@ -24199,6 +24234,41 @@
    "testsMs": 141
   },
   {
+   "file": "tests/screens/a-look-whose-refresh-refused-says-what-refused.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A look already on screen is a read that has not been asked about since the person arrived. When the read that refreshes it refuses, the wall of looks answers with a sentence and keeps its cards; the look page owes the same answer, because a record shown as though it were current after the service said otherwise is the one thing a derived read may not do \u2014 and the heart beside it offers a write against exactly that record.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21103,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the page says what refused and keeps the look it had drawn",
+    "the sentence offers the way to ask for it again"
+   ],
+   "tests": [
+    {
+     "title": "the page says what refused and keeps the look it had drawn",
+     "ms": 39,
+     "measured": false
+    },
+    {
+     "title": "the sentence offers the way to ask for it again",
+     "ms": 38,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2685,
+   "onlyProdLines": null,
+   "testsMs": 77
+  },
+  {
    "file": "tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -28787,6 +28857,35 @@
    "coveredProdLines": 2644,
    "onlyProdLines": null,
    "testsMs": 91
+  },
+  {
+   "file": "tests/screens/the-look-page-paints-its-frame-the-look-s-own-ground.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A look is drawn from one read, and the frame it is drawn on is the look's own: the module paints `background` into the record, and `MediaHero`'s `ground` is what holds that frame while the flat-lay arrives \u2014 or if it never does. Nothing else on this kit paints a record's colour, so this is the case that says the prop arrived at the frame rather than at the model.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18717,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the frame the flat-lay arrives into wears the look's own colour, and no other surface does"
+   ],
+   "tests": [
+    {
+     "title": "the frame the flat-lay arrives into wears the look's own colour, and no other surface does",
+     "ms": 25,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2644,
+   "onlyProdLines": null,
+   "testsMs": 25
   },
   {
    "file": "tests/screens/the-look-window-ends-where-the-read-ended-and-refuses-without-emptying.test.tsx",
