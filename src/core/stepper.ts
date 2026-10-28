@@ -126,7 +126,14 @@ export function deriveStepper(input: StepperInput, p: Presentation) {
       back: current ? make("back", p.copy.kit.back, editable && index > 0) : undefined,
       next:
         current && index < input.steps.length - 1
-          ? make("next", p.copy.kit.next, editable, input.phase === "validating")
+          ? make(
+              "next",
+              // The stage's own verb when its owner resolved one — the words a form's author
+              // chose for leaving that stage — and the kit's word for a stage that names none.
+              current.primary ?? p.copy.kit.next,
+              editable,
+              input.phase === "validating",
+            )
           : undefined,
       skip: current?.optional ? make("skip", p.copy.kit.skip, editable) : undefined,
       finish:

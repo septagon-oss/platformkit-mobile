@@ -10,7 +10,10 @@
 import { readFileSync } from "node:fs";
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-const CAPTURE = new URL("../../testdata/catalog.deck.json", import.meta.url);
+// The capture is read from the repository root, the way every other fixture in this
+// directory reads what `testdata/` holds: the suites run with the root as their working
+// directory, so one path names the file for both the Node suite and the device suite.
+const CAPTURE = "testdata/catalog.deck.json";
 
 /** createSteps is the kernel's three-step create form, member for member. */
 export const createSteps = (): Json[] => [

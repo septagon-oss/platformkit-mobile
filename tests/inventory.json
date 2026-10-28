@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 150,
-   "cases": 496,
-   "ms": 3768842,
-   "testsMs": 57971,
+   "files": 152,
+   "cases": 502,
+   "ms": 3807827,
+   "testsMs": 58392,
    "runners": {
-    "jest": 150
+    "jest": 152
    },
    "unreachable": 0
   },
@@ -25388,6 +25388,88 @@
    "coveredProdLines": 1691,
    "onlyProdLines": null,
    "testsMs": 104
+  },
+  {
+   "file": "tests/screens/a-stepped-sheet-draws-one-step-and-answers-at-its-own-verb.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The sheet a stepped entry opens draws one step at a time: the rail in the server's words, the progress line, only the step's own boxes, and the step's own verb as the way on. The header keeps Cancel and offers no Save, because the write's door is the last step's verb.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19121,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a stepped sheet draws the step it stands on, and the header names no Save",
+    "the sheet refuses onward where the step owes an answer, and opens on the answer given"
+   ],
+   "tests": [
+    {
+     "title": "a stepped sheet draws the step it stands on, and the header names no Save",
+     "ms": 40,
+     "measured": false
+    },
+    {
+     "title": "the sheet refuses onward where the step owes an answer, and opens on the answer given",
+     "ms": 324,
+     "measured": false
+    }
+   ],
+   "loaded": 195,
+   "coveredProdLines": 3027,
+   "onlyProdLines": null,
+   "testsMs": 364
+  },
+  {
+   "file": "tests/screens/a-stepped-sheet-walks-one-section-at-a-time.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "The sheet a stepped entry opens is walked, not scrolled: one step's boxes at a time, the rail in the server's words, Next wearing the step's own verb, a step refused on its own answer, a write only at the last step's door, and a refusal from the server returning the person to the step that was asked for it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19864,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "one step is on the screen at a time, and Next wears the step's own verb",
+    "a server that refuses a field of the first step sends the walk back there",
+    "the last step's verb writes the whole row, and the sheet does not ask who is left behind",
+    "leaving from a later step is a step back; leaving from the first one asks once"
+   ],
+   "tests": [
+    {
+     "title": "one step is on the screen at a time, and Next wears the step's own verb",
+     "ms": 28,
+     "measured": false
+    },
+    {
+     "title": "a server that refuses a field of the first step sends the walk back there",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "the last step's verb writes the whole row, and the sheet does not ask who is left behind",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "leaving from a later step is a step back; leaving from the first one asks once",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 187,
+   "coveredProdLines": 3031,
+   "onlyProdLines": null,
+   "testsMs": 57
   },
   {
    "file": "tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx",
