@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `a1afc2456` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `55ff91f87` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -25,12 +25,12 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 39 | 245 | 47.3 s | 76 s | 0 |
 | behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 305 | 1449 | 97.3 s | 2656 s | 0 |
-| composition | the mounted app: shell + router + screen together | merge | 152 | 503 | 58.5 s | 3816 s | 0 |
+| composition | the mounted app: shell + router + screen together | merge | 153 | 506 | 58.5 s | 3816 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 59 | 51 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 555
+* keep: 556
 * merge: 0
 * delete: 0
 
@@ -46,8 +46,8 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 555 — 242 `tests/*.test.ts` (node), 254 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
-* cases in files a runner reaches: 2197; cases in files no runner reaches: 35
+* files inventoried: 556 — 242 `tests/*.test.ts` (node), 255 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 16 Maestro flows in `e2e/flows`
+* cases in files a runner reaches: 2200; cases in files no runner reaches: 35
 * isolated wall time: contract 76 s, behaviour 2656 s, composition 3816 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
 * whole-suite coverage, each with its own denominator: jest `npx jest --coverage --coverageReporters=text-summary` → statements 71.51 % (4519/6319), branches 64.51 % (3614/5602), functions 57.6 % (1181/2050), lines 73.57 % (4149/5639) in 65.2 s; node `node --import tsx --test --experimental-test-coverage …tests/*.test.ts` → 91.01 % lines / 89.78 % branch / 62.23 % function over what the node suite loads. **Neither is a budget, and they are never added**; the numbers CLEANUP.md:131-152 records are stale and are not the baseline.
@@ -496,6 +496,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/screens/a-sign-out-takes-its-own-row-while-another-address-is-being-handed.test.tsx | jest | composition | 1 | 36985 | 232 |  | not measured | — | 0 | keep | The server keys a device row on the token it was handed, so a registration for another address can never be answered with the row an ending session holds. That… |
 | tests/screens/a-sign-out-whose-storage-will-not-clear-says-so.test.tsx | jest | composition | 1 | 26056 | 127 |  | not measured | — | 0 | keep | Signing out has two halves, and a phone whose own secure storage refuses to clear has a fact of its own to report — before anything the server may owe about th… |
 | tests/screens/a-source-field-save-on-a-translated-read-keeps-the-source.test.tsx | jest | composition | 1 | 23943 | 104 |  | not measured | — | 0 | keep | A source-only field remains a source write even when the same read contains a translation; saving it must keep the unedited translated body out of that write. |
+| tests/screens/a-stepped-sheet-always-leaves-one-door-that-writes.test.tsx | jest | composition | 3 |  |  |  | not measured | — | 0 | keep | A stepped sheet's last step's own verb is the write's door, and the header names no Save. Whatever the walk cannot draw, the person still has one door that fil… |
 | tests/screens/a-stepped-sheet-draws-one-step-and-answers-at-its-own-verb.test.tsx | jest | composition | 3 | 24478 | 477 |  | not measured | — | 0 | keep | The sheet a stepped entry opens draws one step at a time: the rail in the server's words, the progress line, only the step's own boxes, and the step's own verb… |
 | tests/screens/a-stepped-sheet-walks-one-section-at-a-time.test.tsx | jest | composition | 4 | 22792 | 65 |  | not measured | — | 0 | keep | The sheet a stepped entry opens is walked, not scrolled: one step's boxes at a time, the rail in the server's words, Next wearing the step's own verb, a step r… |
 | tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx | jest | composition | 9 | 27340 | 106 |  | not measured | — | 0 | keep | What a release at the end of a row's swipe does: the command the entry named runs through the one submit every other door uses, and is asked first wherever the… |

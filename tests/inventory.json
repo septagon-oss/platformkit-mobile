@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 152,
-   "cases": 503,
+   "files": 153,
+   "cases": 506,
    "ms": 3816112,
    "testsMs": 58513,
    "runners": {
-    "jest": 152
+    "jest": 153
    },
    "unreachable": 0
   },
@@ -25388,6 +25388,46 @@
    "coveredProdLines": 1691,
    "onlyProdLines": null,
    "testsMs": 104
+  },
+  {
+   "file": "tests/screens/a-stepped-sheet-always-leaves-one-door-that-writes.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A stepped sheet's last step's own verb is the write's door, and the header names no Save. Whatever the walk cannot draw, the person still has one door that files what they typed.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "the review's pin for the stepped sheet that can lose its only write door: it states the rule above and runs where its layer runs; the case count and titles are this file's own three cases, and the durations belong to the pass named under measured.jest, which `npm run inventory -- --measure` refuses to take from the red run this pin is in",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-stepped-sheet-always-leaves-one-door-that-writes.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [
+    "a stepped sheet whose step names no label still leaves one door that writes",
+    "a stepped sheet whose step names a blank label still leaves one door that writes",
+    "the step the sheet draws a heading for keeps that heading, and its verb is the one door"
+   ],
+   "tests": [
+    {
+     "title": "a stepped sheet whose step names no label still leaves one door that writes",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "a stepped sheet whose step names a blank label still leaves one door that writes",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "the step the sheet draws a heading for keeps that heading, and its verb is the one door",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/screens/a-stepped-sheet-draws-one-step-and-answers-at-its-own-verb.test.tsx",

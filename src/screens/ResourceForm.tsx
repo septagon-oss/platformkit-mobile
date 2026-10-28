@@ -91,15 +91,19 @@ export function ResourceForm({
   // button that wrote the whole form while a person stood on step one of three would be a
   // second door the server's declaration never stated. A flat sheet keeps both, unchanged.
   const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
-  const stepped = form.stepped;
   const stepper = (() => {
-    if (!stepped) return undefined;
+    if (!form.stepped) return undefined;
     const drawn = deriveStepper(
       form.stepperWords(saving ? "submitting" : form.phase === "saved" ? "finished" : "editing"),
       presentation,
     );
     return drawn.ok ? drawn.value : undefined;
   })();
+  // Whether the rail drew is the one fact the sheet is stepped, so the blocks on screen and
+  // the header's Save both key off it. Keyed off the declaration instead, a walk the stepper
+  // cannot model — a stage word it may not print — would leave the sheet stepped with no
+  // rail: every box on screen, the header holding only Cancel, and no door anywhere.
+  const walked = stepper !== undefined;
   // The options are memoised because the navigator is told them on every
   // render: a fresh object, with fresh callbacks in it, is a new instruction
   // each time and the renders never settle.
@@ -113,7 +117,7 @@ export function ResourceForm({
       ),
       // The stepped sheet names no `headerRight` at all: the write's door is the last
       // step's own verb, which the rail draws under the answers.
-      ...(stepped
+      ...(walked
         ? {}
         : {
             headerRight: () => (
@@ -128,7 +132,7 @@ export function ResourceForm({
             ),
           }),
     }),
-    [saving, phase, cancel, save, stepped],
+    [saving, phase, cancel, save, walked],
   );
 
   return (
@@ -140,7 +144,7 @@ export function ResourceForm({
         // A stepped sheet draws its walk's blocks — one step's worth, in the server's
         // order; a flat sheet draws the blocks the entry asks for. Both are FormBlocks,
         // and every box below is drawn from them the same way.
-        blocks={stepped ? form.walk : form.blocks}
+        blocks={walked ? form.walk : form.blocks}
         held={form.held}
         errors={form.errors}
         detail={form.detail}

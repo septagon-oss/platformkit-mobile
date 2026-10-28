@@ -135,8 +135,9 @@ function stepNames(layout: Shape["layout"]): readonly string[] {
  * and `layout.update`.
  *
  * A form must lay itself out as steps, state at least one step, give each step a key of
- * its own and at least one field, ask no field on two steps, and — for the two forms
- * whose editable list the block itself carries — ask exactly the fields that list names.
+ * its own, a label the sheet can draw and at least one field, ask no field on two steps,
+ * and — for the two forms whose editable list the block itself carries — ask exactly the
+ * fields that list names.
  * A typed-read form is checked for all but that last: this build opens no typed read, so
  * it holds no editable list of its own to hold that block to, and which set the server
  * grouped is the server's to print. The copy of a step follows the kernel's `stepCopy`: a
@@ -175,6 +176,11 @@ function stepsAreSound(layout: Shape["layout"], at: string, notice: Notice): boo
       if (step.key === "") return `${which} holds a step with no key`;
       if (keys.has(step.key)) return `${which} repeats the step ${step.key}`;
       keys.add(step.key);
+      // The kernel's own section rule (`section.Label == ""` in `present/forms.go`): a step
+      // with no word for itself is a heading no sheet can draw. The contract prints `label`
+      // as a required string with no length rule, so a blank one is a legal document, and
+      // an all-blank one is what an author's hint of spaces resolves to.
+      if (step.label.trim() === "") return `step ${step.key} of ${which} names no label`;
       const fields = step.fields ?? [];
       if (fields.length === 0) return `step ${step.key} of ${which} asks no field`;
       const copy = stepCopyIsSound(step, fields);
