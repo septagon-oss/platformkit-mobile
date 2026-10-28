@@ -35,6 +35,11 @@ const policyShape = zResolved
       .array(
         zResolvedField.extend({
           reference: zResolvedReference.nullish(),
+          // A resolved choice is judged where it is read (`./choice`), which names the one
+          // answer or axis that is wrong and leaves the rest of the question standing. Read
+          // strictly here, a bad group list would cost the entry its labels, columns and
+          // sort sheet too.
+          choice: z.unknown().optional(),
           reading: zResolvedReading.extend({
             money: z.nullish(z.unknown()),
             time: zResolvedTime.nullish(),

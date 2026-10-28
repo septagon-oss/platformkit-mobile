@@ -93,9 +93,10 @@ export async function generate(root: string, output: string): Promise<void> {
         .replace("event: eventName,", "...(eventName === undefined ? {} : { event: eventName }),")
         .replace("id: lastEventId,", "...(lastEventId === undefined ? {} : { id: lastEventId }),");
     }
-    // 0.99 emits bigint defaults even with a number resolver. Preserve the
-    // document's numeric default with the same representation as its validator.
-    text = text.replace(/\.default\(BigInt\((-?\d+)\)\)/g, ".default($1)");
+    // 0.99 emits bigint defaults even with a number resolver, and quotes the digits when the
+    // document's default arrived as a string-typed int64. Preserve the document's numeric
+    // default with the same representation as its validator.
+    text = text.replace(/\.default\(BigInt\(["']?(-?\d+)["']?\)\)/g, ".default($1)");
     await writeFile(
       join(output, name),
       await format(text, { ...options, parser: "typescript", filepath: name }),

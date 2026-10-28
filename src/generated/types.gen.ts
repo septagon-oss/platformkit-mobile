@@ -115,6 +115,43 @@ export type ChangeInputBody = {
   new: string;
 };
 
+export type ChoiceEmpty = {
+  message: string;
+  mode: string;
+};
+
+export type ChoiceGroup = {
+  key: string;
+  label: string;
+};
+
+export type ChoiceMaximum = {
+  behaviour: string;
+  count: number;
+  message: string;
+};
+
+export type ChoiceOption = {
+  group?: ChoiceGroup;
+  id: string;
+  label: string;
+  picture?: ChoicePicture;
+};
+
+export type ChoicePicture = {
+  kind: string;
+  value: string;
+};
+
+export type ChoiceSet = {
+  cardinality: string;
+  empty: ChoiceEmpty;
+  maximum?: ChoiceMaximum;
+  noPreference?: string;
+  options: Array<ChoiceOption> | null;
+  searchThreshold: number;
+};
+
 export type ClearOutputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -211,6 +248,49 @@ export type Connection = {
   theme: "light" | "dark" | "system";
 };
 
+export type ConnectionInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Brand accent, #rrggbb
+   */
+  accent: string;
+  /**
+   * How the accent reads against the light and dark canvases
+   */
+  accentRatio: AccentRatio;
+  /**
+   * Path of this workspace's mark, when it has one
+   */
+  logoUrl?: string;
+  /**
+   * Which sign-in methods this workspace accepts now
+   */
+  methods: SignInMethods;
+  /**
+   * What this workspace calls itself
+   */
+  name: string;
+  /**
+   * Whether a forgotten password can be recovered here
+   */
+  recovery: RecoveryAvailability;
+  /**
+   * This workspace's settings write count, from 1 Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  revision: string;
+  /**
+   * The sign-in door this installation mounted
+   */
+  signIn: SignInDoor;
+  /**
+   * Colour scheme, or system to follow the visitor's
+   */
+  theme: "light" | "dark" | "system";
+};
+
 export type Content = {
   /**
    * A URL to the JSON Schema for this object.
@@ -242,6 +322,52 @@ export type Content = {
    * This row's own write count, from 1
    */
   readonly revision?: number;
+  /**
+   * URL name, unique within the tenant
+   */
+  slug: string;
+  /**
+   * Lifecycle state
+   */
+  status?: "draft" | "published" | "archived";
+  /**
+   * Headline
+   */
+  title: string;
+  readonly updatedAt?: string;
+};
+
+export type ContentInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The user who created this
+   */
+  readonly author?: string;
+  /**
+   * The content itself, in Markdown
+   */
+  body?: string;
+  /**
+   * File id of the cover picture
+   */
+  coverImageId?: string;
+  readonly createdAt?: string;
+  readonly id?: string;
+  /**
+   * page or post
+   */
+  kind?: "page" | "post";
+  /**
+   * When this was published
+   */
+  readonly publishedAt?: string;
+  /**
+   * This row's own write count, from 1 Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly revision?: string;
   /**
    * URL name, unique within the tenant
    */
@@ -383,6 +509,64 @@ export type Delivery = {
   readonly updatedAt?: string;
 };
 
+export type DeliveryInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * 1 for the first attempt; the retry ladder's ordinal
+   */
+  readonly attempt: number;
+  /**
+   * When the request was sent
+   */
+  readonly attemptedAt?: string;
+  /**
+   * When this attempt may be made
+   */
+  readonly availableAt: string;
+  /**
+   * Why this row exists: a first attempt, a retry, or a replay an administrator asked for
+   */
+  readonly cause: "initial" | "retry" | "replay";
+  readonly createdAt?: string;
+  /**
+   * The endpoint this attempt was addressed to
+   */
+  readonly endpointId: string;
+  /**
+   * The event's own id, sent as webhook-id
+   */
+  readonly eventId: string;
+  /**
+   * The event type that matched, so the log answers why this delivery exists
+   */
+  readonly eventName: string;
+  readonly id?: string;
+  /**
+   * The CloudEvent as published, and the exact bytes signed
+   */
+  readonly payload: string;
+  /**
+   * Why this attempt failed, was dropped, or was retried
+   */
+  readonly reason?: string;
+  /**
+   * The log's own order Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly seq: string;
+  /**
+   * What became of this attempt
+   */
+  readonly state: "queued" | "in_flight" | "sent" | "failed" | "dropped";
+  /**
+   * The HTTP status the receiver answered, 0 when nothing answered
+   */
+  readonly statusCode: number;
+  readonly updatedAt?: string;
+};
+
 export type Device = {
   /**
    * A URL to the JSON Schema for this object.
@@ -486,6 +670,7 @@ export type Entry = {
   entity: string;
   fields: Array<Field> | null;
   immutable?: Array<string> | null;
+  input?: InputEntry;
   module: string;
   operations?: Array<string> | null;
   path: string;
@@ -568,6 +753,21 @@ export type ErasureReceipt = {
   subject: string;
 };
 
+export type ErasureReceiptInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  at: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  bytes: string;
+  files: number;
+  held?: Array<string> | null;
+  subject: string;
+};
+
 export type Event = {
   /**
    * A URL to the JSON Schema for this object.
@@ -637,6 +837,78 @@ export type Event = {
   traceparent?: string;
 };
 
+export type EventInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The user who caused it, absent for system work
+   */
+  actor?: string;
+  /**
+   * What kind of cause wrote this, when it was no session: user, system, seed or job
+   */
+  actorKind?: string;
+  /**
+   * The address the call arrived from
+   */
+  clientIp?: string;
+  /**
+   * The event this row records
+   */
+  eventId: string;
+  /**
+   * The trail row's own id
+   */
+  id: string;
+  /**
+   * The person the run served, who did not sign in
+   */
+  initiator?: string;
+  /**
+   * The event's name
+   */
+  name: string;
+  /**
+   * When the state changed
+   */
+  occurredAt: string;
+  operationId?: string;
+  operationOutcome?: string;
+  operationPersonId?: string;
+  operationRef?: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  operationRevision?: string;
+  operationTenantId?: string;
+  /**
+   * The event's payload, as its module published it
+   */
+  payload: unknown;
+  /**
+   * The call that caused this, as its caller was told it
+   */
+  requestId?: string;
+  /**
+   * The file that asked for the write, cited by the run that made it
+   */
+  sourceFile?: string;
+  /**
+   * The line of that file
+   */
+  sourceLine?: number;
+  /**
+   * The trace this event happened in, absent when nobody traced it
+   */
+  traceId?: string;
+  /**
+   * The W3C trace context of the call that caused this
+   */
+  traceparent?: string;
+};
+
 export type ExportForBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -676,6 +948,7 @@ export type FactorsOutputBody = {
 };
 
 export type Field = {
+  choices?: ChoiceSet;
   default?: string;
   display?: boolean;
   doc?: string;
@@ -702,6 +975,7 @@ export type FieldHints = {
   enumTones?: {
     [key: string]: string;
   };
+  figure?: unknown;
   format?: string;
   help?: string;
   label?: string;
@@ -763,6 +1037,68 @@ export type File = {
    * Bytes
    */
   readonly size?: number;
+  /**
+   * Since when nothing shows it
+   */
+  readonly unusedSince?: string;
+  readonly updatedAt?: string;
+  /**
+   * The user who uploaded it
+   */
+  readonly uploader?: string;
+  /**
+   * Who may read it
+   */
+  visibility?: "private" | "public";
+  /**
+   * Pixels across, as stored
+   */
+  readonly width?: number;
+};
+
+export type FileInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * What the image says about itself, empty until somebody captions it
+   */
+  alt: string;
+  /**
+   * Media type, as the upload declared it
+   */
+  contentType?: string;
+  readonly createdAt?: string;
+  /**
+   * True when the image carries no information a reader would want
+   */
+  decorative: boolean;
+  /**
+   * Pixels down, as stored
+   */
+  readonly height?: number;
+  readonly id?: string;
+  /**
+   * Retention class, as the product names it
+   */
+  kind?: string;
+  /**
+   * The name the file was uploaded under
+   */
+  name: string;
+  /**
+   * Whether only the module that stored it serves its bytes
+   */
+  readonly sealed?: boolean;
+  /**
+   * SHA-256 of the content, hex
+   */
+  readonly sha256?: string;
+  /**
+   * Bytes Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly size?: string;
   /**
    * Since when nothing shows it
    */
@@ -932,6 +1268,13 @@ export type Identity = {
   permissions: Array<string> | null;
   roles: Array<string> | null;
   userId: string;
+};
+
+export type InputEntry = {
+  fields: Array<Field> | null;
+  output: Array<Field> | null;
+  outputList: boolean;
+  path: string;
 };
 
 export type Invitation = {
@@ -1266,6 +1609,20 @@ export type PageContentBody = {
   total: number;
 };
 
+export type PageContentBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<ContentInt64Response> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageDeliveryBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1275,6 +1632,20 @@ export type PageDeliveryBody = {
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageDeliveryBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<DeliveryInt64Response> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageDeviceBody = {
@@ -1288,6 +1659,20 @@ export type PageDeviceBody = {
   total: number;
 };
 
+export type PageDeviceBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Device> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageEndpointBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1297,6 +1682,20 @@ export type PageEndpointBody = {
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageEndpointBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Endpoint> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageEventBody = {
@@ -1310,6 +1709,20 @@ export type PageEventBody = {
   total: number;
 };
 
+export type PageEventBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<EventInt64Response> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageFileBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1319,6 +1732,20 @@ export type PageFileBody = {
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageFileBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<FileInt64Response> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageNotificationBody = {
@@ -1332,6 +1759,20 @@ export type PageNotificationBody = {
   total: number;
 };
 
+export type PageNotificationBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<Notification> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PagePlanBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1341,6 +1782,20 @@ export type PagePlanBody = {
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PagePlanBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<PlanInt64Response> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageProposalBody = {
@@ -1354,6 +1809,20 @@ export type PageProposalBody = {
   total: number;
 };
 
+export type PageProposalBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<ProposalInt64Response> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageTaskBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1365,6 +1834,20 @@ export type PageTaskBody = {
   total: number;
 };
 
+export type PageTaskBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<TaskInt64Response> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageUserBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1374,6 +1857,20 @@ export type PageUserBody = {
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageUserBodyInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<User> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PasskeyBeginAssertionInputBody = {
@@ -1556,6 +2053,44 @@ export type Plan = {
   readonly updatedAt?: string;
 };
 
+export type PlanInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Whether this plan accepts new subscriptions
+   */
+  active: boolean;
+  /**
+   * Stable identifier, unique within the tenant
+   */
+  code: string;
+  readonly createdAt?: string;
+  /**
+   * ISO 4217 code
+   */
+  currency: string;
+  /**
+   * Feature names this plan includes
+   */
+  features?: Array<string> | null;
+  readonly id?: string;
+  /**
+   * How long one period lasts
+   */
+  interval?: "month" | "year";
+  /**
+   * Display name
+   */
+  name: string;
+  /**
+   * Price of one interval, in the currency's minor unit Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807. minimum: 0.
+   */
+  priceCents?: string;
+  readonly updatedAt?: string;
+};
+
 export type PlanPatch = {
   /**
    * Whether this plan accepts new subscriptions
@@ -1670,6 +2205,78 @@ export type Proposal = {
   readonly verdict: "" | "approved" | "declined";
 };
 
+export type ProposalInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * The subject revision this proposal caused Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly appliedRevision: string;
+  /**
+   * The subject's revision this diff was made against Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly baseRevision: string;
+  /**
+   * Why, in the reviewer's words
+   */
+  comment?: string;
+  readonly createdAt?: string;
+  /**
+   * The change, as an RFC 7386 merge patch
+   */
+  diff: {
+    [key: string]: unknown;
+  };
+  /**
+   * sha256 of the canonical diff, which is what a verdict is about
+   */
+  readonly diffDigest: string;
+  readonly id?: string;
+  /**
+   * Who put it forward, from their own credentials
+   */
+  readonly proposer: string;
+  /**
+   * When the decision was made
+   */
+  readonly reviewedAt?: string;
+  /**
+   * Who decided
+   */
+  readonly reviewer?: string;
+  /**
+   * This row's own revision, which every command rechecks Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly revision: string;
+  /**
+   * Where it is in the lifecycle
+   */
+  readonly state: "proposed" | "approved" | "declined" | "withdrawn" | "applied";
+  /**
+   * The entity inside it
+   */
+  subjectEntity: string;
+  /**
+   * The row, or nil for a one-per-tenant entity
+   */
+  subjectId: string;
+  /**
+   * The module that owns the row
+   */
+  subjectModule: string;
+  /**
+   * One line on what the change is
+   */
+  summary: string;
+  readonly updatedAt?: string;
+  /**
+   * The decision, empty until one is made
+   */
+  readonly verdict: "" | "approved" | "declined";
+};
+
 export type ProviderConfig = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1709,6 +2316,29 @@ export type Quota = {
   readonly variants: number;
 };
 
+export type QuotaInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Bytes allowed, when the deployment sets one Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly quota: string;
+  /**
+   * True when this installation sets no ceiling
+   */
+  readonly unlimited: boolean;
+  /**
+   * Bytes this tenant is holding Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly used: string;
+  /**
+   * Bytes of those bytes that are other widths of the same pictures Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly variants: string;
+};
+
 export type Receipt = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1720,6 +2350,24 @@ export type Receipt = {
   outcomeAt?: string;
   ref: string;
   revision: number;
+  route: string;
+  startedAt: string;
+};
+
+export type ReceiptInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  id: string;
+  method: string;
+  outcome?: string;
+  outcomeAt?: string;
+  ref: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  revision: string;
   route: string;
   startedAt: string;
 };
@@ -1797,6 +2445,29 @@ export type Request = {
   updatedAt: string;
 };
 
+export type RequestInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  bundle: string;
+  bundleDigest?: string;
+  createdAt: string;
+  detail?: string;
+  id: string;
+  kind: string;
+  linkExpires?: string;
+  reason?: string;
+  requester: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  revision: string;
+  state: string;
+  subject: string;
+  updatedAt: string;
+};
+
 export type ResendVerificationInputBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -1845,11 +2516,23 @@ export type Resolved = {
   policyVersion: number;
   summary: ResolvedSummary;
   titles: ResolvedTitles;
+  views: Array<ResolvedView> | null;
+};
+
+export type ResolvedChoice = {
+  cardinality: string;
+  empty: ChoiceEmpty;
+  groups: Array<ChoiceGroup> | null;
+  maximum?: ChoiceMaximum;
+  noPreference: string;
+  searchEnabled: boolean;
+  searchThreshold: number;
 };
 
 export type ResolvedCommand = {
   confirmation?: ResolvedConfirmation;
   destructive: boolean;
+  fields: Array<ResolvedField> | null;
   label: string;
   primary: boolean;
   successMessage: string;
@@ -1862,6 +2545,14 @@ export type ResolvedConfirmation = {
   body: string;
   confirmLabel: string;
   title: string;
+};
+
+export type ResolvedControl = {
+  control: string;
+  editable: boolean;
+  interactions: Array<string> | null;
+  name: string;
+  path: Array<string> | null;
 };
 
 export type ResolvedDeck = {
@@ -1888,8 +2579,10 @@ export type ResolvedEditable = {
 };
 
 export type ResolvedField = {
+  choice?: ResolvedChoice;
   control: string;
   editable: ResolvedEditable;
+  figure: unknown;
   help: string;
   kind: string;
   label: string;
@@ -1907,6 +2600,17 @@ export type ResolvedFilter = {
   kind: string;
   label: string;
   values: Array<ResolvedOption> | null;
+};
+
+export type ResolvedForm = {
+  layout: string;
+  steps: Array<ResolvedStep> | null;
+};
+
+export type ResolvedForms = {
+  createForm?: ResolvedForm;
+  inputForm?: ResolvedForm;
+  updateForm?: ResolvedForm;
 };
 
 export type ResolvedGroup = {
@@ -1927,6 +2631,7 @@ export type ResolvedIdentity = {
 export type ResolvedLayout = {
   columns: Array<string> | null;
   create: Array<string> | null;
+  forms?: ResolvedForms;
   information: Array<string> | null;
   overview: Array<string> | null;
   sections: Array<ResolvedSection> | null;
@@ -1946,7 +2651,10 @@ export type ResolvedMoney = {
 
 export type ResolvedOption = {
   done: boolean;
+  group: string;
   label: string;
+  noPreference: boolean;
+  picture?: ChoicePicture;
   tone: string;
   value: string;
 };
@@ -1978,6 +2686,16 @@ export type ResolvedSortOption = {
   query: string;
 };
 
+export type ResolvedStep = {
+  answerField: string;
+  emptyLabel: string;
+  fields: Array<string> | null;
+  key: string;
+  label: string;
+  primaryLabel: string;
+  section: string;
+};
+
 export type ResolvedSummary = {
   highlight?: EntryHighlight;
   trendField: string;
@@ -1997,6 +2715,13 @@ export type ResolvedTitles = {
   status: string;
   summary: Array<string> | null;
   thumbnail: string;
+};
+
+export type ResolvedView = {
+  cardinality: string;
+  controls: Array<ResolvedControl> | null;
+  kind: string;
+  verb: string;
 };
 
 export type ResourceGroup = {
@@ -2308,6 +3033,48 @@ export type SiteSettings = {
   readonly updatedAt?: string;
 };
 
+export type SiteSettingsInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  readonly createdAt?: string;
+  /**
+   * Slug of the content served at /
+   */
+  homeSlug?: string;
+  readonly id?: string;
+  /**
+   * File id of the logo
+   */
+  logoFileId?: string;
+  /**
+   * The site's navigation, in order
+   */
+  nav?: Array<NavItem> | null;
+  /**
+   * Brand colour, #rrggbb. A site that names none is rendered in the installation's own accent; a read always answers #rrggbb
+   */
+  primaryColor?: string;
+  /**
+   * This row's own write count, from 1 Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly revision?: string;
+  /**
+   * The line under the name
+   */
+  tagline?: string;
+  /**
+   * Colour scheme, or system to follow the visitor's
+   */
+  theme?: "light" | "dark" | "system";
+  /**
+   * The site's name
+   */
+  title?: string;
+  readonly updatedAt?: string;
+};
+
 export type SubscribeBody = {
   /**
    * A URL to the JSON Schema for this object.
@@ -2373,6 +3140,60 @@ export type Subscription = {
   readonly updatedAt?: string;
 };
 
+export type SubscriptionInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * Day of the month this subscription bills on
+   */
+  readonly anchorDay?: number;
+  /**
+   * Consecutive charges that did not settle
+   */
+  readonly attemptCount?: number;
+  /**
+   * Whether this subscription ends when the current period does
+   */
+  cancelAtPeriodEnd?: boolean;
+  readonly createdAt?: string;
+  /**
+   * ISO 4217 code this subscription is billed in
+   */
+  readonly currency?: string;
+  /**
+   * End of the period being served
+   */
+  readonly currentPeriodEnd?: string;
+  /**
+   * Start of the period being served
+   */
+  readonly currentPeriodStart?: string;
+  readonly id?: string;
+  /**
+   * When this subscription first failed to pay
+   */
+  readonly pastDueSince?: string;
+  /**
+   * The plan this subscription is for
+   */
+  planId: string;
+  /**
+   * What this subscription is billed per period, in the minor unit of Currency Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly priceCents?: string;
+  /**
+   * Lifecycle state
+   */
+  status?: "trial" | "active" | "past_due" | "cancelled";
+  /**
+   * When this tenant's one trial was issued
+   */
+  readonly trialUsedAt?: string;
+  readonly updatedAt?: string;
+};
+
 export type Summary = {
   /**
    * A URL to the JSON Schema for this object.
@@ -2388,6 +3209,29 @@ export type SummaryEntry = {
   module: string;
   total?: number;
   trend?: Trend;
+};
+
+export type SummaryEntryInt64Response = {
+  entity: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  highlight?: string;
+  module: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total?: string;
+  trend?: TrendInt64Response;
+};
+
+export type SummaryInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  asOf: string;
+  entries: Array<SummaryEntryInt64Response> | null;
 };
 
 export type TotpEnrolment = {
@@ -2451,6 +3295,68 @@ export type Task = {
    * This row's own write count, from 1
    */
   readonly revision?: number;
+  /**
+   * True once the deadline elapsed with the task unresolved
+   */
+  slaBreached?: boolean;
+  /**
+   * Hard SLA deadline; a breach is measured against this
+   */
+  slaDeadline?: string;
+  /**
+   * Origin of the task
+   */
+  source?: string;
+  /**
+   * Reference into the source system
+   */
+  sourceRef?: string;
+  /**
+   * Lifecycle state
+   */
+  status?: "open" | "acknowledged" | "in_progress" | "resolved" | "closed";
+  /**
+   * Short summary of the task
+   */
+  title: string;
+  readonly updatedAt?: string;
+};
+
+export type TaskInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  /**
+   * User responsible for the task
+   */
+  assigneeId?: string;
+  readonly createdAt?: string;
+  /**
+   * Detailed description of the task
+   */
+  description?: string;
+  /**
+   * Soft target completion time
+   */
+  dueAt?: string;
+  readonly id?: string;
+  /**
+   * Task priority
+   */
+  priority?: "low" | "normal" | "high" | "critical";
+  /**
+   * How the task was resolved
+   */
+  resolution?: string;
+  /**
+   * When the task was resolved
+   */
+  readonly resolvedAt?: string;
+  /**
+   * This row's own write count, from 1 Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  readonly revision?: string;
   /**
    * True once the deadline elapsed with the task unresolved
    */
@@ -2586,6 +3492,19 @@ export type Trend = {
 export type TrendDay = {
   count: number;
   day: string;
+};
+
+export type TrendDayInt64Response = {
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  count: string;
+  day: string;
+};
+
+export type TrendInt64Response = {
+  days: Array<TrendDayInt64Response> | null;
+  field: string;
 };
 
 export type UseRow = {
@@ -2759,6 +3678,53 @@ export type Version = {
   version: number;
 };
 
+export type VersionInt64Response = {
+  /**
+   * Who made this write; the zero uuid when nobody signed in
+   */
+  actor: string;
+  /**
+   * When this write committed
+   */
+  at: string;
+  /**
+   * The fields this write moved; empty on a record's first version, which nothing preceded
+   */
+  changed: Array<string> | null;
+  /**
+   * The record's entity within that module
+   */
+  entity: string;
+  /**
+   * The record as this write committed it, in the field names the record's own body uses
+   */
+  fields: unknown;
+  /**
+   * This version row's own id
+   */
+  id: string;
+  /**
+   * The language of this version series, as a BCP-47 tag
+   */
+  locale: string;
+  /**
+   * The module that owns the record this version describes
+   */
+  module: string;
+  /**
+   * The write's own sentence about why it happened; empty for an ordinary save
+   */
+  reason: string;
+  /**
+   * The record this is one version of
+   */
+  record: string;
+  /**
+   * This version's number in its series — the row's own write count when the write made it, from 1 Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  version: string;
+};
+
 export type VersionPage = {
   /**
    * A URL to the JSON Schema for this object.
@@ -2766,6 +3732,18 @@ export type VersionPage = {
   readonly $schema?: string;
   items: Array<Version> | null;
   next: number;
+};
+
+export type VersionPageInt64Response = {
+  /**
+   * A URL to the JSON Schema for this object.
+   */
+  readonly $schema?: string;
+  items: Array<VersionInt64Response> | null;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  next: string;
 };
 
 export type Violation = {
@@ -2875,7 +3853,73 @@ export type ConnectionWritable = {
   theme: "light" | "dark" | "system";
 };
 
+export type ConnectionInt64ResponseWritable = {
+  /**
+   * Brand accent, #rrggbb
+   */
+  accent: string;
+  /**
+   * How the accent reads against the light and dark canvases
+   */
+  accentRatio: AccentRatio;
+  /**
+   * Path of this workspace's mark, when it has one
+   */
+  logoUrl?: string;
+  /**
+   * Which sign-in methods this workspace accepts now
+   */
+  methods: SignInMethods;
+  /**
+   * What this workspace calls itself
+   */
+  name: string;
+  /**
+   * Whether a forgotten password can be recovered here
+   */
+  recovery: RecoveryAvailability;
+  /**
+   * This workspace's settings write count, from 1 Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  revision: string;
+  /**
+   * The sign-in door this installation mounted
+   */
+  signIn: SignInDoor;
+  /**
+   * Colour scheme, or system to follow the visitor's
+   */
+  theme: "light" | "dark" | "system";
+};
+
 export type ContentWritable = {
+  /**
+   * The content itself, in Markdown
+   */
+  body?: string;
+  /**
+   * File id of the cover picture
+   */
+  coverImageId?: string;
+  /**
+   * page or post
+   */
+  kind?: "page" | "post";
+  /**
+   * URL name, unique within the tenant
+   */
+  slug: string;
+  /**
+   * Lifecycle state
+   */
+  status?: "draft" | "published" | "archived";
+  /**
+   * Headline
+   */
+  title: string;
+};
+
+export type ContentInt64ResponseWritable = {
   /**
    * The content itself, in Markdown
    */
@@ -2984,6 +4028,17 @@ export type ErasureReceiptWritable = {
   subject: string;
 };
 
+export type ErasureReceiptInt64ResponseWritable = {
+  at: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  bytes: string;
+  files: number;
+  held?: Array<string> | null;
+  subject: string;
+};
+
 export type EventWritable = {
   /**
    * The user who caused it, absent for system work
@@ -3049,6 +4104,74 @@ export type EventWritable = {
   traceparent?: string;
 };
 
+export type EventInt64ResponseWritable = {
+  /**
+   * The user who caused it, absent for system work
+   */
+  actor?: string;
+  /**
+   * What kind of cause wrote this, when it was no session: user, system, seed or job
+   */
+  actorKind?: string;
+  /**
+   * The address the call arrived from
+   */
+  clientIp?: string;
+  /**
+   * The event this row records
+   */
+  eventId: string;
+  /**
+   * The trail row's own id
+   */
+  id: string;
+  /**
+   * The person the run served, who did not sign in
+   */
+  initiator?: string;
+  /**
+   * The event's name
+   */
+  name: string;
+  /**
+   * When the state changed
+   */
+  occurredAt: string;
+  operationId?: string;
+  operationOutcome?: string;
+  operationPersonId?: string;
+  operationRef?: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  operationRevision?: string;
+  operationTenantId?: string;
+  /**
+   * The event's payload, as its module published it
+   */
+  payload: unknown;
+  /**
+   * The call that caused this, as its caller was told it
+   */
+  requestId?: string;
+  /**
+   * The file that asked for the write, cited by the run that made it
+   */
+  sourceFile?: string;
+  /**
+   * The line of that file
+   */
+  sourceLine?: number;
+  /**
+   * The trace this event happened in, absent when nobody traced it
+   */
+  traceId?: string;
+  /**
+   * The W3C trace context of the call that caused this
+   */
+  traceparent?: string;
+};
+
 export type ExportForBodyWritable = {
   /**
    * Why, recorded on the request
@@ -3076,6 +4199,33 @@ export type FactorsOutputBodyWritable = {
 };
 
 export type FileWritable = {
+  /**
+   * What the image says about itself, empty until somebody captions it
+   */
+  alt: string;
+  /**
+   * Media type, as the upload declared it
+   */
+  contentType?: string;
+  /**
+   * True when the image carries no information a reader would want
+   */
+  decorative: boolean;
+  /**
+   * Retention class, as the product names it
+   */
+  kind?: string;
+  /**
+   * The name the file was uploaded under
+   */
+  name: string;
+  /**
+   * Who may read it
+   */
+  visibility?: "private" | "public";
+};
+
+export type FileInt64ResponseWritable = {
   /**
    * What the image says about itself, empty until somebody captions it
    */
@@ -3401,11 +4551,31 @@ export type PageContentBodyWritable = {
   total: number;
 };
 
+export type PageContentBodyInt64ResponseWritable = {
+  items: Array<ContentInt64ResponseWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageDeliveryBodyWritable = {
   items: Array<unknown> | null;
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageDeliveryBodyInt64ResponseWritable = {
+  items: Array<unknown> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageDeviceBodyWritable = {
@@ -3415,11 +4585,31 @@ export type PageDeviceBodyWritable = {
   total: number;
 };
 
+export type PageDeviceBodyInt64ResponseWritable = {
+  items: Array<DeviceWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageEndpointBodyWritable = {
   items: Array<EndpointWritable> | null;
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageEndpointBodyInt64ResponseWritable = {
+  items: Array<EndpointWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageEventBodyWritable = {
@@ -3429,11 +4619,31 @@ export type PageEventBodyWritable = {
   total: number;
 };
 
+export type PageEventBodyInt64ResponseWritable = {
+  items: Array<EventInt64ResponseWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageFileBodyWritable = {
   items: Array<FileWritable> | null;
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageFileBodyInt64ResponseWritable = {
+  items: Array<FileInt64ResponseWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageNotificationBodyWritable = {
@@ -3443,11 +4653,31 @@ export type PageNotificationBodyWritable = {
   total: number;
 };
 
+export type PageNotificationBodyInt64ResponseWritable = {
+  items: Array<NotificationWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PagePlanBodyWritable = {
   items: Array<PlanWritable> | null;
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PagePlanBodyInt64ResponseWritable = {
+  items: Array<PlanInt64ResponseWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PageProposalBodyWritable = {
@@ -3457,6 +4687,16 @@ export type PageProposalBodyWritable = {
   total: number;
 };
 
+export type PageProposalBodyInt64ResponseWritable = {
+  items: Array<ProposalInt64ResponseWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageTaskBodyWritable = {
   items: Array<TaskWritable> | null;
   limit: number;
@@ -3464,11 +4704,31 @@ export type PageTaskBodyWritable = {
   total: number;
 };
 
+export type PageTaskBodyInt64ResponseWritable = {
+  items: Array<TaskInt64ResponseWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
+};
+
 export type PageUserBodyWritable = {
   items: Array<UserWritable> | null;
   limit: number;
   offset: number;
   total: number;
+};
+
+export type PageUserBodyInt64ResponseWritable = {
+  items: Array<UserWritable> | null;
+  limit: number;
+  offset: number;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  total: string;
 };
 
 export type PasskeyBeginAssertionInputBodyWritable = {
@@ -3606,6 +4866,37 @@ export type PlanWritable = {
   priceCents?: number;
 };
 
+export type PlanInt64ResponseWritable = {
+  /**
+   * Whether this plan accepts new subscriptions
+   */
+  active: boolean;
+  /**
+   * Stable identifier, unique within the tenant
+   */
+  code: string;
+  /**
+   * ISO 4217 code
+   */
+  currency: string;
+  /**
+   * Feature names this plan includes
+   */
+  features?: Array<string> | null;
+  /**
+   * How long one period lasts
+   */
+  interval?: "month" | "year";
+  /**
+   * Display name
+   */
+  name: string;
+  /**
+   * Price of one interval, in the currency's minor unit Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807. minimum: 0.
+   */
+  priceCents?: string;
+};
+
 export type ProblemWritable = {
   detail?: string;
   errors?: Array<string> | null;
@@ -3617,6 +4908,35 @@ export type ProblemWritable = {
 };
 
 export type ProposalWritable = {
+  /**
+   * Why, in the reviewer's words
+   */
+  comment?: string;
+  /**
+   * The change, as an RFC 7386 merge patch
+   */
+  diff: {
+    [key: string]: unknown;
+  };
+  /**
+   * The entity inside it
+   */
+  subjectEntity: string;
+  /**
+   * The row, or nil for a one-per-tenant entity
+   */
+  subjectId: string;
+  /**
+   * The module that owns the row
+   */
+  subjectModule: string;
+  /**
+   * One line on what the change is
+   */
+  summary: string;
+};
+
+export type ProposalInt64ResponseWritable = {
   /**
    * Why, in the reviewer's words
    */
@@ -3668,6 +4988,20 @@ export type ReceiptWritable = {
   startedAt: string;
 };
 
+export type ReceiptInt64ResponseWritable = {
+  id: string;
+  method: string;
+  outcome?: string;
+  outcomeAt?: string;
+  ref: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  revision: string;
+  route: string;
+  startedAt: string;
+};
+
 export type RecoveryCodesOutputBodyWritable = {
   codes: Array<string> | null;
   factor?: FactorWritable;
@@ -3702,6 +5036,25 @@ export type RequestWritable = {
   reason?: string;
   requester: string;
   revision: number;
+  state: string;
+  subject: string;
+  updatedAt: string;
+};
+
+export type RequestInt64ResponseWritable = {
+  bundle: string;
+  bundleDigest?: string;
+  createdAt: string;
+  detail?: string;
+  id: string;
+  kind: string;
+  linkExpires?: string;
+  reason?: string;
+  requester: string;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  revision: string;
   state: string;
   subject: string;
   updatedAt: string;
@@ -3911,6 +5264,37 @@ export type SiteSettingsWritable = {
   title?: string;
 };
 
+export type SiteSettingsInt64ResponseWritable = {
+  /**
+   * Slug of the content served at /
+   */
+  homeSlug?: string;
+  /**
+   * File id of the logo
+   */
+  logoFileId?: string;
+  /**
+   * The site's navigation, in order
+   */
+  nav?: Array<NavItem> | null;
+  /**
+   * Brand colour, #rrggbb. A site that names none is rendered in the installation's own accent; a read always answers #rrggbb
+   */
+  primaryColor?: string;
+  /**
+   * The line under the name
+   */
+  tagline?: string;
+  /**
+   * Colour scheme, or system to follow the visitor's
+   */
+  theme?: "light" | "dark" | "system";
+  /**
+   * The site's name
+   */
+  title?: string;
+};
+
 export type SubscribeBodyWritable = {
   /**
    * The plan to subscribe to
@@ -3933,9 +5317,29 @@ export type SubscriptionWritable = {
   status?: "trial" | "active" | "past_due" | "cancelled";
 };
 
+export type SubscriptionInt64ResponseWritable = {
+  /**
+   * Whether this subscription ends when the current period does
+   */
+  cancelAtPeriodEnd?: boolean;
+  /**
+   * The plan this subscription is for
+   */
+  planId: string;
+  /**
+   * Lifecycle state
+   */
+  status?: "trial" | "active" | "past_due" | "cancelled";
+};
+
 export type SummaryWritable = {
   asOf: string;
   entries: Array<SummaryEntry> | null;
+};
+
+export type SummaryInt64ResponseWritable = {
+  asOf: string;
+  entries: Array<SummaryEntryInt64Response> | null;
 };
 
 export type TotpEnrolmentWritable = {
@@ -3957,6 +5361,53 @@ export type TargetBodyWritable = {
 };
 
 export type TaskWritable = {
+  /**
+   * User responsible for the task
+   */
+  assigneeId?: string;
+  /**
+   * Detailed description of the task
+   */
+  description?: string;
+  /**
+   * Soft target completion time
+   */
+  dueAt?: string;
+  /**
+   * Task priority
+   */
+  priority?: "low" | "normal" | "high" | "critical";
+  /**
+   * How the task was resolved
+   */
+  resolution?: string;
+  /**
+   * True once the deadline elapsed with the task unresolved
+   */
+  slaBreached?: boolean;
+  /**
+   * Hard SLA deadline; a breach is measured against this
+   */
+  slaDeadline?: string;
+  /**
+   * Origin of the task
+   */
+  source?: string;
+  /**
+   * Reference into the source system
+   */
+  sourceRef?: string;
+  /**
+   * Lifecycle state
+   */
+  status?: "open" | "acknowledged" | "in_progress" | "resolved" | "closed";
+  /**
+   * Short summary of the task
+   */
+  title: string;
+};
+
+export type TaskInt64ResponseWritable = {
   /**
    * User responsible for the task
    */
@@ -4130,7 +5581,18 @@ export type VersionPageWritable = {
   next: number;
 };
 
+export type VersionPageInt64ResponseWritable = {
+  items: Array<VersionInt64Response> | null;
+  /**
+   *  Signed 64-bit decimal integer, -9223372036854775808 through 9223372036854775807.
+   */
+  next: string;
+};
+
 export type AppAccessRequestData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: AccessBodyWritable;
   headers?: {
     /**
@@ -4197,7 +5659,7 @@ export type AppConnectionError = AppConnectionErrors[keyof AppConnectionErrors];
 
 export type AppConnectionResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Connection;
 };
@@ -4240,7 +5702,7 @@ export type AppOperationOutcomeError = AppOperationOutcomeErrors[keyof AppOperat
 
 export type AppOperationOutcomeResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Receipt;
 };
@@ -4343,7 +5805,7 @@ export type AppSummaryError = AppSummaryErrors[keyof AppSummaryErrors];
 
 export type AppSummaryResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Summary;
 };
@@ -4421,7 +5883,7 @@ export type AuditEventListError = AuditEventListErrors[keyof AuditEventListError
 
 export type AuditEventListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageEventBody;
 };
@@ -4463,7 +5925,7 @@ export type AuditEventReadError = AuditEventReadErrors[keyof AuditEventReadError
 
 export type AuditEventReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Event;
 };
@@ -4471,6 +5933,9 @@ export type AuditEventReadResponses = {
 export type AuditEventReadResponse = AuditEventReadResponses[keyof AuditEventReadResponses];
 
 export type AuthChallengePasskeyBeginData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PasskeyBeginAssertionInputBodyWritable;
   headers?: {
     /**
@@ -4512,6 +5977,9 @@ export type AuthChallengePasskeyBeginResponse =
   AuthChallengePasskeyBeginResponses[keyof AuthChallengePasskeyBeginResponses];
 
 export type AuthChallengePasskeyVerifyData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PasskeyVerifyInputBodyWritable;
   headers?: {
     /**
@@ -4561,6 +6029,9 @@ export type AuthChallengePasskeyVerifyResponse =
   AuthChallengePasskeyVerifyResponses[keyof AuthChallengePasskeyVerifyResponses];
 
 export type AuthChallengeVerifyData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: VerifyFactorInputBodyWritable;
   path?: never;
   query?: never;
@@ -4665,6 +6136,9 @@ export type AuthFactorPasskeyBeginResponse =
   AuthFactorPasskeyBeginResponses[keyof AuthFactorPasskeyBeginResponses];
 
 export type AuthFactorPasskeyFinishData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PasskeyFinishInputBodyWritable;
   headers?: {
     /**
@@ -4787,6 +6261,9 @@ export type AuthFactorTotpBeginResponse =
   AuthFactorTotpBeginResponses[keyof AuthFactorTotpBeginResponses];
 
 export type AuthFactorTotpFinishData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: FinishTotpInputBodyWritable;
   headers?: {
     /**
@@ -4879,6 +6356,9 @@ export type AuthFactorWithdrawResponse =
   AuthFactorWithdrawResponses[keyof AuthFactorWithdrawResponses];
 
 export type AuthLoginData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: LoginInputBodyWritable;
   path?: never;
   query?: never;
@@ -4965,6 +6445,9 @@ export type AuthLoginPasskeyBeginResponse =
   AuthLoginPasskeyBeginResponses[keyof AuthLoginPasskeyBeginResponses];
 
 export type AuthLoginPasskeyVerifyData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PasskeyVerifyInputBodyWritable;
   headers?: {
     /**
@@ -5157,6 +6640,9 @@ export type AuthOidcStartResponses = {
 export type AuthOidcStartResponse = AuthOidcStartResponses[keyof AuthOidcStartResponses];
 
 export type AuthPasswordChangeData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: ChangeInputBodyWritable;
   headers?: {
     /**
@@ -5201,6 +6687,9 @@ export type AuthPasswordChangeResponse =
   AuthPasswordChangeResponses[keyof AuthPasswordChangeResponses];
 
 export type AuthPasswordResetData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: ResetInputBodyWritable;
   path?: never;
   query?: never;
@@ -5272,6 +6761,9 @@ export type AuthRoleListResponses = {
 export type AuthRoleListResponse = AuthRoleListResponses[keyof AuthRoleListResponses];
 
 export type AuthRoleSetData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: RoleInputBodyWritable;
   path: {
     /**
@@ -5542,6 +7034,9 @@ export type AuthSessionRevokeResponse =
   AuthSessionRevokeResponses[keyof AuthSessionRevokeResponses];
 
 export type AuthPasskeySignInSetData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PasskeySignInSettingInputBodyWritable;
   headers?: {
     /**
@@ -5604,6 +7099,9 @@ export type AuthTokenListResponses = {
 export type AuthTokenListResponse = AuthTokenListResponses[keyof AuthTokenListResponses];
 
 export type AuthTokenIssueData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: IssueTokenInputBodyWritable;
   headers?: {
     /**
@@ -5785,7 +7283,7 @@ export type BillingPlanListError = BillingPlanListErrors[keyof BillingPlanListEr
 
 export type BillingPlanListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PagePlanBody;
 };
@@ -5831,7 +7329,7 @@ export type BillingPlanReadError = BillingPlanReadErrors[keyof BillingPlanReadEr
 
 export type BillingPlanReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Plan;
 };
@@ -5873,7 +7371,7 @@ export type BillingSubscriptionReadError =
 
 export type BillingSubscriptionReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Subscription;
 };
@@ -5882,6 +7380,9 @@ export type BillingSubscriptionReadResponse =
   BillingSubscriptionReadResponses[keyof BillingSubscriptionReadResponses];
 
 export type BillingSubscriptionCancelData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CancelBodyWritable;
   headers?: {
     /**
@@ -5922,7 +7423,7 @@ export type BillingSubscriptionCancelError =
 
 export type BillingSubscriptionCancelResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Subscription;
 };
@@ -5931,6 +7432,9 @@ export type BillingSubscriptionCancelResponse =
   BillingSubscriptionCancelResponses[keyof BillingSubscriptionCancelResponses];
 
 export type BillingSubscriptionSubscribeData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: SubscribeBodyWritable;
   headers?: {
     /**
@@ -5971,7 +7475,7 @@ export type BillingSubscriptionSubscribeError =
 
 export type BillingSubscriptionSubscribeResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Subscription;
 };
@@ -6038,7 +7542,7 @@ export type ChangeProposalListError = ChangeProposalListErrors[keyof ChangePropo
 
 export type ChangeProposalListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageProposalBody;
 };
@@ -6047,6 +7551,9 @@ export type ChangeProposalListResponse =
   ChangeProposalListResponses[keyof ChangeProposalListResponses];
 
 export type ChangeProposalProposeData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: NewProposalWritable;
   headers?: {
     /**
@@ -6087,7 +7594,7 @@ export type ChangeProposalProposeError =
 
 export type ChangeProposalProposeResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Proposal;
 };
@@ -6134,7 +7641,7 @@ export type ChangeProposalReadError = ChangeProposalReadErrors[keyof ChangePropo
 
 export type ChangeProposalReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Proposal;
 };
@@ -6143,6 +7650,9 @@ export type ChangeProposalReadResponse =
   ChangeProposalReadResponses[keyof ChangeProposalReadResponses];
 
 export type ChangeProposalApplyData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: RevisionInputWritable;
   headers?: {
     /**
@@ -6187,7 +7697,7 @@ export type ChangeProposalApplyError = ChangeProposalApplyErrors[keyof ChangePro
 
 export type ChangeProposalApplyResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Proposal;
 };
@@ -6196,6 +7706,9 @@ export type ChangeProposalApplyResponse =
   ChangeProposalApplyResponses[keyof ChangeProposalApplyResponses];
 
 export type ChangeProposalReviewData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: ReviewWritable;
   headers?: {
     /**
@@ -6241,7 +7754,7 @@ export type ChangeProposalReviewError =
 
 export type ChangeProposalReviewResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Proposal;
 };
@@ -6250,6 +7763,9 @@ export type ChangeProposalReviewResponse =
   ChangeProposalReviewResponses[keyof ChangeProposalReviewResponses];
 
 export type ChangeProposalWithdrawData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: RevisionInputWritable;
   headers?: {
     /**
@@ -6295,7 +7811,7 @@ export type ChangeProposalWithdrawError =
 
 export type ChangeProposalWithdrawResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Proposal;
 };
@@ -6358,7 +7874,7 @@ export type ContentContentListError = ContentContentListErrors[keyof ContentCont
 
 export type ContentContentListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageContentBody;
 };
@@ -6367,6 +7883,9 @@ export type ContentContentListResponse =
   ContentContentListResponses[keyof ContentContentListResponses];
 
 export type ContentContentCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: ContentWritable;
   headers?: {
     /**
@@ -6407,7 +7926,7 @@ export type ContentContentCreateError =
 
 export type ContentContentCreateResponses = {
   /**
-   * Created
+   * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   201: Content;
 };
@@ -6513,7 +8032,7 @@ export type ContentContentReadError = ContentContentReadErrors[keyof ContentCont
 
 export type ContentContentReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6522,6 +8041,9 @@ export type ContentContentReadResponse =
   ContentContentReadResponses[keyof ContentContentReadResponses];
 
 export type ContentContentUpdateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: ContentPatch;
   headers?: {
     /**
@@ -6576,7 +8098,7 @@ export type ContentContentUpdateError =
 
 export type ContentContentUpdateResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6585,6 +8107,9 @@ export type ContentContentUpdateResponse =
   ContentContentUpdateResponses[keyof ContentContentUpdateResponses];
 
 export type ContentContentArchiveData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -6630,7 +8155,7 @@ export type ContentContentArchiveError =
 
 export type ContentContentArchiveResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6639,6 +8164,9 @@ export type ContentContentArchiveResponse =
   ContentContentArchiveResponses[keyof ContentContentArchiveResponses];
 
 export type ContentContentPublishData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -6684,7 +8212,7 @@ export type ContentContentPublishError =
 
 export type ContentContentPublishResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6693,6 +8221,9 @@ export type ContentContentPublishResponse =
   ContentContentPublishResponses[keyof ContentContentPublishResponses];
 
 export type ContentContentRestoreData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: RestoreArgumentContentWritable;
   headers?: {
     /**
@@ -6738,7 +8269,7 @@ export type ContentContentRestoreError =
 
 export type ContentContentRestoreResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6747,6 +8278,9 @@ export type ContentContentRestoreResponse =
   ContentContentRestoreResponses[keyof ContentContentRestoreResponses];
 
 export type ContentContentReviewTranslationData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: TranslationFieldsBodyWritable;
   headers?: {
     /**
@@ -6792,7 +8326,7 @@ export type ContentContentReviewTranslationError =
 
 export type ContentContentReviewTranslationResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6801,6 +8335,9 @@ export type ContentContentReviewTranslationResponse =
   ContentContentReviewTranslationResponses[keyof ContentContentReviewTranslationResponses];
 
 export type ContentContentSuggestTranslationData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: TranslationFieldsBodyWritable;
   headers?: {
     /**
@@ -6846,7 +8383,7 @@ export type ContentContentSuggestTranslationError =
 
 export type ContentContentSuggestTranslationResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6855,6 +8392,9 @@ export type ContentContentSuggestTranslationResponse =
   ContentContentSuggestTranslationResponses[keyof ContentContentSuggestTranslationResponses];
 
 export type ContentContentTranslateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: TranslateBodyWritable;
   headers?: {
     /**
@@ -6900,7 +8440,7 @@ export type ContentContentTranslateError =
 
 export type ContentContentTranslateResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6909,6 +8449,9 @@ export type ContentContentTranslateResponse =
   ContentContentTranslateResponses[keyof ContentContentTranslateResponses];
 
 export type ContentContentUnpublishData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -6954,7 +8497,7 @@ export type ContentContentUnpublishError =
 
 export type ContentContentUnpublishResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -6963,6 +8506,9 @@ export type ContentContentUnpublishResponse =
   ContentContentUnpublishResponses[keyof ContentContentUnpublishResponses];
 
 export type ContentContentUntranslateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: TranslationFieldsBodyWritable;
   headers?: {
     /**
@@ -7008,7 +8554,7 @@ export type ContentContentUntranslateError =
 
 export type ContentContentUntranslateResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Content;
 };
@@ -7069,7 +8615,7 @@ export type ContentContentVersionsError =
 
 export type ContentContentVersionsResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: VersionPage;
 };
@@ -7136,7 +8682,7 @@ export type FileFileListError = FileFileListErrors[keyof FileFileListErrors];
 
 export type FileFileListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageFileBody;
 };
@@ -7200,7 +8746,7 @@ export type FileFileUploadError = FileFileUploadErrors[keyof FileFileUploadError
 
 export type FileFileUploadResponses = {
   /**
-   * Created
+   * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   201: File;
 };
@@ -7208,6 +8754,9 @@ export type FileFileUploadResponses = {
 export type FileFileUploadResponse = FileFileUploadResponses[keyof FileFileUploadResponses];
 
 export type FileFileEraseData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: EraseBodyWritable;
   headers?: {
     /**
@@ -7251,7 +8800,7 @@ export type FileFileEraseError = FileFileEraseErrors[keyof FileFileEraseErrors];
 
 export type FileFileEraseResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: ErasureReceipt;
 };
@@ -7347,7 +8896,7 @@ export type FileFileReadError = FileFileReadErrors[keyof FileFileReadErrors];
 
 export type FileFileReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: File;
 };
@@ -7355,6 +8904,9 @@ export type FileFileReadResponses = {
 export type FileFileReadResponse = FileFileReadResponses[keyof FileFileReadResponses];
 
 export type FileFileAltCommandData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: AltBodyWritable;
   headers?: {
     /**
@@ -7400,7 +8952,7 @@ export type FileFileAltCommandError = FileFileAltCommandErrors[keyof FileFileAlt
 
 export type FileFileAltCommandResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: File;
 };
@@ -7409,6 +8961,9 @@ export type FileFileAltCommandResponse =
   FileFileAltCommandResponses[keyof FileFileAltCommandResponses];
 
 export type FileFileAltData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: AltBodyWritable;
   path: {
     id: string;
@@ -7448,7 +9003,7 @@ export type FileFileAltError = FileFileAltErrors[keyof FileFileAltErrors];
 
 export type FileFileAltResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: File;
 };
@@ -7655,6 +9210,9 @@ export type FileFileReleaseResponses = {
 export type FileFileReleaseResponse = FileFileReleaseResponses[keyof FileFileReleaseResponses];
 
 export type FileFileRetainData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: RetainBodyWritable;
   headers?: {
     /**
@@ -7786,7 +9344,7 @@ export type FileQuotaReadError = FileQuotaReadErrors[keyof FileQuotaReadErrors];
 
 export type FileQuotaReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Quota;
 };
@@ -7837,7 +9395,7 @@ export type NotificationNotificationListError =
 
 export type NotificationNotificationListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageNotificationBody;
 };
@@ -7889,7 +9447,7 @@ export type NotificationDeviceListError =
 
 export type NotificationDeviceListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageDeviceBody;
 };
@@ -7898,6 +9456,9 @@ export type NotificationDeviceListResponse =
   NotificationDeviceListResponses[keyof NotificationDeviceListResponses];
 
 export type NotificationDeviceRegisterData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: RegisterDeviceInputBodyWritable;
   headers?: {
     /**
@@ -8043,6 +9604,9 @@ export type NotificationNotificationReadResponse =
   NotificationNotificationReadResponses[keyof NotificationNotificationReadResponses];
 
 export type BillingPlanCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PlanWritable;
   path?: never;
   query?: never;
@@ -8076,7 +9640,7 @@ export type BillingPlanCreateError = BillingPlanCreateErrors[keyof BillingPlanCr
 
 export type BillingPlanCreateResponses = {
   /**
-   * Created
+   * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   201: Plan;
 };
@@ -8138,6 +9702,9 @@ export type BillingPlanDeleteResponse =
   BillingPlanDeleteResponses[keyof BillingPlanDeleteResponses];
 
 export type BillingPlanUpdateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PlanPatch;
   headers?: {
     /**
@@ -8182,7 +9749,7 @@ export type BillingPlanUpdateError = BillingPlanUpdateErrors[keyof BillingPlanUp
 
 export type BillingPlanUpdateResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Plan;
 };
@@ -8232,6 +9799,9 @@ export type TenantTenantListResponses = {
 export type TenantTenantListResponse = TenantTenantListResponses[keyof TenantTenantListResponses];
 
 export type TenantTenantCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: NewTenantWritable;
   path?: never;
   query?: never;
@@ -8320,6 +9890,9 @@ export type TenantTenantReadResponses = {
 export type TenantTenantReadResponse = TenantTenantReadResponses[keyof TenantTenantReadResponses];
 
 export type TenantTenantDeleteData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: DeleteWritable;
   path: {
     /**
@@ -8367,6 +9940,9 @@ export type TenantTenantDeleteResponse =
   TenantTenantDeleteResponses[keyof TenantTenantDeleteResponses];
 
 export type TenantTenantAddHostData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: HostInputBodyWritable;
   path: {
     /**
@@ -8466,6 +10042,9 @@ export type TenantTenantRemoveHostResponse =
   TenantTenantRemoveHostResponses[keyof TenantTenantRemoveHostResponses];
 
 export type TenantTenantInviteData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: InviteInputBodyWritable;
   path: {
     /**
@@ -8513,6 +10092,9 @@ export type TenantTenantInviteResponse =
   TenantTenantInviteResponses[keyof TenantTenantInviteResponses];
 
 export type TenantTenantSetLocaleData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: SetLocaleWritable;
   path: {
     /**
@@ -8561,6 +10143,9 @@ export type TenantTenantSetLocaleResponse =
   TenantTenantSetLocaleResponses[keyof TenantTenantSetLocaleResponses];
 
 export type TenantTenantSetOidcData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: OidcSettingsWritable;
   path: {
     /**
@@ -8704,6 +10289,9 @@ export type TenantTenantReactivateResponse =
   TenantTenantReactivateResponses[keyof TenantTenantReactivateResponses];
 
 export type TenantTenantRenameData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: RenameWritable;
   path: {
     /**
@@ -8751,6 +10339,9 @@ export type TenantTenantRenameResponse =
   TenantTenantRenameResponses[keyof TenantTenantRenameResponses];
 
 export type TenantTenantSetSamlData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: SamlSettingsWritable;
   path: {
     /**
@@ -8893,6 +10484,9 @@ export type TenantTenantSuspendResponse =
   TenantTenantSuspendResponses[keyof TenantTenantSuspendResponses];
 
 export type AuthMailDeliveryData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: MailDeliveryInputBodyWritable;
   headers?: {
     /**
@@ -8936,6 +10530,9 @@ export type AuthMailDeliveryResponses = {
 export type AuthMailDeliveryResponse = AuthMailDeliveryResponses[keyof AuthMailDeliveryResponses];
 
 export type AuthPasswordForgotData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: ForgotInputBodyWritable;
   headers?: {
     /**
@@ -8980,6 +10577,9 @@ export type AuthPasswordForgotResponse =
   AuthPasswordForgotResponses[keyof AuthPasswordForgotResponses];
 
 export type AuthRegisterData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PasswordRegistrationInputBodyWritable;
   headers?: {
     /**
@@ -9027,6 +10627,9 @@ export type AuthRegisterResponses = {
 export type AuthRegisterResponse = AuthRegisterResponses[keyof AuthRegisterResponses];
 
 export type AuthResendVerificationData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: ResendVerificationInputBodyWritable;
   headers?: {
     /**
@@ -9076,6 +10679,9 @@ export type AuthResendVerificationResponse =
   AuthResendVerificationResponses[keyof AuthResendVerificationResponses];
 
 export type AuthVerifyEmailData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: VerifyEmailInputBody;
   headers?: {
     /**
@@ -9361,6 +10967,9 @@ export type ScimGroupMappingsListResponse =
   ScimGroupMappingsListResponses[keyof ScimGroupMappingsListResponses];
 
 export type ScimGroupMappingWriteData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: MappingInputBodyWritable;
   path?: never;
   query?: never;
@@ -9433,7 +11042,7 @@ export type SiteSettingsReadError = SiteSettingsReadErrors[keyof SiteSettingsRea
 
 export type SiteSettingsReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: SiteSettings;
 };
@@ -9441,6 +11050,9 @@ export type SiteSettingsReadResponses = {
 export type SiteSettingsReadResponse = SiteSettingsReadResponses[keyof SiteSettingsReadResponses];
 
 export type SiteSettingsSaveData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: SiteSettingsWritable;
   path?: never;
   query?: never;
@@ -9474,7 +11086,7 @@ export type SiteSettingsSaveError = SiteSettingsSaveErrors[keyof SiteSettingsSav
 
 export type SiteSettingsSaveResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: SiteSettings;
 };
@@ -9482,6 +11094,9 @@ export type SiteSettingsSaveResponses = {
 export type SiteSettingsSaveResponse = SiteSettingsSaveResponses[keyof SiteSettingsSaveResponses];
 
 export type SubjectEraseRequestData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: PersonEraseBodyWritable;
   headers?: {
     /**
@@ -9526,6 +11141,9 @@ export type SubjectEraseRequestResponse =
   SubjectEraseRequestResponses[keyof SubjectEraseRequestResponses];
 
 export type SubjectExportRequestMineData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: OwnExportBodyWritable;
   headers?: {
     /**
@@ -9562,7 +11180,7 @@ export type SubjectExportRequestMineError =
 
 export type SubjectExportRequestMineResponses = {
   /**
-   * Accepted
+   * Accepted Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   202: Request;
 };
@@ -9571,6 +11189,9 @@ export type SubjectExportRequestMineResponse =
   SubjectExportRequestMineResponses[keyof SubjectExportRequestMineResponses];
 
 export type SubjectExportRequestForData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: ExportForBodyWritable;
   headers?: {
     /**
@@ -9607,7 +11228,7 @@ export type SubjectExportRequestForError =
 
 export type SubjectExportRequestForResponses = {
   /**
-   * Accepted
+   * Accepted Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   202: Request;
 };
@@ -9701,7 +11322,7 @@ export type SubjectExportReadMineError =
 
 export type SubjectExportReadMineResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Request;
 };
@@ -9810,7 +11431,7 @@ export type TaskTaskListError = TaskTaskListErrors[keyof TaskTaskListErrors];
 
 export type TaskTaskListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageTaskBody;
 };
@@ -9818,6 +11439,9 @@ export type TaskTaskListResponses = {
 export type TaskTaskListResponse = TaskTaskListResponses[keyof TaskTaskListResponses];
 
 export type TaskTaskCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: TaskWritable;
   headers?: {
     /**
@@ -9857,7 +11481,7 @@ export type TaskTaskCreateError = TaskTaskCreateErrors[keyof TaskTaskCreateError
 
 export type TaskTaskCreateResponses = {
   /**
-   * Created
+   * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   201: Task;
 };
@@ -9955,7 +11579,7 @@ export type TaskTaskReadError = TaskTaskReadErrors[keyof TaskTaskReadErrors];
 
 export type TaskTaskReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Task;
 };
@@ -9963,6 +11587,9 @@ export type TaskTaskReadResponses = {
 export type TaskTaskReadResponse = TaskTaskReadResponses[keyof TaskTaskReadResponses];
 
 export type TaskTaskUpdateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: TaskPatch;
   headers?: {
     /**
@@ -10011,7 +11638,7 @@ export type TaskTaskUpdateError = TaskTaskUpdateErrors[keyof TaskTaskUpdateError
 
 export type TaskTaskUpdateResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Task;
 };
@@ -10019,6 +11646,9 @@ export type TaskTaskUpdateResponses = {
 export type TaskTaskUpdateResponse = TaskTaskUpdateResponses[keyof TaskTaskUpdateResponses];
 
 export type TaskTaskAssignData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: AssignBodyWritable;
   headers?: {
     /**
@@ -10063,7 +11693,7 @@ export type TaskTaskAssignError = TaskTaskAssignErrors[keyof TaskTaskAssignError
 
 export type TaskTaskAssignResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Task;
 };
@@ -10071,6 +11701,9 @@ export type TaskTaskAssignResponses = {
 export type TaskTaskAssignResponse = TaskTaskAssignResponses[keyof TaskTaskAssignResponses];
 
 export type TaskTaskCheckSlaData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -10115,7 +11748,7 @@ export type TaskTaskCheckSlaError = TaskTaskCheckSlaErrors[keyof TaskTaskCheckSl
 
 export type TaskTaskCheckSlaResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Task;
 };
@@ -10123,6 +11756,9 @@ export type TaskTaskCheckSlaResponses = {
 export type TaskTaskCheckSlaResponse = TaskTaskCheckSlaResponses[keyof TaskTaskCheckSlaResponses];
 
 export type TaskTaskResolveData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: ResolveBodyWritable;
   headers?: {
     /**
@@ -10167,7 +11803,7 @@ export type TaskTaskResolveError = TaskTaskResolveErrors[keyof TaskTaskResolveEr
 
 export type TaskTaskResolveResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Task;
 };
@@ -10175,6 +11811,9 @@ export type TaskTaskResolveResponses = {
 export type TaskTaskResolveResponse = TaskTaskResolveResponses[keyof TaskTaskResolveResponses];
 
 export type UserInvitationCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: InvitationWritable;
   headers?: {
     /**
@@ -10270,7 +11909,7 @@ export type UserUserListError = UserUserListErrors[keyof UserUserListErrors];
 
 export type UserUserListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageUserBody;
 };
@@ -10278,6 +11917,9 @@ export type UserUserListResponses = {
 export type UserUserListResponse = UserUserListResponses[keyof UserUserListResponses];
 
 export type UserUserCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: UserWritable;
   headers?: {
     /**
@@ -10423,6 +12065,9 @@ export type UserUserReadResponses = {
 export type UserUserReadResponse = UserUserReadResponses[keyof UserUserReadResponses];
 
 export type UserUserUpdateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: UserPatch;
   headers?: {
     /**
@@ -10479,6 +12124,9 @@ export type UserUserUpdateResponses = {
 export type UserUserUpdateResponse = UserUserUpdateResponses[keyof UserUserUpdateResponses];
 
 export type UserUserApproveRegistrationData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -10533,6 +12181,9 @@ export type UserUserApproveRegistrationResponse =
   UserUserApproveRegistrationResponses[keyof UserUserApproveRegistrationResponses];
 
 export type UserUserDeactivateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -10586,6 +12237,9 @@ export type UserUserDeactivateResponse =
   UserUserDeactivateResponses[keyof UserUserDeactivateResponses];
 
 export type UserUserHandleData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: HandleBodyWritable;
   headers?: {
     /**
@@ -10638,6 +12292,9 @@ export type UserUserHandleResponses = {
 export type UserUserHandleResponse = UserUserHandleResponses[keyof UserUserHandleResponses];
 
 export type UserUserRolesData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: RolesBodyWritable;
   headers?: {
     /**
@@ -10690,6 +12347,9 @@ export type UserUserRolesResponses = {
 export type UserUserRolesResponse = UserUserRolesResponses[keyof UserUserRolesResponses];
 
 export type UserUserSetPasswordData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: PasswordBodyWritable;
   headers?: {
     /**
@@ -10793,7 +12453,7 @@ export type WebhookDeliveryListError = WebhookDeliveryListErrors[keyof WebhookDe
 
 export type WebhookDeliveryListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageDeliveryBody;
 };
@@ -10840,7 +12500,7 @@ export type WebhookDeliveryReadError = WebhookDeliveryReadErrors[keyof WebhookDe
 
 export type WebhookDeliveryReadResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Delivery;
 };
@@ -10849,6 +12509,9 @@ export type WebhookDeliveryReadResponse =
   WebhookDeliveryReadResponses[keyof WebhookDeliveryReadResponses];
 
 export type WebhookDeliveryReplayData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -10894,7 +12557,7 @@ export type WebhookDeliveryReplayError =
 
 export type WebhookDeliveryReplayResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: Delivery;
 };
@@ -10953,7 +12616,7 @@ export type WebhookEndpointListError = WebhookEndpointListErrors[keyof WebhookEn
 
 export type WebhookEndpointListResponses = {
   /**
-   * OK
+   * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
    */
   200: PageEndpointBody;
 };
@@ -10962,6 +12625,9 @@ export type WebhookEndpointListResponse =
   WebhookEndpointListResponses[keyof WebhookEndpointListResponses];
 
 export type WebhookEndpointCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CreateBodyWritable;
   headers?: {
     /**
@@ -11112,6 +12778,9 @@ export type WebhookEndpointReadResponse =
   WebhookEndpointReadResponses[keyof WebhookEndpointReadResponses];
 
 export type WebhookEndpointUpdateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: EndpointPatch;
   headers?: {
     /**
@@ -11170,6 +12839,9 @@ export type WebhookEndpointUpdateResponse =
   WebhookEndpointUpdateResponses[keyof WebhookEndpointUpdateResponses];
 
 export type WebhookEndpointDisableData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -11224,6 +12896,9 @@ export type WebhookEndpointDisableResponse =
   WebhookEndpointDisableResponses[keyof WebhookEndpointDisableResponses];
 
 export type WebhookEndpointEnableData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: CommandInputStructBody;
   headers?: {
     /**
@@ -11332,6 +13007,9 @@ export type WebhookEndpointRotateResponse =
   WebhookEndpointRotateResponses[keyof WebhookEndpointRotateResponses];
 
 export type WebhookEndpointTargetData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body?: TargetBodyWritable;
   headers?: {
     /**
@@ -11415,6 +13093,9 @@ export type ScimGroupsListResponses = {
 export type ScimGroupsListResponse = ScimGroupsListResponses[keyof ScimGroupsListResponses];
 
 export type ScimGroupCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: GroupDraftWritable;
   headers?: {
     /**
@@ -11546,6 +13227,9 @@ export type ScimGroupGetResponses = {
 export type ScimGroupGetResponse = ScimGroupGetResponses[keyof ScimGroupGetResponses];
 
 export type ScimGroupPatchData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PatchInputBodyWritable;
   headers?: {
     /**
@@ -11595,6 +13279,9 @@ export type ScimGroupPatchResponses = {
 export type ScimGroupPatchResponse = ScimGroupPatchResponses[keyof ScimGroupPatchResponses];
 
 export type ScimGroupReplaceData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: GroupDraftWritable;
   headers?: {
     /**
@@ -11813,6 +13500,9 @@ export type ScimUsersListResponses = {
 export type ScimUsersListResponse = ScimUsersListResponses[keyof ScimUsersListResponses];
 
 export type ScimUserCreateData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: UserDraftWritable;
   headers?: {
     /**
@@ -11944,6 +13634,9 @@ export type ScimUserGetResponses = {
 export type ScimUserGetResponse = ScimUserGetResponses[keyof ScimUserGetResponses];
 
 export type ScimUserPatchData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: PatchInputBodyWritable;
   headers?: {
     /**
@@ -11997,6 +13690,9 @@ export type ScimUserPatchResponses = {
 export type ScimUserPatchResponse = ScimUserPatchResponses[keyof ScimUserPatchResponses];
 
 export type ScimUserReplaceData = {
+  /**
+   *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+   */
   body: UserDraftWritable;
   headers?: {
     /**

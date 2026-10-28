@@ -111,7 +111,14 @@ export interface RendererRef {
 export type Entry = View<
   Omit<
     WireEntry,
-    "fields" | "commands" | "immutable" | "singleton" | "operations" | "presentation" | "resolved"
+    | "fields"
+    | "commands"
+    | "immutable"
+    | "input"
+    | "singleton"
+    | "operations"
+    | "presentation"
+    | "resolved"
   >
 > & {
   readonly fields: readonly Field[];
@@ -349,7 +356,14 @@ function fieldType(v: unknown, at: string): FieldType {
 // the generated schema gives it (`nullish` where the document says a server may
 // print no key, `nullable` where it must print one), so loosening a hint cannot
 // quietly make a wire member required or optional.
-const looseField = zField.extend({ presentation: z.unknown().optional() });
+// `choices` is the schema's own guess at a field's answers, and this build answers a finite
+// choice from the server's resolved block (`./choice`), never from the declaration, so the hint
+// is not carried — the way a command's `output` is not. It is also what the read cannot hold:
+// `View` maps one level, and a parsed choice set carries `| undefined` on the members the wire
+// type leaves optional. A wrong choice declaration is therefore not read at all rather than
+// refused; the resolved answer set beside it is judged, and that is the one a person draws from.
+const declaredField = zField.omit({ choices: true });
+const looseField = declaredField.extend({ presentation: z.unknown().optional() });
 const looseCommand = zCommand.extend({
   fields: z.array(looseField).nullish(),
   presentation: z.unknown().optional(),
@@ -944,6 +958,10 @@ function entry(v: ParsedEntry, at: string, notice: HintNotice): Entry {
     singleton,
     presentation,
     resolved,
+    // `input` is the typed-read block: the fields a caller of a read must name. No screen in this
+    // build opens a typed read, so the declaration is validated by the contract's own schema and
+    // carried by no type here — the way a command's `output` is validated and not carried.
+    input: _typedRead,
     ...rest
   } = v;
   const pack = rendererRef(renderer);

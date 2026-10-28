@@ -3390,7 +3390,7 @@
    "runner": "node",
    "layer": "contract",
    "cases": 1,
-   "rule": "The three copies this repository draws from the kernel \u2014 the catalogue golden every screen derives from, the served HTTP document `src/generated` is generated from, and the parity fixtures the phone's models are held to \u2014 are one kernel commit's bytes. Each copy's own record is proved by its own script (`catalog.ts`, `api.ts`, `parity.ts`), so nothing here would notice a re-pin that moved one copy and left the other two answering for a kernel this phone no longer runs: the agreement the parity suite claims is only as true as the commit all three name.",
+   "rule": "The five presentation copies this repository draws from the kernel \u2014 the catalogue golden every screen derives from, the served HTTP document `src/generated` is generated from, the parity fixtures the phone's models are held to, and the two per-concern captures the choice and step readings are proved against \u2014 are one kernel commit's bytes. Each copy's own record is proved by its own script (`catalog.ts`, `api.ts`, `parity.ts`) or by the case that reads it, so nothing here would notice a re-pin that moved one copy and left the other four answering for a kernel this phone no longer runs: the agreement the parity suite claims is only as true as the commit all five name. The captures of a Go test door and of the design export are not presentation of a resource, so they name their own commits and are not listed here.",
    "ruleSource": "first comment",
    "tier": "push",
    "reach": "npm test (node half)",

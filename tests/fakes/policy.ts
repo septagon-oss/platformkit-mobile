@@ -14,6 +14,11 @@ const reading = (over: Json = {}): Json => ({
   ...over,
 });
 
+// A resolved answer option names the group it sits under and whether it is the No
+// preference answer; the server prints both words even for an option that declared
+// neither, so the block a case is written against prints them too.
+const resolvedOption = (over: Json): Json => ({ group: "", noPreference: false, ...over });
+
 const resolvedField = (name: string, label: string, over: Json = {}): Json => ({
   name,
   label,
@@ -25,6 +30,9 @@ const resolvedField = (name: string, label: string, over: Json = {}): Json => ({
   control: "text",
   kind: "text",
   reading: reading(),
+  // A field's declared figure is a plain value the server prints whatever it holds;
+  // nothing is declared here, which the server says as null.
+  figure: null,
   options: [],
   reference: null,
   ...over,
@@ -74,8 +82,8 @@ export const invoiceBlock = (): Json => ({
     resolvedField("total", "Valor", { reading: reading({ precision: 0 }) }),
     resolvedField("status", "Estado", {
       options: [
-        { value: "open", label: "Em aberto", tone: "warning", done: false },
-        { value: "paid", label: "Liquidada", tone: "success", done: true },
+        resolvedOption({ value: "open", label: "Em aberto", tone: "warning", done: false }),
+        resolvedOption({ value: "paid", label: "Liquidada", tone: "success", done: true }),
       ],
     }),
     resolvedField("memo", "Nota", { reading: reading({ missing: "sem nota" }) }),
@@ -148,7 +156,9 @@ export const taskBlock = (): Json => ({
     resolvedField("description", "Descrição"),
     resolvedField("priority", "Prioridade"),
     resolvedField("status", "Estado", {
-      options: [{ value: "open", label: "Em aberto", tone: "warning", done: false }],
+      options: [
+        resolvedOption({ value: "open", label: "Em aberto", tone: "warning", done: false }),
+      ],
     }),
     resolvedField("slaDeadline", "Prazo"),
     resolvedField("slaBreached", "Atraso"),

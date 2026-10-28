@@ -55,6 +55,43 @@ export const zChangeInputBody = z.object({
   new: z.string().min(12).max(256),
 });
 
+export const zChoiceEmpty = z.object({
+  message: z.string(),
+  mode: z.string(),
+});
+
+export const zChoiceGroup = z.object({
+  key: z.string(),
+  label: z.string(),
+});
+
+export const zChoiceMaximum = z.object({
+  behaviour: z.string(),
+  count: z.number().int(),
+  message: z.string(),
+});
+
+export const zChoicePicture = z.object({
+  kind: z.string(),
+  value: z.string(),
+});
+
+export const zChoiceOption = z.object({
+  group: zChoiceGroup.optional(),
+  id: z.string(),
+  label: z.string(),
+  picture: zChoicePicture.optional(),
+});
+
+export const zChoiceSet = z.object({
+  cardinality: z.string(),
+  empty: zChoiceEmpty,
+  maximum: zChoiceMaximum.optional(),
+  noPreference: z.string().optional(),
+  options: z.array(zChoiceOption).nullable(),
+  searchThreshold: z.number().int(),
+});
+
 export const zClearOutputBody = z.object({
   $schema: z.url().readonly().optional(),
   signedIn: z.boolean().optional(),
@@ -87,6 +124,22 @@ export const zConfigFeature = z.object({
 });
 
 export const zContent = z.object({
+  $schema: z.url().readonly().optional(),
+  author: z.uuid().readonly().optional(),
+  body: z.string().max(262144).optional(),
+  coverImageId: z.uuid().optional(),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  id: z.string().readonly().optional(),
+  kind: z.enum(["page", "post"]).optional().default("post"),
+  publishedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  revision: z.number().int().readonly().optional(),
+  slug: z.string().min(1).max(200),
+  status: z.enum(["draft", "published", "archived"]).optional().default("draft"),
+  title: z.string().min(1).max(200),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zContentInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   author: z.uuid().readonly().optional(),
   body: z.string().max(262144).optional(),
@@ -139,6 +192,25 @@ export const zDelete = z.object({
 });
 
 export const zDelivery = z.object({
+  $schema: z.url().readonly().optional(),
+  attempt: z.number().int().readonly(),
+  attemptedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  availableAt: z.iso.datetime({ offset: true }).readonly(),
+  cause: z.enum(["initial", "retry", "replay"]).readonly(),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  endpointId: z.uuid().readonly(),
+  eventId: z.uuid().readonly(),
+  eventName: z.string().readonly(),
+  id: z.string().readonly().optional(),
+  payload: z.string().readonly(),
+  reason: z.string().readonly().optional(),
+  seq: z.number().int().readonly(),
+  state: z.enum(["queued", "in_flight", "sent", "failed", "dropped"]).readonly(),
+  statusCode: z.number().int().readonly(),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zDeliveryInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   attempt: z.number().int().readonly(),
   attemptedAt: z.iso.datetime({ offset: true }).readonly().optional(),
@@ -241,7 +313,40 @@ export const zErasureReceipt = z.object({
   subject: z.uuid(),
 });
 
+export const zErasureReceiptInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  at: z.iso.datetime({ offset: true }),
+  bytes: z.number().int(),
+  files: z.number().int(),
+  held: z.array(z.string()).nullish(),
+  subject: z.uuid(),
+});
+
 export const zEvent = z.object({
+  $schema: z.url().readonly().optional(),
+  actor: z.uuid().optional(),
+  actorKind: z.string().optional(),
+  clientIp: z.string().optional(),
+  eventId: z.uuid(),
+  id: z.uuid(),
+  initiator: z.uuid().optional(),
+  name: z.string(),
+  occurredAt: z.iso.datetime({ offset: true }),
+  operationId: z.string().optional(),
+  operationOutcome: z.string().optional(),
+  operationPersonId: z.string().optional(),
+  operationRef: z.string().optional(),
+  operationRevision: z.number().int().optional(),
+  operationTenantId: z.string().optional(),
+  payload: z.unknown(),
+  requestId: z.string().optional(),
+  sourceFile: z.string().max(512).optional(),
+  sourceLine: z.number().int().optional(),
+  traceId: z.uuid().optional(),
+  traceparent: z.string().optional(),
+});
+
+export const zEventInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   actor: z.uuid().optional(),
   actorKind: z.string().optional(),
@@ -298,6 +403,7 @@ export const zFieldHints = z.object({
   doneValues: z.array(z.string()).nullish(),
   enumLabels: z.record(z.string(), z.string()).optional(),
   enumTones: z.record(z.string(), z.string()).optional(),
+  figure: z.unknown().optional(),
   format: z.string().optional(),
   help: z.string().optional(),
   label: z.string().optional(),
@@ -308,6 +414,26 @@ export const zFieldHints = z.object({
 });
 
 export const zFile = z.object({
+  $schema: z.url().readonly().optional(),
+  alt: z.string().max(1000),
+  contentType: z.string().max(120).optional(),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  decorative: z.boolean(),
+  height: z.number().int().readonly().optional(),
+  id: z.string().readonly().optional(),
+  kind: z.string().max(32).optional(),
+  name: z.string().min(1).max(255),
+  sealed: z.boolean().readonly().optional(),
+  sha256: z.string().readonly().optional(),
+  size: z.number().int().readonly().optional(),
+  unusedSince: z.iso.datetime({ offset: true }).readonly().optional(),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  uploader: z.uuid().readonly().optional(),
+  visibility: z.enum(["private", "public"]).optional().default("private"),
+  width: z.number().int().readonly().optional(),
+});
+
+export const zFileInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   alt: z.string().max(1000),
   contentType: z.string().max(120).optional(),
@@ -460,6 +586,7 @@ export const zMapKey = z.object({
 });
 
 export const zField = z.object({
+  choices: zChoiceSet.optional(),
   default: z.string().optional(),
   display: z.boolean().optional(),
   doc: z.string().optional(),
@@ -490,6 +617,13 @@ export const zCommand = z.object({
   summary: z.string().optional(),
   undo: z.string().optional(),
   verb: z.string(),
+});
+
+export const zInputEntry = z.object({
+  fields: z.array(zField).nullable(),
+  output: z.array(zField).nullable(),
+  outputList: z.boolean(),
+  path: z.string(),
 });
 
 export const zMappingInputBody = z.object({
@@ -620,6 +754,14 @@ export const zPageContentBody = z.object({
   total: z.number().int(),
 });
 
+export const zPageContentBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zContentInt64Response).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageDeliveryBody = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zDelivery).nullable(),
@@ -628,7 +770,23 @@ export const zPageDeliveryBody = z.object({
   total: z.number().int(),
 });
 
+export const zPageDeliveryBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zDeliveryInt64Response).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageDeviceBody = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zDevice).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zPageDeviceBodyInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zDevice).nullable(),
   limit: z.number().int(),
@@ -644,9 +802,25 @@ export const zPageEndpointBody = z.object({
   total: z.number().int(),
 });
 
+export const zPageEndpointBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zEndpoint).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageEventBody = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zEvent).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zPageEventBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zEventInt64Response).nullable(),
   limit: z.number().int(),
   offset: z.number().int(),
   total: z.number().int(),
@@ -660,7 +834,23 @@ export const zPageFileBody = z.object({
   total: z.number().int(),
 });
 
+export const zPageFileBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zFileInt64Response).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageNotificationBody = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zNotification).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zPageNotificationBodyInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zNotification).nullable(),
   limit: z.number().int(),
@@ -754,6 +944,28 @@ export const zPagePlanBody = z.object({
   total: z.number().int(),
 });
 
+export const zPlanInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  active: z.boolean(),
+  code: z.string().min(1).max(60),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  currency: z.string().length(3),
+  features: z.array(z.string()).nullish(),
+  id: z.string().readonly().optional(),
+  interval: z.enum(["month", "year"]).optional().default("month"),
+  name: z.string().min(1).max(120),
+  priceCents: z.number().int().optional().default(0),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zPagePlanBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zPlanInt64Response).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPlanPatch = z.object({
   active: z.boolean().optional(),
   code: z.string().min(1).max(60).optional(),
@@ -794,6 +1006,36 @@ export const zPageProposalBody = z.object({
   total: z.number().int(),
 });
 
+export const zProposalInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  appliedRevision: z.number().int().readonly(),
+  baseRevision: z.number().int().readonly(),
+  comment: z.string().max(2000).optional(),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  diff: z.record(z.string(), z.unknown()),
+  diffDigest: z.string().readonly(),
+  id: z.string().readonly().optional(),
+  proposer: z.string().readonly(),
+  reviewedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  reviewer: z.uuid().readonly().optional(),
+  revision: z.number().int().readonly(),
+  state: z.enum(["proposed", "approved", "declined", "withdrawn", "applied"]).readonly(),
+  subjectEntity: z.string(),
+  subjectId: z.uuid(),
+  subjectModule: z.string(),
+  summary: z.string().max(200),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  verdict: z.enum(["", "approved", "declined"]).readonly(),
+});
+
+export const zPageProposalBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zProposalInt64Response).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zProviderConfig = z.object({
   $schema: z.url().readonly().optional(),
   authenticationSchemes: z.array(zAuthScheme).nullish(),
@@ -815,7 +1057,27 @@ export const zQuota = z.object({
   variants: z.number().int().readonly(),
 });
 
+export const zQuotaInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  quota: z.number().int().readonly(),
+  unlimited: z.boolean().readonly(),
+  used: z.number().int().readonly(),
+  variants: z.number().int().readonly(),
+});
+
 export const zReceipt = z.object({
+  $schema: z.url().readonly().optional(),
+  id: z.string(),
+  method: z.string(),
+  outcome: z.string().optional(),
+  outcomeAt: z.iso.datetime({ offset: true }).optional(),
+  ref: z.string(),
+  revision: z.number().int(),
+  route: z.string(),
+  startedAt: z.iso.datetime({ offset: true }),
+});
+
+export const zReceiptInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   id: z.string(),
   method: z.string(),
@@ -870,6 +1132,23 @@ export const zRequest = z.object({
   updatedAt: z.iso.datetime({ offset: true }),
 });
 
+export const zRequestInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  bundle: z.uuid(),
+  bundleDigest: z.string().optional(),
+  createdAt: z.iso.datetime({ offset: true }),
+  detail: z.string().optional(),
+  id: z.uuid(),
+  kind: z.string(),
+  linkExpires: z.iso.datetime({ offset: true }).optional(),
+  reason: z.string().optional(),
+  requester: z.uuid(),
+  revision: z.number().int(),
+  state: z.string(),
+  subject: z.uuid(),
+  updatedAt: z.iso.datetime({ offset: true }),
+});
+
 export const zResendVerificationInputBody = z.object({
   $schema: z.url().readonly().optional(),
   email: z.email().min(1).max(320),
@@ -886,21 +1165,28 @@ export const zResolveBody = z.object({
   resolution: z.string().max(4000).optional(),
 });
 
+export const zResolvedChoice = z.object({
+  cardinality: z.string(),
+  empty: zChoiceEmpty,
+  groups: z.array(zChoiceGroup).nullable(),
+  maximum: zChoiceMaximum.optional(),
+  noPreference: z.string(),
+  searchEnabled: z.boolean(),
+  searchThreshold: z.number().int(),
+});
+
 export const zResolvedConfirmation = z.object({
   body: z.string(),
   confirmLabel: z.string(),
   title: z.string(),
 });
 
-export const zResolvedCommand = z.object({
-  confirmation: zResolvedConfirmation.optional(),
-  destructive: z.boolean(),
-  label: z.string(),
-  primary: z.boolean(),
-  successMessage: z.string(),
-  system: z.boolean(),
-  verb: z.string(),
-  visible: z.boolean(),
+export const zResolvedControl = z.object({
+  control: z.string(),
+  editable: z.boolean(),
+  interactions: z.array(z.string()).nullable(),
+  name: z.string(),
+  path: z.array(z.string()).nullable(),
 });
 
 export const zResolvedDeckDirection = z.object({
@@ -946,7 +1232,10 @@ export const zResolvedMoney = z.object({
 
 export const zResolvedOption = z.object({
   done: z.boolean(),
+  group: z.string(),
   label: z.string(),
+  noPreference: z.boolean(),
+  picture: zChoicePicture.optional(),
   tone: z.string(),
   value: z.string(),
 });
@@ -968,15 +1257,6 @@ export const zResolvedSection = z.object({
   label: z.string(),
 });
 
-export const zResolvedLayout = z.object({
-  columns: z.array(z.string()).nullable(),
-  create: z.array(z.string()).nullable(),
-  information: z.array(z.string()).nullable(),
-  overview: z.array(z.string()).nullable(),
-  sections: z.array(zResolvedSection).nullable(),
-  update: z.array(z.string()).nullable(),
-});
-
 export const zResolvedSortOption = z.object({
   desc: z.boolean(),
   field: z.string(),
@@ -988,6 +1268,37 @@ export const zResolvedList = z.object({
   defaultSort: z.string(),
   filters: z.array(zResolvedFilter).nullable(),
   sorts: z.array(zResolvedSortOption).nullable(),
+});
+
+export const zResolvedStep = z.object({
+  answerField: z.string(),
+  emptyLabel: z.string(),
+  fields: z.array(z.string()).nullable(),
+  key: z.string(),
+  label: z.string(),
+  primaryLabel: z.string(),
+  section: z.string(),
+});
+
+export const zResolvedForm = z.object({
+  layout: z.string(),
+  steps: z.array(zResolvedStep).nullable(),
+});
+
+export const zResolvedForms = z.object({
+  createForm: zResolvedForm.optional(),
+  inputForm: zResolvedForm.optional(),
+  updateForm: zResolvedForm.optional(),
+});
+
+export const zResolvedLayout = z.object({
+  columns: z.array(z.string()).nullable(),
+  create: z.array(z.string()).nullable(),
+  forms: zResolvedForms.optional(),
+  information: z.array(z.string()).nullable(),
+  overview: z.array(z.string()).nullable(),
+  sections: z.array(zResolvedSection).nullable(),
+  update: z.array(z.string()).nullable(),
 });
 
 export const zResolvedSummary = z.object({
@@ -1011,8 +1322,10 @@ export const zResolvedReading = z.object({
 });
 
 export const zResolvedField = z.object({
+  choice: zResolvedChoice.optional(),
   control: z.string(),
   editable: zResolvedEditable,
+  figure: z.unknown(),
   help: z.string(),
   kind: z.string(),
   label: z.string(),
@@ -1023,6 +1336,18 @@ export const zResolvedField = z.object({
   reading: zResolvedReading,
   reference: zResolvedReference.optional(),
   section: z.string(),
+});
+
+export const zResolvedCommand = z.object({
+  confirmation: zResolvedConfirmation.optional(),
+  destructive: z.boolean(),
+  fields: z.array(zResolvedField).nullable(),
+  label: z.string(),
+  primary: z.boolean(),
+  successMessage: z.string(),
+  system: z.boolean(),
+  verb: z.string(),
+  visible: z.boolean(),
 });
 
 export const zResolvedTitles = z.object({
@@ -1036,6 +1361,13 @@ export const zResolvedTitles = z.object({
   thumbnail: z.string(),
 });
 
+export const zResolvedView = z.object({
+  cardinality: z.string(),
+  controls: z.array(zResolvedControl).nullable(),
+  kind: z.string(),
+  verb: z.string(),
+});
+
 export const zResolved = z.object({
   commands: z.array(zResolvedCommand).nullable(),
   deck: zResolvedDeck.optional(),
@@ -1047,6 +1379,7 @@ export const zResolved = z.object({
   policyVersion: z.number().int(),
   summary: zResolvedSummary,
   titles: zResolvedTitles,
+  views: z.array(zResolvedView).nullable(),
 });
 
 export const zResourceGroup = z.object({
@@ -1081,6 +1414,7 @@ export const zEntry = z.object({
   entity: z.string(),
   fields: z.array(zField).nullable(),
   immutable: z.array(z.string()).nullish(),
+  input: zInputEntry.optional(),
   module: z.string(),
   operations: z.array(z.string()).nullish(),
   path: z.string(),
@@ -1257,7 +1591,38 @@ export const zConnection = z.object({
   theme: z.enum(["light", "dark", "system"]),
 });
 
+export const zConnectionInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  accent: z.string(),
+  accentRatio: zAccentRatio,
+  logoUrl: z.string().optional(),
+  methods: zSignInMethods,
+  name: z.string(),
+  recovery: zRecoveryAvailability,
+  revision: z.number().int(),
+  signIn: zSignInDoor,
+  theme: z.enum(["light", "dark", "system"]),
+});
+
 export const zSiteSettings = z.object({
+  $schema: z.url().readonly().optional(),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  homeSlug: z.string().max(200).optional(),
+  id: z.string().readonly().optional(),
+  logoFileId: z.uuid().optional(),
+  nav: z.array(zNavItem).nullish(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  revision: z.number().int().readonly().optional(),
+  tagline: z.string().max(200).optional(),
+  theme: z.enum(["light", "dark", "system"]).optional().default("system"),
+  title: z.string().max(120).optional(),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zSiteSettingsInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
   homeSlug: z.string().max(200).optional(),
@@ -1281,6 +1646,24 @@ export const zSubscribeBody = z.object({
 });
 
 export const zSubscription = z.object({
+  $schema: z.url().readonly().optional(),
+  anchorDay: z.number().int().readonly().optional(),
+  attemptCount: z.number().int().readonly().optional(),
+  cancelAtPeriodEnd: z.boolean().optional().default(false),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  currency: z.string().readonly().optional(),
+  currentPeriodEnd: z.iso.datetime({ offset: true }).readonly().optional(),
+  currentPeriodStart: z.iso.datetime({ offset: true }).readonly().optional(),
+  id: z.string().readonly().optional(),
+  pastDueSince: z.iso.datetime({ offset: true }).readonly().optional(),
+  planId: z.uuid(),
+  priceCents: z.number().int().readonly().optional(),
+  status: z.enum(["trial", "active", "past_due", "cancelled"]).optional().default("trial"),
+  trialUsedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zSubscriptionInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   anchorDay: z.number().int().readonly().optional(),
   attemptCount: z.number().int().readonly().optional(),
@@ -1338,6 +1721,37 @@ export const zTask = z.object({
 export const zPageTaskBody = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zTask).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zTaskInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  assigneeId: z.uuid().optional(),
+  createdAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  description: z.string().optional(),
+  dueAt: z.iso.datetime({ offset: true }).optional(),
+  id: z.string().readonly().optional(),
+  priority: z.enum(["low", "normal", "high", "critical"]).optional().default("normal"),
+  resolution: z.string().optional(),
+  resolvedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+  revision: z.number().int().readonly().optional(),
+  slaBreached: z.boolean().optional().default(false),
+  slaDeadline: z.iso.datetime({ offset: true }).optional(),
+  source: z.string().optional(),
+  sourceRef: z.string().optional(),
+  status: z
+    .enum(["open", "acknowledged", "in_progress", "resolved", "closed"])
+    .optional()
+    .default("open"),
+  title: z.string().min(1).max(200),
+  updatedAt: z.iso.datetime({ offset: true }).readonly().optional(),
+});
+
+export const zPageTaskBodyInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zTaskInt64Response).nullable(),
   limit: z.number().int(),
   offset: z.number().int(),
   total: z.number().int(),
@@ -1419,6 +1833,30 @@ export const zSummary = z.object({
   entries: z.array(zSummaryEntry).nullable(),
 });
 
+export const zTrendDayInt64Response = z.object({
+  count: z.number().int(),
+  day: z.string(),
+});
+
+export const zTrendInt64Response = z.object({
+  days: z.array(zTrendDayInt64Response).nullable(),
+  field: z.string(),
+});
+
+export const zSummaryEntryInt64Response = z.object({
+  entity: z.string(),
+  highlight: z.number().int().optional(),
+  module: z.string(),
+  total: z.number().int().optional(),
+  trend: zTrendInt64Response.optional(),
+});
+
+export const zSummaryInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  asOf: z.iso.datetime({ offset: true }),
+  entries: z.array(zSummaryEntryInt64Response).nullable(),
+});
+
 export const zUseRow = z.object({
   Entity: z.string(),
   Field: z.string(),
@@ -1444,6 +1882,14 @@ export const zUser = z.object({
 });
 
 export const zPageUserBody = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zUser).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zPageUserBodyInt64Response = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zUser).nullable(),
   limit: z.number().int(),
@@ -1517,9 +1963,29 @@ export const zVersion = z.object({
   version: z.number().int(),
 });
 
+export const zVersionInt64Response = z.object({
+  actor: z.uuid(),
+  at: z.iso.datetime({ offset: true }),
+  changed: z.array(z.string()).nullable(),
+  entity: z.string(),
+  fields: z.unknown(),
+  id: z.uuid(),
+  locale: z.string(),
+  module: z.string(),
+  reason: z.string(),
+  record: z.uuid(),
+  version: z.number().int(),
+});
+
 export const zVersionPage = z.object({
   $schema: z.url().readonly().optional(),
   items: z.array(zVersion).nullable(),
+  next: z.number().int(),
+});
+
+export const zVersionPageInt64Response = z.object({
+  $schema: z.url().readonly().optional(),
+  items: z.array(zVersionInt64Response).nullable(),
   next: z.number().int(),
 });
 
@@ -1587,7 +2053,28 @@ export const zConnectionWritable = z.object({
   theme: z.enum(["light", "dark", "system"]),
 });
 
+export const zConnectionInt64ResponseWritable = z.object({
+  accent: z.string(),
+  accentRatio: zAccentRatio,
+  logoUrl: z.string().optional(),
+  methods: zSignInMethods,
+  name: z.string(),
+  recovery: zRecoveryAvailability,
+  revision: z.number().int(),
+  signIn: zSignInDoor,
+  theme: z.enum(["light", "dark", "system"]),
+});
+
 export const zContentWritable = z.object({
+  body: z.string().max(262144).optional(),
+  coverImageId: z.uuid().optional(),
+  kind: z.enum(["page", "post"]).optional().default("post"),
+  slug: z.string().min(1).max(200),
+  status: z.enum(["draft", "published", "archived"]).optional().default("draft"),
+  title: z.string().min(1).max(200),
+});
+
+export const zContentInt64ResponseWritable = z.object({
   body: z.string().max(262144).optional(),
   coverImageId: z.uuid().optional(),
   kind: z.enum(["page", "post"]).optional().default("post"),
@@ -1645,7 +2132,38 @@ export const zErasureReceiptWritable = z.object({
   subject: z.uuid(),
 });
 
+export const zErasureReceiptInt64ResponseWritable = z.object({
+  at: z.iso.datetime({ offset: true }),
+  bytes: z.number().int(),
+  files: z.number().int(),
+  held: z.array(z.string()).nullish(),
+  subject: z.uuid(),
+});
+
 export const zEventWritable = z.object({
+  actor: z.uuid().optional(),
+  actorKind: z.string().optional(),
+  clientIp: z.string().optional(),
+  eventId: z.uuid(),
+  id: z.uuid(),
+  initiator: z.uuid().optional(),
+  name: z.string(),
+  occurredAt: z.iso.datetime({ offset: true }),
+  operationId: z.string().optional(),
+  operationOutcome: z.string().optional(),
+  operationPersonId: z.string().optional(),
+  operationRef: z.string().optional(),
+  operationRevision: z.number().int().optional(),
+  operationTenantId: z.string().optional(),
+  payload: z.unknown(),
+  requestId: z.string().optional(),
+  sourceFile: z.string().max(512).optional(),
+  sourceLine: z.number().int().optional(),
+  traceId: z.uuid().optional(),
+  traceparent: z.string().optional(),
+});
+
+export const zEventInt64ResponseWritable = z.object({
   actor: z.uuid().optional(),
   actorKind: z.string().optional(),
   clientIp: z.string().optional(),
@@ -1686,6 +2204,15 @@ export const zFactorsOutputBodyWritable = z.object({
 });
 
 export const zFileWritable = z.object({
+  alt: z.string().max(1000),
+  contentType: z.string().max(120).optional(),
+  decorative: z.boolean(),
+  kind: z.string().max(32).optional(),
+  name: z.string().min(1).max(255),
+  visibility: z.enum(["private", "public"]).optional().default("private"),
+});
+
+export const zFileInt64ResponseWritable = z.object({
   alt: z.string().max(1000),
   contentType: z.string().max(120).optional(),
   decorative: z.boolean(),
@@ -1872,7 +2399,21 @@ export const zPageContentBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPageContentBodyInt64ResponseWritable = z.object({
+  items: z.array(zContentInt64ResponseWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageDeliveryBodyWritable = z.object({
+  items: z.array(z.unknown()).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zPageDeliveryBodyInt64ResponseWritable = z.object({
   items: z.array(z.unknown()).nullable(),
   limit: z.number().int(),
   offset: z.number().int(),
@@ -1886,7 +2427,21 @@ export const zPageDeviceBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPageDeviceBodyInt64ResponseWritable = z.object({
+  items: z.array(zDeviceWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageEndpointBodyWritable = z.object({
+  items: z.array(zEndpointWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zPageEndpointBodyInt64ResponseWritable = z.object({
   items: z.array(zEndpointWritable).nullable(),
   limit: z.number().int(),
   offset: z.number().int(),
@@ -1900,6 +2455,13 @@ export const zPageEventBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPageEventBodyInt64ResponseWritable = z.object({
+  items: z.array(zEventInt64ResponseWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageFileBodyWritable = z.object({
   items: z.array(zFileWritable).nullable(),
   limit: z.number().int(),
@@ -1907,7 +2469,21 @@ export const zPageFileBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPageFileBodyInt64ResponseWritable = z.object({
+  items: z.array(zFileInt64ResponseWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zPageNotificationBodyWritable = z.object({
+  items: z.array(zNotificationWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zPageNotificationBodyInt64ResponseWritable = z.object({
   items: z.array(zNotificationWritable).nullable(),
   limit: z.number().int(),
   offset: z.number().int(),
@@ -1981,6 +2557,23 @@ export const zPagePlanBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPlanInt64ResponseWritable = z.object({
+  active: z.boolean(),
+  code: z.string().min(1).max(60),
+  currency: z.string().length(3),
+  features: z.array(z.string()).nullish(),
+  interval: z.enum(["month", "year"]).optional().default("month"),
+  name: z.string().min(1).max(120),
+  priceCents: z.number().int().optional().default(0),
+});
+
+export const zPagePlanBodyInt64ResponseWritable = z.object({
+  items: z.array(zPlanInt64ResponseWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zProblemWritable = z.object({
   detail: z.string().optional(),
   errors: z.array(z.string()).nullish(),
@@ -2002,6 +2595,22 @@ export const zProposalWritable = z.object({
 
 export const zPageProposalBodyWritable = z.object({
   items: z.array(zProposalWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zProposalInt64ResponseWritable = z.object({
+  comment: z.string().max(2000).optional(),
+  diff: z.record(z.string(), z.unknown()),
+  subjectEntity: z.string(),
+  subjectId: z.uuid(),
+  subjectModule: z.string(),
+  summary: z.string().max(200),
+});
+
+export const zPageProposalBodyInt64ResponseWritable = z.object({
+  items: z.array(zProposalInt64ResponseWritable).nullable(),
   limit: z.number().int(),
   offset: z.number().int(),
   total: z.number().int(),
@@ -2030,6 +2639,17 @@ export const zReceiptWritable = z.object({
   startedAt: z.iso.datetime({ offset: true }),
 });
 
+export const zReceiptInt64ResponseWritable = z.object({
+  id: z.string(),
+  method: z.string(),
+  outcome: z.string().optional(),
+  outcomeAt: z.iso.datetime({ offset: true }).optional(),
+  ref: z.string(),
+  revision: z.number().int(),
+  route: z.string(),
+  startedAt: z.iso.datetime({ offset: true }),
+});
+
 export const zRecoveryCodesOutputBodyWritable = z.object({
   codes: z.array(z.string()).nullable(),
   factor: zFactorWritable.optional(),
@@ -2045,6 +2665,22 @@ export const zRenameWritable = z.object({
 });
 
 export const zRequestWritable = z.object({
+  bundle: z.uuid(),
+  bundleDigest: z.string().optional(),
+  createdAt: z.iso.datetime({ offset: true }),
+  detail: z.string().optional(),
+  id: z.uuid(),
+  kind: z.string(),
+  linkExpires: z.iso.datetime({ offset: true }).optional(),
+  reason: z.string().optional(),
+  requester: z.uuid(),
+  revision: z.number().int(),
+  state: z.string(),
+  subject: z.uuid(),
+  updatedAt: z.iso.datetime({ offset: true }),
+});
+
+export const zRequestInt64ResponseWritable = z.object({
   bundle: z.uuid(),
   bundleDigest: z.string().optional(),
   createdAt: z.iso.datetime({ offset: true }),
@@ -2180,6 +2816,19 @@ export const zSiteSettingsWritable = z.object({
   title: z.string().max(120).optional(),
 });
 
+export const zSiteSettingsInt64ResponseWritable = z.object({
+  homeSlug: z.string().max(200).optional(),
+  logoFileId: z.uuid().optional(),
+  nav: z.array(zNavItem).nullish(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  tagline: z.string().max(200).optional(),
+  theme: z.enum(["light", "dark", "system"]).optional().default("system"),
+  title: z.string().max(120).optional(),
+});
+
 export const zSubscribeBodyWritable = z.object({
   planId: z.uuid(),
 });
@@ -2190,9 +2839,20 @@ export const zSubscriptionWritable = z.object({
   status: z.enum(["trial", "active", "past_due", "cancelled"]).optional().default("trial"),
 });
 
+export const zSubscriptionInt64ResponseWritable = z.object({
+  cancelAtPeriodEnd: z.boolean().optional().default(false),
+  planId: z.uuid(),
+  status: z.enum(["trial", "active", "past_due", "cancelled"]).optional().default("trial"),
+});
+
 export const zSummaryWritable = z.object({
   asOf: z.iso.datetime({ offset: true }),
   entries: z.array(zSummaryEntry).nullable(),
+});
+
+export const zSummaryInt64ResponseWritable = z.object({
+  asOf: z.iso.datetime({ offset: true }),
+  entries: z.array(zSummaryEntryInt64Response).nullable(),
 });
 
 export const zTotpEnrolmentWritable = z.object({
@@ -2226,6 +2886,30 @@ export const zTaskWritable = z.object({
 
 export const zPageTaskBodyWritable = z.object({
   items: z.array(zTaskWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
+export const zTaskInt64ResponseWritable = z.object({
+  assigneeId: z.uuid().optional(),
+  description: z.string().optional(),
+  dueAt: z.iso.datetime({ offset: true }).optional(),
+  priority: z.enum(["low", "normal", "high", "critical"]).optional().default("normal"),
+  resolution: z.string().optional(),
+  slaBreached: z.boolean().optional().default(false),
+  slaDeadline: z.iso.datetime({ offset: true }).optional(),
+  source: z.string().optional(),
+  sourceRef: z.string().optional(),
+  status: z
+    .enum(["open", "acknowledged", "in_progress", "resolved", "closed"])
+    .optional()
+    .default("open"),
+  title: z.string().min(1).max(200),
+});
+
+export const zPageTaskBodyInt64ResponseWritable = z.object({
+  items: z.array(zTaskInt64ResponseWritable).nullable(),
   limit: z.number().int(),
   offset: z.number().int(),
   total: z.number().int(),
@@ -2285,6 +2969,13 @@ export const zPageUserBodyWritable = z.object({
   total: z.number().int(),
 });
 
+export const zPageUserBodyInt64ResponseWritable = z.object({
+  items: z.array(zUserWritable).nullable(),
+  limit: z.number().int(),
+  offset: z.number().int(),
+  total: z.number().int(),
+});
+
 export const zUserDraftWritable = z.object({
   active: z.boolean().optional(),
   displayName: z.string().optional(),
@@ -2328,6 +3019,14 @@ export const zVersionPageWritable = z.object({
   next: z.number().int(),
 });
 
+export const zVersionPageInt64ResponseWritable = z.object({
+  items: z.array(zVersionInt64Response).nullable(),
+  next: z.number().int(),
+});
+
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAppAccessRequestBody = zAccessBodyWritable;
 
 export const zAppAccessRequestHeaders = z.object({
@@ -2335,7 +3034,7 @@ export const zAppAccessRequestHeaders = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zAppConnectionResponse = zConnection;
 
@@ -2344,7 +3043,7 @@ export const zAppOperationOutcomePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zAppOperationOutcomeResponse = zReceipt;
 
@@ -2358,7 +3057,7 @@ export const zAppStreamQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zAppSummaryResponse = zSummary;
 
@@ -2376,7 +3075,7 @@ export const zAuditEventListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zAuditEventListResponse = zPageEventBody;
 
@@ -2385,10 +3084,13 @@ export const zAuditEventReadPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zAuditEventReadResponse = zEvent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthChallengePasskeyBeginBody = zPasskeyBeginAssertionInputBodyWritable;
 
 export const zAuthChallengePasskeyBeginHeaders = z.object({
@@ -2400,6 +3102,9 @@ export const zAuthChallengePasskeyBeginHeaders = z.object({
  */
 export const zAuthChallengePasskeyBeginResponse = zPasskeyChallenge;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthChallengePasskeyVerifyBody = zPasskeyVerifyInputBodyWritable;
 
 export const zAuthChallengePasskeyVerifyHeaders = z.object({
@@ -2411,6 +3116,9 @@ export const zAuthChallengePasskeyVerifyHeaders = z.object({
  */
 export const zAuthChallengePasskeyVerifyResponse = zIdentity;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthChallengeVerifyBody = zVerifyFactorInputBodyWritable;
 
 /**
@@ -2432,6 +3140,9 @@ export const zAuthFactorPasskeyBeginHeaders = z.object({
  */
 export const zAuthFactorPasskeyBeginResponse = zPasskeyChallenge;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthFactorPasskeyFinishBody = zPasskeyFinishInputBodyWritable;
 
 export const zAuthFactorPasskeyFinishHeaders = z.object({
@@ -2461,6 +3172,9 @@ export const zAuthFactorTotpBeginHeaders = z.object({
  */
 export const zAuthFactorTotpBeginResponse = zTotpEnrolment;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthFactorTotpFinishBody = zFinishTotpInputBodyWritable;
 
 export const zAuthFactorTotpFinishHeaders = z.object({
@@ -2481,6 +3195,9 @@ export const zAuthFactorWithdrawPath = z.object({
  */
 export const zAuthFactorWithdrawResponse = zDoneOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthLoginBody = zLoginInputBodyWritable;
 
 /**
@@ -2497,6 +3214,9 @@ export const zAuthLoginPasskeyBeginHeaders = z.object({
  */
 export const zAuthLoginPasskeyBeginResponse = zPasskeyChallenge;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthLoginPasskeyVerifyBody = zPasskeyVerifyInputBodyWritable;
 
 export const zAuthLoginPasskeyVerifyHeaders = z.object({
@@ -2537,6 +3257,9 @@ export const zAuthOidcCallbackResponse = z.void();
  */
 export const zAuthOidcStartResponse = z.void();
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthPasswordChangeBody = zChangeInputBodyWritable;
 
 export const zAuthPasswordChangeHeaders = z.object({
@@ -2548,6 +3271,9 @@ export const zAuthPasswordChangeHeaders = z.object({
  */
 export const zAuthPasswordChangeResponse = zDoneOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthPasswordResetBody = zResetInputBodyWritable;
 
 /**
@@ -2560,6 +3286,9 @@ export const zAuthPasswordResetResponse = zClearOutputBody;
  */
 export const zAuthRoleListResponse = zRolesOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthRoleSetBody = zRoleInputBodyWritable;
 
 export const zAuthRoleSetPath = z.object({
@@ -2617,6 +3346,9 @@ export const zAuthSessionRevokePath = z.object({
  */
 export const zAuthSessionRevokeResponse = zDoneOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthPasskeySignInSetBody = zPasskeySignInSettingInputBodyWritable;
 
 export const zAuthPasskeySignInSetHeaders = z.object({
@@ -2633,6 +3365,9 @@ export const zAuthPasskeySignInSetResponse = zPasskeySignInSettingOutputBody;
  */
 export const zAuthTokenListResponse = zTokensOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthTokenIssueBody = zIssueTokenInputBodyWritable;
 
 export const zAuthTokenIssueHeaders = z.object({
@@ -2674,7 +3409,7 @@ export const zBillingPlanListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zBillingPlanListResponse = zPagePlanBody;
 
@@ -2683,15 +3418,18 @@ export const zBillingPlanReadPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zBillingPlanReadResponse = zPlan;
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zBillingSubscriptionReadResponse = zSubscription;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zBillingSubscriptionCancelBody = zCancelBodyWritable;
 
 export const zBillingSubscriptionCancelHeaders = z.object({
@@ -2699,10 +3437,13 @@ export const zBillingSubscriptionCancelHeaders = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zBillingSubscriptionCancelResponse = zSubscription;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zBillingSubscriptionSubscribeBody = zSubscribeBodyWritable;
 
 export const zBillingSubscriptionSubscribeHeaders = z.object({
@@ -2710,7 +3451,7 @@ export const zBillingSubscriptionSubscribeHeaders = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zBillingSubscriptionSubscribeResponse = zSubscription;
 
@@ -2724,10 +3465,13 @@ export const zChangeProposalListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zChangeProposalListResponse = zPageProposalBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zChangeProposalProposeBody = zNewProposalWritable;
 
 export const zChangeProposalProposeHeaders = z.object({
@@ -2735,7 +3479,7 @@ export const zChangeProposalProposeHeaders = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zChangeProposalProposeResponse = zProposal;
 
@@ -2744,10 +3488,13 @@ export const zChangeProposalReadPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zChangeProposalReadResponse = zProposal;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zChangeProposalApplyBody = zRevisionInputWritable;
 
 export const zChangeProposalApplyHeaders = z.object({
@@ -2759,10 +3506,13 @@ export const zChangeProposalApplyPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zChangeProposalApplyResponse = zProposal;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zChangeProposalReviewBody = zReviewWritable;
 
 export const zChangeProposalReviewHeaders = z.object({
@@ -2774,10 +3524,13 @@ export const zChangeProposalReviewPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zChangeProposalReviewResponse = zProposal;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zChangeProposalWithdrawBody = zRevisionInputWritable;
 
 export const zChangeProposalWithdrawHeaders = z.object({
@@ -2789,7 +3542,7 @@ export const zChangeProposalWithdrawPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zChangeProposalWithdrawResponse = zProposal;
 
@@ -2802,10 +3555,13 @@ export const zContentContentListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentListResponse = zPageContentBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentCreateBody = zContentWritable;
 
 export const zContentContentCreateHeaders = z.object({
@@ -2813,7 +3569,7 @@ export const zContentContentCreateHeaders = z.object({
 });
 
 /**
- * Created
+ * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentCreateResponse = zContent;
 
@@ -2839,10 +3595,13 @@ export const zContentContentReadQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentReadResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentUpdateBody = zContentPatch;
 
 export const zContentContentUpdateHeaders = z.object({
@@ -2859,10 +3618,13 @@ export const zContentContentUpdateQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentUpdateResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentArchiveBody = zCommandInputStructBody;
 
 export const zContentContentArchiveHeaders = z.object({
@@ -2874,10 +3636,13 @@ export const zContentContentArchivePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentArchiveResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentPublishBody = zCommandInputStructBody;
 
 export const zContentContentPublishHeaders = z.object({
@@ -2889,10 +3654,13 @@ export const zContentContentPublishPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentPublishResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentRestoreBody = zRestoreArgumentContentWritable;
 
 export const zContentContentRestoreHeaders = z.object({
@@ -2904,10 +3672,13 @@ export const zContentContentRestorePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentRestoreResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentReviewTranslationBody = zTranslationFieldsBodyWritable;
 
 export const zContentContentReviewTranslationHeaders = z.object({
@@ -2919,10 +3690,13 @@ export const zContentContentReviewTranslationPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentReviewTranslationResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentSuggestTranslationBody = zTranslationFieldsBodyWritable;
 
 export const zContentContentSuggestTranslationHeaders = z.object({
@@ -2934,10 +3708,13 @@ export const zContentContentSuggestTranslationPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentSuggestTranslationResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentTranslateBody = zTranslateBodyWritable;
 
 export const zContentContentTranslateHeaders = z.object({
@@ -2949,10 +3726,13 @@ export const zContentContentTranslatePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentTranslateResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentUnpublishBody = zCommandInputStructBody;
 
 export const zContentContentUnpublishHeaders = z.object({
@@ -2964,10 +3744,13 @@ export const zContentContentUnpublishPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentUnpublishResponse = zContent;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zContentContentUntranslateBody = zTranslationFieldsBodyWritable;
 
 export const zContentContentUntranslateHeaders = z.object({
@@ -2979,7 +3762,7 @@ export const zContentContentUntranslatePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentUntranslateResponse = zContent;
 
@@ -2994,7 +3777,7 @@ export const zContentContentVersionsQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zContentContentVersionsResponse = zVersionPage;
 
@@ -3008,7 +3791,7 @@ export const zFileFileListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zFileFileListResponse = zPageFileBody;
 
@@ -3025,10 +3808,13 @@ export const zFileFileUploadQuery = z.object({
 });
 
 /**
- * Created
+ * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zFileFileUploadResponse = zFile;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zFileFileEraseBody = zEraseBodyWritable;
 
 export const zFileFileEraseHeaders = z.object({
@@ -3036,7 +3822,7 @@ export const zFileFileEraseHeaders = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zFileFileEraseResponse = zErasureReceipt;
 
@@ -3054,10 +3840,13 @@ export const zFileFileReadPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zFileFileReadResponse = zFile;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zFileFileAltCommandBody = zAltBodyWritable;
 
 export const zFileFileAltCommandHeaders = z.object({
@@ -3069,10 +3858,13 @@ export const zFileFileAltCommandPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zFileFileAltCommandResponse = zFile;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zFileFileAltBody = zAltBodyWritable;
 
 export const zFileFileAltPath = z.object({
@@ -3080,7 +3872,7 @@ export const zFileFileAltPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zFileFileAltResponse = zFile;
 
@@ -3122,6 +3914,9 @@ export const zFileFileReleasePath = z.object({
  */
 export const zFileFileReleaseResponse = z.void();
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zFileFileRetainBody = zRetainBodyWritable;
 
 export const zFileFileRetainHeaders = z.object({
@@ -3147,7 +3942,7 @@ export const zFileFileUsesPath = z.object({
 export const zFileFileUsesResponse = z.array(zUseRow).nullable();
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zFileQuotaReadResponse = zQuota;
 
@@ -3158,7 +3953,7 @@ export const zNotificationNotificationListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zNotificationNotificationListResponse = zPageNotificationBody;
 
@@ -3169,10 +3964,13 @@ export const zNotificationDeviceListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zNotificationDeviceListResponse = zPageDeviceBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zNotificationDeviceRegisterBody = zRegisterDeviceInputBodyWritable;
 
 export const zNotificationDeviceRegisterHeaders = z.object({
@@ -3210,10 +4008,13 @@ export const zNotificationNotificationReadPath = z.object({
  */
 export const zNotificationNotificationReadResponse = zNotification;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zBillingPlanCreateBody = zPlanWritable;
 
 /**
- * Created
+ * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zBillingPlanCreateResponse = zPlan;
 
@@ -3230,6 +4031,9 @@ export const zBillingPlanDeletePath = z.object({
  */
 export const zBillingPlanDeleteResponse = z.void();
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zBillingPlanUpdateBody = zPlanPatch;
 
 export const zBillingPlanUpdateHeaders = z.object({
@@ -3241,7 +4045,7 @@ export const zBillingPlanUpdatePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zBillingPlanUpdateResponse = zPlan;
 
@@ -3250,6 +4054,9 @@ export const zBillingPlanUpdateResponse = zPlan;
  */
 export const zTenantTenantListResponse = zListOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantCreateBody = zNewTenantWritable;
 
 /**
@@ -3266,6 +4073,9 @@ export const zTenantTenantReadPath = z.object({
  */
 export const zTenantTenantReadResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantDeleteBody = zDeleteWritable;
 
 export const zTenantTenantDeletePath = z.object({
@@ -3277,6 +4087,9 @@ export const zTenantTenantDeletePath = z.object({
  */
 export const zTenantTenantDeleteResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantAddHostBody = zHostInputBodyWritable;
 
 export const zTenantTenantAddHostPath = z.object({
@@ -3298,6 +4111,9 @@ export const zTenantTenantRemoveHostPath = z.object({
  */
 export const zTenantTenantRemoveHostResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantInviteBody = zInviteInputBodyWritable;
 
 export const zTenantTenantInvitePath = z.object({
@@ -3309,6 +4125,9 @@ export const zTenantTenantInvitePath = z.object({
  */
 export const zTenantTenantInviteResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantSetLocaleBody = zSetLocaleWritable;
 
 export const zTenantTenantSetLocalePath = z.object({
@@ -3320,6 +4139,9 @@ export const zTenantTenantSetLocalePath = z.object({
  */
 export const zTenantTenantSetLocaleResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantSetOidcBody = zOidcSettingsWritable;
 
 export const zTenantTenantSetOidcPath = z.object({
@@ -3349,6 +4171,9 @@ export const zTenantTenantReactivatePath = z.object({
  */
 export const zTenantTenantReactivateResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantRenameBody = zRenameWritable;
 
 export const zTenantTenantRenamePath = z.object({
@@ -3360,6 +4185,9 @@ export const zTenantTenantRenamePath = z.object({
  */
 export const zTenantTenantRenameResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTenantTenantSetSamlBody = zSamlSettingsWritable;
 
 export const zTenantTenantSetSamlPath = z.object({
@@ -3389,6 +4217,9 @@ export const zTenantTenantSuspendPath = z.object({
  */
 export const zTenantTenantSuspendResponse = zTenant;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthMailDeliveryBody = zMailDeliveryInputBodyWritable;
 
 export const zAuthMailDeliveryHeaders = z.object({
@@ -3400,6 +4231,9 @@ export const zAuthMailDeliveryHeaders = z.object({
  */
 export const zAuthMailDeliveryResponse = zMailDeliveryOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthPasswordForgotBody = zForgotInputBodyWritable;
 
 export const zAuthPasswordForgotHeaders = z.object({
@@ -3411,6 +4245,9 @@ export const zAuthPasswordForgotHeaders = z.object({
  */
 export const zAuthPasswordForgotResponse = zDoneOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthRegisterBody = zPasswordRegistrationInputBodyWritable;
 
 export const zAuthRegisterHeaders = z.object({
@@ -3422,6 +4259,9 @@ export const zAuthRegisterHeaders = z.object({
  */
 export const zAuthRegisterResponse = zDoneOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthResendVerificationBody = zResendVerificationInputBodyWritable;
 
 export const zAuthResendVerificationHeaders = z.object({
@@ -3433,6 +4273,9 @@ export const zAuthResendVerificationHeaders = z.object({
  */
 export const zAuthResendVerificationResponse = zDoneOutputBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zAuthVerifyEmailBody = zVerifyEmailInputBody;
 
 export const zAuthVerifyEmailHeaders = z.object({
@@ -3485,6 +4328,9 @@ export const zSubjectExportBundlePath = z.object({
  */
 export const zScimGroupMappingsListResponse = z.array(zGroupMapping).nullable();
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zScimGroupMappingWriteBody = zMappingInputBodyWritable;
 
 /**
@@ -3493,17 +4339,23 @@ export const zScimGroupMappingWriteBody = zMappingInputBodyWritable;
 export const zScimGroupMappingWriteResponse = zGroupMapping;
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zSiteSettingsReadResponse = zSiteSettings;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zSiteSettingsSaveBody = zSiteSettingsWritable;
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zSiteSettingsSaveResponse = zSiteSettings;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zSubjectEraseRequestBody = zPersonEraseBodyWritable;
 
 export const zSubjectEraseRequestHeaders = z.object({
@@ -3515,6 +4367,9 @@ export const zSubjectEraseRequestHeaders = z.object({
  */
 export const zSubjectEraseRequestResponse = zErasure;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zSubjectExportRequestMineBody = zOwnExportBodyWritable;
 
 export const zSubjectExportRequestMineHeaders = z.object({
@@ -3522,10 +4377,13 @@ export const zSubjectExportRequestMineHeaders = z.object({
 });
 
 /**
- * Accepted
+ * Accepted Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zSubjectExportRequestMineResponse = zRequest;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zSubjectExportRequestForBody = zExportForBodyWritable;
 
 export const zSubjectExportRequestForHeaders = z.object({
@@ -3533,7 +4391,7 @@ export const zSubjectExportRequestForHeaders = z.object({
 });
 
 /**
- * Accepted
+ * Accepted Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zSubjectExportRequestForResponse = zRequest;
 
@@ -3555,7 +4413,7 @@ export const zSubjectExportReadMinePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zSubjectExportReadMineResponse = zRequest;
 
@@ -3580,10 +4438,13 @@ export const zTaskTaskListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zTaskTaskListResponse = zPageTaskBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTaskTaskCreateBody = zTaskWritable;
 
 export const zTaskTaskCreateHeaders = z.object({
@@ -3591,7 +4452,7 @@ export const zTaskTaskCreateHeaders = z.object({
 });
 
 /**
- * Created
+ * Created Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zTaskTaskCreateResponse = zTask;
 
@@ -3613,10 +4474,13 @@ export const zTaskTaskReadPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zTaskTaskReadResponse = zTask;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTaskTaskUpdateBody = zTaskPatch;
 
 export const zTaskTaskUpdateHeaders = z.object({
@@ -3629,10 +4493,13 @@ export const zTaskTaskUpdatePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zTaskTaskUpdateResponse = zTask;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTaskTaskAssignBody = zAssignBodyWritable;
 
 export const zTaskTaskAssignHeaders = z.object({
@@ -3644,10 +4511,13 @@ export const zTaskTaskAssignPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zTaskTaskAssignResponse = zTask;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTaskTaskCheckSlaBody = zCommandInputStructBody;
 
 export const zTaskTaskCheckSlaHeaders = z.object({
@@ -3659,10 +4529,13 @@ export const zTaskTaskCheckSlaPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zTaskTaskCheckSlaResponse = zTask;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zTaskTaskResolveBody = zResolveBodyWritable;
 
 export const zTaskTaskResolveHeaders = z.object({
@@ -3674,10 +4547,13 @@ export const zTaskTaskResolvePath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zTaskTaskResolveResponse = zTask;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserInvitationCreateBody = zInvitationWritable;
 
 export const zUserInvitationCreateHeaders = z.object({
@@ -3697,10 +4573,13 @@ export const zUserUserListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zUserUserListResponse = zPageUserBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserUserCreateBody = zUserWritable;
 
 export const zUserUserCreateHeaders = z.object({
@@ -3734,6 +4613,9 @@ export const zUserUserReadPath = z.object({
  */
 export const zUserUserReadResponse = zUser;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserUserUpdateBody = zUserPatch;
 
 export const zUserUserUpdateHeaders = z.object({
@@ -3750,6 +4632,9 @@ export const zUserUserUpdatePath = z.object({
  */
 export const zUserUserUpdateResponse = zUser;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserUserApproveRegistrationBody = zCommandInputStructBody;
 
 export const zUserUserApproveRegistrationHeaders = z.object({
@@ -3765,6 +4650,9 @@ export const zUserUserApproveRegistrationPath = z.object({
  */
 export const zUserUserApproveRegistrationResponse = zUser;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserUserDeactivateBody = zCommandInputStructBody;
 
 export const zUserUserDeactivateHeaders = z.object({
@@ -3780,6 +4668,9 @@ export const zUserUserDeactivatePath = z.object({
  */
 export const zUserUserDeactivateResponse = zUser;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserUserHandleBody = zHandleBodyWritable;
 
 export const zUserUserHandleHeaders = z.object({
@@ -3795,6 +4686,9 @@ export const zUserUserHandlePath = z.object({
  */
 export const zUserUserHandleResponse = zUser;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserUserRolesBody = zRolesBodyWritable;
 
 export const zUserUserRolesHeaders = z.object({
@@ -3810,6 +4704,9 @@ export const zUserUserRolesPath = z.object({
  */
 export const zUserUserRolesResponse = zUser;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zUserUserSetPasswordBody = zPasswordBodyWritable;
 
 export const zUserUserSetPasswordHeaders = z.object({
@@ -3833,7 +4730,7 @@ export const zWebhookDeliveryListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zWebhookDeliveryListResponse = zPageDeliveryBody;
 
@@ -3842,10 +4739,13 @@ export const zWebhookDeliveryReadPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zWebhookDeliveryReadResponse = zDelivery;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zWebhookDeliveryReplayBody = zCommandInputStructBody;
 
 export const zWebhookDeliveryReplayHeaders = z.object({
@@ -3857,7 +4757,7 @@ export const zWebhookDeliveryReplayPath = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zWebhookDeliveryReplayResponse = zDelivery;
 
@@ -3869,10 +4769,13 @@ export const zWebhookEndpointListQuery = z.object({
 });
 
 /**
- * OK
+ * OK Numeric int64 output is deprecated; select application/vnd.platformkit.int64+json for exact decimal strings.
  */
 export const zWebhookEndpointListResponse = zPageEndpointBody;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zWebhookEndpointCreateBody = zCreateBodyWritable;
 
 export const zWebhookEndpointCreateHeaders = z.object({
@@ -3906,6 +4809,9 @@ export const zWebhookEndpointReadPath = z.object({
  */
 export const zWebhookEndpointReadResponse = zEndpoint;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zWebhookEndpointUpdateBody = zEndpointPatch;
 
 export const zWebhookEndpointUpdateHeaders = z.object({
@@ -3922,6 +4828,9 @@ export const zWebhookEndpointUpdatePath = z.object({
  */
 export const zWebhookEndpointUpdateResponse = zEndpoint;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zWebhookEndpointDisableBody = zCommandInputStructBody;
 
 export const zWebhookEndpointDisableHeaders = z.object({
@@ -3937,6 +4846,9 @@ export const zWebhookEndpointDisablePath = z.object({
  */
 export const zWebhookEndpointDisableResponse = zEndpoint;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zWebhookEndpointEnableBody = zCommandInputStructBody;
 
 export const zWebhookEndpointEnableHeaders = z.object({
@@ -3965,6 +4877,9 @@ export const zWebhookEndpointRotatePath = z.object({
  */
 export const zWebhookEndpointRotateResponse = zIssued;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zWebhookEndpointTargetBody = zTargetBodyWritable;
 
 export const zWebhookEndpointTargetHeaders = z.object({
@@ -3991,6 +4906,9 @@ export const zScimGroupsListQuery = z.object({
  */
 export const zScimGroupsListResponse = zGroupList;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zScimGroupCreateBody = zGroupDraftWritable;
 
 export const zScimGroupCreateHeaders = z.object({
@@ -4025,6 +4943,9 @@ export const zScimGroupGetPath = z.object({
  */
 export const zScimGroupGetResponse = zGroupResource;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zScimGroupPatchBody = zPatchInputBodyWritable;
 
 export const zScimGroupPatchHeaders = z.object({
@@ -4041,6 +4962,9 @@ export const zScimGroupPatchPath = z.object({
  */
 export const zScimGroupPatchResponse = zGroupResource;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zScimGroupReplaceBody = zGroupDraftWritable;
 
 export const zScimGroupReplaceHeaders = z.object({
@@ -4100,6 +5024,9 @@ export const zScimUsersListQuery = z.object({
  */
 export const zScimUsersListResponse = zUserList;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zScimUserCreateBody = zUserDraftWritable;
 
 export const zScimUserCreateHeaders = z.object({
@@ -4134,6 +5061,9 @@ export const zScimUserGetPath = z.object({
  */
 export const zScimUserGetResponse = zUserResource;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zScimUserPatchBody = zPatchInputBodyWritable;
 
 export const zScimUserPatchHeaders = z.object({
@@ -4150,6 +5080,9 @@ export const zScimUserPatchPath = z.object({
  */
 export const zScimUserPatchResponse = zUserResource;
 
+/**
+ *  Signed 64-bit fields also accept exact decimal strings; /openapi.json?int64=string documents both input forms.
+ */
 export const zScimUserReplaceBody = zUserDraftWritable;
 
 export const zScimUserReplaceHeaders = z.object({

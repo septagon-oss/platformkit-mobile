@@ -35,11 +35,11 @@ test("the copy is the bytes the record names, at the commit it names", () => {
   // The commit this copy was taken from prints an unset `resolved` member by saying nothing, which
   // is what the phone's strict generated read of a served catalogue needs (README, "The server's
   // resolved policy"); an older capture printed those absences as `null` and was refused.
-  assert.equal(record.upstream.commit, "087b984bd56b5313ddd279317f1eabdbdf84e0b2");
+  assert.equal(record.upstream.commit, "2499b3679005623b1bc73e2b2cf7ae88d81da004");
   assert.equal(record.upstream.path, "ui/screens/testdata/catalog-choices.json");
   assert.match(
     record.upstream.command,
-    /raw\.githubusercontent\.com\/septagon-oss\/platformkit\/087b984bd56b5313ddd279317f1eabdbdf84e0b2\/ui\/screens\/testdata\/catalog-choices\.json$/,
+    /raw\.githubusercontent\.com\/septagon-oss\/platformkit\/2499b3679005623b1bc73e2b2cf7ae88d81da004\/ui\/screens\/testdata\/catalog-choices\.json$/,
   );
 });
 
