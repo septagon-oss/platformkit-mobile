@@ -96,6 +96,12 @@ export type CrudVerb = (typeof CRUD_VERBS)[number];
  * read, write and door is resolved against. Nothing authorises anything from
  * it — a name this build does not ship draws the generated screens.
  */
+/**
+ * @deprecated Pack identity is declared, not printed: a product declares its pack
+ * with `definePack` (`src/pack.ts`), whose key is the `module/entity` the pinned
+ * document answers a read of. This shape stays because the kernel owns the `renderer`
+ * member and may print it again; nothing a build writes should reach for it.
+ */
 export interface RendererRef {
   readonly name: string;
   /** minShell is the lowest SHELL_VERSION whose shell can draw this pack's screen. */
@@ -283,6 +289,12 @@ export const SUPPORTED_CATALOG_VERSION = 3;
  * can read and is refused when it is exceeded; this one is the oldest *shell*
  * a screen may ask for and falls back when it is not reached, because a screen
  * that needs more is a screen a person can get by updating the app.
+ */
+/**
+ * @deprecated A declared pack needs no shell handshake: its key is checked against
+ * the pinned document at compile time, so there is no version of this phone for it to
+ * be ahead of. This number is what an entry that prints `renderer.min_shell` is still
+ * measured against, and it goes when the kernel stops printing that member.
  */
 export const SHELL_VERSION = 1;
 
@@ -836,7 +848,11 @@ function commandBindings(
   return Object.keys(kept).length === 0 ? undefined : kept;
 }
 
-/** rendererRef reads which pack an entry asks for, or says that it asks for none. */
+/**
+ * rendererRef reads which pack an entry asks for, or says that it asks for none. It
+ * reads a wire member the kernel owns and prints nothing of today, which is why a
+ * malformed one costs the entry nothing.
+ */
 function rendererRef(v: unknown): RendererRef | undefined {
   if (!isRecord(v)) return undefined;
   const name = v.name;
@@ -1092,13 +1108,21 @@ export const key = (e: Entry): string => `${e.module}/${e.entity}`;
  * the resource itself. Data identity never moves here — every request still
  * goes to `entry.path` — which is what lets one module ship a screen another
  * module's entry asks for.
+ *
+ * @deprecated The name half is the kernel's dormant `renderer.name`, which a declared
+ * pack does not need: `key(e)` alone is what `definePack` registers under, and the two
+ * agree whenever the server prints nothing. A pack no entry names by key is reachable
+ * only through a plain `Renderers` record for the rest of this window.
  */
 export const packKey = (e: Entry): string => e.renderer?.name ?? key(e);
 
 /**
- * shellReady says whether this build can draw the pack the entry names. An
- * entry that names no pack needs nothing; one that needs a newer shell is
- * drawn by the generated screens, which is a fallback, not a refusal.
+ * shellReady says whether this build can draw the pack the entry names. An entry
+ * that names no pack needs nothing; one that needs a newer shell is drawn by the
+ * generated screens, which is a fallback, not a refusal.
+ *
+ * @deprecated Replaced by the compile-time check `definePack` makes; kept because an
+ * entry that prints `renderer.min_shell` is still drawn generated until the app is.
  */
 export const shellReady = (e: Entry): boolean =>
   e.renderer === undefined || e.renderer.minShell <= SHELL_VERSION;

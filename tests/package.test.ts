@@ -56,6 +56,7 @@ test("a packed dependency resolves the shared composition and atomic layers with
     "effects/native-store",
     "effects/native-reach",
     "renderers",
+    "pack",
     "route",
     "shell",
     "tools/tokens",

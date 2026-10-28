@@ -19,6 +19,21 @@ for the version being released.
 
 ## 0.3.0 (unreleased)
 
+- A renderer pack is one typed declaration. `definePack({ key, read, input, detail?,
+  list?, deck?, form?, command? })` (`@…/pack`) is the one statement a custom screen
+  is: its `key` is checked against the `module/entity` keys the pinned document answers
+  a read of, and its `read` against the operations that answer that key, so a misspelled
+  key, an operation of another key and a `POST` offered as a screen's data are compile
+  errors. The map they are checked against, `src/generated/entries.gen.ts`, is generated
+  by `npm run api` from the same document the transport's route table comes from. A
+  declared screen is handed the read, the entry's row commands and `present(field,
+  value)`, which reads a field as that entry's resolved policy reads it; `ReadState`
+  carries `failure`, the verdict behind its `error` sentence, beside the sentence.
+  `entry.renderer`, `RendererRef`, `packKey`'s name preference, `shellReady`,
+  `SHELL_VERSION` and the example's `taskRenderers` export are kept and deprecated —
+  a declared pack is registered under its own key and needs none of them, and their
+  removal is a listed later step, not this one.
+
 - The derivation layer has five doors. `./core/list` (which fields a page draws, in
   what order, under which filters), `./core/record` (what one record shows and where
   its address is), `./core/form` (what a person types and what the phone sends),

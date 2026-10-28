@@ -111,6 +111,11 @@ export async function generate(root: string, output: string): Promise<void> {
  * credential carrying its own scope (kit/httpx/authorize.go) — which every key this phone mints
  * does. So the transport reads the kind off the route rather than guessing what to present.
  *
+ * It is also the only inventory of which reads answer which pack key: a module
+ * declares one `"module/entity"` and the operation that answers it, and the key
+ * is the first two words of the `operationId` because the catalogue's entity is
+ * singular (`task-task-read` is `task/task`) where its path is plural.
+ *
  * It is also the only inventory of what a key may be narrowed to: the mint
  * refuses a scope no module declares and a scope its holder does not already
  * grant (modules/auth/internal/tokens.go's IssueToken), so a phone that wants a
@@ -122,6 +127,7 @@ async function routeCalls(root: string, output: string): Promise<void> {
   const entries: string[] = [];
   const bound: string[] = [];
   const grants = new Map<string, string>();
+  const reads = new Map<string, Set<string>>();
   for (const [path, item] of Object.entries(document.paths)) {
     for (const [method, operation] of Object.entries(
       item as Record<
@@ -165,6 +171,17 @@ async function routeCalls(root: string, output: string): Promise<void> {
           throw new Error(`${declared.permission}: declared as ${before} and as ${recorded}`);
         grants.set(declared.permission, recorded);
       }
+      // A screen draws a body the document says arrives: a GET that answers no
+      // JSON is a redirect or a file, and drawing it would be the phone deciding
+      // that a write or a download is a read.
+      if (method === "get" && jsonResponse) {
+        const words = operation.operationId.split("-");
+        if (words.length >= 2) {
+          const pair = `${words[0]}/${words[1]}`;
+          if (!reads.has(pair)) reads.set(pair, new Set());
+          reads.get(pair)!.add(name);
+        }
+      }
       const multipart = !!operation.requestBody?.content?.["multipart/form-data"];
       const statuses = Object.keys(operation.responses)
         .filter((status) => /^2\d\d$/.test(status))
@@ -200,6 +217,29 @@ async function routeCalls(root: string, output: string): Promise<void> {
     "",
   ].join("\n");
   await writeFile(join(output, "grants.gen.ts"), grantFile);
+  const readEntries = [...reads.entries()]
+    .sort(([left], [right]) => (left < right ? -1 : 1))
+    .map(([pair, names]) => {
+      const listed = [...names]
+        .sort()
+        .map((name) => JSON.stringify(name))
+        .join(", ");
+      return `${JSON.stringify(pair)}: [${listed}],`;
+    });
+  const readSource = [
+    '// Generated from the pinned document by scripts/api.ts: for every "module/entity" the',
+    "// document answers a read of, the operations that answer it. Nothing outside the document",
+    "// is added and no read it answers is dropped; a key no catalogue entry carries is a key",
+    "// no screen is ever asked for.",
+    'import type { Operations } from "./operations.gen";',
+    "export const entryReads = {",
+    ...readEntries,
+    "} as const satisfies Record<string, readonly (keyof Operations)[]>;",
+    "export type EntryKey = keyof typeof entryReads;",
+    "export type OperationFor<K extends EntryKey> = (typeof entryReads)[K][number];",
+    "",
+  ].join("\n");
+  await writeFile(join(output, "entries.gen.ts"), readSource);
   await writeFile(
     join(output, "routes.gen.ts"),
     `// Generated from the pinned document by scripts/api.ts. No route outside it is added.\nimport * as sdk from "./sdk.gen";\nimport type { Client } from "./client";\nconst routes = [${entries.join(",\n")}];\nexport function documentedRoute(method: string, path: string) { return routes.find(route => route.method === method && route.pattern.test(path.split("?")[0]!)); }\n`,

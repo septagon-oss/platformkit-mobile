@@ -39,6 +39,76 @@ test("two generations agree and every class of generated drift is refused withou
   }
 });
 
+test("the read map names every key the pin answers a read of, and no other", async () => {
+  // A pack declares one "module/entity" and the read that answers it; this is the
+  // inventory that decides both. Re-derived from the document here, so a generator
+  // that dropped a key, invented one or printed a GET whose answer is not a body
+  // fails by name rather than by a screen that drew nothing on a device.
+  const temporary = await mkdtemp(join(tmpdir(), "entry-reads-"));
+  try {
+    await generate(process.cwd(), temporary);
+    const [printed, operations] = await Promise.all([
+      readFile(join(temporary, "entries.gen.ts"), "utf8"),
+      readFile(join(temporary, "operations.gen.ts"), "utf8"),
+    ]);
+    const map = new Map<string, string[]>();
+    for (const row of printed.matchAll(/^\s*"([^"]+)": \[([^\]]*)\],$/gm))
+      map.set(
+        row[1]!,
+        row[2]!
+          .split(",")
+          .map((name) => name.trim().replaceAll('"', ""))
+          .filter((name) => name !== ""),
+      );
+    const answered = new Map<string, string[]>();
+    const document = JSON.parse(await readFile("testdata/openapi.json", "utf8")) as {
+      paths: Record<string, Record<string, unknown>>;
+    };
+    for (const methods of Object.values(document.paths)) {
+      for (const [method, entry] of Object.entries(methods)) {
+        const call = entry as {
+          operationId?: string;
+          responses?: Record<string, { content?: Record<string, unknown> }>;
+        };
+        if (method !== "get" || !call.operationId) continue;
+        const words = call.operationId.split("-");
+        if (words.length < 2) continue;
+        if (
+          !Object.entries(call.responses ?? {}).some(
+            ([status, response]) =>
+              /^2\d\d$/.test(status) && response.content?.["application/json"],
+          )
+        )
+          continue;
+        const pair = `${words[0]}/${words[1]}`;
+        const name = call.operationId.replace(/-([a-z])/g, (_, letter: string) =>
+          letter.toUpperCase(),
+        );
+        assert.ok(
+          operations.includes(`${name}: (`),
+          `${name}: printed as a read of ${pair} with no generated method`,
+        );
+        answered.set(pair, [...(answered.get(pair) ?? []), name].sort());
+      }
+    }
+    assert.deepEqual(
+      new Map([...map.entries()].sort()),
+      new Map(
+        [...answered.entries()]
+          .sort(([a], [b]) => (a < b ? -1 : 1))
+          .map(([pair, names]) => [pair, names]),
+      ),
+    );
+    assert.ok(map.get("task/task")?.includes("taskTaskRead"));
+    assert.ok(
+      !map.has("note/note"),
+      "the golden catalogue's module is outside the public document",
+    );
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
 test("the pin answers the counts door, and answers it with numbers only", async () => {
   // A path the document does not print is refused before the wire, so "the phone may
   // ask" is a fact about the pin and not about a screen: it is checked here, where the

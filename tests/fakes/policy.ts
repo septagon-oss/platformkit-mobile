@@ -104,3 +104,54 @@ export const invoiceDocument = (block: unknown = invoiceBlock()): Json => ({
     },
   ],
 });
+
+/**
+ * taskBlock is the policy a server resolved for the kernel's `task/task` record, in
+ * Portuguese: the resolved block the example pack is read against when a case asks
+ * whose word and whose shade a value wears. It is the wire shape the server prints,
+ * not a stand-in for it — `status` is labelled and shaded, `priority` is labelled and
+ * left plain, so a pack that shaded every value would fail the comparison.
+ */
+export const taskBlock = (): Json => ({
+  policyVersion: 1,
+  language: "pt-PT",
+  identity: {
+    singular: "Tarefa",
+    plural: "Tarefas",
+    description: "",
+    emptyDescription: "",
+    icon: "",
+    group: null,
+    order: 0,
+  },
+  titles: {
+    listCandidates: ["title"],
+    recordCandidates: ["title"],
+    emptyTitle: "Sem título",
+    preview: "description",
+    status: "status",
+    cover: "",
+    thumbnail: "",
+    summary: [],
+  },
+  layout: {
+    columns: ["title", "status"],
+    create: ["title"],
+    update: ["title"],
+    overview: [],
+    information: [],
+    sections: [],
+  },
+  fields: [
+    resolvedField("id", "Identificador"),
+    resolvedField("title", "Título"),
+    resolvedField("description", "Descrição"),
+    resolvedField("priority", "Prioridade"),
+    resolvedField("status", "Estado", {
+      options: [{ value: "open", label: "Em aberto", tone: "warning", done: false }],
+    }),
+    resolvedField("slaDeadline", "Prazo"),
+    resolvedField("slaBreached", "Atraso"),
+  ],
+  list: { defaultSort: "", filters: [], sorts: [] },
+});

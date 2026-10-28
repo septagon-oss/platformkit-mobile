@@ -1,7 +1,7 @@
 // taskRenderers is the kit's one example of a module-owned native screen, kept
 // in src/examples and composed by no route. It is the pattern a product copies,
-// not product UI: the kernel's own `task/tasks` record, drawn from the typed
-// body of a generated operation.
+// not product UI: the kernel's own `task/task` record, drawn from the typed body
+// of the operation that answers that key.
 //
 // What makes this screen worth writing at all is the SLA line. Everything else
 // on it — the title, the priority, the lifecycle state — is a column the schema
@@ -12,18 +12,23 @@
 // That is the whole test for a custom screen: a workflow the resource schema
 // cannot express.
 //
-// It is reached by a catalogue entry naming `"renderer": {"name":
-// "task/tasks", "min_shell": 1}`; `app/_layout.tsx` passes `defaultRenderers`,
+// The one declaration below names the key, the read and the screen. The key is
+// checked against the pinned document, the read against the key, and every field
+// this screen draws against what that read answers, so nothing here can drift from
+// the server without a compile error. `app/_layout.tsx` passes `defaultRenderers`,
 // so nothing in this app renders it, and no server has to have the key.
 import { Stack } from "expo-router";
 import React, { useMemo } from "react";
 import { View } from "react-native";
-import { humanize, timeText, type Feedback } from "../core/present";
-import { rowCommands } from "../core/command";
-import type { OperationData, OperationName, Renderer, ScreenProps } from "../renderers";
-import { useCommandRun } from "../screens/useCommand";
-import { useFeedback } from "../screens/useFeedback";
-import { useOperation } from "../screens/useOperation";
+import {
+  timeText,
+  type Feedback,
+  type Motion,
+  type Present,
+  type Presented,
+} from "../core/present";
+import { definePack, type ReadProps } from "../pack";
+import type { OperationData, OperationName } from "../renderers";
 import { Badge } from "../ui/atoms/Badge";
 import { Notice, retry } from "../ui/atoms/Notice";
 import { Spinner } from "../ui/atoms/Spinner";
@@ -38,14 +43,8 @@ import { useStyles } from "../ui/theme";
 /** Task is what the pinned document answers `taskTaskRead` with. */
 type Task = OperationData<"taskTaskRead">;
 
-function TaskDetail({ entry, id }: ScreenProps) {
-  const feedback = useFeedback();
-  // The read is named, not fetched: `id` of undefined means there is no row to
-  // ask about yet, and asking would be a request the screen has no subject for.
-  const read = useOperation("taskTaskRead", id === undefined ? undefined : { path: { id } });
+function TaskDetail({ read, present, feedback, actions }: ReadProps<Task>) {
   const task = read.data;
-  const { run, busy } = useCommandRun(entry, id);
-  const commands = rowCommands(entry);
   // The header takes the typed row's own title, which is the simplest thing a
   // typed body buys: `task.title` is the document's `title`, and a field it does
   // not print is a compile error, not a blank line weeks later.
@@ -66,41 +65,53 @@ function TaskDetail({ entry, id }: ScreenProps) {
         {task ? (
           <>
             <Section>
-              <DetailRow testID="task-title" term={humanize("title")} value={task.title} />
+              <DetailRow testID="task-title" {...row(present("title", task.title))} />
               {task.description ? (
                 <DetailRow
                   testID="task-description"
-                  term={humanize("description")}
-                  value={task.description}
+                  {...row(present("description", task.description))}
                 />
               ) : null}
               {task.priority ? (
                 <DetailRow
                   testID="task-priority"
-                  term={humanize("priority")}
-                  value={humanize(task.priority)}
-                  shown={<Badge label={humanize(task.priority)} />}
+                  {...pill(present("priority", task.priority), feedback.motion)}
                 />
               ) : null}
               {task.status ? (
                 <DetailRow
                   testID="task-status"
-                  term={humanize("status")}
-                  value={humanize(task.status)}
-                  shown={<Badge label={humanize(task.status)} />}
+                  {...pill(present("status", task.status), feedback.motion)}
                 />
               ) : null}
             </Section>
             {task.slaDeadline ? (
-              <SlaLine deadline={task.slaDeadline} task={task} feedback={feedback} />
+              <SlaLine
+                deadline={task.slaDeadline}
+                breached={task.slaBreached === true}
+                feedback={feedback}
+                present={present}
+              />
             ) : null}
           </>
         ) : null}
-        <Actions commands={commands} running={busy} onRun={run} />
+        <Actions commands={actions.commands} running={actions.busy} onRun={actions.run} />
       </Screen>
     </>
   );
 }
+
+/** row is one presented field as a detail row's two props: the field's word for itself, and its value. */
+const row = (presented: Presented): { readonly term: string; readonly value: string } => ({
+  term: presented.label,
+  value: presented.value,
+});
+
+/** pill is a closed-set value as the policy reads it: the same words on the row and on the pill. */
+const pill = (presented: Presented, motion: Motion) => ({
+  ...row(presented),
+  shown: <Badge label={presented.value} tone={presented.tone} motion={motion} />,
+});
 
 /**
  * SlaLine is the reason this screen exists: the deadline in the device's own
@@ -111,27 +122,34 @@ function TaskDetail({ entry, id }: ScreenProps) {
  */
 function SlaLine({
   deadline,
-  task,
+  breached,
   feedback,
+  present,
 }: {
   readonly deadline: string;
-  readonly task: Task;
+  readonly breached: boolean;
   readonly feedback: Feedback;
+  readonly present: Present;
 }) {
   const s = useStyles(kitStyles);
-  const breached = task.slaBreached === true;
   const shown = timeText(new Date(deadline), feedback);
+  const field = present("slaDeadline", deadline);
   return (
     <Section>
       <DetailRow
         testID="task-sla"
-        term={humanize("slaDeadline")}
+        term={field.label}
         value={shown}
         shown={
           <View style={s.row}>
             <Text>{shown}</Text>
             {breached ? (
-              <Badge label={humanize("slaBreached")} tone="danger" symbol="warning" />
+              <Badge
+                label={present("slaBreached", true).label}
+                tone="danger"
+                symbol="warning"
+                motion={feedback.motion}
+              />
             ) : null}
           </View>
         }
@@ -141,11 +159,29 @@ function SlaLine({
 }
 
 /**
- * taskRenderers is the pack. One kind, `detail`: the list, form and command
- * screens stay generated, because the schema derives them well and this screen
- * would only be a second implementation of them.
+ * taskPack is the pack: one key the pinned document answers a read of, the read
+ * that answers it, and one screen. The list, form and command screens stay
+ * generated, because the schema derives them well and this screen would only be a
+ * second implementation of them.
  */
-export const taskRenderers: Renderer = { detail: TaskDetail };
+export const taskPack = definePack({
+  key: "task/task",
+  read: "taskTaskRead",
+  // A detail screen with no id has no row to ask about, and asking anyway would be a
+  // read of the whole collection dressed up as one row.
+  input: ({ id }) => (id === undefined ? undefined : { path: { id } }),
+  detail: TaskDetail,
+});
+
+/**
+ * taskRenderers is the same pack in the shape a plain `Renderers` record takes.
+ *
+ * @deprecated Declare the pack with `definePack` and spread its result into the
+ * `renderers` passed to `<Shell>`; this name is the pack's key looked up by hand,
+ * which is what a server-printed `renderer.name` still reaches during the
+ * compatibility window.
+ */
+export const taskRenderers = taskPack["task/task"];
 
 /**
  * typeProof is this pack's compile-time half, checked by `npm run typecheck` and

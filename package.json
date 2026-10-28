@@ -24,6 +24,7 @@
     "./effects/native-store": "./src/effects/native-store.ts",
     "./effects/native-reach": "./src/effects/native-reach.ts",
     "./renderers": "./src/renderers.ts",
+    "./pack": "./src/pack.ts",
     "./route": "./src/route.tsx",
     "./shell": "./src/shell.tsx",
     "./examples/taskRenderers": "./src/examples/taskRenderers.tsx",

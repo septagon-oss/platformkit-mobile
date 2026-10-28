@@ -3,6 +3,8 @@
 // registers itself, and a key nobody asks for is a key nothing renders.
 import type { ComponentType } from "react";
 import type { Entry } from "./core/catalog";
+import type { FailureVerdict } from "./core/failure";
+import type { EntryKey, OperationFor } from "./generated/entries.gen";
 import type { Operations } from "./generated/operations.gen";
 import type { FinishingProps } from "./ui/organisms/ResourceDetail";
 import type { CoverMotionProps } from "./ui/organisms/RecordCover";
@@ -10,6 +12,13 @@ import type { ZoomSlotProps } from "./ui/organisms/PhotoViewer";
 import type { DeckMotionProps } from "./ui/organisms/ResourceDeck";
 import type { RowActionProps } from "./ui/organisms/DataList";
 
+/**
+ * ScreenProps is what the route dispatcher hands a screen: the catalogue entry it is
+ * about, the record's id, and the verb a command screen is running. A pack screen
+ * written with `definePack` (`./pack`) gets these three beside the read, the words and
+ * the row's commands it declares a need for; a screen added to a plain `Renderers`
+ * record — the deprecated form — is written against this shape alone.
+ */
 export interface ScreenProps {
   readonly entry: Entry;
   readonly id?: string;
@@ -56,6 +65,15 @@ export const defaultRenderers: Renderers = {};
  */
 export type OperationName = keyof Operations;
 
+/**
+ * EntryKey is every `"module/entity"` the pinned document answers a read of, and
+ * OperationFor is the reads that answer one. Both come from the same generated
+ * inventory the transport's route table comes from (`src/generated/entries.gen.ts`),
+ * which is what lets a pack declaration tie its key to its read: a key the document
+ * answers nothing for, or an operation that answers another key, is a compile error.
+ */
+export type { EntryKey, OperationFor };
+
 /** OperationInput is what that operation takes: its generated path, query and body. */
 export type OperationInput<K extends OperationName> = Parameters<Operations[K]>[0];
 
@@ -73,5 +91,12 @@ export interface ReadState<d> {
   readonly data: d | undefined;
   /** error is the sentence to put on screen, the server's own or this read's; "" when none. */
   readonly error: string;
+  /**
+   * failure is the verdict behind that sentence whenever the read answered one — the
+   * kind, what the screen keeps and what the person may do next. A verdict that draws
+   * no sentence at all (`outcome` "silent" or "fields") is exactly what `error` cannot
+   * say, so it is carried here; undefined when nothing was asked or a body arrived.
+   */
+  readonly failure?: FailureVerdict | undefined;
   readonly reload: () => void;
 }
