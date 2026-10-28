@@ -13,6 +13,18 @@ export interface Step {
   readonly optional: boolean;
   readonly completion: "incomplete" | "complete" | "skipped";
   readonly problems: readonly Problem[];
+  /**
+   * fields names what this stage asks, in the order it asks them. A refusal needs it
+   * to find the stage a refused field belongs to; a caller-supplied scene (the kit's
+   * gallery) states stages by their word alone, which is why it is opt-in.
+   */
+  readonly fields?: readonly string[];
+  /**
+   * primary is the stage's own primary verb, resolved copy and all. `deriveStepper`
+   * labels Next with it when a stage carries one and with the kit's word otherwise, so
+   * a stepped form wears the server's word for the step and not a translated "next".
+   */
+  readonly primary?: string;
 }
 export interface StepperInput {
   readonly steps: readonly Step[];
@@ -135,7 +147,13 @@ export type StepperModel = Extract<ReturnType<typeof deriveStepper>, { ok: true 
 export type StepEvent =
   | { readonly kind: "back" | "skip" }
   | { readonly kind: "go" | "edited"; readonly stepId: string }
-  | { readonly kind: "validated"; readonly problems: readonly Problem[] };
+  | { readonly kind: "validated"; readonly problems: readonly Problem[] }
+  /**
+   * `refused` is a write that came back naming fields: every stage holding one takes
+   * its sentence and the walk lands on the earliest such stage. Unlike `validated`,
+   * which answers the stage a person just left, it can move them anywhere backwards.
+   */
+  | { readonly kind: "refused"; readonly problems: readonly Problem[] };
 /** The optional presentation only localizes refusals; no clock is consulted. */
 export function stepTransition(
   input: StepperInput,
@@ -186,6 +204,23 @@ export function stepTransition(
       v.need(steps[index]!.optional, "currentId", "validation");
       steps[index] = { ...steps[index]!, completion: "skipped", problems: [] };
       target = Math.min(index + 1, steps.length - 1);
+    } else if (event.kind === "refused") {
+      event.problems.forEach((problem) => {
+        v.text(problem.fieldId, "problems.fieldId");
+        v.text(problem.message, "problems.message");
+      });
+      const named = steps.map((step) =>
+        (step.fields ?? [])
+          .filter((name) => event.problems.some((problem) => problem.fieldId === name))
+          .map((name) => event.problems.find((problem) => problem.fieldId === name)!),
+      );
+      const first = named.findIndex((own) => own.length > 0);
+      steps = steps.map((step, i) =>
+        named[i]!.length === 0 ? step : { ...step, problems: named[i]!, completion: "incomplete" },
+      );
+      // A sentence naming no stage of this walk moves nobody: the refusal is read over
+      // the sheet it belongs to, where the person already is.
+      if (first >= 0) target = first;
     } else if (event.kind === "validated") {
       event.problems.forEach((problem) => {
         v.text(problem.fieldId, "problems.fieldId");
