@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type ReactNode } from "react";
 import { View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { ActionControl } from "../atoms/ActionControl";
@@ -6,6 +6,12 @@ import { MediaHero } from "../molecules/MediaHero";
 import { ModelState } from "../molecules/ModelState";
 import type { Props } from "./PhotoGallery";
 import { useStyles, type Theme } from "../theme";
+/**
+ * MasonryWall is a wall of named pictures: two columns of cells, the states of the page it was
+ * given, and the one foot control that asks for more of them. `header` is what a screen shows above
+ * the cells inside this scroll view — the wall owns the only scroll view a page may have, so a
+ * screen that has anything to say above the wall says it here rather than nesting a second page.
+ */
 export function MasonryWall({
   model,
   renderImage,
@@ -13,7 +19,8 @@ export function MasonryWall({
   onMore,
   onRetry,
   columns,
-}: Props & { readonly columns: 1 | 2 | 3 }) {
+  header,
+}: Props & { readonly columns: 1 | 2 | 3; readonly header?: ReactNode }) {
   const s = useStyles(styles);
   return (
     <FlashList
@@ -36,7 +43,12 @@ export function MasonryWall({
           />
         </View>
       )}
-      ListHeaderComponent={<ModelState model={model} />}
+      ListHeaderComponent={
+        <>
+          {header}
+          <ModelState model={model} />
+        </>
+      }
       ListFooterComponent={
         model.more ? <ActionControl model={model.more} onAction={onMore} /> : null
       }

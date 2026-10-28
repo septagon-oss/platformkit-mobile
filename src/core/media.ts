@@ -32,6 +32,12 @@ export interface MediaInput {
   readonly content: Content<readonly MediaItem[]>;
   readonly selectedId?: string;
   readonly page: Page;
+  /**
+   * moreLabel is the word the wall's foot control prints. A wall of photographs offers more of the
+   * same; a wall of something a person is choosing between offers the next of them, and the one
+   * sentence it prints is the collection's, not the organism's.
+   */
+  readonly moreLabel?: string;
 }
 export interface ImageSlotProps {
   /** instance distinguishes simultaneous uses of the same file; absent uses the file identity. */
@@ -95,7 +101,12 @@ export function deriveMedia(input: MediaInput, p: Presentation) {
       ...base,
       title: p.copy.kit.images,
       items: models,
-      more: pageControl(input.page, v, input.content.phase === "ready"),
+      more: pageControl(
+        input.page,
+        v,
+        input.content.phase === "ready",
+        input.moreLabel === undefined ? v.p.copy.kit.more : input.moreLabel,
+      ),
       pageError: input.page.error,
       selectionIssue:
         input.selectedId && !models.some((item) => item.id === input.selectedId && item.canOpen)
