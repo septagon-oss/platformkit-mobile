@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 300,
-   "cases": 1417,
-   "ms": 2651613,
-   "testsMs": 97151.49999999993,
+   "files": 305,
+   "cases": 1449,
+   "ms": 2656454,
+   "testsMs": 97265.39999999994,
    "runners": {
     "jest": 102,
-    "node": 198
+    "node": 203
    },
    "unreachable": 0
   },
@@ -11219,6 +11219,131 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-form-declaration-this-build-cannot-trust-costs-the-entry-its-policy.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 17,
+   "rule": "A stepped declaration this build cannot trust costs the entry its policy, one sentence, exactly as every other part of the block does. Each case breaks one member of the kernel's own three-step form and refuses: the phone will not guess a layout, complete a step list or wear a verb it cannot fill.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 829,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a stepped form with a layout this build does not know costs the entry its policy and says so once",
+    "a stepped form with steps with no layout word costs the entry its policy and says so once",
+    "a stepped form with a nil step list costs the entry its policy and says so once",
+    "a stepped form with an empty step list costs the entry its policy and says so once",
+    "a stepped form with a repeated step key costs the entry its policy and says so once",
+    "a stepped form with a step that asks no field costs the entry its policy and says so once",
+    "a stepped form with one field on two steps costs the entry its policy and says so once",
+    "a stepped form with a create field no step asks costs the entry its policy and says so once",
+    "a stepped form with a step that asks a field the form does not edit costs the entry its policy and says so once",
+    "a stepped form with a step whose verb says nothing costs the entry its policy and says so once",
+    "a stepped form with a verb wearing two answers costs the entry its policy and says so once",
+    "a stepped form with a token this build does not fill costs the entry its policy and says so once",
+    "a stepped form with an answer field off its own step costs the entry its policy and says so once",
+    "a stepped form with an answer with no empty label costs the entry its policy and says so once",
+    "a stepped form with a literal verb with answer properties costs the entry its policy and says so once",
+    "a step pointing at a name the entry has no field of is refused as a pointer",
+    "the same form with nothing broken about it is read whole"
+   ],
+   "tests": [
+    {
+     "title": "a stepped form with a layout this build does not know costs the entry its policy and says so once",
+     "ms": 17.481321,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with steps with no layout word costs the entry its policy and says so once",
+     "ms": 0.856143,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a nil step list costs the entry its policy and says so once",
+     "ms": 0.58956,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with an empty step list costs the entry its policy and says so once",
+     "ms": 0.54599,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a repeated step key costs the entry its policy and says so once",
+     "ms": 0.651505,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a step that asks no field costs the entry its policy and says so once",
+     "ms": 0.601703,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with one field on two steps costs the entry its policy and says so once",
+     "ms": 0.596973,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a create field no step asks costs the entry its policy and says so once",
+     "ms": 0.564233,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a step that asks a field the form does not edit costs the entry its policy and says so once",
+     "ms": 0.572488,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a step whose verb says nothing costs the entry its policy and says so once",
+     "ms": 0.528327,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a verb wearing two answers costs the entry its policy and says so once",
+     "ms": 0.521123,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a token this build does not fill costs the entry its policy and says so once",
+     "ms": 0.568431,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with an answer field off its own step costs the entry its policy and says so once",
+     "ms": 0.552261,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with an answer with no empty label costs the entry its policy and says so once",
+     "ms": 0.60554,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a literal verb with answer properties costs the entry its policy and says so once",
+     "ms": 0.639553,
+     "measured": false
+    },
+    {
+     "title": "a step pointing at a name the entry has no field of is refused as a pointer",
+     "ms": 0.668687,
+     "measured": false
+    },
+    {
+     "title": "the same form with nothing broken about it is read whole",
+     "ms": 1.488692,
+     "measured": false
+    }
+   ],
+   "loaded": 7,
+   "coveredProdLines": 6760,
+   "onlyProdLines": null,
+   "testsMs": 28
+  },
+  {
    "file": "tests/a-form-keeps-what-the-person-typed.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -12249,6 +12374,53 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-refusal-names-the-step-whose-field-fell-first.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "A refusal \u2014 the phone's own or the server's \u2014 belongs to the step that asked the field, and the walk goes back there whatever order the sentences arrived in. A sentence naming no step of this walk moves nobody: it is read over the sheet the person is standing in.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1568,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a step refuses on its own fields, in the order it asks them",
+    "the step owning a refusal is the earliest one that asked the field",
+    "a refused write marks every step that asked a named field and lands on the first",
+    "a whole-form refusal is still what the write answers to, steps or no steps"
+   ],
+   "tests": [
+    {
+     "title": "a step refuses on its own fields, in the order it asks them",
+     "ms": 2.164492,
+     "measured": false
+    },
+    {
+     "title": "the step owning a refusal is the earliest one that asked the field",
+     "ms": 0.23789,
+     "measured": false
+    },
+    {
+     "title": "a refused write marks every step that asked a named field and lands on the first",
+     "ms": 3.209975,
+     "measured": false
+    },
+    {
+     "title": "a whole-form refusal is still what the write answers to, steps or no steps",
+     "ms": 0.166688,
+     "measured": false
+    }
+   ],
+   "loaded": 64,
+   "coveredProdLines": 16077,
+   "onlyProdLines": null,
+   "testsMs": 5.8
+  },
+  {
    "file": "tests/a-released-swipe-reaches-its-command-from-the-ui-runtime.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -12680,6 +12852,100 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-step-verb-names-the-answer-the-person-chose.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "The verb a step wears is the step's own sentence with the person's own answer in it: the kernel's answer rule read line for line, so a closed set says its answers' labels and never the ids a row stores, and anything this phone cannot read wears the step's empty label rather than a raw value in a button.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 725,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a step naming no answer field says its literal verb whatever the boxes hold",
+    "a closed set wears its answers' labels, in the order the person chose them",
+    "an answer this phone cannot read wears the step's empty label",
+    "a step whose answer is a text box says what was typed",
+    "the walk a stepper draws carries each step's verb and its own fields"
+   ],
+   "tests": [
+    {
+     "title": "a step naming no answer field says its literal verb whatever the boxes hold",
+     "ms": 18.898291,
+     "measured": false
+    },
+    {
+     "title": "a closed set wears its answers' labels, in the order the person chose them",
+     "ms": 1.27672,
+     "measured": false
+    },
+    {
+     "title": "an answer this phone cannot read wears the step's empty label",
+     "ms": 0.836356,
+     "measured": false
+    },
+    {
+     "title": "a step whose answer is a text box says what was typed",
+     "ms": 0.764754,
+     "measured": false
+    },
+    {
+     "title": "the walk a stepper draws carries each step's verb and its own fields",
+     "ms": 1.781173,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 13631,
+   "onlyProdLines": null,
+   "testsMs": 23.6
+  },
+  {
+   "file": "tests/a-stepped-form-is-read-from-the-servers-resolved-form.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The stepped form a person walks is the server's, never this repository's: the reading reaches the kernel's own stepped bytes, reaches the three-step create case the kernel resolves in Go, and says \"flat\" for every entry that does not state the member \u2014 which is what makes the opt-in the only opt-in.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 920,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the kernel's stepped bytes reach the one step its own document states",
+    "a stepped create form of three steps is read as three steps in its own order",
+    "a form without the stepped declaration walks as it does today"
+   ],
+   "tests": [
+    {
+     "title": "the kernel's stepped bytes reach the one step its own document states",
+     "ms": 25.954457,
+     "measured": false
+    },
+    {
+     "title": "a stepped create form of three steps is read as three steps in its own order",
+     "ms": 2.223231,
+     "measured": false
+    },
+    {
+     "title": "a form without the stepped declaration walks as it does today",
+     "ms": 7.228244,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 13669,
+   "onlyProdLines": null,
+   "testsMs": 35.4
   },
   {
    "file": "tests/a-supported-policy-keeps-its-blank-summary-blank.test.ts",
@@ -15444,6 +15710,47 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/each-step-asks-the-fields-it-names-and-nothing-else.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "A step asks the fields it names and nothing else: the controls it draws are found by name among `formControls`' answer, in the order the step asks them, and what no step asks stays in the body the write sends without ever reaching the screen.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 799,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "each step of the kernel's create form asks its own fields, in its own order",
+    "a field no step asks is written but never walked",
+    "a step the sheet would draw empty is no step at all"
+   ],
+   "tests": [
+    {
+     "title": "each step of the kernel's create form asks its own fields, in its own order",
+     "ms": 18.966787,
+     "measured": false
+    },
+    {
+     "title": "a field no step asks is written but never walked",
+     "ms": 1.280257,
+     "measured": false
+    },
+    {
+     "title": "a step the sheet would draw empty is no step at all",
+     "ms": 0.840935,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 13631,
+   "onlyProdLines": null,
+   "testsMs": 21.1
   },
   {
    "file": "tests/emulator-boot-ownership.test.ts",
