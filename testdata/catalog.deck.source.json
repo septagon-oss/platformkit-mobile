@@ -1,0 +1,16 @@
+{
+  "schema": "platformkit.catalog-capture.v1",
+  "fixture": "testdata/catalog.deck.json",
+  "sha256": "0fe69e7a78916d6cf7d07c17da63d92160c858c4662978f604bb7a5e94c32736",
+  "upstream": {
+    "repository": "https://github.com/septagon-oss/platformkit",
+    "commit": "2499b3679005623b1bc73e2b2cf7ae88d81da004",
+    "path": "ui/screens/testdata/catalog-deck.json",
+    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/2499b3679005623b1bc73e2b2cf7ae88d81da004/ui/screens/testdata/catalog-deck.json"
+  },
+  "capture": {
+    "method": "The kernel renders this document from its own deck composition (kit/entity/present resolves the policy, ui/screens serves the document); the copy is the file at the named commit, byte for byte. It is the only capture in this repository whose resolved block states a stepped form, which is why the stepped reading is proved against kernel bytes and not against a document written here.",
+    "result": "One entry, note/note, whose resolved layout states an update form of one step: key unsectioned, labelled Details, asking title, body, rank, pinned and tags in that order with the literal verb Save the note. Its create form and its typed-read form are absent, which is how the kernel prints a form a person is not walked through.",
+    "scope": "A stepped edit form and the flat create form beside it, in one entry. It carries no multi-step form and no sectioned step, which is why the fake in tests/fakes/steps.ts states the kernel's own three-step create case."
+  }
+}

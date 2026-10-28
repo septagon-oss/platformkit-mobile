@@ -1,12 +1,12 @@
 {
   "schema": "platformkit.catalog-capture.v1",
   "fixture": "testdata/catalog.choices.json",
-  "sha256": "fcd9e76718afe72c0c06596666c4bacc22bfa39eca3fdeac3d951870094f2dbc",
+  "sha256": "d5b4f21679c06e40065cb5164e18e94a20027ea10b94454459c1fdbb619e665d",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "087b984bd56b5313ddd279317f1eabdbdf84e0b2",
+    "commit": "2499b3679005623b1bc73e2b2cf7ae88d81da004",
     "path": "ui/screens/testdata/catalog-choices.json",
-    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/087b984bd56b5313ddd279317f1eabdbdf84e0b2/ui/screens/testdata/catalog-choices.json"
+    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/2499b3679005623b1bc73e2b2cf7ae88d81da004/ui/screens/testdata/catalog-choices.json"
   },
   "capture": {
     "method": "The kernel renders this document from the declared ChoiceSets of its own reference composition (kit/entity/present); the copy is the file at the named commit, byte for byte. It is the only capture in this repository that carries a resolved finite choice. Cases this capture does not carry - a single-answer choice, a malformed word - are built from its bytes in the test that needs them, the way every other catalogue case here is built.",

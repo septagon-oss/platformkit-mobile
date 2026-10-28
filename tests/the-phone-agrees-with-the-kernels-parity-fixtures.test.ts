@@ -115,6 +115,7 @@ for (const name of fixtures) {
     const entry = entryOf(fixture);
     agreesOnWords(entry, fixture.expected.resolved);
     agreesOnOrder(entry, fixture.expected.resolved);
-    agreesOnRows(entry, fixture.expected.rows ?? {}, fixture.input.rows);
+    // A case about a command or a field states no rows, so it agrees on none.
+    agreesOnRows(entry, fixture.expected.rows ?? {}, fixture.input.rows ?? []);
   });
 }

@@ -778,6 +778,23 @@ even when it is optional, and never leaves the block its entry filed it in.
 command's argument the same way with no identity to lead on. Neither moves a byte
 `values` sends: reordering what is drawn does not reorder what is written.
 
+A form the server resolved as steps is walked rather than scrolled. `steppedForm`
+(`src/core/form/steps.ts`) answers the step list the block states for the sheet's own mode
+(`layout.forms.createForm` for a create, `updateForm` for an edit) and nothing for a form
+laid out flat; `stepBlocks` gives each step the controls naming one of its fields and drops
+a step the sheet would draw empty, so a walk left with no block is the flat sheet above.
+The screen holds where the person stands and asks the core's `stepTransition` for every
+move — forward, back, skipped, jumped to — so the order a form may be taken through is
+answered once in the core and never in a component; `stepProblems` is what Next refuses on
+that step alone, `stepVerb` the word that button wears, and `stepOwning` the step a refusal
+returns the person to. The words are the server's too: a step's `label`, `primaryLabel` and
+`emptyLabel`, and the sheet adds none of its own. The last step's own verb is the write's
+door, so a walked sheet names no header `Save` and keeps the header `Cancel`, and a sheet
+the stepper cannot model is not walked at all and keeps the `Save` it always had. Nothing
+below the walk changed: the body, the write, the outbox note and the arrival are still built
+from the whole sheet read flat, so a stepped form writes the fields it never showed exactly
+as the flat one does.
+
 Help is the author's line. A field's `hints.help` is drawn under the field and
 announced with it; the developer's `doc`, which describes a wire member, is
 never drawn or announced on any form, sheet title or command screen — the same text
@@ -957,6 +974,21 @@ asking this file's heuristic for a text field or an enum to put there. A sort sh
 block is the block's declaration — its queries, in its order, under the words it resolved —
 with the phone's "Newest first" and "Oldest first" said in place of a declared order on one
 of the two stamps. Instants and relative time stay the phone's own device formatting.
+**A stepped form is judged before anything draws it.** `layout.forms` states, per form, that
+the sheet is walked (`layout: "steps"`) and which fields each step asks. `stepsAreSound` holds
+that block to the kernel's own checks in `kit/entity/present/forms.go`: the layout word, a
+step list with something in it, a key of its own per step, a label the sheet can draw, at
+least one field per step, no field asked on two steps, and — for the create and update forms,
+whose editable lists the block itself carries — steps asking exactly `layout.create`/`update`.
+A step's copy follows the kernel's `stepCopy`: a literal verb that is not blank, at most one
+`{answer}` token and no other brace, and with a token an answer field on that very step and a
+non-empty empty label. One broken member costs the entry its whole policy and is named once,
+the way every other part of the block is, because a half-read step list would decide which
+boxes a person can reach. What survives is read by `src/core/form/steps.ts` (see _How a form
+asks_), and `deriveStepper` refuses to model a stage whose word holds no text — which is why
+the sheet's blocks and its header `Save` are keyed off the rail that drew and not off the
+declaration: a walk that cannot be drawn leaves the flat sheet, door included.
+
 A refusal's `violations` name the form's fields; `errors` is read only when they name none.
 `tests/parity` holds the kernel's reviewed cases byte for byte, `npm run check:parity` proves
 them against `parity.source.json`, and the phone's models are held to each.
@@ -964,7 +996,9 @@ them against `parity.source.json`, and the phone's models are held to each.
 **Limits.** Not yet readers: `commands[]` confirmation copy, `deck`, `list.filters` (its
 options and kinds; a block naming a filter's field is still checked against the entry),
 `layout.sections`/`overview`/`information` (a form still groups by the legacy `sections`
-hint, and the record's blocks by it), `summary`, `titles.summary` (the row's cells still
+hint, and the record's blocks by it), `layout.forms.inputForm` as a drawing (its steps are
+read and judged, and this build opens no typed read to walk them), `summary`,
+`titles.summary` (the row's cells still
 follow `summaryFields`), `reading.precision`, `writeControls`' extra fields,
 `identity.icon`/`group`/`description`, `titles.cover`/`thumbnail` (they stay on today's
 derivation under a supported block), `fields[].editable` (`layout.create`/`update` already
@@ -977,11 +1011,13 @@ saying nothing, so the pin names the kernel commit that prints an unset `resolve
 absent; the strict `appResources` operation then takes the golden with its resolved blocks
 in. `readPolicy` still admits a `null` for `identity.group`, `reference`, `reading.money` and
 `reading.time`, because a server older than that commit writes `null` for the same absence and the
-entry keeps the policy it was given either way. The four kernel copies this repository holds name
-two commits of it: the golden, the HTTP document and the parity fixtures at that commit, and
-`testdata/catalog.choices.json` at the kernel's later re-print of that document (`087b984b`), whose
-copy prints a command's unset `confirmation` by saying nothing — the copy this kit held before was
-older than that and the generated read refused it. Two members
+entry keeps the policy it was given either way. The five kernel presentation copies this repository
+holds name one commit of it (`2499b3679005623b1bc73e2b2cf7ae88d81da004`): the golden, the HTTP
+document, the parity fixtures, `testdata/catalog.choices.json` and `testdata/catalog.deck.json`,
+the last two the captures the choice and step readings are proved against. Each copy's record
+is proved by the script that reads it, and
+`tests/the-phone-s-kernel-copies-name-one-commit.test.ts` refuses a re-pin that moves one copy
+and leaves the others answering for a kernel this phone no longer runs. Two members
 (`resolved.fields[].figure` and `reading.precision`) are still printed `null` there, and the
 `ResolvedReading.precision` the document generates is nullable while `figure` is unknown to it, so
 neither costs a read.
@@ -992,12 +1028,17 @@ one fallback, is the open question.
 
 **Reused** — `parseCatalog`'s `notice` fallback, `View<>`, the generated `zResolved*` schemas,
 `verifySource`'s source-record idiom, `fieldLabel`, `enumLabel`, `label`, `sortOptions` and
-`formControls` as the readers' callers, and `problem()` in `src/effects/api.ts`. **Added** —
-`catalogPolicy.ts`, `derivePolicy.ts`, `scripts/parity.ts` and `tests/parity`, because nothing
-read `resolved`, nothing held Go's canonical-JSON hash, and the kernel's cases live in another
-repository. **Made reusable** — `readPolicy` and the `Policy`/`PolicyField` types for the
+`formControls` as the readers' callers, and `problem()` in `src/effects/api.ts`; the stepped form
+reuses that one `notice` ending rather than a second channel, and the source-record and
+`check:parity` idiom for its two new captures. **Added** — `catalogPolicy.ts`, `derivePolicy.ts`,
+`scripts/parity.ts` and `tests/parity`, because nothing read `resolved`, nothing held Go's
+canonical-JSON hash, and the kernel's cases live in another repository; `stepsAreSound` for the
+step judgements zod cannot state between the two lists the block already carries, and
+`src/core/form/steps.ts` for the walk, because nothing read `layout.forms` or answered which step
+a refusal belongs to. **Made reusable** — `readPolicy` and the `Policy`/`PolicyField` types for the
 remaining readers listed above, `tests/fakes/policy.ts` and `parityEntry` for any test that
-needs a supported entry.
+needs a supported entry, and `steppedForm`, `stepBlocks`, `stepProblems`, `stepOwning`, `stepVerb`
+and `walkSteps` through `src/core/form/index.ts` for the next screen that walks a form.
 
 ### How a finite choice is drawn
 

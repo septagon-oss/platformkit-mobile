@@ -14,13 +14,24 @@ import { key, offers, type Entry } from "../core/catalog";
 import { address } from "../core/reentry";
 import { useRecordNames } from "./useReferenceNames";
 import {
+  type Problem,
+  type Step,
+  type StepperInput,
+  type StepEvent,
   changedFields,
   controlPointers,
-  formControls,
   firstProblem,
+  formControls,
   formSections,
   problems,
   saveBody,
+  stepBlocks,
+  stepOwning,
+  stepProblems,
+  steppedForm,
+  stepTransition,
+  stepVerb,
+  walkSteps,
   writeLanguage,
   writePath,
 } from "../core/form";
@@ -134,6 +145,44 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     [entry, row, create, copy.kit.overview, names],
   );
   const controls = useMemo(() => blocks.flatMap((b) => b.controls), [blocks]);
+  /* The walk is the server's. `steppedForm` answers the resolved step list for this
+   * mode or nothing, `stepBlocks` gives each step the controls that name one of its
+   * fields, and everything below the two — a body, a write, a refusal — keeps being
+   * built from `controls`, the whole sheet read flat. A step the sheet would draw
+   * empty is no step, so `walk` shorter than `steps` is the entry's own answer, and
+   * `walk` empty means this sheet is not walked at all: the person gets the one
+   * scroll the entry asks for and every line below stays unread. */
+  const steps = useMemo(() => steppedForm(entry, create) ?? [], [entry, create]);
+  const walk = useMemo(() => stepBlocks(steps, controls), [steps, controls]);
+  const stepped = walk.length > 0;
+  // Where the person stands, and which steps they have crossed: the sheet's whole step
+  // state. A row that arrives after they reached step two keeps them on step two, and a
+  // step no longer named by the block this row yields leaves the walk with it.
+  const [standing, setStanding] = useState("");
+  const [crossed, setCrossed] = useState<Readonly<Record<string, Step["completion"]>>>({});
+  const at = stepped && walk.some((b) => b.key === standing) ? standing : (walk[0]?.key ?? "");
+  // The sentences a step wears are the ones the sheet already announced — its own refused
+  // fields, in the step's order. A live "required" while a box is still being typed in is
+  // not a refusal, and `next` is where the sheet decides one.
+  const marks = useMemo(() => {
+    const out: Record<string, readonly Problem[]> = {};
+    for (const block of walk) {
+      const asked = steps.find((s) => s.key === block.key)?.fields ?? [];
+      const named = asked.filter((name) => errors[name] !== undefined);
+      if (named.length > 0)
+        out[block.key] = named.map((name) => ({ fieldId: name, message: errors[name]! }));
+    }
+    return out;
+  }, [walk, steps, errors]);
+  const stages = useMemo(
+    () =>
+      walkSteps(walk, steps, held, errors).map((stage) => ({
+        ...stage,
+        completion: crossed[stage.id] ?? "incomplete",
+        problems: marks[stage.id] ?? [],
+      })),
+    [walk, steps, held, errors, crossed, marks],
+  );
   // Dirty means changed, not touched: a person who typed something and put it back
   // changed nothing, and asking them whether to throw it away wastes the question.
   const dirty = changedFields(controls, held).length > 0;
@@ -141,6 +190,118 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // sheet puts Save and Cancel in the navigator's options, and an option rebuilt
   // on every render is an instruction the navigator repeats forever.
   const contents = useRef<Readonly<Record<string, string>>>(held);
+
+  /* One field can refuse what it holds without the core being able to see it: a
+   * comma-joined box keeps a word it cannot store out of the value, and the text
+   * stays on screen. `refusing` is the set of those fields, and a save meets the
+   * same answer as a `problems` refusal — nothing leaves the phone while a field the
+   * person is being asked to fix still stands. */
+  const refusing = useRef<Readonly<Record<string, boolean>>>({});
+  const fieldRefused = useCallback((name: string, refused: boolean) => {
+    if ((refusing.current[name] ?? false) === refused) return;
+    const next = { ...refusing.current };
+    if (refused) next[name] = true;
+    else delete next[name];
+    refusing.current = next;
+  }, []);
+
+  /* The walk itself. One transition owns every move, forward, back, skipped or
+   * jumped to, so the order a person may take through a form is decided in one
+   * place — the core's — and this sheet only says which move happened and adopts
+   * where it landed. `crossed` and `standing` are all it keeps: the stepper's own
+   * stages are re-derived from the answers each render, so a step whose fields
+   * changed is incomplete again without a rule written twice. */
+  // The sheet as the stepper states it: its stages, where the person stands, the tense
+  // the sheet is in, and the last step's own verb as the write's door. One spelling of
+  // it, so the model a screen draws and the transition a move is checked against cannot
+  // answer for two sheets.
+  const stepperWords = useCallback(
+    (busy: "editing" | "validating" | "submitting" | "finished" = "editing"): StepperInput => {
+      const last = stages[stages.length - 1];
+      return {
+        steps: stages,
+        ...(at === "" ? {} : { currentId: at }),
+        phase:
+          busy === "editing" && phase === "failed"
+            ? "failed"
+            : busy === "editing"
+              ? "editing"
+              : busy,
+        finish: {
+          id: "save",
+          label: last?.primary ?? copy.kit.finish,
+          tone: "primary",
+          state: "ready",
+        },
+        dirty,
+      };
+    },
+    [stages, at, phase, copy.kit.finish, dirty],
+  );
+  const walkTo = useCallback(
+    (event: StepEvent, busy: "editing" | "validating" = "editing") => {
+      const moved = stepTransition(stepperWords(busy), event);
+      if (!moved.ok) return false;
+      setCrossed(
+        Object.fromEntries(moved.value.steps.map((s) => [s.id, s.completion])) as Record<
+          string,
+          Step["completion"]
+        >,
+      );
+      setStanding(moved.value.currentId ?? "");
+      return true;
+    },
+    [stepperWords],
+  );
+  // The step a person stands on, or nothing when the walk left the block this row yields.
+  const stepAt = (key: string) => steps.find((s) => s.key === key);
+  // Next answers this step alone: the fields it asked, held as they stand, through the
+  // same `problems` the write is answered by. Nothing leaves the phone on a step move and
+  // nothing is written — a person who is refused stays where they were with the sentence
+  // on the box that owes it, which is the sheet's ordinary colouring, not a new one.
+  const next = useCallback(() => {
+    const asked = stepAt(at);
+    if (asked === undefined || phase !== "editing") return;
+    const owed = stepProblems(asked, controls, contents.current, copy.kit);
+    const held = (asked.fields ?? []).filter((name) => refusing.current[name] === true);
+    if (owed.length > 0 || held.length > 0) {
+      if (owed.length > 0)
+        setErrors({
+          ...errors,
+          ...Object.fromEntries(owed.map((p) => [p.fieldId, p.message])),
+        });
+      setDetail(copy.kit.validation);
+      setAwaiting(owed[0]?.fieldId ?? held[0] ?? "");
+      setRefusals((n) => n + 1);
+      return;
+    }
+    walkTo({ kind: "validated", problems: [] }, "validating");
+  }, [at, steps, phase, controls, copy.kit, errors, walkTo]);
+  const back = useCallback(() => {
+    walkTo({ kind: "back" });
+  }, [walkTo]);
+  const go = useCallback(
+    (id: string) => {
+      walkTo({ kind: "go", stepId: id });
+    },
+    [walkTo],
+  );
+  const skip = useCallback(() => {
+    walkTo({ kind: "skip" });
+  }, [walkTo]);
+  // A refusal — the phone's or the server's — returns the person to the step that asked the
+  // first field it named, and marks that step needing an answer again. A sentence naming no
+  // step of this walk leaves them where they stand: it is read over the sheet, not walked to.
+  const answerTo = useCallback(
+    (refused: Readonly<Record<string, string>>) => {
+      if (!stepped) return;
+      const owner = stepOwning(steps, refused);
+      if (owner === undefined) return;
+      setStanding(owner);
+      setCrossed((own) => ({ ...own, [owner]: "incomplete" }));
+    },
+    [stepped, steps],
+  );
 
   // What the sheet asks before it throws away what a person wrote, in the words the
   // copy table holds in both languages. One function, asked by the guard the platform
@@ -173,13 +334,22 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   // person answers the same question twice. The gesture and the system back need no
   // such flag - the action this callback re-dispatches already carries the route as
   // visited, which is why that door asks once.
-  usePreventRemove(phase === "editing" && dirty && !leaving, ({ data }) =>
+  // The one guard, three answers, and the position in the walk decides which: a step
+  // back is not a departure and asks nothing, leaving a dirty sheet from its first step
+  // asks once, and leaving a clean one is not a question at all. A flat sheet has no
+  // position, so it gets the second and third answers exactly as it always did.
+  const first = !stepped || at === walk[0]?.key;
+  usePreventRemove(phase === "editing" && !leaving && (!first || dirty), ({ data }) => {
+    if (!first) {
+      back();
+      return;
+    }
     askDiscard(() => {
       // Discarded means the shell keeps none of it either.
       keep(here, {});
       navigation.dispatch(data.action);
-    }),
-  );
+    });
+  });
 
   // Leaving happens after the render that cleared the guard above.
   useEffect(() => {
@@ -225,20 +395,6 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     [here, keep, awaiting],
   );
 
-  /* One field can refuse what it holds without the core being able to see it: a
-   * comma-joined box keeps a word it cannot store out of the value, and the text
-   * stays on screen. `refusing` is the set of those fields, and a save meets the
-   * same answer as a `problems` refusal — nothing leaves the phone while a field the
-   * person is being asked to fix still stands. */
-  const refusing = useRef<Readonly<Record<string, boolean>>>({});
-  const fieldRefused = useCallback((name: string, refused: boolean) => {
-    if ((refusing.current[name] ?? false) === refused) return;
-    const next = { ...refusing.current };
-    if (refused) next[name] = true;
-    else delete next[name];
-    refusing.current = next;
-  }, []);
-
   const save = useCallback(async () => {
     if (phase !== "editing") return;
     // The header's New/Edit button is the door for this write, and it is drawn
@@ -257,6 +413,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setDetail(copy.kit.validation);
       setAwaiting(firstProblem(controls, refused) ?? "");
       setRefusals((n) => n + 1);
+      answerTo(refused);
       return;
     }
     setPhase("saving");
@@ -351,6 +508,10 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
       setAwaiting(firstProblem(controls, fields) ?? "");
       setRefusals((n) => n + 1);
       setPhase("editing");
+      // The answers stay where they are and the walk goes back to the step that was
+      // asked for them: a 422 about the first step read from the third is a person
+      // scrolling to hunt for it otherwise.
+      answerTo(fields);
     }
   }, [
     phase,
@@ -367,6 +528,7 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
     say,
     celebrate,
     outbox,
+    answerTo,
   ]);
 
   // Cancel is the third door out of a dirty sheet, and it asks the same question the
@@ -392,6 +554,16 @@ export function useResourceForm(entry: Entry, id: string | undefined) {
   return {
     create,
     blocks,
+    stepped,
+    walk,
+    stages,
+    at,
+    dirty,
+    stepperWords,
+    next,
+    back,
+    go,
+    skip,
     held,
     errors,
     detail,

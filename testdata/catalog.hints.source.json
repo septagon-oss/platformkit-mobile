@@ -5,7 +5,7 @@
   "origin": {
     "kind": "this repository",
     "base": "testdata/catalog.json",
-    "baseSha256": "27095b20a53554329ab6161df1511e7b435e35d0accefbe65f439eaa23a6d3e7",
+    "baseSha256": "c373eed843f98411ee39f41d9cca8f2a756ea21b7e6e13c7d248b3bfa982b048",
     "baseCommand": "node --import tsx scripts/catalog.ts refresh",
     "command": "the pinned copy with this repository's declarations added by hand",
     "note": "Synthetic presentation declarations layered on the pinned note catalogue, not a served capture. The note catalogue fixture has no presentation declarations; the separate served picture fixture records the public reference composition."

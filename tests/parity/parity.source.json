@@ -2,14 +2,15 @@
   "schema": "platformkit.parity-source.v1",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "d2f02143692090fb37b029d48f5f681508bf6b08",
+    "commit": "2499b3679005623b1bc73e2b2cf7ae88d81da004",
     "path": "ui/screens/testdata/parity",
-    "command": "git -C platformkit archive d2f02143692090fb37b029d48f5f681508bf6b08 ui/screens/testdata/parity"
+    "command": "git -C platformkit archive 2499b3679005623b1bc73e2b2cf7ae88d81da004 ui/screens/testdata/parity"
   },
   "files": {
-    "README.md": "b57fdd86cb7248204f2044b9341d2ba90553f6b8cddd6ae0e1bc990dc08d7c32",
+    "README.md": "0a3812c06587c8344e0d96f40fe4954c230543a765de0805bf119a259945d21c",
     "absent-hints.json": "536374f19eca1bd66cff4e4c169d4d55d936ce1a308cb48298f9a994736491d3",
     "blank-identity.json": "1a6ced583246b56aef44dd95a157dd88797d154b9efdd0bed26a8df18450ae81",
+    "choice-axes-command.json": "e03e32b02d071346314e60e4bf8f5765c31525922dd8a5b297dde05d25caffce",
     "command-owned-create-fields.json": "8a06098627962cc22157fddd67ecfdc520b4a980af5ec50d80f355a3a7bce9d5",
     "commands-only.json": "cf021fb038e302ee1cb0ecdb06842579cb6d1e1eda72ae5ae24fa3df77e22711",
     "deck-directions.json": "319c157c2434a5afb6a1322829d94956c650d19f6c3c698ff909f967d44999a5",

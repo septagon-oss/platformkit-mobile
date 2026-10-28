@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 300,
-   "cases": 1417,
-   "ms": 2651613,
-   "testsMs": 97151.49999999993,
+   "files": 305,
+   "cases": 1449,
+   "ms": 2656454,
+   "testsMs": 97265.39999999994,
    "runners": {
     "jest": 102,
-    "node": 198
+    "node": 203
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 150,
-   "cases": 496,
-   "ms": 3768842,
-   "testsMs": 57971,
+   "files": 154,
+   "cases": 507,
+   "ms": 3836697,
+   "testsMs": 58871,
    "runners": {
-    "jest": 150
+    "jest": 154
    },
    "unreachable": 0
   },
@@ -3390,7 +3390,7 @@
    "runner": "node",
    "layer": "contract",
    "cases": 1,
-   "rule": "The three copies this repository draws from the kernel \u2014 the catalogue golden every screen derives from, the served HTTP document `src/generated` is generated from, and the parity fixtures the phone's models are held to \u2014 are one kernel commit's bytes. Each copy's own record is proved by its own script (`catalog.ts`, `api.ts`, `parity.ts`), so nothing here would notice a re-pin that moved one copy and left the other two answering for a kernel this phone no longer runs: the agreement the parity suite claims is only as true as the commit all three name.",
+   "rule": "The five presentation copies this repository draws from the kernel \u2014 the catalogue golden every screen derives from, the served HTTP document `src/generated` is generated from, the parity fixtures the phone's models are held to, and the two per-concern captures the choice and step readings are proved against \u2014 are one kernel commit's bytes. Each copy's own record is proved by its own script (`catalog.ts`, `api.ts`, `parity.ts`) or by the case that reads it, so nothing here would notice a re-pin that moved one copy and left the other four answering for a kernel this phone no longer runs: the agreement the parity suite claims is only as true as the commit all five name. The captures of a Go test door and of the design export are not presentation of a resource, so they name their own commits and are not listed here.",
    "ruleSource": "first comment",
    "tier": "push",
    "reach": "npm test (node half)",
@@ -3536,7 +3536,7 @@
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "verdictReason": "the only case that reaches a stepped sheet whose walk cannot be modelled by a route the step label decides nothing about: a 422 whose issue detail holds no words survives the transport, refuses `deriveStepper`, and the sheet must still hold every box and exactly one door that files the answer; the stepped suites prove the rail and the label refusal, none proves this fallback; wall time, cases and titles come from `npm run inventory -- --measure tests/screens/a-refusal-the-stepper-cannot-print-leaves-the-sheet-writable.test.tsx`",
    "ms": 25877,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
@@ -11219,6 +11219,131 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-form-declaration-this-build-cannot-trust-costs-the-entry-its-policy.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 17,
+   "rule": "A stepped declaration this build cannot trust costs the entry its policy, one sentence, exactly as every other part of the block does. Each case breaks one member of the kernel's own three-step form and refuses: the phone will not guess a layout, complete a step list or wear a verb it cannot fill.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 829,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a stepped form with a layout this build does not know costs the entry its policy and says so once",
+    "a stepped form with steps with no layout word costs the entry its policy and says so once",
+    "a stepped form with a nil step list costs the entry its policy and says so once",
+    "a stepped form with an empty step list costs the entry its policy and says so once",
+    "a stepped form with a repeated step key costs the entry its policy and says so once",
+    "a stepped form with a step that asks no field costs the entry its policy and says so once",
+    "a stepped form with one field on two steps costs the entry its policy and says so once",
+    "a stepped form with a create field no step asks costs the entry its policy and says so once",
+    "a stepped form with a step that asks a field the form does not edit costs the entry its policy and says so once",
+    "a stepped form with a step whose verb says nothing costs the entry its policy and says so once",
+    "a stepped form with a verb wearing two answers costs the entry its policy and says so once",
+    "a stepped form with a token this build does not fill costs the entry its policy and says so once",
+    "a stepped form with an answer field off its own step costs the entry its policy and says so once",
+    "a stepped form with an answer with no empty label costs the entry its policy and says so once",
+    "a stepped form with a literal verb with answer properties costs the entry its policy and says so once",
+    "a step pointing at a name the entry has no field of is refused as a pointer",
+    "the same form with nothing broken about it is read whole"
+   ],
+   "tests": [
+    {
+     "title": "a stepped form with a layout this build does not know costs the entry its policy and says so once",
+     "ms": 17.481321,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with steps with no layout word costs the entry its policy and says so once",
+     "ms": 0.856143,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a nil step list costs the entry its policy and says so once",
+     "ms": 0.58956,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with an empty step list costs the entry its policy and says so once",
+     "ms": 0.54599,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a repeated step key costs the entry its policy and says so once",
+     "ms": 0.651505,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a step that asks no field costs the entry its policy and says so once",
+     "ms": 0.601703,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with one field on two steps costs the entry its policy and says so once",
+     "ms": 0.596973,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a create field no step asks costs the entry its policy and says so once",
+     "ms": 0.564233,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a step that asks a field the form does not edit costs the entry its policy and says so once",
+     "ms": 0.572488,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a step whose verb says nothing costs the entry its policy and says so once",
+     "ms": 0.528327,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a verb wearing two answers costs the entry its policy and says so once",
+     "ms": 0.521123,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a token this build does not fill costs the entry its policy and says so once",
+     "ms": 0.568431,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with an answer field off its own step costs the entry its policy and says so once",
+     "ms": 0.552261,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with an answer with no empty label costs the entry its policy and says so once",
+     "ms": 0.60554,
+     "measured": false
+    },
+    {
+     "title": "a stepped form with a literal verb with answer properties costs the entry its policy and says so once",
+     "ms": 0.639553,
+     "measured": false
+    },
+    {
+     "title": "a step pointing at a name the entry has no field of is refused as a pointer",
+     "ms": 0.668687,
+     "measured": false
+    },
+    {
+     "title": "the same form with nothing broken about it is read whole",
+     "ms": 1.488692,
+     "measured": false
+    }
+   ],
+   "loaded": 7,
+   "coveredProdLines": 6760,
+   "onlyProdLines": null,
+   "testsMs": 28
+  },
+  {
    "file": "tests/a-form-keeps-what-the-person-typed.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -12249,6 +12374,53 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-refusal-names-the-step-whose-field-fell-first.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "A refusal \u2014 the phone's own or the server's \u2014 belongs to the step that asked the field, and the walk goes back there whatever order the sentences arrived in. A sentence naming no step of this walk moves nobody: it is read over the sheet the person is standing in.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1568,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a step refuses on its own fields, in the order it asks them",
+    "the step owning a refusal is the earliest one that asked the field",
+    "a refused write marks every step that asked a named field and lands on the first",
+    "a whole-form refusal is still what the write answers to, steps or no steps"
+   ],
+   "tests": [
+    {
+     "title": "a step refuses on its own fields, in the order it asks them",
+     "ms": 2.164492,
+     "measured": false
+    },
+    {
+     "title": "the step owning a refusal is the earliest one that asked the field",
+     "ms": 0.23789,
+     "measured": false
+    },
+    {
+     "title": "a refused write marks every step that asked a named field and lands on the first",
+     "ms": 3.209975,
+     "measured": false
+    },
+    {
+     "title": "a whole-form refusal is still what the write answers to, steps or no steps",
+     "ms": 0.166688,
+     "measured": false
+    }
+   ],
+   "loaded": 64,
+   "coveredProdLines": 16077,
+   "onlyProdLines": null,
+   "testsMs": 5.8
+  },
+  {
    "file": "tests/a-released-swipe-reaches-its-command-from-the-ui-runtime.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -12680,6 +12852,100 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/a-step-verb-names-the-answer-the-person-chose.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "The verb a step wears is the step's own sentence with the person's own answer in it: the kernel's answer rule read line for line, so a closed set says its answers' labels and never the ids a row stores, and anything this phone cannot read wears the step's empty label rather than a raw value in a button.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 725,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a step naming no answer field says its literal verb whatever the boxes hold",
+    "a closed set wears its answers' labels, in the order the person chose them",
+    "an answer this phone cannot read wears the step's empty label",
+    "a step whose answer is a text box says what was typed",
+    "the walk a stepper draws carries each step's verb and its own fields"
+   ],
+   "tests": [
+    {
+     "title": "a step naming no answer field says its literal verb whatever the boxes hold",
+     "ms": 18.898291,
+     "measured": false
+    },
+    {
+     "title": "a closed set wears its answers' labels, in the order the person chose them",
+     "ms": 1.27672,
+     "measured": false
+    },
+    {
+     "title": "an answer this phone cannot read wears the step's empty label",
+     "ms": 0.836356,
+     "measured": false
+    },
+    {
+     "title": "a step whose answer is a text box says what was typed",
+     "ms": 0.764754,
+     "measured": false
+    },
+    {
+     "title": "the walk a stepper draws carries each step's verb and its own fields",
+     "ms": 1.781173,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 13631,
+   "onlyProdLines": null,
+   "testsMs": 23.6
+  },
+  {
+   "file": "tests/a-stepped-form-is-read-from-the-servers-resolved-form.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "The stepped form a person walks is the server's, never this repository's: the reading reaches the kernel's own stepped bytes, reaches the three-step create case the kernel resolves in Go, and says \"flat\" for every entry that does not state the member \u2014 which is what makes the opt-in the only opt-in.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 920,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the kernel's stepped bytes reach the one step its own document states",
+    "a stepped create form of three steps is read as three steps in its own order",
+    "a form without the stepped declaration walks as it does today"
+   ],
+   "tests": [
+    {
+     "title": "the kernel's stepped bytes reach the one step its own document states",
+     "ms": 25.954457,
+     "measured": false
+    },
+    {
+     "title": "a stepped create form of three steps is read as three steps in its own order",
+     "ms": 2.223231,
+     "measured": false
+    },
+    {
+     "title": "a form without the stepped declaration walks as it does today",
+     "ms": 7.228244,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 13669,
+   "onlyProdLines": null,
+   "testsMs": 35.4
   },
   {
    "file": "tests/a-supported-policy-keeps-its-blank-summary-blank.test.ts",
@@ -15444,6 +15710,47 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (node half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/each-step-asks-the-fields-it-names-and-nothing-else.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 3,
+   "rule": "A step asks the fields it names and nothing else: the controls it draws are found by name among `formControls`' answer, in the order the step asks them, and what no step asks stays in the body the write sends without ever reaching the screen.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 799,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "each step of the kernel's create form asks its own fields, in its own order",
+    "a field no step asks is written but never walked",
+    "a step the sheet would draw empty is no step at all"
+   ],
+   "tests": [
+    {
+     "title": "each step of the kernel's create form asks its own fields, in its own order",
+     "ms": 18.966787,
+     "measured": false
+    },
+    {
+     "title": "a field no step asks is written but never walked",
+     "ms": 1.280257,
+     "measured": false
+    },
+    {
+     "title": "a step the sheet would draw empty is no step at all",
+     "ms": 0.840935,
+     "measured": false
+    }
+   ],
+   "loaded": 51,
+   "coveredProdLines": 13631,
+   "onlyProdLines": null,
+   "testsMs": 21.1
   },
   {
    "file": "tests/emulator-boot-ownership.test.ts",
@@ -24390,6 +24697,35 @@
    "testsMs": 872
   },
   {
+   "file": "tests/screens/a-refusal-the-stepper-cannot-print-leaves-the-sheet-writable.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A stepped sheet keeps one door that writes for a reason the step label never decides. A refusal sentence the stepper may not print refuses the walk's model, and the sheet a model-less walk falls back to is the flat sheet: every box, and a header that can write.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20585,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a refusal sentence the stepper may not print leaves the sheet every box and one door"
+   ],
+   "tests": [
+    {
+     "title": "a refusal sentence the stepper may not print leaves the sheet every box and one door",
+     "ms": 358,
+     "measured": false
+    }
+   ],
+   "loaded": 194,
+   "coveredProdLines": 3120,
+   "onlyProdLines": null,
+   "testsMs": 358
+  },
+  {
    "file": "tests/screens/a-refused-composed-picture-shows-the-empty-picture.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -25081,6 +25417,134 @@
    "coveredProdLines": 1691,
    "onlyProdLines": null,
    "testsMs": 104
+  },
+  {
+   "file": "tests/screens/a-stepped-sheet-always-leaves-one-door-that-writes.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "A stepped sheet's last step's own verb is the write's door, and the header names no Save. Whatever the walk cannot draw, the person still has one door that files what they typed.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "the review's pin for the stepped sheet that can lose its only write door: it states the rule above and runs where its layer runs; the case count and titles are this file's own three cases, and the durations belong to the pass named under measured.jest, which `npm run inventory -- --measure` refuses to take from the red run this pin is in",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/screens/a-stepped-sheet-always-leaves-one-door-that-writes.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [
+    "a stepped sheet whose step names no label still leaves one door that writes",
+    "a stepped sheet whose step names a blank label still leaves one door that writes",
+    "the step the sheet draws a heading for keeps that heading, and its verb is the one door"
+   ],
+   "tests": [
+    {
+     "title": "a stepped sheet whose step names no label still leaves one door that writes",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "a stepped sheet whose step names a blank label still leaves one door that writes",
+     "ms": null,
+     "measured": false
+    },
+    {
+     "title": "the step the sheet draws a heading for keeps that heading, and its verb is the one door",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
+  },
+  {
+   "file": "tests/screens/a-stepped-sheet-draws-one-step-and-answers-at-its-own-verb.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 3,
+   "rule": "The sheet a stepped entry opens draws one step at a time: the rail in the server's words, the progress line, only the step's own boxes, and the step's own verb as the way on. The header keeps Cancel and offers no Save, because the write's door is the last step's verb.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 24478,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a stepped sheet draws the step it stands on, and the header names no Save",
+    "the sheet refuses onward where the step owes an answer, and opens on the answer given",
+    "the stepped form the kernel printed is the walk its own step names"
+   ],
+   "tests": [
+    {
+     "title": "a stepped sheet draws the step it stands on, and the header names no Save",
+     "ms": 52,
+     "measured": false
+    },
+    {
+     "title": "the sheet refuses onward where the step owes an answer, and opens on the answer given",
+     "ms": 394,
+     "measured": false
+    },
+    {
+     "title": "the stepped form the kernel printed is the walk its own step names",
+     "ms": 31,
+     "measured": false
+    }
+   ],
+   "loaded": 195,
+   "coveredProdLines": 3134,
+   "onlyProdLines": null,
+   "testsMs": 477
+  },
+  {
+   "file": "tests/screens/a-stepped-sheet-walks-one-section-at-a-time.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "The sheet a stepped entry opens is walked, not scrolled: one step's boxes at a time, the rail in the server's words, Next wearing the step's own verb, a step refused on its own answer, a write only at the last step's door, and a refusal from the server returning the person to the step that was asked for it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22792,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "one step is on the screen at a time, and Next wears the step's own verb",
+    "a server that refuses a field of the first step sends the walk back there",
+    "the last step's verb writes the whole row, and the sheet does not ask who is left behind",
+    "leaving from a later step is a step back; leaving from the first one asks once"
+   ],
+   "tests": [
+    {
+     "title": "one step is on the screen at a time, and Next wears the step's own verb",
+     "ms": 36,
+     "measured": false
+    },
+    {
+     "title": "a server that refuses a field of the first step sends the walk back there",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "the last step's verb writes the whole row, and the sheet does not ask who is left behind",
+     "ms": 9,
+     "measured": false
+    },
+    {
+     "title": "leaving from a later step is a step back; leaving from the first one asks once",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 187,
+   "coveredProdLines": 3031,
+   "onlyProdLines": null,
+   "testsMs": 65
   },
   {
    "file": "tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx",

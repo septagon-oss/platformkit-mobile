@@ -8,7 +8,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { findNodeHandle, type ScrollView, type TextInput } from "react-native";
 import { type Feedback, timeText } from "../../core/present";
-import { timeValue, timeWire, type Control, FormBlock } from "../../core/form";
+import {
+  timeValue,
+  timeWire,
+  type Control,
+  type FormBlock,
+  type StepperModel,
+} from "../../core/form";
 import {
   figureLine,
   insertLine,
@@ -29,6 +35,7 @@ import { RichTextToolbar } from "../molecules/RichTextToolbar";
 import { Section } from "../molecules/Section";
 import { TagsField } from "../molecules/TagsField";
 import { Text } from "../atoms/Text";
+import { Stepper } from "./Stepper";
 import { Screen } from "../templates/Screen";
 
 /** Phase is what the sheet is doing: loading the row to edit, failed to, editing, saving, or done. */
@@ -55,6 +62,20 @@ export interface Props {
    */
   readonly refusals?: number;
   readonly phase: Phase;
+  /**
+   * walk is the sheet stepped: the stepper's model, and the moves it answers to. Present,
+   * the organism draws the step the model says the person stands on, inside the rail and
+   * above its verbs; absent, it draws the one scroll the entry asks for. Which step is
+   * whose, and what it asks, are the core's answer (`core/form/steps`); this only draws it.
+   */
+  readonly walk?: {
+    readonly model: StepperModel;
+    readonly onNext: () => void;
+    readonly onBack: () => void;
+    readonly onGo: (id: string) => void;
+    readonly onSkip: () => void;
+    readonly onFinish: () => void;
+  };
   /**
    * acts is what a command sheet says above its controls: the record it runs on,
    * and what running it does. Each line is drawn only where it has words, and a
@@ -98,6 +119,7 @@ export function ResourceForm({
   awaiting = "",
   refusals = 0,
   phase,
+  walk,
   acts,
   onChange,
   onImage,
@@ -321,12 +343,36 @@ export function ResourceForm({
         <Section>
           <Skeleton label={feedback.loadingLabel} motion={feedback.motion} lines={5} />
         </Section>
-      ) : phase === "failed" ? null : (
+      ) : phase === "failed" ? null : walk === undefined ? (
         blocks.map((block) => (
           <Section key={block.key || "overview"} {...(block.label ? { title: block.label } : {})}>
             {block.controls.map(field)}
           </Section>
         ))
+      ) : (
+        (() => {
+          // One block of the walk is drawn: the step the model says the person stands
+          // on, or the first one when the walk has not been told otherwise. The refusal
+          // above, the boxes below and the focus effect between them are the same code
+          // a flat sheet runs, because a stepped sheet is the same sheet with a position.
+          const step = blocks.find((b) => b.key === walk.model.currentId) ?? blocks[0];
+          return (
+            <Stepper
+              model={walk.model}
+              onNext={walk.onNext}
+              onBack={walk.onBack}
+              onGo={walk.onGo}
+              onSkip={walk.onSkip}
+              onFinish={walk.onFinish}
+            >
+              {step === undefined ? null : (
+                <Section key={step.key} {...(step.label ? { title: step.label } : {})}>
+                  {step.controls.map(field)}
+                </Section>
+              )}
+            </Stepper>
+          );
+        })()
       )}
     </Screen>
   );

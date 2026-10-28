@@ -15,8 +15,13 @@ export interface Props {
   readonly onGo: (id: string) => void;
   readonly onSkip: () => void;
   readonly onFinish: () => void;
-  readonly onSaveAndExit: () => void;
-  readonly onReconcile: () => void;
+  /**
+   * A sheet that keeps its own draft elsewhere (a stepped form, whose answers the shell
+   * already holds) offers no Save-and-exit and no reconcile, and passes no handler for
+   * them: the model says which of the two it offers, and these answer only when it does.
+   */
+  readonly onSaveAndExit?: () => void;
+  readonly onReconcile?: () => void;
 }
 export function Stepper({
   model,
@@ -81,9 +86,11 @@ export function Stepper({
       <View style={s.row} testID="stepper-exit">
         {model.back ? <ActionControl model={model.back} onAction={onBack} /> : null}
         {model.saveAndExit ? (
-          <ActionControl model={model.saveAndExit} onAction={onSaveAndExit} />
+          <ActionControl model={model.saveAndExit} onAction={() => onSaveAndExit?.()} />
         ) : null}
-        {model.reconcile ? <ActionControl model={model.reconcile} onAction={onReconcile} /> : null}
+        {model.reconcile ? (
+          <ActionControl model={model.reconcile} onAction={() => onReconcile?.()} />
+        ) : null}
       </View>
     </View>
   );

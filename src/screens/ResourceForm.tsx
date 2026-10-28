@@ -9,7 +9,8 @@ import type { ScreenProps } from "../renderers";
 import { Button } from "../ui/atoms/Button";
 import { ResourceForm as ResourceFormView } from "../ui/organisms/ResourceForm";
 import { useResourceForm } from "./useResourceForm";
-import { label, type Clock } from "../core/present";
+import { label, type Clock, type Presentation } from "../core/present";
+import { deriveStepper } from "../core/form";
 import { systemClock, useInitialDate } from "./clock";
 import { useShell } from "../shell";
 import { choose } from "../ui/chooser";
@@ -85,6 +86,24 @@ export function ResourceForm({
     },
     [api, entryOf, kit, mode],
   );
+  // A stepped sheet writes at its last step's own verb, which the rail carries beneath the
+  // answers. The header keeps its Cancel — the exit, which asks — and offers no Save: a
+  // button that wrote the whole form while a person stood on step one of three would be a
+  // second door the server's declaration never stated. A flat sheet keeps both, unchanged.
+  const presentation: Presentation = { ...feedback, weekStartsOn: 1 };
+  const stepper = (() => {
+    if (!form.stepped) return undefined;
+    const drawn = deriveStepper(
+      form.stepperWords(saving ? "submitting" : form.phase === "saved" ? "finished" : "editing"),
+      presentation,
+    );
+    return drawn.ok ? drawn.value : undefined;
+  })();
+  // Whether the rail drew is the one fact the sheet is stepped, so the blocks on screen and
+  // the header's Save both key off it. Keyed off the declaration instead, a walk the stepper
+  // cannot model — a stage word it may not print — would leave the sheet stepped with no
+  // rail: every box on screen, the header holding only Cancel, and no door anywhere.
+  const walked = stepper !== undefined;
   // The options are memoised because the navigator is told them on every
   // render: a fresh object, with fresh callbacks in it, is a new instruction
   // each time and the renders never settle.
@@ -96,18 +115,24 @@ export function ResourceForm({
       headerLeft: () => (
         <Button placement="header" label="Cancel" onPress={cancel} disabled={saving} />
       ),
-      headerRight: () => (
-        <Button
-          placement="header"
-          label="Save"
-          onPress={() => void save()}
-          busy={saving}
-          disabled={phase !== "editing"}
-          testID="save"
-        />
-      ),
+      // The stepped sheet names no `headerRight` at all: the write's door is the last
+      // step's own verb, which the rail draws under the answers.
+      ...(walked
+        ? {}
+        : {
+            headerRight: () => (
+              <Button
+                placement="header"
+                label="Save"
+                onPress={() => void save()}
+                busy={saving}
+                disabled={phase !== "editing"}
+                testID="save"
+              />
+            ),
+          }),
     }),
-    [saving, phase, cancel, save],
+    [saving, phase, cancel, save, walked],
   );
 
   return (
@@ -116,13 +141,28 @@ export function ResourceForm({
       <ResourceFormView
         feedback={feedback}
         initialDate={initialDate}
-        blocks={form.blocks}
+        // A stepped sheet draws its walk's blocks — one step's worth, in the server's
+        // order; a flat sheet draws the blocks the entry asks for. Both are FormBlocks,
+        // and every box below is drawn from them the same way.
+        blocks={walked ? form.walk : form.blocks}
         held={form.held}
         errors={form.errors}
         detail={form.detail}
         awaiting={form.awaiting}
         refusals={form.refusals}
         phase={form.phase}
+        {...(stepper === undefined
+          ? {}
+          : {
+              walk: {
+                model: stepper,
+                onNext: form.next,
+                onBack: form.back,
+                onGo: form.go,
+                onSkip: form.skip,
+                onFinish: () => void save(),
+              },
+            })}
         onChange={form.change}
         onImage={pickImage}
         onFieldRefused={form.fieldRefused}

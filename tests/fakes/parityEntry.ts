@@ -30,6 +30,10 @@ const inertField = (name: string): Json => ({
   editable: { create: true, update: true },
   control: "text",
   kind: "text",
+  // The kernel prints a field's declared figure as a plain `any`, so a resolved block always
+  // carries the member and says `null` when nothing is declared. Cases are stated over fixtures
+  // written before it existed, so the inert block prints the answer those fixtures mean.
+  figure: null,
   reading: {
     format: "",
     missing: "—",
@@ -54,7 +58,17 @@ function completed(item: Json): Json {
     };
   if ("field" in item) return { label: item.field, kind: "", values: null, ...item };
   if ("value" in item || ("label" in item && !("name" in item)))
-    return { value: item.label, label: item.value, tone: "neutral", done: false, ...item };
+    // An answer option carries the group it sits under and whether it is the No preference
+    // answer; the kernel prints both words even when the option declared neither.
+    return {
+      value: item.label,
+      label: item.value,
+      tone: "neutral",
+      done: false,
+      group: "",
+      noPreference: false,
+      ...item,
+    };
   return item;
 }
 
@@ -105,7 +119,9 @@ export function parityEntry(fixture: { input: Json; expected: Json }): Json {
   return {
     module: schema.module,
     entity: schema.entity,
-    path: schema.path,
+    // A fixture that names no address is about a field or a command, not a route; the entry is
+    // still one the kernel mounts, so it names the conventional address of its own entity.
+    path: schema.path ?? `/api/v1/m/${schema.entity}`,
     writable: true,
     immutable: immutable ?? [],
     fields: schema.fields.map(({ presentation: _p, ...f }: Json) => f),
