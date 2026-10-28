@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 153,
-   "cases": 506,
-   "ms": 3816112,
-   "testsMs": 58513,
+   "files": 154,
+   "cases": 507,
+   "ms": 3836697,
+   "testsMs": 58871,
    "runners": {
-    "jest": 153
+    "jest": 154
    },
    "unreachable": 0
   },
@@ -3536,7 +3536,7 @@
    "reach": "npm test (jest half)",
    "runsNowhere": false,
    "verdict": "keep",
-   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "verdictReason": "the only case that reaches a stepped sheet whose walk cannot be modelled by a route the step label decides nothing about: a 422 whose issue detail holds no words survives the transport, refuses `deriveStepper`, and the sheet must still hold every box and exactly one door that files the answer; the stepped suites prove the rail and the label refusal, none proves this fallback; wall time, cases and titles come from `npm run inventory -- --measure tests/screens/a-refusal-the-stepper-cannot-print-leaves-the-sheet-writable.test.tsx`",
    "ms": 25877,
    "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
    "titles": [
@@ -24695,6 +24695,35 @@
    "coveredProdLines": 2190,
    "onlyProdLines": null,
    "testsMs": 872
+  },
+  {
+   "file": "tests/screens/a-refusal-the-stepper-cannot-print-leaves-the-sheet-writable.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A stepped sheet keeps one door that writes for a reason the step label never decides. A refusal sentence the stepper may not print refuses the walk's model, and the sheet a model-less walk falls back to is the flat sheet: every box, and a header that can write.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 20585,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a refusal sentence the stepper may not print leaves the sheet every box and one door"
+   ],
+   "tests": [
+    {
+     "title": "a refusal sentence the stepper may not print leaves the sheet every box and one door",
+     "ms": 358,
+     "measured": false
+    }
+   ],
+   "loaded": 194,
+   "coveredProdLines": 3120,
+   "onlyProdLines": null,
+   "testsMs": 358
   },
   {
    "file": "tests/screens/a-refused-composed-picture-shows-the-empty-picture.test.tsx",
