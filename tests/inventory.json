@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 310,
-   "cases": 1463,
+   "files": 311,
+   "cases": 1464,
    "ms": 2722985,
    "testsMs": 97336.09999999993,
    "runners": {
-    "jest": 104,
+    "jest": 105,
     "node": 206
    },
    "unreachable": 0
@@ -3588,6 +3588,34 @@
    "coveredProdLines": 2021,
    "onlyProdLines": null,
    "testsMs": 119
+  },
+  {
+   "file": "tests/expo-router-navigation-import-loads.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "The native route dependency must load under the component test transform.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": null,
+   "exclusiveNotMeasured": "npm run inventory -- --measure tests/expo-router-navigation-import-loads.test.tsx fills wall time, cases and titles from one run of this file",
+   "titles": [
+    "expo-router navigation imports load in the component runner"
+   ],
+   "tests": [
+    {
+     "title": "expo-router navigation imports load in the component runner",
+     "ms": null,
+     "measured": false
+    }
+   ],
+   "loaded": null,
+   "coveredProdLines": null,
+   "onlyProdLines": null
   },
   {
    "file": "tests/native-store-scope.test.tsx",

@@ -1,6 +1,6 @@
 # The test inventory, with the verdict proposed for each test
 
-Written at `12c60a342` and re-checked on every push by `npm run check:inventory` — the shape of every
+Written at `3e40f5150` and re-checked on every push by `npm run check:inventory` — the shape of every
 row is re-read from the checkout, the numbers stay the record of the run that took them. **Root ratifies
 the verdicts in this table before any prune commit lands** (0088). Nothing was deleted to produce it, and
 no CI job may read a verdict to decide whether a file runs: a file runs because its runner's glob reaches it.
@@ -24,13 +24,13 @@ no CI job may read a verdict to decide whether a file runs: a file runs because 
 | layer | job | tier in this repository (0088 rule 5) | files | cases | work (sum of the runner's own per-test durations) | cost as one process per file | files no runner reaches |
 |---|---|---|---|---|---|---|---|
 | contract | the wire: the pinned OpenAPI/catalogue/design-token documents, the generated client, the published surface | push, first | 39 | 245 | 47.3 s | 76 s | 0 |
-| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 310 | 1463 | 97.3 s | 2723 s | 0 |
+| behaviour | one rule of `src/core` or one component, named for the rule | push (scoped to the packages the diff reaches), full at merge | 311 | 1463 | 97.3 s | 2723 s | 0 |
 | composition | the mounted app: shell + router + screen together | merge | 165 | 531 | 60.0 s | 4051 s | 0 |
 | journey | what a person does on a device or in a browser | nightly / before a release | 60 | 52 | 0.0 s | 0 s | 43 |
 
 ## The verdicts
 
-* keep: 574
+* keep: 575
 * merge: 0
 * delete: 0
 
@@ -46,7 +46,7 @@ or no runner reaches it (the browser specimens and the flows).
 
 ## The baseline this table records (0088: this repository has no line budget, so counts and coverage per file are the baseline)
 
-* files inventoried: 574 — 245 `tests/*.test.ts` (node), 269 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 17 Maestro flows in `e2e/flows`
+* files inventoried: 575 — 245 `tests/*.test.ts` (node), 270 `tests/**/*.test.tsx` (jest), 43 `.case.mjs`/`.spec.ts`/`.case.tsx` reached by no runner, 17 Maestro flows in `e2e/flows`
 * cases in files a runner reaches: 2239; cases in files no runner reaches: 35
 * isolated wall time: contract 76 s, behaviour 2723 s, composition 4051 s, journey 0 s
 * the two ratchets: review-named files 0 (0072, `tests/test-name-grammar.test.ts` refuses a rise), files no runner reaches 43 (`check:inventory` refuses a new one)
@@ -135,6 +135,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | tests/a-link-the-arrival-rule-does-not-read-reaches-the-router.test.tsx | jest | behaviour | 2 | 25877 | 5 |  | not measured | — | 0 | keep | A link the arrival rule does not read reaches the router as it arrived. expo-router hands every URL the platform opened the app with to `redirectSystemPath` an… |
 | tests/app-root-draws-every-screen-under-the-gesture-root.test.tsx | jest | behaviour | 1 | 38736 | 119 |  | not measured | — | 0 | keep | The composition root draws the navigator, and with it every screen, under one gesture root. A row's swipe surface is a `GestureDetector`, and react-native-gest… |
+| tests/expo-router-navigation-import-loads.test.tsx | jest | behaviour | 1 |  |  |  | not measured | — | 0 | keep | The native route dependency must load under the component test transform. |
 | tests/native-store-scope.test.tsx | jest | behaviour | 4 | 30107 | 14 |  | not measured | — | 0 | keep | The device store keeps one sign-in's held writes out of reach of another on the SQLite file itself, not only in the in-memory double: a claim, a release, a set… |
 | tests/screens/a-cancelled-swipe-runs-nothing.test.tsx | jest | behaviour | 2 | 30721 | 11 |  | not measured | — | 0 | keep | The product's own swipe surface, driven through the callbacks react-native-gesture-handler hands it. A release is the moment of decision; a drag the system or … |
 | tests/screens/a-new-sign-in-registers-while-an-earlier-push-pass-finishes.test.tsx | jest | behaviour | 3 | 22361 | 118 |  | not measured | — | 0 | keep | A new sign-in has its own notification pass even while an earlier session's answer is pending. Finishing the earlier sign-out must leave the new workspace addr… |
@@ -191,7 +192,7 @@ suite whatever the push tier selected, and a selection that named no file says s
 | tests/ui/interaction.test.tsx | jest | behaviour | 15 | 21059 | 939 | 4 | 1 of 15 | — | 0 | keep | The five molecules the reference bar asked for, and the states the theme hands them. Each one is asked the question a person looks at it to answer: how far thr… |
 | tests/ui/list-count-announcement.test.tsx | jest | behaviour | 2 | 20702 | 189 | 0 | 0 of 2 | — | 0 | keep | (no first comment; first test title) en announces a lone group's count once and withdraws it while loading |
 | tests/ui/list-withdrawal.test.tsx | jest | behaviour | 4 | 20424 | 230 | 0 | 0 of 4 | — | 0 | keep | A withdrawn list does not keep the controls of the list it replaced: selection and bulk actions go with it, and coming back needs an explicit selection rather … |
-| tests/ui/malformed-stored-sketch-is-not-partly-rendered.test.tsx | jest | behaviour | 1 | 22305 | 6 |  | not measured | — | 0 | keep | A malformed stored value is rejected before any stroke reaches react-native-svg.
+| tests/ui/malformed-stored-sketch-is-not-partly-rendered.test.tsx | jest | behaviour | 1 | 22305 | 6 |  | not measured | — | 0 | keep | A malformed stored value is rejected before any stroke reaches react-native-svg. |
 | tests/ui/map-withdrawal.test.tsx | jest | behaviour | 4 | 20760 | 739 | 0 | 0 of 4 | — | 0 | keep | Map data that was withdrawn cannot keep a marker's detail open or accept a marker press that arrived late: the surface answers with what it can still authorise. |
 | tests/ui/media-hero-caption.test.tsx | jest | behaviour | 2 | 20508 | 135 | 0 | 0 of 2 | — | 0 | keep | A hero names its picture once, and only where the name can be read as a line of the screen. The frame used to write the image's description inside itself while… |
 | tests/ui/media-specimen-actions.test.tsx | jest | behaviour | 3 | 20782 | 163 | 0 | 0 of 3 | — | 0 | keep | (no first comment; first test title) the default media specimen exposes only actions its content can perform |
