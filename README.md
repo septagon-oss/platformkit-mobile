@@ -1893,6 +1893,11 @@ npm audit                   # what the database says, reviewed or not
 make test                   # the advisory rules themselves are tested offline
 ```
 
+The lockfile overrides `decode-uri-component` to 0.5.1 because
+`expo-router`'s `query-string` dependency still requests the vulnerable 0.2
+series. Version 0.5.1 is the first release outside the filed vulnerable range;
+remove the override when that dependency requests a fixed version itself.
+
 What the database says with nothing compared against it — and what a review will
 expire against — is in the weekly `drift` report beside the SDK's opinion.
 
