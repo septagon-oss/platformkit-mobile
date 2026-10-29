@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 311,
-   "cases": 1464,
-   "ms": 2722985,
-   "testsMs": 97336.09999999993,
+   "files": 312,
+   "cases": 1465,
+   "ms": 2751618,
+   "testsMs": 97343.09999999993,
    "runners": {
-    "jest": 105,
+    "jest": 106,
     "node": 206
    },
    "unreachable": 0
@@ -9560,6 +9560,35 @@
    "coveredProdLines": 2277,
    "onlyProdLines": null,
    "testsMs": 18
+  },
+  {
+   "file": "tests/ui/sketch-refuses-malformed-time-before-drawing.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A stored sketch with decreasing elapsed time is refused before any stroke is drawn.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 28633,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a sketch with decreasing elapsed time draws no partial stroke"
+   ],
+   "tests": [
+    {
+     "title": "a sketch with decreasing elapsed time draws no partial stroke",
+     "ms": 7,
+     "measured": false
+    }
+   ],
+   "loaded": 167,
+   "coveredProdLines": 2233,
+   "onlyProdLines": null,
+   "testsMs": 7
   },
   {
    "file": "tests/ui/slot-withdrawal.test.tsx",
