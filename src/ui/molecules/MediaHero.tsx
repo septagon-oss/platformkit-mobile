@@ -17,6 +17,7 @@ export function MediaHero({
   onAction,
   onRetry,
   fit = "cover",
+  ground,
 }: {
   readonly model: MediaHeroModel;
   readonly renderImage: ImageRenderer;
@@ -25,6 +26,12 @@ export function MediaHero({
   readonly onAction?: (id: string) => void;
   readonly onRetry?: (id: string) => void;
   readonly fit?: "cover" | "contain";
+  /**
+   * ground is the colour a record is drawn on — its own, from the body that named the picture, in
+   * the same way a declared answer's colour is drawn beside its word. It shows through while the
+   * picture arrives; a surface the page chose is painted by `renderFrame` instead.
+   */
+  readonly ground?: string;
 }) {
   const s = useStyles(kitStyles),
     item = model.item;
@@ -38,7 +45,13 @@ export function MediaHero({
   // caption reads as a caption, not as the act it is.
   const named = Boolean(model.title || model.subtitle || item.caption);
   const frame = (
-    <View style={[s.image, drawn ? { aspectRatio: item.aspectRatio } : s.imageVoid]}>
+    <View
+      style={[
+        s.image,
+        ...(ground === undefined ? [] : [{ backgroundColor: ground }]),
+        drawn ? { aspectRatio: item.aspectRatio } : s.imageVoid,
+      ]}
+    >
       {drawn ? (
         <View
           style={[s.imageFill, item.state === "loading" && s.concealed]}

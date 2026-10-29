@@ -71,6 +71,12 @@ interface Words {
     readonly participants: string;
     readonly participantAdd: string;
   };
+  /**
+   * outfit is the vocabulary of a look the module composed: the door to the next window of
+   * suggestions and the door back to it. No word here names a garment, a season or a colour — the
+   * module prints those, and the phone repeats them.
+   */
+  readonly outfit: { readonly anotherIdea: string; readonly moreIdeas: string };
   readonly choice: { readonly placeholder: string; readonly cancel: string; readonly hint: string };
   readonly dateTime: {
     readonly set: string;
@@ -235,6 +241,7 @@ const en: Words = {
     participants: "Who can vote",
     participantAdd: "Invite a person",
   },
+  outfit: { anotherIdea: "Another idea", moreIdeas: "More ideas" },
   choice: { placeholder: "Choose", cancel: "Cancel", hint: "Opens the choices" },
   dateTime: {
     set: "Set",
@@ -379,6 +386,7 @@ const pt: Words = {
     participants: "Quem pode votar",
     participantAdd: "Convidar uma pessoa",
   },
+  outfit: { anotherIdea: "Outra ideia", moreIdeas: "Mais ideias" },
   choice: { placeholder: "Escolher", cancel: "Cancelar", hint: "Abre as opções" },
   dateTime: {
     set: "Definir",
@@ -479,6 +487,7 @@ function bundle(language: Language, words: Words): Copy {
     language,
     kit: Object.freeze(words.kit),
     decide: Object.freeze(words.decide),
+    outfit: Object.freeze(words.outfit),
     review: Object.freeze(words.review),
     choice: Object.freeze(words.choice),
     dateTime: Object.freeze(words.dateTime),

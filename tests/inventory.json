@@ -285,23 +285,23 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 305,
-   "cases": 1449,
-   "ms": 2656454,
-   "testsMs": 97265.39999999994,
+   "files": 307,
+   "cases": 1455,
+   "ms": 2659350,
+   "testsMs": 97290.49999999993,
    "runners": {
     "jest": 102,
-    "node": 203
+    "node": 205
    },
    "unreachable": 0
   },
   "composition": {
-   "files": 154,
-   "cases": 507,
-   "ms": 3836697,
-   "testsMs": 58871,
+   "files": 165,
+   "cases": 531,
+   "ms": 4050995,
+   "testsMs": 60005,
    "runners": {
-    "jest": 154
+    "jest": 165
    },
    "unreachable": 0
   },
@@ -12003,6 +12003,41 @@
    "runsNowhere": false
   },
   {
+   "file": "tests/a-look-key-the-module-printed-opens-at-one-row.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "A look's key is its address, and the module mints it in its own grammar: the recipe id and the three colours its slots wear, each colour spelled with the `#` that makes it a colour. That key is what the phone puts in a path, so this checks the case the fake's keys do not exercise \u2014 a look key carrying three `#` characters \u2014 against the kit's own one spelling of a row's route: it stays one part of one path, arrives back as the same key, and never becomes a fragment.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1776,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "a key the module printed is read whole, with the colours it wears",
+    "a key the module printed opens at one row, and its colours stay data"
+   ],
+   "tests": [
+    {
+     "title": "a key the module printed is read whole, with the colours it wears",
+     "ms": 5.855198,
+     "measured": false
+    },
+    {
+     "title": "a key the module printed opens at one row, and its colours stay data",
+     "ms": 3.077581,
+     "measured": false
+    }
+   ],
+   "loaded": 54,
+   "coveredProdLines": 13600,
+   "onlyProdLines": null,
+   "testsMs": 8.9
+  },
+  {
    "file": "tests/a-notification-opens-a-route-the-generated-router-accepts.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -23128,6 +23163,53 @@
    "testsMs": 13
   },
   {
+   "file": "tests/the-outfit-wire-refuses-a-body-outside-the-modules-shape.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 4,
+   "rule": "The outfit wire is the module's shape and nothing looser: a body outside it is refused there, so a screen never draws a look with a member missing. Each case refuses one thing at a time, with an example the kit's own fake does not use, and the last two name what a look is addressed by \u2014 the key the module kept it under, which is the same identity a person's copy is kept against.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 1120,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "the module's own look body is read as it arrived",
+    "one member at a time is refused, and only it",
+    "a window that ended is read as one window that ended",
+    "a look is opened and kept under the key the read gave it, never its recipe"
+   ],
+   "tests": [
+    {
+     "title": "the module's own look body is read as it arrived",
+     "ms": 6.205396,
+     "measured": false
+    },
+    {
+     "title": "one member at a time is refused, and only it",
+     "ms": 2.787716,
+     "measured": false
+    },
+    {
+     "title": "a window that ended is read as one window that ended",
+     "ms": 0.192566,
+     "measured": false
+    },
+    {
+     "title": "a look is opened and kept under the key the read gave it, never its recipe",
+     "ms": 6.978517,
+     "measured": false
+    }
+   ],
+   "loaded": 54,
+   "coveredProdLines": 13601,
+   "onlyProdLines": null,
+   "testsMs": 16.2
+  },
+  {
    "file": "tests/the-phone-agrees-with-the-kernels-parity-fixtures.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -24123,6 +24205,70 @@
    "testsMs": 161
   },
   {
+   "file": "tests/screens/a-look-the-module-answered-twice-is-one-cell-and-one-door.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "The ranking is the module's and it may move between two asks; the phone holds one cell per look. A window that arrives overlapping the one on screen \u2014 the same look under the same key, because a key is that look's recipe with the colours actually worn \u2014 joins it once and opens one door, so a person who pressed the second copy would not be reading the same look twice.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18994,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a look the module answered twice is one cell of the wall and one door"
+   ],
+   "tests": [
+    {
+     "title": "a look the module answered twice is one cell of the wall and one door",
+     "ms": 141,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2680,
+   "onlyProdLines": null,
+   "testsMs": 141
+  },
+  {
+   "file": "tests/screens/a-look-whose-refresh-refused-says-what-refused.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "A look already on screen is a read that has not been asked about since the person arrived. When the read that refreshes it refuses, the wall of looks answers with a sentence and keeps its cards; the look page owes the same answer, because a record shown as though it were current after the service said otherwise is the one thing a derived read may not do \u2014 and the heart beside it offers a write against exactly that record.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 21103,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the page says what refused and keeps the look it had drawn",
+    "the sentence offers the way to ask for it again"
+   ],
+   "tests": [
+    {
+     "title": "the page says what refused and keeps the look it had drawn",
+     "ms": 39,
+     "measured": false
+    },
+    {
+     "title": "the sentence offers the way to ask for it again",
+     "ms": 38,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2685,
+   "onlyProdLines": null,
+   "testsMs": 77
+  },
+  {
    "file": "tests/screens/a-malformed-destructive-row-command-still-needs-confirmation.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -24794,6 +24940,35 @@
    "coveredProdLines": 2235,
    "onlyProdLines": null,
    "testsMs": 478
+  },
+  {
+   "file": "tests/screens/a-refused-look-keeps-its-last-copy-visible.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A look the service would not refresh remains the last copy the phone read, with a visible way to ask again. This is the fragile boundary between the read's refusal and the detail screen.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22026,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "keeps the last look visible with a retry action"
+   ],
+   "tests": [
+    {
+     "title": "keeps the last look visible with a retry action",
+     "ms": 38,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2680,
+   "onlyProdLines": null,
+   "testsMs": 38
   },
   {
    "file": "tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx",
@@ -25545,6 +25720,59 @@
    "coveredProdLines": 3031,
    "onlyProdLines": null,
    "testsMs": 65
+  },
+  {
+   "file": "tests/screens/a-suggestion-this-phone-cannot-read-is-refused-as-a-whole.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 5,
+   "rule": "A suggestion outside the module's shape is refused as a whole. The transport runs the pack's own validator on every success, so a renamed member, a colour in the wrong case or a window with no position arrives as a refusal and never as a card with something missing from it.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19033,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the whole read is refused and no look is drawn",
+    "the whole read is refused and no look is drawn",
+    "the whole read is refused and no look is drawn",
+    "the whole read is refused and no look is drawn",
+    "the whole read is refused and no look is drawn"
+   ],
+   "tests": [
+    {
+     "title": "the whole read is refused and no look is drawn",
+     "ms": 26,
+     "measured": false
+    },
+    {
+     "title": "the whole read is refused and no look is drawn",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "the whole read is refused and no look is drawn",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "the whole read is refused and no look is drawn",
+     "ms": 8,
+     "measured": false
+    },
+    {
+     "title": "the whole read is refused and no look is drawn",
+     "ms": 8,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2662,
+   "onlyProdLines": null,
+   "testsMs": 58
   },
   {
    "file": "tests/screens/a-swiped-row-runs-what-its-entry-names.test.tsx",
@@ -26687,6 +26915,53 @@
    "tier": "merge",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/screens/an-idea-from-the-look-walks-the-wall-and-clears-its-own-address.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "\"Another idea\" on the look page leaves one instruction in the address of the wall; the wall reads it once, walks to the window after the one it holds, and clears its own address so a reload asks for what is on screen rather than for the idea someone asked for two screens ago. A wall that is mounted under the instruction \u2014 opened from a kept copy, with no wall behind it \u2014 takes the same step once it has a window to step from, and an instruction in no spelling the wall knows leaves the window where it was.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18999,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the look's own door asks for one window further on and clears the address",
+    "the wall walks the window the address asked for, then holds no stale instruction",
+    "a wall mounted under the instruction reads one window, then takes the step it was asked for",
+    "an instruction in no spelling the wall knows leaves the window where it is"
+   ],
+   "tests": [
+    {
+     "title": "the look's own door asks for one window further on and clears the address",
+     "ms": 26,
+     "measured": false
+    },
+    {
+     "title": "the wall walks the window the address asked for, then holds no stale instruction",
+     "ms": 97,
+     "measured": false
+    },
+    {
+     "title": "a wall mounted under the instruction reads one window, then takes the step it was asked for",
+     "ms": 22,
+     "measured": false
+    },
+    {
+     "title": "an instruction in no spelling the wall knows leaves the window where it is",
+     "ms": 12,
+     "measured": false
+    }
+   ],
+   "loaded": 200,
+   "coveredProdLines": 2763,
+   "onlyProdLines": null,
+   "testsMs": 157
   },
   {
    "file": "tests/screens/an-unanswered-queue-read-offers-retry-and-reads-again.test.tsx",
@@ -28002,6 +28277,35 @@
    "testsMs": 87
   },
   {
+   "file": "tests/screens/opening-one-look-asks-for-it-once.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "Arriving at a look is one read of it. The mount that has not been shown yet asks nothing and the focus that shows the screen asks once, so the transport's own record of where it was sent is the measure: a page that read the same record on mount and again on focus would double every ask a person makes of the service, and the wall already counts one ask per screen it draws.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18970,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the page asks for the record its address names, once"
+   ],
+   "tests": [
+    {
+     "title": "the page asks for the record its address names, once",
+     "ms": 78,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2635,
+   "onlyProdLines": null,
+   "testsMs": 78
+  },
+  {
    "file": "tests/screens/record-command-at-collection-address.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -28490,6 +28794,41 @@
    "testsMs": 16
   },
   {
+   "file": "tests/screens/the-answers-a-person-is-suggested-with-are-drawn-with-or-without-a-press.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The answers a person is being suggested with are true information whether or not this installation mounted the questions: the colours, the season and the style are drawn either way, and the press that goes back to them appears only where the entry actually offers a create. A caption that looks pressable and opens nothing is a door somebody else's absence would have to explain.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18862,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "each colour is named, and the press opens the questions the entry mounts",
+    "an entry that mounts no questions draws the answers with no press"
+   ],
+   "tests": [
+    {
+     "title": "each colour is named, and the press opens the questions the entry mounts",
+     "ms": 87,
+     "measured": false
+    },
+    {
+     "title": "an entry that mounts no questions draws the answers with no press",
+     "ms": 14,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2672,
+   "onlyProdLines": null,
+   "testsMs": 101
+  },
+  {
    "file": "tests/screens/the-heart-waits-for-the-answer-before-it-says-so.test.tsx",
    "runner": "jest",
    "layer": "composition",
@@ -28553,6 +28892,146 @@
    "coveredProdLines": 2399,
    "onlyProdLines": null,
    "testsMs": 260
+  },
+  {
+   "file": "tests/screens/the-look-page-draws-every-piece-with-the-colour-that-paints-it.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 2,
+   "rule": "The look page draws what the module composed: the flat-lay, the look's own name, the two answers it was composed under, and one line per piece in the order they were laid out \u2014 each with the colour that paints it. It re-words no garment, groups none by which part of the body it covers, and draws no heart this build cannot answer for.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18994,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "every piece is drawn once, in order, with the colour that paints it",
+    "the look offers the next idea, and keeps a copy only where this build answers for one"
+   ],
+   "tests": [
+    {
+     "title": "every piece is drawn once, in order, with the colour that paints it",
+     "ms": 26,
+     "measured": false
+    },
+    {
+     "title": "the look offers the next idea, and keeps a copy only where this build answers for one",
+     "ms": 66,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2644,
+   "onlyProdLines": null,
+   "testsMs": 92
+  },
+  {
+   "file": "tests/screens/the-look-page-paints-its-frame-the-look-s-own-ground.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A look is drawn from one read, and the frame it is drawn on is the look's own: the module paints `background` into the record, and `MediaHero`'s `ground` is what holds that frame while the flat-lay arrives \u2014 or if it never does. Nothing else on this kit paints a record's colour, so this is the case that says the prop arrived at the frame rather than at the model.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18717,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the frame the flat-lay arrives into wears the look's own colour, and no other surface does"
+   ],
+   "tests": [
+    {
+     "title": "the frame the flat-lay arrives into wears the look's own colour, and no other surface does",
+     "ms": 25,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2644,
+   "onlyProdLines": null,
+   "testsMs": 25
+  },
+  {
+   "file": "tests/screens/the-look-window-ends-where-the-read-ended-and-refuses-without-emptying.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 4,
+   "rule": "The window of looks moves where the read said it had got to: the next ask starts after the window that was answered, a window the module ended leaves no door to the next one, and a window that refused leaves the looks already drawn where they were. The ranking is cut round, not off the end: a window near the end of six looks rotates back to their front, so the next ask never hands back a short page of the leftovers.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 18898,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "more ideas asks for the window after the one that was answered and joins it to the wall",
+    "a window the module ended offers no way on, because there is none under these answers",
+    "the window past the last whole one rotates back to the front of the ranking and leaves no door",
+    "a window that refused keeps the looks already drawn and says what went wrong"
+   ],
+   "tests": [
+    {
+     "title": "more ideas asks for the window after the one that was answered and joins it to the wall",
+     "ms": 133,
+     "measured": false
+    },
+    {
+     "title": "a window the module ended offers no way on, because there is none under these answers",
+     "ms": 13,
+     "measured": false
+    },
+    {
+     "title": "the window past the last whole one rotates back to the front of the ranking and leaves no door",
+     "ms": 63,
+     "measured": false
+    },
+    {
+     "title": "a window that refused keeps the looks already drawn and says what went wrong",
+     "ms": 69,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2713,
+   "onlyProdLines": null,
+   "testsMs": 278
+  },
+  {
+   "file": "tests/screens/the-looks-wall-draws-the-looks-in-the-order-the-read-ranked-them.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "The wall of looks is the module's ranking, not one the phone made: the looks it answered for this window, in the order it answered them, each named by the look's own name and captioned by the module's own pieces line, never re-joined or re-sorted here.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 19702,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "the looks stand in the order the read ranked them, named and captioned"
+   ],
+   "tests": [
+    {
+     "title": "the looks stand in the order the read ranked them, named and captioned",
+     "ms": 89,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2670,
+   "onlyProdLines": null,
+   "testsMs": 89
   },
   {
    "file": "tests/screens/the-notification-offer-is-one-sentence-and-two-answers.test.tsx",
