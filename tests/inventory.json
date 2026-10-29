@@ -296,12 +296,12 @@
    "unreachable": 0
   },
   "composition": {
-   "files": 164,
-   "cases": 530,
-   "ms": 4028969,
-   "testsMs": 59967,
+   "files": 165,
+   "cases": 531,
+   "ms": 4050995,
+   "testsMs": 60005,
    "runners": {
-    "jest": 164
+    "jest": 165
    },
    "unreachable": 0
   },
@@ -24940,6 +24940,35 @@
    "coveredProdLines": 2235,
    "onlyProdLines": null,
    "testsMs": 478
+  },
+  {
+   "file": "tests/screens/a-refused-look-keeps-its-last-copy-visible.test.tsx",
+   "runner": "jest",
+   "layer": "composition",
+   "cases": 1,
+   "rule": "A look the service would not refresh remains the last copy the phone read, with a visible way to ask again. This is the fragile boundary between the read's refusal and the detail screen.",
+   "ruleSource": "first comment",
+   "tier": "merge",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22026,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "keeps the last look visible with a retry action"
+   ],
+   "tests": [
+    {
+     "title": "keeps the last look visible with a retry action",
+     "ms": 38,
+     "measured": false
+    }
+   ],
+   "loaded": 198,
+   "coveredProdLines": 2680,
+   "onlyProdLines": null,
+   "testsMs": 38
   },
   {
    "file": "tests/screens/a-refused-person-withdraws-before-other-reads-finish.test.tsx",
