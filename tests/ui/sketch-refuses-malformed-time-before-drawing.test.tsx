@@ -24,7 +24,13 @@ test("a sketch with decreasing elapsed time draws no partial stroke", async () =
       <Value
         presentation={feedback}
         field={{ name: "drawing", type: "sketch" }}
-        value={[[[10, 20, 0], [30, 40, 9], [50, 60, 8]]]}
+        value={[
+          [
+            [10, 20, 0],
+            [30, 40, 9],
+            [50, 60, 8],
+          ],
+        ]}
       />
     </ThemeProvider>,
   );
