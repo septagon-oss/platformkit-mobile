@@ -54,6 +54,10 @@
           "name": "tags",
           "type": "list",
           "elem": "string"
+        },
+        {
+          "name": "drawing",
+          "type": "sketch"
         }
       ],
       "screen": "/app/note/notes",
@@ -67,6 +71,10 @@
           "summary": "Publish a note",
           "description": "Makes the note visible. Publishing a published note changes nothing.",
           "fields": [
+            {
+              "name": "drawing",
+              "type": "sketch"
+            },
             {
               "name": "at",
               "type": "string",

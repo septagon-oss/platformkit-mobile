@@ -22,13 +22,15 @@ import {
   points,
   text,
 } from "../../core/present";
-import { splitList } from "../../core/form";
+import { parseSketch, splitList } from "../../core/form";
 import { AvatarStack } from "./AvatarStack";
+import { SketchBoard } from "./SketchBoard";
 import type { ImageRenderer } from "./MediaHero";
 import { Badge } from "../atoms/Badge";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
 import { testable } from "../props";
+import { extent } from "../scale";
 import { useStyles, type Theme } from "../theme";
 
 interface Props {
@@ -69,6 +71,21 @@ export function Value({
   const shown = display(field, value, presentation, names);
   const raw = text(value);
   const id = testable(testID);
+
+  if (field.type === "sketch") {
+    const sketch = value === null || value === undefined ? [] : (parseSketch(value) ?? []);
+    return (
+      <SketchBoard
+        value={sketch}
+        editable={false}
+        accessibilityLabel={fieldLabel(field)}
+        undoLabel={presentation.copy.kit.undo}
+        clearLabel={presentation.copy.kit.clear}
+        {...(compact ? { height: extent.sketchPreview } : {})}
+        {...id}
+      />
+    );
+  }
 
   const person = personValue(
     field,

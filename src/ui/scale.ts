@@ -26,6 +26,8 @@ export const extent = {
   rowMedia: 40,
   avatarOverlap: 8,
   textarea: 120,
+  sketch: 200,
+  sketchPreview: 48,
   skeleton: 14,
   skeletonMedia: 180,
   skeletonRow: 44,

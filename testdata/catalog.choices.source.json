@@ -4,9 +4,9 @@
   "sha256": "d5b4f21679c06e40065cb5164e18e94a20027ea10b94454459c1fdbb619e665d",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "2499b3679005623b1bc73e2b2cf7ae88d81da004",
+    "commit": "ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce",
     "path": "ui/screens/testdata/catalog-choices.json",
-    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/2499b3679005623b1bc73e2b2cf7ae88d81da004/ui/screens/testdata/catalog-choices.json"
+    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce/ui/screens/testdata/catalog-choices.json"
   },
   "capture": {
     "method": "The kernel renders this document from the declared ChoiceSets of its own reference composition (kit/entity/present); the copy is the file at the named commit, byte for byte. It is the only capture in this repository that carries a resolved finite choice. Cases this capture does not carry - a single-answer choice, a malformed word - are built from its bytes in the test that needs them, the way every other catalogue case here is built.",

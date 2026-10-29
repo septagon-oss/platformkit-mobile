@@ -285,13 +285,13 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 307,
-   "cases": 1455,
-   "ms": 2659350,
-   "testsMs": 97290.49999999993,
+   "files": 309,
+   "cases": 1462,
+   "ms": 2700680,
+   "testsMs": 97330.09999999993,
    "runners": {
-    "jest": 102,
-    "node": 205
+    "jest": 103,
+    "node": 206
    },
    "unreachable": 0
   },
@@ -306,13 +306,13 @@
    "unreachable": 0
   },
   "journey": {
-   "files": 59,
-   "cases": 51,
+   "files": 60,
+   "cases": 52,
    "ms": 0,
    "testsMs": 0,
    "runners": {
     "browser": 43,
-    "maestro": 16
+    "maestro": 17
    },
    "unreachable": 43
   }
@@ -9468,6 +9468,41 @@
    "coveredProdLines": 628,
    "onlyProdLines": null,
    "testsMs": 38
+  },
+  {
+   "file": "tests/ui/sketch-board-uses-the-shared-touch-model.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 2,
+   "rule": "Synthetic responder events exercise the same normalized stroke decisions the board uses.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 39030,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "synthetic responder touches draw and commit the normalized stroke",
+    "read-only sketch has no drawing or edit actions"
+   ],
+   "tests": [
+    {
+     "title": "synthetic responder touches draw and commit the normalized stroke",
+     "ms": 15,
+     "measured": false
+    },
+    {
+     "title": "read-only sketch has no drawing or edit actions",
+     "ms": 3,
+     "measured": false
+    }
+   ],
+   "loaded": 165,
+   "coveredProdLines": 2277,
+   "onlyProdLines": null,
+   "testsMs": 18
   },
   {
    "file": "tests/ui/slot-withdrawal.test.tsx",
@@ -22402,6 +22437,59 @@
    "testsMs": 42.6
   },
   {
+   "file": "tests/sketch-value.test.ts",
+   "runner": "node",
+   "layer": "behaviour",
+   "cases": 5,
+   "rule": "The mobile sketch value and form draft enforce the kernel's bounded wire shape.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (node half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.node",
+   "ms": 2300,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other node file's coverage in the same pass; see measured.node",
+   "titles": [
+    "sketch values accept only bounded normalized integer strokes",
+    "sketch touch decisions normalize letterboxed input and preserve stroke order",
+    "sketch form text round-trips wire values and absent values stay empty",
+    "sketch forms submit an absent or cleared drawing as an empty array",
+    "sketch actions refuse the next stroke or point at either kernel cap"
+   ],
+   "tests": [
+    {
+     "title": "sketch values accept only bounded normalized integer strokes",
+     "ms": 2.614467,
+     "measured": false
+    },
+    {
+     "title": "sketch touch decisions normalize letterboxed input and preserve stroke order",
+     "ms": 0.429334,
+     "measured": false
+    },
+    {
+     "title": "sketch form text round-trips wire values and absent values stay empty",
+     "ms": 0.22141,
+     "measured": false
+    },
+    {
+     "title": "sketch forms submit an absent or cleared drawing as an empty array",
+     "ms": 12.07103,
+     "measured": false
+    },
+    {
+     "title": "sketch actions refuse the next stroke or point at either kernel cap",
+     "ms": 6.310173,
+     "measured": false
+    }
+   ],
+   "loaded": 52,
+   "coveredProdLines": 13566,
+   "onlyProdLines": null,
+   "testsMs": 21.6
+  },
+  {
    "file": "tests/slot-availability-withdrawal.test.ts",
    "runner": "node",
    "layer": "behaviour",
@@ -32418,6 +32506,25 @@
    "tier": "nightly",
    "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
    "runsNowhere": false
+  },
+  {
+   "file": "e2e/flows/sketch.yaml",
+   "runner": "maestro",
+   "layer": "journey",
+   "cases": 1,
+   "rule": "A sketch field is drawn, undone, drawn again, saved, read back, cleared and saved empty.",
+   "ruleSource": "first comment",
+   "tier": "nightly",
+   "reach": "emulator job only (mobile-e2e.yml): every run of main read from the forge failed there",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.maestro",
+   "claims": [
+    "app/[module]/[entity]/new.tsx",
+    "app/[module]/[entity]/[id]/index.tsx",
+    "app/[module]/[entity]/[id]/edit.tsx"
+   ],
+   "steps": 1
   },
   {
    "file": "e2e/flows/verb.yaml",

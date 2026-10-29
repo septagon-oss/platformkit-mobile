@@ -10,7 +10,7 @@ import { kitEnglish } from "../src/core/kitCopy";
 
 // The journey-coverage guard reads this literal list on one line.
 // prettier-ignore
-for (const name of ["create", "deck", "detail", "edit", "first-journey", "list", "record", "verb"]) {
+for (const name of ["create", "deck", "detail", "edit", "first-journey", "list", "record", "sketch", "verb"]) {
   test(`${name} delete selector matches the dialog answer as raw regex source`, () => {
     const documents = parseAllDocuments(readFileSync(`e2e/flows/${name}.yaml`, "utf8"));
     const steps = documents[1]!.toJSON() as { tapOn?: string | { id?: string; text?: string } }[];

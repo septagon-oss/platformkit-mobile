@@ -125,6 +125,12 @@ is dismissed. A select asks the platform's own chooser, an instant its own
 date and time controls, and an instant reads in the device's zone, which is
 the one place this shell deliberately reads differently from the web shell.
 
+### Sketch fields
+
+**Reused** — the pinned catalogue parser, core form control/value path, resource form organism, `Value`, `react-native-svg` and the shared theme/scale compose sketch fields without a new server operation. **Added** — the bounded sketch value helper and `SketchBoard`, because the phone had no normalized touch-to-stroke model or drawing surface; the board edits the existing form draft and Save keeps its existing request and conflict behavior. **Made reusable** — the normalized point projection, cap-aware stroke decisions, SVG board, read-only preview, bilingual undo/clear words and synthetic responder pattern are available to any resource declaring a `sketch` field.
+
+Sketch fields carry ordered strokes of integer `[x, y, elapsedMilliseconds]` points, normalized to `0…1000`; the server's limits are 400 strokes and 20,000 points. Empty values submit as `[]`, resize changes the displayed projection only, and a malformed stored drawing is never partly rendered. The mobile catalogue and API documents are pinned together at the public kernel revision recorded by `testdata/catalog.source.json` and `testdata/openapi.source.json`; that fixture proves only the pinned contract, not every server release. `npm run check` exercises synthetic responder input and the parser. The native `e2e/flows/sketch.yaml` journey draws, undoes and redraws a stroke, saves and reads it back, then clears and saves the empty value; device execution and screen-reader output remain part of native verification.
+
 Only the current atomic session record is supported. Older installations require
 a fresh server selection and sign-in. Failed saves
 prevent sign-in completion. Sign-out immediately clears the active client;
@@ -1012,7 +1018,7 @@ absent; the strict `appResources` operation then takes the golden with its resol
 in. `readPolicy` still admits a `null` for `identity.group`, `reference`, `reading.money` and
 `reading.time`, because a server older than that commit writes `null` for the same absence and the
 entry keeps the policy it was given either way. The five kernel presentation copies this repository
-holds name one commit of it (`2499b3679005623b1bc73e2b2cf7ae88d81da004`): the golden, the HTTP
+holds name one commit of it (`ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce`): the golden, the HTTP
 document, the parity fixtures, `testdata/catalog.choices.json` and `testdata/catalog.deck.json`,
 the last two the captures the choice and step readings are proved against. Each copy's record
 is proved by the script that reads it, and

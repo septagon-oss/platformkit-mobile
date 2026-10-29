@@ -110,8 +110,9 @@ describe("ResourceList", () => {
     // same field. One value, one drawing: the pill in the column `Row` reserves for it,
     // and no cell repeating it under the field's own word. Two identical badges on one
     // row is what this refuses, so it counts what is drawn rather than the model.
-    const hinted = parseCatalog(JSON.parse(readFileSync("testdata/catalog.hints.json", "utf8")))
-      .resources[0]!;
+    const hinted = parseCatalog(
+      unresolved(JSON.parse(readFileSync("testdata/catalog.hints.json", "utf8"))),
+    ).resources[0]!;
     await inTheme(
       <ResourceList
         presentation={presentation}

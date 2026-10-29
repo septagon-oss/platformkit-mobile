@@ -15,6 +15,7 @@ import {
   type FormBlock,
   type StepperModel,
 } from "../../core/form";
+import { sketchFromText } from "../../core/form";
 import {
   figureLine,
   insertLine,
@@ -34,6 +35,7 @@ import { FormField } from "../molecules/FormField";
 import { RichTextToolbar } from "../molecules/RichTextToolbar";
 import { Section } from "../molecules/Section";
 import { TagsField } from "../molecules/TagsField";
+import { SketchBoard } from "../molecules/SketchBoard";
 import { Text } from "../atoms/Text";
 import { Stepper } from "./Stepper";
 import { Screen } from "../templates/Screen";
@@ -265,6 +267,24 @@ export function ResourceForm({
               onRefused={(r) => onFieldRefused?.(name, r)}
               copy={kit}
               disabled={off}
+            />
+          </FormField>
+        );
+      case "sketch":
+        return (
+          <FormField key={name} {...common}>
+            <SketchBoard
+              value={sketchFromText(value) ?? []}
+              editable={!off}
+              accessibilityLabel={named(c)}
+              undoLabel={kit.undo}
+              clearLabel={kit.clear}
+              testID={`input-${name}`}
+              onChange={(sketch) => {
+                onFieldRefused?.(name, false);
+                onChange(name, JSON.stringify(sketch));
+              }}
+              onRefused={() => onFieldRefused?.(name, true)}
             />
           </FormField>
         );

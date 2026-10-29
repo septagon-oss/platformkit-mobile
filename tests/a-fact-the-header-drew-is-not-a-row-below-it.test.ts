@@ -12,13 +12,16 @@ import test from "node:test";
 import { parseCatalog, type Entry } from "../src/core/catalog";
 import { recordHeader, recordInformation, recordSections } from "../src/core/derive";
 import { feedback } from "./fakes/presentation";
+import { unresolved } from "./fakes/unresolved";
 
 process.env.TZ = "UTC";
 
 /** The served hinted document, its name and state kept for the record's own screen. */
 function keptForTheRecord(): Entry {
-  const doc = JSON.parse(
-    readFileSync(new URL("../testdata/catalog.hints.json", import.meta.url).pathname, "utf8"),
+  const doc = unresolved(
+    JSON.parse(
+      readFileSync(new URL("../testdata/catalog.hints.json", import.meta.url).pathname, "utf8"),
+    ),
   );
   const fields = (doc.resources[0] as { fields: Record<string, unknown>[] }).fields;
   fields.find((f) => f.name === "title")!.presentation = {

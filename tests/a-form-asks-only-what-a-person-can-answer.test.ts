@@ -127,12 +127,12 @@ const taskRow: Row = {
 };
 
 test("a form leads with the field the record is called by, then required, then optional", () => {
-  // Schema order is `title, body, rank, pinned, tags`; `pinned` required is the
+  // Schema order is `title, body, rank, pinned, tags, drawing`; `pinned` required is the
   // mutation no schema-order rule can answer, because it belongs above `body`.
   const blocks = formSections(unhinted(pinRequired), undefined, true, kit.overview);
   assert.deepEqual(
     blocks.flatMap((b) => b.controls.map((c) => `${c.field.name}${c.required ? "*" : ""}`)),
-    ["title*", "pinned*", "body", "rank", "tags"],
+    ["title*", "pinned*", "body", "rank", "tags", "drawing"],
   );
 });
 
@@ -155,7 +155,7 @@ test("a field the entry filed nowhere lands in the last block, named the overvie
   const last = blocks[blocks.length - 1]!;
   assert.equal(last.key, "");
   assert.equal(last.label, "Overview");
-  assert.equal(names(last.controls), "pinned, tags");
+  assert.equal(names(last.controls), "pinned, tags, drawing");
   assert.deepEqual(
     formSections(hinted(), undefined, true, "Visão geral").at(-1)!.label,
     "Visão geral",
@@ -167,7 +167,7 @@ test("an entry that declares no sections gets one block with no heading", () => 
   const blocks = formSections(plain, undefined, true, kit.overview);
   assert.equal(blocks.length, 1);
   assert.equal(blocks[0]!.label, "", "the sheet is the group: an unfiled form says no heading");
-  assert.equal(names(blocks[0]!.controls), "title, body, rank, pinned, tags");
+  assert.equal(names(blocks[0]!.controls), "title, body, rank, pinned, tags, drawing");
 });
 
 test("the identity field leads its block even when it is optional", () => {
@@ -190,7 +190,7 @@ test("an identity field never moves out of the block its entry filed it in", () 
     formSections(hinted(refilled), undefined, true, kit.overview).map(
       (b) => `${b.key || "-"}:${names(b.controls)}`,
     ),
-    ["content:body", "details:title", "-:pinned, tags"],
+    ["content:body", "details:title", "-:pinned, tags, drawing"],
   );
 });
 
@@ -328,7 +328,7 @@ test("a hidden field is not offered and not sent; a required one stays and says 
   );
   assert.deepEqual(
     Object.keys(values(offered, {})),
-    ["title", "pinned", "tags"],
+    ["title", "pinned", "tags", "drawing"],
     "a create body names no hidden field",
   );
   assert.deepEqual(Object.keys(values(offered, {})).includes("rank"), false);

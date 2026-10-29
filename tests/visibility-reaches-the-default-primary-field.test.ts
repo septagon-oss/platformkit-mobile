@@ -37,7 +37,7 @@ test("a field declared hidden never names a row", () => {
   assert.equal(label(entry, row, untitled), "Untitled Note");
   assert.deepEqual(
     listColumns(entry).map((f) => f.name),
-    ["createdAt", "updatedAt", "status", "rank", "pinned", "tags"],
+    ["createdAt", "updatedAt", "status", "rank", "pinned", "tags", "drawing"],
     "a hidden field is off the list, leading column included",
   );
 });
@@ -48,7 +48,7 @@ test("a field declared detail does not lead the list", () => {
   // the list's columns are the fields the author left on a row.
   assert.deepEqual(
     listColumns(entry).map((f) => f.name),
-    ["createdAt", "updatedAt", "status", "rank", "pinned", "tags"],
+    ["createdAt", "updatedAt", "status", "rank", "pinned", "tags", "drawing"],
     "a detail field gives up the column, the leading one included",
   );
 });

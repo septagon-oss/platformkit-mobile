@@ -181,7 +181,13 @@ test("values turns what a form holds back into what the API takes", () => {
     tags: "a, b",
     body: "",
   });
-  assert.deepEqual(out, { title: "Milk", rank: 3, pinned: true, tags: ["a", "b"] });
+  assert.deepEqual(out, {
+    title: "Milk",
+    rank: 3,
+    pinned: true,
+    tags: ["a", "b"],
+    drawing: [],
+  });
 });
 
 test("a screen path is module/entity", () => {
@@ -481,8 +487,10 @@ test("a row's own line is what a row has room for, which is not what a record ha
 test("a command's argument is a form built by the rules a field is built by", () => {
   const publish = note.commands.find((c) => c.verb === "publish")!;
   const controls = commandControls(publish);
-  assert.equal(controls.length, 1);
-  const at = controls[0]!;
+  assert.equal(controls.length, 2);
+  assert.equal(controls[0]!.field.name, "drawing");
+  assert.equal(controls[0]!.kind, "sketch");
+  const at = controls[1]!;
   assert.equal(at.kind, "text");
   assert.equal(at.label, "At");
   assert.equal(at.readOnly, false);

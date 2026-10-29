@@ -40,7 +40,7 @@ test("a create sends every field the sheet asks about", () => {
   const controls = formControls(entry, undefined, true);
   const held = { title: "Seedling care", body: "Dê água fresca." };
   const sent = saveBody(controls, held, undefined, undefined, "pt");
-  assert.deepEqual(Object.keys(sent).sort(), ["body", "pinned", "tags", "title"]);
+  assert.deepEqual(Object.keys(sent).sort(), ["body", "drawing", "pinned", "tags", "title"]);
 });
 
 test("the record's own copy keeps a field nobody edited", () => {

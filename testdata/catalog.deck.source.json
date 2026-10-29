@@ -4,9 +4,9 @@
   "sha256": "0fe69e7a78916d6cf7d07c17da63d92160c858c4662978f604bb7a5e94c32736",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "2499b3679005623b1bc73e2b2cf7ae88d81da004",
+    "commit": "ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce",
     "path": "ui/screens/testdata/catalog-deck.json",
-    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/2499b3679005623b1bc73e2b2cf7ae88d81da004/ui/screens/testdata/catalog-deck.json"
+    "command": "curl -fsSL https://raw.githubusercontent.com/septagon-oss/platformkit/ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce/ui/screens/testdata/catalog-deck.json"
   },
   "capture": {
     "method": "The kernel renders this document from its own deck composition (kit/entity/present resolves the policy, ui/screens serves the document); the copy is the file at the named commit, byte for byte. It is the only capture in this repository whose resolved block states a stepped form, which is why the stepped reading is proved against kernel bytes and not against a document written here.",

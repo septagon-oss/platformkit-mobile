@@ -3,6 +3,7 @@ import { control, listValues, sameAnswer } from "../internals";
 import { numberValue, timeValue, timeWire, valueHoldsSeparator, values } from "./values";
 import { type Control, kind } from "./controls";
 import { label, text } from "../present";
+import { sketchFromText } from "./sketch";
 
 /**
  * FormWords is the copy a form needs to refuse what it can refuse: the sentences
@@ -23,6 +24,8 @@ export interface FormWords {
   readonly fieldTime: string;
   /** A comma-joined list holding an item its field's item type cannot store. */
   readonly listItemType: string;
+  /** A drawing that does not match the stored sketch shape. */
+  readonly sketchInvalid: string;
 }
 
 /**
@@ -56,6 +59,8 @@ export function problems(
     if (c.kind === "number" && numberValue(raw) === undefined)
       out[c.field.name] = words.fieldNumber;
     if (c.kind === "datetime" && timeValue(raw) === undefined) out[c.field.name] = words.fieldTime;
+    if (c.kind === "sketch" && sketchFromText(raw) === undefined)
+      out[c.field.name] = words.sketchInvalid;
     // The comma is refused on its own, ahead of the item type: a value spelled
     // `1,2` is two integers read out of one item, and the sentence a person can
     // act on is about the comma, not about a type nobody wrote wrong.

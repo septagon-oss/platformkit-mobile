@@ -1,0 +1,74 @@
+# A sketch field is drawn, undone, drawn again, saved, read back, cleared and saved empty.
+# screen: app/[module]/[entity]/new.tsx
+# screen: app/[module]/[entity]/[id]/index.tsx
+# screen: app/[module]/[entity]/[id]/edit.tsx
+appId: ${APP_ID}
+env:
+  APP_ID: dev.septagon.platformkit.ci
+  DRAWING: drawing
+---
+- runFlow: sign-in.yaml
+- tapOn:
+    id: "open-${MODULE}-${ENTITY}"
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- tapOn: "New"
+- tapOn:
+    id: "input-${KNOWN}"
+- inputText: ${TITLE} sketch
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "input-${DRAWING}"
+- assertVisible:
+    id: "input-${DRAWING}"
+- swipe:
+    start: 50%, 70%
+    end: 70%, 75%
+    duration: 500
+- tapOn:
+    id: "input-${DRAWING}-undo"
+- swipe:
+    start: 45%, 72%
+    end: 65%, 78%
+    duration: 500
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: "field-${DRAWING}"
+- assertVisible:
+    id: "field-${DRAWING}"
+- tapOn: "Edit"
+- scrollUntilVisible:
+    element:
+      id: "input-${DRAWING}"
+- tapOn:
+    id: "input-${DRAWING}-clear"
+- tapOn:
+    id: "save"
+- extendedWaitUntil:
+    visible:
+      id: "resource-detail"
+    timeout: 15000
+- assertVisible:
+    id: "field-${DRAWING}"
+- tapOn:
+    id: "record-menu"
+- scrollUntilVisible:
+    element:
+      id: "delete"
+- tapOn:
+    id: "delete"
+- tapOn: (?i)^Delete [^‘’?]+$
+- extendedWaitUntil:
+    visible:
+      id: "resource-list"
+    timeout: 15000
+- assertNotVisible: ${TITLE} sketch
