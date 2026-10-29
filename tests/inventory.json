@@ -285,12 +285,12 @@
    "unreachable": 0
   },
   "behaviour": {
-   "files": 309,
-   "cases": 1462,
-   "ms": 2700680,
-   "testsMs": 97330.09999999993,
+   "files": 310,
+   "cases": 1463,
+   "ms": 2722985,
+   "testsMs": 97336.09999999993,
    "runners": {
-    "jest": 103,
+    "jest": 104,
     "node": 206
    },
    "unreachable": 0
@@ -7366,6 +7366,35 @@
    "tier": "push(scoped)+merge(full)",
    "reach": "npm test (jest half)",
    "runsNowhere": false
+  },
+  {
+   "file": "tests/ui/malformed-stored-sketch-is-not-partly-rendered.test.tsx",
+   "runner": "jest",
+   "layer": "behaviour",
+   "cases": 1,
+   "rule": "A malformed stored value is rejected before any stroke reaches react-native-svg.",
+   "ruleSource": "first comment",
+   "tier": "push(scoped)+merge(full)",
+   "reach": "npm test (jest half)",
+   "runsNowhere": false,
+   "verdict": "keep",
+   "verdictReason": "new since this table was measured: it states the rule above and runs where its layer runs; its cost and exclusive-line columns belong to the pass named under measured.jest",
+   "ms": 22305,
+   "exclusiveNotMeasured": "the exclusive-line columns need every other jest suite's coverage in the same pass; see measured.jest",
+   "titles": [
+    "a malformed stored sketch is refused as a whole before it reaches the canvas"
+   ],
+   "tests": [
+    {
+     "title": "a malformed stored sketch is refused as a whole before it reaches the canvas",
+     "ms": 6,
+     "measured": false
+    }
+   ],
+   "loaded": 167,
+   "coveredProdLines": 2233,
+   "onlyProdLines": null,
+   "testsMs": 6
   },
   {
    "file": "tests/ui/map-withdrawal.test.tsx",
