@@ -39,9 +39,7 @@ const body = {
   version: "of1-2f4d0aa1f9c74b0a8e5f2b6c1d3a4e5f",
 };
 
-const mounted = parseCatalog(
-  unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))),
-);
+const mounted = parseCatalog(unresolved(JSON.parse(readFileSync("testdata/catalog.json", "utf8"))));
 const entry = { ...mounted.resources[0]!, module: "outfit", entity: "look" };
 
 test("a key the module printed is read whole, with the colours it wears", () => {
@@ -57,11 +55,10 @@ test("a key the module printed opens at one row, and its colours stay data", () 
   const url = new URL(href, "https://server.test");
   assert.equal(url.hash, "");
   assert.equal(url.search, "");
-  assert.deepEqual(url.pathname.split("/").filter((part) => part !== ""), [
-    "outfit",
-    "look",
-    encodeURIComponent(moduleKey),
-  ]);
+  assert.deepEqual(
+    url.pathname.split("/").filter((part) => part !== ""),
+    ["outfit", "look", encodeURIComponent(moduleKey)],
+  );
   // And the row the screen opens at is the look that was read: the part decodes back to the key.
   assert.equal(decodeURIComponent(url.pathname.split("/").pop()!), moduleKey);
   assert.deepEqual(sourceRef(entry, moduleKey), {
