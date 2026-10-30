@@ -278,6 +278,7 @@ test("a whole-row write keeps what the sheet was not shown", () => {
     rank: 4,
     pinned: false,
     tags: [],
+    drawing: [],
   });
   // The server's own three never travel back in a body that replaces a row.
   assert.ok(!("id" in body) && !("createdAt" in body) && !("updatedAt" in body));
@@ -286,7 +287,13 @@ test("a whole-row write keeps what the sheet was not shown", () => {
   const sparse = values(writeControls(entry, { id: "1", title: "Buy milk" }, sheet), {
     body: "one errand",
   });
-  assert.deepEqual(sparse, { title: "Buy milk", body: "one errand", pinned: false, tags: [] });
+  assert.deepEqual(sparse, {
+    title: "Buy milk",
+    body: "one errand",
+    pinned: false,
+    tags: [],
+    drawing: [],
+  });
 });
 
 test("a hidden list the row answered for goes back item for item, not as its joined spelling reads", () => {

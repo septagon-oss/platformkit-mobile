@@ -45,6 +45,7 @@ const words: FormWords = {
   fieldNumber: "number",
   fieldTime: "time",
   listItemType: "item type",
+  sketchInvalid: "invalid sketch",
 };
 
 for (const [said, names] of [

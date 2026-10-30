@@ -2,12 +2,12 @@
   "schema": "platformkit.parity-source.v1",
   "upstream": {
     "repository": "https://github.com/septagon-oss/platformkit",
-    "commit": "2499b3679005623b1bc73e2b2cf7ae88d81da004",
+    "commit": "ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce",
     "path": "ui/screens/testdata/parity",
-    "command": "git -C platformkit archive 2499b3679005623b1bc73e2b2cf7ae88d81da004 ui/screens/testdata/parity"
+    "command": "git -C platformkit archive ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce ui/screens/testdata/parity"
   },
   "files": {
-    "README.md": "0a3812c06587c8344e0d96f40fe4954c230543a765de0805bf119a259945d21c",
+    "README.md": "c7aaec8488795a4c4b79edf633d0526e895e36d0ddeaa4c91e002dee001f9048",
     "absent-hints.json": "536374f19eca1bd66cff4e4c169d4d55d936ce1a308cb48298f9a994736491d3",
     "blank-identity.json": "1a6ced583246b56aef44dd95a157dd88797d154b9efdd0bed26a8df18450ae81",
     "choice-axes-command.json": "e03e32b02d071346314e60e4bf8f5765c31525922dd8a5b297dde05d25caffce",

@@ -1,11 +1,11 @@
 {
   "schema": "platformkit.catalog-declared.v1",
   "fixture": "testdata/catalog.hints.json",
-  "sha256": "23194070ea629c507be6d57de70a6538100ef356174244ca68dde0ff8cd25b57",
+  "sha256": "f70c388506f514ac30ed9ea3e9ba85a1114d1444ddb65393964d9d7a32c1c0e2",
   "origin": {
     "kind": "this repository",
     "base": "testdata/catalog.json",
-    "baseSha256": "c373eed843f98411ee39f41d9cca8f2a756ea21b7e6e13c7d248b3bfa982b048",
+    "baseSha256": "fa9cccae8fc64ad5d40844cd76f7d8b658eacb1462c9db402f50cb9d56c94052",
     "baseCommand": "node --import tsx scripts/catalog.ts refresh",
     "command": "the pinned copy with this repository's declarations added by hand",
     "note": "Synthetic presentation declarations layered on the pinned note catalogue, not a served capture. The note catalogue fixture has no presentation declarations; the separate served picture fixture records the public reference composition."

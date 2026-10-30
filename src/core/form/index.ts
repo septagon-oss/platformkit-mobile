@@ -7,5 +7,6 @@ export * from "./controls";
 export * from "./problems";
 export * from "./steps";
 export * from "./values";
+export * from "./sketch";
 export * from "../stepper";
 export * from "../slots";

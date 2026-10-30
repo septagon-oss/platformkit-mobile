@@ -78,6 +78,7 @@ describe("useCommandForm", () => {
     shell.value = shellValue(api);
     const { result } = await renderHook(() => useCommandForm(note, "1", publish));
     expect(result.current.blocks.flatMap((b) => b.controls.map((c) => c.field.name))).toEqual([
+      "drawing",
       "at",
     ]);
     expect(result.current.phase).toBe("editing");

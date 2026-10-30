@@ -52,6 +52,7 @@ import { SaveButton } from "./molecules/SaveButton";
 import { ServerField } from "./molecules/ServerField";
 import { TagsField } from "./molecules/TagsField";
 import { Value } from "./molecules/Value";
+import { SketchShowcase } from "./organisms/SketchShowcase";
 import { Screen } from "./templates/Screen";
 import { VerbStage } from "./verb";
 import { ThemeProvider, useStyles, useTheme, type Theme, type Palette, type Fonts } from "./theme";
@@ -568,9 +569,7 @@ function Samples({
         </View>
       </Section>
 
-      {/* A number the person may be reading when it changes elsewhere rolls to its new value rather
-          than replacing the line under their eye. Only the count is drawn here: the string is the
-          caller's own, and this atom formats nothing — the same rule a Price and a StatTile keep. */}
+      {/* The roll demonstrates a changing value without replacing the reader's current line. */}
       <Section title="A value that changed">
         <View style={s.stack}>
           <RolledValue
@@ -648,6 +647,7 @@ function Samples({
         <FormField label="Tags">
           <TagsField label="Tags" value={tags} onChange={setTags} copy={feedback.copy.kit} />
         </FormField>
+        <SketchShowcase feedback={feedback} />
         <ServerField
           caption={feedback.copy.kit.workspaceAddress}
           value={server}

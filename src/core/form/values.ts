@@ -6,6 +6,7 @@ import { type Control, kind } from "./controls";
 import { changedFields } from "./problems";
 import { text } from "../present";
 import { type Row } from "../record";
+import { sketchFromText } from "./sketch";
 
 /** timeValue is the instant a field holds, or nothing when it holds nothing or nonsense. */
 export function timeValue(raw: unknown): Date | undefined {
@@ -196,6 +197,11 @@ export function values(
       case "list": {
         const list = listValues(c.field, raw);
         if (list !== undefined) out[c.field.name] = list;
+        break;
+      }
+      case "sketch": {
+        const sketch = sketchFromText(raw);
+        if (sketch !== undefined) out[c.field.name] = sketch;
         break;
       }
       case "datetime":

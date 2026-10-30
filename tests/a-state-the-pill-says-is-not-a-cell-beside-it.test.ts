@@ -21,7 +21,9 @@ const golden = () =>
     JSON.parse(readFileSync(new URL("../testdata/catalog.json", import.meta.url), "utf8")),
   );
 const hinted = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.hints.json", import.meta.url), "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.hints.json", import.meta.url), "utf8")),
+  );
 
 const task = {
   id: "11111111-1111-4111-8111-111111111111",

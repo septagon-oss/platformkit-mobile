@@ -15,6 +15,7 @@ import { issuePath } from "./responses";
 import { readDeck, type Deck } from "./catalogDeck";
 import { applyChoices, type FieldChoice } from "./choice";
 import { readPolicy, type Policy, type PolicyField } from "./catalogPolicy";
+import { FIELD_TYPES } from "./fieldTypes";
 
 export { SUPPORTED_POLICY_VERSION, type Policy, type PolicyField } from "./catalogPolicy";
 
@@ -28,17 +29,7 @@ type View<T> = Readonly<
   }
 >;
 
-export const FIELD_TYPES = [
-  "string",
-  "text",
-  "int",
-  "float",
-  "bool",
-  "time",
-  "uuid",
-  "picture",
-  "list",
-] as const;
+export { FIELD_TYPES } from "./fieldTypes";
 export type FieldType = (typeof FIELD_TYPES)[number];
 
 /**

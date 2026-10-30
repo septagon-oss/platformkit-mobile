@@ -32,7 +32,7 @@ const bytes = (name: string) =>
 
 /** hintedTask is T-0328's served hinted document, with two fields put where this screen reads them. */
 function hinted(mutate: (resource: Record<string, unknown>) => void = () => undefined): Entry {
-  const doc = bytes("catalog.hints.json");
+  const doc = unresolved(bytes("catalog.hints.json"));
   mutate(doc.resources[0]);
   return parseCatalog(doc, (at, why) => {
     assert.fail(`${at}: ${why}`);

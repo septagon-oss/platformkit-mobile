@@ -4,6 +4,7 @@ import { policyForm } from "../derivePolicy";
 import { control } from "../internals";
 import { type Pointer, type Row, primary, recordSections } from "../record";
 import { type Names, label, nameKey, pointedAt, points, text } from "../present";
+import { sketchText } from "./sketch";
 
 /**
  * controlPointers are the records the greyed boxes of a sheet point at: each is
@@ -29,7 +30,15 @@ export function controlPointers(
 }
 
 export type ControlKind =
-  "text" | "textarea" | "select" | "switch" | "number" | "datetime" | "list" | "reference";
+  | "text"
+  | "textarea"
+  | "select"
+  | "switch"
+  | "number"
+  | "datetime"
+  | "list"
+  | "reference"
+  | "sketch";
 
 export interface Control {
   readonly kind: ControlKind;
@@ -75,6 +84,8 @@ export function kind(f: Field): ControlKind {
       return "datetime";
     case "list":
       return "list";
+    case "sketch":
+      return "sketch";
     default:
       return "text";
   }
@@ -107,7 +118,14 @@ export function formControls(
     if (f.hints?.visibility === "hidden" && f.required !== true) continue;
     const immutable = e.immutable.includes(f.name);
     if (create && immutable) continue;
-    const stored = row && f.name in row ? text(row[f.name]) : create ? (f.default ?? "") : "";
+    const stored =
+      f.type === "sketch"
+        ? sketchText(row && f.name in row ? row[f.name] : null)
+        : row && f.name in row
+          ? text(row[f.name])
+          : create
+            ? (f.default ?? "")
+            : "";
     const value =
       immutable && points(f) && names !== undefined
         ? (names[nameKey(pointedAt(f) ?? "", stored)] ?? stored)

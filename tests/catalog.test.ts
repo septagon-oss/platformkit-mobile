@@ -42,6 +42,7 @@ test("the golden catalog parses", () => {
   assert.deepEqual(note.immutable, ["status"]);
   assert.equal(note.fields[0]!.name, "id");
   assert.equal(note.fields[0]!.readOnly, true);
+  assert.equal(note.fields.find((field) => field.name === "drawing")?.type, "sketch");
   const status = note.fields.find((f) => f.name === "status")!;
   assert.deepEqual(status.enum, ["open", "done"]);
   assert.equal(status.default, "open");
@@ -57,7 +58,7 @@ test("the golden catalog parses", () => {
   assert.equal(publish.collection, undefined);
   assert.deepEqual(
     publish.fields.map((f) => f.name),
-    ["at"],
+    ["drawing", "at"],
   );
   assert.equal(note.commands[1]!.collection, true);
   assert.deepEqual(note.commands[1]!.fields, []);
@@ -267,7 +268,7 @@ test("the shell version is a whole number the screens may depend on", () => {
 // The commit testdata/catalog.source.json records. It is written here as a literal on
 // purpose: a re-pin should be a diff somebody reads, and a fixture that moved under a
 // test that only ever re-read it would report agreement about bytes nobody fetched.
-const PINNED = "2499b3679005623b1bc73e2b2cf7ae88d81da004";
+const PINNED = "ddc7b9e31b1638ec2ab5709ee189c62f5dc1f2ce";
 
 const PIN_SHORT = PINNED.slice(0, 8);
 
@@ -468,7 +469,12 @@ test("the extension fixture is the pinned copy plus the case it does not carry",
   // relation between them is asserted rather than remembered: the extension is
   // the copy with entries added to it, so it cannot quietly drift off the
   // document every screen is derived from.
-  assert.equal(controlPlane().catalogVersion, 2);
+  const extended = controlPlane();
+  assert.equal(extended.catalogVersion, 2);
+  assert.equal(
+    parseCatalog(extended).resources[0]!.fields.find((field) => field.name === "drawing")?.type,
+    "sketch",
+  );
   assert.deepEqual(
     parseCatalog(controlPlane()).resources.slice(0, 3),
     parseCatalog(fixture()).resources,

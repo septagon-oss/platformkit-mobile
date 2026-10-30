@@ -347,7 +347,7 @@ jobs:
 
       - name: Run every journey in e2e/flows
         # The kernel the job built above, its own database, one tenant and one
-        # administrator, then the flows — all ten of them, read from the directory
+        # administrator, then every flow, read from the directory
         # and never from a list beside it. Maestro runs one invocation serially, so
         # the journeys share a device; they do not share a record, because each
         # names its own `${TITLE} <journey>` and deletes it.

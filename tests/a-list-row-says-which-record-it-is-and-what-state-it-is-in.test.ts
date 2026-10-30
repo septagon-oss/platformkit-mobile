@@ -31,7 +31,9 @@ const golden = () =>
     ),
   );
 const hinted = () =>
-  JSON.parse(readFileSync(new URL("../testdata/catalog.hints.json", import.meta.url), "utf8"));
+  unresolved(
+    JSON.parse(readFileSync(new URL("../testdata/catalog.hints.json", import.meta.url), "utf8")),
+  );
 
 /** One entry of the hinted document, as its author described it. */
 function hintEntry(mutate: (entry: Record<string, unknown>) => void = () => {}): Entry {

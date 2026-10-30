@@ -480,7 +480,7 @@ test("a malformed hint never costs a screen, over the wire too", async () => {
   const entry = catalog.resources[0]!;
   // The workspace keeps every screen it had, with its fields, commands and address.
   assert.equal(catalog.resources.length, 3);
-  assert.equal(entry.fields.length, 9);
+  assert.equal(entry.fields.length, 10);
   assert.equal(entry.commands.length, 2);
   assert.equal(entry.path, "/api/v1/note/notes");
   // Unknown glyphs are discarded alongside the other defective optional hints.

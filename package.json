@@ -159,7 +159,8 @@
     },
     "react-native-markdown-display": {
       "markdown-it": "14.3.3"
-    }
+    },
+    "decode-uri-component": "0.5.1"
   },
   "engines": {
     "node": ">=22.18.0"
